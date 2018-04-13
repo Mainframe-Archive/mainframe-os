@@ -1,0 +1,20 @@
+{
+  "name": "@mainframe/daemon",
+  "version": "0.1.0",
+  "main": "lib/index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "babel src --out-dir lib",
+    "dev": "babel-node src",
+    "start": "node lib"
+  },
+  "dependencies": {
+    "debug": "^3.1.0",
+    "fs-extra": "^5.0.0",
+    "nanoid": "^1.0.2",
+    "sodium-native": "^2.1.5"
+  },
+  "devDependencies": {
+    "flow-bin": "^0.69.0"
+  }
+}

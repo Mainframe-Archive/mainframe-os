@@ -1,0 +1,44 @@
+{
+  "name": "js-mainframe",
+  "version": "0.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "private": true,
+  "workspaces": ["packages/*"],
+  "scripts": {
+    "flow:create-symlinks": "flow-mono create-symlinks .flowconfig",
+    "flow:install-types":
+      "flow-mono install-types --overwrite --ignoreDeps=peer",
+    "flow:create-stubs": "flow-mono create-stubs --use-root",
+    "flow:bootstrap":
+      "yarn flow:create-symlinks && yarn flow:install-types && yarn flow:create-stubs",
+    "bootstrap": "lerna bootstrap && yarn flow:bootstrap",
+    "test": "lerna run test",
+    "build": "lerna run build",
+    "start": "yarn test && yarn build"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.0",
+    "babel-plugin-syntax-class-properties": "^6.13.0",
+    "babel-plugin-syntax-object-rest-spread": "^6.13.0",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-flow": "^6.23.0",
+    "del-cli": "^1.1.0",
+    "flow-bin": "^0.69.0",
+    "flow-copy-source": "^1.3.0",
+    "flow-mono-cli": "^1.3.1",
+    "flow-remove-types": "^1.2.3",
+    "lerna": "^2.10.1"
+  },
+  "flow-mono": {
+    "create-symlinks": {
+      "ignore": []
+    },
+    "create-stubs": {
+      "dependencies": []
+    }
+  }
+}
