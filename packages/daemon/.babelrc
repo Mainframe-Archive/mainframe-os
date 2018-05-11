@@ -5,7 +5,9 @@
       {
         "targets": {
           "node": 8
-        }
+        },
+        "modules": false,
+        "loose": true
       }
     ],
     "flow"

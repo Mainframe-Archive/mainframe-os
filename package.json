@@ -4,41 +4,53 @@
   "main": "index.js",
   "license": "MIT",
   "private": true,
-  "workspaces": ["packages/*"],
+  "workspaces": {
+    "packages": ["packages/*"],
+    "nohoist": [
+      "**/@mainframe/rpc-*",
+      "**/@mainframe/transport-*",
+      "**/@mainframe/utils-crypto",
+      "**/rx-socket",
+      "**/rxjs",
+      "**/sodium-universal",
+      "**/ws"
+    ]
+  },
   "scripts": {
     "flow:create-symlinks": "flow-mono create-symlinks .flowconfig",
     "flow:install-types":
-      "flow-mono install-types --overwrite --ignoreDeps=peer",
-    "flow:create-stubs": "flow-mono create-stubs --use-root",
-    "flow:bootstrap":
-      "yarn flow:create-symlinks && yarn flow:install-types && yarn flow:create-stubs",
+      "flow-mono install-types --overwrite --ignoreDeps=dev",
+    "flow:reinstall": "lerna exec del flow-typed && yarn flow:install-types",
+    "flow:align": "flow-mono align-versions",
+    "flow:bootstrap": "yarn flow:create-symlinks && yarn flow:install-types",
     "bootstrap": "lerna bootstrap && yarn flow:bootstrap",
-    "test": "lerna run test",
+    "lint": "eslint packages/*/src",
+    "lint:fix": "yarn lint --fix",
+    "test:packages": "lerna run test",
+    "test": "yarn test:packages",
+    "test:all": "yarn lint && yarn test",
     "build": "lerna run build",
-    "start": "yarn test && yarn build"
+    "start": "yarn lint && yarn build && yarn test"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.0",
+    "babel-eslint": "^8.2.3",
     "babel-plugin-syntax-class-properties": "^6.13.0",
     "babel-plugin-syntax-object-rest-spread": "^6.13.0",
     "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
-    "babel-preset-env": "^1.6.1",
+    "babel-preset-env": "^1.7.0",
     "babel-preset-flow": "^6.23.0",
     "del-cli": "^1.1.0",
-    "flow-bin": "^0.69.0",
+    "eslint": "^4.19.1",
+    "eslint-config-mainframe": "^1.1.0",
+    "flow-bin": "^0.72.0",
     "flow-copy-source": "^1.3.0",
     "flow-mono-cli": "^1.3.1",
     "flow-remove-types": "^1.2.3",
-    "lerna": "^2.10.1"
-  },
-  "flow-mono": {
-    "create-symlinks": {
-      "ignore": []
-    },
-    "create-stubs": {
-      "dependencies": []
-    }
+    "flow-typed": "^2.4.0",
+    "lerna": "^2.11.0",
+    "prettier": "^1.12.1"
   }
 }

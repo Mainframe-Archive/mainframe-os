@@ -1,77 +1,28 @@
 // @flow
 
 import type { Socket } from 'net'
-import sodium from 'sodium-native'
 
 import { fromBase64, toBase64, type base64, type ID } from '../utils'
 import type Vault from '../vault/Vault'
-import vaults from '../vault/vaults'
+import { getVault, openVault, createVault } from '../vault'
 
 import { RPCError } from './errors'
+import web3Client from './web3Client'
 
 const SEED_MIN_LENGTH = 20
 
-class SocketState {
-  _socket: Socket
-  _isAgent: boolean = false
-
-  constructor(socket: Socket) {
-    this._socket = socket
+const getClientVault = (socket: Socket): Vault => {
+  const vault = getVault(socket)
+  if (vault == null) {
+    throw new RPCError(-32000, 'Vault is not open')
   }
-
-  get isAgent(): boolean {
-    return this._isAgent
-  }
-
-  get vault(): ?Vault {
-    return vaults.getVault(this._socket)
-  }
-
-  setAgent(isAgent: boolean = true) {
-    this._isAgent = isAgent
-  }
-
-  openVault(path: string, key: string): Promise<void> {
-    if (!this._isAgent) {
-      return Promise.reject(
-        new Error('Client must be user agent to open vault'),
-      )
-    }
-    return vaults.open(this._socket, path, fromBase64(key))
-  }
-
-  async newVault(path: string, key: string): Promise<void> {
-    if (!this._isAgent) {
-      return Promise.reject(
-        new Error('Client must be user agent to create vault'),
-      )
-    }
-    await vaults.create(this._socket, path, fromBase64(key))
-  }
-}
-
-const socketState: WeakMap<Socket, SocketState> = new WeakMap()
-
-const getState = (socket: Socket): SocketState => {
-  let state = socketState.get(socket)
-  if (state == null) {
-    state = new SocketState(socket)
-    socketState.set(socket, state)
-  }
-  return state
+  return vault
 }
 
 export default {
-  mf_isUserAgent: (socket: Socket) => getState(socket).isAgent,
-
-  mf_setUserAgent: (socket: Socket, [agent]: [boolean] = []) => {
-    getState(socket).setAgent(agent)
-    return 'OK'
-  },
-
   mf_openVault: async (socket: Socket, [path, key]: [string, base64] = []) => {
     try {
-      await getState(socket).openVault(path, key)
+      await openVault(socket, path, fromBase64(key))
       return 'OK'
     } catch (err) {
       // TODO: different error code depending on actual error
@@ -81,7 +32,7 @@ export default {
 
   mf_newVault: async (socket: Socket, [path, key]: [string, base64] = []) => {
     try {
-      await getState(socket).newVault(path, key)
+      await createVault(socket, path, fromBase64(key))
       return 'OK'
     } catch (err) {
       // TODO: different error code depending on actual error
@@ -89,22 +40,25 @@ export default {
     }
   },
 
-  mf_newIdentity: async (
+  mf_newUserIdentity: (socket: Socket): { id: ID } => {
+    const vault = getClientVault(socket)
+    const id = vault.identities.createOwnUser()
+    return { id }
+  },
+
+  mf_callWeb3: (
     socket: Socket,
-  ): Promise<{
-    id: ID,
-    publicKey: base64,
-  }> => {
-    const vault = getState(socket).vault
-    if (vault == null) {
-      throw new RPCError(-32000, 'Vault is not open')
+    [appID, identityID, method, params]: [ID, ID, string, any] = [],
+  ) => {
+    // TODO: check app permissions to ensure call is allowed
+    const vault = getClientVault(socket)
+    const app = vault.apps.getApp(appID)
+
+    if (app == null) {
+      // TODO: error code
+      throw new RPCError(-32000, 'App not found')
     }
 
-    await vault.opened
-    const identity = vault.createIdentity()
-    return {
-      id: identity.id,
-      publicKey: toBase64(identity.publicKey),
-    }
+    return web3Client.request(method, params)
   },
 }

@@ -1,23 +1,57 @@
 // @flow
 
-import { verifySignature, open } from '../crypto'
+import {
+  getSignature,
+  openSigned,
+  sign,
+  verifySignature,
+  type KeyPair,
+} from '@mainframe/utils-crypto'
+
+import { type ID } from '../utils'
+
+import Keychain from './Keychain'
 
 export default class Identity {
-  _publicKey: Buffer
+  _keychain: Keychain
 
-  constructor(publicKey: Buffer) {
-    this._publicKey = publicKey
+  constructor(keychain: Keychain) {
+    this._keychain = keychain
   }
 
-  get publicKey(): Buffer {
-    return this._publicKey
+  get keychain(): Keychain {
+    return this._keychain
   }
 
-  verify(message: Buffer, signature: Buffer) {
-    return verifySignature(message, signature, this._publicKey)
+  getPairSign(id?: ID): ?KeyPair {
+    return this._keychain.getPairSign(id)
   }
 
-  open(signed: Buffer) {
-    return open(signed, this._publicKey)
+  getSignature(message: Buffer, id?: ID): Buffer {
+    const keyPair = this._keychain.getPairSign(id)
+    if (keyPair == null) {
+      throw new Error('No key pair to sign with')
+    }
+    return getSignature(message, keyPair.secretKey)
+  }
+
+  sign(message: Buffer, id?: ID): Buffer {
+    const keyPair = this._keychain.getPairSign(id)
+    if (keyPair == null) {
+      throw new Error('No key pair to sign with')
+    }
+    return sign(message, keyPair.secretKey)
+  }
+
+  verifySignature(message: Buffer, signature: Buffer, id?: ID): boolean {
+    const key = this._keychain.getPublicSign(id)
+    return key ? verifySignature(message, signature, key) : false
+  }
+
+  openSigned(signed: Buffer, id?: ID): ?Buffer {
+    const key = this._keychain.getPublicSign(id)
+    if (key != null) {
+      return openSigned(signed, key)
+    }
   }
 }
