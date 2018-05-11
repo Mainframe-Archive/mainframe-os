@@ -1,0 +1,15 @@
+{
+  "id": "app1",
+  "version": "0.1",
+  "name": "Onyx",
+  "developer": {
+    "id": "dev1",
+    "name": "Dapp Dev 1"
+  },
+  "permissions": [
+    {
+      "name": "wallet",
+      "required": true
+    }
+  ]
+}
