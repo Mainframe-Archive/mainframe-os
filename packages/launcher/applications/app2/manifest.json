@@ -1,0 +1,15 @@
+{
+  "id": "app2",
+  "version": "0.1",
+  "name": "Mainframe Wallet",
+  "developer": {
+    "id": "dev2",
+    "name": "Dapp Dev 2"
+  },
+  "permissions": [
+    {
+      "name": "wallet",
+      "required": true
+    }
+  ]
+}
