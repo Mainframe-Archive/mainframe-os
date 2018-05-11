@@ -21,16 +21,24 @@ const createWindow = () => {
 
   // Emitted when the window is closed.
   mainWindow.on('closed', () => {
-    const keys = Object.keys(appWindows)
-    Object.keys(appWindows).forEach(w => {
-      appWindows[w].close()
-    })
+    // TODO: fix below to not error on close
+    // const keys = Object.keys(appWindows)
+    // Object.keys(appWindows).forEach(w => {
+    //   appWindows[w].close()
+    // })
     mainWindow = null
   })
 }
 
 const launchApp = (appId) => {
-  const appWindow = new BrowserWindow({width: 800, height: 600})
+  const appWindow = new BrowserWindow({
+    width: 800,
+    height: 600,
+    webPreferences: {
+      sandbox: true,
+      preload: path.join(__dirname, 'preload.js'),
+    }
+  })
   appWindow.loadURL(url.format({
     pathname: path.join(__dirname, 'applications', appId, `${appId}.asar`, 'index.html'),
     protocol: 'file:',
@@ -58,4 +66,23 @@ app.on('activate', () => {
 
 ipcMain.on('launchApp', (e, appId) => {
   launchApp(appId)
+})
+
+const simpleClient = {
+  getBalance: () => 1000,
+}
+
+ipcMain.on('message', (e, msg) => {
+  if (msg.method && simpleClient[msg.method]) {
+    const res = simpleClient[msg.method](...msg.args)
+    if (appWindows[msg.appId]) {
+      appWindows[msg.appId].webContents.send(
+        'message',
+        {
+          appId: msg.appId,
+          body: res,
+        },
+      )
+    }
+  }
 })
