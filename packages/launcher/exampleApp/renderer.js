@@ -6,23 +6,22 @@ appEl.innerHTML = `
     <button class="pure-button">Fetch Balance</button>
   </div>
 `
-appEl.addEventListener('click', () => {
-  window.ipc.send('message', {
-    appId,
-    method: 'getBalance',
-    args: ['0xSomeWalletAddress'],
-  })
-})
-document.body.appendChild(appEl)
-
-window.ipc.on('message', (event, message) => {
-  if (message.appId === appId) {
+appEl.addEventListener('click', async () => {
+  try {
+    const res = await window.ipc.callMain('ipcRequest', {
+      appId,
+      method: 'getBalance',
+      args: ['0xSomeWalletAddress'],
+    })
     const balance = document.createElement('div')
     balance.innerHTML = `
       <div class="pure-u-1-1">
-        ${message.body}
+        ${res}
       </div>
     `
     document.body.appendChild(balance)
+  } catch (err) {
+    console.log('err: ', err)
   }
 })
+document.body.appendChild(appEl)
