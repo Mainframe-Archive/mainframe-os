@@ -1,0 +1,53 @@
+// @flow
+
+import { DaemonConfig } from '@mainframe/config'
+import { startDaemon } from '@mainframe/toolbox'
+import { flags } from '@oclif/command'
+
+import Command from '../../Command'
+
+export default class StartCommand extends Command {
+  static description = 'Start the daemon'
+
+  static flags = {
+    ...Command.flags,
+    detached: flags.boolean({
+      char: 'd',
+      description: 'start the process in detached mode',
+    }),
+  }
+
+  async run() {
+    const cfg = new DaemonConfig(this.env)
+    const status = cfg.runStatus
+    if (status === 'starting') {
+      this.warn('Daemon is already starting from another process')
+    } else if (status === 'running') {
+      this.log('Daemon is already running from another process')
+    } else {
+      cfg.runStatus = 'starting'
+      try {
+        const proc = await startDaemon(this.flags.detached)
+        cfg.runStatus = 'running'
+        if (proc == null) {
+          this.log('Daemon is started')
+        } else if (!this.flags.detached) {
+          proc.stdout.pipe(process.stdout)
+          proc.stderr.pipe(process.stderr)
+          proc.on('exit', (code: number) => {
+            this.log(`Daemon process terminated with code ${code}`)
+            cfg.runStatus = 'stopped'
+            process.exit(code)
+          })
+          process.on('SIGINT', () => {
+            cfg.runStatus = 'stopping'
+            proc.kill('SIGINT')
+          })
+        }
+      } catch (err) {
+        cfg.runStatus = 'stopped'
+        throw err
+      }
+    }
+  }
+}

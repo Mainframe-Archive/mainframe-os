@@ -3,9 +3,17 @@
   "version": "0.1.0",
   "main": "lib/index.js",
   "license": "MIT",
+  "bin": {
+    "mainframe-daemon": "./bin/run"
+  },
+  "oclif": {
+    "commands": "./lib/cli/commands",
+    "bin": "mainframe-daemon",
+    "plugins": ["@oclif/plugin-help"]
+  },
   "scripts": {
     "clean": "del lib",
-    "build:js": "flow-remove-types src --out-dir lib",
+    "build:js": "babel src --out-dir lib",
     "build:flow": "flow-copy-source src lib",
     "build": "yarn clean && yarn build:js && yarn build:flow",
     "test": "flow check",
@@ -15,6 +23,9 @@
   "dependencies": {
     "@mainframe/rpc-node": "^0.2.0",
     "@mainframe/utils-crypto": "^0.1.0",
+    "@oclif/command": "^1.4.30",
+    "@oclif/config": "^1.6.18",
+    "@oclif/plugin-help": "^1.2.11",
     "asar": "^0.14.3",
     "debug": "^3.1.0",
     "esm": "^3.0.26",
