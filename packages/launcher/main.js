@@ -7,6 +7,9 @@ const url = require('url')
 let mainWindow
 const appWindows = {}
 
+const requestChannel = 'ipc-request-channel'
+const responseChannel = 'ipc-response-channel'
+
 const createWindow = () => {
 
   mainWindow = new BrowserWindow({width: 800, height: 600})
@@ -21,16 +24,24 @@ const createWindow = () => {
 
   // Emitted when the window is closed.
   mainWindow.on('closed', () => {
-    const keys = Object.keys(appWindows)
-    Object.keys(appWindows).forEach(w => {
-      appWindows[w].close()
-    })
+    // TODO: fix below to not error on close
+    // const keys = Object.keys(appWindows)
+    // Object.keys(appWindows).forEach(w => {
+    //   appWindows[w].close()
+    // })
     mainWindow = null
   })
 }
 
 const launchApp = (appId) => {
-  const appWindow = new BrowserWindow({width: 800, height: 600})
+  const appWindow = new BrowserWindow({
+    width: 800,
+    height: 600,
+    webPreferences: {
+      sandbox: true,
+      preload: path.join(__dirname, 'preload.js'),
+    }
+  })
   appWindow.loadURL(url.format({
     pathname: path.join(__dirname, 'applications', appId, `${appId}.asar`, 'index.html'),
     protocol: 'file:',
@@ -58,4 +69,45 @@ app.on('activate', () => {
 
 ipcMain.on('launchApp', (e, appId) => {
   launchApp(appId)
+})
+
+const simpleClient = {
+  getBalance: () => 1000,
+  getPublicKey: () => 'myKey',
+}
+
+const handleRequest = (request) => {
+  if (request.data.method && simpleClient[request.data.method]) {
+    const args = request.data.args || []
+    try {
+      const res = simpleClient[request.data.method](...args)
+      return {
+        id: request.id,
+        result: res,
+      }
+    } catch (error) {
+      return {
+        error,
+        id: request.id,
+      }
+    }
+  }
+  return {
+    error: {
+      message: 'Method not found',
+      code: 32601,
+    },
+    id: request.id,
+  }
+}
+
+ipcMain.on(requestChannel, async (event, request) => {
+  const window = BrowserWindow.fromWebContents(event.sender)
+  const send = (channel, response) => {
+    if (!(window && window.isDestroyed())) {
+      event.sender.send(channel, response)
+    }
+  }
+  const res = handleRequest(request, window)
+  send(responseChannel, res)
 })

@@ -1,0 +1,9 @@
+{
+  "id": "sandbox",
+  "version": "0.1",
+  "name": "Sandboxed Wallet",
+  "developer": {
+    "id": "dev3",
+    "name": "Dapp Dev 3"
+  }
+}
