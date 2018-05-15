@@ -7,11 +7,8 @@ const url = require('url')
 let mainWindow
 const appWindows = {}
 
-const getChannels = (channel) => ({
-  sendChannel: `ipc-send-channel-${channel}`,
-  dataChannel: `ipc-response-data-channel-${channel}`,
-  errorChannel: `ipc-response-error-channel-${channel}`
-})
+const requestChannel = 'ipc-request-channel'
+const responseChannel = 'ipc-response-channel'
 
 const createWindow = () => {
 
@@ -76,30 +73,41 @@ ipcMain.on('launchApp', (e, appId) => {
 
 const simpleClient = {
   getBalance: () => 1000,
+  getPublicKey: () => 'myKey',
 }
 
-const answerRenderer = (channel, callback) => {
-  const {sendChannel, dataChannel, errorChannel} = getChannels(channel)
-
-  ipcMain.on(sendChannel, async (event, data) => {
-    const window = BrowserWindow.fromWebContents(event.sender)
-    const send = (channel, data) => {
-      if (!(window && window.isDestroyed())) {
-        event.sender.send(channel, data)
+const handleRequest = (request) => {
+  if (request.data.method && simpleClient[request.data.method]) {
+    const args = request.data.args || []
+    try {
+      const res = simpleClient[request.data.method](...args)
+      return {
+        id: request.id,
+        result: res,
+      }
+    } catch (error) {
+      return {
+        error,
+        id: request.id,
       }
     }
-
-    try {
-      send(dataChannel, await callback(data, window))
-    } catch (error) {
-      send(errorChannel, error)
-    }
-  })
+  }
+  return {
+    error: {
+      message: 'Method not found',
+      code: 32601,
+    },
+    id: request.id,
+  }
 }
 
-answerRenderer('ipcRequest', (msg) => {
-  if (msg.method && simpleClient[msg.method]) {
-    return simpleClient[msg.method](...msg.args)
+ipcMain.on(requestChannel, async (event, request) => {
+  const window = BrowserWindow.fromWebContents(event.sender)
+  const send = (channel, response) => {
+    if (!(window && window.isDestroyed())) {
+      event.sender.send(channel, response)
+    }
   }
-  throw new Error('unknown request')
+  const res = handleRequest(request, window)
+  send(responseChannel, res)
 })

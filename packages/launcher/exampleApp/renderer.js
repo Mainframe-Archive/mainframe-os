@@ -8,11 +8,15 @@ appEl.innerHTML = `
 `
 appEl.addEventListener('click', async () => {
   try {
-    const res = await window.ipc.callMain('ipcRequest', {
-      appId,
-      method: 'getBalance',
-      args: ['0xSomeWalletAddress'],
-    })
+    const res = await Promise.all([
+      window.ipc.callMain('ipcRequest', {
+        method: 'getBalance',
+        args: ['0xSomeWalletAddress'],
+      }),
+      window.ipc.callMain('ipcRequest', {
+        method: 'getPublicKey',
+      })
+    ])
     const balance = document.createElement('div')
     balance.innerHTML = `
       <div class="pure-u-1-1">
@@ -21,7 +25,7 @@ appEl.addEventListener('click', async () => {
     `
     document.body.appendChild(balance)
   } catch (err) {
-    console.log('err: ', err)
+    console.log(err)
   }
 })
 document.body.appendChild(appEl)

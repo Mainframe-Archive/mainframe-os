@@ -1,30 +1,31 @@
-const {ipcRenderer} = require('electron')
+const { ipcRenderer } = require('electron')
 
-const getChannels = (channel) => ({
-  sendChannel: `ipc-send-channel-${channel}`,
-  dataChannel: `ipc-response-data-channel-${channel}`,
-  errorChannel: `ipc-response-error-channel-${channel}`
-})
+const generateId = () => Math.random().toString(36).slice(2)
+
+const requestChannel = 'ipc-request-channel'
+const responseChannel = 'ipc-response-channel'
+
+const listeners = {}
 
 const callMain = (channel, data) => new Promise((resolve, reject) => {
-  const {sendChannel, dataChannel, errorChannel} = getChannels(channel)
-
-  const cleanup = () => {
-    ipcRenderer.removeAllListeners(dataChannel)
-    ipcRenderer.removeAllListeners(errorChannel)
+  const request = {
+    id: generateId(),
+    data,
   }
-
-  ipcRenderer.on(dataChannel, (event, result) => {
-    cleanup()
-    resolve(result)
-  })
-
-  ipcRenderer.on(errorChannel, (event, error) => {
-    cleanup()
-    reject(error)
-  })
-
-  ipcRenderer.send(sendChannel, data)
+  const listener = (event, msg) => {
+    if (msg.id === request.id) {
+      if (msg.error || !msg.result) {
+        reject(msg.error)
+      } else {
+        resolve(msg.result)
+      }
+      ipcRenderer.removeListener(responseChannel, listeners[request.id])
+      delete listeners[request.id]
+    }
+  }
+  listeners[request.id] = listener
+  ipcRenderer.on(responseChannel, listener)
+  ipcRenderer.send(requestChannel, request)
 })
 
 const ipc = { callMain }
