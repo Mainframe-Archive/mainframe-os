@@ -5,8 +5,6 @@ const generateId = () => Math.random().toString(36).slice(2)
 const requestChannel = 'ipc-request-channel'
 const responseChannel = 'ipc-response-channel'
 
-const listeners = {}
-
 const callMain = (channel, data) => new Promise((resolve, reject) => {
   const request = {
     id: generateId(),
@@ -19,11 +17,9 @@ const callMain = (channel, data) => new Promise((resolve, reject) => {
       } else {
         resolve(msg.result)
       }
-      ipcRenderer.removeListener(responseChannel, listeners[request.id])
-      delete listeners[request.id]
+      ipcRenderer.removeListener(responseChannel, listener)
     }
   }
-  listeners[request.id] = listener
   ipcRenderer.on(responseChannel, listener)
   ipcRenderer.send(requestChannel, request)
 })
