@@ -1,8 +1,8 @@
 // @flow
 
-const { app, BrowserWindow, ipcMain } = require('electron')
-const path = require('path')
-const url = require('url')
+import { app, BrowserWindow, ipcMain } from 'electron'
+import path from 'path'
+import url from 'url'
 
 let mainWindow
 const appWindows = {}
@@ -10,17 +10,25 @@ const appWindows = {}
 const requestChannel = 'ipc-request-channel'
 const responseChannel = 'ipc-response-channel'
 
+const isDevelopment = process.env.NODE_ENV !== 'production'
+
 const createWindow = () => {
 
   mainWindow = new BrowserWindow({width: 800, height: 600})
 
-  mainWindow.webContents.openDevTools()
+  if (isDevelopment) {
+    mainWindow.webContents.openDevTools()
+  }
 
-  mainWindow.loadURL(url.format({
-    pathname: path.join(__dirname, 'ui', 'index.html'),
-    protocol: 'file:',
-    slashes: true
-  }))
+  if (isDevelopment) {
+    mainWindow.loadURL(`http://localhost:${process.env.ELECTRON_WEBPACK_WDS_PORT}`)
+  } else {
+    mainWindow.loadURL(url.format({
+      pathname: path.join(__dirname, 'ui', 'index.html'),
+      protocol: 'file:',
+      slashes: true
+    }))
+  }
 
   // Emitted when the window is closed.
   mainWindow.on('closed', () => {
@@ -39,11 +47,11 @@ const launchApp = (appId) => {
     height: 600,
     webPreferences: {
       sandbox: true,
-      preload: path.join(__dirname, 'preload.js'),
+      preload: path.join(__static, 'preload.js'),
     }
   })
   appWindow.loadURL(url.format({
-    pathname: path.join(__dirname, 'applications', appId, `${appId}.asar`, 'index.html'),
+    pathname: path.join(__static, 'applications', appId, `${appId}.asar`, 'index.html'),
     protocol: 'file:',
     slashes: true
   }))
