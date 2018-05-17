@@ -1,4 +1,7 @@
 // @flow
 
-export { start as startServer } from './rpc/server'
-export { stop as stopServer } from './rpc/server'
+export {
+  isListening as isServerListening,
+  start as startServer,
+  stop as stopServer,
+} from './rpc'

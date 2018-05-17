@@ -8,15 +8,12 @@ import Command from '../../Command'
 
 export default class SetupCommand extends Command {
   static description = 'Setup the daemon configuration'
-
   static flags = {
     ...Command.flags,
     'bin-path': flags.string({
-      char: 'b',
       description: 'path to the daemon binary',
     }),
     'socket-path': flags.string({
-      char: 's',
       description: 'path to the daemon socket',
     }),
   }

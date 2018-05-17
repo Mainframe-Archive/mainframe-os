@@ -44,7 +44,7 @@ export const createWhenDaemonInstallStatus = (env: Environment) => {
 }
 
 export const getDaemonRunStatus = (env: Environment): RunStatus => {
-  return env.config.get(DAEMON_INSTALL_STATUS_KEY) || 'stopped'
+  return env.config.get(DAEMON_RUN_STATUS_KEY) || 'stopped'
 }
 
 export const setDaemonRunStatus = (
@@ -65,7 +65,7 @@ export class DaemonConfig extends EnvironmentConfig {
   constructor(env: Environment) {
     super(env)
     this.whenInstallStatus = createWhenDaemonInstallStatus(env)
-    this.whenRunStatus = createWhenDaemonInstallStatus(env)
+    this.whenRunStatus = createWhenDaemonRunStatus(env)
   }
 
   get binPath(): ?string {

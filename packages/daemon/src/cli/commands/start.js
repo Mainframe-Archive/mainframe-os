@@ -16,11 +16,14 @@ export default class StartCommand extends Command {
   async run() {
     const { flags } = this.parse(StartCommand)
     this.log(`Starting daemon with path ${flags.path}`)
+
     await startServer(flags.path)
     this.log(`Daemon started`)
+
     process.on('SIGINT', async () => {
       this.log(`Stopping daemon`)
-      await stopServer()
+      await stopServer(flags.path)
+
       this.log(`Daemon stopped`)
       process.exit(0)
     })

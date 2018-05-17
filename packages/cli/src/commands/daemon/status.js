@@ -8,6 +8,7 @@ import Command from '../../Command'
 
 export default class StatusCommand extends Command {
   static description = 'Display the daemon runnin status and socket path'
+  static flags = Command.flags
 
   async run() {
     const status = getDaemonRunStatus(this.env)

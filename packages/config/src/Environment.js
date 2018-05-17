@@ -48,18 +48,37 @@ export default class Environment {
       : join(this._paths.config, path)
   }
 
-  createWhenValue<T>(key: string) {
+  createWhenValue<T>(key: string, timeout?: number) {
     return (expectedValue: T): Promise<any> => {
-      return new Promise(resolve => {
-        const dispose = this._conf.onDidChange(
-          key,
-          (newValue: T, previousValue: any) => {
-            if (newValue === expectedValue) {
-              dispose()
-              resolve(previousValue)
-            }
-          },
-        )
+      return new Promise((resolve, reject) => {
+        if (this._conf.get(key) === expectedValue) {
+          resolve()
+        } else {
+          let resolved = false
+          let timeoutID
+
+          const dispose = this._conf.onDidChange(
+            key,
+            (newValue: T, previousValue: any) => {
+              if (newValue === expectedValue && !resolved) {
+                resolved = true
+                clearTimeout(timeoutID)
+                dispose()
+                resolve(previousValue)
+              }
+            },
+          )
+
+          if (timeout != null) {
+            timeoutID = setTimeout(() => {
+              if (!resolved) {
+                resolved = true
+                dispose()
+                reject(new Error('Timeout'))
+              }
+            }, timeout)
+          }
+        }
       })
     }
   }
