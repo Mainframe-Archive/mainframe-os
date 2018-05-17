@@ -1,6 +1,7 @@
 // @flow
 
 import { app, BrowserWindow, ipcMain } from 'electron'
+import querystring from 'querystring'
 import path from 'path'
 import url from 'url'
 
@@ -12,23 +13,30 @@ const responseChannel = 'ipc-response-channel'
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
-const createWindow = () => {
-
-  mainWindow = new BrowserWindow({width: 800, height: 600})
-
+const newWindow = (params) => {
+  const window = new BrowserWindow({width: 800, height: 600})
   if (isDevelopment) {
-    mainWindow.webContents.openDevTools()
+    window.webContents.openDevTools()
   }
+  const stringParams = querystring.stringify(params)
 
   if (isDevelopment) {
-    mainWindow.loadURL(`http://localhost:${process.env.ELECTRON_WEBPACK_WDS_PORT}`)
+    window.loadURL(`http://localhost:${process.env.ELECTRON_WEBPACK_WDS_PORT}?${stringParams}`)
   } else {
-    mainWindow.loadURL(url.format({
-      pathname: path.join(__dirname, 'index.html'),
+    window.loadURL(url.format({
+      pathname: path.join(__dirname, `index.html?${params}`),
       protocol: 'file:',
       slashes: true
     }))
   }
+  return window
+}
+
+const createWindow = () => {
+
+  mainWindow = newWindow({
+    type: 'launcher',
+  })
 
   // Emitted when the window is closed.
   mainWindow.on('closed', () => {
@@ -42,19 +50,10 @@ const createWindow = () => {
 }
 
 const launchApp = (appId) => {
-  const appWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
-    webPreferences: {
-      sandbox: true,
-      preload: path.join(__static, 'preload.js'),
-    }
+  const appWindow = newWindow({
+    type: 'app',
+    appId,
   })
-  appWindow.loadURL(url.format({
-    pathname: path.join(__static, 'applications', appId, `${appId}.asar`, 'index.html'),
-    protocol: 'file:',
-    slashes: true
-  }))
   appWindows[appId] = appWindow
 }
 
