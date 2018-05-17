@@ -1,28 +1,40 @@
 // @flow
 
+import { mapObject, type ID } from '../utils'
+
 import App, { type AppSerialized } from './App'
-import { type ID, typeID, objectValues } from '../utils'
 
 export type AppsManagerSerialized = Array<AppSerialized>
 
-type Apps = { [id: ID]: App }
+type Apps = { [ID]: App }
+
+const appsToJSON = mapObject(App.toJSON)
 
 export default class AppsManager {
-  static hydrate = (serialized: AppsManagerSerialized) => {
+  static fromJSON = (serialized: AppsManagerSerialized = []) => {
     const apps = serialized.reduce((acc, params) => {
-      acc[params.id] = App.hydrate(params)
+      acc[(params.appID: string)] = App.fromJSON(params)
       return acc
     }, {})
     return new AppsManager(apps)
   }
 
+  static toJSON = (manager: AppsManager): AppsManagerSerialized => {
+    // $FlowFixMe: mapping type
+    return appsToJSON(manager.apps)
+  }
+
   _apps: Apps
 
-  constructor(apps: Apps) {
+  constructor(apps: Apps = {}) {
     this._apps = apps
   }
 
-  serialized(): AppsManagerSerialized {
-    return objectValues(this._apps).map(App.serialize)
+  get apps(): Apps {
+    return this._apps
+  }
+
+  getApp(id: ID): ?App {
+    return this._apps[id]
   }
 }

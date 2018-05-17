@@ -24,7 +24,7 @@ const createWindow = () => {
     mainWindow.loadURL(`http://localhost:${process.env.ELECTRON_WEBPACK_WDS_PORT}`)
   } else {
     mainWindow.loadURL(url.format({
-      pathname: path.join(__dirname, 'ui', 'index.html'),
+      pathname: path.join(__dirname, 'index.html'),
       protocol: 'file:',
       slashes: true
     }))

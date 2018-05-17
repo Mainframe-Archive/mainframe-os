@@ -7,8 +7,6 @@
 [include]
 
 [libs]
-# Include patched typings or stubs from the root of the mono-repo.
-./../../flow-typed/npm
 
 [lints]
 

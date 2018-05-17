@@ -1,7 +1,9 @@
 // @flow
 
-import AppManifest, { type AppManifestSerialized } from './AppManifest'
-import { uniqueID, typeID, type ID } from '../utils'
+import { type ID } from '../utils'
+
+// TODO: better type or class to handle validation
+export type AppManifest = Object
 
 export type AppInstallationState =
   | 'manifest-pending'
@@ -17,64 +19,93 @@ export type AppInstallationState =
   | 'package-invalid-signature'
   | 'ready'
 
+export type PermissionKey = 'CALL_WEB3'
+
+export type PermissionGrant = 'allow' | 'ask' | 'deny'
+
+export type PermissionConfig = {
+  grant: PermissionGrant,
+}
+
 export type AppIdentitySettings = {
-  permissions: Object,
+  permissions: { [PermissionKey]: PermissionConfig },
 }
 
 export type AppParams = {
-  id?: ID,
+  appID: ID,
+  currentUserID: ID,
   manifest: AppManifest,
-  currentIdentity: ID,
   installationState: AppInstallationState,
-  settings?: { [id: ID]: AppIdentitySettings },
+  settings?: { [ID]: AppIdentitySettings },
 }
 
-export type AppSerialized = {
-  id: string,
-  manifest: AppManifestSerialized,
-  currentIdentity: string,
-  installationState: AppInstallationState,
-  settings?: { [id: ID]: AppIdentitySettings },
-}
+export type AppSerialized = AppParams
 
 export default class App {
-  static hydrate = (params: AppSerialized) => {
-    return new App({
-      id: typeID(params.id),
-      manifest: AppManifest.hydrate(params.manifest),
-      currentIdentity: typeID(params.currentIdentity),
-      installationState: params.installationState,
-      settings: params.settings,
-    })
-  }
+  static fromJSON = (params: AppSerialized): App => new App(params)
 
-  static serialize = (app: App): AppSerialized => app.serialized()
+  static toJSON = (app: App): AppSerialized => ({
+    appID: app._appID,
+    currentUserID: app._currentUserID,
+    manifest: app._manifest,
+    installationState: app._installationState,
+    settings: app._settings,
+  })
 
   _appID: ID
+  _currentUserID: ID
   _manifest: AppManifest
-  _currentIdentity: ID
   _installationState: AppInstallationState
-  _settings: { [id: ID]: AppIdentitySettings }
+  _settings: { [ID]: AppIdentitySettings }
 
   constructor(params: AppParams) {
-    this._appID = params.id || uniqueID()
+    this._appID = params.appID
+    this._currentUserID = params.currentUserID
     this._manifest = params.manifest
-    this._currentIdentity = params.currentIdentity
     this._installationState = params.installationState
-    this._settings = params.settings || {}
+    this._settings = params.settings == null ? {} : params.settings
   }
 
   get id(): ID {
     return this._appID
   }
 
-  serialized(): AppSerialized {
-    return {
-      id: this._appID,
-      manifest: this._manifest.serialized(),
-      currentIdentity: this._currentIdentity,
-      installationState: this._installationState,
-      settings: this._settings,
+  getUserPermission(userID: ID, key: PermissionKey): ?PermissionConfig {
+    const settings = this._settings[userID]
+    if (settings != null && settings.permissions != null) {
+      return settings.permissions[key]
     }
+  }
+
+  getPermission(key: PermissionKey): ?PermissionConfig {
+    return this.getUserPermission(this._currentUserID, key)
+  }
+
+  setUserPermission(
+    userID: ID,
+    key: PermissionKey,
+    value: PermissionConfig,
+  ): void {
+    const settings = this._settings[userID] || { permissions: {} }
+    settings.permissions[key] = value
+    this._settings[userID] = settings
+  }
+
+  setPermission(key: PermissionKey, value: PermissionConfig): void {
+    this.setUserPermission(this._currentUserID, key, value)
+  }
+
+  grantUserPermission(
+    userID: ID,
+    key: PermissionKey,
+    grant?: PermissionGrant = 'allow',
+  ): void {
+    const permission = this.getUserPermission(userID, key) || {}
+    permission.grant = grant
+    this.setUserPermission(userID, key, permission)
+  }
+
+  grantPermission(key: PermissionKey, grant?: PermissionGrant): void {
+    this.grantUserPermission(this._currentUserID, key, grant)
   }
 }

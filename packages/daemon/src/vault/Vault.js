@@ -1,85 +1,82 @@
 // @flow
 
+import type App from '../app/App'
 import AppsManager, { type AppsManagerSerialized } from '../app/AppsManager'
 import IdentitiesManager, {
   type IdentitiesManagerSerialized,
 } from '../identity/IdentitiesManager'
-import type OwnIdentity from '../identity/OwnIdentity'
-import { uniqueID, type ID, readSecureFile, writeSecureFile } from '../utils'
+import type Keychain from '../identity/Keychain'
+import { type ID, readSecureFile, writeSecureFile } from '../utils'
+
+export type VaultData = {
+  apps: AppsManager,
+  identities: IdentitiesManager,
+}
 
 export type VaultSerialized = {
-  apps: AppsManagerSerialized,
-  identities: IdentitiesManagerSerialized,
+  apps?: AppsManagerSerialized,
+  identities?: IdentitiesManagerSerialized,
 }
 
 export default class Vault {
   static create = async (path: string, key: Buffer): Promise<Vault> => {
     const vault = new Vault(path, key)
     await vault.save()
-    vault._setOpened()
     return vault
+  }
+
+  static open = async (path: string, key: Buffer): Promise<Vault> => {
+    const buffer = await readSecureFile(path, key)
+    if (buffer == null) {
+      throw new Error('Unable to open vault')
+    }
+    const data = JSON.parse(buffer.toString())
+    return new Vault(path, key, {
+      apps: AppsManager.fromJSON(data.apps),
+      identities: IdentitiesManager.fromJSON(data.identities),
+    })
   }
 
   _path: string
   _key: Buffer
-  _apps: ?AppsManager
-  _identities: ?IdentitiesManager
-  _isOpen: boolean = false
-  _opened: Promise<void>
-  _setOpened: () => void
+  _data: VaultData
 
-  constructor(path: string, key: Buffer) {
+  constructor(path: string, key: Buffer, data?: ?VaultData) {
     this._path = path
     this._key = key
-    this._opened = new Promise(resolve => {
-      this._setOpened = () => {
-        this._isOpen = true
-        resolve()
+    if (data == null) {
+      this._data = {
+        apps: new AppsManager(),
+        identities: new IdentitiesManager(),
       }
-    })
+    } else {
+      this._data = data
+    }
   }
 
-  get isOpen(): boolean {
-    return this._isOpen
+  get apps(): AppsManager {
+    return this._data.apps
   }
 
-  get opened(): Promise<void> {
-    return this._opened
+  get identities(): IdentitiesManager {
+    return this._data.identities
   }
 
   checkKey(key: Buffer): boolean {
     return this._key.equals(key)
   }
 
-  async open() {
-    const buffer = await readSecureFile(this._path, this._key)
-    if (buffer == null) {
-      throw new Error('Unable to open vault')
-    }
-
-    const data = JSON.parse(buffer.toString())
-    this._apps = AppsManager.hydrate(data.apps)
-    this._identities = IdentitiesManager.hydrate(data.identities)
-
-    this._setOpened()
-  }
-
   save() {
-    const contents = Buffer.from(JSON.stringify(this.serialized()))
+    const contents = Buffer.from(JSON.stringify(this.toJSON()))
     return writeSecureFile(this._path, contents, this._key)
   }
 
-  serialized(): VaultSerialized {
-    return {
-      apps: this._apps ? this._apps.serialized() : [],
-      identities: this._identities ? this._identities.serialized() : [],
-    }
-  }
-
-  createIdentity(seed?: Buffer): OwnIdentity {
-    if (this._identities == null) {
-      throw new Error('Vault is not open')
-    }
-    return this._identities.create(seed)
+  toJSON(): VaultSerialized {
+    return this._data
+      ? {
+          apps: AppsManager.toJSON(this._data.apps),
+          identities: IdentitiesManager.toJSON(this._data.identities),
+        }
+      : {}
   }
 }

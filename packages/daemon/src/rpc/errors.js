@@ -1,5 +1,10 @@
 // @flow
 
+export type ErrorObject = {
+  code: number,
+  message: string,
+}
+
 export class RPCError extends Error {
   code: number
   constructor(code: number, message: string) {

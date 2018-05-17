@@ -4,17 +4,27 @@
   "main": "lib/index.js",
   "license": "MIT",
   "scripts": {
-    "build": "babel src --out-dir lib",
+    "clean": "del lib",
+    "build:js": "flow-remove-types src --out-dir lib",
+    "build:flow": "flow-copy-source src lib",
+    "build": "yarn clean && yarn build:js && yarn build:flow",
+    "test": "flow check",
     "dev": "babel-node src",
-    "start": "node lib"
+    "start": "node -r esm lib"
   },
   "dependencies": {
+    "@mainframe/rpc-node": "^0.2.0",
+    "@mainframe/utils-crypto": "^0.1.0",
+    "asar": "^0.14.3",
     "debug": "^3.1.0",
-    "fs-extra": "^5.0.0",
+    "esm": "^3.0.26",
+    "fast-json-stable-stringify": "^2.0.0",
+    "fs-extra": "^6.0.1",
     "nanoid": "^1.0.2",
-    "sodium-native": "^2.1.5"
+    "rxjs": "^6.0.0",
+    "sodium-native": "^2.1.6"
   },
   "devDependencies": {
-    "flow-bin": "^0.69.0"
+    "flow-bin": "^0.72.0"
   }
 }

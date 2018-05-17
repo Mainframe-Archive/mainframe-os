@@ -1,15 +1,16 @@
 // @flow
 
+import {
+  encryptSecretBox,
+  decryptSecretBox,
+  type EncryptedBox,
+  type KeyPair,
+} from '@mainframe/utils-crypto'
 import { readFile, writeFile } from 'fs-extra'
 import nanoid from 'nanoid'
+// TODO: sodium is only needed to access the crypto_secretbox_NONCEBYTES
+// could be a re-export from @mainframe/utils-crypto or have the lib provide these helpers
 import sodium from 'sodium-native'
-
-import {
-  encryptSym,
-  decryptSym,
-  type EncryptedMessage,
-  type KeyPair,
-} from './crypto'
 
 export opaque type base64: string = string
 
@@ -32,13 +33,14 @@ export const keyPairFromBuffer = (buffer: Buffer, pkSize: number): KeyPair => ({
   secretKey: buffer.slice(pkSize),
 })
 
-export const encryptedMessageToBuffer = (msg: EncryptedMessage): Buffer =>
-  Buffer.concat([msg.nonce, msg.cipher])
+export const encryptedBoxToBuffer = (encrypted: EncryptedBox): Buffer => {
+  return Buffer.concat([encrypted.nonce, encrypted.cipher])
+}
 
-export const encryptedMessageFromBuffer = (
+export const encryptedBoxFromBuffer = (
   msg: Buffer,
   nonceSize: number,
-): EncryptedMessage => ({
+): EncryptedBox => ({
   nonce: msg.slice(0, nonceSize),
   cipher: msg.slice(nonceSize),
 })
@@ -48,19 +50,27 @@ export const writeSecureFile = (
   contents: Buffer,
   key: Buffer,
 ) => {
-  const data = encryptedMessageToBuffer(encryptSym(contents, key))
+  const data = encryptedBoxToBuffer(encryptSecretBox(contents, key))
   return writeFile(path, data)
 }
 
 export const readSecureFile = async (path: string, key: Buffer) => {
   const contents = await readFile(path)
-  const encryptedData = encryptedMessageFromBuffer(
+  const encryptedData = encryptedBoxFromBuffer(
     contents,
     sodium.crypto_secretbox_NONCEBYTES,
   )
-  return decryptSym(encryptedData, key)
+  return decryptSecretBox(encryptedData, key)
 }
 
-// Use instead of Object.values() so Flow properly types the values
-// https://github.com/facebook/flow/issues/2221
-export const objectValues = (obj: Object) => Object.keys(obj).map(k => obj[k])
+export const mapObject = <T, U>(mapper: (input: T) => U) => (
+  obj: ?{ [string]: T },
+): { [string]: U } => {
+  return obj == null
+    ? {}
+    : Object.keys(obj).reduce((acc, key) => {
+        // $FlowFixMe: obj[key] shouldn't be possibly null
+        acc[key] = mapper(obj[key])
+        return acc
+      }, {})
+}
