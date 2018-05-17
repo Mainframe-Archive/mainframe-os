@@ -1,5 +1,10 @@
 import React, { Component } from 'react'
-
+import {
+  View,
+  TouchableOpacity,
+  StyleSheet,
+  Text,
+} from 'react-native'
 const electron = window.require('electron')
 const fs = window.require('fs-extra')
 const path = window.require('path')
@@ -26,19 +31,39 @@ export default class App extends Component {
           }
 
           appRows.push(
-            <button onClick={onClick} className="app-list-item" key={manifest.id}>
-              {manifest.name}
-            </button>
+            <TouchableOpacity onPress={onClick} style={styles.appRow} key={manifest.id}>
+              <Text>{manifest.name}</Text>
+            </TouchableOpacity>
           )
         }
       }
     })
 
     return (
-      <div>
-      	<h1>Mainframe Launcher</h1>
-        {appRows}
-      </div>
+      <View style={styles.container}>
+        <Text style={styles.title}>Mainframe Launcher</Text>
+        <View style={styles.apps}>
+          {appRows}
+        </View>
+      </View>
     )
   }
 }
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 30,
+  },
+  title: {
+    fontSize: 20,
+  },
+  apps: {
+    marginTop: 20,
+    flex: 1,
+  },
+  appRow: {
+    padding: 10,
+    marginBottom: 10,
+    backgroundColor: '#f5f5f5',
+  }
+})
