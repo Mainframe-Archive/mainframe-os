@@ -10,6 +10,7 @@
       "**/@mainframe/rpc-*",
       "**/@mainframe/transport-*",
       "**/@mainframe/utils-crypto",
+      "**/nanoid",
       "**/rx-socket",
       "**/rxjs",
       "**/sodium-universal",

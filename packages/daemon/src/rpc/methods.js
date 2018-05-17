@@ -9,8 +9,6 @@ import { getVault, openVault, createVault } from '../vault'
 import { RPCError } from './errors'
 import web3Client from './web3Client'
 
-const SEED_MIN_LENGTH = 20
-
 const getClientVault = (socket: Socket): Vault => {
   const vault = getVault(socket)
   if (vault == null) {
@@ -20,6 +18,8 @@ const getClientVault = (socket: Socket): Vault => {
 }
 
 export default {
+  mf_apiVersion: () => 0,
+
   mf_openVault: async (socket: Socket, [path, key]: [string, base64] = []) => {
     try {
       await openVault(socket, path, fromBase64(key))

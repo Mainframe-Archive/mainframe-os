@@ -1,0 +1,20 @@
+{
+  "name": "@mainframe/toolbox",
+  "version": "0.1.0",
+  "main": "lib/index.js",
+  "license": "MIT",
+  "scripts": {
+    "clean": "del lib",
+    "build:js": "flow-remove-types src --out-dir lib",
+    "build:flow": "flow-copy-source src lib",
+    "build": "yarn clean && yarn build:js && yarn build:flow",
+    "test": "flow check"
+  },
+  "dependencies": {
+    "@mainframe/config": "*",
+    "execa": "^0.10.0"
+  },
+  "devDependencies": {
+    "flow-bin": "^0.72.0"
+  }
+}

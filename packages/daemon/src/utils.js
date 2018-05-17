@@ -14,8 +14,9 @@ import sodium from 'sodium-native'
 
 export opaque type base64: string = string
 
-export const fromBase64 = (input: string): Buffer =>
-  Buffer.from(input, 'base64')
+export const fromBase64 = (input: string): Buffer => {
+  return Buffer.from(input, 'base64')
+}
 
 export const toBase64 = (input: Buffer) => (input.toString('base64'): base64)
 
@@ -25,8 +26,9 @@ export const typeID = (value: any) => (value: ID)
 
 export const uniqueID = () => typeID(nanoid())
 
-export const keyPairToBuffer = (pair: KeyPair): Buffer =>
-  Buffer.concat([pair.publicKey, pair.secretKey])
+export const keyPairToBuffer = (pair: KeyPair): Buffer => {
+  return Buffer.concat([pair.publicKey, pair.secretKey])
+}
 
 export const keyPairFromBuffer = (buffer: Buffer, pkSize: number): KeyPair => ({
   publicKey: buffer.slice(0, pkSize),
