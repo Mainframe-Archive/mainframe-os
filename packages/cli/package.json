@@ -1,0 +1,36 @@
+{
+  "name": "@mainframe/cli",
+  "description": "Mainframe CLI",
+  "version": "0.1.0",
+  "author": "Mainframe",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "bin": {
+    "mainframe": "./bin/run"
+  },
+  "oclif": {
+    "commands": "./lib/commands",
+    "bin": "mainframe",
+    "plugins": ["@oclif/plugin-help"]
+  },
+  "files": ["/bin", "/lib"],
+  "scripts": {
+    "clean": "del lib",
+    "build:js": "babel src --out-dir lib",
+    "build:flow": "flow-copy-source src lib",
+    "build": "yarn clean && yarn build:js && yarn build:flow",
+    "test": "flow check"
+  },
+  "dependencies": {
+    "@mainframe/client": "*",
+    "@mainframe/config": "*",
+    "@mainframe/toolbox": "*",
+    "@oclif/command": "^1.4.30",
+    "@oclif/config": "^1.6.19",
+    "@oclif/plugin-help": "^1.2.11",
+    "esm": "^3.0.34"
+  },
+  "devDependencies": {
+    "flow-bin": "^0.72.0"
+  }
+}

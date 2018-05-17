@@ -1,0 +1,7 @@
+#!/usr/bin/env node --experimental-repl-await
+
+require = require('esm')(module, { mode: 'auto' })
+require('@oclif/command')
+  .run()
+  .then(require('@oclif/command/flush'))
+  .catch(require('@oclif/errors/handle'))
