@@ -13,7 +13,11 @@
       "**/rx-socket",
       "**/rxjs",
       "**/sodium-universal",
-      "**/ws"
+      "**/ws",
+      "**/react", "**/react/**",
+      "**/react-dom", "**/react-dom/**",
+      "**/electron", "**/electron/**",
+      "**/electron-webpack", "**/electron-webpack/**"
     ]
   },
   "scripts": {

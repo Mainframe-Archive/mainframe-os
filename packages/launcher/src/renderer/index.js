@@ -1,6 +1,15 @@
 import React from 'react'
 import { render } from 'react-dom'
-import './styles.css'
-import App from './App.js'
+import { parse } from 'query-string'
 
-render(<App/>, document.getElementById('app'))
+import './styles.css'
+import Launcher from './launcher/Launcher.js'
+import AppContainer from './apps/AppContainer.js'
+
+const params = parse(document.location.search)
+
+const app = params.type === 'launcher'
+  ? <Launcher />
+  : <AppContainer appId={params.appId} />
+
+render(app, document.getElementById('app'))

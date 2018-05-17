@@ -9,7 +9,7 @@ export default class App extends Component {
 
   render() {
     // TODO: Temporary applications directory for dev
-    const appsPath = path.join(__dirname, '../../static/', 'applications')
+    const appsPath = path.join(__dirname, '../../../static/', 'applications')
     const files = fs.readdirSync(appsPath)
     const appRows = []
 
