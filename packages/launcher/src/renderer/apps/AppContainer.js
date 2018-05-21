@@ -5,18 +5,23 @@ import path from 'path'
 import url from 'url'
 
 export default class App extends Component {
-
   render() {
     const { appId } = this.props
     const appUrl = url.format({
-      pathname: path.join(__static, 'applications', appId, `${appId}.asar`, `index.html`),
+      pathname: path.join(
+        __static,
+        'applications',
+        appId,
+        `${appId}.asar`,
+        `index.html`,
+      ),
       protocol: 'file:',
-      slashes: true
+      slashes: true,
     })
     const preloadPath = url.format({
       pathname: path.join(__static, 'preload.js'),
       protocol: 'file:',
-      slashes: true
+      slashes: true,
     })
     return (
       <View style={styles.outerContainer}>
@@ -32,7 +37,7 @@ export default class App extends Component {
           id="foo"
           src={appUrl}
           preload={preloadPath}
-          style={{flex: 1}}
+          style={{ flex: 1 }}
           sandboxed="true"
         />
       </View>
@@ -51,7 +56,7 @@ const styles = StyleSheet.create({
     padding: 10,
     height: 50,
     flexDirection: 'row',
-    backgroundColor: '#f7f7f7'
+    backgroundColor: '#f7f7f7',
   },
   appInfo: {
     paddingTop: 5,

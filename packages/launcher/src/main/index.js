@@ -60,6 +60,9 @@ const setupClient = async () => {
       await client.openVault(vaultPath, vaultKey)
     }
   }
+
+  const apps = await client.apps()
+  console.log(apps)
 }
 
 const createLauncherWindow = async () => {
