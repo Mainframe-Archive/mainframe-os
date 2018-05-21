@@ -9,11 +9,21 @@ import Client from '@mainframe/client'
 import { Environment } from '@mainframe/config'
 import { getDaemonSocketPath } from '@mainframe/config'
 
+const testVaultKey =
+  'yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy'
+
 let mainWindow
 let client
 let env
 
-const appWindows = {}
+type AppWindows = {
+  [appId: string]: {
+    window: BrowserWindow,
+    appId: string,
+  },
+}
+
+const appWindows: AppWindows = {}
 const requestChannel = 'ipc-request-channel'
 const responseChannel = 'ipc-response-channel'
 const isDevelopment = process.env.NODE_ENV !== 'production'
@@ -45,8 +55,6 @@ const newWindow = params => {
 
 const setupClient = async () => {
   const envName = isDevelopment ? 'development' : 'production'
-  const vaultKey =
-    'yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy'
 
   env = new Environment(envName)
   const socketPath = getDaemonSocketPath(env)
@@ -54,15 +62,12 @@ const setupClient = async () => {
   client = new Client(socketPath)
 
   try {
-    const createRes = await client.newVault(vaultPath, vaultKey)
+    const createRes = await client.newVault(vaultPath, testVaultKey)
   } catch (err) {
     if (err.message === 'Vault already exists') {
-      await client.openVault(vaultPath, vaultKey)
+      await client.openVault(vaultPath, testVaultKey)
     }
   }
-
-  const apps = await client.apps()
-  console.log(apps)
 }
 
 const createLauncherWindow = async () => {
@@ -88,7 +93,10 @@ const launchApp = appId => {
     type: 'app',
     appId,
   })
-  appWindows[appId] = appWindow
+  appWindows[appId] = {
+    appId,
+    window: appWindow,
+  }
 }
 
 app.on('ready', createLauncherWindow)

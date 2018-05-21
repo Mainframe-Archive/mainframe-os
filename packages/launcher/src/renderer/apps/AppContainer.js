@@ -1,10 +1,14 @@
 // @flow
 import React, { Component } from 'react'
-import { View, StyleSheet, Text } from 'react-native'
+import { View, StyleSheet, Text } from 'react-native-web'
 import path from 'path'
 import url from 'url'
 
-export default class App extends Component {
+type Props = {
+  appId: string,
+}
+
+export default class App extends Component<Props> {
   render() {
     const { appId } = this.props
     const appUrl = url.format({

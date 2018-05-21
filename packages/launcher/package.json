@@ -7,9 +7,11 @@
     "dev": "electron-webpack dev",
     "compile": "electron-webpack",
     "dist": "yarn compile && electron-builder",
-    "dist:dir": "yarn dist --dir -c.compression=store -c.mac.identity=null"
+    "dist:dir": "yarn dist --dir -c.compression=store -c.mac.identity=null",
+    "build:flow": "flow-copy-source src lib"
   },
   "dependencies": {
+    "@babel/preset-flow": "^7.0.0-beta.47",
     "fs-extra": "^6.0.1",
     "react": "^16.3.2",
     "react-art": "^16.3.2",

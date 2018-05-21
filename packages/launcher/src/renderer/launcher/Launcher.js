@@ -1,5 +1,7 @@
+//@flow
+
 import React, { Component } from 'react'
-import { View, TouchableOpacity, StyleSheet, Text } from 'react-native'
+import { View, TouchableOpacity, StyleSheet, Text } from 'react-native-web'
 const electron = window.require('electron')
 const fs = window.require('fs-extra')
 const path = window.require('path')
