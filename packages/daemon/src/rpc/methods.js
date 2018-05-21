@@ -46,6 +46,11 @@ export default {
     return { id }
   },
 
+  mf_apps: (socket: Socket): { id: ID } => {
+    const vault = getClientVault(socket)
+    return vault.apps
+  },
+
   mf_callWeb3: (
     socket: Socket,
     [appID, identityID, method, params]: [ID, ID, string, any] = [],

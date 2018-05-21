@@ -32,6 +32,10 @@ export default class MainframeClient {
     return this._rpc.request('mf_newUserIdentity')
   }
 
+  apps(): Promise<Array<Object>> {
+    return this._rpc.request('mf_apps')
+  }
+
   callWeb3(
     appID: string,
     identityID: string,

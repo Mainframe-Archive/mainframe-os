@@ -2,4 +2,4 @@ node_modules
 /packages/*/lib
 /packages/*/.flowconfig
 *.log
-/packages/launcher/dist/main/*
+/packages/launcher/dist

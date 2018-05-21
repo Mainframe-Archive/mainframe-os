@@ -5,38 +5,69 @@ import querystring from 'querystring'
 import path from 'path'
 import url from 'url'
 
-let mainWindow
-const appWindows = {}
+import Client from '@mainframe/client'
+import { Environment } from '@mainframe/config'
+import { getDaemonSocketPath } from '@mainframe/config'
 
+let mainWindow
+let client
+let env
+
+const appWindows = {}
 const requestChannel = 'ipc-request-channel'
 const responseChannel = 'ipc-response-channel'
-
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
-const newWindow = (params) => {
-  const window = new BrowserWindow({width: 800, height: 600})
+const newWindow = params => {
+  const window = new BrowserWindow({ width: 800, height: 600 })
   if (isDevelopment) {
     window.webContents.openDevTools()
   }
   const stringParams = querystring.stringify(params)
 
   if (isDevelopment) {
-    window.loadURL(`http://localhost:${process.env.ELECTRON_WEBPACK_WDS_PORT}?${stringParams}`)
+    window.loadURL(
+      `http://localhost:${
+        process.env.ELECTRON_WEBPACK_WDS_PORT
+      }?${stringParams}`,
+    )
   } else {
-    window.loadURL(url.format({
-      pathname: path.join(__dirname, `index.html?${params}`),
-      protocol: 'file:',
-      slashes: true
-    }))
+    window.loadURL(
+      url.format({
+        pathname: path.join(__dirname, `index.html?${stringParams}`),
+        protocol: 'file:',
+        slashes: true,
+      }),
+    )
   }
   return window
 }
 
-const createWindow = () => {
+const setupClient = async () => {
+  const envName = isDevelopment ? 'development' : 'production'
+  const vaultKey =
+    'yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy'
 
+  env = new Environment(envName)
+  const socketPath = getDaemonSocketPath(env)
+  const vaultPath = path.join(env.paths.config, 'defaultVault')
+  client = new Client(socketPath)
+
+  try {
+    const createRes = await client.newVault(vaultPath, vaultKey)
+  } catch (err) {
+    if (err.message === 'Vault already exists') {
+      await client.openVault(vaultPath, vaultKey)
+    }
+  }
+}
+
+const createLauncherWindow = async () => {
   mainWindow = newWindow({
     type: 'launcher',
   })
+
+  setupClient()
 
   // Emitted when the window is closed.
   mainWindow.on('closed', () => {
@@ -49,7 +80,7 @@ const createWindow = () => {
   })
 }
 
-const launchApp = (appId) => {
+const launchApp = appId => {
   const appWindow = newWindow({
     type: 'app',
     appId,
@@ -57,7 +88,7 @@ const launchApp = (appId) => {
   appWindows[appId] = appWindow
 }
 
-app.on('ready', createWindow)
+app.on('ready', createLauncherWindow)
 
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {
@@ -70,7 +101,7 @@ app.on('activate', () => {
   // On macOS it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   if (mainWindow === null) {
-    createWindow()
+    createLauncherWindow()
   }
 })
 
@@ -83,11 +114,11 @@ const simpleClient = {
   getPublicKey: () => 'myKey',
 }
 
-const handleRequest = (request) => {
-  if (request.data.method && simpleClient[request.data.method]) {
+const handleRequest = request => {
+  if (request.data && request.data.method && client[request.data.method]) {
     const args = request.data.args || []
     try {
-      const res = simpleClient[request.data.method](...args)
+      const res = client[request.data.method](...args)
       return {
         id: request.id,
         result: res,
