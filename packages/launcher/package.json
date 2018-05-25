@@ -16,6 +16,7 @@
     "react": "^16.3.2",
     "react-art": "^16.3.2",
     "react-dom": "^16.3.2",
+    "react-modal": "^3.4.4",
     "react-native-web": "^0.6.1",
     "source-map-support": "^0.5.5"
   },
