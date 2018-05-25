@@ -1,28 +1,26 @@
 // @flow
 
+import {
+  decodeBase64,
+  encodeBase64,
+  type base64,
+} from '@mainframe/utils-base64'
+import type { ID } from '@mainframe/utils-id'
 import type { Socket } from 'net'
 
-import { fromBase64, toBase64, type base64, type ID } from '../utils'
-import type Vault from '../vault/Vault'
-import { getVault, openVault, createVault } from '../vault'
-
 import { RPCError } from './errors'
+import type { RequestContext } from './types'
 import web3Client from './web3Client'
-
-const getClientVault = (socket: Socket): Vault => {
-  const vault = getVault(socket)
-  if (vault == null) {
-    throw new RPCError(-32000, 'Vault is not open')
-  }
-  return vault
-}
 
 export default {
   mf_apiVersion: () => 0,
 
-  mf_openVault: async (socket: Socket, [path, key]: [string, base64] = []) => {
+  mf_openVault: async (
+    ctx: RequestContext,
+    [path, key]: [string, base64] = [],
+  ) => {
     try {
-      await openVault(socket, path, fromBase64(key))
+      await ctx.vaults.open(ctx.socket, path, decodeBase64(key))
       return 'OK'
     } catch (err) {
       // TODO: different error code depending on actual error
@@ -30,9 +28,12 @@ export default {
     }
   },
 
-  mf_newVault: async (socket: Socket, [path, key]: [string, base64] = []) => {
+  mf_newVault: async (
+    ctx: RequestContext,
+    [path, key]: [string, base64] = [],
+  ) => {
     try {
-      await createVault(socket, path, fromBase64(key))
+      await ctx.vaults.create(ctx.socket, path, decodeBase64(key))
       return 'OK'
     } catch (err) {
       // TODO: different error code depending on actual error
@@ -40,19 +41,17 @@ export default {
     }
   },
 
-  mf_newUserIdentity: (socket: Socket): { id: ID } => {
-    const vault = getClientVault(socket)
-    const id = vault.identities.createOwnUser()
+  mf_newUserIdentity: (ctx: RequestContext): { id: ID } => {
+    const id = ctx.openVault.identities.createOwnUser()
     return { id }
   },
 
   mf_callWeb3: (
-    socket: Socket,
+    ctx: RequestContext,
     [appID, identityID, method, params]: [ID, ID, string, any] = [],
   ) => {
     // TODO: check app permissions to ensure call is allowed
-    const vault = getClientVault(socket)
-    const app = vault.apps.getApp(appID)
+    const app = ctx.openVault.apps.getApp(appID)
 
     if (app == null) {
       // TODO: error code

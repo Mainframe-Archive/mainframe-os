@@ -1,7 +1,9 @@
 // @flow
 
-import { unlink } from 'fs'
+import { remove } from 'fs-extra'
 import { createServer, type Server, type Socket } from 'net'
+
+import { VaultRegistry } from '../vault'
 
 import handleClient from './handleClient'
 
@@ -9,15 +11,17 @@ export default class ServerHandler {
   _clients: Set<Socket> = new Set()
   _path: string
   _server: Server
+  _vaults: VaultRegistry = new VaultRegistry()
 
   constructor(path: string) {
     this._path = path
     this._server = createServer((socket: Socket) => {
       this._clients.add(socket)
-      socket.on('close', () => {
+      socket.on('close', async () => {
+        await this._vaults.close(socket)
         this._clients.delete(socket)
       })
-      handleClient(socket)
+      handleClient(socket, this._vaults)
     })
 
     this._server.on('close', () => {
@@ -35,12 +39,11 @@ export default class ServerHandler {
       return Promise.resolve()
     }
 
+    await remove(this._path)
     return new Promise((resolve, reject) => {
-      unlink(this._path, () => {
-        this._server.listen(this._path, err => {
-          if (err) reject(err)
-          else resolve()
-        })
+      this._server.listen(this._path, err => {
+        if (err) reject(err)
+        else resolve()
       })
     })
   }

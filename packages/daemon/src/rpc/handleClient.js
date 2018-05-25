@@ -1,10 +1,11 @@
 // @flow
 
+import { uniqueID } from '@mainframe/utils-id'
 import debug from 'debug'
 import type { Socket } from 'net'
 import { inspect } from 'util'
 
-import { uniqueID } from '../utils'
+import type { VaultRegistry } from '../vault'
 
 import {
   parseError,
@@ -14,21 +15,25 @@ import {
   type ErrorObject,
 } from './errors'
 import methods from './methods'
+import RequestContext from './RequestContext'
 
-type ID = number | string
-
-type Methods = { [string]: (socket: Socket, params: any) => any | Promise<any> }
+type requestID = number | string
 
 type PromiseObject = {
   resolve: (value?: ?any) => void,
   reject: (error: RPCError) => void,
 }
 
-export default (socket: Socket) => {
+type Methods = {
+  [string]: (ctx: RequestContext, params: any) => any | Promise<any>,
+}
+
+export default (socket: Socket, vaults: VaultRegistry) => {
+  const context = new RequestContext(socket, vaults)
   const ns = `mainframe:daemon:rpc:client:${uniqueID()}`
   const log = debug(ns)
   const logIO = debug(`${ns}:io`)
-  const requests: { [id: ID]: PromiseObject } = {}
+  const requests: { [requestID]: PromiseObject } = {}
 
   const logJSON = (msg: string, data: Object) => {
     logIO(msg, inspect(data, { colors: true, depth: 5 }))
@@ -40,11 +45,11 @@ export default (socket: Socket) => {
     socket.write(JSON.stringify(payload))
   }
 
-  const sendError = (id: ?ID, error: RPCError) => {
+  const sendError = (id: ?requestID, error: RPCError) => {
     sendJSON({ id, error: { code: error.code, message: error.message } })
   }
 
-  const sendResult = (id: ID, result?: any) => {
+  const sendResult = (id: requestID, result?: any) => {
     sendJSON({ id, result })
   }
 
@@ -61,10 +66,14 @@ export default (socket: Socket) => {
     if (handler == null) {
       throw methodNotFound()
     }
-    return await handler(socket, params)
+    return await handler(context, params)
   }
 
-  const handleResponse = async (id: ID, error: ?ErrorObject, result?: any) => {
+  const handleResponse = async (
+    id: requestID,
+    error: ?ErrorObject,
+    result?: any,
+  ) => {
     const req = requests[id]
     if (req == null) {
       console.warn('Request not found for response', id)

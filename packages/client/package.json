@@ -12,10 +12,12 @@
   },
   "dependencies": {
     "@mainframe/rpc-ipc": "^0.2.0",
-    "rxjs": "^6.1.0"
+    "@mainframe/utils-base64": "^0.1.0",
+    "rxjs": "^6.1.0",
+    "sodium-universal": "^2.0.0"
   },
   "devDependencies": {
     "@mainframe/rpc-stream": "^0.2.1",
-    "flow-bin": "^0.72.0"
+    "flow-bin": "^0.73.0"
   }
 }

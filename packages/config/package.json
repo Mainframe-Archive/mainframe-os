@@ -11,11 +11,12 @@
     "test": "flow check"
   },
   "dependencies": {
+    "@mainframe/utils-id": "^0.1.0",
     "conf": "^1.4.0",
     "env-paths": "^1.0.0",
     "esm": "^3.0.26"
   },
   "devDependencies": {
-    "flow-bin": "^0.72.0"
+    "flow-bin": "^0.73.0"
   }
 }

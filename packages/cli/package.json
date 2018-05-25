@@ -11,9 +11,14 @@
   "oclif": {
     "commands": "./lib/commands",
     "bin": "mainframe",
-    "plugins": ["@oclif/plugin-help"]
+    "plugins": [
+      "@oclif/plugin-help"
+    ]
   },
-  "files": ["/bin", "/lib"],
+  "files": [
+    "/bin",
+    "/lib"
+  ],
   "scripts": {
     "clean": "del lib",
     "build:js": "babel src --out-dir lib",
@@ -28,9 +33,10 @@
     "@oclif/command": "^1.4.30",
     "@oclif/config": "^1.6.19",
     "@oclif/plugin-help": "^1.2.11",
-    "esm": "^3.0.34"
+    "esm": "3.0.34",
+    "inquirer": "^5.2.0"
   },
   "devDependencies": {
-    "flow-bin": "^0.72.0"
+    "flow-bin": "^0.73.0"
   }
 }

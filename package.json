@@ -9,16 +9,20 @@
     "nohoist": [
       "**/@mainframe/rpc-*",
       "**/@mainframe/transport-*",
-      "**/@mainframe/utils-crypto",
+      "**/@mainframe/utils-*",
       "**/nanoid",
       "**/rx-socket",
       "**/rxjs",
       "**/sodium-universal",
       "**/ws",
-      "**/react", "**/react/**",
-      "**/react-dom", "**/react-dom/**",
-      "**/electron", "**/electron/**",
-      "**/electron-webpack", "**/electron-webpack/**"
+      "**/react",
+      "**/react/**",
+      "**/react-dom",
+      "**/react-dom/**",
+      "**/electron",
+      "**/electron/**",
+      "**/electron-webpack",
+      "**/electron-webpack/**"
     ]
   },
   "scripts": {
@@ -49,8 +53,8 @@
     "babel-preset-flow": "^6.23.0",
     "del-cli": "^1.1.0",
     "eslint": "^4.19.1",
-    "eslint-config-mainframe": "^1.1.0",
-    "flow-bin": "^0.72.0",
+    "eslint-config-mainframe": "^1.2.0",
+    "flow-bin": "^0.73.0",
     "flow-copy-source": "^1.3.0",
     "flow-mono-cli": "^1.3.1",
     "flow-remove-types": "^1.2.3",

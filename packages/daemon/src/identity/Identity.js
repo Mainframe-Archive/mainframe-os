@@ -7,8 +7,7 @@ import {
   verifySignature,
   type KeyPair,
 } from '@mainframe/utils-crypto'
-
-import { type ID } from '../utils'
+import type { ID } from '@mainframe/utils-id'
 
 import Keychain from './Keychain'
 
