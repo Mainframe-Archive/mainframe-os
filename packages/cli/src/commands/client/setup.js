@@ -11,13 +11,8 @@ export default class SetupCommand extends Command {
   static flags = Command.flags
 
   async createVault(cfg: VaultConfig) {
-    const client = this.client
-    if (client == null) {
-      return
-    }
-
     const path = cfg.createVaultPath()
-    await createVault(cfg, client, path, true)
+    await createVault(this, cfg, path, true)
     this.log(`New vault created at ${path}`)
   }
 

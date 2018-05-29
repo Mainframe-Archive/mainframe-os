@@ -3,8 +3,8 @@
 import {
   encryptSecretBox,
   decryptSecretBox,
-  type EncryptedBox,
-  type KeyPair,
+  type EncryptedBox, // eslint-disable-line import/named
+  type KeyPair, // eslint-disable-line import/named
 } from '@mainframe/utils-crypto'
 import { outputFile, readFile } from 'fs-extra'
 // TODO: sodium is only needed to access the crypto_secretbox_NONCEBYTES

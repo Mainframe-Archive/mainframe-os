@@ -1,6 +1,7 @@
 // @flow
 
 import type { KeyPair } from '@mainframe/utils-crypto'
+// eslint-disable-next-line import/named
 import { uniqueID, idType, type ID } from '@mainframe/utils-id'
 
 import { mapObject } from '../utils'

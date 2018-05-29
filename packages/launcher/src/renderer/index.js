@@ -9,10 +9,13 @@ import AppContainer from './apps/AppContainer.js'
 const params = parse(document.location.search)
 
 class App extends Component {
-  render () {
-    const app = params.type === 'launcher'
-      ? <Launcher />
-      : <AppContainer appId={params.appId} />
+  render() {
+    const app =
+      params.type === 'launcher' ? (
+        <Launcher />
+      ) : (
+        <AppContainer appId={params.appId} />
+      )
     return app
   }
 }

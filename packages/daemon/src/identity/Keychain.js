@@ -3,14 +3,15 @@
 import {
   decodeBase64,
   encodeBase64,
-  type base64,
+  type base64, // eslint-disable-line import/named
 } from '@mainframe/utils-base64'
 import {
   createBoxKeyPair,
   createSecretBoxKey,
   createSignKeyPair,
-  type KeyPair,
+  type KeyPair, // eslint-disable-line import/named
 } from '@mainframe/utils-crypto'
+// eslint-disable-next-line import/named
 import { uniqueID, type ID } from '@mainframe/utils-id'
 
 import { mapObject } from '../utils'

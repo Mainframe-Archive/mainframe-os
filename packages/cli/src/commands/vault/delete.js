@@ -19,10 +19,11 @@ export default class DeleteCommand extends Command {
 
   async deleteVault(cfg: VaultConfig, path: string) {
     const label = cfg.getLabel(path)
+    const name = label ? `${label} (${path})` : path
     const { confirmed } = await prompt({
       type: 'confirm',
       name: 'confirmed',
-      message: `Are you sure you want to delete the vault ${label} (${path})? This CAN NOT be reversed.`,
+      message: `Are you sure you want to delete the vault ${name}? This CAN NOT be reversed.`,
       default: false,
     })
     if (confirmed) {

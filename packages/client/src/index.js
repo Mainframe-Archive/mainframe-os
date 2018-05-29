@@ -17,19 +17,19 @@ export default class MainframeClient {
   }
 
   apiVersion(): Promise<number> {
-    return this._rpc.request('mf_apiVersion')
+    return this._rpc.request('api_version')
   }
 
-  newVault(path: string, key: string): Promise<void> {
-    return this._rpc.request('mf_newVault', [path, encodeVaultKey(key)])
+  createVault(path: string, key: string): Promise<void> {
+    return this._rpc.request('vault_create', [path, encodeVaultKey(key)])
   }
 
   openVault(path: string, key: string): Promise<void> {
-    return this._rpc.request('mf_openVault', [path, encodeVaultKey(key)])
+    return this._rpc.request('vault_open', [path, encodeVaultKey(key)])
   }
 
-  newUserIdentity(): Promise<string> {
-    return this._rpc.request('mf_newUserIdentity')
+  createUserIdentity(): Promise<string> {
+    return this._rpc.request('identity_createUser')
   }
 
   callWeb3(
@@ -38,6 +38,6 @@ export default class MainframeClient {
     method: string,
     params?: any,
   ): Promise<any> {
-    return this._rpc.request('mf_callWeb3', [appID, identityID, method, params])
+    return this._rpc.request('web3_call', [appID, identityID, method, params])
   }
 }

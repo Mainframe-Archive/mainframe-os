@@ -18,15 +18,10 @@ export default class CreateCommand extends Command {
   }
 
   async run() {
-    const client = this.client
-    if (client == null) {
-      return
-    }
-
     const cfg = new VaultConfig(this.env)
     const path = this.flags.path || cfg.createVaultPath()
 
-    await createVault(cfg, client, path, cfg.defaultVault == null)
+    await createVault(this, cfg, path, cfg.defaultVault == null)
     this.log(`New vault created at ${path}`)
   }
 }

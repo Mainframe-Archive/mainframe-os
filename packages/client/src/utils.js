@@ -1,5 +1,6 @@
 // @flow
 
+// eslint-disable-next-line import/named
 import { encodeBase64, type base64 } from '@mainframe/utils-base64'
 import sodium from 'sodium-universal'
 
