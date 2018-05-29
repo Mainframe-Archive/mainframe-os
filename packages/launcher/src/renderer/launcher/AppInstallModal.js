@@ -11,6 +11,7 @@ import {
 import fs from 'fs-extra'
 import ReactModal from 'react-modal'
 import Button from '../Button'
+import PermissionsView, { type PermissionSettings } from './PermissionsView'
 
 type Props = {
   onRequestClose: () => void,
@@ -18,6 +19,7 @@ type Props = {
 
 type State = {
   inputValue?: string,
+  manifest: Object,
   installStep: 'manifest' | 'permissions' | 'download',
 }
 
@@ -47,6 +49,10 @@ export default class AppInstallModal extends Component<Props, State> {
       const file = files[0]
       try {
         const manifest = fs.readJsonSync(file.path)
+        this.setState({
+          manifest,
+          installStep: 'permissions',
+        })
         console.log('manifest: ', manifest)
       } catch (err) {
         // TODO: Feedback error
@@ -55,12 +61,16 @@ export default class AppInstallModal extends Component<Props, State> {
     }
   }
 
+  onSubmitPermissions = (permissions: PermissionSettings) => {
+    console.log('do something with permissions', permissions)
+  }
+
   // RENDER
 
   renderManifestImport() {
     return (
       <View style={styles.container}>
-        <Text style={styles.header}>Install Mainframe App</Text>
+        <Text style={styles.header}>Install New App</Text>
         <Text style={styles.description}>Import an app manifest file</Text>
         <Button
           title="Import App Manifest"
@@ -79,7 +89,15 @@ export default class AppInstallModal extends Component<Props, State> {
   }
 
   renderPermissions() {
-    return undefined
+    return (
+      <View style={styles.container}>
+        <Text style={styles.header}>Install New App</Text>
+        <PermissionsView
+          permissions={this.state.manifest.permissions}
+          onSubmit={this.onSubmitPermissions}
+        />
+      </View>
+    )
   }
 
   renderDownload() {
