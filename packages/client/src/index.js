@@ -3,6 +3,8 @@
 import ipcRPC from '@mainframe/rpc-ipc'
 import type StreamRPC from '@mainframe/rpc-stream'
 
+import { encodeVaultKey } from './utils'
+
 export default class MainframeClient {
   _rpc: StreamRPC
 
@@ -10,26 +12,24 @@ export default class MainframeClient {
     this._rpc = ipcRPC(socketPath)
   }
 
-  apiVersion(): Promise<number> {
-    return this._rpc.request('mf_apiVersion')
+  close() {
+    this._rpc._transport.complete()
   }
 
-  newVault(path: string, key: string): Promise<void> {
-    return this._rpc.request('mf_newVault', [
-      path,
-      Buffer.from(key).toString('base64'),
-    ])
+  apiVersion(): Promise<number> {
+    return this._rpc.request('api_version')
+  }
+
+  createVault(path: string, key: string): Promise<void> {
+    return this._rpc.request('vault_create', [path, encodeVaultKey(key)])
   }
 
   openVault(path: string, key: string): Promise<void> {
-    return this._rpc.request('mf_openVault', [
-      path,
-      Buffer.from(key).toString('base64'),
-    ])
+    return this._rpc.request('vault_open', [path, encodeVaultKey(key)])
   }
 
-  newUserIdentity(): Promise<string> {
-    return this._rpc.request('mf_newUserIdentity')
+  createUserIdentity(): Promise<string> {
+    return this._rpc.request('identity_createUser')
   }
 
   apps(): Promise<Array<Object>> {
@@ -42,6 +42,6 @@ export default class MainframeClient {
     method: string,
     params?: any,
   ): Promise<any> {
-    return this._rpc.request('mf_callWeb3', [appID, identityID, method, params])
+    return this._rpc.request('web3_call', [appID, identityID, method, params])
   }
 }

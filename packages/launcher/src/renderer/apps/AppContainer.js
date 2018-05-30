@@ -1,14 +1,11 @@
 // @flow
+
 import React, { Component } from 'react'
 import { View, StyleSheet, Text } from 'react-native-web'
 import path from 'path'
 import url from 'url'
 
-type Props = {
-  appId: string,
-}
-
-export default class App extends Component<Props> {
+export default class App extends Component<{ appId: string }> {
   render() {
     const { appId } = this.props
     const appUrl = url.format({
@@ -41,7 +38,7 @@ export default class App extends Component<Props> {
           id="foo"
           src={appUrl}
           preload={preloadPath}
-          style={{ flex: 1 }}
+          style={{ flex: 1 }} // eslint-disable-line react-native/no-inline-styles
           sandboxed="true"
         />
       </View>
@@ -49,18 +46,19 @@ export default class App extends Component<Props> {
   }
 }
 
+const COLOR_WHITE = '#ffffff'
+const COLOR_GREY = '#f7f7f7'
+const COLOR_RED = '#ff0000'
+
 const styles = StyleSheet.create({
   outerContainer: {
-    flex: 1,
-  },
-  webView: {
     flex: 1,
   },
   header: {
     padding: 10,
     height: 50,
     flexDirection: 'row',
-    backgroundColor: '#f7f7f7',
+    backgroundColor: COLOR_GREY,
   },
   appInfo: {
     paddingTop: 5,
@@ -69,9 +67,9 @@ const styles = StyleSheet.create({
   identity: {
     borderRadius: 16,
     height: 30,
-    backgroundColor: 'red',
+    backgroundColor: COLOR_RED,
     paddingHorizontal: 20,
-    backgroundColor: '#FFF',
+    backgroundColor: COLOR_WHITE,
     justifyContent: 'center',
   },
 })

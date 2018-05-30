@@ -6,7 +6,7 @@ import IdentitiesManager, {
   type IdentitiesManagerSerialized,
 } from '../identity/IdentitiesManager'
 import type Keychain from '../identity/Keychain'
-import { type ID, readSecureFile, writeSecureFile } from '../utils'
+import { readSecureFile, writeSecureFile } from '../utils'
 
 export type VaultData = {
   apps: AppsManager,
@@ -54,16 +54,16 @@ export default class Vault {
     }
   }
 
+  get path(): string {
+    return this._path
+  }
+
   get apps(): AppsManager {
     return this._data.apps
   }
 
   get identities(): IdentitiesManager {
     return this._data.identities
-  }
-
-  checkKey(key: Buffer): boolean {
-    return this._key.equals(key)
   }
 
   save() {

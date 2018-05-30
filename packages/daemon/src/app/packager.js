@@ -4,7 +4,7 @@ import {
   hashStream,
   openSigned,
   sign,
-  type KeyPair,
+  type KeyPair, // eslint-disable-line import/named
 } from '@mainframe/utils-crypto'
 import asar from 'asar'
 import stringify from 'fast-json-stable-stringify'

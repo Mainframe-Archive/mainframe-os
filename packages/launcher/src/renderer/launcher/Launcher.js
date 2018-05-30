@@ -1,7 +1,7 @@
 //@flow
 
 import React, { Component } from 'react'
-import { View, TouchableOpacity, StyleSheet, Text } from 'react-native-web'
+import { View, TouchableOpacity, StyleSheet, Text } from 'react-native'
 import AppInstallModal from './AppInstallModal'
 import Button from '../Button'
 
@@ -10,12 +10,12 @@ const fs = window.require('fs-extra')
 const path = window.require('path')
 const ipc = electron.ipcRenderer
 
-type AppState = {
+type State = {
   showAppInstallModal?: boolean,
 }
 
-export default class App extends Component<AppState> {
-  state: AppState = {}
+export default class App extends Component<{}, State> {
+  state = {}
 
   // HANDLERS
 
@@ -84,6 +84,8 @@ export default class App extends Component<AppState> {
   }
 }
 
+const COLOR_GREY = '#f5f5f5'
+
 const styles = StyleSheet.create({
   container: {
     padding: 30,
@@ -98,6 +100,6 @@ const styles = StyleSheet.create({
   appRow: {
     padding: 10,
     marginBottom: 10,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: COLOR_GREY,
   },
 })

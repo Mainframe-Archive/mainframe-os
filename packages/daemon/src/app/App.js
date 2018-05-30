@@ -1,6 +1,6 @@
 // @flow
 
-import { type ID } from '../utils'
+import type { ID } from '@mainframe/utils-id'
 
 // TODO: better type or class to handle validation
 export type AppManifest = Object

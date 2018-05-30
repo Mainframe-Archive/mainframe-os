@@ -1,7 +1,5 @@
 // @flow
 
-import Client from '@mainframe/client'
-import { getDaemonSocketPath } from '@mainframe/config'
 import repl from 'repl'
 
 import Command from '../../Command'
@@ -18,7 +16,7 @@ export default class REPLCommand extends Command {
       Object.defineProperty(r.context, 'client', {
         configurable: false,
         enumerable: true,
-        value: new Client(getDaemonSocketPath(this.env)),
+        value: this.createClient(),
       })
     }
 

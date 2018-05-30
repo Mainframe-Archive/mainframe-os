@@ -1,4 +1,5 @@
 node_modules
+/packages/*/flow-typed
 /packages/*/lib
 /packages/*/.flowconfig
 *.log

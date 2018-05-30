@@ -1,16 +1,10 @@
 // @flow
 
 import type { KeyPair } from '@mainframe/utils-crypto'
+// eslint-disable-next-line import/named
+import { uniqueID, idType, type ID } from '@mainframe/utils-id'
 
-import {
-  fromBase64,
-  toBase64,
-  type base64,
-  uniqueID,
-  typeID,
-  type ID,
-  mapObject,
-} from '../utils'
+import { mapObject } from '../utils'
 
 import type Identity from './Identity'
 import type Keychain from './Keychain'
@@ -112,7 +106,7 @@ export default class IdentitiesManager {
     Object.keys(this._identities).forEach(ownership => {
       Object.keys(this._identities[ownership]).forEach(domain => {
         Object.keys(this._identities[ownership][domain]).forEach(id => {
-          this._refs[typeID(id)] = { ownership, domain }
+          this._refs[idType(id)] = { ownership, domain }
         })
       })
     })
