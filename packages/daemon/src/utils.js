@@ -3,28 +3,13 @@
 import {
   encryptSecretBox,
   decryptSecretBox,
-  type EncryptedBox,
-  type KeyPair,
+  type EncryptedBox, // eslint-disable-line import/named
+  type KeyPair, // eslint-disable-line import/named
 } from '@mainframe/utils-crypto'
-import { readFile, writeFile } from 'fs-extra'
-import nanoid from 'nanoid'
+import { outputFile, readFile } from 'fs-extra'
 // TODO: sodium is only needed to access the crypto_secretbox_NONCEBYTES
 // could be a re-export from @mainframe/utils-crypto or have the lib provide these helpers
 import sodium from 'sodium-native'
-
-export opaque type base64: string = string
-
-export const fromBase64 = (input: string): Buffer => {
-  return Buffer.from(input, 'base64')
-}
-
-export const toBase64 = (input: Buffer) => (input.toString('base64'): base64)
-
-export opaque type ID: string = string
-
-export const typeID = (value: any) => (value: ID)
-
-export const uniqueID = () => typeID(nanoid())
 
 export const keyPairToBuffer = (pair: KeyPair): Buffer => {
   return Buffer.concat([pair.publicKey, pair.secretKey])
@@ -53,7 +38,7 @@ export const writeSecureFile = (
   key: Buffer,
 ) => {
   const data = encryptedBoxToBuffer(encryptSecretBox(contents, key))
-  return writeFile(path, data)
+  return outputFile(path, data)
 }
 
 export const readSecureFile = async (path: string, key: Buffer) => {

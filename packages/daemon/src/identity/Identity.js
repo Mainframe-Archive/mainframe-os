@@ -5,10 +5,9 @@ import {
   openSigned,
   sign,
   verifySignature,
-  type KeyPair,
+  type KeyPair, // eslint-disable-line import/named
 } from '@mainframe/utils-crypto'
-
-import { type ID } from '../utils'
+import type { ID } from '@mainframe/utils-id'
 
 import Keychain from './Keychain'
 

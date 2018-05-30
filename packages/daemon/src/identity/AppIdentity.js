@@ -1,5 +1,6 @@
 // @flow
 
+// eslint-disable-next-line import/named
 import { type KeyPair } from '@mainframe/utils-crypto'
 
 import Identity from './Identity'

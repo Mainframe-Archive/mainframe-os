@@ -13,27 +13,32 @@ const responseChannel = 'ipc-response-channel'
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
-const newWindow = (params) => {
-  const window = new BrowserWindow({width: 800, height: 600})
+const newWindow = params => {
+  const window = new BrowserWindow({ width: 800, height: 600 })
   if (isDevelopment) {
     window.webContents.openDevTools()
   }
   const stringParams = querystring.stringify(params)
 
   if (isDevelopment) {
-    window.loadURL(`http://localhost:${process.env.ELECTRON_WEBPACK_WDS_PORT}?${stringParams}`)
+    window.loadURL(
+      `http://localhost:${
+        process.env.ELECTRON_WEBPACK_WDS_PORT
+      }?${stringParams}`,
+    )
   } else {
-    window.loadURL(url.format({
-      pathname: path.join(__dirname, `index.html?${params}`),
-      protocol: 'file:',
-      slashes: true
-    }))
+    window.loadURL(
+      url.format({
+        pathname: path.join(__dirname, `index.html?${params}`),
+        protocol: 'file:',
+        slashes: true,
+      }),
+    )
   }
   return window
 }
 
 const createWindow = () => {
-
   mainWindow = newWindow({
     type: 'launcher',
   })
@@ -49,7 +54,7 @@ const createWindow = () => {
   })
 }
 
-const launchApp = (appId) => {
+const launchApp = appId => {
   const appWindow = newWindow({
     type: 'app',
     appId,
@@ -83,7 +88,7 @@ const simpleClient = {
   getPublicKey: () => 'myKey',
 }
 
-const handleRequest = (request) => {
+const handleRequest = request => {
   if (request.data.method && simpleClient[request.data.method]) {
     const args = request.data.args || []
     try {

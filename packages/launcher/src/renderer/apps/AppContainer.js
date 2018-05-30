@@ -1,22 +1,28 @@
 // @flow
+
 import React, { Component } from 'react'
 import { View, StyleSheet, Text } from 'react-native'
 import path from 'path'
 import url from 'url'
 
-export default class App extends Component {
-
+export default class App extends Component<{ appId: string }> {
   render() {
     const { appId } = this.props
     const appUrl = url.format({
-      pathname: path.join(__static, 'applications', appId, `${appId}.asar`, `index.html`),
+      pathname: path.join(
+        __static,
+        'applications',
+        appId,
+        `${appId}.asar`,
+        `index.html`,
+      ),
       protocol: 'file:',
-      slashes: true
+      slashes: true,
     })
     const preloadPath = url.format({
       pathname: path.join(__static, 'preload.js'),
       protocol: 'file:',
-      slashes: true
+      slashes: true,
     })
     return (
       <View style={styles.outerContainer}>
@@ -32,7 +38,7 @@ export default class App extends Component {
           id="foo"
           src={appUrl}
           preload={preloadPath}
-          style={{flex: 1}}
+          style={{ flex: 1 }} // eslint-disable-line react-native/no-inline-styles
           sandboxed="true"
         />
       </View>
@@ -40,18 +46,19 @@ export default class App extends Component {
   }
 }
 
+const COLOR_WHITE = '#ffffff'
+const COLOR_GREY = '#f7f7f7'
+const COLOR_RED = '#ff0000'
+
 const styles = StyleSheet.create({
   outerContainer: {
-    flex: 1,
-  },
-  webView: {
     flex: 1,
   },
   header: {
     padding: 10,
     height: 50,
     flexDirection: 'row',
-    backgroundColor: '#f7f7f7'
+    backgroundColor: COLOR_GREY,
   },
   appInfo: {
     paddingTop: 5,
@@ -60,9 +67,9 @@ const styles = StyleSheet.create({
   identity: {
     borderRadius: 16,
     height: 30,
-    backgroundColor: 'red',
+    backgroundColor: COLOR_RED,
     paddingHorizontal: 20,
-    backgroundColor: '#FFF',
+    backgroundColor: COLOR_WHITE,
     justifyContent: 'center',
   },
 })

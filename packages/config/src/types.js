@@ -18,3 +18,5 @@ export type InstallStatus =
   | 'installed'
 
 export type RunStatus = 'starting' | 'running' | 'stopping' | 'stopped'
+
+export type VaultsLabels = { [path: string]: string }

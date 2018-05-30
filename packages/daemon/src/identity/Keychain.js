@@ -1,20 +1,20 @@
 // @flow
 
 import {
+  decodeBase64,
+  encodeBase64,
+  type base64, // eslint-disable-line import/named
+} from '@mainframe/utils-base64'
+import {
   createBoxKeyPair,
   createSecretBoxKey,
   createSignKeyPair,
-  type KeyPair,
+  type KeyPair, // eslint-disable-line import/named
 } from '@mainframe/utils-crypto'
+// eslint-disable-next-line import/named
+import { uniqueID, type ID } from '@mainframe/utils-id'
 
-import {
-  fromBase64,
-  toBase64,
-  type base64,
-  uniqueID,
-  type ID,
-  mapObject,
-} from '../utils'
+import { mapObject } from '../utils'
 
 type KeysPairs = { [ID]: KeyPair }
 type KeysBuffers = { [ID]: Buffer }
@@ -53,19 +53,19 @@ export type KeychainSerialized = {
 }
 
 const parseKeyPair = (serialized: KeyPairSerialized): KeyPair => ({
-  publicKey: fromBase64(serialized.publicKey),
-  secretKey: fromBase64(serialized.secretKey),
+  publicKey: decodeBase64(serialized.publicKey),
+  secretKey: decodeBase64(serialized.secretKey),
 })
 
 const serializeKeyPair = (keyPair: KeyPair): KeyPairSerialized => ({
-  publicKey: toBase64(keyPair.publicKey),
-  secretKey: toBase64(keyPair.secretKey),
+  publicKey: encodeBase64(keyPair.publicKey),
+  secretKey: encodeBase64(keyPair.secretKey),
 })
 
 const fromKeysPairs = mapObject(serializeKeyPair)
-const fromKeysBuffers = mapObject(toBase64)
+const fromKeysBuffers = mapObject(encodeBase64)
 const toKeysPairs = mapObject(parseKeyPair)
-const toKeysBuffers = mapObject(fromBase64)
+const toKeysBuffers = mapObject(decodeBase64)
 
 export default class Keychain {
   static fromJSON = (serialized: KeychainSerialized): Keychain => {
