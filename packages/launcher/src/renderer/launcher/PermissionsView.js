@@ -12,6 +12,8 @@ import {
 } from 'react-native-web'
 import Button from '../Button'
 
+// TODO use types defined in permissions package when ready
+
 type Domain = string
 type PermissionGrant = 'accepted' | 'rejected'
 type PermissionRequirement = 'required' | 'optional'
@@ -24,14 +26,27 @@ type PermissionSetting = {
   [PermissionKey]: ?PermissionGrant,
 }
 
+// Permissions requested by manifest
+export type PermissionOptions = {
+  [PermissionRequirement]: PermissionOption,
+}
+
+// Permissions set by user
 export type PermissionSettings = {
   [PermissionRequirement]: PermissionSetting,
 }
 
-type Props = {
-  permissions: {
-    [PermissionRequirement]: PermissionOption,
+// Permissions formatted for saving to app state
+export type AppPermissions = {
+  HTTPS_REQUEST?: {
+    granted?: Array<Domain>,
+    denied?: Array<Domain>,
   },
+  [PermissionKey]: ?boolean,
+}
+
+type Props = {
+  permissions: PermissionOptions,
   onSubmit: (permissionSettings: PermissionSettings) => void,
 }
 
@@ -283,9 +298,13 @@ export default class PermissionsView extends Component<Props, State> {
   }
 }
 
+const COLOR_WHITE = '#ffffff'
+const COLOR_LIGHT_GREY = '#f0f0f0'
+const COLOR_MF_RED = '#db0b56'
+
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#ffffff',
+    backgroundColor: COLOR_WHITE,
     flex: 1,
     maxHeight: 400,
   },
@@ -295,7 +314,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   permissionRow: {
-    backgroundColor: '#f0f0f0',
+    backgroundColor: COLOR_LIGHT_GREY,
     padding: 8,
     marginBottom: 6,
     flexDirection: 'row',
@@ -303,7 +322,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   permissionRowWithOptions: {
-    backgroundColor: '#f0f0f0',
+    backgroundColor: COLOR_LIGHT_GREY,
     padding: 8,
     marginBottom: 6,
     flexDirection: 'column',
@@ -330,20 +349,17 @@ const styles = StyleSheet.create({
   domainRow: {
     flexDirection: 'row',
     padding: 7,
-    backgroundColor: '#ffffff',
+    backgroundColor: COLOR_WHITE,
   },
   domainOption: {
     borderRadius: 30,
     padding: 8,
-    backgroundColor: '#ffffff',
+    backgroundColor: COLOR_WHITE,
     textAlign: 'center',
     margin: 4,
   },
   domainLabel: {
     flex: 1,
-  },
-  grantedDomain: {
-    backgroundColor: '#ffffff',
   },
   switches: {
     flexDirection: 'row',
@@ -354,6 +370,6 @@ const styles = StyleSheet.create({
   errorMessage: {
     paddingBottom: 10,
     paddingTop: 5,
-    color: '#db0b56',
+    color: COLOR_MF_RED,
   },
 })

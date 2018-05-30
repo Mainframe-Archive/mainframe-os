@@ -1,16 +1,15 @@
 // @flow
 
 import { app, BrowserWindow, ipcMain } from 'electron'
+import betterIpc from 'electron-better-ipc'
 import querystring from 'querystring'
 import path from 'path'
 import url from 'url'
 
 import Client from '@mainframe/client'
-import { Environment } from '@mainframe/config'
-import { getDaemonSocketPath } from '@mainframe/config'
+import { Environment, getDaemonSocketPath } from '@mainframe/config'
 
-const testVaultKey =
-  'yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy'
+const testVaultKey = 'testKey'
 
 let mainWindow
 let client
@@ -55,18 +54,17 @@ const newWindow = params => {
 
 const setupClient = async () => {
   const envName = isDevelopment ? 'development' : 'production'
-
   env = new Environment(envName)
   const socketPath = getDaemonSocketPath(env)
   const vaultPath = path.join(env.paths.config, 'defaultVault')
   client = new Client(socketPath)
 
+  // TODO: Implement proper vault handling
+
   try {
-    const createRes = await client.newVault(vaultPath, testVaultKey)
+    const res = await client.openVault(vaultPath, testVaultKey)
   } catch (err) {
-    if (err.message === 'Vault already exists') {
-      await client.openVault(vaultPath, testVaultKey)
-    }
+    const createRes = await client.createVault(vaultPath, testVaultKey)
   }
 }
 
@@ -118,6 +116,13 @@ app.on('activate', () => {
 
 ipcMain.on('launchApp', (e, appId) => {
   launchApp(appId)
+})
+
+// IPC COMMS
+
+betterIpc.answerRenderer('client-request', async request => {
+  const res = await handleRequest(request)
+  return res
 })
 
 const simpleClient = {

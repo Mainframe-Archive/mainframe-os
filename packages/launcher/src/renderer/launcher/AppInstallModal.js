@@ -10,21 +10,34 @@ import {
 } from 'react-native-web'
 import fs from 'fs-extra'
 import ReactModal from 'react-modal'
+
+import { callMain } from '../../electronIpc.js'
 import Button from '../Button'
-import PermissionsView, { type PermissionSettings } from './PermissionsView'
+import PermissionsView, {
+  type PermissionSettings,
+  type PermissionOptions,
+} from './PermissionsView'
 
 type Props = {
   onRequestClose: () => void,
 }
 
+type PermissionSettingsFormatted = Object // TODO use type defined in other package when ready
+
 type State = {
   inputValue?: string,
-  manifest: Object,
-  installStep: 'manifest' | 'permissions' | 'download',
+  manifest?: {
+    permissions: PermissionOptions,
+    name: string,
+  },
+  installStep: 'manifest' | 'permissions' | 'download' | 'id',
+  appPermissions?: PermissionSettings,
+  appPath?: string,
+  userId?: string,
 }
 
 export default class AppInstallModal extends Component<Props, State> {
-  state: State = {
+  state = {
     installStep: 'manifest',
   }
   fileInput: ?Element<'input'>
@@ -63,6 +76,37 @@ export default class AppInstallModal extends Component<Props, State> {
 
   onSubmitPermissions = (permissions: PermissionSettings) => {
     console.log('do something with permissions', permissions)
+    this.setState({
+      appPermissions: permissions,
+      installStep: 'download',
+    })
+    // TODO Actually download from swarm
+    setTimeout(this.onDownloadComplete, 1000, 'testPath')
+  }
+
+  onDownloadComplete = (path: string) => {
+    this.setState({
+      appPath: path,
+      installStep: 'id',
+    })
+  }
+
+  onSelectId = (id: string) => {
+    this.setState({
+      userId: id,
+    })
+  }
+
+  createNewId = () => {}
+
+  saveApp = async () => {
+    try {
+      const res = callMain({})
+      console.log(res)
+    } catch (err) {
+      console.log(err)
+      // TODO: handle error
+    }
   }
 
   // RENDER
@@ -89,9 +133,10 @@ export default class AppInstallModal extends Component<Props, State> {
   }
 
   renderPermissions() {
+    const header = `Manage permissions for ${this.state.manifest.name}`
     return (
       <View style={styles.container}>
-        <Text style={styles.header}>Install New App</Text>
+        <Text style={styles.header}>{header}</Text>
         <PermissionsView
           permissions={this.state.manifest.permissions}
           onSubmit={this.onSubmitPermissions}
@@ -101,7 +146,52 @@ export default class AppInstallModal extends Component<Props, State> {
   }
 
   renderDownload() {
-    return undefined
+    const header = `Downloading ${this.state.manifest.name}`
+    return (
+      <View style={styles.container}>
+        <Text style={styles.header}>{header}</Text>
+        <Text>Downloading from swarm...</Text>
+      </View>
+    )
+  }
+
+  renderSetId() {
+    const header = `Select User ID`
+    // TODO: fetch from daemon
+    const ids = [
+      {
+        id: 'jsmith',
+        name: 'James Smith',
+      },
+      {
+        id: 'mranon',
+        name: 'Mr Anon',
+      },
+    ]
+    const rowRender = (name, style, handler) => {
+      return (
+        <TouchableOpacity onPress={handler} style={style} key={name}>
+          <Text>{name}</Text>
+        </TouchableOpacity>
+      )
+    }
+    const idRows = ids.map((id, index) => {
+      const handler = () => this.onSelectId(id.id)
+      return rowRender(id.name, styles.idRow, handler)
+    })
+    const createIdHandler = this.createNewId()
+    const createNewRow = rowRender(
+      '+ Create new ID',
+      [styles.idRow, styles.newId],
+      createIdHandler,
+    )
+    return (
+      <View style={styles.container}>
+        <Text style={styles.header}>{header}</Text>
+        {idRows}
+        {createNewRow}
+      </View>
+    )
   }
 
   renderContent() {
@@ -112,6 +202,8 @@ export default class AppInstallModal extends Component<Props, State> {
         return this.renderPermissions()
       case 'download':
         return this.renderDownload()
+      case 'id':
+        return this.renderSetId()
     }
   }
 
@@ -124,18 +216,33 @@ export default class AppInstallModal extends Component<Props, State> {
   }
 }
 
+const COLOR_WHITE = '#ffffff'
+const COLOR_GREY = '#eeeeee'
+
 const styles = StyleSheet.create({
   container: {
     maxWidth: 600,
     minWidth: 480,
     padding: 20,
-    backgroundColor: '#ffffff',
+    backgroundColor: COLOR_WHITE,
     flex: 1,
   },
   header: {
-    fontSize: 20,
+    fontSize: 18,
+    fontWeight: 'bold',
   },
   description: {
     paddingVertical: 15,
+  },
+  idRow: {
+    padding: 10,
+    borderRadius: 3,
+    backgroundColor: COLOR_GREY,
+    marginTop: 10,
+  },
+  newId: {
+    borderWidth: 1,
+    borderColor: COLOR_GREY,
+    backgroundColor: COLOR_WHITE,
   },
 })
