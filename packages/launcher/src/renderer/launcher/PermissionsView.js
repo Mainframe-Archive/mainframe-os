@@ -12,18 +12,25 @@ import {
 } from 'react-native-web'
 import Button from '../Button'
 
-type PermissionOption = string | Array<string>
-type PermissionSetting = string | { string?: 'accepted' | 'rejected' }
+type Domain = string
+type PermissionGrant = 'accepted' | 'rejected'
+type PermissionRequirement = 'required' | 'optional'
+type PermissionOption = {
+  HTTPS_REQUEST?: Array<Domain>,
+  [PermissionKey]: ?true,
+}
+type PermissionSetting = {
+  HTTPS_REQUEST?: { [Domain]: PermissionGrant },
+  [PermissionKey]: ?PermissionGrant,
+}
 
 export type PermissionSettings = {
-  required: { string?: PermissionSetting },
-  optional: { string?: PermissionSetting },
+  [PermissionRequirement]: PermissionSetting,
 }
 
 type Props = {
   permissions: {
-    required: { string: PermissionOption },
-    optional: { string: PermissionOption },
+    [PermissionRequirement]: PermissionOption,
   },
   onSubmit: (permissionSettings: PermissionSettings) => void,
 }
@@ -70,8 +77,10 @@ const PERMISSION_NAMES = {
   },
 }
 
-export default class PermissionsView extends Component {
-  state: State = {
+type PermissionKey = $Keys<typeof PERMISSION_NAMES>
+
+export default class PermissionsView extends Component<Props, State> {
+  state = {
     permissionSettings: {
       required: {
         HTTPS_REQUEST: {},
@@ -86,16 +95,20 @@ export default class PermissionsView extends Component {
 
   onPressDone = () => {
     const invalid = Object.keys(this.props.permissions.required).some(key => {
+      const stateValue = this.state.permissionSettings.required[key]
+      if (stateValue == null) {
+        return true
+      }
       if (key === 'HTTPS_REQUEST') {
-        const nonAcceptedDomain = this.props.permissions.required[key].some(
-          domain => {
-            return (
-              this.state.permissionSettings.required[key][domain] !== 'accepted'
-            )
-          },
-        )
+        const value = this.props.permissions.required[key]
+        if (value == null) {
+          return true
+        }
+        const nonAcceptedDomain = value.some(domain => {
+          return stateValue[domain] !== 'accepted'
+        })
         return nonAcceptedDomain
-      } else if (this.state.permissionSettings.required[key] !== 'accepted') {
+      } else if (stateValue !== 'accepted') {
         return true
       }
       return false
@@ -108,14 +121,16 @@ export default class PermissionsView extends Component {
   }
 
   onToggle = (
-    key: string,
-    requiredType: 'required' | 'optional',
+    key: PermissionKey,
+    requiredType: PermissionRequirement,
     accept: boolean,
-    option: ?string,
+    option?: string,
   ) => {
     const permissionSettings = this.state.permissionSettings
-    if (key === 'HTTPS_REQUEST') {
-      let acceptedDomains = this.state.permissionSettings[requiredType][key]
+    if (key === 'HTTPS_REQUEST' && option != null) {
+      let acceptedDomains = this.state.permissionSettings[requiredType][
+        'HTTPS_REQUEST'
+      ]
       if (accept) {
         permissionSettings[requiredType][key][option] =
           acceptedDomains[option] === 'accepted' ? undefined : 'accepted'
@@ -142,7 +157,7 @@ export default class PermissionsView extends Component {
   // RENDER
 
   renderPermission = (
-    key: string,
+    key: PermissionKey,
     option: PermissionOption,
     required: boolean,
   ) => {
@@ -235,12 +250,12 @@ export default class PermissionsView extends Component {
 
   renderPermissionsOptions = () => {
     const required = Object.keys(this.props.permissions.required).map(key => {
-      const options = this.props.permissions.required[key]
-      return this.renderPermission(key, options, true)
+      const option = this.props.permissions.required[key]
+      return this.renderPermission(key, option, true)
     })
     const optional = Object.keys(this.props.permissions.optional).map(key => {
-      const options = this.props.permissions.optional[key]
-      return this.renderPermission(key, options, false)
+      const option = this.props.permissions.optional[key]
+      return this.renderPermission(key, option, false)
     })
     return (
       <ScrollView style={styles.scrollView}>
