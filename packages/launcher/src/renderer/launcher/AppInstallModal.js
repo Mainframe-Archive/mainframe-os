@@ -11,18 +11,16 @@ import {
 import fs from 'fs-extra'
 import ReactModal from 'react-modal'
 
-import { callMain } from '../../electronIpc.js'
+import { callMainClient } from '../electronIpc.js'
 import Button from '../Button'
 import PermissionsView, {
-  type PermissionSettings,
   type PermissionOptions,
+  type AppPermissions,
 } from './PermissionsView'
 
 type Props = {
   onRequestClose: () => void,
 }
-
-type PermissionSettingsFormatted = Object // TODO use type defined in other package when ready
 
 type State = {
   inputValue?: string,
@@ -31,7 +29,7 @@ type State = {
     name: string,
   },
   installStep: 'manifest' | 'permissions' | 'download' | 'id',
-  appPermissions?: PermissionSettings,
+  appPermissions?: AppPermissions,
   appPath?: string,
   userId?: string,
 }
@@ -74,7 +72,7 @@ export default class AppInstallModal extends Component<Props, State> {
     }
   }
 
-  onSubmitPermissions = (permissions: PermissionSettings) => {
+  onSubmitPermissions = (permissions: AppPermissions) => {
     console.log('do something with permissions', permissions)
     this.setState({
       appPermissions: permissions,
@@ -95,16 +93,22 @@ export default class AppInstallModal extends Component<Props, State> {
     this.setState({
       userId: id,
     })
+    this.saveApp()
   }
 
   createNewId = () => {}
 
   saveApp = async () => {
+    const app = {
+      name: this.state.manifest.name,
+      permissions: this.state.appPermissions,
+    }
+    console.log('saving app: ', app)
     try {
-      const res = callMain({})
-      console.log(res)
+      const res = await callMainClient.createApp(app)
+      console.log('res: ', res)
     } catch (err) {
-      console.log(err)
+      console.log('err:', err)
       // TODO: handle error
     }
   }

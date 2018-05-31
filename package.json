@@ -20,6 +20,7 @@
       "**/react-dom",
       "**/react-dom/**",
       "**/electron",
+      "**/electron-better-ipc",
       "**/electron/**",
       "**/electron-webpack",
       "**/electron-webpack/**"

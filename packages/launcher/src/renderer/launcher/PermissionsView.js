@@ -15,7 +15,7 @@ import Button from '../Button'
 // TODO use types defined in permissions package when ready
 
 type Domain = string
-type PermissionGrant = 'accepted' | 'rejected'
+type PermissionGrant = boolean
 type PermissionRequirement = 'required' | 'optional'
 type PermissionOption = {
   HTTPS_REQUEST?: Array<Domain>,
@@ -23,7 +23,7 @@ type PermissionOption = {
 }
 type PermissionSetting = {
   HTTPS_REQUEST?: { [Domain]: PermissionGrant },
-  [PermissionKey]: ?PermissionGrant,
+  [PermissionKey]: PermissionGrant,
 }
 
 // Permissions requested by manifest
@@ -120,19 +120,43 @@ export default class PermissionsView extends Component<Props, State> {
           return true
         }
         const nonAcceptedDomain = value.some(domain => {
-          return stateValue[domain] !== 'accepted'
+          return !stateValue[domain]
         })
         return nonAcceptedDomain
-      } else if (stateValue !== 'accepted') {
+      } else if (!stateValue) {
         return true
       }
       return false
     })
     if (invalid) {
       this.setState({ failedValidation: true })
-    } else {
-      this.props.onSubmit(this.state.permissionSettings)
+      return
     }
+
+    const appPermissions = {
+      HTTPS_REQUEST: {
+        granted: [],
+        denied: [],
+      },
+    }
+    const formatSettings = settings => {
+      Object.keys(settings).forEach(key => {
+        const perm = settings[key]
+        if (key === 'HTTPS_REQUEST') {
+          Object.keys(perm).forEach(domain => {
+            if (!appPermissions[key][domain]) {
+              const granted = perm[domain] ? 'granted' : 'denied'
+              appPermissions[key][granted].push(domain)
+            }
+          })
+        } else {
+          appPermissions[key] = perm
+        }
+      })
+    }
+    formatSettings(this.state.permissionSettings.required)
+    formatSettings(this.state.permissionSettings.optional)
+    this.props.onSubmit(appPermissions)
   }
 
   onToggle = (
@@ -146,24 +170,20 @@ export default class PermissionsView extends Component<Props, State> {
       let acceptedDomains = this.state.permissionSettings[requiredType][
         'HTTPS_REQUEST'
       ]
-      if (accept) {
-        permissionSettings[requiredType][key][option] =
-          acceptedDomains[option] === 'accepted' ? undefined : 'accepted'
+      if (permissionSettings[requiredType].HTTPS_REQUEST[option] === accept) {
+        delete permissionSettings[requiredType].HTTPS_REQUEST[option]
       } else {
-        permissionSettings[requiredType][key][option] =
-          acceptedDomains[option] === 'rejected' ? undefined : 'rejected'
+        permissionSettings[requiredType].HTTPS_REQUEST[option] = accept
+        console.log(
+          'set perm: ',
+          permissionSettings[requiredType].HTTPS_REQUEST[option],
+        )
       }
     } else {
-      if (accept) {
-        permissionSettings[requiredType][key] =
-          permissionSettings[requiredType][key] === 'accepted'
-            ? undefined
-            : 'accepted'
+      if (permissionSettings[requiredType][key] === accept) {
+        delete permissionSettings[requiredType][key]
       } else {
-        permissionSettings[requiredType][key] =
-          permissionSettings[requiredType][key] === 'rejected'
-            ? undefined
-            : 'rejected'
+        permissionSettings[requiredType][key] = accept
       }
     }
     this.setState({ permissionSettings })
@@ -184,10 +204,8 @@ export default class PermissionsView extends Component<Props, State> {
         options = (
           <View key={key} style={styles.domains}>
             {option.map(domain => {
-              const accepted =
-                permissionSettings[type][key][domain] === 'accepted'
-              const rejected =
-                permissionSettings[type][key][domain] === 'rejected'
+              const accepted = !!permissionSettings[type][key][domain]
+              const rejected = permissionSettings[type][key][domain] === false
               const style = [styles.domainOption]
               return (
                 <View style={styles.domainRow} key={domain}>
@@ -216,8 +234,8 @@ export default class PermissionsView extends Component<Props, State> {
           </View>
         )
       } else {
-        const accepted = permissionSettings[type][key] === 'accepted'
-        const rejected = permissionSettings[type][key] === 'rejected'
+        const accepted = !!permissionSettings[type][key]
+        const rejected = permissionSettings[type][key] === false
         options = (
           <View style={styles.switches}>
             <Text style={styles.switchLabel}>YES</Text>

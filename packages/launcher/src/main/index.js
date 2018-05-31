@@ -22,6 +22,12 @@ type AppWindows = {
   },
 }
 
+type ClientResponse = {
+  id: string,
+  error?: Object,
+  result?: Object,
+}
+
 const appWindows: AppWindows = {}
 const requestChannel = 'ipc-request-channel'
 const responseChannel = 'ipc-response-channel'
@@ -121,17 +127,21 @@ ipcMain.on('launchApp', (e, appId) => {
 // IPC COMMS
 
 betterIpc.answerRenderer('client-request', async request => {
-  const res = await handleRequest(request)
+  const res = handleRequest(request)
   return res
 })
 
-const simpleClient = {
-  getBalance: () => 1000,
-  getPublicKey: () => 'myKey',
-}
-
-const handleRequest = request => {
-  if (request.data && request.data.method && client[request.data.method]) {
+const handleRequest = (request: Object): ClientResponse => {
+  if (request == null || !request || !request.data) {
+    return {
+      error: {
+        message: 'Invalid request',
+        code: 32600,
+      },
+      id: request.id,
+    }
+  }
+  if (request.data.method && client[request.data.method]) {
     const args = request.data.args || []
     try {
       const res = client[request.data.method](...args)

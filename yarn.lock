@@ -3807,6 +3807,10 @@ ejs@^2.5.9, ejs@^2.6.1:
   version "2.6.1"
   resolved "https://registry.yarnpkg.com/ejs/-/ejs-2.6.1.tgz#498ec0d495655abc6f23cd61868d926464071aa0"
 
+electron-better-ipc@^0.1.1:
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/electron-better-ipc/-/electron-better-ipc-0.1.1.tgz#36c54a20499ecb061564ac82c054e88611b90efb"
+
 electron-builder-lib@20.13.4:
   version "20.13.4"
   resolved "https://registry.yarnpkg.com/electron-builder-lib/-/electron-builder-lib-20.13.4.tgz#dcadc4a72b4d57996c11a32e5a6a4669bbb4cff9"

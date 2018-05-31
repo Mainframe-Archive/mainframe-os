@@ -63,15 +63,9 @@ export default class App extends Component<{}, State> {
       }
     })
 
-    console.log(
-      'this.state.showAppInstallModa: ',
-      this.state.showAppInstallModal,
-    )
     const installModal = this.state.showAppInstallModal ? (
       <AppInstallModal onRequestClose={this.onCloseInstallModal} />
     ) : null
-
-    console.log('installModal: ', installModal)
 
     return (
       <View style={styles.container}>
