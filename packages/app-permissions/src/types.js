@@ -1,7 +1,12 @@
 // @flow
 
-// TODO: add others
-export type PermissionKeyBasic = 'WEB3_CALL' | 'WEB3_SEND'
+export type PermissionKeyBasic =
+  | 'LOCATION_GET'
+  | 'NOTIFICATION_DISPLAY'
+  | 'SWARM_DOWNLOAD'
+  | 'SWARM_UPLOAD'
+  | 'WEB3_CALL'
+  | 'WEB3_SEND'
 export type PermissionKey = 'HTTPS_REQUEST' | PermissionKeyBasic
 
 export type HTTPSRequestDefinition = Array<string>

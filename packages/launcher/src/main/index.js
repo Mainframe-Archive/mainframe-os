@@ -9,6 +9,8 @@ import url from 'url'
 import Client from '@mainframe/client'
 import { Environment, getDaemonSocketPath } from '@mainframe/config'
 
+const PORT = process.env.ELECTRON_WEBPACK_WDS_PORT || ''
+
 const testVaultKey = 'testKey'
 
 let mainWindow
@@ -41,11 +43,7 @@ const newWindow = params => {
   const stringParams = querystring.stringify(params)
 
   if (isDevelopment) {
-    window.loadURL(
-      `http://localhost:${
-        process.env.ELECTRON_WEBPACK_WDS_PORT
-      }?${stringParams}`,
-    )
+    window.loadURL(`http://localhost:${PORT}?${stringParams}`)
   } else {
     window.loadURL(
       url.format({
@@ -141,9 +139,11 @@ const handleRequest = (request: Object): ClientResponse => {
       id: request.id,
     }
   }
+  // $FlowFixMe: indexer property
   if (request.data.method && client[request.data.method]) {
     const args = request.data.args || []
     try {
+      // $FlowFixMe: indexer property
       const res = client[request.data.method](...args)
       return {
         id: request.id,
@@ -172,6 +172,6 @@ ipcMain.on(requestChannel, async (event, request) => {
       event.sender.send(channel, response)
     }
   }
-  const res = handleRequest(request, window)
+  const res = handleRequest(request)
   send(responseChannel, res)
 })

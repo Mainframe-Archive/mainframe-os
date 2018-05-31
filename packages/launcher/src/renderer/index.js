@@ -1,26 +1,21 @@
 // @flow
 
-import React, { Component } from 'react'
-import { AppRegistry } from 'react-native-web'
 import { parse } from 'query-string'
+import React from 'react'
+import { AppRegistry } from 'react-native-web'
 import './styles.css'
 
 import Launcher from './launcher/Launcher.js'
 import AppContainer from './apps/AppContainer.js'
 
 const params = parse(document.location.search)
+const rootTag = document.getElementById('app')
 
-class App extends Component {
-  render() {
-    const app =
-      params.type === 'launcher' ? (
-        <Launcher />
-      ) : (
-        <AppContainer appId={params.appId} />
-      )
-    return app
-  }
+if (params.type === 'launcher') {
+  AppRegistry.registerComponent('Launcher', () => Launcher)
+  AppRegistry.runApplication('Launcher', { rootTag })
+} else {
+  const App = () => <AppContainer appId={params.appId} />
+  AppRegistry.registerComponent('App', () => App)
+  AppRegistry.runApplication('App', { rootTag })
 }
-
-AppRegistry.registerComponent('App', () => App)
-AppRegistry.runApplication('App', { rootTag: document.getElementById('app') })

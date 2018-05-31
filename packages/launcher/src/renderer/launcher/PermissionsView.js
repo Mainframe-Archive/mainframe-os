@@ -1,5 +1,11 @@
 //@flow
 
+import {
+  createHTTPSRequestGrant,
+  type PermissionKey, // eslint-disable-line import/named
+  type PermissionRequirement, // eslint-disable-line import/named
+  type PermissionsGrants, // eslint-disable-line import/named
+} from '@mainframe/app-permissions'
 import React, { Component } from 'react'
 import {
   View,
@@ -10,21 +16,18 @@ import {
   Switch,
   ScrollView,
 } from 'react-native-web'
+
 import Button from '../Button'
 
-// TODO use types defined in permissions package when ready
-
 type Domain = string
-type PermissionGrant = boolean
-type PermissionRequirement = 'required' | 'optional'
+type PermissionGranted = boolean
+
 type PermissionOption = {
   HTTPS_REQUEST?: Array<Domain>,
-  [PermissionKey]: ?true,
+  [PermissionKey]: true,
 }
-type PermissionSetting = {
-  HTTPS_REQUEST?: { [Domain]: PermissionGrant },
-  [PermissionKey]: PermissionGrant,
-}
+
+type PermissionOptionValue = $Values<PermissionOption>
 
 // Permissions requested by manifest
 export type PermissionOptions = {
@@ -32,27 +35,9 @@ export type PermissionOptions = {
 }
 
 // Permissions set by user
-export type PermissionSettings = {
-  [PermissionRequirement]: PermissionSetting,
-}
-
-// Permissions formatted for saving to app state
-export type AppPermissions = {
-  HTTPS_REQUEST?: {
-    granted?: Array<Domain>,
-    denied?: Array<Domain>,
-  },
-  [PermissionKey]: ?boolean,
-}
-
-type Props = {
-  permissions: PermissionOptions,
-  onSubmit: (permissionSettings: PermissionSettings) => void,
-}
-
-type State = {
-  permissionSettings: PermissionSettings,
-  failedValidation?: boolean,
+type PermissionsSettings = {
+  HTTPS_REQUEST: { [Domain]: PermissionGranted },
+  [PermissionKey]: PermissionGranted,
 }
 
 type PermissionInfo = {
@@ -82,7 +67,7 @@ const PERMISSION_NAMES = {
     name: 'Make https requests',
     description: 'Allow this app to make https requests to specified domains',
   },
-  NOTIFICATIONS_DISPLAY: {
+  NOTIFICATION_DISPLAY: {
     name: 'Display Notifications',
     description: 'Allow this app to display notifications',
   },
@@ -92,185 +77,91 @@ const PERMISSION_NAMES = {
   },
 }
 
-type PermissionKey = $Keys<typeof PERMISSION_NAMES>
+const formatSettings = (
+  settings: $Shape<PermissionsSettings>,
+): $Shape<PermissionsGrants> => {
+  const { HTTPS_REQUEST, ...others } = settings
+  return {
+    ...others,
+    HTTPS_REQUEST: HTTPS_REQUEST
+      ? createHTTPSRequestGrant(Object.keys(HTTPS_REQUEST).filter(Boolean))
+      : createHTTPSRequestGrant(),
+  }
+}
+
+type Props = {
+  permissions: PermissionOptions,
+  onSubmit: (permissions: PermissionsGrants) => void,
+}
+
+type State = {
+  failedValidation: boolean,
+  permissionsSettings: PermissionsSettings,
+}
 
 export default class PermissionsView extends Component<Props, State> {
   state = {
-    permissionSettings: {
-      required: {
-        HTTPS_REQUEST: {},
-      },
-      optional: {
-        HTTPS_REQUEST: {},
-      },
+    failedValidation: false,
+    permissionsSettings: {
+      HTTPS_REQUEST: {},
     },
   }
 
   // HANDLERS
 
   onPressDone = () => {
-    const invalid = Object.keys(this.props.permissions.required).some(key => {
-      const stateValue = this.state.permissionSettings.required[key]
-      if (stateValue == null) {
-        return true
+    const { permissions } = this.props
+    const { permissionsSettings } = this.state
+
+    let invalid = false
+    if (permissions.required != null) {
+      const { HTTPS_REQUEST, ...others } = permissions.required
+      // Check expected values for basic keys (boolean)
+      invalid = Object.keys(others).some(
+        key => permissionsSettings[key] !== true,
+      )
+      if (invalid === false && HTTPS_REQUEST != null) {
+        // Check special HTTPS_REQUEST case
+        invalid = HTTPS_REQUEST.some(
+          domain => permissionsSettings.HTTPS_REQUEST[domain] !== true,
+        )
       }
-      if (key === 'HTTPS_REQUEST') {
-        const value = this.props.permissions.required[key]
-        if (value == null) {
-          return true
-        }
-        const nonAcceptedDomain = value.some(domain => {
-          return !stateValue[domain]
-        })
-        return nonAcceptedDomain
-      } else if (!stateValue) {
-        return true
-      }
-      return false
-    })
-    if (invalid) {
-      this.setState({ failedValidation: true })
-      return
     }
 
-    const appPermissions = {
-      HTTPS_REQUEST: {
-        granted: [],
-        denied: [],
-      },
+    if (invalid) {
+      this.setState({ failedValidation: true })
+    } else {
+      this.props.onSubmit(formatSettings(permissionsSettings))
     }
-    const formatSettings = settings => {
-      Object.keys(settings).forEach(key => {
-        const perm = settings[key]
-        if (key === 'HTTPS_REQUEST') {
-          Object.keys(perm).forEach(domain => {
-            if (!appPermissions[key][domain]) {
-              const granted = perm[domain] ? 'granted' : 'denied'
-              appPermissions[key][granted].push(domain)
-            }
-          })
-        } else {
-          appPermissions[key] = perm
-        }
-      })
-    }
-    formatSettings(this.state.permissionSettings.required)
-    formatSettings(this.state.permissionSettings.optional)
-    this.props.onSubmit(appPermissions)
   }
 
   onToggle = (
     key: PermissionKey,
-    requiredType: PermissionRequirement,
-    accept: boolean,
+    granted: PermissionGranted,
     option?: string,
   ) => {
-    const permissionSettings = this.state.permissionSettings
-    if (key === 'HTTPS_REQUEST' && option != null) {
-      let acceptedDomains = this.state.permissionSettings[requiredType][
-        'HTTPS_REQUEST'
-      ]
-      if (permissionSettings[requiredType].HTTPS_REQUEST[option] === accept) {
-        delete permissionSettings[requiredType].HTTPS_REQUEST[option]
+    this.setState(({ permissionsSettings }) => {
+      if (key === 'HTTPS_REQUEST') {
+        if (option == null) {
+          return null // Don't update state
+        }
+        permissionsSettings.HTTPS_REQUEST[option] = granted
       } else {
-        permissionSettings[requiredType].HTTPS_REQUEST[option] = accept
-        console.log(
-          'set perm: ',
-          permissionSettings[requiredType].HTTPS_REQUEST[option],
-        )
+        permissionsSettings[key] = granted
       }
-    } else {
-      if (permissionSettings[requiredType][key] === accept) {
-        delete permissionSettings[requiredType][key]
-      } else {
-        permissionSettings[requiredType][key] = accept
-      }
-    }
-    this.setState({ permissionSettings })
+      return { permissionsSettings }
+    })
   }
 
   // RENDER
 
   renderPermission = (
     key: PermissionKey,
-    option: PermissionOption,
+    value: PermissionOptionValue,
     required: boolean,
   ) => {
-    const { permissionSettings } = this.state
-    const type = required ? 'required' : 'optional'
-    let options
-    if (PERMISSION_NAMES[key]) {
-      if (key === 'HTTPS_REQUEST') {
-        options = (
-          <View key={key} style={styles.domains}>
-            {option.map(domain => {
-              const accepted = !!permissionSettings[type][key][domain]
-              const rejected = permissionSettings[type][key][domain] === false
-              const style = [styles.domainOption]
-              return (
-                <View style={styles.domainRow} key={domain}>
-                  <Text key={domain} style={styles.domainLabel}>
-                    {domain}
-                  </Text>
-                  <View style={styles.switches}>
-                    <Text style={styles.switchLabel}>YES</Text>
-                    <Switch
-                      value={accepted}
-                      onValueChange={() =>
-                        this.onToggle(key, type, true, domain)
-                      }
-                    />
-                    <Text style={styles.switchLabel}>NO</Text>
-                    <Switch
-                      value={rejected}
-                      onValueChange={() =>
-                        this.onToggle(key, type, false, domain)
-                      }
-                    />
-                  </View>
-                </View>
-              )
-            })}
-          </View>
-        )
-      } else {
-        const accepted = !!permissionSettings[type][key]
-        const rejected = permissionSettings[type][key] === false
-        options = (
-          <View style={styles.switches}>
-            <Text style={styles.switchLabel}>YES</Text>
-            <Switch
-              value={accepted}
-              onValueChange={() => this.onToggle(key, type, true)}
-              key={key + 'YES'}
-            />
-            <Text style={styles.switchLabel}>NO</Text>
-            <Switch
-              value={rejected}
-              onValueChange={() => this.onToggle(key, type, false)}
-              key={key + 'NO'}
-            />
-          </View>
-        )
-      }
-      const hasOptions = key === 'HTTPS_REQUEST'
-      const rowStyle = hasOptions
-        ? styles.permissionRowWithOptions
-        : styles.permissionRow
-      return (
-        <View style={rowStyle} key={key}>
-          <View style={styles.permissionInfo}>
-            <Text style={styles.permissionName}>
-              {PERMISSION_NAMES[key].name}
-            </Text>
-            <Text style={styles.permissionDescription}>
-              {PERMISSION_NAMES[key].description}
-            </Text>
-          </View>
-          {options}
-        </View>
-      )
-    } else {
+    const permissionData = PERMISSION_NAMES[key]
+    if (permissionData == null) {
       return (
         <View style={styles.permissionRow} key={key}>
           <Text style={styles.permissionName}>
@@ -279,24 +170,104 @@ export default class PermissionsView extends Component<Props, State> {
         </View>
       )
     }
+
+    const { permissionsSettings } = this.state
+    let options, rowStyle
+
+    if (key === 'HTTPS_REQUEST') {
+      if (Array.isArray(value)) {
+        options = (
+          <View key={key} style={styles.domains}>
+            {value.map(domain => (
+              <View style={styles.domainRow} key={domain}>
+                <Text key={domain} style={styles.domainLabel}>
+                  {domain}
+                </Text>
+                <View style={styles.switches}>
+                  <Text style={styles.switchLabel}>YES</Text>
+                  <Switch
+                    value={permissionsSettings.HTTPS_REQUEST[domain] === true}
+                    onValueChange={() =>
+                      this.onToggle('HTTPS_REQUEST', true, domain)
+                    }
+                  />
+                  <Text style={styles.switchLabel}>NO</Text>
+                  <Switch
+                    value={permissionsSettings.HTTPS_REQUEST[domain] === false}
+                    onValueChange={() =>
+                      this.onToggle('HTTPS_REQUEST', false, domain)
+                    }
+                  />
+                </View>
+              </View>
+            ))}
+          </View>
+        )
+      } else {
+        // Bad data provided
+        options = null
+      }
+      rowStyle = styles.permissionRowWithOptions
+    } else {
+      options = (
+        <View style={styles.switches}>
+          <Text style={styles.switchLabel}>YES</Text>
+          <Switch
+            // $FlowFixMe: missing key in Object
+            value={permissionsSettings[key] === true}
+            onValueChange={() => this.onToggle(key, true)}
+            key={key + 'YES'}
+          />
+          <Text style={styles.switchLabel}>NO</Text>
+          <Switch
+            // $FlowFixMe: missing key in Object
+            value={permissionsSettings[key] === false}
+            onValueChange={() => this.onToggle(key, false)}
+            key={key + 'NO'}
+          />
+        </View>
+      )
+      rowStyle = styles.permissionRow
+    }
+
+    return (
+      <View style={rowStyle} key={key}>
+        <View style={styles.permissionInfo}>
+          <Text style={styles.permissionName}>{permissionData.name}</Text>
+          <Text style={styles.permissionDescription}>
+            {permissionData.description}
+          </Text>
+        </View>
+        {options}
+      </View>
+    )
   }
 
   renderPermissionsOptions = () => {
-    const required = Object.keys(this.props.permissions.required).map(key => {
-      const option = this.props.permissions.required[key]
-      return this.renderPermission(key, option, true)
-    })
-    const optional = Object.keys(this.props.permissions.optional).map(key => {
-      const option = this.props.permissions.optional[key]
-      return this.renderPermission(key, option, false)
-    })
-    return (
+    const { permissions } = this.props
+
+    const required = permissions.required
+      ? Object.keys(permissions.required).map(key => {
+          return this.renderPermission(key, permissions.required[key], true)
+        })
+      : null
+    const optional = permissions.optional
+      ? Object.keys(permissions.optional).map(key => {
+          return this.renderPermission(key, permissions.optional[key], false)
+        })
+      : null
+
+    return required || optional ? (
       <ScrollView style={styles.scrollView}>
         <Text style={styles.header}>Required Permissions</Text>
-        {required}
+        {required || <Text>No required permission</Text>}
         <Text style={styles.header}>Optional Permissions</Text>
-        {optional}
+        {optional || <Text>No additional permission</Text>}
       </ScrollView>
+    ) : (
+      <View>
+        <Text style={styles.header}>No permission needed</Text>
+      </View>
     )
   }
 
@@ -306,6 +277,7 @@ export default class PermissionsView extends Component<Props, State> {
         You have to accept all required permissions to continue.
       </Text>
     ) : null
+
     return (
       <View style={styles.container}>
         {this.renderPermissionsOptions()}
@@ -369,13 +341,13 @@ const styles = StyleSheet.create({
     padding: 7,
     backgroundColor: COLOR_WHITE,
   },
-  domainOption: {
-    borderRadius: 30,
-    padding: 8,
-    backgroundColor: COLOR_WHITE,
-    textAlign: 'center',
-    margin: 4,
-  },
+  // domainOption: {
+  //   borderRadius: 30,
+  //   padding: 8,
+  //   backgroundColor: COLOR_WHITE,
+  //   textAlign: 'center',
+  //   margin: 4,
+  // },
   domainLabel: {
     flex: 1,
   },

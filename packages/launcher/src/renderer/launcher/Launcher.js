@@ -1,21 +1,23 @@
 //@flow
 
+import { ipcRenderer as ipc, remote } from 'electron'
 import React, { Component } from 'react'
-import { View, TouchableOpacity, StyleSheet, Text } from 'react-native'
+import { View, TouchableOpacity, StyleSheet, Text } from 'react-native-web'
+
 import AppInstallModal from './AppInstallModal'
 import Button from '../Button'
 
-const electron = window.require('electron')
-const fs = window.require('fs-extra')
-const path = window.require('path')
-const ipc = electron.ipcRenderer
+const fs = remote.require('fs-extra')
+const path = remote.require('path')
 
 type State = {
-  showAppInstallModal?: boolean,
+  showAppInstallModal: boolean,
 }
 
 export default class App extends Component<{}, State> {
-  state = {}
+  state = {
+    showAppInstallModal: false,
+  }
 
   // HANDLERS
 

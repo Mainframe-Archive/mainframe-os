@@ -1,6 +1,13 @@
 //@flow
 
-import React, { Component, type Element } from 'react'
+import type { PermissionsGrants } from '@mainframe/app-permissions'
+import fs from 'fs-extra'
+import React, {
+  createRef,
+  Component,
+  type Element,
+  type ElementRef,
+} from 'react'
 import {
   View,
   TouchableOpacity,
@@ -8,46 +15,42 @@ import {
   Text,
   Modal,
 } from 'react-native-web'
-import fs from 'fs-extra'
 import ReactModal from 'react-modal'
 
 import { callMainClient } from '../electronIpc.js'
 import Button from '../Button'
-import PermissionsView, {
-  type PermissionOptions,
-  type AppPermissions,
-} from './PermissionsView'
+import PermissionsView, { type PermissionOptions } from './PermissionsView'
 
 type Props = {
   onRequestClose: () => void,
 }
 
 type State = {
-  inputValue?: string,
-  manifest?: {
-    permissions: PermissionOptions,
-    name: string,
-  },
+  inputValue: string,
   installStep: 'manifest' | 'permissions' | 'download' | 'id',
-  appPermissions?: AppPermissions,
+  manifest: ?{
+    name: string,
+    permissions: PermissionOptions,
+  },
+  userPermissions?: PermissionsGrants,
   appPath?: string,
   userId?: string,
 }
 
 export default class AppInstallModal extends Component<Props, State> {
   state = {
+    inputValue: '',
     installStep: 'manifest',
+    manifest: null,
   }
-  fileInput: ?Element<'input'>
+
+  // $FlowFixMe: React Ref
+  fileInput: ElementRef<'input'> = createRef()
 
   // HANDLERS
 
   onPressImportManifest = () => {
-    this.fileInput.click()
-  }
-
-  bindFileInput = (e: Element<'input'>) => {
-    this.fileInput = e
+    this.fileInput.current.click()
   }
 
   onFileInputChange = () => {
@@ -60,11 +63,18 @@ export default class AppInstallModal extends Component<Props, State> {
       const file = files[0]
       try {
         const manifest = fs.readJsonSync(file.path)
-        this.setState({
-          manifest,
-          installStep: 'permissions',
-        })
         console.log('manifest: ', manifest)
+        if (
+          typeof manifest.name === 'string' &&
+          typeof manifest.permissions === 'object'
+        ) {
+          this.setState({
+            manifest,
+            installStep: 'permissions',
+          })
+        } else {
+          console.log('invalid manifest')
+        }
       } catch (err) {
         // TODO: Feedback error
         console.log('error parsing manifest: ', err)
@@ -72,11 +82,11 @@ export default class AppInstallModal extends Component<Props, State> {
     }
   }
 
-  onSubmitPermissions = (permissions: AppPermissions) => {
-    console.log('do something with permissions', permissions)
+  onSubmitPermissions = (userPermissions: PermissionsGrants) => {
+    console.log('do something with permissions', userPermissions)
     this.setState({
-      appPermissions: permissions,
       installStep: 'download',
+      userPermissions,
     })
     // TODO Actually download from swarm
     setTimeout(this.onDownloadComplete, 1000, 'testPath')
@@ -90,18 +100,22 @@ export default class AppInstallModal extends Component<Props, State> {
   }
 
   onSelectId = (id: string) => {
-    this.setState({
-      userId: id,
-    })
-    this.saveApp()
+    this.setState({ userId: id }, this.saveApp)
   }
 
   createNewId = () => {}
 
   saveApp = async () => {
+    // $FlowFixMe: userPermissions key in state
+    const { manifest, userPermissions } = this.state
+    if (manifest == null || userPermissions == null) {
+      console.log('invalid manifest or permissions to save app')
+      return
+    }
+
     const app = {
-      name: this.state.manifest.name,
-      permissions: this.state.appPermissions,
+      name: manifest.name,
+      permissions: userPermissions,
     }
     console.log('saving app: ', app)
     try {
@@ -127,7 +141,7 @@ export default class AppInstallModal extends Component<Props, State> {
         <input
           multiple
           onChange={this.onFileInputChange}
-          ref={this.bindFileInput}
+          ref={this.fileInput}
           type="file"
           hidden
           value={this.state.inputValue}
@@ -137,26 +151,30 @@ export default class AppInstallModal extends Component<Props, State> {
   }
 
   renderPermissions() {
-    const header = `Manage permissions for ${this.state.manifest.name}`
-    return (
+    const { manifest } = this.state
+
+    return manifest ? (
       <View style={styles.container}>
-        <Text style={styles.header}>{header}</Text>
+        <Text style={styles.header}>{`Manage permissions for ${
+          manifest.name
+        }`}</Text>
         <PermissionsView
-          permissions={this.state.manifest.permissions}
+          permissions={manifest.permissions}
           onSubmit={this.onSubmitPermissions}
         />
       </View>
-    )
+    ) : null
   }
 
   renderDownload() {
-    const header = `Downloading ${this.state.manifest.name}`
-    return (
+    const { manifest } = this.state
+
+    return manifest ? (
       <View style={styles.container}>
-        <Text style={styles.header}>{header}</Text>
+        <Text style={styles.header}>{`Downloading ${manifest.name}`}</Text>
         <Text>Downloading from swarm...</Text>
       </View>
-    )
+    ) : null
   }
 
   renderSetId() {
