@@ -6,16 +6,11 @@
   "bin": {
     "mainframe-daemon": "./bin/run"
   },
-  "files": [
-    "/bin",
-    "/lib"
-  ],
+  "files": ["/bin", "/lib"],
   "oclif": {
     "commands": "./lib/cli/commands",
     "bin": "mainframe-daemon",
-    "plugins": [
-      "@oclif/plugin-help"
-    ]
+    "plugins": ["@oclif/plugin-help"]
   },
   "scripts": {
     "clean": "del lib",
@@ -27,6 +22,7 @@
     "start": "node -r esm lib"
   },
   "dependencies": {
+    "@mainframe/app-permissions": "*",
     "@mainframe/rpc-node": "^0.2.0",
     "@mainframe/utils-base64": "^0.1.0",
     "@mainframe/utils-crypto": "^0.1.0",

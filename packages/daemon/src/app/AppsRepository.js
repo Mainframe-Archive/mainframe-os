@@ -1,5 +1,6 @@
 // @flow
 
+import type { PermissionKey, PermissionGrant } from '@mainframe/app-permissions'
 // eslint-disable-next-line import/named
 import { uniqueID, idType, type ID } from '@mainframe/utils-id'
 
@@ -9,8 +10,6 @@ import App, {
   type AppManifest,
   type AppSerialized,
   type AppUserSettings,
-  type PermissionKey,
-  type PermissionGrant,
   type SessionData,
 } from './App'
 

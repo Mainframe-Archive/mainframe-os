@@ -1,16 +1,14 @@
 // @flow
 
+import {
+  checkPermission,
+  type PermissionKey, // eslint-disable-line import/named
+  type PermissionGrant, // eslint-disable-line import/named
+  type PermissionsGrants, // eslint-disable-line import/named
+  type PermissionCheckResult, // eslint-disable-line import/named
+} from '@mainframe/app-permissions'
 // eslint-disable-next-line import/named
 import { type ID } from '@mainframe/utils-id'
-
-import type { PermissionKey, PermissionGrant, PermissionsGrants } from './App'
-
-export type PermissionResult =
-  | 'unknown_key'
-  | 'not_set'
-  | 'invalid_input'
-  | 'granted'
-  | 'denied'
 
 export default class Session {
   _appID: ID
@@ -31,31 +29,8 @@ export default class Session {
     return this._userID
   }
 
-  checkPermission(key: PermissionKey, input?: ?string): PermissionResult {
-    switch (key) {
-      case 'HTTPS_REQUEST': {
-        if (input == null) {
-          return 'invalid_input'
-        }
-        const domains = this._permissions.HTTPS_REQUEST
-        if (domains.granted.includes(input)) {
-          return 'granted'
-        }
-        if (domains.denied.includes(input)) {
-          return 'denied'
-        }
-        return 'not_set'
-      }
-
-      case 'WEB3_CALL':
-        if (this._permissions[key] == null) {
-          return 'not_set'
-        }
-        return this._permissions[key] === true ? 'granted' : 'denied'
-
-      default:
-        return 'unknown_key'
-    }
+  checkPermission(key: PermissionKey, input?: ?string): PermissionCheckResult {
+    return checkPermission(this._permissions, key, input)
   }
 
   // $FlowFixMe: value polymorphism

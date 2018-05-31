@@ -1,43 +1,20 @@
 // @flow
 
+import {
+  createHTTPSRequestGrant,
+  mergeGrantsToDetails,
+  type PermissionGrant, // eslint-disable-line import/named
+  type PermissionKey, // eslint-disable-line import/named
+  type PermissionRequirements, // eslint-disable-line import/named
+  type PermissionsDetails, // eslint-disable-line import/named
+  type PermissionsGrants, // eslint-disable-line import/named
+} from '@mainframe/app-permissions'
 // eslint-disable-next-line import/named
 import { idType, uniqueID, type ID } from '@mainframe/utils-id'
 
 import type { MFID } from '../utils'
 
 import Session from './Session'
-
-// TODO: add others
-type PermissionKeySimple = 'WEB3_CALL' | 'WEB3_SEND'
-export type PermissionKey = 'HTTPS_REQUEST' | PermissionKeySimple
-
-export type PermissionsDefinitions = {
-  HTTPS_REQUEST: Array<string>,
-  [PermissionKeySimple]: boolean,
-}
-
-export type PermissionsGrants = {
-  HTTPS_REQUEST: {
-    granted: Array<string>,
-    denied: Array<string>,
-  },
-  [PermissionKeySimple]: boolean,
-}
-
-export type PermissionGrant = $Values<PermissionsGrants>
-
-export type PermissionRequirement = 'required' | 'optional'
-
-export type PermissionLifetime =
-  | 'app' // As long as the app is installed
-  | 'user' // As long as the user allows
-  | 'session' // As long as the app is running
-
-export type PermissionRequirements = {
-  [PermissionRequirement]: PermissionsDefinitions,
-}
-
-export type PermissionsDetails = { [PermissionLifetime]: PermissionsGrants }
 
 export type AppManifest = {
   id: MFID,
@@ -157,46 +134,19 @@ export default class App {
   }
 
   createSession(userID: ID): SessionData {
-    const appRequired = this.manifest.permissions.required || {}
-    const appRequest = {
-      granted: appRequired.HTTPS_REQUEST || [],
-      denied: [],
+    const requiredPermissions = this.manifest.permissions.required
+    const appPermissions = {
+      ...requiredPermissions,
+      HTTPS_REQUEST: createHTTPSRequestGrant(requiredPermissions.HTTPS_REQUEST),
     }
-
-    const userPermissions = this.getPermissions(userID) || {}
-    const userRequest = userPermissions.HTTPS_REQUEST || {
-      granted: [],
-      denied: [],
+    const userPermissions = this.getPermissions(userID) || {
+      HTTPS_REQUEST: createHTTPSRequestGrant(),
     }
-
-    // These permissions details will be provided to the client
-    const permissions: PermissionsDetails = {
-      app: {
-        ...appRequired,
-        HTTPS_REQUEST: appRequest,
-      },
-      user: {
-        ...userPermissions,
-        HTTPS_REQUEST: userRequest,
-      },
-      session: {
-        HTTPS_REQUEST: appRequest,
-      },
-    }
-
-    const sessionPermissions = {
-      ...permissions.user, // User configuration
-      ...permissions.app, // Manifest requirements overrides
-      // Special case
-      HTTPS_REQUEST: {
-        granted: appRequest.granted.concat(userRequest.granted),
-        denied: [...userRequest.denied],
-      },
-    }
+    const permissions = mergeGrantsToDetails(appPermissions, userPermissions)
 
     return {
       sessID: uniqueID(),
-      session: new Session(this._appID, userID, sessionPermissions),
+      session: new Session(this._appID, userID, permissions.session),
       permissions,
       // TODO: add path to app assets
     }

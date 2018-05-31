@@ -1,8 +1,7 @@
 // @flow
 
+import type { PermissionCheckResult } from '@mainframe/app-permissions'
 import ExtendableError from 'es6-error'
-
-import type { PermissionResult } from '../app/Session'
 
 export type ErrorObject = {
   code: number,
@@ -63,7 +62,7 @@ export const permissionDeniedError = (
   return new RPCError(4104, message)
 }
 
-export const permissionErrorFromResult = (result: PermissionResult) => {
+export const permissionErrorFromResult = (result: PermissionCheckResult) => {
   switch (result) {
     case 'unknown_key':
       return permissionUnknowError()

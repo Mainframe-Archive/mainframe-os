@@ -1,16 +1,15 @@
 // @flow
 
+import type {
+  PermissionKey,
+  PermissionGrant,
+  PermissionsDetails,
+  PermissionCheckResult,
+} from '@mainframe/app-permissions'
 // eslint-disable-next-line import/named
 import { idType, type ID } from '@mainframe/utils-id'
 
-import {
-  type AppManifest,
-  type AppUserSettings,
-  type PermissionKey,
-  type PermissionGrant,
-  type PermissionsDetails,
-} from '../../app/App'
-import { type PermissionResult } from '../../app/Session'
+import type { AppManifest, AppUserSettings } from '../../app/App'
 
 import { clientError, sessionError } from '../errors'
 import type RequestContext from '../RequestContext'
@@ -28,7 +27,7 @@ type AppInstalled = {
 export const checkPermission = (
   ctx: RequestContext,
   [sessID, key, input]: [ID, PermissionKey, ?string] = [],
-): { result: PermissionResult } => {
+): { result: PermissionCheckResult } => {
   const session = ctx.openVault.getSession(sessID)
   if (session == null) {
     throw clientError('Invalid session')
