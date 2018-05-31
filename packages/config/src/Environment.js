@@ -4,14 +4,16 @@ import Conf from 'conf'
 import envPaths from 'env-paths'
 import { join } from 'path'
 
-import type { EnvPaths } from './types'
+import type { EnvPaths, EnvType } from './types'
+
+export const ENV_TYPE_KEY = 'env_type'
 
 export default class Environment {
   _conf: Conf
   _name: string
   _paths: EnvPaths
 
-  constructor(name: string) {
+  constructor(name: string, type: ?EnvType = 'development') {
     if (name == null) {
       throw new Error('Missing environment name')
     }
@@ -24,6 +26,10 @@ export default class Environment {
       projectName: namespace,
     })
     this._paths = envPaths(namespace)
+
+    if (!this._conf.has(ENV_TYPE_KEY)) {
+      this._conf.set(ENV_TYPE_KEY, type)
+    }
   }
 
   get config(): Conf {
@@ -36,6 +42,26 @@ export default class Environment {
 
   get paths(): EnvPaths {
     return this._paths
+  }
+
+  get type(): EnvType {
+    return this._conf.get(ENV_TYPE_KEY)
+  }
+
+  set type(value: EnvType) {
+    this._conf.set(ENV_TYPE_KEY, value)
+  }
+
+  get isDev(): boolean {
+    return this.type === 'development'
+  }
+
+  get isProd(): boolean {
+    return this.type === 'production'
+  }
+
+  get isTesting(): boolean {
+    return this.type === 'testing'
   }
 
   createBinPath(path: string): string {

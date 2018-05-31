@@ -12,40 +12,40 @@ import AppIdentity, { type AppIdentitySerialized } from './AppIdentity'
 import AuthorIdentity, { type AuthorIdentitySerialized } from './AuthorIdentity'
 import UserIdentity, { type UserIdentitySerialized } from './UserIdentity'
 
-type IdentitiesManagerGroupSerialized = {
+type IdentitiesRepositoryGroupSerialized = {
   apps?: { [ID]: AppIdentitySerialized },
   authors?: { [ID]: AuthorIdentitySerialized },
   users?: { [ID]: UserIdentitySerialized },
 }
 
-export type IdentitiesManagerSerialized = {
-  own?: IdentitiesManagerGroupSerialized,
-  other?: IdentitiesManagerGroupSerialized,
+export type IdentitiesRepositorySerialized = {
+  own?: IdentitiesRepositoryGroupSerialized,
+  other?: IdentitiesRepositoryGroupSerialized,
 }
 
-type IdentitiesManagerGroupParams = {
+type IdentitiesRepositoryGroupParams = {
   apps?: { [ID]: AppIdentity },
   authors?: { [ID]: AuthorIdentity },
   users?: { [ID]: UserIdentity },
 }
 
-export type IdentitiesManagerParams = {
-  own?: IdentitiesManagerGroupParams,
-  other?: IdentitiesManagerGroupParams,
+export type IdentitiesRepositoryParams = {
+  own?: IdentitiesRepositoryGroupParams,
+  other?: IdentitiesRepositoryGroupParams,
 }
 
-type IdentitiesManagerGroup = {
+type IdentitiesRepositoryGroup = {
   apps: { [ID]: AppIdentity },
   authors: { [ID]: AuthorIdentity },
   users: { [ID]: UserIdentity },
 }
 
 type IdentitiesData = {
-  own: IdentitiesManagerGroup,
-  other: IdentitiesManagerGroup,
+  own: IdentitiesRepositoryGroup,
+  other: IdentitiesRepositoryGroup,
 }
 
-type domain = $Keys<IdentitiesManagerGroup>
+type domain = $Keys<IdentitiesRepositoryGroup>
 type ownership = $Keys<IdentitiesData>
 type reference = { domain: domain, ownership: ownership }
 
@@ -67,17 +67,17 @@ const toGroup = mapObject(group => ({
   users: toUserIdentity(group.users),
 }))
 
-const createGroup = (params: IdentitiesManagerGroupParams = {}) => ({
+const createGroup = (params: IdentitiesRepositoryGroupParams = {}) => ({
   apps: params.apps == null ? {} : params.apps,
   authors: params.authors == null ? {} : params.authors,
   users: params.users == null ? {} : params.users,
 })
 
-export default class IdentitiesManager {
+export default class IdentitiesRepository {
   static fromJSON = (
-    serialized: IdentitiesManagerSerialized = {},
-  ): IdentitiesManager => {
-    return new IdentitiesManager({
+    serialized: IdentitiesRepositorySerialized = {},
+  ): IdentitiesRepository => {
+    return new IdentitiesRepository({
       // $FlowFixMe: mapper type
       own: serialized.own ? toGroup(serialized.own) : {},
       // $FlowFixMe: mapper type
@@ -86,18 +86,18 @@ export default class IdentitiesManager {
   }
 
   static toJSON = (
-    manager: IdentitiesManager,
-  ): IdentitiesManagerSerialized => ({
+    repository: IdentitiesRepository,
+  ): IdentitiesRepositorySerialized => ({
     // $FlowFixMe: mapper type
-    own: fromGroup(manager.ownIdentities),
+    own: fromGroup(repository.ownIdentities),
     // $FlowFixMe: mapper type
-    other: fromGroup(manager.otherIdentities),
+    other: fromGroup(repository.otherIdentities),
   })
 
   _identities: IdentitiesData
   _refs: { [ID]: reference } = {}
 
-  constructor(identities: IdentitiesManagerParams = {}) {
+  constructor(identities: IdentitiesRepositoryParams = {}) {
     this._identities = {
       own: createGroup(identities.own),
       other: createGroup(identities.other),
@@ -112,11 +112,11 @@ export default class IdentitiesManager {
     })
   }
 
-  get ownIdentities(): IdentitiesManagerGroup {
+  get ownIdentities(): IdentitiesRepositoryGroup {
     return this._identities.own
   }
 
-  get otherIdentities(): IdentitiesManagerGroup {
+  get otherIdentities(): IdentitiesRepositoryGroup {
     return this._identities.other
   }
 

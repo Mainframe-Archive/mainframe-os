@@ -12,10 +12,8 @@ export default class Command extends Cmd {
   static flags = {
     env: flags.string({
       char: 'e',
-      default: 'development',
       description: 'Mainframe environment to run the command in',
       env: 'MAINFRAME_ENV',
-      options: ['development', 'production'],
     }),
   }
 

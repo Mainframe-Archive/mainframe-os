@@ -6,11 +6,16 @@
   "bin": {
     "mainframe-daemon": "./bin/run"
   },
-  "files": ["/bin", "/lib"],
+  "files": [
+    "/bin",
+    "/lib"
+  ],
   "oclif": {
     "commands": "./lib/cli/commands",
     "bin": "mainframe-daemon",
-    "plugins": ["@oclif/plugin-help"]
+    "plugins": [
+      "@oclif/plugin-help"
+    ]
   },
   "scripts": {
     "clean": "del lib",

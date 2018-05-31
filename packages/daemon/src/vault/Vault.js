@@ -1,21 +1,33 @@
 // @flow
 
-import type App from '../app/App'
-import AppsManager, { type AppsManagerSerialized } from '../app/AppsManager'
-import IdentitiesManager, {
-  type IdentitiesManagerSerialized,
-} from '../identity/IdentitiesManager'
+// eslint-disable-next-line import/named
+import { type ID } from '@mainframe/utils-id'
+
+import {
+  type default as App,
+  type AppManifest,
+  type AppUserSettings, // eslint-disable-line import/named
+  type PermissionKey, // eslint-disable-line import/named
+  type SessionData,
+} from '../app/App'
+import AppsRepository, {
+  type AppsRepositorySerialized, // eslint-disable-line import/named
+} from '../app/AppsRepository'
+import { type default as Session, type PermissionResult } from '../app/Session'
+import IdentitiesRepository, {
+  type IdentitiesRepositorySerialized, // eslint-disable-line import/named
+} from '../identity/IdentitiesRepository'
 import type Keychain from '../identity/Keychain'
 import { readSecureFile, writeSecureFile } from '../utils'
 
 export type VaultData = {
-  apps: AppsManager,
-  identities: IdentitiesManager,
+  apps: AppsRepository,
+  identities: IdentitiesRepository,
 }
 
 export type VaultSerialized = {
-  apps?: AppsManagerSerialized,
-  identities?: IdentitiesManagerSerialized,
+  apps?: AppsRepositorySerialized,
+  identities?: IdentitiesRepositorySerialized,
 }
 
 export default class Vault {
@@ -32,22 +44,23 @@ export default class Vault {
     }
     const data = JSON.parse(buffer.toString())
     return new Vault(path, key, {
-      apps: AppsManager.fromJSON(data.apps),
-      identities: IdentitiesManager.fromJSON(data.identities),
+      apps: AppsRepository.fromJSON(data.apps),
+      identities: IdentitiesRepository.fromJSON(data.identities),
     })
   }
 
   _path: string
   _key: Buffer
   _data: VaultData
+  _sessions: { [ID]: Session } = {}
 
   constructor(path: string, key: Buffer, data?: ?VaultData) {
     this._path = path
     this._key = key
     if (data == null) {
       this._data = {
-        apps: new AppsManager(),
-        identities: new IdentitiesManager(),
+        apps: new AppsRepository(),
+        identities: new IdentitiesRepository(),
       }
     } else {
       this._data = data
@@ -58,13 +71,49 @@ export default class Vault {
     return this._path
   }
 
-  get apps(): AppsManager {
+  get apps(): AppsRepository {
     return this._data.apps
   }
 
-  get identities(): IdentitiesManager {
+  get identities(): IdentitiesRepository {
     return this._data.identities
   }
+
+  // App
+
+  closeApp(sessID: ID): void {
+    delete this._sessions[sessID]
+  }
+
+  openApp(appID: ID, userID: ID): SessionData {
+    const sessionData = this.apps.createSession(appID, userID)
+    this._sessions[sessionData.sessID] = sessionData.session
+    return sessionData
+  }
+
+  installApp(
+    manifest: AppManifest,
+    userID: ID,
+    settings: AppUserSettings,
+  ): SessionData {
+    let appID = this.apps.getID(manifest.id)
+    if (appID == null) {
+      // Add app with user settings
+      appID = this.apps.add(manifest, userID, settings)
+    } else {
+      // Set user settings for already existing app
+      this.apps.setUserSettings(appID, userID, settings)
+    }
+    return this.openApp(appID, userID)
+  }
+
+  // Session
+
+  getSession(id: ID): ?Session {
+    return this._sessions[id]
+  }
+
+  // Vault lifecycle
 
   save() {
     const contents = Buffer.from(JSON.stringify(this.toJSON()))
@@ -74,8 +123,8 @@ export default class Vault {
   toJSON(): VaultSerialized {
     return this._data
       ? {
-          apps: AppsManager.toJSON(this._data.apps),
-          identities: IdentitiesManager.toJSON(this._data.identities),
+          apps: AppsRepository.toJSON(this._data.apps),
+          identities: IdentitiesRepository.toJSON(this._data.identities),
         }
       : {}
   }

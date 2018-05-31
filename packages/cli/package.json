@@ -8,11 +8,16 @@
   "bin": {
     "mainframe": "./bin/run"
   },
-  "files": ["/bin", "/lib"],
+  "files": [
+    "/bin",
+    "/lib"
+  ],
   "oclif": {
     "commands": "./lib/commands",
     "bin": "mainframe",
-    "plugins": ["@oclif/plugin-help"]
+    "plugins": [
+      "@oclif/plugin-help"
+    ]
   },
   "scripts": {
     "clean": "del lib",
