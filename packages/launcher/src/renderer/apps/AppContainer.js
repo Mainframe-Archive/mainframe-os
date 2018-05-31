@@ -1,7 +1,7 @@
 // @flow
 
 import React, { Component } from 'react'
-import { View, StyleSheet, Text } from 'react-native'
+import { View, StyleSheet, Text } from 'react-native-web'
 import path from 'path'
 import url from 'url'
 

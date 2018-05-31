@@ -1,16 +1,36 @@
 // @flow
 
 import { app, BrowserWindow, ipcMain } from 'electron'
+import betterIpc from 'electron-better-ipc'
 import querystring from 'querystring'
 import path from 'path'
 import url from 'url'
 
-let mainWindow
-const appWindows = {}
+import Client from '@mainframe/client'
+import { Environment, getDaemonSocketPath } from '@mainframe/config'
 
+const testVaultKey = 'testKey'
+
+let mainWindow
+let client
+let env
+
+type AppWindows = {
+  [appId: string]: {
+    window: BrowserWindow,
+    appId: string,
+  },
+}
+
+type ClientResponse = {
+  id: string,
+  error?: Object,
+  result?: Object,
+}
+
+const appWindows: AppWindows = {}
 const requestChannel = 'ipc-request-channel'
 const responseChannel = 'ipc-response-channel'
-
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
 const newWindow = params => {
@@ -29,7 +49,7 @@ const newWindow = params => {
   } else {
     window.loadURL(
       url.format({
-        pathname: path.join(__dirname, `index.html?${params}`),
+        pathname: path.join(__dirname, `index.html?${stringParams}`),
         protocol: 'file:',
         slashes: true,
       }),
@@ -38,10 +58,28 @@ const newWindow = params => {
   return window
 }
 
-const createWindow = () => {
+const setupClient = async () => {
+  const envName = isDevelopment ? 'development' : 'production'
+  env = new Environment(envName)
+  const socketPath = getDaemonSocketPath(env)
+  const vaultPath = path.join(env.paths.config, 'defaultVault')
+  client = new Client(socketPath)
+
+  // TODO: Implement proper vault handling
+
+  try {
+    const res = await client.openVault(vaultPath, testVaultKey)
+  } catch (err) {
+    const createRes = await client.createVault(vaultPath, testVaultKey)
+  }
+}
+
+const createLauncherWindow = async () => {
   mainWindow = newWindow({
     type: 'launcher',
   })
+
+  setupClient()
 
   // Emitted when the window is closed.
   mainWindow.on('closed', () => {
@@ -59,10 +97,13 @@ const launchApp = appId => {
     type: 'app',
     appId,
   })
-  appWindows[appId] = appWindow
+  appWindows[appId] = {
+    appId,
+    window: appWindow,
+  }
 }
 
-app.on('ready', createWindow)
+app.on('ready', createLauncherWindow)
 
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {
@@ -75,7 +116,7 @@ app.on('activate', () => {
   // On macOS it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   if (mainWindow === null) {
-    createWindow()
+    createLauncherWindow()
   }
 })
 
@@ -83,16 +124,27 @@ ipcMain.on('launchApp', (e, appId) => {
   launchApp(appId)
 })
 
-const simpleClient = {
-  getBalance: () => 1000,
-  getPublicKey: () => 'myKey',
-}
+// IPC COMMS
 
-const handleRequest = request => {
-  if (request.data.method && simpleClient[request.data.method]) {
+betterIpc.answerRenderer('client-request', async request => {
+  const res = handleRequest(request)
+  return res
+})
+
+const handleRequest = (request: Object): ClientResponse => {
+  if (request == null || !request || !request.data) {
+    return {
+      error: {
+        message: 'Invalid request',
+        code: 32600,
+      },
+      id: request.id,
+    }
+  }
+  if (request.data.method && client[request.data.method]) {
     const args = request.data.args || []
     try {
-      const res = simpleClient[request.data.method](...args)
+      const res = client[request.data.method](...args)
       return {
         id: request.id,
         result: res,
