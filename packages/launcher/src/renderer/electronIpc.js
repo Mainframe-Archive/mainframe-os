@@ -1,6 +1,6 @@
 // @flow
 
-const ipc = require('electron-better-ipc')
+import ipc from 'electron-better-ipc'
 
 const generateId = () =>
   Math.random()

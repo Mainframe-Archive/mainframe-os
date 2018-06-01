@@ -2,34 +2,106 @@
 
 import Conf from 'conf'
 import envPaths from 'env-paths'
+import { remove } from 'fs-extra'
 import { join } from 'path'
 
 import type { EnvPaths, EnvType } from './types'
 
-export const ENV_TYPE_KEY = 'env_type'
+const DEFAULT_KEY = 'default'
+const ENVS_KEY = 'envs'
+
+const createConf = (name: string) => {
+  return new Conf({
+    // NOT a security measure - see https://github.com/sindresorhus/conf#encryptionkey
+    encryptionKey: 'mainframe',
+    projectName: `mainframe-${name}`,
+  })
+}
+
+// Global config used to store the list of envs
+// Do not use for anything else than envs metadata, actual configs should be env-specific
+const envsConf = createConf('envs')
+const envKey = (name: string): string => `${ENVS_KEY}.${name}`
 
 export default class Environment {
-  _conf: Conf
-  _name: string
-  _paths: EnvPaths
-
-  constructor(name: string, type: ?EnvType = 'development') {
+  static create(
+    name: string,
+    type?: EnvType = 'development',
+    setDefault: boolean = false,
+  ): Environment {
     if (name == null) {
       throw new Error('Missing environment name')
     }
 
-    const namespace = `mainframe-${name}`
-    this._name = name
-    this._conf = new Conf({
-      // NOT a security measure - see https://github.com/sindresorhus/conf#encryptionkey
-      encryptionKey: 'mainframe',
-      projectName: namespace,
-    })
-    this._paths = envPaths(namespace)
-
-    if (!this._conf.has(ENV_TYPE_KEY)) {
-      this._conf.set(ENV_TYPE_KEY, type)
+    const key = envKey(name)
+    if (envsConf.has(key)) {
+      throw new Error('Environment already exists')
     }
+
+    envsConf.set(key, type)
+    if (setDefault) {
+      envsConf.set(DEFAULT_KEY, name)
+    }
+
+    return new Environment(name)
+  }
+
+  static exists(name: string): boolean {
+    return envsConf.has(envKey(name))
+  }
+
+  static get(name: string, type?: EnvType): Environment {
+    return Environment.exists(name)
+      ? Environment.load(name)
+      : Environment.create(name, type)
+  }
+
+  static list(): { [name: string]: EnvType } {
+    return envsConf.get(ENVS_KEY) || {}
+  }
+
+  static load(name: string): Environment {
+    if (name == null) {
+      throw new Error('Missing environment name')
+    }
+    if (envsConf.has(envKey(name))) {
+      return new Environment(name)
+    }
+    throw new Error('Unknown environment')
+  }
+
+  static async destroy(name: string) {
+    const env = Environment.load(name)
+    // Delete all environment folders
+    await Promise.all(Object.values(env.paths).map(remove))
+
+    envsConf.delete(envKey(name))
+    if (envsConf.get(DEFAULT_KEY) === name) {
+      envsConf.delete(DEFAULT_KEY)
+    }
+  }
+
+  static getDefault(): ?string {
+    return envsConf.get(DEFAULT_KEY)
+  }
+
+  static setDefault(name: string) {
+    if (Environment.exists(name)) {
+      envsConf.set(DEFAULT_KEY, name)
+    } else {
+      throw new Error('Unknown environment')
+    }
+  }
+
+  _conf: Conf
+  _name: string
+  _paths: EnvPaths
+
+  constructor(name: string) {
+    const namespace = `mainframe-env-${name}`
+    this._name = name
+    this._conf = createConf(namespace)
+    this._paths = envPaths(namespace)
   }
 
   get config(): Conf {
@@ -45,11 +117,11 @@ export default class Environment {
   }
 
   get type(): EnvType {
-    return this._conf.get(ENV_TYPE_KEY)
+    return envsConf.get(envKey(this.name))
   }
 
   set type(value: EnvType) {
-    this._conf.set(ENV_TYPE_KEY, value)
+    envsConf.set(envKey(this.name), value)
   }
 
   get isDev(): boolean {

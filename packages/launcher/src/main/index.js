@@ -1,21 +1,29 @@
 // @flow
 
+import Client from '@mainframe/client'
+import { Environment, DaemonConfig, VaultConfig } from '@mainframe/config'
+import { startDaemon } from '@mainframe/toolbox'
 import { app, BrowserWindow, ipcMain } from 'electron'
 import betterIpc from 'electron-better-ipc'
-import querystring from 'querystring'
 import path from 'path'
+import { stringify } from 'query-string'
 import url from 'url'
-
-import Client from '@mainframe/client'
-import { Environment, getDaemonSocketPath } from '@mainframe/config'
 
 const PORT = process.env.ELECTRON_WEBPACK_WDS_PORT || ''
 
-const testVaultKey = 'testKey'
+const envType =
+  process.env.NODE_ENV === 'production' ? 'production' : 'development'
+const envName = process.env.MAINFRAME_ENV || `launcher-${envType}`
+// Get existing env or create with specified type
+const env = Environment.get(envName, envType)
 
-let mainWindow
+const daemonConfig = new DaemonConfig(env)
+const vaultConfig = new VaultConfig(env)
+const isDevelopment = env.isDev
+const testVaultKey = 'testKey' // TODO: user input once launcher opens
+
 let client
-let env
+let mainWindow
 
 type AppWindows = {
   [appId: string]: {
@@ -33,16 +41,13 @@ type ClientResponse = {
 const appWindows: AppWindows = {}
 const requestChannel = 'ipc-request-channel'
 const responseChannel = 'ipc-response-channel'
-const isDevelopment = process.env.NODE_ENV !== 'production'
 
 const newWindow = params => {
   const window = new BrowserWindow({ width: 800, height: 600 })
-  if (isDevelopment) {
-    window.webContents.openDevTools()
-  }
-  const stringParams = querystring.stringify(params)
+  const stringParams = stringify(params)
 
   if (isDevelopment) {
+    window.webContents.openDevTools()
     window.loadURL(`http://localhost:${PORT}?${stringParams}`)
   } else {
     window.loadURL(
@@ -56,28 +61,41 @@ const newWindow = params => {
   return window
 }
 
+// TODO: proper setup, this is just temporary logic to simplify development flow
 const setupClient = async () => {
-  const envName = isDevelopment ? 'development' : 'production'
-  env = new Environment(envName)
-  const socketPath = getDaemonSocketPath(env)
-  const vaultPath = path.join(env.paths.config, 'defaultVault')
-  client = new Client(socketPath)
+  // /!\ Temporary only, should be handled by toolbox with installation flow
+  daemonConfig.runStatus = 'stopped'
+  if (daemonConfig.binPath == null) {
+    daemonConfig.binPath = path.resolve(__dirname, '../../../daemon/bin/run')
+  }
+  await startDaemon(daemonConfig, true)
+  client = new Client(daemonConfig.socketPath)
+  // Simple check for API call, not proper versioning logic
+  const version = await client.apiVersion()
+  if (version !== 0) {
+    throw new Error('Unexpected API version')
+  }
+}
 
-  // TODO: Implement proper vault handling
-
-  try {
-    const res = await client.openVault(vaultPath, testVaultKey)
-  } catch (err) {
-    const createRes = await client.createVault(vaultPath, testVaultKey)
+// TODO: opening or creating a vault should be done as the result of user interaction in the launcher
+const setupVault = async () => {
+  const existing = vaultConfig.defaultVault
+  if (existing != null) {
+    await client.openVault(existing, testVaultKey)
+  } else {
+    const vaultPath = vaultConfig.createVaultPath()
+    await client.createVault(vaultPath, testVaultKey)
+    vaultConfig.defaultVault = vaultPath
   }
 }
 
 const createLauncherWindow = async () => {
+  await setupClient()
+  await setupVault()
+
   mainWindow = newWindow({
     type: 'launcher',
   })
-
-  setupClient()
 
   // Emitted when the window is closed.
   mainWindow.on('closed', () => {

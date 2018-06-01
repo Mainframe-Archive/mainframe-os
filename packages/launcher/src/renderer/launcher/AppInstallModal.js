@@ -54,8 +54,7 @@ export default class AppInstallModal extends Component<Props, State> {
   }
 
   onFileInputChange = () => {
-    const files = [...this.fileInput.files]
-    this.handleSelectedFiles(files)
+    this.handleSelectedFiles([...this.fileInput.current.files])
   }
 
   handleSelectedFiles = (files: Array<Object>) => {

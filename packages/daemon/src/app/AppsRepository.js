@@ -28,7 +28,7 @@ export default class AppsRepository {
 
   static toJSON = (registry: AppsRepository): AppsRepositorySerialized => {
     // $FlowFixMe: mapping type
-    return appsToJSON(manager.apps)
+    return appsToJSON(registry.apps)
   }
 
   _apps: Apps

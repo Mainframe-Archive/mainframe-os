@@ -21,6 +21,13 @@ export default class REPLCommand extends Command {
     }
 
     initializeContext(r.context)
+    // $FlowFixMe: VM context
+    Object.defineProperty(r.context, 'env', {
+      configurable: false,
+      enumerable: true,
+      value: this.env,
+    })
+
     r.on('reset', initializeContext)
 
     r.on('exit', () => {

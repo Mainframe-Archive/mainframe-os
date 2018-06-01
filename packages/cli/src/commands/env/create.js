@@ -18,6 +18,10 @@ export default class CreateCommand extends Command {
       description: 'environment type',
       options: ENV_TYPES,
     }),
+    default: flags.boolean({
+      char: 'd',
+      description: 'use as default environment',
+    }),
   }
 
   async run() {
@@ -40,6 +44,14 @@ export default class CreateCommand extends Command {
         message: 'Select a vault to use by default',
       })
     }
+    if (flags.default == null) {
+      prompts.push({
+        type: 'confirm',
+        default: Environment.getDefault() == null,
+        name: 'default',
+        message: 'Use as default environment?',
+      })
+    }
 
     const choices = await prompt(prompts)
     const name = flags.name || choices.name
@@ -48,7 +60,11 @@ export default class CreateCommand extends Command {
     if (name == null || type == null) {
       this.warn('Could not create environment')
     } else {
-      const env = new Environment(name, type)
+      const env = Environment.create(
+        name,
+        type,
+        flags.default == null ? choices.default : flags.default,
+      )
       this.log(`Environment ${env.name} (${env.type}) has been created`)
     }
   }
