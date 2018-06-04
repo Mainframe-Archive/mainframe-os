@@ -25,23 +25,22 @@
     "@mainframe/toolbox": "*",
     "electron-better-ipc": "^0.1.1",
     "fs-extra": "^6.0.1",
-    "react": "^16.3.2",
-    "react-art": "^16.3.2",
-    "react-dom": "^16.3.2",
-    "react-modal": "^3.4.4",
-    "react-native-web": "^0.6.1",
+    "react": "^16.4.0",
+    "react-art": "^16.4.0",
+    "react-dom": "^16.4.0",
+    "react-modal": "^3.4.5",
+    "react-native-web": "^0.7.3",
     "source-map-support": "^0.5.5"
   },
   "devDependencies": {
-    "@babel/core": "^7.0.0-beta.47",
-    "@babel/preset-flow": "^7.0.0-beta.47",
-    "@babel/preset-react": "^7.0.0-beta.47",
-    "babel-plugin-react-native-web": "^0.6.1",
-    "electron": "^2.0.0",
-    "electron-builder": "^20.11.1",
-    "electron-webpack": "^2.0.1",
+    "@babel/core": "7.0.0-beta.47",
+    "@babel/preset-flow": "7.0.0-beta.47",
+    "@babel/preset-react": "7.0.0-beta.47",
+    "babel-plugin-react-native-web": "^0.7.3",
+    "electron": "^2.0.2",
+    "electron-builder": "^20.15.1",
+    "electron-webpack": "^2.1.2",
     "flow-bin": "^0.73.0",
-    "webpack": "^4.8.1",
-    "webpack-dev-server": "^3.1.4"
+    "webpack": "^4.10.2"
   }
 }

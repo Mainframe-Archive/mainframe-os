@@ -1,6 +1,6 @@
 // @flow
 
-import { Environment } from '@mainframe/config'
+import { Environment, getDaemonRunStatus } from '@mainframe/config'
 import { Command } from '@oclif/command'
 import Table from 'cli-table'
 
@@ -14,9 +14,17 @@ export default class ListCommand extends Command {
       this.warn('No environment')
     } else {
       const defaultName = Environment.getDefault()
-      const table = new Table({ head: ['Name', 'Type', 'Default'] })
+      const table = new Table({
+        head: ['name', 'type', 'default', 'daemon status'],
+      })
       names.forEach(name => {
-        table.push([name, envs[name], name === defaultName ? 'yes' : 'no'])
+        const env = Environment.load(name)
+        table.push([
+          name,
+          envs[name],
+          name === defaultName ? 'yes' : 'no',
+          getDaemonRunStatus(env),
+        ])
       })
       console.log(table.toString())
     }
