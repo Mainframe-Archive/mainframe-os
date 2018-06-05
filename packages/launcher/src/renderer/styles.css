@@ -1,5 +1,37 @@
-html, body, #app {
+html,
+body,
+#app {
   display: flex;
   flex: 1;
   height: 100%;
+}
+
+.ReactModal__Overlay {
+  position: fixed !important;
+  top: 0px !important;
+  left: 0px !important;
+  right: 0px !important;
+  bottom: 0px !important;
+  background-color: rgba(15, 32, 67, 0.9) !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  z-index: 999 !important;
+  border: none !important;
+}
+
+.ReactModal__Content {
+  position: relative !important;
+  top: initial !important;
+  left: initial !important;
+  right: initial !important;
+  bottom: initial !important;
+  border: none !important;
+  background: none !important;
+  overflow: auto !important;
+  border-radius: 10px !important;
+  border-color: transparent !important;
+  outline: none !important;
+  padding: 0px !important;
+  margin: auto !important;
 }

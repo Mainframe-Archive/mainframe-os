@@ -1,9 +1,32 @@
 // @flow
 
-import type { ID } from '@mainframe/utils-id'
+import {
+  createHTTPSRequestGrant,
+  mergeGrantsToDetails,
+  type PermissionGrant, // eslint-disable-line import/named
+  type PermissionKey, // eslint-disable-line import/named
+  type PermissionRequirements, // eslint-disable-line import/named
+  type PermissionsDetails, // eslint-disable-line import/named
+  type PermissionsGrants, // eslint-disable-line import/named
+} from '@mainframe/app-permissions'
+// eslint-disable-next-line import/named
+import { idType, uniqueID, type ID } from '@mainframe/utils-id'
 
-// TODO: better type or class to handle validation
-export type AppManifest = Object
+import type { MFID } from '../utils'
+
+import Session from './Session'
+
+export type AppManifest = {
+  id: MFID,
+  name: string,
+  permissions: PermissionRequirements,
+}
+
+export type SessionData = {
+  sessID: ID,
+  session: Session,
+  permissions: PermissionsDetails,
+}
 
 export type AppInstallationState =
   | 'manifest-pending'
@@ -19,24 +42,15 @@ export type AppInstallationState =
   | 'package-invalid-signature'
   | 'ready'
 
-export type PermissionKey = 'CALL_WEB3'
-
-export type PermissionGrant = 'allow' | 'ask' | 'deny'
-
-export type PermissionConfig = {
-  grant: PermissionGrant,
-}
-
-export type AppIdentitySettings = {
-  permissions: { [PermissionKey]: PermissionConfig },
+export type AppUserSettings = {
+  permissions: PermissionsGrants,
 }
 
 export type AppParams = {
   appID: ID,
-  currentUserID: ID,
   manifest: AppManifest,
   installationState: AppInstallationState,
-  settings?: { [ID]: AppIdentitySettings },
+  settings?: { [ID]: AppUserSettings },
 }
 
 export type AppSerialized = AppParams
@@ -46,21 +60,18 @@ export default class App {
 
   static toJSON = (app: App): AppSerialized => ({
     appID: app._appID,
-    currentUserID: app._currentUserID,
     manifest: app._manifest,
     installationState: app._installationState,
     settings: app._settings,
   })
 
   _appID: ID
-  _currentUserID: ID
   _manifest: AppManifest
   _installationState: AppInstallationState
-  _settings: { [ID]: AppIdentitySettings }
+  _settings: { [ID]: AppUserSettings }
 
   constructor(params: AppParams) {
     this._appID = params.appID
-    this._currentUserID = params.currentUserID
     this._manifest = params.manifest
     this._installationState = params.installationState
     this._settings = params.settings == null ? {} : params.settings
@@ -70,42 +81,74 @@ export default class App {
     return this._appID
   }
 
-  getUserPermission(userID: ID, key: PermissionKey): ?PermissionConfig {
-    const settings = this._settings[userID]
-    if (settings != null && settings.permissions != null) {
-      return settings.permissions[key]
-    }
+  get manifest(): AppManifest {
+    return this._manifest
   }
 
-  getPermission(key: PermissionKey): ?PermissionConfig {
-    return this.getUserPermission(this._currentUserID, key)
+  get users(): Array<ID> {
+    return Object.keys(this._settings).map(idType)
   }
 
-  setUserPermission(
-    userID: ID,
-    key: PermissionKey,
-    value: PermissionConfig,
-  ): void {
-    const settings = this._settings[userID] || { permissions: {} }
-    settings.permissions[key] = value
+  getSettings(userID: ID): AppUserSettings {
+    return this._settings[userID] || { permissions: {} }
+  }
+
+  setSettings(userID: ID, settings: AppUserSettings): void {
     this._settings[userID] = settings
   }
 
-  setPermission(key: PermissionKey, value: PermissionConfig): void {
-    this.setUserPermission(this._currentUserID, key, value)
+  getPermissions(userID: ID): ?PermissionsGrants {
+    const settings = this._settings[userID]
+    if (settings != null && settings.permissions != null) {
+      return settings.permissions
+    }
   }
 
-  grantUserPermission(
-    userID: ID,
-    key: PermissionKey,
-    grant?: PermissionGrant = 'allow',
-  ): void {
-    const permission = this.getUserPermission(userID, key) || {}
-    permission.grant = grant
-    this.setUserPermission(userID, key, permission)
+  setPermissions(userID: ID, permissions: PermissionsGrants): void {
+    const settings = this.getSettings(userID)
+    settings.permissions = permissions
+    this._settings[userID] = settings
   }
 
-  grantPermission(key: PermissionKey, grant?: PermissionGrant): void {
-    this.grantUserPermission(this._currentUserID, key, grant)
+  getPermission(userID: ID, key: PermissionKey): ?PermissionGrant {
+    const permissions = this.getPermissions(userID)
+    if (permissions != null) {
+      return permissions[key]
+    }
+  }
+
+  setPermission(userID: ID, key: PermissionKey, value: PermissionGrant): void {
+    const { permissions } = this.getSettings(userID)
+    if (
+      (key === 'HTTPS_REQUEST' && typeof value === 'object') ||
+      (key !== 'HTTPS_REQUEST' && typeof value === 'boolean')
+    ) {
+      // $FlowFixMe: value polymorphism
+      permissions[key] = value
+      this.setPermissions(userID, permissions)
+    }
+  }
+
+  removeUser(userID: ID) {
+    delete this._settings[userID]
+  }
+
+  createSession(userID: ID): SessionData {
+    const requiredPermissions = this.manifest.permissions.required
+    const appPermissions = {
+      ...requiredPermissions,
+      HTTPS_REQUEST: createHTTPSRequestGrant(requiredPermissions.HTTPS_REQUEST),
+    }
+    const userPermissions = this.getPermissions(userID) || {
+      HTTPS_REQUEST: createHTTPSRequestGrant(),
+    }
+    const permissions = mergeGrantsToDetails(appPermissions, userPermissions)
+
+    return {
+      sessID: uniqueID(),
+      session: new Session(this._appID, userID, permissions.session),
+      permissions,
+      // TODO: add path to app assets
+    }
   }
 }

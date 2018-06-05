@@ -8,26 +8,24 @@ import {
 import { vaultError } from '../errors'
 import type RequestContext from '../RequestContext'
 
-export const vault_open = async (
+export const create = async (
   ctx: RequestContext,
   [path, key]: [string, base64] = [],
 ) => {
   try {
-    await ctx.vaults.open(ctx.socket, path, decodeBase64(key))
-    return 'OK'
+    await ctx.vaults.create(ctx.socket, path, decodeBase64(key))
   } catch (err) {
     // TODO: different error code depending on actual error
     throw vaultError(err.message)
   }
 }
 
-export const vault_create = async (
+export const open = async (
   ctx: RequestContext,
   [path, key]: [string, base64] = [],
 ) => {
   try {
-    await ctx.vaults.create(ctx.socket, path, decodeBase64(key))
-    return 'OK'
+    await ctx.vaults.open(ctx.socket, path, decodeBase64(key))
   } catch (err) {
     // TODO: different error code depending on actual error
     throw vaultError(err.message)

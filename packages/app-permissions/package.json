@@ -1,5 +1,5 @@
 {
-  "name": "@mainframe/config",
+  "name": "@mainframe/app-permissions",
   "version": "0.1.0",
   "main": "lib/index.js",
   "license": "MIT",
@@ -9,13 +9,6 @@
     "build:flow": "flow-copy-source src lib",
     "build": "yarn clean && yarn build:js && yarn build:flow",
     "test": "flow check"
-  },
-  "dependencies": {
-    "@mainframe/utils-id": "^0.1.0",
-    "conf": "^2.0.0",
-    "env-paths": "^1.0.0",
-    "esm": "3.0.44",
-    "fs-extra": "^6.0.1"
   },
   "devDependencies": {
     "flow-bin": "^0.73.0"

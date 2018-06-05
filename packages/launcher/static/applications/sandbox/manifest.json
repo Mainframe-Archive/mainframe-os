@@ -5,5 +5,16 @@
   "developer": {
     "id": "dev3",
     "name": "Dapp Dev 3"
+  },
+  "permissions": {
+    "required": {
+      "SWARM_DOWNLOAD": true,
+      "WEB3_CALL": true,
+      "HTTPS_REQUEST": ["mainframe.com"]
+    },
+    "optional": {
+      "HTTPS_REQUEST": ["facebook.com", "google.com"],
+      "LOCATION_GET": true
+    }
   }
 }

@@ -5,30 +5,30 @@
   "license": "MIT",
   "private": true,
   "workspaces": {
-    "packages": ["packages/*"],
+    "packages": [
+      "packages/*"
+    ],
     "nohoist": [
       "**/@mainframe/rpc-*",
       "**/@mainframe/transport-*",
       "**/@mainframe/utils-*",
+      "**/electron",
+      "**/electron-better-ipc",
+      "**/electron-webpack",
       "**/nanoid",
+      "**/react",
+      "**/react-dom",
       "**/rx-socket",
       "**/rxjs",
       "**/sodium-universal",
-      "**/ws",
-      "**/react",
-      "**/react/**",
-      "**/react-dom",
-      "**/react-dom/**",
-      "**/electron",
-      "**/electron/**",
-      "**/electron-webpack",
-      "**/electron-webpack/**"
+      "**/webpack",
+      "**/webpack-dev-server",
+      "**/ws"
     ]
   },
   "scripts": {
     "flow:create-symlinks": "flow-mono create-symlinks .flowconfig",
-    "flow:install-types":
-      "flow-mono install-types --overwrite --ignoreDeps=dev",
+    "flow:install-types": "flow-mono install-types --overwrite --ignoreDeps=dev",
     "flow:reinstall": "lerna exec del flow-typed && yarn flow:install-types",
     "flow:align": "flow-mono align-versions",
     "flow:bootstrap": "yarn flow:create-symlinks && yarn flow:install-types",
@@ -39,7 +39,7 @@
     "test": "yarn test:packages",
     "test:all": "yarn lint && yarn test",
     "build": "lerna run build",
-    "start": "yarn lint && yarn build && yarn test"
+    "start": "yarn build && yarn test:all"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
@@ -55,7 +55,7 @@
     "eslint": "^4.19.1",
     "eslint-config-mainframe": "^1.3.1",
     "flow-bin": "^0.73.0",
-    "flow-copy-source": "^1.3.0",
+    "flow-copy-source": "^2.0.0",
     "flow-mono-cli": "^1.3.1",
     "flow-remove-types": "^1.2.3",
     "flow-typed": "^2.4.0",

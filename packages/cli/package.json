@@ -8,11 +8,16 @@
   "bin": {
     "mainframe": "./bin/run"
   },
-  "files": ["/bin", "/lib"],
+  "files": [
+    "/bin",
+    "/lib"
+  ],
   "oclif": {
     "commands": "./lib/commands",
     "bin": "mainframe",
-    "plugins": ["@oclif/plugin-help"]
+    "plugins": [
+      "@oclif/plugin-help"
+    ]
   },
   "scripts": {
     "clean": "del lib",
@@ -27,9 +32,10 @@
     "@mainframe/toolbox": "*",
     "@oclif/command": "^1.4.30",
     "@oclif/config": "^1.6.21",
-    "@oclif/plugin-help": "^1.2.11",
-    "esm": "^3.0.39",
-    "inquirer": "^5.2.0"
+    "@oclif/plugin-help": "^2.0.4",
+    "cli-table": "^0.3.1",
+    "esm": "3.0.44",
+    "inquirer": "^6.0.0"
   },
   "devDependencies": {
     "flow-bin": "^0.73.0"

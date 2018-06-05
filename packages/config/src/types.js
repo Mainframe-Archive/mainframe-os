@@ -8,6 +8,11 @@ export type EnvPaths = {
   temp: string,
 }
 
+export type EnvType =
+  | 'development' // local dev
+  | 'testing' // CI or public testing
+  | 'production' // don't mess up
+
 export type InstallStatus =
   | 'unknown'
   | 'download_started'

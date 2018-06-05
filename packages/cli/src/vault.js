@@ -51,7 +51,8 @@ export const createVault = async (
   path: string,
   setDefault: ?boolean = false,
 ): Promise<void> => {
-  if (cmd.client == null) {
+  const client = cmd.createClient()
+  if (client == null) {
     return
   }
 
@@ -64,7 +65,8 @@ export const createVault = async (
     }
   }
 
-  await cmd.client.createVault(path, vault.passphrase)
+  await client.createVault(path, vault.passphrase)
+  client.close()
 
   // Update config after successful creation by daemon
   cfg.setLabel(path, vault.label)

@@ -12,10 +12,8 @@ export default class Command extends Cmd {
   static flags = {
     env: flags.string({
       char: 'e',
-      default: 'development',
       description: 'Mainframe environment to run the command in',
       env: 'MAINFRAME_ENV',
-      options: ['development', 'production'],
     }),
   }
 
@@ -40,7 +38,11 @@ export default class Command extends Cmd {
 
   async init() {
     const { flags } = this.parse(this.constructor)
-    this.env = new Environment(flags.env)
+    const name = flags.env || Environment.getDefault()
+    if (name == null) {
+      throw new Error('Missing environment')
+    }
+    this.env = Environment.load(name)
     this.flags = flags
   }
 

@@ -6,11 +6,16 @@
   "bin": {
     "mainframe-daemon": "./bin/run"
   },
-  "files": ["/bin", "/lib"],
+  "files": [
+    "/bin",
+    "/lib"
+  ],
   "oclif": {
     "commands": "./lib/cli/commands",
     "bin": "mainframe-daemon",
-    "plugins": ["@oclif/plugin-help"]
+    "plugins": [
+      "@oclif/plugin-help"
+    ]
   },
   "scripts": {
     "clean": "del lib",
@@ -22,17 +27,18 @@
     "start": "node -r esm lib"
   },
   "dependencies": {
+    "@mainframe/app-permissions": "*",
     "@mainframe/rpc-node": "^0.2.0",
     "@mainframe/utils-base64": "^0.1.0",
     "@mainframe/utils-crypto": "^0.1.0",
     "@mainframe/utils-id": "^0.1.0",
     "@oclif/command": "^1.4.30",
     "@oclif/config": "^1.6.21",
-    "@oclif/plugin-help": "^1.2.11",
+    "@oclif/plugin-help": "^2.0.4",
     "asar": "^0.14.3",
     "debug": "^3.1.0",
     "es6-error": "^4.1.1",
-    "esm": "^3.0.39",
+    "esm": "3.0.44",
     "fast-json-stable-stringify": "^2.0.0",
     "fs-extra": "^6.0.1",
     "rxjs": "^6.2.0",

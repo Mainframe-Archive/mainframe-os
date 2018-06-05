@@ -7,7 +7,7 @@ import { inspect } from 'util'
 
 import type { VaultRegistry } from '../vault'
 
-import * as methods from './api'
+import methods from './methods'
 import {
   parseError,
   methodNotFound,
@@ -62,7 +62,7 @@ export default (socket: Socket, vaults: VaultRegistry) => {
   }
 
   const handleRequest = async (method: string, params: any) => {
-    const handler = methods[method] // eslint-disable-line import/namespace
+    const handler = methods[method]
     if (handler == null) {
       throw methodNotFound()
     }

@@ -9,17 +9,21 @@
 
 ## Commands
 
-* `daemon:setup`: configure the daemon binary and socket paths
-* `daemon:status`: display the daemon running status and socket path
-* `daemon:start`: start the daemon using the store configuration
-* `daemon:stop`: start the daemon using the store configuration
-* `client:repl`: open a node REPL with an injected `client` object connected to the daemon
-* `client:setup`: ensure the environment has a default vault setup
-* `vault:create`: create a vault
-* `vault:delete`: delete a vault
+- `env:create`: create a new environment
+- `env:default`: get or set the default environment to use
+- `env:list`: list the environments
+- `daemon:setup`: configure the daemon binary and socket paths
+- `daemon:status`: display the daemon running status and socket path
+- `daemon:start`: start the daemon using the store configuration
+- `daemon:stop`: start the daemon using the store configuration
+- `client:repl`: open a node REPL with an injected `client` object connected to the daemon
+- `client:setup`: ensure the environment has a default vault setup
+- `vault:create`: create a vault
+- `vault:delete`: delete a vault
 
 ## Environment setup
 
+1.  Run `env:create` to create a new environment, set it as default unless you want to provide it explicitly in the next commands
 1.  Run `daemon:setup` to configure the path to the `daemon` CLI, ex `./bin/run daemon:setup --bin-path=/path/to/js-mainframe/packages/daemon/bin/run`
 1.  Run `daemon:start` to start the daemon, use `DEBUG="mainframe:*" ./bin/run daemon:start` to see the logs
 1.  Run `client:setup` to create a new vault and configure it to be used by default
