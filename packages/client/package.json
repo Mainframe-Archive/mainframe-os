@@ -17,7 +17,9 @@
     "sodium-universal": "^2.0.0"
   },
   "devDependencies": {
+    "@mainframe/app-permissions": "*",
     "@mainframe/rpc-stream": "^0.2.1",
+    "@mainframe/utils-id": "^0.1.0",
     "flow-bin": "^0.73.0"
   }
 }

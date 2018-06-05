@@ -1,4 +1,4 @@
 {
   "presets": ["@babel/preset-react", "@babel/preset-flow"],
-  "plugins": ["transform-class-properties"]
+  "plugins": ["react-native-web", "transform-class-properties"]
 }

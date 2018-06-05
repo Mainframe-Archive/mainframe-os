@@ -8,9 +8,11 @@
     "compile": "electron-webpack",
     "dist": "yarn compile && electron-builder",
     "dist:dir": "yarn dist --dir -c.compression=store -c.mac.identity=null",
-    "build:flow": "flow-copy-source src lib"
+    "build:flow": "flow-copy-source src lib",
+    "test": "flow check"
   },
   "electronWebpack": {
+    "title": "Mainframe",
     "whiteListedModules": [
       "@mainframe/app-permissions",
       "@mainframe/client",
@@ -29,18 +31,18 @@
     "react-art": "^16.4.0",
     "react-dom": "^16.4.0",
     "react-modal": "^3.4.5",
-    "react-native-web": "^0.7.3",
+    "react-native-web": "^0.8.0",
     "source-map-support": "^0.5.5"
   },
   "devDependencies": {
     "@babel/core": "7.0.0-beta.47",
     "@babel/preset-flow": "7.0.0-beta.47",
     "@babel/preset-react": "7.0.0-beta.47",
-    "babel-plugin-react-native-web": "^0.7.3",
+    "babel-plugin-react-native-web": "^0.8.0",
     "electron": "^2.0.2",
     "electron-builder": "^20.15.1",
     "electron-webpack": "^2.1.2",
     "flow-bin": "^0.73.0",
-    "webpack": "^4.10.2"
+    "webpack": "^4.11.0"
   }
 }

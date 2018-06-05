@@ -1,6 +1,6 @@
 // @flow
 
-import { parse } from 'query-string'
+import { parse } from 'querystring'
 import React from 'react'
 import { AppRegistry } from 'react-native-web'
 import './styles.css'
@@ -8,7 +8,7 @@ import './styles.css'
 import Launcher from './launcher/Launcher.js'
 import AppContainer from './apps/AppContainer.js'
 
-const params = parse(document.location.search)
+const params = parse(document.location.search.substr(1)) // Remove leading '?'
 const rootTag = document.getElementById('app')
 
 if (params.type === 'launcher') {

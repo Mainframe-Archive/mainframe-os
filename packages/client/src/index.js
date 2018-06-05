@@ -1,9 +1,30 @@
 // @flow
 
+import type {
+  PermissionCheckResult,
+  PermissionGrant,
+  PermissionKey,
+  PermissionsDetails,
+} from '@mainframe/app-permissions'
 import ipcRPC from '@mainframe/rpc-ipc'
 import type StreamRPC from '@mainframe/rpc-stream'
+import type { ID } from '@mainframe/utils-id'
 
 import { encodeVaultKey } from './utils'
+
+// TODO: extract API types from daemon
+type AppManifest = Object
+type AppUserSettings = Object
+
+type ClientSession = {
+  id: ID,
+  permissions: PermissionsDetails,
+}
+
+type InstalledApp = {
+  manifest: AppManifest,
+  users: Array<ID>,
+}
 
 export default class MainframeClient {
   _rpc: StreamRPC
@@ -34,32 +55,29 @@ export default class MainframeClient {
 
   // Identities
 
-  createUserIdentity(): Promise<{ id: string }> {
+  createUserIdentity(): Promise<{ id: ID }> {
     return this._rpc.request('identity_createUser')
   }
 
-  getOwnUserIdentities(): Promise<{ ids: Array<string> }> {
+  getOwnUserIdentities(): Promise<{ ids: Array<ID> }> {
     return this._rpc.request('identity_getOwnUsers')
   }
 
   // App lifecycle
 
-  getInstalledApps(): Promise<{ apps: Array<Object> }> {
-    // TODO: result type
+  getInstalledApps(): Promise<{ apps: Array<InstalledApp> }> {
     return this._rpc.request('app_getInstalled')
   }
 
-  // TODO: input and result types
   installApp(
-    manifest: Object,
-    userID: string,
-    settings: Object,
-  ): Promise<Object> {
+    manifest: AppManifest,
+    userID: ID,
+    settings: AppUserSettings,
+  ): Promise<ClientSession> {
     return this._rpc.request('app_install', [manifest, userID, settings])
   }
 
-  openApp(appID: string, userID: string): Promise<Object> {
-    // TODO: result type
+  openApp(appID: ID, userID: ID): Promise<ClientSession> {
     return this._rpc.request('app_open', [appID, userID])
   }
 
@@ -70,18 +88,17 @@ export default class MainframeClient {
   // App permissions
 
   checkAppPermission(
-    sessID: string,
-    key: string,
+    sessID: ID,
+    key: PermissionKey,
     input?: ?string,
-  ): Promise<{ result: string }> {
-    // TODO: permission result type
+  ): Promise<{ result: PermissionCheckResult }> {
     return this._rpc.request('app_checkPermission', [sessID, key, input])
   }
 
   setAppPermission(
-    sessID: string,
-    key: string,
-    value: boolean | Object, // TODO: proper type
+    sessID: ID,
+    key: PermissionKey,
+    value: PermissionGrant,
   ): Promise<void> {
     return this._rpc.request('app_setPermission', [sessID, key, value])
   }

@@ -10,17 +10,17 @@ import type { EnvPaths, EnvType } from './types'
 const DEFAULT_KEY = 'default'
 const ENVS_KEY = 'envs'
 
-const createConf = (name: string) => {
+const createConf = (projectName: string) => {
   return new Conf({
     // NOT a security measure - see https://github.com/sindresorhus/conf#encryptionkey
     encryptionKey: 'mainframe',
-    projectName: `mainframe-${name}`,
+    projectName,
   })
 }
 
 // Global config used to store the list of envs
 // Do not use for anything else than envs metadata, actual configs should be env-specific
-const envsConf = createConf('envs')
+const envsConf = createConf('mainframe-envs')
 const envKey = (name: string): string => `${ENVS_KEY}.${name}`
 
 export default class Environment {
