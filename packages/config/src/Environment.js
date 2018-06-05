@@ -98,10 +98,9 @@ export default class Environment {
   _paths: EnvPaths
 
   constructor(name: string) {
-    const namespace = `mainframe-env-${name}`
     this._name = name
-    this._conf = createConf(namespace)
-    this._paths = envPaths(namespace)
+    this._conf = createConf(`env-${name}`)
+    this._paths = envPaths(`mainframe-env-${name}`)
   }
 
   get config(): Conf {
