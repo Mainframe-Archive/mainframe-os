@@ -81,10 +81,13 @@ const formatSettings = (
   settings: $Shape<PermissionsSettings>,
 ): $Shape<PermissionsGrants> => {
   const { HTTPS_REQUEST, ...others } = settings
+  const domains = Object.keys(HTTPS_REQUEST)
+  const granted = domains.filter(k => HTTPS_REQUEST[k])
+  const denied = domains.filter(k => !HTTPS_REQUEST[k])
   return {
     ...others,
     HTTPS_REQUEST: HTTPS_REQUEST
-      ? createHTTPSRequestGrant(Object.keys(HTTPS_REQUEST).filter(Boolean))
+      ? createHTTPSRequestGrant(granted, denied)
       : createHTTPSRequestGrant(),
   }
 }
@@ -112,32 +115,18 @@ export default class PermissionsView extends Component<Props, State> {
   onPressDone = () => {
     const { permissions } = this.props
     const { permissionsSettings } = this.state
-
-    let invalid = false
-    if (permissions.required != null) {
-      const { HTTPS_REQUEST, ...others } = permissions.required
-      // Check expected values for basic keys (boolean)
-      invalid = Object.keys(others).some(
-        key => permissionsSettings[key] !== true,
-      )
-      if (invalid === false && HTTPS_REQUEST != null) {
-        // Check special HTTPS_REQUEST case
-        invalid = HTTPS_REQUEST.some(
-          domain => permissionsSettings.HTTPS_REQUEST[domain] !== true,
-        )
-      }
+    const settings = formatSettings(permissionsSettings)
+    const requiredDomains = permissions.required['HTTPS_REQUEST']
+    if (requiredDomains && requiredDomains.length) {
+      settings['HTTPS_REQUEST'].granted.push(...requiredDomains)
+      delete permissions.required['HTTPS_REQUEST']
     }
-
-    if (invalid) {
-      this.setState({ failedValidation: true })
-    } else {
-      this.props.onSubmit(formatSettings(permissionsSettings))
-    }
+    this.props.onSubmit({ ...settings, ...permissions.required })
   }
 
-  onToggle = (
+  onSetPermissionGrant = (
     key: PermissionKey,
-    granted: PermissionGranted,
+    granted: ?PermissionGranted,
     option?: string,
   ) => {
     this.setState(({ permissionsSettings }) => {
@@ -145,7 +134,11 @@ export default class PermissionsView extends Component<Props, State> {
         if (option == null) {
           return null // Don't update state
         }
-        permissionsSettings.HTTPS_REQUEST[option] = granted
+        if (granted === undefined || granted === null) {
+          delete permissionsSettings.HTTPS_REQUEST[option]
+        } else {
+          permissionsSettings.HTTPS_REQUEST[option] = granted
+        }
       } else {
         permissionsSettings[key] = granted
       }
@@ -154,6 +147,53 @@ export default class PermissionsView extends Component<Props, State> {
   }
 
   // RENDER
+
+  renderRequired() {
+    return (
+      <View style={[styles.toggleItem, styles.selectedToggle]}>
+        <Text style={styles.toggleLabel}>Always</Text>
+      </View>
+    )
+  }
+
+  renderToggle(key: PermissionKey, value: ?boolean, option?: string) {
+    const options = [
+      {
+        label: 'Ask',
+        grant: undefined,
+      },
+      {
+        label: 'Always',
+        grant: true,
+      },
+      {
+        label: 'Never',
+        grant: false,
+      },
+    ]
+    let selectedIndex = 0
+    if (value) {
+      selectedIndex = 1
+    } else if (value === false) {
+      selectedIndex = 2
+    }
+    return (
+      <View style={styles.toggle}>
+        {options.map((o, i) => {
+          const toggleStyles = [styles.toggleItem]
+          if (i === selectedIndex) {
+            toggleStyles.push(styles.selectedToggle)
+          }
+          const onPress = () => this.onSetPermissionGrant(key, o.grant, option)
+          return (
+            <TouchableOpacity key={i} onPress={onPress} style={toggleStyles}>
+              <Text style={styles.toggleLabel}>{o.label}</Text>
+            </TouchableOpacity>
+          )
+        })}
+      </View>
+    )
+  }
 
   renderPermission = (
     key: PermissionKey,
@@ -184,20 +224,13 @@ export default class PermissionsView extends Component<Props, State> {
                   {domain}
                 </Text>
                 <View style={styles.switches}>
-                  <Text style={styles.switchLabel}>YES</Text>
-                  <Switch
-                    value={permissionsSettings.HTTPS_REQUEST[domain] === true}
-                    onValueChange={() =>
-                      this.onToggle('HTTPS_REQUEST', true, domain)
-                    }
-                  />
-                  <Text style={styles.switchLabel}>NO</Text>
-                  <Switch
-                    value={permissionsSettings.HTTPS_REQUEST[domain] === false}
-                    onValueChange={() =>
-                      this.onToggle('HTTPS_REQUEST', false, domain)
-                    }
-                  />
+                  {required
+                    ? this.renderRequired()
+                    : this.renderToggle(
+                        'HTTPS_REQUEST',
+                        permissionsSettings.HTTPS_REQUEST[domain],
+                        domain,
+                      )}
                 </View>
               </View>
             ))}
@@ -211,20 +244,9 @@ export default class PermissionsView extends Component<Props, State> {
     } else {
       options = (
         <View style={styles.switches}>
-          <Text style={styles.switchLabel}>YES</Text>
-          <Switch
-            // $FlowFixMe: missing key in Object
-            value={permissionsSettings[key] === true}
-            onValueChange={() => this.onToggle(key, true)}
-            key={key + 'YES'}
-          />
-          <Text style={styles.switchLabel}>NO</Text>
-          <Switch
-            // $FlowFixMe: missing key in Object
-            value={permissionsSettings[key] === false}
-            onValueChange={() => this.onToggle(key, false)}
-            key={key + 'NO'}
-          />
+          {required
+            ? this.renderRequired()
+            : this.renderToggle(key, permissionsSettings[key])}
         </View>
       )
       rowStyle = styles.permissionRow
@@ -289,8 +311,10 @@ export default class PermissionsView extends Component<Props, State> {
 }
 
 const COLOR_WHITE = '#ffffff'
-const COLOR_LIGHT_GREY = '#f0f0f0'
+const COLOR_LIGHTEST_GREY = '#f0f0f0'
+const COLOR_LIGHT_GREY = '#e5e5e5'
 const COLOR_MF_RED = '#db0b56'
+const COLOR_MF_BLUE = '#102043'
 
 const styles = StyleSheet.create({
   container: {
@@ -304,7 +328,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   permissionRow: {
-    backgroundColor: COLOR_LIGHT_GREY,
+    backgroundColor: COLOR_LIGHTEST_GREY,
     padding: 8,
     marginBottom: 6,
     flexDirection: 'row',
@@ -312,7 +336,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   permissionRowWithOptions: {
-    backgroundColor: COLOR_LIGHT_GREY,
+    backgroundColor: COLOR_LIGHTEST_GREY,
     padding: 8,
     marginBottom: 6,
     flexDirection: 'column',
@@ -354,12 +378,24 @@ const styles = StyleSheet.create({
   switches: {
     flexDirection: 'row',
   },
-  switchLabel: {
-    paddingHorizontal: 5,
-  },
   errorMessage: {
     paddingBottom: 10,
     paddingTop: 5,
     color: COLOR_MF_RED,
+  },
+  toggle: {
+    flexDirection: 'row',
+  },
+  toggleItem: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    backgroundColor: COLOR_LIGHT_GREY,
+  },
+  selectedToggle: {
+    color: COLOR_WHITE,
+    backgroundColor: COLOR_MF_BLUE,
+  },
+  toggleLabel: {
+    fontSize: 11,
   },
 })
