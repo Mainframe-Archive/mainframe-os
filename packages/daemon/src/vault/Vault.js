@@ -9,13 +9,13 @@ import { type ID } from '@mainframe/utils-id'
 
 import {
   type default as App,
-  type AppManifest,
   type AppUserSettings, // eslint-disable-line import/named
   type SessionData,
 } from '../app/App'
 import AppsRepository, {
   type AppsRepositorySerialized, // eslint-disable-line import/named
 } from '../app/AppsRepository'
+import { type AppManifest } from '../app/manifest'
 import type Session from '../app/Session'
 import IdentitiesRepository, {
   type IdentitiesRepositorySerialized, // eslint-disable-line import/named

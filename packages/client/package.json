@@ -18,7 +18,7 @@
   },
   "devDependencies": {
     "@mainframe/app-permissions": "*",
-    "@mainframe/rpc-stream": "^0.2.1",
+    "@mainframe/rpc-stream": "^0.2.2",
     "@mainframe/utils-id": "^0.1.0",
     "flow-bin": "^0.73.0"
   }

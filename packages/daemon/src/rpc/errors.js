@@ -1,28 +1,7 @@
 // @flow
 
 import type { PermissionCheckResult } from '@mainframe/app-permissions'
-import ExtendableError from 'es6-error'
-
-export type ErrorObject = {
-  code: number,
-  message: string,
-}
-
-export class RPCError extends ExtendableError {
-  code: number
-  constructor(code: number, message: string) {
-    super(message)
-    this.code = code
-  }
-}
-
-// JSON-RPC spec
-
-export const parseError = () => new RPCError(-32700, 'Parse Error')
-
-export const methodNotFound = () => new RPCError(-32601, 'Method not found')
-
-export const invalidRequest = () => new RPCError(-32600, 'Invalid Request')
+import RPCError from '@mainframe/rpc-error'
 
 // Mainframe protocol
 

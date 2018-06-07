@@ -1,11 +1,14 @@
 // @flow
 
+import {
+  encodeBase64,
+  decodeBase64,
+  type base64, // eslint-disable-line import/named
+} from '@mainframe/utils-base64'
 // eslint-disable-next-line import/named
 import { type KeyPair } from '@mainframe/utils-crypto'
 // eslint-disable-next-line import/named
 import { type ID } from '@mainframe/utils-id'
-
-import { decodeTyped, encodeTyped, fromMFID, toMFID } from '../utils'
 
 import Identity from './Identity'
 import Keychain, { type KeychainSerialized } from './Keychain'
@@ -33,22 +36,17 @@ export default class AppIdentity extends Identity {
     keychain: Keychain.toJSON(identity.keychain),
   })
 
-  static fromMFID = (id: string): AppIdentity => {
-    const parts = fromMFID(id)
-    if (parts[0] === 'app' && parts[1] === 'sign' && parts.length === 3) {
-      const keychain = new Keychain()
-      keychain.addPublicSign(decodeTyped(parts[3]))
-      return new AppIdentity(keychain)
-    } else {
-      throw new Error('Invalid app MFID')
-    }
+  static fromBase64 = (encoded: base64): AppIdentity => {
+    const keychain = new Keychain()
+    keychain.addPublicSign(decodeBase64(encoded))
+    return new AppIdentity(keychain)
   }
 
-  static toMFID = (identity: AppIdentity, signKeyID?: ID): string => {
+  static toBase64 = (identity: AppIdentity, signKeyID?: ID): base64 => {
     const sign = identity.getPairSign(signKeyID)
     if (sign == null) {
       throw new Error('No sign key')
     }
-    return toMFID('app', 'sign', encodeTyped('base64', sign.publicKey))
+    return encodeBase64(sign.publicKey)
   }
 }

@@ -9,7 +9,12 @@ import type {
 // eslint-disable-next-line import/named
 import { idType, type ID } from '@mainframe/utils-id'
 
-import type { AppManifest, AppUserSettings } from '../../app/App'
+import {
+  validateManifest,
+  type AppManifest,
+  type ManifestValidationResult,
+} from '../../app/manifest'
+import type { AppUserSettings } from '../../app/App'
 
 import { clientError, sessionError } from '../errors'
 import type RequestContext from '../RequestContext'
@@ -41,6 +46,7 @@ export const close = (ctx: RequestContext, [sessID]: [ID] = []): void => {
   ctx.openVault.closeApp(sessID)
 }
 
+// TODO: replace by list with filters
 export const getInstalled = (
   ctx: RequestContext,
 ): { apps: { [appID: string]: AppInstalled } } => {
@@ -103,3 +109,10 @@ export const setPermission = async (
     await ctx.openVault.save()
   }
 }
+
+export const validate = (
+  ctx: RequestContext,
+  [manifest]: [AppManifest] = [],
+): { result: ManifestValidationResult } => ({
+  result: validateManifest(manifest),
+})
