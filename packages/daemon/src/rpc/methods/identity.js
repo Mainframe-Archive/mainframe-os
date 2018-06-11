@@ -1,6 +1,6 @@
 // @flow
 
-import type { ID } from '@mainframe/utils-id'
+import { idType, type ID } from '@mainframe/utils-id'
 
 import type RequestContext from '../RequestContext'
 
@@ -12,7 +12,7 @@ type OwnId = {
 export const createUser = async (
   ctx: RequestContext,
   [data]: [Object] = [],
-): { id: ID } => {
+): Promise<{ id: ID }> => {
   const id = ctx.openVault.identities.createOwnUser(data)
   await ctx.openVault.save()
   return { id }
@@ -21,9 +21,10 @@ export const createUser = async (
 export const getOwnUsers = (ctx: RequestContext): { ids: Array<OwnId> } => {
   return {
     ids: Object.keys(ctx.openVault.identities.ownUsers).reduce((acc, id) => {
-      const user = ctx.openVault.identities.ownUsers[id]
+      const uID = idType(id)
+      const user = ctx.openVault.identities.ownUsers[uID]
       acc.push({
-        id,
+        id: uID,
         data: user.data || {},
       })
       return acc

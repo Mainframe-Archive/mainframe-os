@@ -53,8 +53,11 @@ const fromAppIdentity = mapObject(AppIdentity.toJSON)
 const fromAuthorIdentity = mapObject(AuthorIdentity.toJSON)
 const fromUserIdentity = mapObject(UserIdentity.toJSON)
 const fromGroup = group => ({
+  // $FlowFixMe: mapping type
   apps: fromAppIdentity(group.apps),
+  // $FlowFixMe: mapping type
   authors: fromAuthorIdentity(group.authors),
+  // $FlowFixMe: mapping type
   users: fromUserIdentity(group.users),
 })
 
@@ -62,8 +65,11 @@ const toAppIdentity = mapObject(AppIdentity.fromJSON)
 const toAuthorIdentity = mapObject(AuthorIdentity.fromJSON)
 const toUserIdentity = mapObject(UserIdentity.fromJSON)
 const toGroup = group => ({
+  // $FlowFixMe: mapping type
   apps: toAppIdentity(group.apps),
+  // $FlowFixMe: mapping type
   authors: toAuthorIdentity(group.authors),
+  // $FlowFixMe: mapping type
   users: toUserIdentity(group.users),
 })
 
@@ -81,7 +87,7 @@ export default class IdentitiesRepository {
       // $FlowFixMe: mapper type
       own: serialized.own ? toGroup(serialized.own) : {},
       // $FlowFixMe: mapper type
-      other: serialized.other ? toGroup(serialized.others) : {},
+      other: serialized.other ? toGroup(serialized.other) : {},
     })
   }
 
@@ -147,6 +153,7 @@ export default class IdentitiesRepository {
   addIdentity(ownership: ownership, domain: domain, identity: Identity): ID {
     const id = uniqueID()
     this._refs[id] = { ownership, domain }
+    // $FlowFixMe: ID types
     this._identities[ownership][domain][id] = identity
     return id
   }

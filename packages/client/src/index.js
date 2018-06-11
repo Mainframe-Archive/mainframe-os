@@ -26,6 +26,11 @@ type InstalledApp = {
   users: Array<ID>,
 }
 
+type OwnUser = {
+  id: ID,
+  data: Object,
+}
+
 export default class MainframeClient {
   _rpc: StreamRPC
 
@@ -59,7 +64,7 @@ export default class MainframeClient {
     return this._rpc.request('identity_createUser', [data])
   }
 
-  getOwnUserIdentities(): Promise<{ ids: Array<ID> }> {
+  getOwnUserIdentities(): Promise<{ ids: Array<OwnUser> }> {
     return this._rpc.request('identity_getOwnUsers')
   }
 

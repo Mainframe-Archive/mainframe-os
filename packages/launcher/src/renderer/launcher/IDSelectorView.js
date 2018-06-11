@@ -24,13 +24,15 @@ type Props = {
 }
 
 type State = {
-  newName?: string,
+  newName: string,
   ids: Array<OwnId>,
+  showCreateIdForm?: boolean,
 }
 
 export default class IDSelectorView extends Component<Props, State> {
   state = {
     ids: [],
+    newName: '',
   }
 
   componentDidMount() {
@@ -98,7 +100,11 @@ export default class IDSelectorView extends Component<Props, State> {
               value={this.state.newName}
               placeholder="name"
             />
-            <Button onPress={this.createNewId} title="Create" />
+            <Button
+              onPress={this.createNewId}
+              title="Create"
+              disabled={!this.state.newName}
+            />
           </View>
         </View>
       </View>

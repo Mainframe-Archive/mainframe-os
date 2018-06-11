@@ -140,7 +140,11 @@ export default class PermissionsView extends Component<Props, State> {
           permissionsSettings.HTTPS_REQUEST[option] = granted
         }
       } else {
-        permissionsSettings[key] = granted
+        if (granted === undefined || granted === null) {
+          delete permissionsSettings[key]
+        } else {
+          permissionsSettings[key] = granted
+        }
       }
       return { permissionsSettings }
     })
@@ -246,7 +250,8 @@ export default class PermissionsView extends Component<Props, State> {
         <View style={styles.switches}>
           {required
             ? this.renderRequired()
-            : this.renderToggle(key, permissionsSettings[key])}
+            : // $FlowFixMe
+              this.renderToggle(key, permissionsSettings[key])}
         </View>
       )
       rowStyle = styles.permissionRow
