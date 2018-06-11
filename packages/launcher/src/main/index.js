@@ -6,7 +6,7 @@ import { startDaemon } from '@mainframe/toolbox'
 import { app, BrowserWindow, ipcMain } from 'electron'
 import betterIpc from 'electron-better-ipc'
 import path from 'path'
-import { stringify } from 'query-string'
+import { stringify } from 'querystring'
 import url from 'url'
 
 const PORT = process.env.ELECTRON_WEBPACK_WDS_PORT || ''

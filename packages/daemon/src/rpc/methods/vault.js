@@ -14,7 +14,6 @@ export const create = async (
 ) => {
   try {
     await ctx.vaults.create(ctx.socket, path, decodeBase64(key))
-    return 'OK'
   } catch (err) {
     // TODO: different error code depending on actual error
     throw vaultError(err.message)
@@ -27,7 +26,6 @@ export const open = async (
 ) => {
   try {
     await ctx.vaults.open(ctx.socket, path, decodeBase64(key))
-    return 'OK'
   } catch (err) {
     // TODO: different error code depending on actual error
     throw vaultError(err.message)
