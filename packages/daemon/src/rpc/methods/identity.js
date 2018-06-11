@@ -1,5 +1,5 @@
 // @flow
-
+// eslint-disable-next-line import/named
 import { idType, type ID } from '@mainframe/utils-id'
 
 import type RequestContext from '../RequestContext'

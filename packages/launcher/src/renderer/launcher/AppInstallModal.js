@@ -223,15 +223,4 @@ const styles = StyleSheet.create({
   description: {
     paddingVertical: 15,
   },
-  idRow: {
-    padding: 10,
-    borderRadius: 3,
-    backgroundColor: COLOR_GREY,
-    marginTop: 10,
-  },
-  newId: {
-    borderWidth: 1,
-    borderColor: COLOR_GREY,
-    backgroundColor: COLOR_WHITE,
-  },
 })
