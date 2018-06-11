@@ -52,20 +52,20 @@ type reference = { domain: domain, ownership: ownership }
 const fromAppIdentity = mapObject(AppIdentity.toJSON)
 const fromAuthorIdentity = mapObject(AuthorIdentity.toJSON)
 const fromUserIdentity = mapObject(UserIdentity.toJSON)
-const fromGroup = mapObject(group => ({
+const fromGroup = group => ({
   apps: fromAppIdentity(group.apps),
   authors: fromAuthorIdentity(group.authors),
   users: fromUserIdentity(group.users),
-}))
+})
 
 const toAppIdentity = mapObject(AppIdentity.fromJSON)
 const toAuthorIdentity = mapObject(AuthorIdentity.fromJSON)
 const toUserIdentity = mapObject(UserIdentity.fromJSON)
-const toGroup = mapObject(group => ({
+const toGroup = group => ({
   apps: toAppIdentity(group.apps),
   authors: toAuthorIdentity(group.authors),
   users: toUserIdentity(group.users),
-}))
+})
 
 const createGroup = (params: IdentitiesRepositoryGroupParams = {}) => ({
   apps: params.apps == null ? {} : params.apps,
@@ -147,7 +147,7 @@ export default class IdentitiesRepository {
   addIdentity(ownership: ownership, domain: domain, identity: Identity): ID {
     const id = uniqueID()
     this._refs[id] = { ownership, domain }
-    this._identities[ownership][domain] = identity
+    this._identities[ownership][domain][id] = identity
     return id
   }
 
@@ -159,8 +159,8 @@ export default class IdentitiesRepository {
     return this.addIdentity('own', 'authors', AuthorIdentity.create(keyPair))
   }
 
-  createOwnUser(keychain?: Keychain) {
-    return this.addIdentity('own', 'users', UserIdentity.create(keychain))
+  createOwnUser(data: Object, keychain?: Keychain) {
+    return this.addIdentity('own', 'users', UserIdentity.create(data, keychain))
   }
 
   createOtherApp(keyPair?: KeyPair) {

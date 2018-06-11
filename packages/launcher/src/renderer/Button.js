@@ -6,32 +6,29 @@ import { TouchableOpacity, StyleSheet, Text } from 'react-native-web'
 import { COLORS } from './styles'
 
 type Props = {
-  onPress: () => void,
+  onPress: () => any,
   title: string,
 }
 
 export default class AppInstallModal extends Component<Props> {
-  onPressImportManifest = () => {
-    console.log('import')
-  }
-
   render() {
     return (
-      <TouchableOpacity style={styles.installApp} onPress={this.props.onPress}>
-        <Text style={styles.installAppText}>{this.props.title}</Text>
+      <TouchableOpacity style={styles.button} onPress={this.props.onPress}>
+        <Text style={styles.label}>{this.props.title}</Text>
       </TouchableOpacity>
     )
   }
 }
 
 const styles = StyleSheet.create({
-  installApp: {
-    padding: 10,
+  button: {
+    paddingVertical: 10,
     backgroundColor: COLORS.red,
-    width: 180,
+    paddingHorizontal: 30,
     borderRadius: 3,
+    maxWidth: 200,
   },
-  installAppText: {
+  label: {
     textAlign: 'center',
     color: COLORS.white,
   },

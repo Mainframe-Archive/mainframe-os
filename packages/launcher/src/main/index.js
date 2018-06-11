@@ -43,8 +43,10 @@ type ClientResponse = {
 }
 
 const appWindows: AppWindows = {}
-const requestChannel = 'ipc-request-channel'
-const responseChannel = 'ipc-response-channel'
+const sandboxRequestChannel = 'ipc-sandbox-request-channel'
+const sandboxResponseChannel = 'ipc-sandbox-response-channel'
+const launcherRequestChannel = 'ipc-launcher-client-request-channel'
+const launcherResponseChannel = 'ipc-launcher-client-response-channel'
 
 const newWindow = params => {
   const window = new BrowserWindow({ width: 800, height: 600 })
@@ -151,12 +153,34 @@ ipcMain.on('launchApp', (e, appId) => {
 
 // IPC COMMS
 
-betterIpc.answerRenderer('client-request', async request => {
-  const res = handleRequest(request)
-  return res
+const sendIpcResponse = (sender, channel, response) => {
+  const window = BrowserWindow.fromWebContents(sender)
+  const send = (channel, response) => {
+    if (!(window && window.isDestroyed())) {
+      sender.send(channel, response)
+    }
+  }
+  send(channel, response)
+}
+
+// Answer Launcher
+
+ipcMain.on(launcherRequestChannel, async (event, request) => {
+  const res = await handleRequest(request)
+  sendIpcResponse(event.sender, launcherResponseChannel, res)
 })
 
-const handleRequest = (request: Object): ClientResponse => {
+// Answer App
+
+ipcMain.on(sandboxRequestChannel, async (event, request) => {
+  const res = await handleRequest(request)
+  sendIpcResponse(event.sender, sandboxResponseChannel, res)
+})
+
+// Client request handler
+
+const handleRequest = async (request: Object): Promise<ClientResponse> => {
+  console.log('request: ', request)
   if (request == null || !request || !request.data) {
     return {
       error: {
@@ -171,7 +195,7 @@ const handleRequest = (request: Object): ClientResponse => {
     const args = request.data.args || []
     try {
       // $FlowFixMe: indexer property
-      const res = client[request.data.method](...args)
+      const res = await client[request.data.method](...args)
       return {
         id: request.id,
         result: res,
@@ -191,14 +215,3 @@ const handleRequest = (request: Object): ClientResponse => {
     id: request.id,
   }
 }
-
-ipcMain.on(requestChannel, async (event, request) => {
-  const window = BrowserWindow.fromWebContents(event.sender)
-  const send = (channel, response) => {
-    if (!(window && window.isDestroyed())) {
-      event.sender.send(channel, response)
-    }
-  }
-  const res = handleRequest(request)
-  send(responseChannel, res)
-})

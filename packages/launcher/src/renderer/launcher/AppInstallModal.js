@@ -17,9 +17,10 @@ import {
 } from 'react-native-web'
 import ReactModal from 'react-modal'
 
-import { callMainClient } from '../electronIpc.js'
+import { client } from '../electronIpc.js'
 import Button from '../Button'
 import PermissionsView, { type PermissionOptions } from './PermissionsView'
+import IDSelectorView from './IDSelectorView'
 
 type Props = {
   onRequestClose: () => void,
@@ -102,8 +103,6 @@ export default class AppInstallModal extends Component<Props, State> {
     this.setState({ userId: id }, this.saveApp)
   }
 
-  createNewId = () => {}
-
   saveApp = async () => {
     // $FlowFixMe: userPermissions key in state
     const { manifest, userPermissions } = this.state
@@ -118,7 +117,7 @@ export default class AppInstallModal extends Component<Props, State> {
     }
     console.log('saving app: ', app)
     try {
-      const res = await callMainClient.createApp(app)
+      const res = await client.createApp(app)
       console.log('res: ', res)
     } catch (err) {
       console.log('err:', err)
@@ -177,40 +176,9 @@ export default class AppInstallModal extends Component<Props, State> {
   }
 
   renderSetId() {
-    const header = `Select User ID`
-    // TODO: fetch from daemon
-    const ids = [
-      {
-        id: 'jsmith',
-        name: 'James Smith',
-      },
-      {
-        id: 'mranon',
-        name: 'Mr Anon',
-      },
-    ]
-    const rowRender = (name, style, handler) => {
-      return (
-        <TouchableOpacity onPress={handler} style={style} key={name}>
-          <Text>{name}</Text>
-        </TouchableOpacity>
-      )
-    }
-    const idRows = ids.map((id, index) => {
-      const handler = () => this.onSelectId(id.id)
-      return rowRender(id.name, styles.idRow, handler)
-    })
-    const createIdHandler = this.createNewId()
-    const createNewRow = rowRender(
-      '+ Create new ID',
-      [styles.idRow, styles.newId],
-      createIdHandler,
-    )
     return (
       <View style={styles.container}>
-        <Text style={styles.header}>{header}</Text>
-        {idRows}
-        {createNewRow}
+        <IDSelectorView onSelectId={this.onSelectId} />
       </View>
     )
   }
