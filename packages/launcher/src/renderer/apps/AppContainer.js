@@ -10,12 +10,14 @@ declare var __static: string
 export default class App extends Component<{ appId: string }> {
   render() {
     const { appId } = this.props
+    // TODO Use path provided by dameon
+    const demoAppId = 'sandbox'
     const appUrl = url.format({
       pathname: path.join(
         __static,
         'applications',
-        appId,
-        `${appId}.asar`,
+        demoAppId,
+        `${demoAppId}.asar`,
         `index.html`,
       ),
       protocol: 'file:',

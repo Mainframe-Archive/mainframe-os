@@ -83,7 +83,7 @@ const setupClient = async () => {
   client = new Client(daemonConfig.socketPath)
   // Simple check for API call, not proper versioning logic
   const version = await client.apiVersion()
-  if (version !== 0) {
+  if (version !== 0.1) {
     throw new Error('Unexpected API version')
   }
 }

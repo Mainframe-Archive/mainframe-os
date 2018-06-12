@@ -6,7 +6,7 @@ import * as vault from './vault'
 import * as web3 from './web3'
 
 export default {
-  api_version: () => 0,
+  api_version: () => 0.1,
   app_checkPermission: app.checkPermission,
   app_close: app.close,
   app_install: app.install,
