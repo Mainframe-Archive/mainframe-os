@@ -3,6 +3,7 @@
 import { ipcRenderer as ipc, remote } from 'electron'
 import React, { Component } from 'react'
 import { View, TouchableOpacity, StyleSheet, Text } from 'react-native-web'
+import { client } from '../electronIpc.js'
 
 import AppInstallModal from './AppInstallModal'
 import Button from '../Button'
@@ -12,11 +13,20 @@ const path = remote.require('path')
 
 type State = {
   showAppInstallModal: boolean,
+  installedApps: Array<Object>,
 }
 
 export default class App extends Component<{}, State> {
   state = {
     showAppInstallModal: false,
+    installedApps: [],
+  }
+
+  async componentDidMount() {
+    const res = await client.getInstalledApps()
+    this.setState({
+      installedApps: res.apps,
+    })
   }
 
   // HANDLERS
@@ -36,33 +46,21 @@ export default class App extends Component<{}, State> {
   // RENDER
 
   render() {
-    // TODO: Temporary applications directory for dev
-    const appsPath = path.join(__dirname, '../../../static/', 'applications')
-    const files = fs.readdirSync(appsPath)
-    const appRows = []
+    const appRows = this.state.installedApps.map(app => {
+      const manifest = app.manifest
 
-    files.forEach(file => {
-      const appPath = path.join(appsPath, file)
-      const isDir = fs.lstatSync(appPath).isDirectory()
-      if (isDir) {
-        const manifestPath = path.join(appPath, 'manifest.json')
-        if (fs.existsSync(manifestPath)) {
-          const manifest = JSON.parse(fs.readFileSync(manifestPath))
-
-          const onClick = () => {
-            ipc.send('launchApp', manifest.id)
-          }
-
-          appRows.push(
-            <TouchableOpacity
-              onPress={onClick}
-              style={styles.appRow}
-              key={manifest.id}>
-              <Text>{manifest.name}</Text>
-            </TouchableOpacity>,
-          )
-        }
+      const onClick = () => {
+        ipc.send('launchApp', app.appID)
       }
+
+      return (
+        <TouchableOpacity
+          onPress={onClick}
+          style={styles.appRow}
+          key={app.appID}>
+          <Text>{app.manifest.name}</Text>
+        </TouchableOpacity>
+      )
     })
 
     const installModal = this.state.showAppInstallModal ? (

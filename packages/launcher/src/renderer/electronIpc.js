@@ -3,12 +3,6 @@
 import { ipcRenderer } from 'electron'
 import type { ID } from '@mainframe/utils-id'
 
-type App = {
-  userID: ID,
-  manifest: Object,
-  settings: Object,
-}
-
 const generateId = () =>
   Math.random()
     .toString(36)
@@ -44,6 +38,7 @@ const callMainClient = (method, args) =>
   })
 
 export const client = {
+  getInstalledApps: () => callMainClient('getInstalledApps'),
   installApp: (manifest: Object, userId: ID, settings: Object) =>
     callMainClient('installApp', [manifest, userId, settings]),
   createUserIdentity: (identity: Object) =>

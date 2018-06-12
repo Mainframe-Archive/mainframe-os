@@ -43,16 +43,16 @@ export const close = (ctx: RequestContext, [sessID]: [ID] = []): void => {
 
 export const getInstalled = (
   ctx: RequestContext,
-): { apps: { [appID: string]: AppInstalled } } => {
+): { apps: Array<AppInstalled> } => {
   const { apps } = ctx.openVault.apps
-  const installedApps = Object.keys(apps).reduce((acc, appID) => {
+  const installedApps = Object.keys(apps).map(appID => {
     const app = apps[idType(appID)]
-    acc[appID] = {
+    return {
+      appID,
       manifest: app.manifest,
       users: app.users,
     }
-    return acc
-  }, {})
+  })
   return { apps: installedApps }
 }
 
