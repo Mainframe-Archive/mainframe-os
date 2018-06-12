@@ -153,7 +153,7 @@ export default class IdentitiesRepository {
   addIdentity(ownership: ownership, domain: domain, identity: Identity): ID {
     const id = uniqueID()
     this._refs[id] = { ownership, domain }
-    // $FlowFixMe: ID types
+    // $FlowFixMe: polymorphic type
     this._identities[ownership][domain][id] = identity
     return id
   }

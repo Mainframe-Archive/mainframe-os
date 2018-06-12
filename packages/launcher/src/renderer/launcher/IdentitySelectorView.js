@@ -13,7 +13,7 @@ import type { ID } from '@mainframe/utils-id'
 import { client } from '../electronIpc.js'
 import Button from '../Button'
 
-type OwnId = {
+type User = {
   id: ID,
   data: {
     name: string,
@@ -26,34 +26,38 @@ type Props = {
 
 type State = {
   newName: string,
-  ids: Array<OwnId>,
+  users: Array<User>,
   showCreateIdForm?: boolean,
 }
 
-export default class IDSelectorView extends Component<Props, State> {
+export default class IdentitySelectorView extends Component<Props, State> {
   state = {
-    ids: [],
+    users: [],
     newName: '',
   }
 
   componentDidMount() {
-    this.getOwnIds()
+    this.getOwnUserIds()
   }
 
-  async getOwnIds() {
+  async getOwnUserIds() {
     try {
       const res = await client.getOwnUserIdentities()
-      this.setState({ ids: res.ids })
+      this.setState({ users: res.users })
     } catch (err) {
       // TODO: Handle error
       console.warn(err)
     }
   }
 
+  onPressCreateId = () => {
+    this.createNewId()
+  }
+
   createNewId = async () => {
     try {
       const res = await client.createUserIdentity({ name: this.state.newName })
-      this.getOwnIds()
+      this.getOwnUserIds()
       this.setState({ newName: '' })
     } catch (err) {
       // TODO: Handle error
@@ -78,9 +82,9 @@ export default class IDSelectorView extends Component<Props, State> {
       )
     }
 
-    const idRows = this.state.ids.map((id, index) => {
-      const handler = () => this.props.onSelectId(id.id)
-      return rowRender(id.id, id.data.name, handler)
+    const idRows = this.state.users.map((user, index) => {
+      const handler = () => this.props.onSelectId(user.id)
+      return rowRender(user.id, user.data.name, handler)
     })
 
     const newIdForm = this.state.showCreateIdForm ? (
@@ -102,7 +106,7 @@ export default class IDSelectorView extends Component<Props, State> {
               placeholder="name"
             />
             <Button
-              onPress={this.createNewId}
+              onPress={this.onPressCreateId}
               title="Create"
               disabled={!this.state.newName}
             />

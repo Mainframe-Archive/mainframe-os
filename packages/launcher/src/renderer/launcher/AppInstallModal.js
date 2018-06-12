@@ -21,7 +21,7 @@ import type { ID } from '@mainframe/utils-id'
 import { client } from '../electronIpc.js'
 import Button from '../Button'
 import PermissionsView, { type PermissionOptions } from './PermissionsView'
-import IDSelectorView from './IDSelectorView'
+import IdentitySelectorView from './IdentitySelectorView'
 
 type Props = {
   onRequestClose: () => void,
@@ -173,7 +173,7 @@ export default class AppInstallModal extends Component<Props, State> {
   renderSetId() {
     return (
       <View style={styles.container}>
-        <IDSelectorView onSelectId={this.onSelectId} />
+        <IdentitySelectorView onSelectId={this.onSelectId} />
       </View>
     )
   }

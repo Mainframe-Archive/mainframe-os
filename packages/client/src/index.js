@@ -60,11 +60,11 @@ export default class MainframeClient {
 
   // Identities
 
-  createUserIdentity(data: Object): Promise<{ id: ID }> {
+  createUserIdentity(data?: Object = {}): Promise<{ id: ID }> {
     return this._rpc.request('identity_createUser', [data])
   }
 
-  getOwnUserIdentities(): Promise<{ ids: Array<OwnUser> }> {
+  getOwnUserIdentities(): Promise<{ users: Array<OwnUser> }> {
     return this._rpc.request('identity_getOwnUsers')
   }
 

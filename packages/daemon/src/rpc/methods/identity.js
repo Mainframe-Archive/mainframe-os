@@ -18,16 +18,11 @@ export const createUser = async (
   return { id }
 }
 
-export const getOwnUsers = (ctx: RequestContext): { ids: Array<OwnId> } => {
-  return {
-    ids: Object.keys(ctx.openVault.identities.ownUsers).reduce((acc, id) => {
-      const uID = idType(id)
-      const user = ctx.openVault.identities.ownUsers[uID]
-      acc.push({
-        id: uID,
-        data: user.data || {},
-      })
-      return acc
-    }, []),
-  }
+export const getOwnUsers = (ctx: RequestContext): { users: Array<OwnId> } => {
+  const { ownUsers } = ctx.openVault.identities
+  const users = Object.keys(ownUsers).map(id => {
+    const uID = idType(id)
+    return { id: uID, data: ownUsers[uID].data }
+  })
+  return { users }
 }

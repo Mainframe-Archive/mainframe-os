@@ -6,7 +6,7 @@ import { TouchableOpacity, StyleSheet, Text } from 'react-native-web'
 import { COLORS } from './styles'
 
 type Props = {
-  onPress: () => any,
+  onPress: () => void,
   title: string,
   disabled?: boolean,
 }

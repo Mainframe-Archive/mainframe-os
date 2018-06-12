@@ -134,13 +134,13 @@ export default class PermissionsView extends Component<Props, State> {
         if (option == null) {
           return null // Don't update state
         }
-        if (granted === undefined || granted === null) {
+        if (granted == null) {
           delete permissionsSettings.HTTPS_REQUEST[option]
         } else {
           permissionsSettings.HTTPS_REQUEST[option] = granted
         }
       } else {
-        if (granted === undefined || granted === null) {
+        if (granted == null) {
           delete permissionsSettings[key]
         } else {
           permissionsSettings[key] = granted
