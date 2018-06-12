@@ -8,19 +8,20 @@ import {
   Text,
   TextInput,
 } from 'react-native-web'
+import type { ID } from '@mainframe/utils-id'
 
 import { client } from '../electronIpc.js'
 import Button from '../Button'
 
 type OwnId = {
-  id: string,
+  id: ID,
   data: {
     name: string,
   },
 }
 
 type Props = {
-  onSelectId: (id: string) => void,
+  onSelectId: (id: ID) => void,
 }
 
 type State = {

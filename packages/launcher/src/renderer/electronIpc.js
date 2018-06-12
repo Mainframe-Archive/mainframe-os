@@ -1,6 +1,13 @@
 // @flow
 
-const { ipcRenderer } = require('electron')
+import { ipcRenderer } from 'electron'
+import type { ID } from '@mainframe/utils-id'
+
+type App = {
+  userID: ID,
+  manifest: Object,
+  settings: Object,
+}
 
 const generateId = () =>
   Math.random()
@@ -37,7 +44,8 @@ const callMainClient = (method, args) =>
   })
 
 export const client = {
-  createApp: (app: Object) => callMainClient('createApp', [app]),
+  installApp: (manifest: Object, userId: ID, settings: Object) =>
+    callMainClient('installApp', [manifest, userId, settings]),
   createUserIdentity: (identity: Object) =>
     callMainClient('createUserIdentity', [identity]),
   getOwnUserIdentities: () => callMainClient('getOwnUserIdentities'),
