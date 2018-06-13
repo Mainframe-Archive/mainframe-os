@@ -43,16 +43,16 @@ export const close = (ctx: RequestContext, [sessID]: [ID] = []): void => {
 
 export const getInstalled = (
   ctx: RequestContext,
-): { apps: { [appID: string]: AppInstalled } } => {
+): { apps: Array<AppInstalled> } => {
   const { apps } = ctx.openVault.apps
-  const installedApps = Object.keys(apps).reduce((acc, appID) => {
+  const installedApps = Object.keys(apps).map(appID => {
     const app = apps[idType(appID)]
-    acc[appID] = {
+    return {
+      appID,
       manifest: app.manifest,
       users: app.users,
     }
-    return acc
-  }, {})
+  })
   return { apps: installedApps }
 }
 
@@ -66,6 +66,14 @@ export const install = async (
     id: session.sessID,
     permissions: session.permissions,
   }
+}
+
+export const remove = async (
+  ctx: RequestContext,
+  [appID]: [ID] = [],
+): Promise<void> => {
+  ctx.openVault.removeApp(appID)
+  await ctx.openVault.save()
 }
 
 export const open = (

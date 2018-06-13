@@ -3,6 +3,8 @@
 import { ipcRenderer as ipc, remote } from 'electron'
 import React, { Component } from 'react'
 import { View, TouchableOpacity, StyleSheet, Text } from 'react-native-web'
+import { client } from '../electronIpc.js'
+import type { ID } from '@mainframe/utils-id'
 
 import AppInstallModal from './AppInstallModal'
 import Button from '../Button'
@@ -12,11 +14,24 @@ const path = remote.require('path')
 
 type State = {
   showAppInstallModal: boolean,
+  installedApps: Array<Object>,
 }
 
 export default class App extends Component<{}, State> {
   state = {
     showAppInstallModal: false,
+    installedApps: [],
+  }
+
+  componentDidMount() {
+    this.getInstalledApps()
+  }
+
+  async getInstalledApps() {
+    const res = await client.getInstalledApps()
+    this.setState({
+      installedApps: res.apps,
+    })
   }
 
   // HANDLERS
@@ -33,40 +48,52 @@ export default class App extends Component<{}, State> {
     })
   }
 
+  onInstallComplete = (appID: ID) => {
+    this.onCloseInstallModal()
+    this.getInstalledApps()
+  }
+
   // RENDER
 
   render() {
-    // TODO: Temporary applications directory for dev
-    const appsPath = path.join(__dirname, '../../../static/', 'applications')
-    const files = fs.readdirSync(appsPath)
-    const appRows = []
+    const appRows = this.state.installedApps.map(app => {
+      const manifest = app.manifest
 
-    files.forEach(file => {
-      const appPath = path.join(appsPath, file)
-      const isDir = fs.lstatSync(appPath).isDirectory()
-      if (isDir) {
-        const manifestPath = path.join(appPath, 'manifest.json')
-        if (fs.existsSync(manifestPath)) {
-          const manifest = JSON.parse(fs.readFileSync(manifestPath))
-
-          const onClick = () => {
-            ipc.send('launchApp', manifest.id)
-          }
-
-          appRows.push(
-            <TouchableOpacity
-              onPress={onClick}
-              style={styles.appRow}
-              key={manifest.id}>
-              <Text>{manifest.name}</Text>
-            </TouchableOpacity>,
-          )
-        }
+      const onClick = () => {
+        ipc.send('launchApp', app.appID)
       }
+
+      const onClickDelete = () => {
+        client.removeApp(app.appID)
+        this.getInstalledApps()
+      }
+
+      return (
+        <View key={app.appID} style={styles.appRow}>
+          <View style={styles.appIcon} />
+          <View style={styles.appInfo}>
+            <TouchableOpacity onPress={onClick} style={styles.openApp}>
+              <Text style={styles.appName}>{app.manifest.name}</Text>
+              <Text style={styles.appUsers}>
+                {`Identities: ${app.users.join()}`}
+              </Text>
+            </TouchableOpacity>
+          </View>
+          <TouchableOpacity
+            onPress={onClickDelete}
+            style={styles.deleteApp}
+            key={app.appID}>
+            <Text style={styles.deleteLabel}>Delete</Text>
+          </TouchableOpacity>
+        </View>
+      )
     })
 
     const installModal = this.state.showAppInstallModal ? (
-      <AppInstallModal onRequestClose={this.onCloseInstallModal} />
+      <AppInstallModal
+        onRequestClose={this.onCloseInstallModal}
+        onInstallComplete={this.onInstallComplete}
+      />
     ) : null
 
     return (
@@ -80,7 +107,9 @@ export default class App extends Component<{}, State> {
   }
 }
 
-const COLOR_GREY = '#f5f5f5'
+const COLOR_LIGHT_GREY = '#e8e8e8'
+const COLOR_GREY_MED = '#818181'
+const COLOR_WHITE = '#ffffff'
 
 const styles = StyleSheet.create({
   container: {
@@ -96,6 +125,41 @@ const styles = StyleSheet.create({
   appRow: {
     padding: 10,
     marginBottom: 10,
-    backgroundColor: COLOR_GREY,
+    borderColor: COLOR_LIGHT_GREY,
+    borderWidth: 1,
+    flexDirection: 'row',
+    borderRadius: 3,
+  },
+  appIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: COLOR_LIGHT_GREY,
+  },
+  openApp: {
+    flex: 1,
+  },
+  deleteApp: {
+    backgroundColor: COLOR_GREY_MED,
+    color: COLOR_WHITE,
+    borderRadius: 2,
+    height: 22,
+    justifyContent: 'center',
+    paddingHorizontal: 10,
+  },
+  deleteLabel: {
+    fontSize: 10,
+  },
+  appInfo: {
+    marginLeft: 10,
+    flex: 1,
+  },
+  appName: {
+    fontWeight: 'bold',
+  },
+  appUsers: {
+    marginTop: 5,
+    fontSize: 12,
+    color: COLOR_GREY_MED,
   },
 })

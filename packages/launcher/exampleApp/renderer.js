@@ -3,29 +3,24 @@ const appId = 'sandbox'
 
 appEl.innerHTML = `
   <div class="pure-u-1-1">
-    <button class="pure-button">Fetch Balance</button>
+    <button class="pure-button">Fetch API Version</button>
   </div>
 `
 appEl.addEventListener('click', async () => {
   try {
-    const res = await Promise.all([
-      window.ipc.callMain('ipcRequest', {
-        method: 'getBalance',
-        args: ['0xSomeWalletAddress'],
-      }),
-      window.ipc.callMain('ipcRequest', {
-        method: 'getPublicKey',
-      })
-    ])
-    const balance = document.createElement('div')
-    balance.innerHTML = `
+    const res = await window.ipc.callMain('ipcRequest', {
+      method: 'apiVersion',
+      args: [],
+    })
+    const apiVersion = document.createElement('div')
+    apiVersion.innerHTML = `
       <div class="pure-u-1-1">
         ${res}
       </div>
     `
-    document.body.appendChild(balance)
+    document.body.appendChild(apiVersion)
   } catch (err) {
-    console.log(err)
+    console.log('err: ', err)
   }
 })
 document.body.appendChild(appEl)

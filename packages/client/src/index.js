@@ -26,6 +26,11 @@ type InstalledApp = {
   users: Array<ID>,
 }
 
+type OwnUser = {
+  id: ID,
+  data: Object,
+}
+
 export default class MainframeClient {
   _rpc: StreamRPC
 
@@ -55,11 +60,11 @@ export default class MainframeClient {
 
   // Identities
 
-  createUserIdentity(): Promise<{ id: ID }> {
-    return this._rpc.request('identity_createUser')
+  createUserIdentity(data?: Object = {}): Promise<{ id: ID }> {
+    return this._rpc.request('identity_createUser', [data])
   }
 
-  getOwnUserIdentities(): Promise<{ ids: Array<ID> }> {
+  getOwnUserIdentities(): Promise<{ users: Array<OwnUser> }> {
     return this._rpc.request('identity_getOwnUsers')
   }
 
@@ -83,6 +88,10 @@ export default class MainframeClient {
 
   closeApp(sessID: string): Promise<void> {
     return this._rpc.request('app_close', [sessID])
+  }
+
+  removeApp(appID: ID): Promise<void> {
+    return this._rpc.request('app_remove', [appID])
   }
 
   // App permissions

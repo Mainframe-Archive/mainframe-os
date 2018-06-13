@@ -43,6 +43,7 @@
     "electron-builder": "^20.15.1",
     "electron-webpack": "^2.1.2",
     "flow-bin": "^0.73.0",
-    "webpack": "^4.11.0"
+    "webpack": "^4.11.0",
+    "@mainframe/utils-id": "^0.1.0"
   }
 }
