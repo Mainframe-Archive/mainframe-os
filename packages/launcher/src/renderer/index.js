@@ -15,7 +15,7 @@ if (params.type === 'launcher') {
   AppRegistry.registerComponent('Launcher', () => Launcher)
   AppRegistry.runApplication('Launcher', { rootTag })
 } else {
-  const App = () => <AppContainer appId={params.appId} />
+  const App = () => <AppContainer windowId={params.windowId} />
   AppRegistry.registerComponent('App', () => App)
   AppRegistry.runApplication('App', { rootTag })
 }

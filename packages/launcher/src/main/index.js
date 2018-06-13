@@ -4,10 +4,66 @@ import Client from '@mainframe/client'
 import { Environment, DaemonConfig, VaultConfig } from '@mainframe/config'
 import { startDaemon } from '@mainframe/toolbox'
 import { app, BrowserWindow, ipcMain } from 'electron'
-import betterIpc from 'electron-better-ipc'
 import path from 'path'
 import { stringify } from 'querystring'
 import url from 'url'
+// eslint-disable-next-line import/named
+import { idType, type ID } from '@mainframe/utils-id'
+
+import {
+  launcherToDaemonRequestChannel,
+  launcherFromDaemonResponseChannel,
+  mainProcRequestChannel,
+  mainProcResponseChannel,
+} from '../renderer/electronIpc.js'
+
+type AppWindows = {
+  [windowID: string]: {
+    window: BrowserWindow,
+    appSession: AppSessionData,
+  },
+}
+
+type ClientResponse = {
+  id: string,
+  error?: Object,
+  result?: Object,
+}
+
+type User = {
+  id: ID,
+  data: Object,
+}
+
+type App = {
+  id: ID,
+  manifest: Object,
+}
+
+type Session = {
+  id: ID,
+  permission: Object,
+}
+
+type AppSessionData = {
+  app: App,
+  user: User,
+  session: Session,
+}
+
+const sandboxToDaemonRequestChannel = 'ipc-sandbox-request-channel'
+const sandboxFromDaemonResponseChannel = 'ipc-sandbox-response-channel'
+
+const daemonRequestIpcChannels = [
+  {
+    req: launcherToDaemonRequestChannel,
+    res: launcherFromDaemonResponseChannel,
+  },
+  {
+    req: sandboxToDaemonRequestChannel,
+    res: sandboxFromDaemonResponseChannel,
+  },
+]
 
 const PORT = process.env.ELECTRON_WEBPACK_WDS_PORT || ''
 
@@ -29,24 +85,7 @@ const testVaultKey = process.env.MAINFRAME_VAULT_KEY || 'testKey'
 let client
 let mainWindow
 
-type AppWindows = {
-  [appId: string]: {
-    window: BrowserWindow,
-    appId: string,
-  },
-}
-
-type ClientResponse = {
-  id: string,
-  error?: Object,
-  result?: Object,
-}
-
 const appWindows: AppWindows = {}
-const sandboxRequestChannel = 'ipc-sandbox-request-channel'
-const sandboxResponseChannel = 'ipc-sandbox-response-channel'
-const launcherRequestChannel = 'ipc-launcher-client-request-channel'
-const launcherResponseChannel = 'ipc-launcher-client-response-channel'
 
 const newWindow = params => {
   const window = new BrowserWindow({ width: params.width || 800, height: 600 })
@@ -120,13 +159,28 @@ const createLauncherWindow = async () => {
   })
 }
 
-const launchApp = appId => {
+const getWindowId = (appID: ID, userID: ID) => {
+  return `${appID}-${userID}`
+}
+
+const launchApp = async (appID: ID, userID: ID) => {
+  const windowId = getWindowId(appID, userID)
+  if (appWindows[windowId]) {
+    return
+  }
+  // $FlowFixMe: ID incompatible with client package ID type
+  const appSession = await client.openApp(appID, userID)
   const appWindow = newWindow({
     type: 'app',
-    appId,
+    windowId,
   })
-  appWindows[appId] = {
-    appId,
+  appWindow.on('closed', async () => {
+    await client.closeApp(appSession.session.id)
+    delete appWindows[windowId]
+  })
+  // $FlowFixMe: ID incompatible with client package ID type
+  appWindows[windowId] = {
+    appSession,
     window: appWindow,
   }
 }
@@ -148,40 +202,52 @@ app.on('activate', () => {
   }
 })
 
-ipcMain.on('launchApp', (e, appId) => {
-  launchApp(appId)
-})
-
 // IPC COMMS
 
-const sendIpcResponse = (sender, channel, response) => {
-  const window = BrowserWindow.fromWebContents(sender)
-  const send = (channel, response) => {
-    if (!(window && window.isDestroyed())) {
-      sender.send(channel, response)
+// Handle calls to main process
+
+const ipcMainHandler = {
+  launchApp: async (event, request) => {
+    const [appID, userID] = request.data.args
+    launchApp(idType(appID), idType(userID))
+    return { id: request.id }
+  },
+  getAppSession: async (event, request) => {
+    const res = appWindows[request.data.args[0]]
+    if (res && res.appSession) {
+      return {
+        id: request.id,
+        result: { appSession: res.appSession },
+      }
+    } else {
+      return {
+        error: {
+          message: 'Session not found',
+          code: 32601,
+        },
+        id: request.id,
+      }
     }
-  }
-  send(channel, response)
+  },
 }
 
-// Answer Launcher
-
-ipcMain.on(launcherRequestChannel, async (event, request) => {
-  const res = await handleRequest(request)
-  sendIpcResponse(event.sender, launcherResponseChannel, res)
+ipcMain.on(mainProcRequestChannel, async (event, request) => {
+  const res = await ipcMainHandler[request.data.method](event, request)
+  sendIpcResponse(event.sender, mainProcResponseChannel, res)
 })
 
-// Answer App
+// Handle calls to daemon client
 
-ipcMain.on(sandboxRequestChannel, async (event, request) => {
-  const res = await handleRequest(request)
-  sendIpcResponse(event.sender, sandboxResponseChannel, res)
+daemonRequestIpcChannels.forEach(c => {
+  ipcMain.on(c.req, async (event, request) => {
+    const res = await handleRequestToDaemon(request)
+    sendIpcResponse(event.sender, c.res, res)
+  })
 })
 
-// Client request handler
-
-const handleRequest = async (request: Object): Promise<ClientResponse> => {
-  console.log('request: ', request)
+const handleRequestToDaemon = async (
+  request: Object,
+): Promise<ClientResponse> => {
   if (request == null || !request || !request.data) {
     return {
       error: {
@@ -215,4 +281,16 @@ const handleRequest = async (request: Object): Promise<ClientResponse> => {
     },
     id: request.id,
   }
+}
+
+// IPC Responder
+
+const sendIpcResponse = (sender, channel, response) => {
+  const window = BrowserWindow.fromWebContents(sender)
+  const send = (channel, response) => {
+    if (!(window && window.isDestroyed())) {
+      sender.send(channel, response)
+    }
+  }
+  send(channel, response)
 }

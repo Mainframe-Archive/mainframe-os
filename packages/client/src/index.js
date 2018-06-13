@@ -16,9 +16,25 @@ import { encodeVaultKey } from './utils'
 type AppManifest = Object
 type AppUserSettings = Object
 
-type ClientSession = {
+type User = {
+  id: ID,
+  data: Object,
+}
+
+type App = {
+  id: ID,
+  manifest: AppManifest,
+}
+
+type Session = {
   id: ID,
   permissions: PermissionsDetails,
+}
+
+type ClientSession = {
+  session: Session,
+  user: User,
+  app: App,
 }
 
 type InstalledApp = {

@@ -9,19 +9,36 @@ import type {
 // eslint-disable-next-line import/named
 import { idType, type ID } from '@mainframe/utils-id'
 
-import type { AppManifest, AppUserSettings } from '../../app/App'
+import type { AppManifest, AppUserSettings, SessionData } from '../../app/App'
 
 import { clientError, sessionError } from '../errors'
 import type RequestContext from '../RequestContext'
 
-type ClientSession = {
+type User = {
+  id: ID,
+  data: Object,
+}
+
+type App = {
+  id: ID,
+  manifest: AppManifest,
+}
+
+type Session = {
   id: ID,
   permissions: PermissionsDetails,
 }
 
+type ClientSession = {
+  session: Session,
+  user: User,
+  app: App,
+}
+
 type AppInstalled = {
+  appID: ID,
   manifest: AppManifest,
-  users: Array<ID>,
+  users: Array<User>,
 }
 
 export const checkPermission = (
@@ -47,10 +64,20 @@ export const getInstalled = (
   const { apps } = ctx.openVault.apps
   const installedApps = Object.keys(apps).map(appID => {
     const app = apps[idType(appID)]
+    const users = app.userIDs.reduce((acc, id) => {
+      const user = ctx.openVault.identities.getOwnUser(id)
+      if (user) {
+        acc.push({
+          id: idType(id),
+          data: user.data,
+        })
+      }
+      return acc
+    }, [])
     return {
-      appID,
+      appID: idType(appID),
       manifest: app.manifest,
-      users: app.users,
+      users: users,
     }
   })
   return { apps: installedApps }
@@ -60,12 +87,10 @@ export const install = async (
   ctx: RequestContext,
   [manifest, userID, settings]: [AppManifest, ID, AppUserSettings] = [],
 ): Promise<ClientSession> => {
-  const session = ctx.openVault.installApp(manifest, userID, settings)
+  const appID = ctx.openVault.installApp(manifest, userID, settings)
   await ctx.openVault.save()
-  return {
-    id: session.sessID,
-    permissions: session.permissions,
-  }
+  const session = ctx.openVault.openApp(appID, userID)
+  return constructClientSession(ctx, appID, userID, session)
 }
 
 export const remove = async (
@@ -81,10 +106,7 @@ export const open = (
   [appID, userID]: [ID, ID] = [],
 ): ClientSession => {
   const session = ctx.openVault.openApp(appID, userID)
-  return {
-    id: session.sessID,
-    permissions: session.permissions,
-  }
+  return constructClientSession(ctx, appID, userID, session)
 }
 
 export const setPermission = async (
@@ -109,5 +131,34 @@ export const setPermission = async (
     }
     app.setPermission(session.userID, key, value)
     await ctx.openVault.save()
+  }
+}
+
+const constructClientSession = (
+  ctx: RequestContext,
+  appID: ID,
+  userID: ID,
+  session: SessionData,
+): ClientSession => {
+  const user = ctx.openVault.identities.getOwnUser(userID)
+  const app = ctx.openVault.apps.getByID(appID)
+  if (user && app) {
+    return {
+      user: {
+        id: userID,
+        data: user.data,
+      },
+      session: {
+        id: session.sessID,
+        permissions: session.permissions,
+      },
+      app: {
+        id: appID,
+        manifest: app.manifest,
+      },
+    }
+  } else {
+    const type = !user ? 'user' : 'app'
+    throw new Error(`Missing ${type}`)
   }
 }
