@@ -25,6 +25,7 @@ import IdentitySelectorView from './IdentitySelectorView'
 
 type Props = {
   onRequestClose: () => void,
+  onInstallComplete: (appID: ID) => void,
 }
 
 type State = {
@@ -113,7 +114,7 @@ export default class AppInstallModal extends Component<Props, State> {
 
     try {
       const res = await client.installApp(manifest, userId, userPermissions)
-      console.log('res: ', res)
+      this.props.onInstallComplete(res.id)
     } catch (err) {
       console.log('err:', err)
       // TODO: handle error
@@ -205,8 +206,8 @@ const COLOR_GREY = '#eeeeee'
 
 const styles = StyleSheet.create({
   container: {
-    maxWidth: 600,
-    minWidth: 480,
+    maxWidth: 520,
+    minWidth: 420,
     padding: 20,
     backgroundColor: COLOR_WHITE,
     flex: 1,

@@ -10,6 +10,7 @@ export default {
   app_checkPermission: app.checkPermission,
   app_close: app.close,
   app_install: app.install,
+  app_remove: app.remove,
   app_open: app.open,
   app_getInstalled: app.getInstalled,
   app_setPermission: app.setPermission,

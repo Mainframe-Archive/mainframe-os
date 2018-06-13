@@ -49,7 +49,7 @@ const launcherRequestChannel = 'ipc-launcher-client-request-channel'
 const launcherResponseChannel = 'ipc-launcher-client-response-channel'
 
 const newWindow = params => {
-  const window = new BrowserWindow({ width: 800, height: 600 })
+  const window = new BrowserWindow({ width: params.width || 800, height: 600 })
   const stringParams = stringify(params)
 
   if (isDevelopment) {
@@ -106,6 +106,7 @@ const createLauncherWindow = async () => {
 
   mainWindow = newWindow({
     type: 'launcher',
+    width: 480,
   })
 
   // Emitted when the window is closed.

@@ -68,6 +68,14 @@ export const install = async (
   }
 }
 
+export const remove = async (
+  ctx: RequestContext,
+  [appID]: [ID] = [],
+): Promise<void> => {
+  ctx.openVault.removeApp(appID)
+  await ctx.openVault.save()
+}
+
 export const open = (
   ctx: RequestContext,
   [appID, userID]: [ID, ID] = [],

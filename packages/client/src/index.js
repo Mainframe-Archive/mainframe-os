@@ -90,6 +90,10 @@ export default class MainframeClient {
     return this._rpc.request('app_close', [sessID])
   }
 
+  removeApp(appID: ID): Promise<void> {
+    return this._rpc.request('app_remove', [appID])
+  }
+
   // App permissions
 
   checkAppPermission(

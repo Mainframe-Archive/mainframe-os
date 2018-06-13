@@ -19,7 +19,7 @@ const callMain = (requestChan, responseChan, data) =>
     }
     const listener = (event, msg) => {
       if (msg.id === request.id) {
-        if (msg.error || !msg.result) {
+        if (msg.error) {
           reject(msg.error)
         } else {
           resolve(msg.result)
@@ -41,6 +41,7 @@ export const client = {
   getInstalledApps: () => callMainClient('getInstalledApps'),
   installApp: (manifest: Object, userId: ID, settings: Object) =>
     callMainClient('installApp', [manifest, userId, settings]),
+  removeApp: (appID: ID) => callMainClient('removeApp', [appID]),
   createUserIdentity: (identity: Object) =>
     callMainClient('createUserIdentity', [identity]),
   getOwnUserIdentities: () => callMainClient('getOwnUserIdentities'),
