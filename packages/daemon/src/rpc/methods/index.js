@@ -9,13 +9,14 @@ import * as web3 from './web3'
 const noop = () => {}
 
 export default {
-  api_version: () => 0,
+  api_version: () => 0.1,
   app_checkPermission: app.checkPermission,
   app_close: app.close,
   app_install: app.install,
   // TODO: list apps with filter by optional status such as having a manifest, installing or getInstalled
   // Without filter, return all apps
   app_list: noop,
+  app_remove: app.remove,
   app_open: app.open,
   app_getInstalled: app.getInstalled, // TODO: remove, replaced by list
   app_setPermission: app.setPermission,

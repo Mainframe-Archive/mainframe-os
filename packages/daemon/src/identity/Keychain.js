@@ -87,7 +87,7 @@ export default class Keychain {
     // $FlowFixMe: mapping types
     pairBox: fromKeysPairs(keychain.pairBox),
     // $FlowFixMe: mapping types
-    pairSign: fromKeysPairs(skeychain.pairSign),
+    pairSign: fromKeysPairs(keychain.pairSign),
     // $FlowFixMe: mapping types
     publicBox: fromKeysBuffers(keychain.publicBox),
     // $FlowFixMe: mapping types

@@ -16,13 +16,16 @@ import {
   Modal,
 } from 'react-native-web'
 import ReactModal from 'react-modal'
+import type { ID } from '@mainframe/utils-id'
 
-import { callMainClient } from '../electronIpc.js'
+import { client } from '../electronIpc.js'
 import Button from '../Button'
 import PermissionsView, { type PermissionOptions } from './PermissionsView'
+import IdentitySelectorView from './IdentitySelectorView'
 
 type Props = {
   onRequestClose: () => void,
+  onInstallComplete: (appID: ID) => void,
 }
 
 type State = {
@@ -34,7 +37,7 @@ type State = {
   },
   userPermissions?: PermissionsGrants,
   appPath?: string,
-  userId?: string,
+  userId?: ID,
 }
 
 export default class AppInstallModal extends Component<Props, State> {
@@ -62,7 +65,6 @@ export default class AppInstallModal extends Component<Props, State> {
       const file = files[0]
       try {
         const manifest = fs.readJsonSync(file.path)
-        console.log('manifest: ', manifest)
         if (
           typeof manifest.name === 'string' &&
           typeof manifest.permissions === 'object'
@@ -82,7 +84,6 @@ export default class AppInstallModal extends Component<Props, State> {
   }
 
   onSubmitPermissions = (userPermissions: PermissionsGrants) => {
-    console.log('do something with permissions', userPermissions)
     this.setState({
       installStep: 'download',
       userPermissions,
@@ -98,28 +99,22 @@ export default class AppInstallModal extends Component<Props, State> {
     })
   }
 
-  onSelectId = (id: string) => {
+  onSelectId = (id: ID) => {
     this.setState({ userId: id }, this.saveApp)
   }
 
-  createNewId = () => {}
-
   saveApp = async () => {
     // $FlowFixMe: userPermissions key in state
-    const { manifest, userPermissions } = this.state
-    if (manifest == null || userPermissions == null) {
+    const { manifest, userPermissions, userId } = this.state
+    if (manifest == null || userPermissions == null || userId == null) {
       console.log('invalid manifest or permissions to save app')
+      // TODO: Display error
       return
     }
 
-    const app = {
-      name: manifest.name,
-      permissions: userPermissions,
-    }
-    console.log('saving app: ', app)
     try {
-      const res = await callMainClient.createApp(app)
-      console.log('res: ', res)
+      const res = await client.installApp(manifest, userId, userPermissions)
+      this.props.onInstallComplete(res.id)
     } catch (err) {
       console.log('err:', err)
       // TODO: handle error
@@ -177,40 +172,9 @@ export default class AppInstallModal extends Component<Props, State> {
   }
 
   renderSetId() {
-    const header = `Select User ID`
-    // TODO: fetch from daemon
-    const ids = [
-      {
-        id: 'jsmith',
-        name: 'James Smith',
-      },
-      {
-        id: 'mranon',
-        name: 'Mr Anon',
-      },
-    ]
-    const rowRender = (name, style, handler) => {
-      return (
-        <TouchableOpacity onPress={handler} style={style} key={name}>
-          <Text>{name}</Text>
-        </TouchableOpacity>
-      )
-    }
-    const idRows = ids.map((id, index) => {
-      const handler = () => this.onSelectId(id.id)
-      return rowRender(id.name, styles.idRow, handler)
-    })
-    const createIdHandler = this.createNewId()
-    const createNewRow = rowRender(
-      '+ Create new ID',
-      [styles.idRow, styles.newId],
-      createIdHandler,
-    )
     return (
       <View style={styles.container}>
-        <Text style={styles.header}>{header}</Text>
-        {idRows}
-        {createNewRow}
+        <IdentitySelectorView onSelectId={this.onSelectId} />
       </View>
     )
   }
@@ -242,8 +206,8 @@ const COLOR_GREY = '#eeeeee'
 
 const styles = StyleSheet.create({
   container: {
-    maxWidth: 600,
-    minWidth: 480,
+    maxWidth: 520,
+    minWidth: 420,
     padding: 20,
     backgroundColor: COLOR_WHITE,
     flex: 1,
@@ -254,16 +218,5 @@ const styles = StyleSheet.create({
   },
   description: {
     paddingVertical: 15,
-  },
-  idRow: {
-    padding: 10,
-    borderRadius: 3,
-    backgroundColor: COLOR_GREY,
-    marginTop: 10,
-  },
-  newId: {
-    borderWidth: 1,
-    borderColor: COLOR_GREY,
-    backgroundColor: COLOR_WHITE,
   },
 })

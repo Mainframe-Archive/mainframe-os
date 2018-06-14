@@ -5,8 +5,8 @@ const generateId = () =>
     .toString(36)
     .slice(2)
 
-const requestChannel = 'ipc-request-channel'
-const responseChannel = 'ipc-response-channel'
+const requestChannel = 'ipc-sandbox-request-channel'
+const responseChannel = 'ipc-sandbox-response-channel'
 
 const callMain = (channel, data) =>
   new Promise((resolve, reject) => {

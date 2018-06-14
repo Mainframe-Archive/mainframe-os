@@ -16,6 +16,7 @@
       "**/electron-better-ipc",
       "**/electron-webpack",
       "**/es6-error",
+      "**/fs-extra",
       "**/nanoid",
       "**/react",
       "**/react-dom",

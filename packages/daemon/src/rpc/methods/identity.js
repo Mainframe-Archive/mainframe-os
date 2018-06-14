@@ -1,14 +1,28 @@
 // @flow
-
-import type { ID } from '@mainframe/utils-id'
+// eslint-disable-next-line import/named
+import { idType, type ID } from '@mainframe/utils-id'
 
 import type RequestContext from '../RequestContext'
 
-export const createUser = (ctx: RequestContext): { id: ID } => {
-  return { id: ctx.openVault.identities.createOwnUser() }
+type OwnId = {
+  id: ID,
+  data: Object,
 }
 
-// returns Array<ID> in practice but type gets lost by Object.keys()
-export const getOwnUsers = (ctx: RequestContext): { ids: Array<string> } => {
-  return { ids: Object.keys(ctx.openVault.identities.ownUsers) }
+export const createUser = async (
+  ctx: RequestContext,
+  [data]: [Object] = [],
+): Promise<{ id: ID }> => {
+  const id = ctx.openVault.identities.createOwnUser(data)
+  await ctx.openVault.save()
+  return { id }
+}
+
+export const getOwnUsers = (ctx: RequestContext): { users: Array<OwnId> } => {
+  const { ownUsers } = ctx.openVault.identities
+  const users = Object.keys(ownUsers).map(id => {
+    const uID = idType(id)
+    return { id: uID, data: ownUsers[uID].data }
+  })
+  return { users }
 }

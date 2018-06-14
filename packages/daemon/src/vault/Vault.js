@@ -184,6 +184,10 @@ export default class Vault {
     return this.openApp(appID, userID)
   }
 
+  removeApp(appID: ID) {
+    this.apps.remove(appID)
+  }
+
   // Session
 
   getSession(id: ID): ?Session {
