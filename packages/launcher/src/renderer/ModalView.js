@@ -1,17 +1,14 @@
 //@flow
 
-import React, {
-  createRef,
-  Component,
-  type Element,
-  type ElementRef,
-} from 'react'
+import React, { Component, type Element, type Node } from 'react'
 import { View, StyleSheet, Text } from 'react-native-web'
 import ReactModal from 'react-modal'
 
+import colors from './colors'
+
 type Props = {
   onRequestClose: () => void,
-  children?: ?Element<any>,
+  children?: ?Node,
 }
 
 export default class ModalView extends Component<Props> {
@@ -27,14 +24,12 @@ export default class ModalView extends Component<Props> {
   }
 }
 
-const COLOR_WHITE = '#ffffff'
-
 const styles = StyleSheet.create({
   container: {
     maxWidth: 520,
     minWidth: 420,
     padding: 20,
-    backgroundColor: COLOR_WHITE,
+    backgroundColor: colors.WHITE,
     flex: 1,
   },
 })

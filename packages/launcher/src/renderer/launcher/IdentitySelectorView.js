@@ -12,6 +12,7 @@ import type { ID } from '@mainframe/utils-id'
 
 import { client } from '../electronIpc.js'
 import Button from '../Button'
+import colors from '../colors'
 
 type User = {
   id: ID,
@@ -112,16 +113,11 @@ export default class IdentitySelectorView extends Component<Props, State> {
   }
 }
 
-const COLOR_WHITE = '#ffffff'
-const COLOR_GREY = '#eeeeee'
-const COLOR_MED_GREY = '#757575'
-const COLOR_GREY_BORDER = '#e7e7e7'
-
 const styles = StyleSheet.create({
   idRow: {
     padding: 10,
     borderRadius: 3,
-    backgroundColor: COLOR_GREY,
+    backgroundColor: colors.LIGHT_GREY_EE,
     marginTop: 10,
     flexDirection: 'row',
   },
@@ -129,7 +125,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   idLabel: {
-    color: COLOR_MED_GREY,
+    color: colors.GREY_MED_75,
     fontSize: 11,
     fontStyle: 'italic',
   },
@@ -137,8 +133,8 @@ const styles = StyleSheet.create({
     padding: 12,
     borderWidth: 1,
     marginTop: 10,
-    borderColor: COLOR_GREY_BORDER,
-    backgroundColor: COLOR_WHITE,
+    borderColor: colors.LIGHT_GREY_E8,
+    backgroundColor: colors.WHITE,
   },
   createIdForm: {
     flexDirection: 'row',
@@ -148,7 +144,7 @@ const styles = StyleSheet.create({
     padding: 6,
     flex: 1,
     borderWidth: 1,
-    borderColor: COLOR_GREY_BORDER,
+    borderColor: colors.LIGHT_GREY_E8,
     marginRight: 15,
   },
 })

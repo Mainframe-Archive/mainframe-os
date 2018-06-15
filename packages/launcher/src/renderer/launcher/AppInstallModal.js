@@ -2,12 +2,7 @@
 
 import type { PermissionsGrants } from '@mainframe/app-permissions'
 import fs from 'fs-extra'
-import React, {
-  createRef,
-  Component,
-  type Element,
-  type ElementRef,
-} from 'react'
+import React, { createRef, Component, type ElementRef } from 'react'
 import { View, TouchableOpacity, StyleSheet, Text } from 'react-native-web'
 import ReactModal from 'react-modal'
 import type { ID } from '@mainframe/utils-id'
@@ -17,6 +12,7 @@ import Button from '../Button'
 import ModalView from '../ModalView'
 import PermissionsView, { type PermissionOptions } from './PermissionsView'
 import IdentitySelectorView from './IdentitySelectorView'
+import colors from '../colors'
 
 type Props = {
   onRequestClose: () => void,
@@ -221,9 +217,6 @@ export default class AppInstallModal extends Component<Props, State> {
     )
   }
 }
-
-const COLOR_WHITE = '#ffffff'
-const COLOR_GREY = '#eeeeee'
 
 const styles = StyleSheet.create({
   header: {

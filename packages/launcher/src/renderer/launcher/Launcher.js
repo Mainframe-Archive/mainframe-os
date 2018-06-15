@@ -11,6 +11,8 @@ import Button from '../Button'
 import ModalView from '../ModalView'
 import IdentitySelectorView from './IdentitySelectorView'
 
+import colors from '../colors'
+
 const fs = remote.require('fs-extra')
 const path = remote.require('path')
 
@@ -153,10 +155,6 @@ export default class App extends Component<{}, State> {
   }
 }
 
-const COLOR_LIGHT_GREY = '#e8e8e8'
-const COLOR_GREY_MED = '#818181'
-const COLOR_WHITE = '#ffffff'
-
 const styles = StyleSheet.create({
   container: {
     padding: 30,
@@ -171,7 +169,7 @@ const styles = StyleSheet.create({
   appRow: {
     padding: 10,
     marginBottom: 10,
-    borderColor: COLOR_LIGHT_GREY,
+    borderColor: colors.LIGHT_GREY_E8,
     borderWidth: 1,
     flexDirection: 'row',
     borderRadius: 3,
@@ -180,14 +178,14 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: COLOR_LIGHT_GREY,
+    backgroundColor: colors.LIGHT_GREY_E8,
   },
   openApp: {
     flex: 1,
   },
   deleteApp: {
-    backgroundColor: COLOR_GREY_MED,
-    color: COLOR_WHITE,
+    backgroundColor: colors.GREY_MED_81,
+    color: colors.WHITE,
     borderRadius: 2,
     height: 22,
     justifyContent: 'center',
@@ -206,6 +204,6 @@ const styles = StyleSheet.create({
   appUsers: {
     marginTop: 5,
     fontSize: 12,
-    color: COLOR_GREY_MED,
+    color: colors.GREY_MED_81,
   },
 })
