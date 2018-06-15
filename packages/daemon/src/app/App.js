@@ -85,7 +85,7 @@ export default class App {
     return this._manifest
   }
 
-  get users(): Array<ID> {
+  get userIDs(): Array<ID> {
     return Object.keys(this._settings).map(idType)
   }
 
@@ -143,10 +143,10 @@ export default class App {
       HTTPS_REQUEST: createHTTPSRequestGrant(),
     }
     const permissions = mergeGrantsToDetails(appPermissions, userPermissions)
-
+    const session = new Session(this._appID, userID, permissions.session)
     return {
       sessID: uniqueID(),
-      session: new Session(this._appID, userID, permissions.session),
+      session: session,
       permissions,
       // TODO: add path to app assets
     }

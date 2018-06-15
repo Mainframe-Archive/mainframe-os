@@ -3,7 +3,7 @@
 import { ipcRenderer as ipc, remote } from 'electron'
 import React, { Component } from 'react'
 import { View, TouchableOpacity, StyleSheet, Text } from 'react-native-web'
-import { client } from '../electronIpc.js'
+import { client, callMainProcess } from '../electronIpc.js'
 import type { ID } from '@mainframe/utils-id'
 
 import AppInstallModal from './AppInstallModal'
@@ -59,8 +59,9 @@ export default class App extends Component<{}, State> {
     const appRows = this.state.installedApps.map(app => {
       const manifest = app.manifest
 
-      const onClick = () => {
-        ipc.send('launchApp', app.appID)
+      const onClick = async () => {
+        // TODO User selection
+        await callMainProcess('launchApp', [app.appID, app.users[0].id])
       }
 
       const onClickDelete = () => {
@@ -75,7 +76,7 @@ export default class App extends Component<{}, State> {
             <TouchableOpacity onPress={onClick} style={styles.openApp}>
               <Text style={styles.appName}>{app.manifest.name}</Text>
               <Text style={styles.appUsers}>
-                {`Identities: ${app.users.join()}`}
+                {`Identities: ${app.users.map(u => u.data.name).join(', ')}`}
               </Text>
             </TouchableOpacity>
           </View>
