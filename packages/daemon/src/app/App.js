@@ -5,21 +5,20 @@ import {
   mergeGrantsToDetails,
   type PermissionGrant, // eslint-disable-line import/named
   type PermissionKey, // eslint-disable-line import/named
-  type PermissionRequirements, // eslint-disable-line import/named
   type PermissionsDetails, // eslint-disable-line import/named
   type PermissionsGrants, // eslint-disable-line import/named
 } from '@mainframe/app-permissions'
 // eslint-disable-next-line import/named
 import { idType, uniqueID, type ID } from '@mainframe/utils-id'
 
-import type { MFID } from '../utils'
-
+import { type AppManifest } from './manifest'
 import Session from './Session'
 
-export type AppManifest = {
-  id: MFID,
-  name: string,
-  permissions: PermissionRequirements,
+const DEFAULT_SETTINGS = {
+  permissions: {
+    HTTPS_REQUEST: [],
+  },
+  permissionsChecked: false,
 }
 
 export type SessionData = {
@@ -29,21 +28,16 @@ export type SessionData = {
 }
 
 export type AppInstallationState =
-  | 'manifest-pending'
-  | 'manifest-downloading'
-  | 'manifest-invalid-signature'
-  | 'manifest-invalid-schema'
-  | 'confirmation-pending'
-  | 'package-lookup'
-  | 'package-invalid-hash'
-  | 'package-download-started'
-  | 'package-download-failed'
-  | 'package-download-done'
-  | 'package-invalid-signature'
+  | 'pending'
+  | 'hash_lookup'
+  | 'hash_not_found'
+  | 'downloading'
+  | 'download_error'
   | 'ready'
 
 export type AppUserSettings = {
   permissions: PermissionsGrants,
+  permissionsChecked: boolean,
 }
 
 export type AppParams = {
@@ -77,6 +71,8 @@ export default class App {
     this._settings = params.settings == null ? {} : params.settings
   }
 
+  // Getters
+
   get id(): ID {
     return this._appID
   }
@@ -85,12 +81,18 @@ export default class App {
     return this._manifest
   }
 
+  get settings(): { [ID]: AppUserSettings } {
+    return this._settings
+  }
+
   get userIDs(): Array<ID> {
     return Object.keys(this._settings).map(idType)
   }
 
+  // Settings
+
   getSettings(userID: ID): AppUserSettings {
-    return this._settings[userID] || { permissions: {} }
+    return this._settings[userID] || { ...DEFAULT_SETTINGS }
   }
 
   setSettings(userID: ID, settings: AppUserSettings): void {
@@ -129,11 +131,27 @@ export default class App {
     }
   }
 
+  getPermissionsChecked(userID: ID): boolean {
+    return this.getSettings(userID).permissionsChecked
+  }
+
+  setPermissionsChecked(userID: ID, checked: boolean) {
+    const settings = this.getSettings(userID)
+    settings.permissionsChecked = checked
+    this._settings[userID] = settings
+  }
+
   removeUser(userID: ID) {
     delete this._settings[userID]
   }
 
+  // Session
+
   createSession(userID: ID): SessionData {
+    if (!this.getPermissionsChecked(userID)) {
+      throw new Error('Permissions need to be checked by user')
+    }
+
     const requiredPermissions = this.manifest.permissions.required
     const appPermissions = {
       ...requiredPermissions,

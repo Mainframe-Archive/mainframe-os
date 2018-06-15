@@ -10,8 +10,6 @@ import ipcRPC from '@mainframe/rpc-ipc'
 import type StreamRPC from '@mainframe/rpc-stream'
 import type { ID } from '@mainframe/utils-id'
 
-import { encodeVaultKey } from './utils'
-
 // TODO: extract API types from daemon
 type AppManifest = Object
 type AppUserSettings = Object
@@ -66,12 +64,12 @@ export default class MainframeClient {
 
   // Vault
 
-  createVault(path: string, key: string): Promise<void> {
-    return this._rpc.request('vault_create', [path, encodeVaultKey(key)])
+  createVault(path: string, password: string): Promise<void> {
+    return this._rpc.request('vault_create', [path, password])
   }
 
-  openVault(path: string, key: string): Promise<void> {
-    return this._rpc.request('vault_open', [path, encodeVaultKey(key)])
+  openVault(path: string, password: string): Promise<void> {
+    return this._rpc.request('vault_open', [path, password])
   }
 
   // Identities
@@ -130,7 +128,7 @@ export default class MainframeClient {
 
   // Infrastructure interactions
 
-  requestWeb3(sessID: string, method: string, params?: any): Promise<any> {
+  requestWeb3(sessID: ID, method: string, params?: any): Promise<any> {
     return this._rpc.request('web3_request', [sessID, method, params])
   }
 }

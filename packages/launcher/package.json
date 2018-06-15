@@ -37,12 +37,12 @@
     "@babel/core": "7.0.0-beta.47",
     "@babel/preset-flow": "7.0.0-beta.47",
     "@babel/preset-react": "7.0.0-beta.47",
+    "@mainframe/utils-id": "^0.1.0",
     "babel-plugin-react-native-web": "^0.8.0",
     "electron": "^2.0.2",
     "electron-builder": "^20.15.1",
     "electron-webpack": "^2.1.2",
-    "flow-bin": "^0.73.0",
-    "webpack": "^4.11.0",
-    "@mainframe/utils-id": "^0.1.0"
+    "flow-bin": "^0.74.0",
+    "webpack": "^4.11.0"
   }
 }

@@ -4,24 +4,111 @@ import type {
   PermissionKey,
   PermissionCheckResult,
 } from '@mainframe/app-permissions'
+import { readEncryptedFile, writeEncryptedFile } from '@mainframe/secure-file'
+import {
+  decodeBase64,
+  encodeBase64,
+  type base64, // eslint-disable-line import/named
+} from '@mainframe/utils-base64'
+import {
+  PASSWORDHASH_ALG_ARGON2ID13,
+  PASSWORDHASH_MEMLIMIT_SENSITIVE,
+  PASSWORDHASH_OPSLIMIT_SENSITIVE,
+  createPasswordHashSalt,
+  createSecretBoxKeyFromPassword,
+} from '@mainframe/utils-crypto'
 // eslint-disable-next-line import/named
 import { type ID } from '@mainframe/utils-id'
 
 import {
   type default as App,
-  type AppManifest,
   type AppUserSettings, // eslint-disable-line import/named
   type SessionData,
 } from '../app/App'
 import AppsRepository, {
   type AppsRepositorySerialized, // eslint-disable-line import/named
 } from '../app/AppsRepository'
+import { type AppManifest } from '../app/manifest'
 import type Session from '../app/Session'
 import IdentitiesRepository, {
   type IdentitiesRepositorySerialized, // eslint-disable-line import/named
 } from '../identity/IdentitiesRepository'
 import type Keychain from '../identity/Keychain'
-import { readSecureFile, writeSecureFile } from '../utils'
+
+type VaultKDF = {
+  algorithm: number,
+  memlimit: number,
+  opslimit: number,
+  salt: base64,
+}
+
+type VaultMetadata = {
+  version: 1,
+  kdf: VaultKDF,
+}
+
+type VaultKeyParams = {
+  key: Buffer,
+  kdf: VaultKDF,
+}
+
+const createVaultKeyParams = async (
+  password: Buffer,
+): Promise<VaultKeyParams> => {
+  const salt = createPasswordHashSalt()
+  const kdf = {
+    algorithm: PASSWORDHASH_ALG_ARGON2ID13,
+    memlimit: PASSWORDHASH_MEMLIMIT_SENSITIVE,
+    opslimit: PASSWORDHASH_OPSLIMIT_SENSITIVE,
+    salt: encodeBase64(salt),
+  }
+  const key = await createSecretBoxKeyFromPassword(
+    password,
+    salt,
+    kdf.opslimit,
+    kdf.memlimit,
+    kdf.algorithm,
+  )
+  return { kdf, key }
+}
+
+const readVaultFile = async (
+  path: string,
+  password: Buffer,
+): Promise<{ keyParams: VaultKeyParams, data: Object }> => {
+  let keyParams
+  const file = await readEncryptedFile(path, async (meta: ?VaultMetadata) => {
+    if (meta == null) {
+      throw new Error('Missing metadata')
+    }
+    if (meta.version !== 1) {
+      throw new Error('Invalid vault format version')
+    }
+
+    const key = await createSecretBoxKeyFromPassword(
+      password,
+      decodeBase64(meta.kdf.salt),
+      meta.kdf.opslimit,
+      meta.kdf.memlimit,
+      meta.kdf.algorithm,
+    )
+    keyParams = { key, kdf: meta.kdf }
+
+    return key
+  })
+
+  if (file.opened == null) {
+    throw new Error('Invalid password')
+  }
+  if (keyParams == null) {
+    throw new Error('Invalid file')
+  }
+
+  return {
+    data: JSON.parse(file.opened.toString()),
+    keyParams,
+  }
+}
 
 export type VaultData = {
   apps: AppsRepository,
@@ -34,32 +121,29 @@ export type VaultSerialized = {
 }
 
 export default class Vault {
-  static create = async (path: string, key: Buffer): Promise<Vault> => {
-    const vault = new Vault(path, key)
+  static create = async (path: string, password: Buffer): Promise<Vault> => {
+    const keyParams = await createVaultKeyParams(password)
+    const vault = new Vault(path, keyParams)
     await vault.save()
     return vault
   }
 
-  static open = async (path: string, key: Buffer): Promise<Vault> => {
-    const buffer = await readSecureFile(path, key)
-    if (buffer == null) {
-      throw new Error('Unable to open vault')
-    }
-    const data = JSON.parse(buffer.toString())
-    return new Vault(path, key, {
+  static open = async (path: string, password: Buffer): Promise<Vault> => {
+    const { data, keyParams } = await readVaultFile(path, password)
+    return new Vault(path, keyParams, {
       apps: AppsRepository.fromJSON(data.apps),
       identities: IdentitiesRepository.fromJSON(data.identities),
     })
   }
 
   _path: string
-  _key: Buffer
+  _keyParams: VaultKeyParams
   _data: VaultData
   _sessions: { [ID]: Session } = {}
 
-  constructor(path: string, key: Buffer, data?: ?VaultData) {
+  constructor(path: string, keyParams: VaultKeyParams, data?: ?VaultData) {
     this._path = path
-    this._key = key
+    this._keyParams = keyParams
     if (data == null) {
       this._data = {
         apps: new AppsRepository(),
@@ -119,8 +203,11 @@ export default class Vault {
   // Vault lifecycle
 
   save() {
-    const contents = Buffer.from(JSON.stringify(this.toJSON()))
-    return writeSecureFile(this._path, contents, this._key)
+    const data = Buffer.from(JSON.stringify(this.toJSON()))
+    return writeEncryptedFile(this._path, data, this._keyParams.key, {
+      version: 1,
+      kdf: this._keyParams.kdf,
+    })
   }
 
   toJSON(): VaultSerialized {

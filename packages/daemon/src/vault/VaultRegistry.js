@@ -35,24 +35,24 @@ export default class VaultRegistry {
     }
   }
 
-  async create(socket: Socket, path: string, key: Buffer): Promise<Vault> {
+  async create(socket: Socket, path: string, password: Buffer): Promise<Vault> {
     if (this.isLocked(path)) {
       throw new Error('Vault is already open by another client')
     }
 
-    const vault = await Vault.create(path, key)
+    const vault = await Vault.create(path, password)
     this._socketByVaultPath.set(path, socket)
     this._vaultBySocket.set(socket, vault)
 
     return vault
   }
 
-  async open(socket: Socket, path: string, key: Buffer): Promise<Vault> {
+  async open(socket: Socket, path: string, password: Buffer): Promise<Vault> {
     if (this.isLocked(path)) {
       throw new Error('Vault is already open by another client')
     }
 
-    const vault = await Vault.open(path, key)
+    const vault = await Vault.open(path, password)
     this._socketByVaultPath.set(path, socket)
     this._vaultBySocket.set(socket, vault)
 

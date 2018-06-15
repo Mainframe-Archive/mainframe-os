@@ -9,7 +9,12 @@ import type {
 // eslint-disable-next-line import/named
 import { idType, type ID } from '@mainframe/utils-id'
 
-import type { AppManifest, AppUserSettings, SessionData } from '../../app/App'
+import {
+  validateManifest,
+  type AppManifest,
+  type ManifestValidationResult,
+} from '../../app/manifest'
+import type { AppUserSettings, SessionData } from '../../app/App'
 
 import { clientError, sessionError } from '../errors'
 import type RequestContext from '../RequestContext'
@@ -41,6 +46,36 @@ type AppInstalled = {
   users: Array<User>,
 }
 
+const createClientSession = (
+  ctx: RequestContext,
+  appID: ID,
+  userID: ID,
+  session: SessionData,
+): ClientSession => {
+  const app = ctx.openVault.apps.getByID(appID)
+  if (app == null) {
+    throw new Error('Invalid appID')
+  }
+  const user = ctx.openVault.identities.getOwnUser(userID)
+  if (user == null) {
+    throw new Error('Invalid userID')
+  }
+  return {
+    user: {
+      id: userID,
+      data: user.data,
+    },
+    session: {
+      id: session.sessID,
+      permissions: session.permissions,
+    },
+    app: {
+      id: appID,
+      manifest: app.manifest,
+    },
+  }
+}
+
 export const checkPermission = (
   ctx: RequestContext,
   [sessID, key, input]: [ID, PermissionKey, ?string] = [],
@@ -58,6 +93,7 @@ export const close = (ctx: RequestContext, [sessID]: [ID] = []): void => {
   ctx.openVault.closeApp(sessID)
 }
 
+// TODO: replace by list with filters
 export const getInstalled = (
   ctx: RequestContext,
 ): { apps: Array<AppInstalled> } => {
@@ -134,32 +170,9 @@ export const setPermission = async (
   }
 }
 
-const createClientSession = (
+export const validate = (
   ctx: RequestContext,
-  appID: ID,
-  userID: ID,
-  session: SessionData,
-): ClientSession => {
-  const app = ctx.openVault.apps.getByID(appID)
-  if (app == null) {
-    throw new Error('Invalid appID')
-  }
-  const user = ctx.openVault.identities.getOwnUser(userID)
-  if (user == null) {
-    throw new Error('Invalid userID')
-  }
-  return {
-    user: {
-      id: userID,
-      data: user.data,
-    },
-    session: {
-      id: session.sessID,
-      permissions: session.permissions,
-    },
-    app: {
-      id: appID,
-      manifest: app.manifest,
-    },
-  }
-}
+  [manifest]: [AppManifest] = [],
+): { result: ManifestValidationResult } => ({
+  result: validateManifest(manifest),
+})

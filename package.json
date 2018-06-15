@@ -5,7 +5,9 @@
   "license": "MIT",
   "private": true,
   "workspaces": {
-    "packages": ["packages/*"],
+    "packages": [
+      "packages/*"
+    ],
     "nohoist": [
       "**/@mainframe/rpc-*",
       "**/@mainframe/transport-*",
@@ -13,6 +15,7 @@
       "**/electron",
       "**/electron-better-ipc",
       "**/electron-webpack",
+      "**/es6-error",
       "**/fs-extra",
       "**/nanoid",
       "**/react",
@@ -27,8 +30,7 @@
   },
   "scripts": {
     "flow:create-symlinks": "flow-mono create-symlinks .flowconfig",
-    "flow:install-types":
-      "flow-mono install-types --overwrite --ignoreDeps=dev",
+    "flow:install-types": "flow-mono install-types --overwrite --ignoreDeps=dev",
     "flow:reinstall": "lerna exec del flow-typed && yarn flow:install-types",
     "flow:align": "flow-mono align-versions",
     "flow:bootstrap": "yarn flow:create-symlinks && yarn flow:install-types",
@@ -40,6 +42,9 @@
     "test:all": "yarn lint && yarn test",
     "build": "lerna run build",
     "start": "yarn build && yarn test:all"
+  },
+  "resolutions": {
+    "esm": "3.0.44"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
@@ -54,12 +59,12 @@
     "del-cli": "^1.1.0",
     "eslint": "^4.19.1",
     "eslint-config-mainframe": "^1.3.1",
-    "flow-bin": "^0.73.0",
+    "flow-bin": "^0.74.0",
     "flow-copy-source": "^2.0.0",
-    "flow-mono-cli": "^1.3.1",
+    "flow-mono-cli": "^1.3.3",
     "flow-remove-types": "^1.2.3",
     "flow-typed": "^2.4.0",
     "lerna": "^2.11.0",
-    "prettier": "^1.13.2"
+    "prettier": "^1.13.5"
   }
 }

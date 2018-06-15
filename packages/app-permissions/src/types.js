@@ -16,6 +16,18 @@ export type PermissionsDefinitions = {
   [PermissionKeyBasic]: boolean,
 }
 
+export type PartialPermissionsDefinitions = {
+  HTTPS_REQUEST?: HTTPSRequestDefinition,
+  [PermissionKeyBasic]: boolean,
+}
+
+export type PermissionsDefinitionsDifference = {
+  added: PartialPermissionsDefinitions,
+  changed: PartialPermissionsDefinitions,
+  removed: PartialPermissionsDefinitions,
+  unchanged: PartialPermissionsDefinitions,
+}
+
 export type HTTPSRequestGrant = {
   granted: HTTPSRequestDefinition,
   denied: HTTPSRequestDefinition,
@@ -35,8 +47,12 @@ export type PermissionLifetime =
   | 'user' // As long as the user allows
   | 'session' // As long as the app is running
 
-export type PermissionRequirements = {
+export type PermissionsRequirements = {
   [PermissionRequirement]: PermissionsDefinitions,
+}
+
+export type PermissionsRequirementsDifference = {
+  [PermissionRequirement]: PermissionsDefinitionsDifference,
 }
 
 export type PermissionsDetails = { [PermissionLifetime]: PermissionsGrants }

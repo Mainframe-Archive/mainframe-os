@@ -15,13 +15,13 @@ export const promptVault = async (setDefault: ?boolean = false) => {
     },
     {
       type: 'password',
-      name: 'passphrase',
-      message: 'Vault passphrase (make it long!)',
+      name: 'password',
+      message: 'Vault password (make it secure!)',
     },
     {
       type: 'password',
       name: 'confirmation',
-      message: 'Vault passphrase (confirmation)',
+      message: 'Vault password (confirmation)',
     },
     {
       type: 'confirm',
@@ -34,14 +34,14 @@ export const promptVault = async (setDefault: ?boolean = false) => {
   if (answers.label.length === 0) {
     throw new Error('Label must be provided')
   }
-  if (answers.passphrase !== answers.confirmation) {
-    throw new Error('Passphrase and confirmation do not match')
+  if (answers.password !== answers.confirmation) {
+    throw new Error('Password and confirmation do not match')
   }
 
   return {
     label: answers.label,
     setDefault: answers.setDefault,
-    passphrase: answers.passphrase,
+    password: answers.password,
   }
 }
 
@@ -65,7 +65,7 @@ export const createVault = async (
     }
   }
 
-  await client.createVault(path, vault.passphrase)
+  await client.createVault(path, vault.password)
   client.close()
 
   // Update config after successful creation by daemon
