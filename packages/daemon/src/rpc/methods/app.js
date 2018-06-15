@@ -14,7 +14,7 @@ import {
   type AppManifest,
   type ManifestValidationResult,
 } from '../../app/manifest'
-import type { AppManifest, AppUserSettings, SessionData } from '../../app/App'
+import type { AppUserSettings, SessionData } from '../../app/App'
 
 import { clientError, sessionError } from '../errors'
 import type RequestContext from '../RequestContext'

@@ -14,8 +14,8 @@ import {
   PASSWORDHASH_ALG_ARGON2ID13,
   PASSWORDHASH_MEMLIMIT_SENSITIVE,
   PASSWORDHASH_OPSLIMIT_SENSITIVE,
-  createSecretBoxKeyFromPassword,
   createPasswordHashSalt,
+  createSecretBoxKeyFromPassword,
 } from '@mainframe/utils-crypto'
 // eslint-disable-next-line import/named
 import { type ID } from '@mainframe/utils-id'
@@ -44,6 +44,7 @@ type VaultKDF = {
 }
 
 type VaultMetadata = {
+  version: 1,
   kdf: VaultKDF,
 }
 
@@ -81,6 +82,9 @@ const readVaultFile = async (
     if (meta == null) {
       throw new Error('Missing metadata')
     }
+    if (meta.version !== 1) {
+      throw new Error('Invalid vault format version')
+    }
 
     const key = await createSecretBoxKeyFromPassword(
       password,
@@ -97,7 +101,14 @@ const readVaultFile = async (
   if (file.opened == null) {
     throw new Error('Invalid password')
   }
-  return JSON.parse(file.opened.toString())
+  if (keyParams == null) {
+    throw new Error('Invalid file')
+  }
+
+  return {
+    data: JSON.parse(file.opened.toString()),
+    keyParams,
+  }
 }
 
 export type VaultData = {
@@ -195,6 +206,7 @@ export default class Vault {
   save() {
     const data = Buffer.from(JSON.stringify(this.toJSON()))
     return writeEncryptedFile(this._path, data, this._keyParams.key, {
+      version: 1,
       kdf: this._keyParams.kdf,
     })
   }

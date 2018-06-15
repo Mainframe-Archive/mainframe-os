@@ -43,6 +43,9 @@
     "build": "lerna run build",
     "start": "yarn build && yarn test:all"
   },
+  "resolutions": {
+    "esm": "3.0.44"
+  },
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.0",

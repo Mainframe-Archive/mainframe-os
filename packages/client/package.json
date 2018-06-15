@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@mainframe/rpc-ipc": "^0.2.0",
-    "rxjs": "^6.1.0"
+    "rxjs": "^6.2.1"
   },
   "devDependencies": {
     "@mainframe/app-permissions": "*",

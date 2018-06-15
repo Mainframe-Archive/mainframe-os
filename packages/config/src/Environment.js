@@ -73,7 +73,7 @@ export default class Environment {
   static async destroy(name: string) {
     const env = Environment.load(name)
     // Delete all environment folders
-    await Promise.all(Object.values(env.paths).map(remove))
+    await Promise.all(Object.values(env.paths).map(path => remove(path)))
 
     envsConf.delete(envKey(name))
     if (envsConf.get(DEFAULT_KEY) === name) {

@@ -11,6 +11,7 @@
 
 - `env:create`: create a new environment
 - `env:default`: get or set the default environment to use
+- `env:delete`: delete an environment
 - `env:list`: list the environments
 - `daemon:setup`: configure the daemon binary and socket paths
 - `daemon:status`: display the daemon running status and socket path
