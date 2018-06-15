@@ -39,7 +39,7 @@ export default class AppContainer extends Component<
   { windowId: string },
   State,
 > {
-  state: State = {}
+  state = {}
 
   componentDidMount() {
     this.fetchSession()

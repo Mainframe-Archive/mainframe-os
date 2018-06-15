@@ -90,7 +90,7 @@ export const install = async (
   const appID = ctx.openVault.installApp(manifest, userID, settings)
   await ctx.openVault.save()
   const session = ctx.openVault.openApp(appID, userID)
-  return constructClientSession(ctx, appID, userID, session)
+  return createClientSession(ctx, appID, userID, session)
 }
 
 export const remove = async (
@@ -106,7 +106,7 @@ export const open = (
   [appID, userID]: [ID, ID] = [],
 ): ClientSession => {
   const session = ctx.openVault.openApp(appID, userID)
-  return constructClientSession(ctx, appID, userID, session)
+  return createClientSession(ctx, appID, userID, session)
 }
 
 export const setPermission = async (
@@ -134,31 +134,32 @@ export const setPermission = async (
   }
 }
 
-const constructClientSession = (
+const createClientSession = (
   ctx: RequestContext,
   appID: ID,
   userID: ID,
   session: SessionData,
 ): ClientSession => {
-  const user = ctx.openVault.identities.getOwnUser(userID)
   const app = ctx.openVault.apps.getByID(appID)
-  if (user && app) {
-    return {
-      user: {
-        id: userID,
-        data: user.data,
-      },
-      session: {
-        id: session.sessID,
-        permissions: session.permissions,
-      },
-      app: {
-        id: appID,
-        manifest: app.manifest,
-      },
-    }
-  } else {
-    const type = !user ? 'user' : 'app'
-    throw new Error(`Missing ${type}`)
+  if (app == null) {
+    throw new Error('Invalid appID')
+  }
+  const user = ctx.openVault.identities.getOwnUser(userID)
+  if (user == null) {
+    throw new Error('Invalid userID')
+  }
+  return {
+    user: {
+      id: userID,
+      data: user.data,
+    },
+    session: {
+      id: session.sessID,
+      permissions: session.permissions,
+    },
+    app: {
+      id: appID,
+      manifest: app.manifest,
+    },
   }
 }
