@@ -8,12 +8,15 @@ import type { ID } from '@mainframe/utils-id'
 
 import AppInstallModal from './AppInstallModal'
 import Button from '../Button'
+import ModalView from '../ModalView'
+import IdentitySelectorView from './IdentitySelectorView'
 
 const fs = remote.require('fs-extra')
 const path = remote.require('path')
 
 type State = {
   showAppInstallModal: boolean,
+  selectIdForApp?: ?Object,
   installedApps: Array<Object>,
 }
 
@@ -53,6 +56,39 @@ export default class App extends Component<{}, State> {
     this.getInstalledApps()
   }
 
+  onOpenApp = async (appID: ID) => {
+    const app = this.state.installedApps.find(a => a.appID === appID)
+    if (!app) {
+      return
+    }
+    if (app.users.length > 1) {
+      this.setState({
+        selectIdForApp: app,
+      })
+    } else {
+      this.openApp(app.appID, app.users[0].id)
+    }
+  }
+
+  onCloseIdSelector = () => {
+    this.setState({
+      selectIdForApp: undefined,
+    })
+  }
+
+  onSelectAppUser = (userID: ID) => {
+    if (this.state.selectIdForApp) {
+      this.openApp(this.state.selectIdForApp.appID, userID)
+    }
+  }
+
+  async openApp(appID: ID, userID: ID) {
+    await callMainProcess('launchApp', [appID, userID])
+    this.setState({
+      selectIdForApp: undefined,
+    })
+  }
+
   // RENDER
 
   render() {
@@ -60,8 +96,7 @@ export default class App extends Component<{}, State> {
       const manifest = app.manifest
 
       const onClick = async () => {
-        // TODO User selection
-        await callMainProcess('launchApp', [app.appID, app.users[0].id])
+        this.onOpenApp(app.appID)
       }
 
       const onClickDelete = () => {
@@ -97,12 +132,22 @@ export default class App extends Component<{}, State> {
       />
     ) : null
 
+    const appIdentitySelector = this.state.selectIdForApp ? (
+      <ModalView isOpen={true} onRequestClose={this.onCloseIdSelector}>
+        <IdentitySelectorView
+          users={this.state.selectIdForApp.users}
+          onSelectId={this.onSelectAppUser}
+        />
+      </ModalView>
+    ) : null
+
     return (
       <View style={styles.container}>
         <Text style={styles.title}>Mainframe Launcher</Text>
         <View style={styles.apps}>{appRows}</View>
         <Button title="Install New App" onPress={this.onPressInstall} />
         {installModal}
+        {appIdentitySelector}
       </View>
     )
   }

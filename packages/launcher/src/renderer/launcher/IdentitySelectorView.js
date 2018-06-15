@@ -21,7 +21,10 @@ type User = {
 }
 
 type Props = {
+  users: Array<User>,
+  enableCreate?: boolean,
   onSelectId: (id: ID) => void,
+  onCreatedId?: (id: ID) => void,
 }
 
 type State = {
@@ -36,29 +39,17 @@ export default class IdentitySelectorView extends Component<Props, State> {
     newName: '',
   }
 
-  componentDidMount() {
-    this.getOwnUserIds()
-  }
-
-  async getOwnUserIds() {
-    try {
-      const res = await client.getOwnUserIdentities()
-      this.setState({ users: res.users })
-    } catch (err) {
-      // TODO: Handle error
-      console.warn(err)
-    }
-  }
-
   onPressCreateId = () => {
-    this.createNewId()
+    this.createId()
   }
 
-  createNewId = async () => {
+  async createId() {
     try {
       const res = await client.createUserIdentity({ name: this.state.newName })
-      this.getOwnUserIds()
       this.setState({ newName: '' })
+      if (this.props.onCreatedId) {
+        this.props.onCreatedId(res.id)
+      }
     } catch (err) {
       // TODO: Handle error
       console.warn(err)
@@ -82,10 +73,29 @@ export default class IdentitySelectorView extends Component<Props, State> {
       )
     }
 
-    const idRows = this.state.users.map((user, index) => {
+    const idRows = this.props.users.map((user, index) => {
       const handler = () => this.props.onSelectId(user.id)
       return rowRender(user.id, user.data.name, handler)
     })
+
+    const createIdentity = this.props.enableCreate ? (
+      <View style={styles.createIdContainer}>
+        <Text>Create New Identity</Text>
+        <View style={styles.createIdForm}>
+          <TextInput
+            style={styles.input}
+            onChangeText={this.onChangeName}
+            value={this.state.newName}
+            placeholder="name"
+          />
+          <Button
+            onPress={this.onPressCreateId}
+            title="Create"
+            disabled={!this.state.newName}
+          />
+        </View>
+      </View>
+    ) : null
 
     const newIdForm = this.state.showCreateIdForm ? (
       <View>
@@ -96,22 +106,7 @@ export default class IdentitySelectorView extends Component<Props, State> {
       <View>
         <Text style={styles.header}>{header}</Text>
         {idRows}
-        <View style={styles.createIdContainer}>
-          <Text>Create New Identity</Text>
-          <View style={styles.createIdForm}>
-            <TextInput
-              style={styles.input}
-              onChangeText={this.onChangeName}
-              value={this.state.newName}
-              placeholder="name"
-            />
-            <Button
-              onPress={this.onPressCreateId}
-              title="Create"
-              disabled={!this.state.newName}
-            />
-          </View>
-        </View>
+        {createIdentity}
       </View>
     )
   }

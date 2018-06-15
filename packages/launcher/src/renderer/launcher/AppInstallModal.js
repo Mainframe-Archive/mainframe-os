@@ -8,18 +8,13 @@ import React, {
   type Element,
   type ElementRef,
 } from 'react'
-import {
-  View,
-  TouchableOpacity,
-  StyleSheet,
-  Text,
-  Modal,
-} from 'react-native-web'
+import { View, TouchableOpacity, StyleSheet, Text } from 'react-native-web'
 import ReactModal from 'react-modal'
 import type { ID } from '@mainframe/utils-id'
 
 import { client } from '../electronIpc.js'
 import Button from '../Button'
+import ModalView from '../ModalView'
 import PermissionsView, { type PermissionOptions } from './PermissionsView'
 import IdentitySelectorView from './IdentitySelectorView'
 
@@ -28,6 +23,12 @@ type Props = {
   onInstallComplete: (appID: ID) => void,
 }
 
+type User = {
+  id: ID,
+  data: {
+    name: string,
+  },
+}
 type State = {
   inputValue: string,
   installStep: 'manifest' | 'permissions' | 'download' | 'id',
@@ -38,6 +39,7 @@ type State = {
   userPermissions?: PermissionsGrants,
   appPath?: string,
   userId?: ID,
+  ownUsers: Array<User>,
 }
 
 export default class AppInstallModal extends Component<Props, State> {
@@ -45,6 +47,7 @@ export default class AppInstallModal extends Component<Props, State> {
     inputValue: '',
     installStep: 'manifest',
     manifest: null,
+    ownUsers: [],
   }
 
   // $FlowFixMe: React Ref
@@ -92,7 +95,18 @@ export default class AppInstallModal extends Component<Props, State> {
     setTimeout(this.onDownloadComplete, 1000, 'testPath')
   }
 
-  onDownloadComplete = (path: string) => {
+  async getOwnIdentities() {
+    try {
+      const res = await client.getOwnUserIdentities()
+      this.setState({ ownUsers: res.users })
+    } catch (err) {
+      // TODO: Handle error
+      console.warn(err)
+    }
+  }
+
+  onDownloadComplete = async (path: string) => {
+    await this.getOwnIdentities()
     this.setState({
       appPath: path,
       installStep: 'id',
@@ -101,6 +115,10 @@ export default class AppInstallModal extends Component<Props, State> {
 
   onSelectId = (id: ID) => {
     this.setState({ userId: id }, this.saveApp)
+  }
+
+  onCreatedId = (id: ID) => {
+    this.getOwnIdentities()
   }
 
   saveApp = async () => {
@@ -125,7 +143,7 @@ export default class AppInstallModal extends Component<Props, State> {
 
   renderManifestImport() {
     return (
-      <View style={styles.container}>
+      <View>
         <Text style={styles.header}>Install New App</Text>
         <Text style={styles.description}>Import an app manifest file</Text>
         <Button
@@ -148,7 +166,7 @@ export default class AppInstallModal extends Component<Props, State> {
     const { manifest } = this.state
 
     return manifest ? (
-      <View style={styles.container}>
+      <View>
         <Text style={styles.header}>{`Manage permissions for ${
           manifest.name
         }`}</Text>
@@ -164,7 +182,7 @@ export default class AppInstallModal extends Component<Props, State> {
     const { manifest } = this.state
 
     return manifest ? (
-      <View style={styles.container}>
+      <View>
         <Text style={styles.header}>{`Downloading ${manifest.name}`}</Text>
         <Text>Downloading from swarm...</Text>
       </View>
@@ -173,9 +191,12 @@ export default class AppInstallModal extends Component<Props, State> {
 
   renderSetId() {
     return (
-      <View style={styles.container}>
-        <IdentitySelectorView onSelectId={this.onSelectId} />
-      </View>
+      <IdentitySelectorView
+        enableCreate
+        onSelectId={this.onSelectId}
+        users={this.state.ownUsers}
+        onCreatedId={this.onCreatedId}
+      />
     )
   }
 
@@ -194,9 +215,9 @@ export default class AppInstallModal extends Component<Props, State> {
 
   render() {
     return (
-      <ReactModal isOpen={true} onRequestClose={this.props.onRequestClose}>
+      <ModalView isOpen={true} onRequestClose={this.props.onRequestClose}>
         {this.renderContent()}
-      </ReactModal>
+      </ModalView>
     )
   }
 }
@@ -205,13 +226,6 @@ const COLOR_WHITE = '#ffffff'
 const COLOR_GREY = '#eeeeee'
 
 const styles = StyleSheet.create({
-  container: {
-    maxWidth: 520,
-    minWidth: 420,
-    padding: 20,
-    backgroundColor: COLOR_WHITE,
-    flex: 1,
-  },
   header: {
     fontSize: 18,
     fontWeight: 'bold',
