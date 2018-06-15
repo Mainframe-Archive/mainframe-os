@@ -34,7 +34,6 @@ import IdentitiesRepository, {
   type IdentitiesRepositorySerialized, // eslint-disable-line import/named
 } from '../identity/IdentitiesRepository'
 import type Keychain from '../identity/Keychain'
-import { readSecureFile, writeSecureFile } from '../utils'
 
 type VaultKDF = {
   algorithm: number,
