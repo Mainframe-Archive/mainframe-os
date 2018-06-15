@@ -168,11 +168,7 @@ export default class Vault {
     return sessionData
   }
 
-  installApp(
-    manifest: AppManifest,
-    userID: ID,
-    settings: AppUserSettings,
-  ): SessionData {
+  installApp(manifest: AppManifest, userID: ID, settings: AppUserSettings): ID {
     let appID = this.apps.getID(manifest.id)
     if (appID == null) {
       // Add app with user settings
@@ -181,7 +177,7 @@ export default class Vault {
       // Set user settings for already existing app
       this.apps.setUserSettings(appID, userID, settings)
     }
-    return this.openApp(appID, userID)
+    return appID
   }
 
   removeApp(appID: ID) {

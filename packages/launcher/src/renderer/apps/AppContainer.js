@@ -4,21 +4,73 @@ import React, { Component } from 'react'
 import { View, StyleSheet, Text } from 'react-native-web'
 import path from 'path'
 import url from 'url'
+import type { ID } from '@mainframe/utils-id'
+
+import { callMainProcess } from '../electronIpc'
 
 declare var __static: string
 
-export default class App extends Component<{ appId: string }> {
+type User = {
+  id: ID,
+  data: Object,
+}
+
+type App = {
+  id: ID,
+  manifest: Object,
+}
+
+type Session = {
+  id: ID,
+  permission: Object,
+}
+
+type AppSessionData = {
+  app: App,
+  user: User,
+  session: Session,
+}
+
+type State = {
+  sessionData?: AppSessionData,
+}
+
+export default class AppContainer extends Component<
+  { windowId: string },
+  State,
+> {
+  state = {}
+
+  componentDidMount() {
+    this.fetchSession()
+  }
+
+  async fetchSession() {
+    const { windowId } = this.props
+    try {
+      const res = await callMainProcess('getAppSession', [windowId])
+      this.setState({
+        sessionData: res.appSession,
+      })
+    } catch (err) {
+      console.warn(err)
+      //TODO handle error
+    }
+  }
+
   render() {
-    const { appId } = this.props
+    const { sessionData } = this.state
+    if (!sessionData) {
+      return <View />
+    }
     // TODO Use path provided by dameon
-    const demoAppId = 'sandbox'
     const appUrl = url.format({
       pathname: path.join(
         __static,
         'applications',
-        demoAppId,
-        `${demoAppId}.asar`,
-        `index.html`,
+        'sandbox',
+        'sandbox.asar',
+        'index.html',
       ),
       protocol: 'file:',
       slashes: true,
@@ -32,10 +84,10 @@ export default class App extends Component<{ appId: string }> {
       <View style={styles.outerContainer}>
         <View style={styles.header}>
           <View style={styles.appInfo}>
-            <Text>App: {appId}</Text>
+            <Text>App: {sessionData.app.manifest.name}</Text>
           </View>
           <View style={styles.identity}>
-            <Text>id: James Smith</Text>
+            <Text>User: {sessionData.user.data.name}</Text>
           </View>
         </View>
         <webview
