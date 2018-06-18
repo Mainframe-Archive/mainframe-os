@@ -1,20 +1,20 @@
-# Mainframe Browser
+# Mainframe Platform
 
-A browser for the new decentralized web. Makes building and running distributed, unstoppable apps easier. Built with electron.
+A platform for the new decentralized web. Makes building and running distributed, unstoppable apps easier.
 
 ## Overview
 
 The main components (packages) of the Mainframe Browser are as follows:
 
-- `daemon`: a background daemon process
-- `launcher`: a front-end browser (powered by electron)
+- `daemon`: a background daemon process that communicates with decentralized services
+- `launcher`: a front-end browser-like app launcher (powered by electron)
 
 In addition, there are several auxiliary packages:
 
-- `app-permissions`: a grouping of permissions that can be granted to dapps
+- `app-permissions`: a utility library for distributed app permissions
 - `cli`: a command-line interface to communicate with the daemon
-- `client`: a library used by the front-end to communicate with the daemon
-- `config`: the configuration object that several components rely on
+- `client`: a library used by the CLI & launcher to communicate with the daemon
+- `config`: shared configuration utilities used by several packages
 - `toolbox`: a set of functions that both the launcher and the cli use
 
 In order to make it easier to share code among packages, this project uses [lerna](https://lernajs.io/). Whenever code changes, it's expected that you run `yarn build` from the root of the project directory, and it will kick off the necessary `lerna` build processes in the package folders.
@@ -25,21 +25,18 @@ Each package contains (or will contain) a readme with further information pertai
 In the root of the project, install node dependencies:
 ```
 $ yarn install
-$ (cd packages/launcher; yarn install)
 $ yarn bootstrap
 ```
 
 Next, set up the daemon using the CLI:
 ```
-$ cd packages/cli
-$ ./bin/run env:create
-$ ./bin/run daemon:setup --bin-path=../daemon/bin/run --socket-path=/tmp/mainframe.ipc
+$ packages/cli/bin/run env:create
+$ packages/cli/bin/run daemon:setup --bin-path=$(pwd)/packages/daemon/bin/run
 ```
 
 Currently it is necessary to create a vault with password `testKey`:
 ```
-$ cd packages/cli
-$ ./bin/run vault:create
+$ packages/cli/bin/run vault:create
 ? Vault label TestVault
 ? Vault passphrase (make it long!) testKey
 ? Vault passphrase (confirmation) testKey
