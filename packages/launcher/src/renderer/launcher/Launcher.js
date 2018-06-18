@@ -8,12 +8,17 @@ import type { ID } from '@mainframe/utils-id'
 
 import AppInstallModal from './AppInstallModal'
 import Button from '../Button'
+import ModalView from '../ModalView'
+import IdentitySelectorView from './IdentitySelectorView'
+
+import colors from '../colors'
 
 const fs = remote.require('fs-extra')
 const path = remote.require('path')
 
 type State = {
   showAppInstallModal: boolean,
+  selectIdForApp?: ?Object,
   installedApps: Array<Object>,
 }
 
@@ -53,6 +58,39 @@ export default class App extends Component<{}, State> {
     this.getInstalledApps()
   }
 
+  onOpenApp = async (appID: ID) => {
+    const app = this.state.installedApps.find(a => a.appID === appID)
+    if (!app) {
+      return
+    }
+    if (app.users.length > 1) {
+      this.setState({
+        selectIdForApp: app,
+      })
+    } else {
+      this.openApp(app.appID, app.users[0].id)
+    }
+  }
+
+  onCloseIdSelector = () => {
+    this.setState({
+      selectIdForApp: undefined,
+    })
+  }
+
+  onSelectAppUser = (userID: ID) => {
+    if (this.state.selectIdForApp) {
+      this.openApp(this.state.selectIdForApp.appID, userID)
+    }
+  }
+
+  async openApp(appID: ID, userID: ID) {
+    await callMainProcess('launchApp', [appID, userID])
+    this.setState({
+      selectIdForApp: undefined,
+    })
+  }
+
   // RENDER
 
   render() {
@@ -60,8 +98,7 @@ export default class App extends Component<{}, State> {
       const manifest = app.manifest
 
       const onClick = async () => {
-        // TODO User selection
-        await callMainProcess('launchApp', [app.appID, app.users[0].id])
+        this.onOpenApp(app.appID)
       }
 
       const onClickDelete = () => {
@@ -97,20 +134,26 @@ export default class App extends Component<{}, State> {
       />
     ) : null
 
+    const appIdentitySelector = this.state.selectIdForApp ? (
+      <ModalView isOpen={true} onRequestClose={this.onCloseIdSelector}>
+        <IdentitySelectorView
+          users={this.state.selectIdForApp.users}
+          onSelectId={this.onSelectAppUser}
+        />
+      </ModalView>
+    ) : null
+
     return (
       <View style={styles.container}>
         <Text style={styles.title}>Mainframe Launcher</Text>
         <View style={styles.apps}>{appRows}</View>
         <Button title="Install New App" onPress={this.onPressInstall} />
         {installModal}
+        {appIdentitySelector}
       </View>
     )
   }
 }
-
-const COLOR_LIGHT_GREY = '#e8e8e8'
-const COLOR_GREY_MED = '#818181'
-const COLOR_WHITE = '#ffffff'
 
 const styles = StyleSheet.create({
   container: {
@@ -126,7 +169,7 @@ const styles = StyleSheet.create({
   appRow: {
     padding: 10,
     marginBottom: 10,
-    borderColor: COLOR_LIGHT_GREY,
+    borderColor: colors.LIGHT_GREY_E8,
     borderWidth: 1,
     flexDirection: 'row',
     borderRadius: 3,
@@ -135,14 +178,14 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: COLOR_LIGHT_GREY,
+    backgroundColor: colors.LIGHT_GREY_E8,
   },
   openApp: {
     flex: 1,
   },
   deleteApp: {
-    backgroundColor: COLOR_GREY_MED,
-    color: COLOR_WHITE,
+    backgroundColor: colors.GREY_MED_81,
+    color: colors.WHITE,
     borderRadius: 2,
     height: 22,
     justifyContent: 'center',
@@ -161,6 +204,6 @@ const styles = StyleSheet.create({
   appUsers: {
     marginTop: 5,
     fontSize: 12,
-    color: COLOR_GREY_MED,
+    color: colors.GREY_MED_81,
   },
 })
