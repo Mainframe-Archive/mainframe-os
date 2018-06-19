@@ -9,7 +9,7 @@
     "dist": "yarn compile && electron-builder",
     "dist:dir": "yarn dist --dir -c.compression=store -c.mac.identity=null",
     "build:flow": "flow-copy-source src lib",
-    "test": "flow check"
+    "test:types": "flow check"
   },
   "electronWebpack": {
     "title": "Mainframe",

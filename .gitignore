@@ -1,6 +1,6 @@
 node_modules
+coverage
 /packages/*/flow-typed
 /packages/*/lib
 /packages/*/.flowconfig
 *.log
-/packages/launcher/dist

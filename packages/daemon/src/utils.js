@@ -1,13 +1,10 @@
 // @flow
 
-export const mapObject = <T, U>(mapper: (input: T) => U) => (
-  obj: ?{ [string]: T },
-): { [string]: U } => {
-  return obj == null
-    ? {}
-    : Object.keys(obj).reduce((acc, key) => {
-        // $FlowFixMe: obj[key] shouldn't be possibly null
-        acc[key] = mapper(obj[key])
-        return acc
-      }, {})
+export const mapObject = <V, T>(mapper: (input: V) => T) => (
+  obj: { [string]: V } = {},
+): $ObjMap<{ [string]: V }, mapper> => {
+  return Object.keys(obj).reduce((acc, key) => {
+    acc[key] = mapper(obj[key])
+    return acc
+  }, {})
 }

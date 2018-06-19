@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "contents": {
+    "version": 1,
+    "type": "encrypted",
+    "encrypted": {
+      "cipher":
+        "vsxhVQUZIEXyO3RFpmpZ8wvPEHFxM6elCGqq0A8x9vQCVB8LppBXi6G9VZtukJZH2kqpWO2mmVZdQCeJK4k5UzEKpWLxSnxjdOfPmqwNG4NsMvCj2ui5/Bgj3B/w3ILT0LZMICsFRZm2d/+l/IS7EaALZvg4wMQVElGxUvMJ2KfAMvE4t6dZ2g/3ry2xfOC0jwZLRIZy",
+      "nonce": "JVFncmvkt6AhhxWCqaUgtEW6JNol9jMp"
+    }
+  },
+  "metadata": {
+    "version": 0,
+    "kdf": {
+      "algorithm": 2,
+      "memlimit": 1073741824,
+      "opslimit": 4,
+      "salt": "Z23zIJCJCSapPZxdbo6anw=="
+    }
+  }
+}

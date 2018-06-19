@@ -52,7 +52,7 @@ type VaultKeyParams = {
   kdf: VaultKDF,
 }
 
-const createVaultKeyParams = async (
+export const createVaultKeyParams = async (
   password: Buffer,
 ): Promise<VaultKeyParams> => {
   const salt = createPasswordHashSalt()
@@ -72,7 +72,7 @@ const createVaultKeyParams = async (
   return { kdf, key }
 }
 
-const readVaultFile = async (
+export const readVaultFile = async (
   path: string,
   password: Buffer,
 ): Promise<{ keyParams: VaultKeyParams, data: Object }> => {
@@ -83,6 +83,9 @@ const readVaultFile = async (
     }
     if (meta.version !== 1) {
       throw new Error('Invalid vault format version')
+    }
+    if (meta.kdf == null) {
+      throw new Error('Missing KDF parameters in metadata')
     }
 
     const key = await createSecretBoxKeyFromPassword(
