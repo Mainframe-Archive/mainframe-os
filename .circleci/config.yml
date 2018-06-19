@@ -10,12 +10,23 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-          - dependencies-{{ checksum "package.json" }}
+          - v1-dependencies-{{ checksum "package.json" }}
           # fallback to using the latest cache if no exact match is found
-          - dependencies
-      - run: yarn install && yarn bootstrap
+          - v1-dependencies
+      - run:
+          name: Setup
+          command: yarn install && yarn bootstrap
       - save_cache:
           paths:
             - node_modules
-          key: dependencies-{{ checksum "package.json" }}
-      - run: yarn build && yarn test:all
+          key: v1-dependencies-{{ checksum "package.json" }}
+      - run:
+          name: Build and check
+          command: yarn build && yarn lint && yarn test:types
+      - run:
+          name: Project tests
+          command: yarn test:ci
+          environment:
+            JEST_JUNIT_OUTPUT: "/tmp/test-reports/jest/results.xml"
+      - store_test_results:
+          path: /tmp/test-reports

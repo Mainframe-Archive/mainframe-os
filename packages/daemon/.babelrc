@@ -17,5 +17,10 @@
     "syntax-object-rest-spread",
     "transform-class-properties",
     "transform-object-rest-spread"
-  ]
+  ],
+  "env": {
+    "test": {
+      "presets": ["env", "flow"]
+    }
+  }
 }
