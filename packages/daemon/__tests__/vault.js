@@ -25,6 +25,7 @@ describe('vault', () => {
   })
 
   it('readVaultFile() opens the vault file when provided the correct password', async () => {
+    jest.setTimeout(10000) // 10 secs - password hashing takes a few secs
     const file = await readVaultFile(
       getFixture('1.vault-ok.json'),
       Buffer.from('password'),
@@ -70,7 +71,7 @@ describe('vault', () => {
   })
 
   it('Vault.create() creates a vault and Vault.open() opens it', async () => {
-    jest.setTimeout(15000) // 15 secs - password hashing takes a few secs
+    jest.setTimeout(20000) // 20 secs - password hashing takes a few secs
     const path = getTempFile('vault-create-open')
     const password = Buffer.from('password')
     await Vault.create(path, password)
