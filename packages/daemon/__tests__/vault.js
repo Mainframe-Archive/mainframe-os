@@ -4,13 +4,8 @@ import {
   PASSWORDHASH_OPSLIMIT_SENSITIVE,
   SECRETBOX_KEYBYTES,
 } from '@mainframe/utils-crypto'
-import { tmpdir } from 'os'
-import { join } from 'path'
 
 import Vault, { createVaultKeyParams, readVaultFile } from '../lib/vault/Vault'
-
-const getFixture = name => join(__dirname, '__fixtures__', name)
-const getTempFile = name => join(tmpdir(), 'mf-platform-vault', name)
 
 describe('vault', () => {
   it('createVaultKeyParams() creates a random key using the provided password', async () => {
@@ -27,7 +22,7 @@ describe('vault', () => {
   it('readVaultFile() opens the vault file when provided the correct password', async () => {
     jest.setTimeout(10000) // 10 secs - password hashing takes a few secs
     const file = await readVaultFile(
-      getFixture('1.vault-ok.json'),
+      getFixture(__dirname, '1.vault-ok.json'),
       Buffer.from('password'),
     )
     expect(file.data).toEqual(expect.any(Object))
@@ -37,7 +32,7 @@ describe('vault', () => {
   it('readVaultFile() throws an error if the vault password is incorrect', () => {
     expect(
       readVaultFile(
-        getFixture('1.vault-ok.json'),
+        getFixture(__dirname, '1.vault-ok.json'),
         Buffer.from('wrong password'),
       ),
     ).rejects.toThrow('Invalid password')
@@ -46,7 +41,7 @@ describe('vault', () => {
   it('readVaultFile() throws an error if no metadata is provided', () => {
     expect(
       readVaultFile(
-        getFixture('2.vault-no-metadata.json'),
+        getFixture(__dirname, '2.vault-no-metadata.json'),
         Buffer.from('password'),
       ),
     ).rejects.toThrow('Missing metadata')
@@ -55,7 +50,7 @@ describe('vault', () => {
   it('readVaultFile() throws an error if the metadata version is not 1', () => {
     expect(
       readVaultFile(
-        getFixture('3.vault-metadata-bad-version.json'),
+        getFixture(__dirname, '3.vault-metadata-bad-version.json'),
         Buffer.from('password'),
       ),
     ).rejects.toThrow('Invalid vault format version')
@@ -64,7 +59,7 @@ describe('vault', () => {
   it('readVaultFile() throws an error if the metadata KDF params are not set', () => {
     expect(
       readVaultFile(
-        getFixture('4.vault-metadata-no-kdf.json'),
+        getFixture(__dirname, '4.vault-metadata-no-kdf.json'),
         Buffer.from('password'),
       ),
     ).rejects.toThrow('Missing KDF parameters in metadata')
