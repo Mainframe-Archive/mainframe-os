@@ -28,6 +28,7 @@
     "start": "node -r esm lib"
   },
   "dependencies": {
+    "@mainframe/app-manifest": "*",
     "@mainframe/app-permissions": "*",
     "@mainframe/rpc-error": "^0.1.0",
     "@mainframe/rpc-node": "^0.2.0",
@@ -47,6 +48,6 @@
     "semver": "^5.5.0"
   },
   "devDependencies": {
-    "flow-bin": "^0.74.0"
+    "flow-bin": "^0.75.0"
   }
 }

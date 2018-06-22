@@ -1,12 +1,14 @@
 // @flow
 
+// eslint-disable-next-line import/named
+import { validateManifest, type ManifestData } from '@mainframe/app-manifest'
 import {
   getRequirementsDifference,
   type PermissionKey, // eslint-disable-line import/named
   type PermissionGrant, // eslint-disable-line import/named
 } from '@mainframe/app-permissions'
 // eslint-disable-next-line import/named
-import { type base64 } from '@mainframe/utils-base64'
+import { base64Type, type base64 } from '@mainframe/utils-base64'
 // eslint-disable-next-line import/named
 import { uniqueID, idType, type ID } from '@mainframe/utils-id'
 
@@ -17,7 +19,6 @@ import App, {
   type AppUserSettings,
   type SessionData,
 } from './App'
-import { validateManifest, type AppManifest } from './manifest'
 
 export type AppUpdate = {
   app: App,
@@ -104,7 +105,7 @@ export default class AppsRepository {
     return this._byBase64[b64]
   }
 
-  add(manifest: AppManifest, userID: ID, settings: AppUserSettings): ID {
+  add(manifest: ManifestData, userID: ID, settings: AppUserSettings): ID {
     if (validateManifest(manifest) === 'valid') {
       throw new Error('Invalid manifest')
     }
@@ -121,7 +122,7 @@ export default class AppsRepository {
         },
       },
     })
-    this._byBase64[manifest.id] = appID
+    this._byBase64[base64Type(manifest.id)] = appID
 
     return appID
   }
@@ -159,7 +160,7 @@ export default class AppsRepository {
     const app = this.getByID(id)
     if (app != null) {
       // TODO: handle "clean" option to remove the app contents
-      delete this._byBase64[app.manifest.id]
+      delete this._byBase64[base64Type(app.manifest.id)]
       delete this._apps[id]
     }
   }
@@ -180,7 +181,7 @@ export default class AppsRepository {
     return this._updates[id]
   }
 
-  createUpdate(appID: ID, manifest: AppManifest): AppUpdate {
+  createUpdate(appID: ID, manifest: ManifestData): AppUpdate {
     const app = this.getByID(appID)
     if (app == null) {
       throw new Error('Invalid app')

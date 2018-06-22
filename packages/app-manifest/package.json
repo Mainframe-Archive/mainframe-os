@@ -19,6 +19,6 @@
     "@mainframe/app-permissions": "*",
     "@mainframe/utils-base64": "^0.1.0",
     "@mainframe/utils-crypto": "^0.2.1",
-    "flow-bin": "^0.74.0"
+    "flow-bin": "^0.75.0"
   }
 }

@@ -1,5 +1,6 @@
 // @flow
 
+import type { ManifestData } from '@mainframe/app-manifest'
 import type {
   PermissionKey,
   PermissionCheckResult,
@@ -8,6 +9,7 @@ import { readEncryptedFile, writeEncryptedFile } from '@mainframe/secure-file'
 import {
   decodeBase64,
   encodeBase64,
+  base64Type,
   type base64, // eslint-disable-line import/named
 } from '@mainframe/utils-base64'
 import {
@@ -28,7 +30,6 @@ import {
 import AppsRepository, {
   type AppsRepositorySerialized, // eslint-disable-line import/named
 } from '../app/AppsRepository'
-import { type AppManifest } from '../app/manifest'
 import type Session from '../app/Session'
 import IdentitiesRepository, {
   type IdentitiesRepositorySerialized, // eslint-disable-line import/named
@@ -181,8 +182,12 @@ export default class Vault {
     return sessionData
   }
 
-  installApp(manifest: AppManifest, userID: ID, settings: AppUserSettings): ID {
-    let appID = this.apps.getID(manifest.id)
+  installApp(
+    manifest: ManifestData,
+    userID: ID,
+    settings: AppUserSettings,
+  ): ID {
+    let appID = this.apps.getID(base64Type(manifest.id))
     if (appID == null) {
       // Add app with user settings
       appID = this.apps.add(manifest, userID, settings)
