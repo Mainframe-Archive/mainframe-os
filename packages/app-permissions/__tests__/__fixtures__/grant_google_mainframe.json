@@ -1,0 +1,7 @@
+{
+  "LOCATION_GET": false,
+  "HTTPS_REQUEST": {
+    "granted": ["https://google.com", "https://mainframe.com"],
+    "denied": ["https://facebook.com"]
+  }
+}
