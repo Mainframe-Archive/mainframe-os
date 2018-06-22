@@ -33,7 +33,7 @@ export const mergeGrantsToDetails = (
     ...app, // Manifest requirements overrides
     // Special case
     HTTPS_REQUEST: {
-      granted: app.HTTPS_REQUEST.granted.concat(user.HTTPS_REQUEST.granted),
+      granted: [...new Set([...app.HTTPS_REQUEST.granted, ...user.HTTPS_REQUEST.granted])],
       denied: [...user.HTTPS_REQUEST.denied],
     },
   },
