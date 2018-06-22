@@ -1,5 +1,5 @@
 {
-  "name": "@mainframe/app-permissions",
+  "name": "@mainframe/app-manifest",
   "version": "0.1.0",
   "main": "lib/index.js",
   "license": "MIT",
@@ -10,7 +10,15 @@
     "build": "yarn clean && yarn build:js && yarn build:flow",
     "test:types": "flow check"
   },
+  "dependencies": {
+    "@mainframe/secure-file": "^0.1.0",
+    "es6-error": "^4.1.1",
+    "semver": "^5.5.0"
+  },
   "devDependencies": {
+    "@mainframe/app-permissions": "*",
+    "@mainframe/utils-base64": "^0.1.0",
+    "@mainframe/utils-crypto": "^0.2.1",
     "flow-bin": "^0.74.0"
   }
 }

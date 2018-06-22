@@ -54,11 +54,11 @@ const createClientSession = (
 ): ClientSession => {
   const app = ctx.openVault.apps.getByID(appID)
   if (app == null) {
-    throw new Error('Invalid appID')
+    throw clientError('Invalid appID')
   }
   const user = ctx.openVault.identities.getOwnUser(userID)
   if (user == null) {
-    throw new Error('Invalid userID')
+    throw clientError('Invalid userID')
   }
   return {
     user: {
