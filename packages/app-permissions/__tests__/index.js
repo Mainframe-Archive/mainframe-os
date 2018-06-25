@@ -15,13 +15,13 @@ const readJsonFixture = filename => {
 }
 
 describe('EMPTY_DEFINITIONS', () => {
-  it('has HTTPS_REQUEST', async () => {
+  it('has HTTPS_REQUEST', () => {
     expect(EMPTY_DEFINITIONS).toHaveProperty('HTTPS_REQUEST')
   })
 })
 
 describe('mergeGrantsToDetails', () => {
-  it('merges', async () => {
+  it('merges', () => {
     const app = readJsonFixture('grant_google_twitter.json')
     const user = readJsonFixture('grant_google_mainframe.json')
 
@@ -30,7 +30,7 @@ describe('mergeGrantsToDetails', () => {
     expect(mergeGrantsToDetails(app, user)).toEqual(details)
   })
 
-  it('session grants are UNIONed', async () => {
+  it('session grants are UNIONed', () => {
     let g1 = ['https://google.com', 'https://twitter.com']
     let g2 = ['https://google.com', 'https://mainframe.com']
     let result = mergeGrantsToDetails(
