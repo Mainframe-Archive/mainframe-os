@@ -1,6 +1,10 @@
 // @flow
 
 import type {
+  ManifestData,
+  ManifestValidationResult,
+} from '@mainframe/app-manifest'
+import type {
   PermissionCheckResult,
   PermissionGrant,
   PermissionKey,
@@ -11,7 +15,6 @@ import type StreamRPC from '@mainframe/rpc-stream'
 import type { ID } from '@mainframe/utils-id'
 
 // TODO: extract API types from daemon
-type AppManifest = Object
 type AppUserSettings = Object
 
 type User = {
@@ -21,7 +24,7 @@ type User = {
 
 type App = {
   id: ID,
-  manifest: AppManifest,
+  manifest: ManifestData,
 }
 
 type Session = {
@@ -36,7 +39,7 @@ type ClientSession = {
 }
 
 type InstalledApp = {
-  manifest: AppManifest,
+  manifest: ManifestData,
   users: Array<ID>,
 }
 
@@ -82,6 +85,14 @@ export default class MainframeClient {
     return this._rpc.request('identity_getOwnUsers')
   }
 
+  // App creation
+
+  validateManifest(
+    manifest: ManifestData,
+  ): Promise<{ result: ManifestValidationResult }> {
+    return this._rpc.request('app_validateManifest', [manifest])
+  }
+
   // App lifecycle
 
   getInstalledApps(): Promise<{ apps: Array<InstalledApp> }> {
@@ -89,7 +100,7 @@ export default class MainframeClient {
   }
 
   installApp(
-    manifest: AppManifest,
+    manifest: ManifestData,
     userID: ID,
     settings: AppUserSettings,
   ): Promise<ClientSession> {

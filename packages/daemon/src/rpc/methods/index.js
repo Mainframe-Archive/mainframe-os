@@ -26,7 +26,7 @@ export default {
   // - "remove": clear + also removes manifest, no more knowledge about this app in vault
   app_uninstall: noop,
   app_update: noop, // TODO: similar to install
-  app_validate: app.validate,
+  app_validateManifest: app.validateManifestData,
   identity_createUser: identity.createUser,
   identity_getOwnUsers: identity.getOwnUsers,
   sub_unsubscribe: sub.unsubscribe,
