@@ -1,7 +1,0 @@
-{
-  "WEB3_SEND": false,
-  "HTTPS_REQUEST": {
-    "granted": ["https://google.com", "https://twitter.com"],
-    "denied": ["https://facebook.com"]
-  }
-}

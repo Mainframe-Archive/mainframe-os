@@ -1,18 +1,4 @@
-import { readFileSync } from 'fs'
 import { EMPTY_DEFINITIONS, mergeGrantsToDetails } from '../lib'
-
-const readJsonFixture = filename => {
-  const fullpath = getFixture(__dirname, filename)
-  const json = readFileSync(fullpath, 'utf8')
-  try {
-    return JSON.parse(json)
-  } catch (err) {
-    if (err.name === 'SyntaxError') {
-      err.message = err.message + ' in file ' + filename
-    }
-    throw err
-  }
-}
 
 describe('EMPTY_DEFINITIONS', () => {
   it('has HTTPS_REQUEST', () => {
@@ -22,17 +8,44 @@ describe('EMPTY_DEFINITIONS', () => {
 
 describe('mergeGrantsToDetails', () => {
   it('merges', () => {
-    const app = readJsonFixture('grant_google_twitter.json')
-    const user = readJsonFixture('grant_google_mainframe.json')
+    const appGrants = {
+      WEB3_SEND: false,
+      HTTPS_REQUEST: {
+        granted: ['https://google.com', 'https://twitter.com'],
+        denied: [],
+      },
+    }
+    const userGrants = {
+      LOCATION_GET: true,
+      HTTPS_REQUEST: {
+        granted: ['https://mainframe.com'],
+        denied: ['https://facebook.com'],
+      },
+    }
 
-    const details = readJsonFixture('details_merged.json')
+    const details = {
+      app: appGrants,
+      user: userGrants,
+      session: {
+        HTTPS_REQUEST: {
+          granted: [
+            'https://google.com',
+            'https://twitter.com',
+            'https://mainframe.com',
+          ],
+          denied: ['https://facebook.com'],
+        },
+        LOCATION_GET: true,
+        WEB3_SEND: false,
+      },
+    }
 
-    expect(mergeGrantsToDetails(app, user)).toEqual(details)
+    expect(mergeGrantsToDetails(appGrants, userGrants)).toEqual(details)
   })
 
-  it('session grants are UNIONed', () => {
+  it('session HTTPS_REQUEST grants are concatenated', () => {
     let g1 = ['https://google.com', 'https://twitter.com']
-    let g2 = ['https://google.com', 'https://mainframe.com']
+    let g2 = ['https://mainframe.com']
     let result = mergeGrantsToDetails(
       { HTTPS_REQUEST: { granted: g1, denied: [] } },
       { HTTPS_REQUEST: { granted: g2, denied: [] } },
