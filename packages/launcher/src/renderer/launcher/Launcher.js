@@ -22,11 +22,11 @@ type VaultPath = string
 type VaultsData = {
   paths: Array<VaultPath>,
   defaultVault: VaultPath,
+  vaultOpen: boolean,
 }
 
 type State = {
   showAppInstallModal: boolean,
-  vaultOpen?: boolean,
   vaultsData?: VaultsData,
   selectIdForApp?: ?Object,
   installedApps: Array<Object>,
@@ -126,18 +126,16 @@ export default class App extends Component<{}, State> {
   // RENDER
 
   renderVaultManager() {
-    if (!this.state.vaultsData) {
-      return null
+    if (this.state.vaultsData) {
+      const { vaultsData } = this.state
+      return (
+        <VaultManagerModal
+          paths={vaultsData.paths}
+          defaultVault={vaultsData.defaultVault}
+          onOpenedVault={this.onOpenedVault}
+        />
+      )
     }
-    console.log('vaults data: ', this.state.vaultsData)
-    const { paths, defaultVault } = this.state.vaultsData
-    return (
-      <VaultManagerModal
-        paths={paths}
-        defaultVault={defaultVault}
-        onOpenedVault={this.onOpenedVault}
-      />
-    )
   }
 
   render() {

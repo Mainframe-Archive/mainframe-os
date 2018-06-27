@@ -84,8 +84,6 @@ console.log(`using environment "${env.name}" (${env.type})`)
 const daemonConfig = new DaemonConfig(env)
 const vaultConfig = new VaultConfig(env)
 const isDevelopment = env.isDev
-// TODO: user input once launcher opens rather than hardcoded value
-const testVaultKey = process.env.MAINFRAME_VAULT_KEY || 'testKey'
 
 let client
 let mainWindow
@@ -133,22 +131,8 @@ const setupClient = async () => {
   }
 }
 
-// TODO: opening or creating a vault should be done as the result of user interaction in the launcher
-
-const setupVault = async () => {
-  const existing = process.env.MAINFRAME_VAULT_PATH || vaultConfig.defaultVault
-  if (existing != null) {
-    await client.openVault(existing, testVaultKey)
-  } else {
-    const vaultPath = vaultConfig.createVaultPath()
-    await client.createVault(vaultPath, testVaultKey)
-    vaultConfig.defaultVault = vaultPath
-  }
-}
-
 const createLauncherWindow = async () => {
   await setupClient()
-  // await setupVault()
 
   mainWindow = newWindow({
     type: 'launcher',
