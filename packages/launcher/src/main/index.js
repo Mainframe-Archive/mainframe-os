@@ -89,6 +89,7 @@ const testVaultKey = process.env.MAINFRAME_VAULT_KEY || 'testKey'
 
 let client
 let mainWindow
+let vaultOpen: ?string // currently open vault path
 
 const appWindows: AppWindows = {}
 
@@ -114,8 +115,6 @@ const newWindow = params => {
 // TODO: proper setup, this is just temporary logic to simplify development flow
 const setupClient = async () => {
   // /!\ Temporary only, should be handled by toolbox with installation flow
-  console.log(vaultConfig.defaultVault)
-  console.log(daemonConfig)
   if (daemonConfig.binPath == null) {
     daemonConfig.binPath = path.resolve(__dirname, '../../../daemon/bin/run')
   }
@@ -215,7 +214,7 @@ app.on('activate', () => {
 // Handle calls to main process
 
 const IPC_ERRORS: Object = {
-  inavlidParams: {
+  invalidParams: {
     message: 'Invalid params',
     code: 32602,
   },
@@ -268,7 +267,8 @@ const ipcMainHandler = {
       id: request.id,
       result: {
         paths: vaultsPaths,
-        default: vaultConfig.defaultVault,
+        defaultVault: vaultConfig.defaultVault,
+        vaultOpen: vaultOpen,
       },
     }
   },
@@ -288,6 +288,33 @@ const ipcMainHandler = {
         id: request.id,
         result: {
           path,
+        },
+      }
+    } catch (err) {
+      return {
+        error: {
+          message: err.message,
+          code: IPC_ERRORS.invalidParams.code,
+        },
+        id: request.id,
+      }
+    }
+  },
+
+  openVault: async (event, request) => {
+    if (request.data.args.length !== 2) {
+      return {
+        error: IPC_ERRORS.invalidParams,
+        id: request.id,
+      }
+    }
+    try {
+      const res = await client.openVault(...request.data.args)
+      vaultOpen = request.data.args[0]
+      return {
+        id: request.id,
+        result: {
+          open: true,
         },
       }
     } catch (err) {

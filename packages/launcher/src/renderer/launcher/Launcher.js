@@ -39,15 +39,18 @@ export default class App extends Component<{}, State> {
   }
 
   componentDidMount() {
-    this.setup()
+    this.getVaultsData()
   }
 
-  async setup() {
+  async getVaultsData() {
     try {
       const vaultsData = await callMainProcess('getVaultsData')
       this.setState({
         vaultsData,
       })
+      if (vaultsData.vaultOpen) {
+        this.getInstalledApps()
+      }
     } catch (err) {
       console.warn(err)
     }
@@ -65,10 +68,7 @@ export default class App extends Component<{}, State> {
   }
 
   onOpenedVault = () => {
-    this.setState({
-      vaultOpen: true,
-    })
-    this.getInstalledApps()
+    this.getVaultsData()
   }
 
   // HANDLERS
@@ -129,6 +129,7 @@ export default class App extends Component<{}, State> {
     if (!this.state.vaultsData) {
       return null
     }
+    console.log('vaults data: ', this.state.vaultsData)
     const { paths, defaultVault } = this.state.vaultsData
     return (
       <VaultManagerModal
@@ -140,7 +141,7 @@ export default class App extends Component<{}, State> {
   }
 
   render() {
-    if (!this.state.vaultOpen && this.state.vaultsData) {
+    if (!this.state.vaultsData || !this.state.vaultsData.vaultOpen) {
       return this.renderVaultManager()
     }
     const appRows = this.state.installedApps.map(app => {

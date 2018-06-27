@@ -25,7 +25,8 @@ type Props = {
 type State = {
   password: string,
   confirmPassword: string,
-  saving?: boolean,
+  unlockPassword: string,
+  awaitingResponse?: boolean,
   error?: ?string,
 }
 
@@ -33,6 +34,7 @@ export default class VaultCreateModal extends Component<Props, State> {
   state = {
     password: '',
     confirmPassword: '',
+    unlockPassword: '',
   }
 
   // HANDLERS
@@ -46,6 +48,12 @@ export default class VaultCreateModal extends Component<Props, State> {
   onChangeConfirmPassword = (value: string) => {
     this.setState({
       confirmPassword: value,
+    })
+  }
+
+  onChangeUnlockPassword = (value: string) => {
+    this.setState({
+      unlockPassword: value,
     })
   }
 
@@ -64,7 +72,7 @@ export default class VaultCreateModal extends Component<Props, State> {
     }
     this.setState({
       error: null,
-      saving: true,
+      awaitingResponse: true,
     })
     this.createVault(password)
   }
@@ -75,6 +83,30 @@ export default class VaultCreateModal extends Component<Props, State> {
       this.props.onOpenedVault()
     } catch (err) {
       console.warn(err)
+      this.setState({
+        error: 'Error creating vault',
+      })
+    }
+  }
+
+  onPressUnlockVault = () => {
+    this.unlockVault(this.state.unlockPassword)
+  }
+
+  async unlockVault(password: string) {
+    this.setState({
+      awaitingResponse: true,
+    })
+    try {
+      await callMainProcess('openVault', [this.props.defaultVault, password])
+      this.props.onOpenedVault()
+    } catch (err) {
+      console.warn(err)
+      this.setState({
+        awaitingResponse: false,
+        error:
+          'Failed to unlock vault, please check you entered the correct password.',
+      })
     }
   }
 
@@ -84,7 +116,7 @@ export default class VaultCreateModal extends Component<Props, State> {
     const errorMsg = this.state.error ? (
       <Text style={styles.errorLabel}>{this.state.error}</Text>
     ) : null
-    const action = this.state.saving ? (
+    const action = this.state.awaitingResponse ? (
       <ActivityIndicator />
     ) : (
       <Button title="Create Vault" onPress={this.onPressCreateVault} />
@@ -116,14 +148,26 @@ export default class VaultCreateModal extends Component<Props, State> {
   }
 
   renderOpenVault() {
+    const errorMsg = this.state.error ? (
+      <Text style={styles.errorLabel}>{this.state.error}</Text>
+    ) : null
+    const action = this.state.awaitingResponse ? (
+      <ActivityIndicator />
+    ) : (
+      <Button title="Unlock Vault" onPress={this.onPressUnlockVault} />
+    )
     return (
       <View>
+        <Text style={styles.title}>Unlock Vault</Text>
         <MFTextInput
+          secureTextEntry
           style={styles.input}
-          onChangeText={this.onChangePassword}
-          value={this.state.password}
-          placeholder="vault password"
+          onChangeText={this.onChangeUnlockPassword}
+          value={this.state.unlockPassword}
+          placeholder="Password"
         />
+        {errorMsg}
+        {action}
       </View>
     )
   }
@@ -140,15 +184,17 @@ export default class VaultCreateModal extends Component<Props, State> {
 const styles = StyleSheet.create({
   title: {
     fontWeight: 'bold',
+    paddingBottom: 10,
   },
   description: {
     fontSize: 12,
-    paddingVertical: 10,
+    paddingBottom: 10,
   },
   input: {
     marginBottom: 10,
   },
   errorLabel: {
+    fontSize: 12,
     paddingBottom: 10,
     color: colors.PRIMARY_RED,
   },
