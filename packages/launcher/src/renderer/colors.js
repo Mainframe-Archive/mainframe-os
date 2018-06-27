@@ -1,4 +1,9 @@
 export default {
+  PRIMARY_BLUE: '#59C0D8',
+  PRIMARY_PURPLE: '#8A80B7',
+  PRIMARY_GREEN: '#60CAC5',
+  PRIMARY_RED: '#EC4E73',
+
   LIGHT_GREY_E8: '#e8e8e8',
   LIGHT_GREY_EE: '#eeeeee',
   GREY_MED_81: '#818181',

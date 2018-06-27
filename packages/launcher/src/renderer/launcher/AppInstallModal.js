@@ -4,7 +4,6 @@ import type { PermissionsGrants } from '@mainframe/app-permissions'
 import fs from 'fs-extra'
 import React, { createRef, Component, type ElementRef } from 'react'
 import { View, TouchableOpacity, StyleSheet, Text } from 'react-native-web'
-import ReactModal from 'react-modal'
 import type { ID } from '@mainframe/utils-id'
 
 import { client } from '../electronIpc.js'

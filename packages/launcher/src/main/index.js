@@ -1,7 +1,12 @@
 // @flow
 
 import Client from '@mainframe/client'
-import { Environment, DaemonConfig, VaultConfig } from '@mainframe/config'
+import {
+  Environment,
+  DaemonConfig,
+  VaultConfig,
+  setDefaultVault,
+} from '@mainframe/config'
 import { startDaemon } from '@mainframe/toolbox'
 import { app, BrowserWindow, ipcMain } from 'electron'
 import path from 'path'
@@ -109,6 +114,8 @@ const newWindow = params => {
 // TODO: proper setup, this is just temporary logic to simplify development flow
 const setupClient = async () => {
   // /!\ Temporary only, should be handled by toolbox with installation flow
+  console.log(vaultConfig.defaultVault)
+  console.log(daemonConfig)
   if (daemonConfig.binPath == null) {
     daemonConfig.binPath = path.resolve(__dirname, '../../../daemon/bin/run')
   }
@@ -128,6 +135,7 @@ const setupClient = async () => {
 }
 
 // TODO: opening or creating a vault should be done as the result of user interaction in the launcher
+
 const setupVault = async () => {
   const existing = process.env.MAINFRAME_VAULT_PATH || vaultConfig.defaultVault
   if (existing != null) {
@@ -141,7 +149,7 @@ const setupVault = async () => {
 
 const createLauncherWindow = async () => {
   await setupClient()
-  await setupVault()
+  // await setupVault()
 
   mainWindow = newWindow({
     type: 'launcher',
@@ -206,13 +214,39 @@ app.on('activate', () => {
 
 // Handle calls to main process
 
+const IPC_ERRORS: Object = {
+  inavlidParams: {
+    message: 'Invalid params',
+    code: 32602,
+  },
+  internalError: {
+    message: 'Internal error',
+    code: 32603,
+  },
+  invalidRequest: {
+    message: 'Invalid request',
+    code: 32600,
+  },
+  methodNotFound: {
+    message: 'Method not found',
+    code: 32601,
+  },
+}
+
 const ipcMainHandler = {
   launchApp: async (event, request) => {
     const [appID, userID] = request.data.args
     launchApp(idType(appID), idType(userID))
     return { id: request.id }
   },
+
   getAppSession: async (event, request) => {
+    if (!request.data.args.length) {
+      return {
+        error: IPC_ERRORS.invalidParams,
+        id: request.id,
+      }
+    }
     const res = appWindows[request.data.args[0]]
     if (res && res.appSession) {
       return {
@@ -221,9 +255,46 @@ const ipcMainHandler = {
       }
     } else {
       return {
+        error: IPC_ERRORS.internalError,
+        id: request.id,
+      }
+    }
+  },
+
+  getVaultsData: async (event, request) => {
+    const vaults = vaultConfig.vaults
+    const vaultsPaths = Object.keys(vaults)
+    return {
+      id: request.id,
+      result: {
+        paths: vaultsPaths,
+        default: vaultConfig.defaultVault,
+      },
+    }
+  },
+
+  createVault: async (event, request) => {
+    if (!request.data.args.length) {
+      return {
+        error: IPC_ERRORS.invalidParams,
+        id: request.id,
+      }
+    }
+    const path = vaultConfig.createVaultPath()
+    try {
+      const res = await client.createVault(path, request.data.args[0])
+      setDefaultVault(env, path)
+      return {
+        id: request.id,
+        result: {
+          path,
+        },
+      }
+    } catch (err) {
+      return {
         error: {
-          message: 'Session not found',
-          code: 32601,
+          message: err.message,
+          code: IPC_ERRORS.invalidParams.code,
         },
         id: request.id,
       }
@@ -250,10 +321,7 @@ const handleRequestToDaemon = async (
 ): Promise<ClientResponse> => {
   if (request == null || !request || !request.data) {
     return {
-      error: {
-        message: 'Invalid request',
-        code: 32600,
-      },
+      error: IPC_ERRORS.invalidRequest,
       id: request.id,
     }
   }
@@ -267,18 +335,17 @@ const handleRequestToDaemon = async (
         id: request.id,
         result: res,
       }
-    } catch (error) {
+    } catch (err) {
       return {
-        error,
+        error: {
+          message: err.message,
+        },
         id: request.id,
       }
     }
   }
   return {
-    error: {
-      message: 'Method not found',
-      code: 32601,
-    },
+    error: IPC_ERRORS.methodNotFound,
     id: request.id,
   }
 }

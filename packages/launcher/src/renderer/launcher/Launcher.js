@@ -3,21 +3,31 @@
 import { ipcRenderer as ipc, remote } from 'electron'
 import React, { Component } from 'react'
 import { View, TouchableOpacity, StyleSheet, Text } from 'react-native-web'
-import { client, callMainProcess } from '../electronIpc.js'
 import type { ID } from '@mainframe/utils-id'
 
+import { client, callMainProcess } from '../electronIpc'
 import AppInstallModal from './AppInstallModal'
 import Button from '../Button'
 import ModalView from '../ModalView'
 import IdentitySelectorView from './IdentitySelectorView'
+import VaultManagerModal from './VaultManagerModal'
 
 import colors from '../colors'
 
 const fs = remote.require('fs-extra')
 const path = remote.require('path')
 
+type VaultPath = string
+
+type VaultsData = {
+  paths: Array<VaultPath>,
+  defaultVault: VaultPath,
+}
+
 type State = {
   showAppInstallModal: boolean,
+  vaultOpen?: boolean,
+  vaultsData?: VaultsData,
   selectIdForApp?: ?Object,
   installedApps: Array<Object>,
 }
@@ -29,14 +39,36 @@ export default class App extends Component<{}, State> {
   }
 
   componentDidMount() {
-    this.getInstalledApps()
+    this.setup()
+  }
+
+  async setup() {
+    try {
+      const vaultsData = await callMainProcess('getVaultsData')
+      this.setState({
+        vaultsData,
+      })
+    } catch (err) {
+      console.warn(err)
+    }
   }
 
   async getInstalledApps() {
-    const res = await client.getInstalledApps()
+    try {
+      const res = await client.getInstalledApps()
+      this.setState({
+        installedApps: res.apps,
+      })
+    } catch (err) {
+      console.warn('error: ', err)
+    }
+  }
+
+  onOpenedVault = () => {
     this.setState({
-      installedApps: res.apps,
+      vaultOpen: true,
     })
+    this.getInstalledApps()
   }
 
   // HANDLERS
@@ -93,7 +125,24 @@ export default class App extends Component<{}, State> {
 
   // RENDER
 
+  renderVaultManager() {
+    if (!this.state.vaultsData) {
+      return null
+    }
+    const { paths, defaultVault } = this.state.vaultsData
+    return (
+      <VaultManagerModal
+        paths={paths}
+        defaultVault={defaultVault}
+        onOpenedVault={this.onOpenedVault}
+      />
+    )
+  }
+
   render() {
+    if (!this.state.vaultOpen && this.state.vaultsData) {
+      return this.renderVaultManager()
+    }
     const appRows = this.state.installedApps.map(app => {
       const manifest = app.manifest
 
