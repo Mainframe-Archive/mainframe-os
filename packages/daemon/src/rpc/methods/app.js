@@ -1,5 +1,10 @@
 // @flow
 
+import {
+  validateManifest,
+  type ManifestData, // eslint-disable-line import/named
+  type ManifestValidationResult, // eslint-disable-line import/named
+} from '@mainframe/app-manifest'
 import type {
   PermissionKey,
   PermissionGrant,
@@ -9,11 +14,6 @@ import type {
 // eslint-disable-next-line import/named
 import { idType, type ID } from '@mainframe/utils-id'
 
-import {
-  validateManifest,
-  type AppManifest,
-  type ManifestValidationResult,
-} from '../../app/manifest'
 import type { AppUserSettings, SessionData } from '../../app/App'
 
 import { clientError, sessionError } from '../errors'
@@ -26,7 +26,7 @@ type User = {
 
 type App = {
   id: ID,
-  manifest: AppManifest,
+  manifest: ManifestData,
 }
 
 type Session = {
@@ -42,7 +42,7 @@ type ClientSession = {
 
 type AppInstalled = {
   appID: ID,
-  manifest: AppManifest,
+  manifest: ManifestData,
   users: Array<User>,
 }
 
@@ -121,7 +121,7 @@ export const getInstalled = (
 
 export const install = async (
   ctx: RequestContext,
-  [manifest, userID, settings]: [AppManifest, ID, AppUserSettings] = [],
+  [manifest, userID, settings]: [ManifestData, ID, AppUserSettings] = [],
 ): Promise<ClientSession> => {
   const appID = ctx.openVault.installApp(manifest, userID, settings)
   await ctx.openVault.save()
@@ -170,9 +170,9 @@ export const setPermission = async (
   }
 }
 
-export const validate = (
+export const validateManifestData = (
   ctx: RequestContext,
-  [manifest]: [AppManifest] = [],
+  [manifest]: [ManifestData] = [],
 ): { result: ManifestValidationResult } => ({
   result: validateManifest(manifest),
 })

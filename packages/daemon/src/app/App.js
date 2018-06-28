@@ -1,5 +1,6 @@
 // @flow
 
+import type { ManifestData } from '@mainframe/app-manifest'
 import {
   createHTTPSRequestGrant,
   mergeGrantsToDetails,
@@ -11,7 +12,6 @@ import {
 // eslint-disable-next-line import/named
 import { idType, uniqueID, type ID } from '@mainframe/utils-id'
 
-import { type AppManifest } from './manifest'
 import Session from './Session'
 
 const DEFAULT_SETTINGS = {
@@ -42,7 +42,7 @@ export type AppUserSettings = {
 
 export type AppParams = {
   appID: ID,
-  manifest: AppManifest,
+  manifest: ManifestData,
   installationState: AppInstallationState,
   settings?: { [ID]: AppUserSettings },
 }
@@ -60,7 +60,7 @@ export default class App {
   })
 
   _appID: ID
-  _manifest: AppManifest
+  _manifest: ManifestData
   _installationState: AppInstallationState
   _settings: { [ID]: AppUserSettings }
 
@@ -77,7 +77,7 @@ export default class App {
     return this._appID
   }
 
-  get manifest(): AppManifest {
+  get manifest(): ManifestData {
     return this._manifest
   }
 

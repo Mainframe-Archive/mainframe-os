@@ -9,6 +9,7 @@ import Vault, { createVaultKeyParams, readVaultFile } from '../lib/vault/Vault'
 
 describe('vault', () => {
   it('createVaultKeyParams() creates a random key using the provided password', async () => {
+    jest.setTimeout(10000) // 10 secs
     const keyParams = await createVaultKeyParams(Buffer.from('test'))
     expect(keyParams.key).toHaveLength(SECRETBOX_KEYBYTES)
     expect(keyParams.kdf).toEqual({
