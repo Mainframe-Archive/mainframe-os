@@ -1,12 +1,7 @@
 // @flow
 
 import Client from '@mainframe/client'
-import {
-  Environment,
-  DaemonConfig,
-  VaultConfig,
-  setDefaultVault,
-} from '@mainframe/config'
+import { Environment, DaemonConfig, VaultConfig } from '@mainframe/config'
 import { startDaemon } from '@mainframe/toolbox'
 import { app, BrowserWindow, ipcMain } from 'electron'
 import path from 'path'
@@ -267,7 +262,7 @@ const ipcMainHandler = {
     const path = vaultConfig.createVaultPath()
     try {
       const res = await client.createVault(path, request.data.args[0])
-      setDefaultVault(env, path)
+      vaultConfig.defaultVault = path
       return {
         id: request.id,
         result: {

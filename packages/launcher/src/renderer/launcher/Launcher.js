@@ -2,7 +2,13 @@
 
 import { ipcRenderer as ipc, remote } from 'electron'
 import React, { Component } from 'react'
-import { View, TouchableOpacity, StyleSheet, Text } from 'react-native-web'
+import {
+  View,
+  TouchableOpacity,
+  StyleSheet,
+  Text,
+  ActivityIndicator,
+} from 'react-native-web'
 import type { ID } from '@mainframe/utils-id'
 
 import { client, callMainProcess } from '../electronIpc'
@@ -136,6 +142,11 @@ export default class App extends Component<{}, State> {
         />
       )
     }
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator />
+      </View>
+    )
   }
 
   render() {
@@ -206,6 +217,10 @@ export default class App extends Component<{}, State> {
 const styles = StyleSheet.create({
   container: {
     padding: 30,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
   },
   title: {
     fontSize: 20,

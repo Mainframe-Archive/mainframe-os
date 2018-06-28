@@ -3,6 +3,7 @@
 import React, { Component } from 'react'
 import { TextInput, StyleSheet } from 'react-native-web'
 
+import { type Style } from '../types'
 import colors from '../colors'
 
 type Props = {
