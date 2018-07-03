@@ -1,7 +1,7 @@
 // @flow
 
-import { uniqueID } from '@mainframe/utils-id'
 import { join } from 'path'
+import { uniqueID } from '@mainframe/utils-id'
 
 import type Environment from './Environment'
 import EnvironmentConfig from './EnvironmentConfig'

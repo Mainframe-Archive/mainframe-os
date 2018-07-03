@@ -1,3 +1,5 @@
+/* global getFixture, getTempFile */
+
 import {
   PASSWORDHASH_ALG_ARGON2ID13,
   PASSWORDHASH_MEMLIMIT_SENSITIVE,

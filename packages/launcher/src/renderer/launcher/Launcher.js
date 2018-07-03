@@ -1,20 +1,17 @@
 //@flow
 
-import { ipcRenderer as ipc, remote } from 'electron'
+import type { ID } from '@mainframe/utils-id'
 import React, { Component } from 'react'
 import { View, TouchableOpacity, StyleSheet, Text } from 'react-native-web'
+
 import { client, callMainProcess } from '../electronIpc.js'
-import type { ID } from '@mainframe/utils-id'
-
-import AppInstallModal from './AppInstallModal'
-import Button from '../Button'
-import ModalView from '../ModalView'
-import IdentitySelectorView from './IdentitySelectorView'
-
 import colors from '../colors'
 
-const fs = remote.require('fs-extra')
-const path = remote.require('path')
+import Button from '../Button'
+import ModalView from '../ModalView'
+
+import AppInstallModal from './AppInstallModal'
+import IdentitySelectorView from './IdentitySelectorView'
 
 type State = {
   showAppInstallModal: boolean,
@@ -53,7 +50,7 @@ export default class App extends Component<{}, State> {
     })
   }
 
-  onInstallComplete = (appID: ID) => {
+  onInstallComplete = () => {
     this.onCloseInstallModal()
     this.getInstalledApps()
   }
@@ -95,8 +92,6 @@ export default class App extends Component<{}, State> {
 
   render() {
     const appRows = this.state.installedApps.map(app => {
-      const manifest = app.manifest
-
       const onClick = async () => {
         this.onOpenApp(app.appID)
       }

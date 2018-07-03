@@ -1,9 +1,9 @@
 // @flow
 
+import { join } from 'path'
 import Conf from 'conf'
 import envPaths from 'env-paths'
 import { remove } from 'fs-extra'
-import { join } from 'path'
 
 import type { EnvPaths, EnvType } from './types'
 
