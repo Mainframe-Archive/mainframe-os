@@ -7,7 +7,7 @@ import ReactModal from 'react-modal'
 import colors from './colors'
 
 type Props = {
-  onRequestClose: () => void,
+  onRequestClose?: () => void,
   children?: ?Node,
 }
 

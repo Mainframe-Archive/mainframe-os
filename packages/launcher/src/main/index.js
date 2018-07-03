@@ -80,11 +80,10 @@ console.log(`using environment "${env.name}" (${env.type})`)
 const daemonConfig = new DaemonConfig(env)
 const vaultConfig = new VaultConfig(env)
 const isDevelopment = env.isDev
-// TODO: user input once launcher opens rather than hardcoded value
-const testVaultKey = process.env.MAINFRAME_VAULT_KEY || 'testKey'
 
 let client
 let mainWindow
+let vaultOpen: ?string // currently open vault path
 
 const appWindows: AppWindows = {}
 
@@ -128,21 +127,8 @@ const setupClient = async () => {
   }
 }
 
-// TODO: opening or creating a vault should be done as the result of user interaction in the launcher
-const setupVault = async () => {
-  const existing = process.env.MAINFRAME_VAULT_PATH || vaultConfig.defaultVault
-  if (existing != null) {
-    await client.openVault(existing, testVaultKey)
-  } else {
-    const vaultPath = vaultConfig.createVaultPath()
-    await client.createVault(vaultPath, testVaultKey)
-    vaultConfig.defaultVault = vaultPath
-  }
-}
-
 const createLauncherWindow = async () => {
   await setupClient()
-  await setupVault()
 
   mainWindow = newWindow({
     type: 'launcher',
@@ -207,13 +193,39 @@ app.on('activate', () => {
 
 // Handle calls to main process
 
+const IPC_ERRORS: Object = {
+  invalidParams: {
+    message: 'Invalid params',
+    code: 32602,
+  },
+  internalError: {
+    message: 'Internal error',
+    code: 32603,
+  },
+  invalidRequest: {
+    message: 'Invalid request',
+    code: 32600,
+  },
+  methodNotFound: {
+    message: 'Method not found',
+    code: 32601,
+  },
+}
+
 const ipcMainHandler = {
   launchApp: async (event, request) => {
     const [appID, userID] = request.data.args
     launchApp(idType(appID), idType(userID))
     return { id: request.id }
   },
+
   getAppSession: async (event, request) => {
+    if (!request.data.args.length) {
+      return {
+        error: IPC_ERRORS.invalidParams,
+        id: request.id,
+      }
+    }
     const res = appWindows[request.data.args[0]]
     if (res && res.appSession) {
       return {
@@ -222,9 +234,74 @@ const ipcMainHandler = {
       }
     } else {
       return {
+        error: IPC_ERRORS.internalError,
+        id: request.id,
+      }
+    }
+  },
+
+  getVaultsData: async (event, request) => {
+    const vaults = vaultConfig.vaults
+    const vaultsPaths = Object.keys(vaults)
+    return {
+      id: request.id,
+      result: {
+        paths: vaultsPaths,
+        defaultVault: vaultConfig.defaultVault,
+        vaultOpen: vaultOpen,
+      },
+    }
+  },
+
+  createVault: async (event, request) => {
+    if (!request.data.args.length) {
+      return {
+        error: IPC_ERRORS.invalidParams,
+        id: request.id,
+      }
+    }
+    const path = vaultConfig.createVaultPath()
+    try {
+      await client.createVault(path, request.data.args[0])
+      vaultConfig.defaultVault = path
+      return {
+        id: request.id,
+        result: {
+          path,
+        },
+      }
+    } catch (err) {
+      return {
         error: {
-          message: 'Session not found',
-          code: 32601,
+          message: err.message,
+          code: IPC_ERRORS.invalidParams.code,
+        },
+        id: request.id,
+      }
+    }
+  },
+
+  openVault: async (event, request) => {
+    if (request.data.args.length !== 2) {
+      return {
+        error: IPC_ERRORS.invalidParams,
+        id: request.id,
+      }
+    }
+    try {
+      await client.openVault(...request.data.args)
+      vaultOpen = request.data.args[0]
+      return {
+        id: request.id,
+        result: {
+          open: true,
+        },
+      }
+    } catch (err) {
+      return {
+        error: {
+          message: err.message,
+          code: IPC_ERRORS.invalidParams.code,
         },
         id: request.id,
       }
@@ -251,10 +328,7 @@ const handleRequestToDaemon = async (
 ): Promise<ClientResponse> => {
   if (request == null || !request || !request.data) {
     return {
-      error: {
-        message: 'Invalid request',
-        code: 32600,
-      },
+      error: IPC_ERRORS.invalidRequest,
       id: request.id,
     }
   }
@@ -268,18 +342,17 @@ const handleRequestToDaemon = async (
         id: request.id,
         result: res,
       }
-    } catch (error) {
+    } catch (err) {
       return {
-        error,
+        error: {
+          message: err.message,
+        },
         id: request.id,
       }
     }
   }
   return {
-    error: {
-      message: 'Method not found',
-      code: 32601,
-    },
+    error: IPC_ERRORS.methodNotFound,
     id: request.id,
   }
 }

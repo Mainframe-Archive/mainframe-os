@@ -2,19 +2,34 @@
 
 import type { ID } from '@mainframe/utils-id'
 import React, { Component } from 'react'
-import { View, TouchableOpacity, StyleSheet, Text } from 'react-native-web'
+import {
+  View,
+  TouchableOpacity,
+  StyleSheet,
+  Text,
+  ActivityIndicator,
+} from 'react-native-web'
 
-import { client, callMainProcess } from '../electronIpc.js'
 import colors from '../colors'
-
+import { client, callMainProcess } from '../electronIpc'
 import Button from '../Button'
 import ModalView from '../ModalView'
+import VaultManagerModal from './VaultManagerModal'
 
 import AppInstallModal from './AppInstallModal'
 import IdentitySelectorView from './IdentitySelectorView'
 
+type VaultPath = string
+
+type VaultsData = {
+  paths: Array<VaultPath>,
+  defaultVault: VaultPath,
+  vaultOpen: boolean,
+}
+
 type State = {
   showAppInstallModal: boolean,
+  vaultsData?: VaultsData,
   selectIdForApp?: ?Object,
   installedApps: Array<Object>,
 }
@@ -26,14 +41,38 @@ export default class App extends Component<{}, State> {
   }
 
   componentDidMount() {
-    this.getInstalledApps()
+    this.getVaultsData()
+  }
+
+  async getVaultsData() {
+    try {
+      const vaultsData = await callMainProcess('getVaultsData')
+      this.setState({
+        vaultsData,
+      })
+      if (vaultsData.vaultOpen) {
+        this.getInstalledApps()
+      }
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.warn(err)
+    }
   }
 
   async getInstalledApps() {
-    const res = await client.getInstalledApps()
-    this.setState({
-      installedApps: res.apps,
-    })
+    try {
+      const res = await client.getInstalledApps()
+      this.setState({
+        installedApps: res.apps,
+      })
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.warn('error: ', err)
+    }
+  }
+
+  onOpenedVault = () => {
+    this.getVaultsData()
   }
 
   // HANDLERS
@@ -90,7 +129,28 @@ export default class App extends Component<{}, State> {
 
   // RENDER
 
+  renderVaultManager() {
+    if (this.state.vaultsData) {
+      const { vaultsData } = this.state
+      return (
+        <VaultManagerModal
+          paths={vaultsData.paths}
+          defaultVault={vaultsData.defaultVault}
+          onOpenedVault={this.onOpenedVault}
+        />
+      )
+    }
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator />
+      </View>
+    )
+  }
+
   render() {
+    if (!this.state.vaultsData || !this.state.vaultsData.vaultOpen) {
+      return this.renderVaultManager()
+    }
     const appRows = this.state.installedApps.map(app => {
       const onClick = async () => {
         this.onOpenApp(app.appID)
@@ -153,6 +213,10 @@ export default class App extends Component<{}, State> {
 const styles = StyleSheet.create({
   container: {
     padding: 30,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
   },
   title: {
     fontSize: 20,
