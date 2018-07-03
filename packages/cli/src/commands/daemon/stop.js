@@ -2,7 +2,6 @@
 
 import { DaemonConfig } from '@mainframe/config'
 import { stopDaemon } from '@mainframe/toolbox'
-import { flags } from '@oclif/command'
 
 import Command from '../../Command'
 

@@ -1,7 +1,7 @@
 // @flow
 
-import type { DaemonConfig } from '@mainframe/config'
 import { spawn, type ChildProcess } from 'child_process'
+import type { DaemonConfig } from '@mainframe/config'
 import execa from 'execa'
 
 const execStartDaemon = (
@@ -60,6 +60,7 @@ export const startDaemon = async (
     case 'stopping':
       // Wait for existing process to be stopped before starting again
       await cfg.whenRunStatus('stopped')
+    // eslint-disable-next-line no-fallthrough
     case 'stopped':
       // Return the child process as provided by execa
       cfg.runStatus = 'starting'
@@ -97,6 +98,7 @@ export const stopDaemon = async (cfg: DaemonConfig): Promise<?ChildProcess> => {
     case 'starting':
       // Already being started by another process, just need to wait for it
       await cfg.whenRunStatus('running')
+    // eslint-disable-next-line no-fallthrough
     case 'running':
       // Return the child process as provided by execa
       cfg.runStatus = 'stopping'

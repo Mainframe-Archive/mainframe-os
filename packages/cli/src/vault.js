@@ -1,6 +1,5 @@
 // @flow
 
-import type Client from '@mainframe/client'
 import type { VaultConfig } from '@mainframe/config'
 import { prompt } from 'inquirer'
 

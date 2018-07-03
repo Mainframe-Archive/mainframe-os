@@ -1,15 +1,14 @@
 // @flow
 
+import type { Socket } from 'net'
+import { inspect } from 'util'
 import { uniqueID } from '@mainframe/utils-id'
 import RPCError, {
   parseError,
   methodNotFound,
   invalidRequest,
-  type ErrorObject, // eslint-disable-line import/named
 } from '@mainframe/rpc-error'
 import debug from 'debug'
-import type { Socket } from 'net'
-import { inspect } from 'util'
 
 import type { VaultRegistry } from '../vault'
 
@@ -17,15 +16,6 @@ import methods from './methods'
 import RequestContext from './RequestContext'
 
 type requestID = number | string
-
-type PromiseObject = {
-  resolve: (value?: ?any) => void,
-  reject: (error: RPCError) => void,
-}
-
-type Methods = {
-  [string]: (ctx: RequestContext, params: any) => any | Promise<any>,
-}
 
 export type NotifyFunc = (method: string, params: Object) => void
 
@@ -89,6 +79,7 @@ export default (socket: Socket, vaults: VaultRegistry) => {
       }
     } else {
       // TODO?: handle notifications
+      // eslint-disable-next-line no-console
       console.log('Unhandled message', msg)
     }
   })

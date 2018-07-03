@@ -1,7 +1,6 @@
 // @flow
 
 import debug from 'debug'
-import { type Socket } from 'net'
 
 import ServerHandler from './ServerHandler'
 

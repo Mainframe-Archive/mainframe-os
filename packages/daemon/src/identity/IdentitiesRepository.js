@@ -45,9 +45,9 @@ type IdentitiesData = {
   other: IdentitiesRepositoryGroup,
 }
 
-type domain = $Keys<IdentitiesRepositoryGroup>
-type ownership = $Keys<IdentitiesData>
-type reference = { domain: domain, ownership: ownership }
+type Domain = $Keys<IdentitiesRepositoryGroup>
+type Ownership = $Keys<IdentitiesData>
+type Reference = { domain: Domain, ownership: Ownership }
 
 const fromAppIdentity = mapObject(AppIdentity.toJSON)
 const fromAuthorIdentity = mapObject(AuthorIdentity.toJSON)
@@ -101,7 +101,7 @@ export default class IdentitiesRepository {
   })
 
   _identities: IdentitiesData
-  _refs: { [ID]: reference } = {}
+  _refs: { [ID]: Reference } = {}
 
   constructor(identities: IdentitiesRepositoryParams = {}) {
     this._identities = {
@@ -150,7 +150,7 @@ export default class IdentitiesRepository {
     return this._identities.other.users
   }
 
-  addIdentity(ownership: ownership, domain: domain, identity: Identity): ID {
+  addIdentity(ownership: Ownership, domain: Domain, identity: Identity): ID {
     const id = uniqueID()
     this._refs[id] = { ownership, domain }
     // $FlowFixMe: polymorphic type

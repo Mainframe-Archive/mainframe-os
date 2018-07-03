@@ -1,10 +1,5 @@
 // @flow
 
-import {
-  decodeBase64,
-  type base64, // eslint-disable-line import/named
-} from '@mainframe/utils-base64'
-
 import { vaultError } from '../errors'
 import type RequestContext from '../RequestContext'
 

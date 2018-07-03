@@ -30,7 +30,7 @@
     "@mainframe/client": "*",
     "@mainframe/config": "*",
     "@mainframe/toolbox": "*",
-    "@oclif/command": "^1.4.33",
+    "@oclif/command": "^1.4.34",
     "@oclif/config": "^1.6.28",
     "@oclif/plugin-help": "^2.0.5",
     "cli-table": "^0.3.1",
