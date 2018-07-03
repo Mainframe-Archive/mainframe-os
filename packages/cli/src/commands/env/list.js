@@ -26,6 +26,7 @@ export default class ListCommand extends Command {
           getDaemonRunStatus(env),
         ])
       })
+      // eslint-disable-next-line no-console
       console.log(table.toString())
     }
   }

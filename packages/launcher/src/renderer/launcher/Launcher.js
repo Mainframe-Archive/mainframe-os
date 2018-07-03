@@ -1,6 +1,6 @@
 //@flow
 
-import { ipcRenderer as ipc, remote } from 'electron'
+import type { ID } from '@mainframe/utils-id'
 import React, { Component } from 'react'
 import {
   View,
@@ -9,19 +9,15 @@ import {
   Text,
   ActivityIndicator,
 } from 'react-native-web'
-import type { ID } from '@mainframe/utils-id'
-
-import { client, callMainProcess } from '../electronIpc'
-import AppInstallModal from './AppInstallModal'
-import Button from '../Button'
-import ModalView from '../ModalView'
-import IdentitySelectorView from './IdentitySelectorView'
-import VaultManagerModal from './VaultManagerModal'
 
 import colors from '../colors'
+import { client, callMainProcess } from '../electronIpc'
+import Button from '../Button'
+import ModalView from '../ModalView'
+import VaultManagerModal from './VaultManagerModal'
 
-const fs = remote.require('fs-extra')
-const path = remote.require('path')
+import AppInstallModal from './AppInstallModal'
+import IdentitySelectorView from './IdentitySelectorView'
 
 type VaultPath = string
 
@@ -58,6 +54,7 @@ export default class App extends Component<{}, State> {
         this.getInstalledApps()
       }
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.warn(err)
     }
   }
@@ -69,6 +66,7 @@ export default class App extends Component<{}, State> {
         installedApps: res.apps,
       })
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.warn('error: ', err)
     }
   }
@@ -91,7 +89,7 @@ export default class App extends Component<{}, State> {
     })
   }
 
-  onInstallComplete = (appID: ID) => {
+  onInstallComplete = () => {
     this.onCloseInstallModal()
     this.getInstalledApps()
   }
@@ -154,8 +152,6 @@ export default class App extends Component<{}, State> {
       return this.renderVaultManager()
     }
     const appRows = this.state.installedApps.map(app => {
-      const manifest = app.manifest
-
       const onClick = async () => {
         this.onOpenApp(app.appID)
       }

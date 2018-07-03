@@ -11,7 +11,7 @@ export default class REPLCommand extends Command {
   async run() {
     const r = repl.start({ breakEvalOnSigint: true, prompt: '> ' })
 
-    const initializeContext = context => {
+    const initializeContext = () => {
       // $FlowFixMe: VM context
       Object.defineProperty(r.context, 'client', {
         configurable: false,
@@ -20,7 +20,7 @@ export default class REPLCommand extends Command {
       })
     }
 
-    initializeContext(r.context)
+    initializeContext()
     // $FlowFixMe: VM context
     Object.defineProperty(r.context, 'env', {
       configurable: false,

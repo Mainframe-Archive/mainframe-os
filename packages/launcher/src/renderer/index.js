@@ -2,6 +2,7 @@
 
 import { parse } from 'querystring'
 import React from 'react'
+import Modal from 'react-modal'
 import { AppRegistry } from 'react-native-web'
 import './styles.css'
 
@@ -10,6 +11,8 @@ import AppContainer from './apps/AppContainer.js'
 
 const params = parse(document.location.search.substr(1)) // Remove leading '?'
 const rootTag = document.getElementById('app')
+
+Modal.setAppElement(rootTag)
 
 if (params.type === 'launcher') {
   AppRegistry.registerComponent('Launcher', () => Launcher)

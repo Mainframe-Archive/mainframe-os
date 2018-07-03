@@ -36,7 +36,7 @@
     "@mainframe/utils-base64": "^0.1.0",
     "@mainframe/utils-crypto": "^0.2.1",
     "@mainframe/utils-id": "^0.1.0",
-    "@oclif/command": "^1.4.33",
+    "@oclif/command": "^1.4.34",
     "@oclif/config": "^1.6.28",
     "@oclif/plugin-help": "^2.0.5",
     "asar": "^0.14.3",

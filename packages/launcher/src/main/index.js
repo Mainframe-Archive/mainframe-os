@@ -1,14 +1,14 @@
 // @flow
 
-import Client from '@mainframe/client'
-import { Environment, DaemonConfig, VaultConfig } from '@mainframe/config'
-import { startDaemon } from '@mainframe/toolbox'
-import { app, BrowserWindow, ipcMain } from 'electron'
 import path from 'path'
 import { stringify } from 'querystring'
 import url from 'url'
+import Client from '@mainframe/client'
+import { Environment, DaemonConfig, VaultConfig } from '@mainframe/config'
+import { startDaemon } from '@mainframe/toolbox'
 // eslint-disable-next-line import/named
 import { idType, type ID } from '@mainframe/utils-id'
+import { app, BrowserWindow, ipcMain } from 'electron'
 
 import {
   launcherToDaemonRequestChannel,
@@ -16,19 +16,6 @@ import {
   mainProcRequestChannel,
   mainProcResponseChannel,
 } from '../renderer/electronIpc.js'
-
-type AppWindows = {
-  [windowID: string]: {
-    window: BrowserWindow,
-    appSession: AppSessionData,
-  },
-}
-
-type ClientResponse = {
-  id: string,
-  error?: Object,
-  result?: Object,
-}
 
 type User = {
   id: ID,
@@ -49,6 +36,19 @@ type AppSessionData = {
   app: App,
   user: User,
   session: Session,
+}
+
+type AppWindows = {
+  [windowID: string]: {
+    window: BrowserWindow,
+    appSession: AppSessionData,
+  },
+}
+
+type ClientResponse = {
+  id: string,
+  error?: Object,
+  result?: Object,
 }
 
 const sandboxToDaemonRequestChannel = 'ipc-sandbox-request-channel'
@@ -74,6 +74,7 @@ const envName =
 // Get existing env or create with specified type
 const env = Environment.get(envName, envType)
 
+// eslint-disable-next-line no-console
 console.log(`using environment "${env.name}" (${env.type})`)
 
 const daemonConfig = new DaemonConfig(env)
@@ -261,7 +262,7 @@ const ipcMainHandler = {
     }
     const path = vaultConfig.createVaultPath()
     try {
-      const res = await client.createVault(path, request.data.args[0])
+      await client.createVault(path, request.data.args[0])
       vaultConfig.defaultVault = path
       return {
         id: request.id,
@@ -288,7 +289,7 @@ const ipcMainHandler = {
       }
     }
     try {
-      const res = await client.openVault(...request.data.args)
+      await client.openVault(...request.data.args)
       vaultOpen = request.data.args[0]
       return {
         id: request.id,

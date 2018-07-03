@@ -1,3 +1,5 @@
+/* global getFixture, getTempFile */
+
 import { signContents } from '@mainframe/secure-file'
 import { createSignKeyPair } from '@mainframe/utils-crypto'
 

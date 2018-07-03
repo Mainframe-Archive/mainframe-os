@@ -1,16 +1,9 @@
 //@flow
 
-import React, { createRef, Component, type ElementRef } from 'react'
-import {
-  View,
-  TouchableOpacity,
-  StyleSheet,
-  Text,
-  ActivityIndicator,
-} from 'react-native-web'
-import type { ID } from '@mainframe/utils-id'
+import React, { Component } from 'react'
+import { View, StyleSheet, Text, ActivityIndicator } from 'react-native-web'
 
-import { client, callMainProcess } from '../electronIpc.js'
+import { callMainProcess } from '../electronIpc.js'
 import Button from '../Button'
 import ModalView from '../ModalView'
 import MFTextInput from '../UIComponents/TextInput'
@@ -79,9 +72,10 @@ export default class VaultCreateModal extends Component<Props, State> {
 
   async createVault(password: string) {
     try {
-      const res = await callMainProcess('createVault', [password])
+      await callMainProcess('createVault', [password])
       this.props.onOpenedVault()
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.warn(err)
       this.setState({
         error: 'Error creating vault',
@@ -101,6 +95,7 @@ export default class VaultCreateModal extends Component<Props, State> {
       await callMainProcess('openVault', [this.props.defaultVault, password])
       this.props.onOpenedVault()
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.warn(err)
       this.setState({
         awaitingResponse: false,

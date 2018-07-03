@@ -1,7 +1,7 @@
 // @flow
 
-import { remove } from 'fs-extra'
 import { createServer, type Server, type Socket } from 'net'
+import { remove } from 'fs-extra'
 
 import { VaultRegistry } from '../vault'
 

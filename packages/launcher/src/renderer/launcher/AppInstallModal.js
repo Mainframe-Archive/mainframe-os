@@ -1,17 +1,16 @@
 //@flow
 
 import type { PermissionsGrants } from '@mainframe/app-permissions'
+import type { ID } from '@mainframe/utils-id'
 import fs from 'fs-extra'
 import React, { createRef, Component, type ElementRef } from 'react'
-import { View, TouchableOpacity, StyleSheet, Text } from 'react-native-web'
-import type { ID } from '@mainframe/utils-id'
+import { View, StyleSheet, Text } from 'react-native-web'
 
 import { client } from '../electronIpc.js'
 import Button from '../Button'
 import ModalView from '../ModalView'
 import PermissionsView, { type PermissionOptions } from './PermissionsView'
 import IdentitySelectorView from './IdentitySelectorView'
-import colors from '../colors'
 
 type Props = {
   onRequestClose: () => void,
@@ -72,10 +71,12 @@ export default class AppInstallModal extends Component<Props, State> {
             installStep: 'permissions',
           })
         } else {
+          // eslint-disable-next-line no-console
           console.log('invalid manifest')
         }
       } catch (err) {
         // TODO: Feedback error
+        // eslint-disable-next-line no-console
         console.log('error parsing manifest: ', err)
       }
     }
@@ -96,6 +97,7 @@ export default class AppInstallModal extends Component<Props, State> {
       this.setState({ ownUsers: res.users })
     } catch (err) {
       // TODO: Handle error
+      // eslint-disable-next-line no-console
       console.warn(err)
     }
   }
@@ -112,7 +114,7 @@ export default class AppInstallModal extends Component<Props, State> {
     this.setState({ userId: id }, this.saveApp)
   }
 
-  onCreatedId = (id: ID) => {
+  onCreatedId = () => {
     this.getOwnIdentities()
   }
 
@@ -120,6 +122,7 @@ export default class AppInstallModal extends Component<Props, State> {
     // $FlowFixMe: userPermissions key in state
     const { manifest, userPermissions, userId } = this.state
     if (manifest == null || userPermissions == null || userId == null) {
+      // eslint-disable-next-line no-console
       console.log('invalid manifest or permissions to save app')
       // TODO: Display error
       return
@@ -129,6 +132,7 @@ export default class AppInstallModal extends Component<Props, State> {
       const res = await client.installApp(manifest, userId, userPermissions)
       this.props.onInstallComplete(res.id)
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.log('err:', err)
       // TODO: handle error
     }
@@ -205,6 +209,8 @@ export default class AppInstallModal extends Component<Props, State> {
         return this.renderDownload()
       case 'id':
         return this.renderSetId()
+      default:
+        return null
     }
   }
 
