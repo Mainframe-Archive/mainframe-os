@@ -8,6 +8,7 @@ import {
   StyleSheet,
   Text,
   ActivityIndicator,
+  Image,
 } from 'react-native-web'
 import type { ID } from '@mainframe/utils-id'
 
@@ -23,6 +24,8 @@ import colors from '../colors'
 
 const fs = remote.require('fs-extra')
 const path = remote.require('path')
+
+const logo = require('../../assets/images/mf-icon.png')
 
 type State = {
   showAppInstallModal: boolean,
@@ -195,7 +198,7 @@ export default class App extends Component<{}, State> {
 
     return (
       <View style={styles.container}>
-        <Text style={styles.title}>Mainframe Launcher</Text>
+        <Image style={styles.mfLogo} source={logo} resizeMode="contain" />
         <View style={styles.apps}>{appRows}</View>
         <Button title="Install New App" onPress={this.onPressInstall} />
         {installModal}
@@ -215,6 +218,9 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 20,
+  },
+  mfLogo: {
+    height: 40,
   },
   apps: {
     marginTop: 20,
