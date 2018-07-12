@@ -1,8 +1,7 @@
 // @flow
 
-import { VaultConfig, type Environment } from '@mainframe/config'
+import { VaultConfig } from '@mainframe/config'
 import { flags } from '@oclif/command'
-import { prompt } from 'inquirer'
 
 import Command from '../../Command'
 import { createVault } from '../../vault'

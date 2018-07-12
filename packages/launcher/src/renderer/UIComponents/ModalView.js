@@ -1,7 +1,7 @@
 //@flow
 
-import React, { Component, type Element, type Node } from 'react'
-import { View, StyleSheet, Text } from 'react-native-web'
+import React, { Component, type Node } from 'react'
+import { View, StyleSheet } from 'react-native-web'
 import ReactModal from 'react-modal'
 
 import colors from '../colors'

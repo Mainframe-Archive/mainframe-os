@@ -1,10 +1,6 @@
 // @flow
 
 import type { ManifestData } from '@mainframe/app-manifest'
-import type {
-  PermissionKey,
-  PermissionCheckResult,
-} from '@mainframe/app-permissions'
 import { readEncryptedFile, writeEncryptedFile } from '@mainframe/secure-file'
 import {
   decodeBase64,
@@ -23,7 +19,6 @@ import {
 import { type ID } from '@mainframe/utils-id'
 
 import {
-  type default as App,
   type AppUserSettings, // eslint-disable-line import/named
   type SessionData,
 } from '../app/App'
@@ -34,7 +29,6 @@ import type Session from '../app/Session'
 import IdentitiesRepository, {
   type IdentitiesRepositorySerialized, // eslint-disable-line import/named
 } from '../identity/IdentitiesRepository'
-import type Keychain from '../identity/Keychain'
 
 type VaultKDF = {
   algorithm: number,

@@ -7,7 +7,7 @@ import { type Style } from '../types'
 import colors from '../colors'
 
 type Props = {
-  style?: number | Array<boolean | number> | Object,
+  style?: Style,
 }
 
 export default class MFTextInput extends Component<Props> {

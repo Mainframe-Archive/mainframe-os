@@ -53,6 +53,7 @@ export default class IdentitySelectorView extends Component<Props, State> {
       }
     } catch (err) {
       // TODO: Handle error
+      // eslint-disable-next-line no-console
       console.warn(err)
     }
   }
@@ -74,7 +75,7 @@ export default class IdentitySelectorView extends Component<Props, State> {
       )
     }
 
-    const idRows = this.props.users.map((user, index) => {
+    const idRows = this.props.users.map(user => {
       const handler = () => this.props.onSelectId(user.id)
       return rowRender(user.id, user.data.name, handler)
     })
@@ -98,11 +99,6 @@ export default class IdentitySelectorView extends Component<Props, State> {
       </View>
     ) : null
 
-    const newIdForm = this.state.showCreateIdForm ? (
-      <View>
-        <TextInput />
-      </View>
-    ) : null
     return (
       <View>
         <Text style={styles.header}>{header}</Text>

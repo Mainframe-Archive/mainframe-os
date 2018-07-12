@@ -1,6 +1,6 @@
 //@flow
 
-import React, { createRef, Component, type ElementRef } from 'react'
+import React, { Component } from 'react'
 import {
   View,
   TouchableOpacity,
@@ -103,6 +103,7 @@ export default class VaultCreateModal extends Component<Props, State> {
       const res = await client.createVault(password, label)
       this.props.onOpenedVault()
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.warn(err)
       this.setState({
         error: 'Error creating vault',
@@ -126,6 +127,7 @@ export default class VaultCreateModal extends Component<Props, State> {
       ])
       this.props.onOpenedVault()
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.warn(err)
       this.setState({
         awaitingResponse: false,

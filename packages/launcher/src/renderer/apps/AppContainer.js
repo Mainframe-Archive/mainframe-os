@@ -1,10 +1,10 @@
 // @flow
 
-import React, { Component } from 'react'
-import { View, StyleSheet, Text } from 'react-native-web'
 import path from 'path'
 import url from 'url'
 import type { ID } from '@mainframe/utils-id'
+import React, { Component } from 'react'
+import { View, StyleSheet, Text } from 'react-native-web'
 
 import { callMainProcess } from '../electronIpc'
 
@@ -53,8 +53,9 @@ export default class AppContainer extends Component<
         sessionData: res.appSession,
       })
     } catch (err) {
+      // TODO handle error
+      // eslint-disable-next-line no-console
       console.warn(err)
-      //TODO handle error
     }
   }
 
@@ -104,7 +105,6 @@ export default class AppContainer extends Component<
 
 const COLOR_WHITE = '#ffffff'
 const COLOR_GREY = '#f7f7f7'
-const COLOR_RED = '#ff0000'
 
 const styles = StyleSheet.create({
   outerContainer: {
@@ -123,7 +123,6 @@ const styles = StyleSheet.create({
   identity: {
     borderRadius: 16,
     height: 30,
-    backgroundColor: COLOR_RED,
     paddingHorizontal: 20,
     backgroundColor: COLOR_WHITE,
     justifyContent: 'center',

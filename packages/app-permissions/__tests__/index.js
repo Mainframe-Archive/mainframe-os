@@ -44,9 +44,9 @@ describe('mergeGrantsToDetails', () => {
   })
 
   it('session HTTPS_REQUEST grants are concatenated', () => {
-    let g1 = ['https://google.com', 'https://twitter.com']
-    let g2 = ['https://mainframe.com']
-    let result = mergeGrantsToDetails(
+    const g1 = ['https://google.com', 'https://twitter.com']
+    const g2 = ['https://mainframe.com']
+    const result = mergeGrantsToDetails(
       { HTTPS_REQUEST: { granted: g1, denied: [] } },
       { HTTPS_REQUEST: { granted: g2, denied: [] } },
     )

@@ -78,7 +78,7 @@ export const getDefinitionsDifference = (
   const unchanged = {}
 
   const { HTTPS_REQUEST: currHR, ...currOthers } = current
-  const { HTTPS_REQUEST: nextHR, ...nextOthers } = current
+  const { HTTPS_REQUEST: nextHR, ...nextOthers } = next
 
   if (currHR.length === 0) {
     if (nextHR.length === 0) {

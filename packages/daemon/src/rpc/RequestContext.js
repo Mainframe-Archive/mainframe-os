@@ -1,7 +1,7 @@
 // @flow
 
-import type { ID } from '@mainframe/utils-id'
 import type { Socket } from 'net'
+import type { ID } from '@mainframe/utils-id'
 
 import type { Vault, VaultRegistry } from '../vault'
 

@@ -1,5 +1,6 @@
 // @flow
 
+import fs from 'fs'
 import {
   hashStream,
   openSigned,
@@ -8,7 +9,6 @@ import {
 } from '@mainframe/utils-crypto'
 import asar from 'asar'
 import stringify from 'fast-json-stable-stringify'
-import fs from 'fs'
 
 export const createPackage = (src: string, dest: string): Promise<void> => {
   return new Promise(resolve => asar.createPackage(src, dest, resolve))

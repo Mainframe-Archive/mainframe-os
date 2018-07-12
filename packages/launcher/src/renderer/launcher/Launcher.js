@@ -1,6 +1,6 @@
 //@flow
 
-import { ipcRenderer as ipc, remote } from 'electron'
+import type { ID } from '@mainframe/utils-id'
 import React, { Component } from 'react'
 import {
   View,
@@ -10,8 +10,8 @@ import {
   ActivityIndicator,
   Image,
 } from 'react-native-web'
-import type { ID } from '@mainframe/utils-id'
 
+import colors from '../colors'
 import { client, callMainProcess } from '../electronIpc'
 import AppInstallModal from './AppInstallModal'
 import Button from '../UIComponents/Button'
@@ -19,11 +19,6 @@ import ModalView from '../UIComponents/ModalView'
 import IdentitySelectorView from './IdentitySelectorView'
 import VaultManagerModal from './VaultManagerModal'
 import type { VaultsData } from '../types'
-
-import colors from '../colors'
-
-const fs = remote.require('fs-extra')
-const path = remote.require('path')
 
 const logo = require('../../assets/images/mf-icon.png')
 
@@ -54,6 +49,7 @@ export default class App extends Component<{}, State> {
         this.getInstalledApps()
       }
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.warn(err)
     }
   }
@@ -65,6 +61,7 @@ export default class App extends Component<{}, State> {
         installedApps: res.apps,
       })
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.warn('error: ', err)
     }
   }
@@ -87,7 +84,7 @@ export default class App extends Component<{}, State> {
     })
   }
 
-  onInstallComplete = (appID: ID) => {
+  onInstallComplete = () => {
     this.onCloseInstallModal()
     this.getInstalledApps()
   }
@@ -148,8 +145,6 @@ export default class App extends Component<{}, State> {
       return this.renderVaultManager()
     }
     const appRows = this.state.installedApps.map(app => {
-      const manifest = app.manifest
-
       const onClick = async () => {
         this.onOpenApp(app.appID)
       }
@@ -215,9 +210,6 @@ const styles = StyleSheet.create({
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
-  },
-  title: {
-    fontSize: 20,
   },
   mfLogo: {
     height: 40,

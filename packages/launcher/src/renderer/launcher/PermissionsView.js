@@ -12,8 +12,6 @@ import {
   TouchableOpacity,
   StyleSheet,
   Text,
-  Modal,
-  Switch,
   ScrollView,
 } from 'react-native-web'
 
@@ -38,11 +36,6 @@ export type PermissionOptions = {
 type PermissionsSettings = {
   HTTPS_REQUEST: { [Domain]: PermissionGranted },
   [PermissionKey]: PermissionGranted,
-}
-
-type PermissionInfo = {
-  name: string,
-  description: string,
 }
 
 const PERMISSION_NAMES = {
