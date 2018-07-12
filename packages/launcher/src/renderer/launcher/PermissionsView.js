@@ -17,7 +17,7 @@ import {
   ScrollView,
 } from 'react-native-web'
 
-import Button from '../Button'
+import Button from '../UIComponents/Button'
 
 type Domain = string
 type PermissionGranted = boolean

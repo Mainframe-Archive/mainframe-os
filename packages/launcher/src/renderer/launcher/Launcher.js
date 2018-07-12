@@ -13,23 +13,16 @@ import type { ID } from '@mainframe/utils-id'
 
 import { client, callMainProcess } from '../electronIpc'
 import AppInstallModal from './AppInstallModal'
-import Button from '../Button'
-import ModalView from '../ModalView'
+import Button from '../UIComponents/Button'
+import ModalView from '../UIComponents/ModalView'
 import IdentitySelectorView from './IdentitySelectorView'
 import VaultManagerModal from './VaultManagerModal'
+import type { VaultsData } from '../types'
 
 import colors from '../colors'
 
 const fs = remote.require('fs-extra')
 const path = remote.require('path')
-
-type VaultPath = string
-
-type VaultsData = {
-  paths: Array<VaultPath>,
-  defaultVault: VaultPath,
-  vaultOpen: boolean,
-}
 
 type State = {
   showAppInstallModal: boolean,
@@ -50,7 +43,7 @@ export default class App extends Component<{}, State> {
 
   async getVaultsData() {
     try {
-      const vaultsData = await callMainProcess('getVaultsData')
+      const vaultsData = await client.getVaultsData()
       this.setState({
         vaultsData,
       })
@@ -133,11 +126,9 @@ export default class App extends Component<{}, State> {
 
   renderVaultManager() {
     if (this.state.vaultsData) {
-      const { vaultsData } = this.state
       return (
         <VaultManagerModal
-          paths={vaultsData.paths}
-          defaultVault={vaultsData.defaultVault}
+          vaultsData={this.state.vaultsData}
           onOpenedVault={this.onOpenedVault}
         />
       )
@@ -235,7 +226,7 @@ const styles = StyleSheet.create({
     borderColor: colors.LIGHT_GREY_E8,
     borderWidth: 1,
     flexDirection: 'row',
-    borderRadius: 3,
+    borderRadius: 50,
   },
   appIcon: {
     width: 40,
@@ -249,7 +240,7 @@ const styles = StyleSheet.create({
   deleteApp: {
     backgroundColor: colors.GREY_MED_81,
     color: colors.WHITE,
-    borderRadius: 2,
+    borderRadius: 11,
     height: 22,
     justifyContent: 'center',
     paddingHorizontal: 10,

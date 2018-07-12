@@ -74,11 +74,16 @@ const envName =
 // Get existing env or create with specified type
 const env = Environment.get(envName, envType)
 
-console.log(`using environment "${env.name}" (${env.type})`)
+console.log(`using environment "${env.name}" (${env.type})`, env)
 
 const daemonConfig = new DaemonConfig(env)
 const vaultConfig = new VaultConfig(env)
 const isDevelopment = env.isDev
+console.log(
+  vaultConfig.getLabel(
+    '/Users/adamclarke/Library/Preferences/mainframe-env-dev2-nodejs/vaults/k_DsHfjSxIxQq~6CWSKmS',
+  ),
+)
 
 let client
 let mainWindow
@@ -245,7 +250,7 @@ const ipcMainHandler = {
     return {
       id: request.id,
       result: {
-        paths: vaultsPaths,
+        vaults,
         defaultVault: vaultConfig.defaultVault,
         vaultOpen: vaultOpen,
       },
@@ -253,7 +258,7 @@ const ipcMainHandler = {
   },
 
   createVault: async (event, request) => {
-    if (!request.data.args.length) {
+    if (request.data.args.length !== 2) {
       return {
         error: IPC_ERRORS.invalidParams,
         id: request.id,
@@ -262,7 +267,9 @@ const ipcMainHandler = {
     const path = vaultConfig.createVaultPath()
     try {
       const res = await client.createVault(path, request.data.args[0])
+      vaultConfig.setLabel(path, request.data.args[1])
       vaultConfig.defaultVault = path
+      vaultOpen = path
       return {
         id: request.id,
         result: {
