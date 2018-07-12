@@ -195,7 +195,9 @@ export default class App extends Component<{}, State> {
       <View style={styles.container}>
         <Image style={styles.mfLogo} source={logo} resizeMode="contain" />
         <View style={styles.apps}>{appRows}</View>
-        <Button title="Install New App" onPress={this.onPressInstall} />
+        <View style={styles.installButtonContainer}>
+          <Button title="Install New App" onPress={this.onPressInstall} />
+        </View>
         {installModal}
         {appIdentitySelector}
       </View>
@@ -257,5 +259,10 @@ const styles = StyleSheet.create({
     marginTop: 5,
     fontSize: 12,
     color: colors.GREY_MED_81,
+  },
+  installButtonContainer: {
+    paddingTop: 10,
+    alignItems: 'center',
+    flex: 1,
   },
 })
