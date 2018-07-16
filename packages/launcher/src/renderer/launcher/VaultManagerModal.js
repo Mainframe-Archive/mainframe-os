@@ -8,7 +8,6 @@ import {
   Text,
   ActivityIndicator,
 } from 'react-native-web'
-import type { ID } from '@mainframe/utils-id'
 
 import { client, callMainProcess } from '../electronIpc.js'
 import Button from '../UIComponents/Button'
@@ -31,10 +30,11 @@ type State = {
   selectedVault: VaultPath,
   awaitingResponse?: boolean,
   showVaultList?: boolean,
+  showCreateVault?: boolean,
   error?: ?string,
 }
 
-export default class VaultCreateModal extends Component<Props, State> {
+export default class VaultManagerModal extends Component<Props, State> {
   constructor(props: Props) {
     super(props)
     this.state = {
@@ -100,7 +100,7 @@ export default class VaultCreateModal extends Component<Props, State> {
 
   async createVault(password: string, label: string) {
     try {
-      const res = await client.createVault(password, label)
+      await client.createVault(password, label)
       this.props.onOpenedVault()
     } catch (err) {
       // eslint-disable-next-line no-console

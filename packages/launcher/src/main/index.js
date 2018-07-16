@@ -80,11 +80,6 @@ console.log(`using environment "${env.name}" (${env.type})`)
 const daemonConfig = new DaemonConfig(env)
 const vaultConfig = new VaultConfig(env)
 const isDevelopment = env.isDev
-console.log(
-  vaultConfig.getLabel(
-    '/Users/adamclarke/Library/Preferences/mainframe-env-dev2-nodejs/vaults/k_DsHfjSxIxQq~6CWSKmS',
-  ),
-)
 
 let client
 let mainWindow
@@ -247,7 +242,6 @@ const ipcMainHandler = {
 
   getVaultsData: async (event, request) => {
     const vaults = vaultConfig.vaults
-    const vaultsPaths = Object.keys(vaults)
     return {
       id: request.id,
       result: {
@@ -267,7 +261,7 @@ const ipcMainHandler = {
     }
     const path = vaultConfig.createVaultPath()
     try {
-      const res = await client.createVault(path, request.data.args[0])
+      await client.createVault(path, request.data.args[0])
       vaultConfig.setLabel(path, request.data.args[1])
       vaultConfig.defaultVault = path
       vaultOpen = path

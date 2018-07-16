@@ -119,6 +119,7 @@ export default class AppsRepository {
       settings: {
         [(userID: string)]: {
           permissions: settings.permissions,
+          permissionsChecked: settings.permissionsChecked,
         },
       },
     })

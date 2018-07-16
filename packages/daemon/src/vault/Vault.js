@@ -189,8 +189,6 @@ export default class Vault {
       // Set user settings for already existing app
       this.apps.setUserSettings(appID, userID, settings)
     }
-    const app = this.apps.getByID(appID)
-    app.setPermissionsChecked(userID, true)
     return appID
   }
 

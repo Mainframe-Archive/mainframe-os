@@ -13,9 +13,9 @@ import {
 
 import colors from '../colors'
 import { client, callMainProcess } from '../electronIpc'
-import AppInstallModal from './AppInstallModal'
 import Button from '../UIComponents/Button'
 import ModalView from '../UIComponents/ModalView'
+import AppInstallModal from './AppInstallModal'
 import IdentitySelectorView from './IdentitySelectorView'
 import VaultManagerModal from './VaultManagerModal'
 import type { VaultsData } from '../types'
