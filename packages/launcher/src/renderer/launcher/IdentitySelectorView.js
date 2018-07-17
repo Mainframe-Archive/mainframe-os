@@ -11,7 +11,7 @@ import {
 import type { ID } from '@mainframe/utils-id'
 
 import { client } from '../electronIpc.js'
-import Button from '../Button'
+import Button from '../UIComponents/Button'
 import colors from '../colors'
 
 type User = {

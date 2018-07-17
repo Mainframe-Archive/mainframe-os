@@ -8,24 +8,18 @@ import {
   StyleSheet,
   Text,
   ActivityIndicator,
+  Image,
 } from 'react-native-web'
 
 import colors from '../colors'
 import { client, callMainProcess } from '../electronIpc'
-import Button from '../Button'
-import ModalView from '../ModalView'
-import VaultManagerModal from './VaultManagerModal'
-
+import Button from '../UIComponents/Button'
+import ModalView from '../UIComponents/ModalView'
+import logo from '../../assets/images/mf-icon.png'
 import AppInstallModal from './AppInstallModal'
 import IdentitySelectorView from './IdentitySelectorView'
-
-type VaultPath = string
-
-type VaultsData = {
-  paths: Array<VaultPath>,
-  defaultVault: VaultPath,
-  vaultOpen: boolean,
-}
+import VaultManagerModal from './VaultManagerModal'
+import type { VaultsData } from '../types'
 
 type State = {
   showAppInstallModal: boolean,
@@ -46,7 +40,7 @@ export default class App extends Component<{}, State> {
 
   async getVaultsData() {
     try {
-      const vaultsData = await callMainProcess('getVaultsData')
+      const vaultsData = await client.getVaultsData()
       this.setState({
         vaultsData,
       })
@@ -131,11 +125,9 @@ export default class App extends Component<{}, State> {
 
   renderVaultManager() {
     if (this.state.vaultsData) {
-      const { vaultsData } = this.state
       return (
         <VaultManagerModal
-          paths={vaultsData.paths}
-          defaultVault={vaultsData.defaultVault}
+          vaultsData={this.state.vaultsData}
           onOpenedVault={this.onOpenedVault}
         />
       )
@@ -200,9 +192,11 @@ export default class App extends Component<{}, State> {
 
     return (
       <View style={styles.container}>
-        <Text style={styles.title}>Mainframe Launcher</Text>
+        <Image style={styles.mfLogo} source={logo} resizeMode="contain" />
         <View style={styles.apps}>{appRows}</View>
-        <Button title="Install New App" onPress={this.onPressInstall} />
+        <View style={styles.installButtonContainer}>
+          <Button title="Install New App" onPress={this.onPressInstall} />
+        </View>
         {installModal}
         {appIdentitySelector}
       </View>
@@ -218,8 +212,8 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
   },
-  title: {
-    fontSize: 20,
+  mfLogo: {
+    height: 40,
   },
   apps: {
     marginTop: 20,
@@ -231,7 +225,7 @@ const styles = StyleSheet.create({
     borderColor: colors.LIGHT_GREY_E8,
     borderWidth: 1,
     flexDirection: 'row',
-    borderRadius: 3,
+    borderRadius: 50,
   },
   appIcon: {
     width: 40,
@@ -245,7 +239,7 @@ const styles = StyleSheet.create({
   deleteApp: {
     backgroundColor: colors.GREY_MED_81,
     color: colors.WHITE,
-    borderRadius: 2,
+    borderRadius: 11,
     height: 22,
     justifyContent: 'center',
     paddingHorizontal: 10,
@@ -264,5 +258,10 @@ const styles = StyleSheet.create({
     marginTop: 5,
     fontSize: 12,
     color: colors.GREY_MED_81,
+  },
+  installButtonContainer: {
+    paddingTop: 10,
+    alignItems: 'center',
+    flex: 1,
   },
 })

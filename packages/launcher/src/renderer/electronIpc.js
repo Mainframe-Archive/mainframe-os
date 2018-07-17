@@ -61,4 +61,9 @@ export const client = {
   createUserIdentity: (identity: Object) =>
     callMainClient('createUserIdentity', [identity]),
   getOwnUserIdentities: () => callMainClient('getOwnUserIdentities'),
+
+  // Main process
+  getVaultsData: () => callMainProcess('getVaultsData'),
+  createVault: (path: string, label: string) =>
+    callMainProcess('createVault', [path, label]),
 }

@@ -7,8 +7,8 @@ import React, { createRef, Component, type ElementRef } from 'react'
 import { View, StyleSheet, Text } from 'react-native-web'
 
 import { client } from '../electronIpc.js'
-import Button from '../Button'
-import ModalView from '../ModalView'
+import Button from '../UIComponents/Button'
+import ModalView from '../UIComponents/ModalView'
 import PermissionsView, { type PermissionOptions } from './PermissionsView'
 import IdentitySelectorView from './IdentitySelectorView'
 
@@ -129,7 +129,11 @@ export default class AppInstallModal extends Component<Props, State> {
     }
 
     try {
-      const res = await client.installApp(manifest, userId, userPermissions)
+      const permissions = {
+        permissions: userPermissions,
+        permissionsChecked: true,
+      }
+      const res = await client.installApp(manifest, userId, permissions)
       this.props.onInstallComplete(res.id)
     } catch (err) {
       // eslint-disable-next-line no-console

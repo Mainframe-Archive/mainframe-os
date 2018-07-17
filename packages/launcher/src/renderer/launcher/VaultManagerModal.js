@@ -1,17 +1,24 @@
 //@flow
 
 import React, { Component } from 'react'
-import { View, StyleSheet, Text, ActivityIndicator } from 'react-native-web'
+import {
+  View,
+  TouchableOpacity,
+  StyleSheet,
+  Text,
+  ActivityIndicator,
+} from 'react-native-web'
 
-import { callMainProcess } from '../electronIpc.js'
-import Button from '../Button'
-import ModalView from '../ModalView'
+import { client, callMainProcess } from '../electronIpc.js'
+import Button from '../UIComponents/Button'
+import ModalView from '../UIComponents/ModalView'
 import MFTextInput from '../UIComponents/TextInput'
+import Icon from '../UIComponents/Icon'
 import colors from '../colors'
+import type { VaultsData, VaultPath } from '../types'
 
 type Props = {
-  defaultVault?: string,
-  vaultPaths?: Array<string>,
+  vaultsData: VaultsData,
   onOpenedVault: () => void,
 }
 
@@ -19,15 +26,24 @@ type State = {
   password: string,
   confirmPassword: string,
   unlockPassword: string,
+  newVaultLabel: string,
+  selectedVault: VaultPath,
   awaitingResponse?: boolean,
+  showVaultList?: boolean,
+  showCreateVault?: boolean,
   error?: ?string,
 }
 
-export default class VaultCreateModal extends Component<Props, State> {
-  state = {
-    password: '',
-    confirmPassword: '',
-    unlockPassword: '',
+export default class VaultManagerModal extends Component<Props, State> {
+  constructor(props: Props) {
+    super(props)
+    this.state = {
+      password: '',
+      confirmPassword: '',
+      unlockPassword: '',
+      newVaultLabel: '',
+      selectedVault: props.vaultsData.defaultVault,
+    }
   }
 
   // HANDLERS
@@ -50,8 +66,20 @@ export default class VaultCreateModal extends Component<Props, State> {
     })
   }
 
+  onChangeLabel = (value: string) => {
+    this.setState({
+      newVaultLabel: value,
+    })
+  }
+
   onPressCreateVault = () => {
-    const { password, confirmPassword } = this.state
+    const { password, confirmPassword, newVaultLabel } = this.state
+    if (!newVaultLabel.length) {
+      this.setState({
+        error: 'Please provide a name for your vault',
+      })
+      return
+    }
     if (password.length < 8) {
       this.setState({
         error: 'Password must be at least 8 characters',
@@ -67,18 +95,19 @@ export default class VaultCreateModal extends Component<Props, State> {
       error: null,
       awaitingResponse: true,
     })
-    this.createVault(password)
+    this.createVault(password, this.state.newVaultLabel)
   }
 
-  async createVault(password: string) {
+  async createVault(password: string, label: string) {
     try {
-      await callMainProcess('createVault', [password])
+      await client.createVault(password, label)
       this.props.onOpenedVault()
     } catch (err) {
       // eslint-disable-next-line no-console
       console.warn(err)
       this.setState({
         error: 'Error creating vault',
+        awaitingResponse: false,
       })
     }
   }
@@ -92,7 +121,10 @@ export default class VaultCreateModal extends Component<Props, State> {
       awaitingResponse: true,
     })
     try {
-      await callMainProcess('openVault', [this.props.defaultVault, password])
+      await callMainProcess('openVault', [
+        this.props.vaultsData.defaultVault,
+        password,
+      ])
       this.props.onOpenedVault()
     } catch (err) {
       // eslint-disable-next-line no-console
@@ -103,6 +135,26 @@ export default class VaultCreateModal extends Component<Props, State> {
           'Failed to unlock vault, please check you entered the correct password.',
       })
     }
+  }
+
+  onSelectVault = (path: string) => {
+    this.setState({
+      selectedVault: path,
+      showVaultList: false,
+    })
+  }
+
+  onToggleSelectVault = () => {
+    this.setState({
+      showVaultList: !this.state.showVaultList,
+    })
+  }
+
+  onToggleShowCreateVault = () => {
+    this.setState({
+      showCreateVault: !this.state.showCreateVault,
+      showVaultList: false,
+    })
   }
 
   // RENDER
@@ -116,12 +168,28 @@ export default class VaultCreateModal extends Component<Props, State> {
     ) : (
       <Button title="Create Vault" onPress={this.onPressCreateVault} />
     )
+    const openVaultButton = this.props.vaultsData.defaultVault ? (
+      <TouchableOpacity
+        style={styles.backButton}
+        onPress={this.onToggleShowCreateVault}>
+        <Icon name="left-arrow-grey" size={14} style={styles.leftArrow} />
+        <Text style={styles.backButtonLabel}>
+          Open a previously created Vault
+        </Text>
+      </TouchableOpacity>
+    ) : null
     return (
       <View>
         <Text style={styles.title}>Create a Vault</Text>
         <Text style={styles.description}>
           This is where we securely store your files, wallets and identities.
         </Text>
+        <MFTextInput
+          style={styles.input}
+          onChangeText={this.onChangeLabel}
+          value={this.state.newVaultLabel}
+          placeholder="Vault name"
+        />
         <MFTextInput
           secureTextEntry
           style={styles.input}
@@ -138,6 +206,50 @@ export default class VaultCreateModal extends Component<Props, State> {
         />
         {errorMsg}
         {action}
+        {openVaultButton}
+      </View>
+    )
+  }
+
+  renderVaultsList() {
+    const { vaultsData } = this.props
+    const rows = this.state.showVaultList
+      ? Object.keys(vaultsData.vaults).map(path => {
+          const label = vaultsData.vaults[path]
+          const onPress = () => {
+            this.onSelectVault(path)
+          }
+          return (
+            <TouchableOpacity
+              key={path}
+              style={styles.vaultListRow}
+              onPress={onPress}>
+              <Text>{label}</Text>
+            </TouchableOpacity>
+          )
+        })
+      : null
+    if (rows) {
+      rows.push(
+        <TouchableOpacity
+          key={'create'}
+          style={styles.vaultListRow}
+          onPress={this.onToggleShowCreateVault}>
+          <Text style={styles.vaultlistCreate}>Create a new vault</Text>
+        </TouchableOpacity>,
+      )
+    }
+    return (
+      <View style={styles.vaults}>
+        <TouchableOpacity
+          style={styles.selectedVault}
+          onPress={this.onToggleSelectVault}>
+          <Text style={styles.selectedVaultLabel}>
+            {vaultsData.vaults[this.state.selectedVault]}
+          </Text>
+          <Icon name="down-arrow-grey" size={15} style={styles.downArrow} />
+        </TouchableOpacity>
+        <View style={styles.selectVaultList}>{rows}</View>
       </View>
     )
   }
@@ -154,6 +266,7 @@ export default class VaultCreateModal extends Component<Props, State> {
     return (
       <View>
         <Text style={styles.title}>Unlock Vault</Text>
+        {this.renderVaultsList()}
         <MFTextInput
           secureTextEntry
           style={styles.input}
@@ -168,29 +281,71 @@ export default class VaultCreateModal extends Component<Props, State> {
   }
 
   render() {
-    const content = this.props.defaultVault
-      ? this.renderOpenVault()
-      : this.renderCreateVault()
+    const content =
+      this.state.showCreateVault || !this.props.vaultsData.defaultVault
+        ? this.renderCreateVault()
+        : this.renderOpenVault()
 
     return <ModalView>{content}</ModalView>
   }
 }
 
+const PADDING = 10
+
 const styles = StyleSheet.create({
   title: {
     fontWeight: 'bold',
-    paddingBottom: 10,
+    paddingBottom: PADDING,
   },
   description: {
-    fontSize: 12,
-    paddingBottom: 10,
+    fontSize: 13,
+    paddingBottom: PADDING,
   },
   input: {
-    marginBottom: 10,
+    marginBottom: PADDING,
   },
   errorLabel: {
     fontSize: 12,
-    paddingBottom: 10,
+    paddingBottom: PADDING,
     color: colors.PRIMARY_RED,
+  },
+  vaults: {
+    paddingBottom: PADDING,
+  },
+  selectedVault: {
+    backgroundColor: colors.LIGHT_GREY_EE,
+    padding: PADDING,
+    flexDirection: 'row',
+  },
+  selectedVaultLabel: {
+    flex: 1,
+  },
+  selectVaultList: {
+    borderColor: colors.LIGHT_GREY_EE,
+    borderWidth: 1,
+  },
+  vaultListRow: {
+    borderBottomColor: colors.LIGHT_GREY_EE,
+    borderBottomWidth: 1,
+    padding: 8,
+    color: colors.GREY_MED_75,
+  },
+  vaultlistCreate: {
+    color: colors.PRIMARY_BLUE,
+  },
+  downArrow: {
+    paddingTop: 5,
+  },
+  leftArrow: {
+    paddingTop: 2,
+    paddingRight: 10,
+  },
+  backButton: {
+    paddingTop: 12,
+    flexDirection: 'row',
+  },
+  backButtonLabel: {
+    fontSize: 13,
+    color: colors.GREY_MED_75,
   },
 })

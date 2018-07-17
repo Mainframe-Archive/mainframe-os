@@ -242,11 +242,10 @@ const ipcMainHandler = {
 
   getVaultsData: async (event, request) => {
     const vaults = vaultConfig.vaults
-    const vaultsPaths = Object.keys(vaults)
     return {
       id: request.id,
       result: {
-        paths: vaultsPaths,
+        vaults,
         defaultVault: vaultConfig.defaultVault,
         vaultOpen: vaultOpen,
       },
@@ -254,7 +253,7 @@ const ipcMainHandler = {
   },
 
   createVault: async (event, request) => {
-    if (!request.data.args.length) {
+    if (request.data.args.length !== 2) {
       return {
         error: IPC_ERRORS.invalidParams,
         id: request.id,
@@ -263,7 +262,9 @@ const ipcMainHandler = {
     const path = vaultConfig.createVaultPath()
     try {
       await client.createVault(path, request.data.args[0])
+      vaultConfig.setLabel(path, request.data.args[1])
       vaultConfig.defaultVault = path
+      vaultOpen = path
       return {
         id: request.id,
         result: {

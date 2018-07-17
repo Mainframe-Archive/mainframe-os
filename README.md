@@ -20,42 +20,39 @@ In addition, there are several auxiliary packages:
 In order to make it easier to share code among packages, this project uses [lerna](https://lernajs.io/). Whenever code changes, it's expected that you run `yarn build` from the root of the project directory, and it will kick off the necessary `lerna` build processes in the package folders.
 
 ## Getting Started
+
 Each package contains (or will contain) a readme with further information pertaining to setup. A shortcut guide is as follows:
 
 In the root of the project, install node dependencies:
+
 ```
 $ yarn install
 $ yarn bootstrap
 ```
 
 Next, set up the daemon using the CLI:
+
 ```
 $ packages/cli/bin/run env:create
 $ packages/cli/bin/run daemon:setup --bin-path=$(pwd)/packages/daemon/bin/run
 ```
 
-Currently it is necessary to create a vault with password `testKey`:
-```
-$ packages/cli/bin/run vault:create
-? Vault label TestVault
-? Vault passphrase (make it long!) testKey
-? Vault passphrase (confirmation) testKey
-? Set as default vault? Yes
-New vault created at /Users/duane/Library/Preferences/mainframe-env-development-nodejs/vaults/XPQDK_i_VPrM6fvJas2ra
-```
-
 ## Run
+
 Whenever code changes in more than one package, you should build everything (via `lerna`) with:
+
 ```
 yarn build
 ```
 
 Now, in one terminal tab, run the daemon:
+
 ```
 (cd packages/cli && ./bin/run daemon:start)
 ```
 
 Then, in another tab, run the launcher:
+
 ```
 (cd packages/launcher && yarn dev)
 ```

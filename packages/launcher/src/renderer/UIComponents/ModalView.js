@@ -4,7 +4,7 @@ import React, { Component, type Node } from 'react'
 import { View, StyleSheet } from 'react-native-web'
 import ReactModal from 'react-modal'
 
-import colors from './colors'
+import colors from '../colors'
 
 type Props = {
   onRequestClose?: () => void,
