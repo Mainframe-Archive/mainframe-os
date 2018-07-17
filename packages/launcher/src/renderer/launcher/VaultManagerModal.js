@@ -172,7 +172,7 @@ export default class VaultManagerModal extends Component<Props, State> {
       <TouchableOpacity
         style={styles.backButton}
         onPress={this.onToggleShowCreateVault}>
-        <Icon name="left-arrow" height={14} style={styles.leftArrow} />
+        <Icon name="left-arrow-grey" size={14} style={styles.leftArrow} />
         <Text style={styles.backButtonLabel}>
           Open a previously created Vault
         </Text>
@@ -247,7 +247,7 @@ export default class VaultManagerModal extends Component<Props, State> {
           <Text style={styles.selectedVaultLabel}>
             {vaultsData.vaults[this.state.selectedVault]}
           </Text>
-          <Icon name="down-arrow" height={8} style={styles.downArrow} />
+          <Icon name="down-arrow-grey" size={15} style={styles.downArrow} />
         </TouchableOpacity>
         <View style={styles.selectVaultList}>{rows}</View>
       </View>

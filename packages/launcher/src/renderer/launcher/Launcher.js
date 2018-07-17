@@ -15,12 +15,11 @@ import colors from '../colors'
 import { client, callMainProcess } from '../electronIpc'
 import Button from '../UIComponents/Button'
 import ModalView from '../UIComponents/ModalView'
+import logo from '../../assets/images/mf-icon.png'
 import AppInstallModal from './AppInstallModal'
 import IdentitySelectorView from './IdentitySelectorView'
 import VaultManagerModal from './VaultManagerModal'
 import type { VaultsData } from '../types'
-
-const logo = require('../../assets/images/mf-icon.png')
 
 type State = {
   showAppInstallModal: boolean,
