@@ -64,6 +64,8 @@ export const client = {
 
   // Main process
   getVaultsData: () => callMainProcess('getVaultsData'),
-  createVault: (path: string, label: string) =>
-    callMainProcess('createVault', [path, label]),
+  createVault: (password: string, label: string) =>
+    callMainProcess('createVault', [password, label]),
+  openVault: (path: string, password: string) =>
+    callMainProcess('openVault', [path, password]),
 }

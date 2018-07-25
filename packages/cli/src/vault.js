@@ -1,11 +1,12 @@
 // @flow
 
-import type { VaultConfig } from '@mainframe/config'
+import { VaultConfig } from '@mainframe/config'
+import type Client from '@mainframe/client'
 import { prompt } from 'inquirer'
 
 import type Command from './Command'
 
-export const promptVault = async (setDefault: ?boolean = false) => {
+export const promptCreateVault = async (setDefault: ?boolean = false) => {
   const answers = await prompt([
     {
       type: 'input',
@@ -44,6 +45,36 @@ export const promptVault = async (setDefault: ?boolean = false) => {
   }
 }
 
+export const promptOpenVault = async () => {
+  const answers = await prompt([
+    {
+      type: 'password',
+      name: 'password',
+      message: 'Vault password',
+    },
+  ])
+
+  if (answers.password.length === 0) {
+    throw new Error('Please provide a password')
+  }
+
+  return answers.password
+}
+
+export const openDefaultVault = async (
+  cmd: Command,
+  client: Client,
+): Promise<void> => {
+  const cfg = new VaultConfig(cmd.env)
+  const vault = cfg.defaultVault
+  if (vault != null) {
+    const vaultPassword = await promptOpenVault()
+    await client.openVault(vault, vaultPassword)
+  } else {
+    throw new Error('No default vault found')
+  }
+}
+
 export const createVault = async (
   cmd: Command,
   cfg: VaultConfig,
@@ -58,7 +89,7 @@ export const createVault = async (
   let vault
   while (vault == null) {
     try {
-      vault = await promptVault(setDefault)
+      vault = await promptCreateVault(setDefault)
     } catch (err) {
       cmd.warn(err)
     }

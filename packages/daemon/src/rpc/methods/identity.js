@@ -9,6 +9,15 @@ type OwnId = {
   data: Object,
 }
 
+export const createDeveloper = async (
+  ctx: RequestContext,
+  [data]: [Object] = [],
+): Promise<{ id: ID }> => {
+  const id = ctx.openVault.identities.createOwnDeveloper(data)
+  await ctx.openVault.save()
+  return { id }
+}
+
 export const createUser = async (
   ctx: RequestContext,
   [data]: [Object] = [],
@@ -25,4 +34,15 @@ export const getOwnUsers = (ctx: RequestContext): { users: Array<OwnId> } => {
     return { id: uID, data: ownUsers[uID].data }
   })
   return { users }
+}
+
+export const getOwnDevelopers = (
+  ctx: RequestContext,
+): { developers: Array<OwnId> } => {
+  const { ownDevelopers } = ctx.openVault.identities
+  const developers = Object.keys(ownDevelopers).map(id => {
+    const uID = idType(id)
+    return { id: uID, data: ownDevelopers[uID].data }
+  })
+  return { developers }
 }
