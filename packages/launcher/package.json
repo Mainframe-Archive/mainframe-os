@@ -9,7 +9,8 @@
     "dist": "yarn compile && electron-builder",
     "dist:dir": "yarn dist --dir -c.compression=store -c.mac.identity=null",
     "build:flow": "flow-copy-source src lib",
-    "test:types": "flow check"
+    "test:types": "flow check",
+    "dapp:bundleExample": "asar p exampleApp static/applications/sandbox/sandbox.asar"
   },
   "electronWebpack": {
     "title": "Mainframe",
@@ -43,6 +44,7 @@
     "electron-builder": "^20.15.1",
     "electron-webpack": "^2.1.2",
     "flow-bin": "^0.77.0",
-    "webpack": "^4.14.0"
+    "webpack": "^4.14.0",
+    "asar": "^0.14.3"
   }
 }
