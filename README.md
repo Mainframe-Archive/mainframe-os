@@ -1,5 +1,7 @@
 # Mainframe Platform
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/MainframeHQ/js-mainframe.svg)](https://greenkeeper.io/)
+
 A platform for the new decentralized web. Makes building and running distributed, unstoppable apps easier.
 
 ## Overview
