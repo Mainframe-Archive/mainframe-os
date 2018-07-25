@@ -28,7 +28,9 @@ export default {
   app_update: noop, // TODO: similar to install
   app_validateManifest: app.validateManifestData,
   identity_createUser: identity.createUser,
+  identity_createDeveloper: identity.createDeveloper,
   identity_getOwnUsers: identity.getOwnUsers,
+  identity_getOwnDevelopers: identity.getOwnDevelopers,
   sub_unsubscribe: sub.unsubscribe,
   vault_create: vault.create,
   vault_open: vault.open,

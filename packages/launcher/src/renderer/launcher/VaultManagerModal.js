@@ -9,7 +9,7 @@ import {
   ActivityIndicator,
 } from 'react-native-web'
 
-import { client, callMainProcess } from '../electronIpc.js'
+import { client } from '../electronIpc.js'
 import Button from '../UIComponents/Button'
 import ModalView from '../UIComponents/ModalView'
 import MFTextInput from '../UIComponents/TextInput'
@@ -121,10 +121,7 @@ export default class VaultManagerModal extends Component<Props, State> {
       awaitingResponse: true,
     })
     try {
-      await callMainProcess('openVault', [
-        this.props.vaultsData.defaultVault,
-        password,
-      ])
+      await client.openVault(this.props.vaultsData.defaultVault, password)
       this.props.onOpenedVault()
     } catch (err) {
       // eslint-disable-next-line no-console

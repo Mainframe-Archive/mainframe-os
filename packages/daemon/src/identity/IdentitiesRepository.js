@@ -9,12 +9,14 @@ import { mapObject } from '../utils'
 import type Identity from './Identity'
 import type Keychain from './Keychain'
 import AppIdentity, { type AppIdentitySerialized } from './AppIdentity'
-import AuthorIdentity, { type AuthorIdentitySerialized } from './AuthorIdentity'
+import DeveloperIdentity, {
+  type DeveloperIdentitySerialized,
+} from './DeveloperIdentity'
 import UserIdentity, { type UserIdentitySerialized } from './UserIdentity'
 
 type IdentitiesRepositoryGroupSerialized = {
   apps?: { [ID]: AppIdentitySerialized },
-  authors?: { [ID]: AuthorIdentitySerialized },
+  developers?: { [ID]: DeveloperIdentitySerialized },
   users?: { [ID]: UserIdentitySerialized },
 }
 
@@ -25,7 +27,7 @@ export type IdentitiesRepositorySerialized = {
 
 type IdentitiesRepositoryGroupParams = {
   apps?: { [ID]: AppIdentity },
-  authors?: { [ID]: AuthorIdentity },
+  developers?: { [ID]: DeveloperIdentity },
   users?: { [ID]: UserIdentity },
 }
 
@@ -36,7 +38,7 @@ export type IdentitiesRepositoryParams = {
 
 type IdentitiesRepositoryGroup = {
   apps: { [ID]: AppIdentity },
-  authors: { [ID]: AuthorIdentity },
+  developers: { [ID]: DeveloperIdentity },
   users: { [ID]: UserIdentity },
 }
 
@@ -50,32 +52,32 @@ type Ownership = $Keys<IdentitiesData>
 type Reference = { domain: Domain, ownership: Ownership }
 
 const fromAppIdentity = mapObject(AppIdentity.toJSON)
-const fromAuthorIdentity = mapObject(AuthorIdentity.toJSON)
+const fromDeveloperIdentity = mapObject(DeveloperIdentity.toJSON)
 const fromUserIdentity = mapObject(UserIdentity.toJSON)
 const fromGroup = group => ({
   // $FlowFixMe: mapping type
   apps: fromAppIdentity(group.apps),
   // $FlowFixMe: mapping type
-  authors: fromAuthorIdentity(group.authors),
+  developers: fromDeveloperIdentity(group.developers),
   // $FlowFixMe: mapping type
   users: fromUserIdentity(group.users),
 })
 
 const toAppIdentity = mapObject(AppIdentity.fromJSON)
-const toAuthorIdentity = mapObject(AuthorIdentity.fromJSON)
+const toDeveloperIdentity = mapObject(DeveloperIdentity.fromJSON)
 const toUserIdentity = mapObject(UserIdentity.fromJSON)
 const toGroup = group => ({
   // $FlowFixMe: mapping type
   apps: toAppIdentity(group.apps),
   // $FlowFixMe: mapping type
-  authors: toAuthorIdentity(group.authors),
+  developers: toDeveloperIdentity(group.developers),
   // $FlowFixMe: mapping type
   users: toUserIdentity(group.users),
 })
 
 const createGroup = (params: IdentitiesRepositoryGroupParams = {}) => ({
   apps: params.apps == null ? {} : params.apps,
-  authors: params.authors == null ? {} : params.authors,
+  developers: params.developers == null ? {} : params.developers,
   users: params.users == null ? {} : params.users,
 })
 
@@ -130,8 +132,8 @@ export default class IdentitiesRepository {
     return this._identities.own.apps
   }
 
-  get ownAuthors(): { [ID]: AuthorIdentity } {
-    return this._identities.own.authors
+  get ownDevelopers(): { [ID]: DeveloperIdentity } {
+    return this._identities.own.developers
   }
 
   get ownUsers(): { [ID]: UserIdentity } {
@@ -142,8 +144,8 @@ export default class IdentitiesRepository {
     return this._identities.other.apps
   }
 
-  get otherAuthors(): { [ID]: AuthorIdentity } {
-    return this._identities.other.authors
+  get otherDevelopers(): { [ID]: DeveloperIdentity } {
+    return this._identities.other.developers
   }
 
   get otherUsers(): { [ID]: UserIdentity } {
@@ -162,8 +164,12 @@ export default class IdentitiesRepository {
     return this.addIdentity('own', 'apps', AppIdentity.create(keyPair))
   }
 
-  createOwnAuthor(keyPair?: KeyPair) {
-    return this.addIdentity('own', 'authors', AuthorIdentity.create(keyPair))
+  createOwnDeveloper(data: Object, keyPair?: KeyPair) {
+    return this.addIdentity(
+      'own',
+      'developers',
+      DeveloperIdentity.create(data, keyPair),
+    )
   }
 
   createOwnUser(data: Object, keychain?: Keychain) {
@@ -174,8 +180,12 @@ export default class IdentitiesRepository {
     return this.addIdentity('other', 'apps', AppIdentity.create(keyPair))
   }
 
-  createOtherAuthor(keyPair?: KeyPair) {
-    return this.addIdentity('other', 'authors', AuthorIdentity.create(keyPair))
+  createOtherDeveloper(keyPair?: KeyPair) {
+    return this.addIdentity(
+      'other',
+      'developers',
+      DeveloperIdentity.create(keyPair),
+    )
   }
 
   createOtherUser(keychain?: Keychain) {
@@ -189,11 +199,11 @@ export default class IdentitiesRepository {
       : this._identities.own.apps[id]
   }
 
-  getOwnAuthor(id?: ID): ?AuthorIdentity {
+  getOwnDeveloper(id?: ID): ?DeveloperIdentity {
     return id == null
       ? // $FlowFixMe: return type
-        Object.values(this._identities.own.authors)[0]
-      : this._identities.own.authors[id]
+        Object.values(this._identities.own.developers)[0]
+      : this._identities.own.developers[id]
   }
 
   getOwnUser(id?: ID): ?UserIdentity {
@@ -210,11 +220,11 @@ export default class IdentitiesRepository {
       : this._identities.other.apps[id]
   }
 
-  getOtherAuthor(id?: ID): ?AuthorIdentity {
+  getOtherDeveloper(id?: ID): ?DeveloperIdentity {
     return id == null
       ? // $FlowFixMe: return type
-        Object.values(this._identities.other.authors)[0]
-      : this._identities.other.authors[id]
+        Object.values(this._identities.other.developers)[0]
+      : this._identities.other.developers[id]
   }
 
   getOtherUser(id?: ID): ?UserIdentity {

@@ -81,8 +81,16 @@ export default class MainframeClient {
     return this._rpc.request('identity_createUser', [data])
   }
 
-  getOwnUserIdentities(): Promise<{ users: Array<OwnUser> }> {
+  createDeveloperIdentity(data?: Object = {}): Promise<{ id: ID }> {
+    return this._rpc.request('identity_createDeveloper', [data])
+  }
+
+  getOwnUserIdentities(): Promise<{ developers: Array<OwnUser> }> {
     return this._rpc.request('identity_getOwnUsers')
+  }
+
+  getOwnDeveloperIdentities(): Promise<{ users: Array<OwnUser> }> {
+    return this._rpc.request('identity_getOwnDevelopers')
   }
 
   // App creation
