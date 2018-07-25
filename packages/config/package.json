@@ -14,10 +14,10 @@
     "@mainframe/utils-id": "^0.1.0",
     "conf": "^2.0.0",
     "env-paths": "^1.0.0",
-    "esm": "3.0.44",
-    "fs-extra": "^6.0.1"
+    "esm": "3.0.72",
+    "fs-extra": "^7.0.0"
   },
   "devDependencies": {
-    "flow-bin": "^0.75.0"
+    "flow-bin": "^0.77.0"
   }
 }
