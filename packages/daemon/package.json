@@ -41,13 +41,13 @@
     "@oclif/plugin-help": "^2.0.5",
     "asar": "^0.14.3",
     "debug": "^3.1.0",
-    "esm": "3.0.44",
+    "esm": "3.0.72",
     "fast-json-stable-stringify": "^2.0.0",
-    "fs-extra": "^6.0.1",
+    "fs-extra": "^7.0.0",
     "rxjs": "^6.2.0",
     "semver": "^5.5.0"
   },
   "devDependencies": {
-    "flow-bin": "^0.75.0"
+    "flow-bin": "^0.77.0"
   }
 }
