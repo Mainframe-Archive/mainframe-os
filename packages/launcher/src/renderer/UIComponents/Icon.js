@@ -16,7 +16,7 @@ export default class Icon extends Component<Props> {
       <View style={this.props.style}>
         <Image
           alt={this.props.name}
-          source={{ uri: `/images/icons/${this.props.name}.svg` }}
+          source={{ uri: `images/icons/${this.props.name}.svg` }}
           style={{ height: this.props.size, width: this.props.size }}
           resizeMode="contain"
         />

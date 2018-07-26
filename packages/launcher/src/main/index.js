@@ -6,6 +6,7 @@ import url from 'url'
 import Client from '@mainframe/client'
 import { Environment, DaemonConfig, VaultConfig } from '@mainframe/config'
 import { startDaemon } from '@mainframe/toolbox'
+import { is } from 'electron-util'
 // eslint-disable-next-line import/named
 import { idType, type ID } from '@mainframe/utils-id'
 import { app, BrowserWindow, ipcMain } from 'electron'
@@ -39,8 +40,8 @@ type AppSessionData = {
 }
 
 type AppWindows = {
-  [windowID: string]: {
-    window: BrowserWindow,
+  [window: BrowserWindow]: {
+    appID: ID,
     appSession: AppSessionData,
   },
 }
@@ -79,29 +80,33 @@ console.log(`using environment "${env.name}" (${env.type})`)
 
 const daemonConfig = new DaemonConfig(env)
 const vaultConfig = new VaultConfig(env)
-const isDevelopment = env.isDev
 
 let client
 let mainWindow
 let vaultOpen: ?string // currently open vault path
 
 const appWindows: AppWindows = {}
+const appWindows2 = {}
 
-const newWindow = params => {
-  const window = new BrowserWindow({ width: params.width || 800, height: 600 })
+const newWindow = (params: Object = {}) => {
+  const window = new BrowserWindow({
+    width: params.width || 800,
+    height: 600,
+    show: false,
+  })
   const stringParams = stringify(params)
 
-  if (isDevelopment) {
+  if (is.development) {
     window.webContents.openDevTools()
     window.loadURL(`http://localhost:${PORT}?${stringParams}`)
   } else {
-    window.loadURL(
-      url.format({
-        pathname: path.join(__dirname, `index.html?${stringParams}`),
-        protocol: 'file:',
-        slashes: true,
-      }),
-    )
+    window.webContents.openDevTools()
+    const formattedUrl = url.format({
+      pathname: path.join(__dirname, `index.html`),
+      protocol: 'file:',
+      slashes: true,
+    })
+    window.loadURL(formattedUrl)
   }
   return window
 }
@@ -130,10 +135,7 @@ const setupClient = async () => {
 const createLauncherWindow = async () => {
   await setupClient()
 
-  mainWindow = newWindow({
-    type: 'launcher',
-    width: 480,
-  })
+  mainWindow = newWindow({ width: 480 })
 
   // Emitted when the window is closed.
   mainWindow.on('closed', () => {
@@ -146,29 +148,22 @@ const createLauncherWindow = async () => {
   })
 }
 
-const getWindowId = (appID: ID, userID: ID) => {
-  return `${appID}-${userID}`
-}
-
 const launchApp = async (appID: ID, userID: ID) => {
-  const windowId = getWindowId(appID, userID)
-  if (appWindows[windowId]) {
+  const appIds = Object.keys(appWindows2).map(w => appWindows2[w].appID)
+  if (appIds.includes(appID)) {
+    // Already open
     return
   }
   // $FlowFixMe: ID incompatible with client package ID type
   const appSession = await client.openApp(appID, userID)
-  const appWindow = newWindow({
-    type: 'app',
-    windowId,
-  })
+  const appWindow = newWindow()
   appWindow.on('closed', async () => {
     await client.closeApp(appSession.session.id)
-    delete appWindows[windowId]
+    delete appWindows2[appWindow]
   })
-  // $FlowFixMe: ID incompatible with client package ID type
-  appWindows[windowId] = {
+  appWindows2[appWindow] = {
+    appID,
     appSession,
-    window: appWindow,
   }
 }
 
@@ -212,6 +207,24 @@ const IPC_ERRORS: Object = {
   },
 }
 
+ipcMain.on('init-window', event => {
+  const window = BrowserWindow.fromWebContents(event.sender)
+  if (window === mainWindow) {
+    window.webContents.send('start', { type: 'launcher' })
+  } else {
+    const appWindowData = appWindows2[window]
+    window.webContents.send('start', {
+      type: 'app',
+      appSession: appWindowData.appSession,
+    })
+  }
+})
+
+ipcMain.on('ready-window', event => {
+  const window = BrowserWindow.fromWebContents(event.sender)
+  window.show()
+})
+
 const ipcMainHandler = {
   launchApp: async (event, request) => {
     const [appID, userID] = request.data.args
@@ -226,11 +239,12 @@ const ipcMainHandler = {
         id: request.id,
       }
     }
-    const res = appWindows[request.data.args[0]]
-    if (res && res.appSession) {
+    const window = BrowserWindow.fromWebContents(event.sender)
+    const windowData = appWindows[window]
+    if (windowData && windowData.appSession) {
       return {
         id: request.id,
-        result: { appSession: res.appSession },
+        result: { appSession: windowData.appSession },
       }
     } else {
       return {

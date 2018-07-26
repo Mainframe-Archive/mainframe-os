@@ -5,23 +5,24 @@
   "license": "MIT",
   "private": true,
   "workspaces": {
-    "packages": [
-      "packages/*"
-    ],
+    "packages": ["packages/*"],
     "nohoist": [
       "**/@mainframe/rpc-*",
       "**/@mainframe/secure-file",
       "**/@mainframe/transport-*",
       "**/@mainframe/utils-*",
+      "**/app-builder-lib",
       "**/electron",
       "**/electron-better-ipc",
       "**/electron-webpack",
+      "**/electron-builder",
       "**/es6-error",
       "**/fs-extra",
       "**/nanoid",
       "**/node-fetch",
       "**/react",
       "**/react-dom",
+      "**/read-config-file",
       "**/rx-socket",
       "**/rxjs",
       "**/sodium-universal",
@@ -32,7 +33,8 @@
   },
   "scripts": {
     "flow:create-symlinks": "flow-mono create-symlinks .flowconfig",
-    "flow:install-types": "flow-mono install-types --overwrite --ignoreDeps=dev",
+    "flow:install-types":
+      "flow-mono install-types --overwrite --ignoreDeps=dev",
     "flow:reinstall": "lerna exec del flow-typed && yarn flow:install-types",
     "flow:align": "flow-mono align-versions",
     "flow:bootstrap": "yarn flow:create-symlinks && yarn flow:install-types",

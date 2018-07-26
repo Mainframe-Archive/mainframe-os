@@ -6,8 +6,6 @@ import type { ID } from '@mainframe/utils-id'
 import React, { Component } from 'react'
 import { View, StyleSheet, Text } from 'react-native-web'
 
-import { callMainProcess } from '../electronIpc'
-
 declare var __static: string
 
 type User = {
@@ -31,37 +29,14 @@ type AppSessionData = {
   session: Session,
 }
 
-type State = {
-  sessionData?: AppSessionData,
+type Props = {
+  appSession: AppSessionData,
 }
 
-export default class AppContainer extends Component<
-  { windowId: string },
-  State,
-> {
-  state = {}
-
-  componentDidMount() {
-    this.fetchSession()
-  }
-
-  async fetchSession() {
-    const { windowId } = this.props
-    try {
-      const res = await callMainProcess('getAppSession', [windowId])
-      this.setState({
-        sessionData: res.appSession,
-      })
-    } catch (err) {
-      // TODO handle error
-      // eslint-disable-next-line no-console
-      console.warn(err)
-    }
-  }
-
+export default class AppContainer extends Component<Props> {
   render() {
-    const { sessionData } = this.state
-    if (!sessionData) {
+    const { appSession } = this.props
+    if (!appSession) {
       return <View />
     }
     // TODO Use path provided by dameon
@@ -69,8 +44,8 @@ export default class AppContainer extends Component<
       pathname: path.join(
         __static,
         'applications',
-        'sandbox',
-        'sandbox.asar',
+        'app1',
+        'wallet.asar',
         'index.html',
       ),
       protocol: 'file:',
@@ -85,10 +60,10 @@ export default class AppContainer extends Component<
       <View style={styles.outerContainer}>
         <View style={styles.header}>
           <View style={styles.appInfo}>
-            <Text>App: {sessionData.app.manifest.name}</Text>
+            <Text>App: {appSession.app.manifest.name}</Text>
           </View>
           <View style={styles.identity}>
-            <Text>User: {sessionData.user.data.name}</Text>
+            <Text>User: {appSession.user.data.name}</Text>
           </View>
         </View>
         <webview
