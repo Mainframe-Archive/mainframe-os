@@ -1,5 +1,7 @@
 // @flow
 
+import { join } from 'path'
+
 import type Environment from './Environment'
 import EnvironmentConfig from './EnvironmentConfig'
 import type { InstallStatus, RunStatus } from './types'
@@ -8,6 +10,14 @@ export const DAEMON_BIN_PATH_KEY = 'daemon.bin_path'
 export const DAEMON_SOCKET_PATH_KEY = 'daemon.socket_path'
 export const DAEMON_INSTALL_STATUS_KEY = 'daemon.install_status'
 export const DAEMON_RUN_STATUS_KEY = 'daemon.run_status'
+
+export const getAppContentsPath = (
+  env: Environment,
+  appID: string,
+  version: string,
+): string => {
+  return join(env.paths.data, 'apps', appID, version)
+}
 
 export const getDaemonBinPath = (env: Environment): ?string => {
   return env.config.get(DAEMON_BIN_PATH_KEY)

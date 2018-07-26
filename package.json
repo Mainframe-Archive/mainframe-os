@@ -16,7 +16,9 @@
       "**/electron",
       "**/electron-better-ipc",
       "**/electron-webpack",
+      "**/erebos-*",
       "**/es6-error",
+      "**/form-data",
       "**/fs-extra",
       "**/nanoid",
       "**/node-fetch",
@@ -25,6 +27,7 @@
       "**/rx-socket",
       "**/rxjs",
       "**/sodium-universal",
+      "**/tar-stream",
       "**/webpack",
       "**/webpack-dev-server",
       "**/ws"

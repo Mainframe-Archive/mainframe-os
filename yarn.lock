@@ -4262,6 +4262,17 @@ envinfo@^5.7.0:
   version "5.10.0"
   resolved "https://registry.yarnpkg.com/envinfo/-/envinfo-5.10.0.tgz#503a9774ae15b93ea68bdfae2ccd6306624ea6df"
 
+erebos-api-bzz-base@^0.3.0:
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/erebos-api-bzz-base/-/erebos-api-bzz-base-0.3.0.tgz#1fcc7384e5b9d9e3581a6ee0211926dd6a0ed33a"
+
+erebos-api-bzz-node@^0.3.0:
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/erebos-api-bzz-node/-/erebos-api-bzz-node-0.3.0.tgz#d5406840626ef71ac649176cf1a79a114294616c"
+  dependencies:
+    erebos-api-bzz-base "^0.3.0"
+    node-fetch "^2.1.2"
+
 errno@^0.1.3, errno@~0.1.7:
   version "0.1.7"
   resolved "https://registry.yarnpkg.com/errno/-/errno-0.1.7.tgz#4684d71779ad39af177e3f007996f7c67c852618"

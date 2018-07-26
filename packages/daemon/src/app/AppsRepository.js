@@ -105,14 +105,13 @@ export default class AppsRepository {
     return this._byBase64[b64]
   }
 
-  add(manifest: ManifestData, userID: ID, settings: AppUserSettings): ID {
+  add(manifest: ManifestData, userID: ID, settings: AppUserSettings): App {
     if (validateManifest(manifest) === 'valid') {
       throw new Error('Invalid manifest')
     }
 
     const appID = uniqueID()
-
-    this._apps[appID] = new App({
+    const app = new App({
       appID,
       manifest,
       installationState: 'ready', // TODO: actual lifecycle flow
@@ -123,9 +122,10 @@ export default class AppsRepository {
         },
       },
     })
+    this._apps[appID] = app
     this._byBase64[base64Type(manifest.id)] = appID
 
-    return appID
+    return app
   }
 
   setUserSettings(appID: ID, userID: ID, settings: AppUserSettings): void {
@@ -212,7 +212,7 @@ export default class AppsRepository {
       app: new App({
         appID,
         manifest,
-        installationState: 'ready', // TODO: actual lifecycle flow
+        installationState: 'pending',
         settings,
       }),
       hasRequiredPermissionsChanges,

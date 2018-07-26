@@ -1,30 +1,34 @@
 // @flow
 
+import { Environment } from '@mainframe/config'
 import debug from 'debug'
 
 import ServerHandler from './ServerHandler'
 
 const log = debug('mainframe:daemon:rpc')
 
-const servers: { [socketPath: string]: ServerHandler } = {}
+const servers: { [envName: string]: ServerHandler } = {}
 
-export const start = (path: string): Promise<void> => {
-  log('start server using socket path', path)
-  let server = servers[path]
+export const start = async (envName: string): Promise<void> => {
+  log('start server using environment', envName)
+  let server = servers[envName]
   if (server == null) {
-    server = new ServerHandler(path)
-    servers[path] = server
+    const env = Environment.load(envName)
+    server = new ServerHandler(env)
+    servers[envName] = server
   }
-  return server.start()
+  await server.start()
 }
 
-export const stop = (path: string): Promise<void> => {
-  log('stop server using socket path', path)
-  const server = servers[path]
-  return server == null ? Promise.resolve() : server.stop()
+export const stop = async (envName: string): Promise<void> => {
+  log('stop server using environment', envName)
+  const server = servers[envName]
+  if (server != null) {
+    await server.stop()
+  }
 }
 
-export const isListening = (path: string): boolean => {
-  const server = servers[path]
+export const isListening = (envName: string): boolean => {
+  const server = servers[envName]
   return server == null ? false : server.listening
 }
