@@ -129,9 +129,10 @@ export const getInstalled = (
 export const install = async (
   ctx: RequestContext,
   [manifest, userID, settings]: [ManifestData, ID, AppUserSettings] = [],
-): Promise<ClientSession> => {
+): Promise<ID> => {
   const app = ctx.openVault.installApp(manifest, userID, settings)
 
+  // TODO: rather thatn waiting for contents to be downloaded, return early and let client subscribe to installation state changes
   if (app.installationState !== 'ready') {
     const contentsPath = getContentsPath(ctx.env, manifest)
     try {
@@ -145,9 +146,7 @@ export const install = async (
   }
 
   await ctx.openVault.save()
-
-  const session = ctx.openVault.openApp(app.id, userID)
-  return createClientSession(ctx, app.id, userID, session)
+  return app.id
 }
 
 export const remove = async (

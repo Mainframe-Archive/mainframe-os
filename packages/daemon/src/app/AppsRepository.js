@@ -114,7 +114,7 @@ export default class AppsRepository {
     const app = new App({
       appID,
       manifest,
-      installationState: 'ready', // TODO: actual lifecycle flow
+      installationState: 'pending',
       settings: {
         [(userID: string)]: {
           permissions: settings.permissions,

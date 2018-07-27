@@ -9,6 +9,10 @@ export default class EnvironmentConfig {
     this._env = env
   }
 
+  get env(): Environment {
+    return this._env
+  }
+
   createWhenValue(key: string) {
     return this._env.createWhenValue(key)
   }

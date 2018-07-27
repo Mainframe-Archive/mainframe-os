@@ -111,7 +111,7 @@ export default class MainframeClient {
     manifest: ManifestData,
     userID: ID,
     settings: AppUserSettings,
-  ): Promise<ClientSession> {
+  ): Promise<ID> {
     return this._rpc.request('app_install', [manifest, userID, settings])
   }
 

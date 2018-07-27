@@ -1,0 +1,15 @@
+{
+  "id": "swarmchat",
+  "version": "0.1.0",
+  "name": "SwarmChat",
+  "developer": {
+    "id": "mainframe",
+    "name": "Mainframe Group"
+  },
+  "contentsHash":
+    "220411120eb4c978cd8d6e9a617bd5bcb1baa28b74378bc4b8aa74b8f2ad4549",
+  "permissions": {
+    "required": {},
+    "optional": {}
+  }
+}

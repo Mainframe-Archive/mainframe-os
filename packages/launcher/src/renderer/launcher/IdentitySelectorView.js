@@ -68,7 +68,7 @@ export default class IdentitySelectorView extends Component<Props, State> {
     const header = `Select User ID`
     const rowRender = (id, name, handler) => {
       return (
-        <TouchableOpacity onPress={handler} style={styles.idRow} key={name}>
+        <TouchableOpacity onPress={handler} style={styles.idRow} key={id}>
           <Text style={styles.nameLabel}>{name}</Text>
           <Text style={styles.idLabel}>{id}</Text>
         </TouchableOpacity>
