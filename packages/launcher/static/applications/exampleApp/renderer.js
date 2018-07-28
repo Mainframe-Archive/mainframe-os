@@ -1,5 +1,4 @@
 const appEl = document.createElement('div')
-const appId = 'sandbox'
 
 appEl.innerHTML = `
   <div class="pure-u-1-1">

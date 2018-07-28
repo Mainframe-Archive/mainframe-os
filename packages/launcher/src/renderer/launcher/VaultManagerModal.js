@@ -163,7 +163,11 @@ export default class VaultManagerModal extends Component<Props, State> {
     const action = this.state.awaitingResponse ? (
       <ActivityIndicator />
     ) : (
-      <Button title="Create Vault" onPress={this.onPressCreateVault} />
+      <Button
+        title="Create Vault"
+        testID="create-vault-button-submit"
+        onPress={this.onPressCreateVault}
+      />
     )
     const openVaultButton = this.props.vaultsData.defaultVault ? (
       <TouchableOpacity
@@ -186,6 +190,7 @@ export default class VaultManagerModal extends Component<Props, State> {
           onChangeText={this.onChangeLabel}
           value={this.state.newVaultLabel}
           placeholder="Vault name"
+          testID="create-vault-input-name"
         />
         <MFTextInput
           secureTextEntry
@@ -193,6 +198,7 @@ export default class VaultManagerModal extends Component<Props, State> {
           onChangeText={this.onChangePassword}
           value={this.state.password}
           placeholder="Password"
+          testID="create-vault-input-password"
         />
         <MFTextInput
           secureTextEntry
@@ -200,6 +206,7 @@ export default class VaultManagerModal extends Component<Props, State> {
           onChangeText={this.onChangeConfirmPassword}
           value={this.state.confirmPassword}
           placeholder="Confirm Password"
+          testID="create-vault-input-confirm-password"
         />
         {errorMsg}
         {action}
@@ -258,7 +265,11 @@ export default class VaultManagerModal extends Component<Props, State> {
     const action = this.state.awaitingResponse ? (
       <ActivityIndicator />
     ) : (
-      <Button title="Unlock Vault" onPress={this.onPressUnlockVault} />
+      <Button
+        title="Unlock Vault"
+        testID="vault-manager-unlock-button"
+        onPress={this.onPressUnlockVault}
+      />
     )
     return (
       <View>
@@ -266,6 +277,7 @@ export default class VaultManagerModal extends Component<Props, State> {
         {this.renderVaultsList()}
         <MFTextInput
           secureTextEntry
+          testID="vault-manager-unlock-input"
           style={styles.input}
           onChangeText={this.onChangeUnlockPassword}
           value={this.state.unlockPassword}

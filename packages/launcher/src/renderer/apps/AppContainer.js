@@ -41,13 +41,7 @@ export default class AppContainer extends Component<Props> {
     }
     // TODO Use path provided by dameon
     const appUrl = url.format({
-      pathname: path.join(
-        __static,
-        'applications',
-        'app1',
-        'wallet.asar',
-        'index.html',
-      ),
+      pathname: path.join(__static, 'applications', 'exampleApp', 'index.html'),
       protocol: 'file:',
       slashes: true,
     })

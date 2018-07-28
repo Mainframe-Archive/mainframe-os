@@ -155,6 +155,7 @@ export default class AppInstallModal extends Component<Props, State> {
         />
         <input
           multiple
+          id="installer-file-selector"
           onChange={this.onFileInputChange}
           ref={this.fileInput}
           type="file"

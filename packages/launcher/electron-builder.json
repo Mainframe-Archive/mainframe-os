@@ -1,0 +1,15 @@
+{
+  "appId": "com.mainframe.launcher",
+  "productName": "Mainframe",
+  "artifactName": "${productName}.${ext}",
+  "appImage": {
+    "systemIntegration": "doNotAsk"
+  },
+  "mac": {
+    "target": ["dir"]
+  },
+  "linux": {
+    "category": "Network",
+    "target": ["AppImage", "dir"]
+  }
+}

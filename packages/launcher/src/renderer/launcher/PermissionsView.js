@@ -302,7 +302,11 @@ export default class PermissionsView extends Component<Props, State> {
       <View style={styles.container}>
         {this.renderPermissionsOptions()}
         {failedValidation}
-        <Button title="Save Preferences" onPress={this.onPressDone} />
+        <Button
+          title="Save Preferences"
+          testID="installer-save-permissions"
+          onPress={this.onPressDone}
+        />
       </View>
     )
   }

@@ -7,6 +7,7 @@ import { COLORS } from '../styles'
 
 type Props = {
   onPress: () => void,
+  testID?: string,
   title: string,
   disabled?: boolean,
 }
@@ -15,6 +16,7 @@ export default class AppInstallModal extends Component<Props> {
   render() {
     return (
       <TouchableOpacity
+        testID={this.props.testID}
         style={styles.button}
         onPress={this.props.onPress}
         disabled={this.props.disabled}>

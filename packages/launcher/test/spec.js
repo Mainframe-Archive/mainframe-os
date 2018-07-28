@@ -1,51 +1,96 @@
-const Application = require('spectron').Application
 const assert = require('assert')
-const electronPath = require('electron') // Require Electron from the binaries included in node_modules.
 const path = require('path')
+const os = require('os')
+const Application = require('spectron').Application
 
-describe('Application launch', () => {
+describe('Application launch', function() {
+  // mocha requires non arrow style function to bind context
   this.timeout(10000)
 
-  beforeEach(function() {
+  before(function() {
+    const binPath =
+      os.platform() === 'darwin'
+        ? 'dist/mac/Mainframe.app/Contents/MacOS/Mainframe'
+        : 'dist/linux-unpacked/mainframe'
     this.app = new Application({
-      // Your electron path can be any binary
-      // i.e for OSX an example path could be '/Applications/MyApp.app/Contents/MacOS/MyApp'
-      // But for the sake of the example we fetch it from our node_modules.
-      path: path.join(
-        __dirname,
-        '..',
-        'dist/mac/Mainframe.app/Contents/MacOS/Mainframe',
-      ),
-
-      // Assuming you have the following directory structure
-
-      //  |__ my project
-      //     |__ ...
-      //     |__ main.js
-      //     |__ package.json
-      //     |__ index.html
-      //     |__ ...
-      //     |__ test
-      //        |__ spec.js  <- You are here! ~ Well you should be.
-
-      // The following line tells spectron to look and use the main.js file
-      // and the package.json located 1 level above.
-      // args: [path.join(__dirname, '..')],
+      path: path.join(__dirname, '..', binPath),
     })
     return this.app.start()
   })
 
-  afterEach(function() {
+  after(function() {
     if (this.app && this.app.isRunning()) {
       return this.app.stop()
     }
   })
 
-  it('shows an initial window', function() {
+  it('shows an initial window', async function() {
     return this.app.client.getWindowCount().then(function(count) {
       assert.equal(count, 1)
-      // Please note that getWindowCount() will return 2 if `dev tools` are opened.
-      // assert.equal(count, 2)
+    })
+  })
+  it('creates a new vault', async function() {
+    await this.app.client
+      .element('[data-testid="create-vault-input-name"]')
+      .setValue('test')
+    await this.app.client
+      .element('[data-testid="create-vault-input-password"]')
+      .setValue('password')
+    await this.app.client
+      .element('[data-testid="create-vault-input-confirm-password"]')
+      .setValue('password')
+    await this.app.client
+      .element('[data-testid="create-vault-button-submit"]')
+      .click()
+    return this.app.client.waitForExist('[data-testid="launcher-view"]', 8000)
+  })
+  // // it('unlocks vault and opens launcher', async () => {
+  // //   await this.app.client
+  // //     .element('[data-testid="vault-manager-unlock-input"]')
+  // //     .setValue('password')
+  // //   await this.app.client
+  // //     .element('[data-testid="vault-manager-unlock-button"]')
+  // //     .click()
+  // //   return this.app.client.waitForExist('[data-testid="launcher-view"]', 8000)
+  // // })
+  it('completes app install flow and opens app', async function() {
+    await this.app.client
+      .element('[data-testid="launcher-install-app-button"]')
+      .click()
+    const manifestPath = path.join(
+      __dirname,
+      '..',
+      'static',
+      'applications',
+      'exampleApp',
+      'manifest.json',
+    )
+    const fileInputSelector = '#installer-file-selector'
+    await this.app.client.waitForExist(fileInputSelector, 2000)
+    await this.app.client.chooseFile(fileInputSelector, manifestPath)
+
+    const permissionsBtnSelector = '[data-testid="installer-save-permissions"]'
+    await this.app.client.waitForExist(permissionsBtnSelector, 2000)
+    await this.app.client.element(permissionsBtnSelector).click()
+
+    const identityInputSelector = '[data-testid="create-identity-input-name"]'
+    await this.app.client.waitForExist(identityInputSelector, 2000)
+    await this.app.client.element(identityInputSelector).setValue('tester')
+
+    const identityButtonSelector =
+      '[data-testid="create-identity-button-submit"]'
+    await this.app.client.waitForExist(identityButtonSelector, 2000)
+    await this.app.client.element(identityButtonSelector).click()
+
+    const identitySelector = '[data-testid="identity-selector-select-tester"]'
+    await this.app.client.waitForExist(identitySelector, 2000)
+    await this.app.client.element(identitySelector).click()
+
+    const appItemSelector = '[data-testid="launcher-open-app"]'
+    await this.app.client.waitForExist(appItemSelector, 2000)
+    await this.app.client.element(appItemSelector).click()
+    return this.app.client.getWindowCount().then(count => {
+      assert.equal(count, 2)
     })
   })
 })

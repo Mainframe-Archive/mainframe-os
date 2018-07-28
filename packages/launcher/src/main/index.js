@@ -100,7 +100,8 @@ const newWindow = (params: Object = {}) => {
     window.webContents.openDevTools()
     window.loadURL(`http://localhost:${PORT}?${stringParams}`)
   } else {
-    window.webContents.openDevTools()
+    // TODO remove dev tools for dist builds
+    // window.webContents.openDevTools()
     const formattedUrl = url.format({
       pathname: path.join(__dirname, `index.html`),
       protocol: 'file:',
@@ -186,6 +187,26 @@ app.on('activate', () => {
 
 // IPC COMMS
 
+// Window lifecycle events
+
+ipcMain.on('init-window', event => {
+  const window = BrowserWindow.fromWebContents(event.sender)
+  if (window === mainWindow) {
+    window.webContents.send('start', { type: 'launcher' })
+  } else {
+    const appWindowData = appWindows2[window]
+    window.webContents.send('start', {
+      type: 'app',
+      appSession: appWindowData.appSession,
+    })
+  }
+})
+
+ipcMain.on('ready-window', event => {
+  const window = BrowserWindow.fromWebContents(event.sender)
+  window.show()
+})
+
 // Handle calls to main process
 
 const IPC_ERRORS: Object = {
@@ -206,24 +227,6 @@ const IPC_ERRORS: Object = {
     code: 32601,
   },
 }
-
-ipcMain.on('init-window', event => {
-  const window = BrowserWindow.fromWebContents(event.sender)
-  if (window === mainWindow) {
-    window.webContents.send('start', { type: 'launcher' })
-  } else {
-    const appWindowData = appWindows2[window]
-    window.webContents.send('start', {
-      type: 'app',
-      appSession: appWindowData.appSession,
-    })
-  }
-})
-
-ipcMain.on('ready-window', event => {
-  const window = BrowserWindow.fromWebContents(event.sender)
-  window.show()
-})
 
 const ipcMainHandler = {
   launchApp: async (event, request) => {
