@@ -6,15 +6,15 @@ import { stopServer } from '../../'
 
 export default class StopCommand extends Command {
   static flags = {
-    path: flags.string({
-      char: 'p',
-      description: 'socket path',
+    env: flags.string({
+      char: 'e',
+      description: 'environment name',
       required: true,
     }),
   }
 
   async run() {
     const { flags } = this.parse(StopCommand)
-    await stopServer(flags.path)
+    await stopServer(flags.env)
   }
 }

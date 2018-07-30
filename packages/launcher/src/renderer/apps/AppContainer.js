@@ -18,6 +18,7 @@ type User = {
 type App = {
   id: ID,
   manifest: Object,
+  contentsPath: string,
 }
 
 type Session = {
@@ -64,15 +65,9 @@ export default class AppContainer extends Component<
     if (!sessionData) {
       return <View />
     }
-    // TODO Use path provided by dameon
+
     const appUrl = url.format({
-      pathname: path.join(
-        __static,
-        'applications',
-        'sandbox',
-        'sandbox.asar',
-        'index.html',
-      ),
+      pathname: path.join(sessionData.app.contentsPath, 'index.html'),
       protocol: 'file:',
       slashes: true,
     })

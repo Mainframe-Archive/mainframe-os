@@ -40,9 +40,9 @@
     "@mainframe/utils-id": "^0.1.0",
     "babel-plugin-react-native-web": "^0.8.6",
     "electron": "^2.0.2",
-    "electron-builder": "^20.15.1",
+    "electron-builder": "^20.16.0",
     "electron-webpack": "^2.1.2",
     "flow-bin": "^0.77.0",
-    "webpack": "^4.14.0"
+    "webpack": "^4.16.3"
   }
 }

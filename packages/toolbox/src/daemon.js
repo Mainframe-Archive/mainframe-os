@@ -6,14 +6,14 @@ import execa from 'execa'
 
 const execStartDaemon = (
   binPath: string,
-  socketPath: string,
+  envName: string,
   detached: boolean = false,
 ): ChildProcess => {
-  return spawn(binPath, ['start', `--path=${socketPath}`], { detached })
+  return spawn(binPath, ['start', `--env=${envName}`], { detached })
 }
 
-const execStopDaemon = (binPath: string, socketPath: string) => {
-  return execa(binPath, ['stop', `--path=${socketPath}`])
+const execStopDaemon = (binPath: string, envName: string) => {
+  return execa(binPath, ['stop', `--env=${envName}`])
 }
 
 export const setupDaemon = (
@@ -64,7 +64,7 @@ export const startDaemon = async (
     case 'stopped':
       // Return the child process as provided by execa
       cfg.runStatus = 'starting'
-      return execStartDaemon(cfg.binPath, cfg.socketPath, detached)
+      return execStartDaemon(cfg.binPath, cfg.env.name, detached)
     default:
       throw new Error(`Unhandled daemon status: ${status}`)
   }
@@ -102,7 +102,7 @@ export const stopDaemon = async (cfg: DaemonConfig): Promise<?ChildProcess> => {
     case 'running':
       // Return the child process as provided by execa
       cfg.runStatus = 'stopping'
-      return execStopDaemon(cfg.binPath, cfg.socketPath)
+      return execStopDaemon(cfg.binPath, cfg.env.name)
     default:
       throw new Error(`Unhandled daemon status: ${status}`)
   }

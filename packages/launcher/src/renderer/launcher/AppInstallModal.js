@@ -25,13 +25,12 @@ type User = {
 }
 type State = {
   inputValue: string,
-  installStep: 'manifest' | 'permissions' | 'download' | 'id',
+  installStep: 'manifest' | 'identity' | 'permissions' | 'download',
   manifest: ?{
     name: string,
     permissions: PermissionOptions,
   },
   userPermissions?: PermissionsGrants,
-  appPath?: string,
   userId?: ID,
   ownUsers: Array<User>,
 }
@@ -46,6 +45,10 @@ export default class AppInstallModal extends Component<Props, State> {
 
   // $FlowFixMe: React Ref
   fileInput: ElementRef<'input'> = createRef()
+
+  componentDidMount() {
+    this.getOwnIdentities()
+  }
 
   // HANDLERS
 
@@ -68,7 +71,7 @@ export default class AppInstallModal extends Component<Props, State> {
         ) {
           this.setState({
             manifest,
-            installStep: 'permissions',
+            installStep: 'identity',
           })
         } else {
           // eslint-disable-next-line no-console
@@ -83,12 +86,13 @@ export default class AppInstallModal extends Component<Props, State> {
   }
 
   onSubmitPermissions = (userPermissions: PermissionsGrants) => {
-    this.setState({
-      installStep: 'download',
-      userPermissions,
-    })
-    // TODO Actually download from swarm
-    setTimeout(this.onDownloadComplete, 1000, 'testPath')
+    this.setState(
+      {
+        installStep: 'download',
+        userPermissions,
+      },
+      this.saveApp,
+    )
   }
 
   async getOwnIdentities() {
@@ -102,16 +106,8 @@ export default class AppInstallModal extends Component<Props, State> {
     }
   }
 
-  onDownloadComplete = async (path: string) => {
-    await this.getOwnIdentities()
-    this.setState({
-      appPath: path,
-      installStep: 'id',
-    })
-  }
-
   onSelectId = (id: ID) => {
-    this.setState({ userId: id }, this.saveApp)
+    this.setState({ installStep: 'permissions', userId: id })
   }
 
   onCreatedId = () => {
@@ -165,6 +161,17 @@ export default class AppInstallModal extends Component<Props, State> {
     )
   }
 
+  renderSetIdentity() {
+    return (
+      <IdentitySelectorView
+        enableCreate
+        onSelectId={this.onSelectId}
+        users={this.state.ownUsers}
+        onCreatedId={this.onCreatedId}
+      />
+    )
+  }
+
   renderPermissions() {
     const { manifest } = this.state
 
@@ -192,27 +199,16 @@ export default class AppInstallModal extends Component<Props, State> {
     ) : null
   }
 
-  renderSetId() {
-    return (
-      <IdentitySelectorView
-        enableCreate
-        onSelectId={this.onSelectId}
-        users={this.state.ownUsers}
-        onCreatedId={this.onCreatedId}
-      />
-    )
-  }
-
   renderContent() {
     switch (this.state.installStep) {
       case 'manifest':
         return this.renderManifestImport()
+      case 'identity':
+        return this.renderSetIdentity()
       case 'permissions':
         return this.renderPermissions()
       case 'download':
         return this.renderDownload()
-      case 'id':
-        return this.renderSetId()
       default:
         return null
     }

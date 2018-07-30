@@ -6,23 +6,23 @@ import { startServer, stopServer } from '../../'
 
 export default class StartCommand extends Command {
   static flags = {
-    path: flags.string({
-      char: 'p',
-      description: 'socket path',
+    env: flags.string({
+      char: 'e',
+      description: 'environment name',
       required: true,
     }),
   }
 
   async run() {
     const { flags } = this.parse(StartCommand)
-    this.log(`Starting daemon with path ${flags.path}`)
+    this.log(`Starting daemon with environment ${flags.env}`)
 
-    await startServer(flags.path)
+    await startServer(flags.env)
     this.log(`Daemon started`)
 
     process.on('SIGINT', async () => {
       this.log(`Stopping daemon`)
-      await stopServer(flags.path)
+      await stopServer(flags.env)
 
       this.log(`Daemon stopped`)
       process.exit(0)

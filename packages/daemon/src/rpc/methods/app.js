@@ -11,8 +11,10 @@ import type {
   PermissionsDetails,
   PermissionCheckResult,
 } from '@mainframe/app-permissions'
+import { getAppContentsPath, type Environment } from '@mainframe/config'
 // eslint-disable-next-line import/named
 import { idType, type ID } from '@mainframe/utils-id'
+import { ensureDir } from 'fs-extra'
 
 import type { AppUserSettings, SessionData } from '../../app/App'
 
@@ -46,6 +48,10 @@ type AppInstalled = {
   users: Array<User>,
 }
 
+const getContentsPath = (env: Environment, manifest: ManifestData): string => {
+  return getAppContentsPath(env, manifest.id, manifest.version)
+}
+
 const createClientSession = (
   ctx: RequestContext,
   appID: ID,
@@ -72,6 +78,7 @@ const createClientSession = (
     app: {
       id: appID,
       manifest: app.manifest,
+      contentsPath: getContentsPath(ctx.env, app.manifest),
     },
   }
 }
@@ -122,11 +129,24 @@ export const getInstalled = (
 export const install = async (
   ctx: RequestContext,
   [manifest, userID, settings]: [ManifestData, ID, AppUserSettings] = [],
-): Promise<ClientSession> => {
-  const appID = ctx.openVault.installApp(manifest, userID, settings)
+): Promise<ID> => {
+  const app = ctx.openVault.installApp(manifest, userID, settings)
+
+  // TODO: rather than waiting for contents to be downloaded, return early and let client subscribe to installation state changes
+  if (app.installationState !== 'ready') {
+    const contentsPath = getContentsPath(ctx.env, manifest)
+    try {
+      app.installationState = 'downloading'
+      await ensureDir(contentsPath)
+      await ctx.bzz.downloadDirectoryTo(manifest.contentsHash, contentsPath)
+      app.installationState = 'ready'
+    } catch (err) {
+      app.installationState = 'download_error'
+    }
+  }
+
   await ctx.openVault.save()
-  const session = ctx.openVault.openApp(appID, userID)
-  return createClientSession(ctx, appID, userID, session)
+  return app.id
 }
 
 export const remove = async (

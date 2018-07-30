@@ -219,6 +219,12 @@ const ipcMainHandler = {
     return { id: request.id }
   },
 
+  installApp: async (event, request) => {
+    const [manifest, userID, settings] = request.data.args
+    const appID = await client.installApp(manifest, userID, settings)
+    return { id: request.id, appID }
+  },
+
   getAppSession: async (event, request) => {
     if (!request.data.args.length) {
       return {
