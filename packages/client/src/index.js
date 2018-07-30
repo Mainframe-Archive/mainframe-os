@@ -17,35 +17,36 @@ import type { ID } from '@mainframe/utils-id'
 // TODO: extract API types from daemon
 type AppUserSettings = Object
 
-type User = {
+export type User = {
   id: ID,
   data: Object,
 }
 
-type App = {
+export type OwnUser = {
   id: ID,
-  manifest: ManifestData,
+  data: Object,
 }
 
-type Session = {
+export type App = {
+  id: ID,
+  manifest: ManifestData,
+  contentsPath: string,
+}
+
+export type Session = {
   id: ID,
   permissions: PermissionsDetails,
 }
 
-type ClientSession = {
+export type ClientSession = {
   session: Session,
   user: User,
   app: App,
 }
 
-type InstalledApp = {
+export type InstalledApp = {
   manifest: ManifestData,
   users: Array<ID>,
-}
-
-type OwnUser = {
-  id: ID,
-  data: Object,
 }
 
 export default class MainframeClient {

@@ -3,7 +3,8 @@
 import path from 'path'
 import { stringify } from 'querystring'
 import url from 'url'
-import Client from '@mainframe/client'
+// eslint-disable-next-line import/named
+import Client, { type ClientSession } from '@mainframe/client'
 import { Environment, DaemonConfig, VaultConfig } from '@mainframe/config'
 import { startDaemon } from '@mainframe/toolbox'
 import { is } from 'electron-util'
@@ -18,31 +19,10 @@ import {
   mainProcResponseChannel,
 } from '../renderer/electronIpc.js'
 
-type User = {
-  id: ID,
-  data: Object,
-}
-
-type App = {
-  id: ID,
-  manifest: Object,
-}
-
-type Session = {
-  id: ID,
-  permission: Object,
-}
-
-type AppSessionData = {
-  app: App,
-  user: User,
-  session: Session,
-}
-
 type AppWindows = {
   [window: BrowserWindow]: {
     appID: ID,
-    appSession: AppSessionData,
+    appSession: ClientSession,
   },
 }
 
