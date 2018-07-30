@@ -42,7 +42,7 @@ export default class AppContainer extends Component<Props> {
     }
 
     const appUrl = url.format({
-      pathname: path.join(sessionData.app.contentsPath, 'index.html'),
+      pathname: path.join(appSession.app.contentsPath, 'index.html'),
       protocol: 'file:',
       slashes: true,
     })

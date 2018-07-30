@@ -86,7 +86,6 @@ let mainWindow
 let vaultOpen: ?string // currently open vault path
 
 const appWindows: AppWindows = {}
-const appWindows2 = {}
 
 const newWindow = (params: Object = {}) => {
   const window = new BrowserWindow({
@@ -100,8 +99,6 @@ const newWindow = (params: Object = {}) => {
     window.webContents.openDevTools()
     window.loadURL(`http://localhost:${PORT}?${stringParams}`)
   } else {
-    // TODO remove dev tools for dist builds
-    // window.webContents.openDevTools()
     const formattedUrl = url.format({
       pathname: path.join(__dirname, `index.html`),
       protocol: 'file:',
@@ -150,7 +147,7 @@ const createLauncherWindow = async () => {
 }
 
 const launchApp = async (appID: ID, userID: ID) => {
-  const appIds = Object.keys(appWindows2).map(w => appWindows2[w].appID)
+  const appIds = Object.keys(appWindows).map(w => appWindows[w].appID)
   if (appIds.includes(appID)) {
     // Already open
     return
@@ -160,9 +157,9 @@ const launchApp = async (appID: ID, userID: ID) => {
   const appWindow = newWindow()
   appWindow.on('closed', async () => {
     await client.closeApp(appSession.session.id)
-    delete appWindows2[appWindow]
+    delete appWindows[appWindow]
   })
-  appWindows2[appWindow] = {
+  appWindows[appWindow] = {
     appID,
     appSession,
   }
@@ -194,7 +191,7 @@ ipcMain.on('init-window', event => {
   if (window === mainWindow) {
     window.webContents.send('start', { type: 'launcher' })
   } else {
-    const appWindowData = appWindows2[window]
+    const appWindowData = appWindows[window]
     window.webContents.send('start', {
       type: 'app',
       appSession: appWindowData.appSession,
@@ -239,28 +236,6 @@ const ipcMainHandler = {
     const [manifest, userID, settings] = request.data.args
     const appID = await client.installApp(manifest, userID, settings)
     return { id: request.id, appID }
-  },
-
-  getAppSession: async (event, request) => {
-    if (!request.data.args.length) {
-      return {
-        error: IPC_ERRORS.invalidParams,
-        id: request.id,
-      }
-    }
-    const window = BrowserWindow.fromWebContents(event.sender)
-    const windowData = appWindows[window]
-    if (windowData && windowData.appSession) {
-      return {
-        id: request.id,
-        result: { appSession: windowData.appSession },
-      }
-    } else {
-      return {
-        error: IPC_ERRORS.internalError,
-        id: request.id,
-      }
-    }
   },
 
   getVaultsData: async (event, request) => {

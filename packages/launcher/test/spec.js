@@ -44,15 +44,6 @@ describe('Application launch', function() {
       .click()
     return this.app.client.waitForExist('[data-testid="launcher-view"]', 8000)
   })
-  // // it('unlocks vault and opens launcher', async () => {
-  // //   await this.app.client
-  // //     .element('[data-testid="vault-manager-unlock-input"]')
-  // //     .setValue('password')
-  // //   await this.app.client
-  // //     .element('[data-testid="vault-manager-unlock-button"]')
-  // //     .click()
-  // //   return this.app.client.waitForExist('[data-testid="launcher-view"]', 8000)
-  // // })
   it('completes app install flow and opens app', async function() {
     await this.app.client
       .element('[data-testid="launcher-install-app-button"]')
@@ -69,10 +60,6 @@ describe('Application launch', function() {
     await this.app.client.waitForExist(fileInputSelector, 2000)
     await this.app.client.chooseFile(fileInputSelector, manifestPath)
 
-    const permissionsBtnSelector = '[data-testid="installer-save-permissions"]'
-    await this.app.client.waitForExist(permissionsBtnSelector, 2000)
-    await this.app.client.element(permissionsBtnSelector).click()
-
     const identityInputSelector = '[data-testid="create-identity-input-name"]'
     await this.app.client.waitForExist(identityInputSelector, 2000)
     await this.app.client.element(identityInputSelector).setValue('tester')
@@ -85,6 +72,10 @@ describe('Application launch', function() {
     const identitySelector = '[data-testid="identity-selector-select-tester"]'
     await this.app.client.waitForExist(identitySelector, 2000)
     await this.app.client.element(identitySelector).click()
+
+    const permissionsBtnSelector = '[data-testid="installer-save-permissions"]'
+    await this.app.client.waitForExist(permissionsBtnSelector, 2000)
+    await this.app.client.element(permissionsBtnSelector).click()
 
     const appItemSelector = '[data-testid="launcher-open-app"]'
     await this.app.client.waitForExist(appItemSelector, 2000)

@@ -6,7 +6,7 @@
     "systemIntegration": "doNotAsk"
   },
   "mac": {
-    "target": ["dir"]
+    "target": ["dmg", "dir"]
   },
   "linux": {
     "category": "Network",

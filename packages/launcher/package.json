@@ -11,9 +11,7 @@
     "dist:dir": "yarn dist --dir -c.compression=store -c.mac.identity=null",
     "build:flow": "flow-copy-source src lib",
     "test:types": "flow check",
-    "test:electron": "mocha",
-    "test:setup":
-      "../cli/bin/run env:create -n tests2 -t testing -d && ../cli/bin/run daemon:setup --bin-path=$(pwd)/packages/daemon/bin/run"
+    "test": "mocha"
   },
   "electronWebpack": {
     "title": "Mainframe",
