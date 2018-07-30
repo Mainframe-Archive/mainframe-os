@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/node:10
+      - image: circleci/node:10-browsers
 
     working_directory: ~/repo
 
@@ -28,5 +28,15 @@ jobs:
           command: yarn test:ci
           environment:
             JEST_JUNIT_OUTPUT: "/tmp/test-reports/jest/results.xml"
+      - run:
+          name: Setup test env
+          command: "./packages/cli/bin/run env:create -n tests -t testing -d && ./packages/cli/bin/run daemon:setup --bin-path=$(pwd)/packages/daemon/bin/run"
+      - run:
+          name: Start test daemon
+          command: ./packages/cli/bin/run daemon:start
+          background: true
+      - run:
+          name: Integration tests
+          command: cd ./packages/launcher && yarn dist:ci && yarn test
       - store_test_results:
           path: /tmp/test-reports

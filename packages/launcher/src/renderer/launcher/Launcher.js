@@ -154,15 +154,19 @@ export default class App extends Component<{}, State> {
       }
 
       return (
-        <View key={app.appID} style={styles.appRow}>
+        <TouchableOpacity
+          key={app.appID}
+          style={styles.appRow}
+          onPress={onClick}
+          testID={'launcher-open-app'}>
           <View style={styles.appIcon} />
           <View style={styles.appInfo}>
-            <TouchableOpacity onPress={onClick} style={styles.openApp}>
+            <View style={styles.openApp}>
               <Text style={styles.appName}>{app.manifest.name}</Text>
               <Text style={styles.appUsers}>
                 {`Identities: ${app.users.map(u => u.data.name).join(', ')}`}
               </Text>
-            </TouchableOpacity>
+            </View>
           </View>
           <TouchableOpacity
             onPress={onClickDelete}
@@ -170,7 +174,7 @@ export default class App extends Component<{}, State> {
             key={app.appID}>
             <Text style={styles.deleteLabel}>Delete</Text>
           </TouchableOpacity>
-        </View>
+        </TouchableOpacity>
       )
     })
 
@@ -191,11 +195,15 @@ export default class App extends Component<{}, State> {
     ) : null
 
     return (
-      <View style={styles.container}>
+      <View style={styles.container} testID="launcher-view">
         <Image style={styles.mfLogo} source={logo} resizeMode="contain" />
         <View style={styles.apps}>{appRows}</View>
         <View style={styles.installButtonContainer}>
-          <Button title="Install New App" onPress={this.onPressInstall} />
+          <Button
+            testID="launcher-install-app-button"
+            title="Install New App"
+            onPress={this.onPressInstall}
+          />
         </View>
         {installModal}
         {appIdentitySelector}

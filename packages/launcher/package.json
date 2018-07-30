@@ -1,15 +1,18 @@
 {
-  "name": "@mainframe/launcher",
+  "name": "Mainframe",
   "version": "0.1.0",
-  "main": "main.js",
+  "main": "main/index.js",
   "license": "MIT",
   "scripts": {
     "dev": "electron-webpack dev",
     "compile": "electron-webpack",
     "dist": "yarn compile && electron-builder",
+    "dist:ci": "yarn compile && yarn electron-builder -l --dir",
     "dist:dir": "yarn dist --dir -c.compression=store -c.mac.identity=null",
+    "dist:electron": "electron-builder",
     "build:flow": "flow-copy-source src lib",
-    "test:types": "flow check"
+    "test:types": "flow check",
+    "test": "mocha"
   },
   "electronWebpack": {
     "title": "Mainframe",
@@ -25,6 +28,7 @@
     "@mainframe/client": "*",
     "@mainframe/config": "*",
     "@mainframe/toolbox": "*",
+    "electron-util": "^0.9.0",
     "fs-extra": "^7.0.0",
     "react": "^16.4.0",
     "react-art": "^16.4.0",
@@ -43,6 +47,8 @@
     "electron-builder": "^20.16.0",
     "electron-webpack": "^2.1.2",
     "flow-bin": "^0.77.0",
-    "webpack": "^4.16.3"
+    "mocha": "^5.2.0",
+    "spectron": "^3.8.0",
+    "webpack": "^4.14.0"
   }
 }

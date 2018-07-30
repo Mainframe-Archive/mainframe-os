@@ -3,9 +3,11 @@
 import path from 'path'
 import { stringify } from 'querystring'
 import url from 'url'
-import Client from '@mainframe/client'
+// eslint-disable-next-line import/named
+import Client, { type ClientSession } from '@mainframe/client'
 import { Environment, DaemonConfig, VaultConfig } from '@mainframe/config'
 import { startDaemon } from '@mainframe/toolbox'
+import { is } from 'electron-util'
 // eslint-disable-next-line import/named
 import { idType, type ID } from '@mainframe/utils-id'
 import { app, BrowserWindow, ipcMain } from 'electron'
@@ -17,31 +19,10 @@ import {
   mainProcResponseChannel,
 } from '../renderer/electronIpc.js'
 
-type User = {
-  id: ID,
-  data: Object,
-}
-
-type App = {
-  id: ID,
-  manifest: Object,
-}
-
-type Session = {
-  id: ID,
-  permission: Object,
-}
-
-type AppSessionData = {
-  app: App,
-  user: User,
-  session: Session,
-}
-
 type AppWindows = {
-  [windowID: string]: {
-    window: BrowserWindow,
-    appSession: AppSessionData,
+  [window: BrowserWindow]: {
+    appID: ID,
+    appSession: ClientSession,
   },
 }
 
@@ -79,7 +60,6 @@ console.log(`using environment "${env.name}" (${env.type})`)
 
 const daemonConfig = new DaemonConfig(env)
 const vaultConfig = new VaultConfig(env)
-const isDevelopment = env.isDev
 
 let client
 let mainWindow
@@ -87,21 +67,24 @@ let vaultOpen: ?string // currently open vault path
 
 const appWindows: AppWindows = {}
 
-const newWindow = params => {
-  const window = new BrowserWindow({ width: params.width || 800, height: 600 })
+const newWindow = (params: Object = {}) => {
+  const window = new BrowserWindow({
+    width: params.width || 800,
+    height: 600,
+    show: false,
+  })
   const stringParams = stringify(params)
 
-  if (isDevelopment) {
+  if (is.development) {
     window.webContents.openDevTools()
     window.loadURL(`http://localhost:${PORT}?${stringParams}`)
   } else {
-    window.loadURL(
-      url.format({
-        pathname: path.join(__dirname, `index.html?${stringParams}`),
-        protocol: 'file:',
-        slashes: true,
-      }),
-    )
+    const formattedUrl = url.format({
+      pathname: path.join(__dirname, `index.html`),
+      protocol: 'file:',
+      slashes: true,
+    })
+    window.loadURL(formattedUrl)
   }
   return window
 }
@@ -130,10 +113,7 @@ const setupClient = async () => {
 const createLauncherWindow = async () => {
   await setupClient()
 
-  mainWindow = newWindow({
-    type: 'launcher',
-    width: 480,
-  })
+  mainWindow = newWindow({ width: 480 })
 
   // Emitted when the window is closed.
   mainWindow.on('closed', () => {
@@ -146,29 +126,22 @@ const createLauncherWindow = async () => {
   })
 }
 
-const getWindowId = (appID: ID, userID: ID) => {
-  return `${appID}-${userID}`
-}
-
 const launchApp = async (appID: ID, userID: ID) => {
-  const windowId = getWindowId(appID, userID)
-  if (appWindows[windowId]) {
+  const appIds = Object.keys(appWindows).map(w => appWindows[w].appID)
+  if (appIds.includes(appID)) {
+    // Already open
     return
   }
   // $FlowFixMe: ID incompatible with client package ID type
   const appSession = await client.openApp(appID, userID)
-  const appWindow = newWindow({
-    type: 'app',
-    windowId,
-  })
+  const appWindow = newWindow()
   appWindow.on('closed', async () => {
     await client.closeApp(appSession.session.id)
-    delete appWindows[windowId]
+    delete appWindows[appWindow]
   })
-  // $FlowFixMe: ID incompatible with client package ID type
-  appWindows[windowId] = {
+  appWindows[appWindow] = {
+    appID,
     appSession,
-    window: appWindow,
   }
 }
 
@@ -190,6 +163,26 @@ app.on('activate', () => {
 })
 
 // IPC COMMS
+
+// Window lifecycle events
+
+ipcMain.on('init-window', event => {
+  const window = BrowserWindow.fromWebContents(event.sender)
+  if (window === mainWindow) {
+    window.webContents.send('start', { type: 'launcher' })
+  } else {
+    const appWindowData = appWindows[window]
+    window.webContents.send('start', {
+      type: 'app',
+      appSession: appWindowData.appSession,
+    })
+  }
+})
+
+ipcMain.on('ready-window', event => {
+  const window = BrowserWindow.fromWebContents(event.sender)
+  window.show()
+})
 
 // Handle calls to main process
 
@@ -223,27 +216,6 @@ const ipcMainHandler = {
     const [manifest, userID, settings] = request.data.args
     const appID = await client.installApp(manifest, userID, settings)
     return { id: request.id, appID }
-  },
-
-  getAppSession: async (event, request) => {
-    if (!request.data.args.length) {
-      return {
-        error: IPC_ERRORS.invalidParams,
-        id: request.id,
-      }
-    }
-    const res = appWindows[request.data.args[0]]
-    if (res && res.appSession) {
-      return {
-        id: request.id,
-        result: { appSession: res.appSession },
-      }
-    } else {
-      return {
-        error: IPC_ERRORS.internalError,
-        id: request.id,
-      }
-    }
   },
 
   getVaultsData: async (event, request) => {

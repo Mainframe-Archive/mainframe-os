@@ -68,7 +68,11 @@ export default class IdentitySelectorView extends Component<Props, State> {
     const header = `Select User ID`
     const rowRender = (id, name, handler) => {
       return (
-        <TouchableOpacity onPress={handler} style={styles.idRow} key={id}>
+        <TouchableOpacity
+          testID={`identity-selector-select-${name}`}
+          onPress={handler}
+          style={styles.idRow}
+          key={id}>
           <Text style={styles.nameLabel}>{name}</Text>
           <Text style={styles.idLabel}>{id}</Text>
         </TouchableOpacity>
@@ -89,11 +93,13 @@ export default class IdentitySelectorView extends Component<Props, State> {
             onChangeText={this.onChangeName}
             value={this.state.newName}
             placeholder="name"
+            testID="create-identity-input-name"
           />
           <Button
             onPress={this.onPressCreateId}
             title="Create"
             disabled={!this.state.newName}
+            testID="create-identity-button-submit"
           />
         </View>
       </View>
