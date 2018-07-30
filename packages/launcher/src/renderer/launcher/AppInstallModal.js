@@ -85,7 +85,7 @@ export default class AppInstallModal extends Component<Props, State> {
     }
   }
 
-  onSubmitPermissions = async (userPermissions: PermissionsGrants) => {
+  onSubmitPermissions = (userPermissions: PermissionsGrants) => {
     this.setState(
       {
         installStep: 'download',

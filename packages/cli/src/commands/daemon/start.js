@@ -20,7 +20,7 @@ export default class StartCommand extends Command {
     const cfg = new DaemonConfig(this.env)
     const status = cfg.runStatus
 
-    this.log(`Starting daemon using socket path ${cfg.socketPath}`)
+    this.log(`Starting daemon for environment ${this.env.name}`)
 
     if (status === 'starting') {
       this.warn('Daemon is already starting from another process')

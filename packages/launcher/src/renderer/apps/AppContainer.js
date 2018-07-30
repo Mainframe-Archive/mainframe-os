@@ -18,6 +18,7 @@ type User = {
 type App = {
   id: ID,
   manifest: Object,
+  contentsPath: string,
 }
 
 type Session = {

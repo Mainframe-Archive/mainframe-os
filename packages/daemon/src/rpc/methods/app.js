@@ -132,7 +132,7 @@ export const install = async (
 ): Promise<ID> => {
   const app = ctx.openVault.installApp(manifest, userID, settings)
 
-  // TODO: rather thatn waiting for contents to be downloaded, return early and let client subscribe to installation state changes
+  // TODO: rather than waiting for contents to be downloaded, return early and let client subscribe to installation state changes
   if (app.installationState !== 'ready') {
     const contentsPath = getContentsPath(ctx.env, manifest)
     try {
