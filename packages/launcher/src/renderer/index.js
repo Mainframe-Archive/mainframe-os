@@ -12,7 +12,7 @@ import AppContainer from './apps/AppContainer.js'
 const callback = () => ipcRenderer.send('ready-window')
 const rootTag = document.getElementById('app')
 
-ipcRenderer.send('init-window', 'test-id')
+ipcRenderer.send('init-window')
 
 Modal.setAppElement(rootTag)
 

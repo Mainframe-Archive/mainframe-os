@@ -37,6 +37,6 @@ jobs:
           background: true
       - run:
           name: Integration tests
-          command: cd ./packages/launcher && yarn dist && yarn test
+          command: cd ./packages/launcher && yarn dist:ci && yarn test
       - store_test_results:
           path: /tmp/test-reports
