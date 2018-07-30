@@ -1,6 +1,7 @@
 // @flow
 
 import { createServer, type Server, type Socket } from 'net'
+import { getDaemonSocketPath, type Environment } from '@mainframe/config'
 import { remove } from 'fs-extra'
 
 import { VaultRegistry } from '../vault'
@@ -13,15 +14,15 @@ export default class ServerHandler {
   _server: Server
   _vaults: VaultRegistry = new VaultRegistry()
 
-  constructor(path: string) {
-    this._path = path
+  constructor(env: Environment) {
+    this._path = getDaemonSocketPath(env)
     this._server = createServer((socket: Socket) => {
       this._clients.add(socket)
       socket.on('close', async () => {
         await this._vaults.close(socket)
         this._clients.delete(socket)
       })
-      handleClient(socket, this._vaults)
+      handleClient(socket, env, this._vaults)
     })
 
     this._server.on('close', () => {

@@ -112,7 +112,7 @@ export default class VaultManagerModal extends Component<Props, State> {
     }
   }
 
-  onPressUnlockVault = () => {
+  onUnlockVault = () => {
     this.unlockVault(this.state.unlockPassword)
   }
 
@@ -268,7 +268,7 @@ export default class VaultManagerModal extends Component<Props, State> {
       <Button
         title="Unlock Vault"
         testID="vault-manager-unlock-button"
-        onPress={this.onPressUnlockVault}
+        onPress={this.onUnlockVault}
       />
     )
     return (
@@ -280,6 +280,7 @@ export default class VaultManagerModal extends Component<Props, State> {
           testID="vault-manager-unlock-input"
           style={styles.input}
           onChangeText={this.onChangeUnlockPassword}
+          onSubmitEditing={this.onUnlockVault}
           value={this.state.unlockPassword}
           placeholder="Password"
         />

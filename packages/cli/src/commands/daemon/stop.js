@@ -13,7 +13,7 @@ export default class StopCommand extends Command {
     const cfg = new DaemonConfig(this.env)
     const status = cfg.runStatus
 
-    this.log(`Stopping daemon using socket path ${cfg.socketPath}`)
+    this.log(`Stopping daemon for environment ${this.env.name}`)
 
     if (status === 'stopping') {
       this.warn('Daemon is already stopping')

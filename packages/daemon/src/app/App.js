@@ -54,27 +54,35 @@ export default class App {
 
   static toJSON = (app: App): AppSerialized => ({
     appID: app._appID,
-    manifest: app._manifest,
     installationState: app._installationState,
+    manifest: app._manifest,
     settings: app._settings,
   })
 
   _appID: ID
-  _manifest: ManifestData
   _installationState: AppInstallationState
+  _manifest: ManifestData
   _settings: { [ID]: AppUserSettings }
 
   constructor(params: AppParams) {
     this._appID = params.appID
-    this._manifest = params.manifest
     this._installationState = params.installationState
+    this._manifest = params.manifest
     this._settings = params.settings == null ? {} : params.settings
   }
 
-  // Getters
+  // Accessors
 
   get id(): ID {
     return this._appID
+  }
+
+  get installationState(): AppInstallationState {
+    return this._installationState
+  }
+
+  set installationState(value: AppInstallationState): void {
+    this._installationState = value
   }
 
   get manifest(): ManifestData {
@@ -163,10 +171,9 @@ export default class App {
     const permissions = mergeGrantsToDetails(appPermissions, userPermissions)
     const session = new Session(this._appID, userID, permissions.session)
     return {
-      sessID: uniqueID(),
-      session: session,
       permissions,
-      // TODO: add path to app assets
+      sessID: uniqueID(),
+      session,
     }
   }
 }

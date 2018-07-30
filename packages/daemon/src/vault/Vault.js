@@ -19,6 +19,7 @@ import {
 import { type ID } from '@mainframe/utils-id'
 
 import {
+  type default as App,
   type AppUserSettings, // eslint-disable-line import/named
   type SessionData,
 } from '../app/App'
@@ -108,14 +109,20 @@ export const readVaultFile = async (
   }
 }
 
+export type UserSettings = {
+  bzzURL: string,
+}
+
 export type VaultData = {
   apps: AppsRepository,
   identities: IdentitiesRepository,
+  settings: UserSettings,
 }
 
 export type VaultSerialized = {
   apps?: AppsRepositorySerialized,
   identities?: IdentitiesRepositorySerialized,
+  settings?: UserSettings,
 }
 
 export default class Vault {
@@ -131,6 +138,7 @@ export default class Vault {
     return new Vault(path, keyParams, {
       apps: AppsRepository.fromJSON(data.apps),
       identities: IdentitiesRepository.fromJSON(data.identities),
+      settings: data.settings,
     })
   }
 
@@ -142,15 +150,18 @@ export default class Vault {
   constructor(path: string, keyParams: VaultKeyParams, data?: ?VaultData) {
     this._path = path
     this._keyParams = keyParams
-    if (data == null) {
-      this._data = {
-        apps: new AppsRepository(),
-        identities: new IdentitiesRepository(),
-      }
-    } else {
-      this._data = data
+
+    const vaultData = {
+      apps: new AppsRepository(),
+      identities: new IdentitiesRepository(),
+      settings: {
+        bzzURL: 'http://swarm-gateways.net',
+      },
     }
+    this._data = data ? Object.assign(vaultData, data) : vaultData
   }
+
+  // Getters
 
   get path(): string {
     return this._path
@@ -162,6 +173,10 @@ export default class Vault {
 
   get identities(): IdentitiesRepository {
     return this._data.identities
+  }
+
+  get settings(): UserSettings {
+    return this._data.settings
   }
 
   // App
@@ -180,16 +195,16 @@ export default class Vault {
     manifest: ManifestData,
     userID: ID,
     settings: AppUserSettings,
-  ): ID {
-    let appID = this.apps.getID(base64Type(manifest.id))
-    if (appID == null) {
+  ): App {
+    let app = this.apps.getByBase64(base64Type(manifest.id))
+    if (app == null) {
       // Add app with user settings
-      appID = this.apps.add(manifest, userID, settings)
+      app = this.apps.add(manifest, userID, settings)
     } else {
       // Set user settings for already existing app
-      this.apps.setUserSettings(appID, userID, settings)
+      this.apps.setUserSettings(app.id, userID, settings)
     }
-    return appID
+    return app
   }
 
   removeApp(appID: ID) {
@@ -200,6 +215,12 @@ export default class Vault {
 
   getSession(id: ID): ?Session {
     return this._sessions[id]
+  }
+
+  // Settings
+
+  setBzzURL(url: string): void {
+    this._data.settings.bzzURL = url
   }
 
   // Vault lifecycle
@@ -217,6 +238,7 @@ export default class Vault {
       ? {
           apps: AppsRepository.toJSON(this._data.apps),
           identities: IdentitiesRepository.toJSON(this._data.identities),
+          settings: this._data.settings,
         }
       : {}
   }

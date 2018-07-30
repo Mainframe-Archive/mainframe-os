@@ -17,9 +17,11 @@
       "**/babel-jest",
       "**/electron",
       "**/electron-better-ipc",
-      "**/electron-webpack",
       "**/electron-builder",
+      "**/electron-webpack",
+      "**/erebos-*",
       "**/es6-error",
+      "**/form-data",
       "**/fs-extra",
       "**/nanoid",
       "**/node-fetch",
@@ -29,6 +31,7 @@
       "**/rx-socket",
       "**/rxjs",
       "**/sodium-universal",
+      "**/tar-stream",
       "**/webpack",
       "**/webpack-dev-server",
       "**/ws"
@@ -58,7 +61,7 @@
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.0",
     "babel-eslint": "^8.2.5",
-    "babel-jest": "^23.2.0",
+    "babel-jest": "^23.4.2",
     "babel-plugin-syntax-class-properties": "^6.13.0",
     "babel-plugin-syntax-object-rest-spread": "^6.13.0",
     "babel-plugin-transform-class-properties": "^6.24.1",
@@ -73,9 +76,9 @@
     "flow-mono-cli": "^1.3.3",
     "flow-remove-types": "^1.2.3",
     "flow-typed": "^2.4.0",
-    "jest": "^23.2.0",
+    "jest": "^23.4.2",
     "jest-junit": "^5.0.0",
     "lerna": "^2.11.0",
-    "prettier": "^1.13.7"
+    "prettier": "^1.14.0"
   }
 }

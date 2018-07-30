@@ -72,7 +72,7 @@ export default class IdentitySelectorView extends Component<Props, State> {
           testID={`identity-selector-select-${name}`}
           onPress={handler}
           style={styles.idRow}
-          key={name}>
+          key={id}>
           <Text style={styles.nameLabel}>{name}</Text>
           <Text style={styles.idLabel}>{id}</Text>
         </TouchableOpacity>

@@ -28,6 +28,7 @@ In the root of the project, install node dependencies:
 ```
 $ yarn install
 $ yarn bootstrap
+$ yarn build
 ```
 
 Next, set up the daemon using the CLI:

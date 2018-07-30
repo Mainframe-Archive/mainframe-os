@@ -2,12 +2,13 @@
 
 import type { Socket } from 'net'
 import { inspect } from 'util'
-import { uniqueID } from '@mainframe/utils-id'
+import type { Environment } from '@mainframe/config'
 import RPCError, {
   parseError,
   methodNotFound,
   invalidRequest,
 } from '@mainframe/rpc-error'
+import { uniqueID } from '@mainframe/utils-id'
 import debug from 'debug'
 
 import type { VaultRegistry } from '../vault'
@@ -19,7 +20,7 @@ type requestID = number | string
 
 export type NotifyFunc = (method: string, params: Object) => void
 
-export default (socket: Socket, vaults: VaultRegistry) => {
+export default (socket: Socket, env: Environment, vaults: VaultRegistry) => {
   const ns = `mainframe:daemon:rpc:client:${uniqueID()}`
   const log = debug(ns)
   const logIO = debug(`${ns}:io`)
@@ -46,7 +47,12 @@ export default (socket: Socket, vaults: VaultRegistry) => {
     sendJSON({ id, result })
   }
 
-  const context = new RequestContext(socket, vaults, sendNotification)
+  const context = new RequestContext({
+    env,
+    notify: sendNotification,
+    socket,
+    vaults,
+  })
 
   const handleRequest = async (method: string, params: any) => {
     const handler = methods[method]
