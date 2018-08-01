@@ -1,26 +1,32 @@
 // @flow
 
-import type { ID } from '@mainframe/utils-id'
-
-import { clientError, permissionErrorFromResult } from '../errors'
 import type RequestContext from '../RequestContext'
-import web3Client from '../web3Client'
 
-export const request = async (
+export const getLatestBlock = async ctx => {
+  return ctx.web3.eth.getBlockNumber()
+}
+
+export const getContractEvents = async (
   ctx: RequestContext,
-  [sessID, method, params, granted]: [ID, string, any, ?boolean] = [],
-): Promise<?mixed> => {
-  const session = ctx.openVault.getSession(sessID)
-  if (session == null) {
-    throw clientError('Invalid session')
-  }
+  [contractAddr, abi, eventName, options]: [
+    string,
+    Array<Object>,
+    string,
+    ?{
+      filter: Object,
+      fromBlock: number,
+      toBlock: number,
+    },
+  ],
+): Promise<Array<Object>> => {
+  const contract = new ctx.web3.eth.Contract(abi, contractAddr)
+  return contract.getPastEvents(eventName, options)
+}
 
-  if (granted !== true) {
-    const result = session.checkPermission('WEB3_CALL')
-    if (result !== 'granted') {
-      throw permissionErrorFromResult(result)
-    }
-  }
-
-  return web3Client.request(method, params)
+export const readContract = async (
+  ctx: RequestContext,
+  [contractAddr, abi, method, params]: [string, Array<Object>, string, any],
+): Promise<any> => {
+  const contract = new ctx.web3.eth.Contract(abi, contractAddr)
+  return await contract.methods[method](...params).call()
 }

@@ -34,5 +34,7 @@ export default {
   sub_unsubscribe: sub.unsubscribe,
   vault_create: vault.create,
   vault_open: vault.open,
-  web3_request: web3.request,
+  web3_getContractEvents: web3.getContractEvents,
+  web3_getLatestBlock: web3.getLatestBlock,
+  web3_readContract: web3.readContract,
 }

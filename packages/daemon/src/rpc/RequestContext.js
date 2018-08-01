@@ -4,6 +4,7 @@ import type { Socket } from 'net'
 import type { Environment } from '@mainframe/config'
 import type { ID } from '@mainframe/utils-id'
 import Bzz from 'erebos-api-bzz-node'
+import Web3 from 'web3'
 
 import type { Vault, VaultRegistry } from '../vault'
 
@@ -36,6 +37,17 @@ export default class RequestContext {
       this._bzz = new Bzz(this.openVault.settings.bzzURL)
     }
     return this._bzz
+  }
+
+  get web3(): Bzz {
+    if (this._web3 == null) {
+      this._web3 = new Web3(
+        new Web3.providers.HttpProvider(
+          this.openVault.settings.web3HTTPProvider,
+        ),
+      )
+    }
+    return this._web3
   }
 
   get env(): Environment {

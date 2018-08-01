@@ -14,6 +14,8 @@ import ipcRPC from '@mainframe/rpc-ipc'
 import type StreamRPC from '@mainframe/rpc-stream'
 import type { ID } from '@mainframe/utils-id'
 
+import Web3Client from './Web3Client'
+
 // TODO: extract API types from daemon
 type AppUserSettings = Object
 
@@ -54,6 +56,7 @@ export default class MainframeClient {
 
   constructor(socketPath: string) {
     this._rpc = ipcRPC(socketPath)
+    this.web3 = new Web3Client(this._rpc)
   }
 
   close() {
@@ -144,11 +147,5 @@ export default class MainframeClient {
     value: PermissionGrant,
   ): Promise<void> {
     return this._rpc.request('app_setPermission', [sessID, key, value])
-  }
-
-  // Infrastructure interactions
-
-  requestWeb3(sessID: ID, method: string, params?: any): Promise<any> {
-    return this._rpc.request('web3_request', [sessID, method, params])
   }
 }
