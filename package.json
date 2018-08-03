@@ -26,6 +26,8 @@
       "**/fastest-validator",
       "**/form-data",
       "**/fs-extra",
+      "**/multibase",
+      "**/multicodec",
       "**/nanoid",
       "**/node-fetch",
       "**/oboe",
@@ -36,6 +38,7 @@
       "**/rxjs",
       "**/sodium-universal",
       "**/tar-stream",
+      "**/uri-js",
       "**/webpack",
       "**/webpack-dev-server",
       "**/ws"

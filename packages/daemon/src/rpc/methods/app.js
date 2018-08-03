@@ -1,7 +1,7 @@
 // @flow
 
-import type { ManifestData } from '@mainframe/app-manifest'
 /* eslint-disable import/named */
+import { parseContentsURI, type ManifestData } from '@mainframe/app-manifest'
 import {
   PERMISSION_KEY_SCHEMA,
   PERMISSION_GRANT_SCHEMA,
@@ -51,7 +51,7 @@ type AppInstalled = {
 }
 
 const getContentsPath = (env: Environment, manifest: ManifestData): string => {
-  return getAppContentsPath(env, manifest.id, manifest.version)
+  return getAppContentsPath(env, (manifest.id: string), manifest.version)
 }
 
 const createClientSession = (
@@ -165,16 +165,21 @@ export const install = {
     // TODO: rather than waiting for contents to be downloaded, return early and let client subscribe to installation state changes
     if (app.installationState !== 'ready') {
       const contentsPath = getContentsPath(ctx.env, params.manifest)
-      try {
-        app.installationState = 'downloading'
-        await ensureDir(contentsPath)
-        await ctx.bzz.downloadDirectoryTo(
-          params.manifest.contentsHash,
-          contentsPath,
-        )
-        app.installationState = 'ready'
-      } catch (err) {
+      const contentsURI = parseContentsURI(params.manifest.contentsURI)
+      if (contentsURI.nid !== 'bzz' || contentsURI.nss == null) {
+        // Unsupported contentsURI
         app.installationState = 'download_error'
+      } else {
+        try {
+          app.installationState = 'downloading'
+          await ensureDir(contentsPath)
+          // contentsURI.nss is expected to be the bzz hash
+          // TODO?: bzz hash validation?
+          await ctx.bzz.downloadDirectoryTo(contentsURI.nss, contentsPath)
+          app.installationState = 'ready'
+        } catch (err) {
+          app.installationState = 'download_error'
+        }
       }
     }
 

@@ -1,28 +1,19 @@
 // @flow
 
 import type { PermissionsRequirements } from '@mainframe/app-permissions'
-import type { base64 } from '@mainframe/utils-base64'
+
+// base64url-encoded Ed25519 public key
+export opaque type ManifestID: string = string
 
 export type ManifestData = {
-  id: base64,
+  id: ManifestID,
   author: {
-    id: base64,
+    id: ManifestID,
   },
   name: string,
   version: string,
-  contentsHash: string,
+  contentsURI: string,
   permissions: PermissionsRequirements,
 }
 
-export type ManifestValidationError =
-  | 'invalid_signature'
-  | 'invalid_input'
-  | 'invalid_id'
-  | 'invalid_author'
-  | 'invalid_name'
-  | 'invalid_version'
-  | 'invalid_min_version'
-  | 'invalid_hash'
-  | 'invalid_permissions'
-
-export type ManifestValidationResult = ManifestValidationError | 'valid'
+export type ManifestValidationResult = true | Array<Object>
