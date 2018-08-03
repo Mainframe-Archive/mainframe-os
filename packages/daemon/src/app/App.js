@@ -2,7 +2,7 @@
 
 import type { ManifestData } from '@mainframe/app-manifest'
 import {
-  createHTTPSRequestGrant,
+  createWebRequestGrant,
   mergeGrantsToDetails,
   type PermissionGrant, // eslint-disable-line import/named
   type PermissionKey, // eslint-disable-line import/named
@@ -16,7 +16,7 @@ import Session from './Session'
 
 const DEFAULT_SETTINGS = {
   permissions: {
-    HTTPS_REQUEST: [],
+    WEB_REQUEST: [],
   },
   permissionsChecked: false,
 }
@@ -130,8 +130,8 @@ export default class App {
   setPermission(userID: ID, key: PermissionKey, value: PermissionGrant): void {
     const { permissions } = this.getSettings(userID)
     if (
-      (key === 'HTTPS_REQUEST' && typeof value === 'object') ||
-      (key !== 'HTTPS_REQUEST' && typeof value === 'boolean')
+      (key === 'WEB_REQUEST' && typeof value === 'object') ||
+      (key !== 'WEB_REQUEST' && typeof value === 'boolean')
     ) {
       // $FlowFixMe: value polymorphism
       permissions[key] = value
@@ -163,10 +163,10 @@ export default class App {
     const requiredPermissions = this.manifest.permissions.required
     const appPermissions = {
       ...requiredPermissions,
-      HTTPS_REQUEST: createHTTPSRequestGrant(requiredPermissions.HTTPS_REQUEST),
+      WEB_REQUEST: createWebRequestGrant(requiredPermissions.WEB_REQUEST),
     }
     const userPermissions = this.getPermissions(userID) || {
-      HTTPS_REQUEST: createHTTPSRequestGrant(),
+      WEB_REQUEST: createWebRequestGrant(),
     }
     const permissions = mergeGrantsToDetails(appPermissions, userPermissions)
     const session = new Session(this._appID, userID, permissions.session)

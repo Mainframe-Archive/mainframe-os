@@ -3,11 +3,10 @@
 import type { Socket } from 'net'
 import { inspect } from 'util'
 import type { Environment } from '@mainframe/config'
-import RPCError, {
-  parseError,
-  methodNotFound,
-  invalidRequest,
-} from '@mainframe/rpc-error'
+import createHandler, {
+  parseJSON,
+  type IncomingMessage, // eslint-disable-line import/named
+} from '@mainframe/rpc-handler'
 import { uniqueID } from '@mainframe/utils-id'
 import debug from 'debug'
 
@@ -15,8 +14,6 @@ import type { VaultRegistry } from '../vault'
 
 import methods from './methods'
 import RequestContext from './RequestContext'
-
-type requestID = number | string
 
 export type NotifyFunc = (method: string, params: Object) => void
 
@@ -29,22 +26,13 @@ export default (socket: Socket, env: Environment, vaults: VaultRegistry) => {
     logIO(msg, inspect(data, { colors: true, depth: 5 }))
   }
 
-  const sendJSON = (data: Object) => {
-    const payload = { jsonrpc: '2.0', ...data }
+  const sendJSON = (payload: Object) => {
     logJSON('<==', payload)
     socket.write(JSON.stringify(payload))
   }
 
-  const sendError = (id: ?requestID, error: RPCError) => {
-    sendJSON({ id, error: { code: error.code, message: error.message } })
-  }
-
   const sendNotification = (method: string, params: Object) => {
-    sendJSON({ method, params })
-  }
-
-  const sendResult = (id: requestID, result?: any) => {
-    sendJSON({ id, result })
+    sendJSON({ jsonrpc: '2.0', method, params })
   }
 
   const context = new RequestContext({
@@ -54,39 +42,29 @@ export default (socket: Socket, env: Environment, vaults: VaultRegistry) => {
     vaults,
   })
 
-  const handleRequest = async (method: string, params: any) => {
-    const handler = methods[method]
-    if (handler == null) {
-      throw methodNotFound()
-    }
-    return await handler(context, params)
-  }
+  const handle = createHandler({
+    methods,
+    onInvalidMessage: (ctx: RequestContext, msg: IncomingMessage) => {
+      log('invalid message', msg)
+    },
+    onNotification: (ctx: RequestContext, msg: IncomingMessage) => {
+      log('notification received', msg)
+    },
+  })
 
   socket.on('data', async (chunk: Buffer) => {
     let msg
     try {
-      msg = JSON.parse(chunk.toString())
+      msg = parseJSON(chunk.toString())
     } catch (err) {
-      return sendError(null, parseError())
+      return sendJSON({ jsonrpc: '2.0', error: err.toObject() })
     }
 
     logJSON('==>', msg)
-    if (msg.jsonrpc !== '2.0') {
-      return sendError(msg.id, invalidRequest())
-    }
 
-    if (msg.method != null) {
-      // Request
-      try {
-        const result = await handleRequest(msg.method, msg.params)
-        sendResult(msg.id, result)
-      } catch (err) {
-        sendError(msg.id, err)
-      }
-    } else {
-      // TODO?: handle notifications
-      // eslint-disable-next-line no-console
-      console.log('Unhandled message', msg)
+    const reply = await handle(context, msg)
+    if (reply != null) {
+      sendJSON(reply)
     }
   })
 

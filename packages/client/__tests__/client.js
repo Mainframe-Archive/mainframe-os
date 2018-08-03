@@ -17,13 +17,4 @@ describe('client', () => {
     expect(client._rpc.request).toHaveBeenCalledTimes(1)
     expect(client._rpc.request).toHaveBeenCalledWith('api_version')
   })
-
-  it('has a validateManifest() method', async () => {
-    const manifest = { id: 'test' }
-    await client.validateManifest(manifest)
-    expect(client._rpc.request).toHaveBeenCalledTimes(1)
-    expect(client._rpc.request).toHaveBeenCalledWith('app_validateManifest', [
-      manifest,
-    ])
-  })
 })

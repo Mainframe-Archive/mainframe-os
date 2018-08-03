@@ -11,7 +11,7 @@
     "test:types": "flow check"
   },
   "dependencies": {
-    "@mainframe/rpc-ipc": "^0.2.0",
+    "@mainframe/rpc-ipc": "^0.2.3",
     "rxjs": "^6.2.1"
   },
   "devDependencies": {
