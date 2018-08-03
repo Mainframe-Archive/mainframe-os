@@ -7,17 +7,17 @@ export type PermissionKeyBasic =
   | 'SWARM_UPLOAD'
   | 'WEB3_CALL'
   | 'WEB3_SEND'
-export type PermissionKey = 'HTTPS_REQUEST' | PermissionKeyBasic
+export type PermissionKey = 'WEB_REQUEST' | PermissionKeyBasic
 
-export type HTTPSRequestDefinition = Array<string>
+export type WebRequestDefinition = Array<string>
 
 export type PermissionsDefinitions = {
-  HTTPS_REQUEST: HTTPSRequestDefinition,
+  WEB_REQUEST: WebRequestDefinition,
   [PermissionKeyBasic]: boolean,
 }
 
 export type PartialPermissionsDefinitions = {
-  HTTPS_REQUEST?: HTTPSRequestDefinition,
+  WEB_REQUEST?: WebRequestDefinition,
   [PermissionKeyBasic]: boolean,
 }
 
@@ -28,13 +28,13 @@ export type PermissionsDefinitionsDifference = {
   unchanged: PartialPermissionsDefinitions,
 }
 
-export type HTTPSRequestGrant = {
-  granted: HTTPSRequestDefinition,
-  denied: HTTPSRequestDefinition,
+export type WebRequestGrant = {
+  granted: WebRequestDefinition,
+  denied: WebRequestDefinition,
 }
 
 export type PermissionsGrants = {
-  HTTPS_REQUEST: HTTPSRequestGrant,
+  WEB_REQUEST: WebRequestGrant,
   [PermissionKeyBasic]: boolean,
 }
 
@@ -60,6 +60,6 @@ export type PermissionsDetails = { [PermissionLifetime]: PermissionsGrants }
 export type PermissionCheckResult =
   | 'unknown_key' // Not a valid permission key
   | 'not_set' // Valid key but no value
-  | 'invalid_input' // Special for HTTPS_REQUEST: domain not provided
+  | 'invalid_input' // Special for WEB_REQUEST: domain not provided
   | 'granted'
   | 'denied'

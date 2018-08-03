@@ -31,7 +31,8 @@
     "@mainframe/app-manifest": "*",
     "@mainframe/app-permissions": "*",
     "@mainframe/config": "*",
-    "@mainframe/rpc-error": "^0.1.0",
+    "@mainframe/rpc-error": "^0.2.1",
+    "@mainframe/rpc-handler": "^0.1.0",
     "@mainframe/rpc-node": "^0.2.0",
     "@mainframe/secure-file": "^0.1.0",
     "@mainframe/utils-base64": "^0.1.0",
@@ -42,7 +43,7 @@
     "@oclif/plugin-help": "^2.0.5",
     "debug": "^3.1.0",
     "erebos-api-bzz-node": "^0.3.3",
-    "esm": "3.0.72",
+    "esm": "3.0.74",
     "fs-extra": "^7.0.0",
     "rxjs": "^6.2.0"
   },

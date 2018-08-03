@@ -8,19 +8,19 @@ import web3Client from '../web3Client'
 
 export const request = async (
   ctx: RequestContext,
-  [sessID, method, params, granted]: [ID, string, any, ?boolean] = [],
+  params: { sessID: ID, method: string, params: any, granted: ?boolean },
 ): Promise<?mixed> => {
-  const session = ctx.openVault.getSession(sessID)
+  const session = ctx.openVault.getSession(params.sessID)
   if (session == null) {
     throw clientError('Invalid session')
   }
 
-  if (granted !== true) {
+  if (params.granted !== true) {
     const result = session.checkPermission('WEB3_CALL')
     if (result !== 'granted') {
       throw permissionErrorFromResult(result)
     }
   }
 
-  return web3Client.request(method, params)
+  return web3Client.request(params.method, params.params)
 }

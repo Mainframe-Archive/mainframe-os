@@ -1,25 +1,27 @@
 // @flow
 
+import type { ManifestData } from '@mainframe/app-manifest'
+/* eslint-disable import/named */
 import {
-  validateManifest,
-  type ManifestData, // eslint-disable-line import/named
-  type ManifestValidationResult, // eslint-disable-line import/named
-} from '@mainframe/app-manifest'
-import type {
-  PermissionKey,
-  PermissionGrant,
-  PermissionsDetails,
-  PermissionCheckResult,
+  PERMISSION_KEY_SCHEMA,
+  PERMISSION_GRANT_SCHEMA,
+  PERMISSIONS_GRANTS_SCHEMA,
+  type PermissionKey,
+  type PermissionGrant,
+  type PermissionsDetails,
+  type PermissionCheckResult,
 } from '@mainframe/app-permissions'
 import { getAppContentsPath, type Environment } from '@mainframe/config'
-// eslint-disable-next-line import/named
 import { idType, type ID } from '@mainframe/utils-id'
+/* eslint-enable import/named */
 import { ensureDir } from 'fs-extra'
 
 import type { AppUserSettings, SessionData } from '../../app/App'
 
 import { clientError, sessionError } from '../errors'
 import type RequestContext from '../RequestContext'
+
+import { localIdParam } from './parameters'
 
 type User = {
   id: ID,
@@ -83,21 +85,33 @@ const createClientSession = (
   }
 }
 
-export const checkPermission = (
-  ctx: RequestContext,
-  [sessID, key, input]: [ID, PermissionKey, ?string] = [],
-): { result: PermissionCheckResult } => {
-  const session = ctx.openVault.getSession(sessID)
-  if (session == null) {
-    throw clientError('Invalid session')
-  }
-  return {
-    result: session.checkPermission(key, input),
-  }
+export const checkPermission = {
+  params: {
+    sessID: localIdParam,
+    key: PERMISSION_KEY_SCHEMA,
+    input: { type: 'string', optional: true, empty: false },
+  },
+  handler: (
+    ctx: RequestContext,
+    params: { sessID: ID, key: PermissionKey, input?: ?string },
+  ): { result: PermissionCheckResult } => {
+    const session = ctx.openVault.getSession(params.sessID)
+    if (session == null) {
+      throw clientError('Invalid session')
+    }
+    return {
+      result: session.checkPermission(params.key, params.input),
+    }
+  },
 }
 
-export const close = (ctx: RequestContext, [sessID]: [ID] = []): void => {
-  ctx.openVault.closeApp(sessID)
+export const close = {
+  params: {
+    sessID: localIdParam,
+  },
+  handler: (ctx: RequestContext, params: { sessID: ID }): void => {
+    ctx.openVault.closeApp(params.sessID)
+  },
 }
 
 // TODO: replace by list with filters
@@ -126,73 +140,105 @@ export const getInstalled = (
   return { apps: installedApps }
 }
 
-export const install = async (
-  ctx: RequestContext,
-  [manifest, userID, settings]: [ManifestData, ID, AppUserSettings] = [],
-): Promise<ID> => {
-  const app = ctx.openVault.installApp(manifest, userID, settings)
+export const install = {
+  params: {
+    manifest: 'any', // TODO: manifest schema - maybe use validator in app-manifest package as well?
+    userID: localIdParam,
+    settings: {
+      type: 'object',
+      props: {
+        permissions: PERMISSIONS_GRANTS_SCHEMA,
+        permissionsChecked: 'boolean',
+      },
+    },
+  },
+  handler: async (
+    ctx: RequestContext,
+    params: { manifest: ManifestData, userID: ID, settings: AppUserSettings },
+  ): Promise<ID> => {
+    const app = ctx.openVault.installApp(
+      params.manifest,
+      params.userID,
+      params.settings,
+    )
 
-  // TODO: rather than waiting for contents to be downloaded, return early and let client subscribe to installation state changes
-  if (app.installationState !== 'ready') {
-    const contentsPath = getContentsPath(ctx.env, manifest)
-    try {
-      app.installationState = 'downloading'
-      await ensureDir(contentsPath)
-      await ctx.bzz.downloadDirectoryTo(manifest.contentsHash, contentsPath)
-      app.installationState = 'ready'
-    } catch (err) {
-      app.installationState = 'download_error'
+    // TODO: rather than waiting for contents to be downloaded, return early and let client subscribe to installation state changes
+    if (app.installationState !== 'ready') {
+      const contentsPath = getContentsPath(ctx.env, params.manifest)
+      try {
+        app.installationState = 'downloading'
+        await ensureDir(contentsPath)
+        await ctx.bzz.downloadDirectoryTo(
+          params.manifest.contentsHash,
+          contentsPath,
+        )
+        app.installationState = 'ready'
+      } catch (err) {
+        app.installationState = 'download_error'
+      }
     }
-  }
 
-  await ctx.openVault.save()
-  return app.id
-}
-
-export const remove = async (
-  ctx: RequestContext,
-  [appID]: [ID] = [],
-): Promise<void> => {
-  ctx.openVault.removeApp(appID)
-  await ctx.openVault.save()
-}
-
-export const open = (
-  ctx: RequestContext,
-  [appID, userID]: [ID, ID] = [],
-): ClientSession => {
-  const session = ctx.openVault.openApp(appID, userID)
-  return createClientSession(ctx, appID, userID, session)
-}
-
-export const setPermission = async (
-  ctx: RequestContext,
-  [sessID, key, value, persist]: [
-    ID,
-    PermissionKey,
-    PermissionGrant,
-    ?boolean,
-  ] = [],
-): Promise<void> => {
-  const session = ctx.openVault.getSession(sessID)
-  if (session == null) {
-    throw clientError('Invalid session')
-  }
-  session.setPermission(key, value)
-
-  if (persist === true) {
-    const app = ctx.openVault.apps.getByID(session.appID)
-    if (app == null) {
-      throw sessionError('Invalid app')
-    }
-    app.setPermission(session.userID, key, value)
     await ctx.openVault.save()
-  }
+    return app.id
+  },
 }
 
-export const validateManifestData = (
-  ctx: RequestContext,
-  [manifest]: [ManifestData] = [],
-): { result: ManifestValidationResult } => ({
-  result: validateManifest(manifest),
-})
+export const remove = {
+  params: {
+    appID: localIdParam,
+  },
+  handler: async (
+    ctx: RequestContext,
+    params: { appID: ID },
+  ): Promise<void> => {
+    ctx.openVault.removeApp(params.appID)
+    await ctx.openVault.save()
+  },
+}
+
+export const open = {
+  params: {
+    appID: localIdParam,
+    userID: localIdParam,
+  },
+  handler: (
+    ctx: RequestContext,
+    params: { appID: ID, userID: ID },
+  ): ClientSession => {
+    const session = ctx.openVault.openApp(params.appID, params.userID)
+    return createClientSession(ctx, params.appID, params.userID, session)
+  },
+}
+
+export const setPermission = {
+  params: {
+    sessID: localIdParam,
+    key: PERMISSION_KEY_SCHEMA,
+    value: PERMISSION_GRANT_SCHEMA,
+    persist: { type: 'boolean', optional: true },
+  },
+  handler: async (
+    ctx: RequestContext,
+    params: {
+      sessID: ID,
+      key: PermissionKey,
+      value: PermissionGrant,
+      persist: ?boolean,
+    },
+  ): Promise<void> => {
+    const session = ctx.openVault.getSession(params.sessID)
+    if (session == null) {
+      throw clientError('Invalid session')
+    }
+    session.setPermission(params.key, params.value)
+
+    if (params.persist === true) {
+      const app = ctx.openVault.apps.getByID(session.appID)
+      if (app == null) {
+        throw sessionError('Invalid app')
+      }
+      app.setPermission(session.userID, params.key, params.value)
+      await ctx.openVault.save()
+    }
+  },
+}

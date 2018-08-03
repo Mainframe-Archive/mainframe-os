@@ -30,9 +30,9 @@
     "@mainframe/toolbox": "*",
     "electron-util": "^0.9.0",
     "fs-extra": "^7.0.0",
-    "react": "^16.4.0",
-    "react-art": "^16.4.0",
-    "react-dom": "^16.4.0",
+    "react": "^16.4.2",
+    "react-art": "^16.4.2",
+    "react-dom": "^16.4.2",
     "react-modal": "^3.4.5",
     "react-native-web": "^0.8.0",
     "source-map-support": "^0.5.5"
@@ -43,12 +43,12 @@
     "@babel/preset-react": "7.0.0-beta.47",
     "@mainframe/utils-id": "^0.1.0",
     "babel-plugin-react-native-web": "^0.8.6",
-    "electron": "^2.0.2",
-    "electron-builder": "^20.16.0",
+    "electron": "^2.0.6",
+    "electron-builder": "^20.26.1",
     "electron-webpack": "^2.1.2",
     "flow-bin": "^0.77.0",
     "mocha": "^5.2.0",
     "spectron": "^3.8.0",
-    "webpack": "^4.14.0"
+    "webpack": "^4.16.4"
   }
 }
