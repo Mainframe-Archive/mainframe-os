@@ -1,0 +1,20 @@
+{
+  "name": "@mainframe/sdk",
+  "version": "0.1.0",
+  "main": "lib/index.js",
+  "license": "MIT",
+  "scripts": {
+    "clean": "del lib",
+    "build:js": "yarn webpack",
+    "build:cjs": "BABEL_ENV='browser-cjs' babel src --out-dir cjs",
+    "build:flow": "flow-copy-source src lib",
+    "build": "yarn clean && yarn build:umd && yarn build:flow",
+    "test:types": "flow check"
+  },
+  "devDependencies": {
+    "babel-loader": "^7.1.5",
+    "babel-plugin-external-helpers": "^6.22.0",
+    "webpack": "^4.16.2",
+    "webpack-cli": "^3.1.0"
+  }
+}

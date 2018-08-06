@@ -28,6 +28,4 @@ const callMain = (channel, data) =>
     ipcRenderer.send(requestChannel, request)
   })
 
-const ipc = { callMain }
-
-window.ipc = ipc
+window.sandboxIpc = { callMain }

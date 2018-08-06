@@ -10,7 +10,7 @@ export default class Web3Client {
     this._rpc = rpc
   }
 
-  latestBlock(): Promise<number> {
+  getLatestBlock(): Promise<number> {
     return this._rpc.request('web3_getLatestBlock')
   }
 

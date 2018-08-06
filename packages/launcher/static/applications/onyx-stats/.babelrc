@@ -1,0 +1,14 @@
+{
+  "presets": [
+    [
+      "env",
+      {
+        "targets": {
+          "node": "current"
+        }
+      }
+    ],
+    "react"
+  ],
+  "plugins": ["inline-react-svg", "transform-class-properties"]
+}

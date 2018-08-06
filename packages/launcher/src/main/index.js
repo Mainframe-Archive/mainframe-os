@@ -305,18 +305,36 @@ daemonRequestIpcChannels.forEach(c => {
 const handleRequestToDaemon = async (
   request: Object,
 ): Promise<ClientResponse> => {
-  if (request == null || !request || !request.data) {
+  if (request == null || !request || !request.data || !request.data.method) {
     return {
       error: IPC_ERRORS.invalidRequest,
       id: request.id,
     }
   }
+
+  // Handle nested calls e.g. 'client.web3.func()'
+
+  const nestedCalls = request.data.method.split('.')
+  let daemonClient = client
+  let func = request.data.method
+
+  if (nestedCalls.length > 1) {
+    nestedCalls.forEach((val, i) => {
+      if (i < nestedCalls.length - 1) {
+        daemonClient = daemonClient[val]
+      }
+    })
+    func = nestedCalls[nestedCalls.length - 1]
+  } else {
+    daemonClient = client
+    func = request.data.method
+  }
   // $FlowFixMe: indexer property
-  if (request.data.method && client[request.data.method]) {
+  if (daemonClient[func]) {
     const args = request.data.args || []
     try {
       // $FlowFixMe: indexer property
-      const res = await client[request.data.method](...args)
+      const res = await daemonClient[func](...args)
       return {
         id: request.id,
         result: res,

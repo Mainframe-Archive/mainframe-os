@@ -3,4 +3,7 @@ coverage
 /packages/*/flow-typed
 /packages/*/lib
 /packages/*/.flowconfig
+/packages/*/cjs
+dist/
 *.log
+.DS_Store
