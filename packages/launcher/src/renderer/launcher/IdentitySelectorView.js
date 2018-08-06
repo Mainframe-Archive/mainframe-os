@@ -1,17 +1,12 @@
 //@flow
 
 import React, { Component } from 'react'
-import {
-  View,
-  TouchableOpacity,
-  StyleSheet,
-  Text,
-  TextInput,
-} from 'react-native-web'
+import { View, TouchableOpacity, StyleSheet, TextInput } from 'react-native-web'
 import type { ID } from '@mainframe/utils-id'
 
 import { client } from '../electronIpc.js'
 import Button from '../UIComponents/Button'
+import Text from '../UIComponents/Text'
 import colors from '../colors'
 
 type User = {

@@ -11,11 +11,11 @@ import {
   View,
   TouchableOpacity,
   StyleSheet,
-  Text,
   ScrollView,
 } from 'react-native-web'
 
 import Button from '../UIComponents/Button'
+import Text from '../UIComponents/Text'
 
 type Domain = string
 type PermissionGranted = boolean

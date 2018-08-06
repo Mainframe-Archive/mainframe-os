@@ -1,9 +1,11 @@
 // @flow
 
 import React, { Component } from 'react'
-import { View, Text, StyleSheet, ScrollView, Image } from 'react-native-web'
+import { View, StyleSheet, ScrollView, Image } from 'react-native-web'
 import MainframeSDK from '@mainframe/sdk'
-import { AreaChart, Line, XAxis, YAxis, Area, Tooltip } from 'recharts'
+import { AreaChart, XAxis, Area, Tooltip } from 'recharts'
+
+import Text from './ui-kit/Text'
 
 export default class App extends Component {
   constructor() {
@@ -37,16 +39,13 @@ export default class App extends Component {
       },
     ]
     const mfTokenAddr = '0xe3C2130530D77418b3e367Fe162808887526e74D'
-    console.log('fetching events...')
     const latestBlock = await this.sdk.web3.getLatestBlock()
-    console.log('latest block: ', latestBlock)
     const res = await this.sdk.web3.getContractEvents(
       mfTokenAddr,
       abi,
       'Staked',
       { fromBlock: 5916157, toBlock: latestBlock },
     )
-    console.log('res: ', res)
     this.generateGraphData(res)
     this.setState({
       stakingEvents: res,
@@ -90,11 +89,23 @@ export default class App extends Component {
     })
   }
 
+  renderTooltip = item => {
+    if (item.payload.length) {
+      return (
+        <View style={styles.tooltip}>
+          <Text style={styles.tooltipText}>
+            Staked:{' '}
+            <Text style={styles.boldLabel}>{item.payload[0].value}</Text>
+          </Text>
+        </View>
+      )
+    }
+  }
+
   renderEvents() {
     if (this.state.stakingEvents) {
       const rows = Object.keys(this.state.graphData).reduce((res, key) => {
         const obj = this.state.graphData[key]
-        console.log()
         const eventsInRange = obj.events.map(e => {
           if (e.event === 'Staked') {
             return (
@@ -134,7 +145,7 @@ export default class App extends Component {
     return (
       <AreaChart
         width={600}
-        height={250}
+        height={220}
         data={this.state.graphData}
         margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
         <defs>
@@ -145,13 +156,11 @@ export default class App extends Component {
         </defs>
         <Tooltip
           cursor={{ stroke: redColor, strokeWidth: 1 }}
-          labelStyle={{ fontFamily: 'sans-serif' }}
-          itemStyle={{ fontFamily: 'sans-serif' }}
+          content={this.renderTooltip}
         />
         <XAxis
           dataKey="name"
-          stroke={extraDarkBlue}
-          strokeWidth={2}
+          strokeWidth={0}
           tick={{
             fontFamily: 'sans-serif',
             fontSize: 12,
@@ -172,15 +181,15 @@ export default class App extends Component {
     return (
       <View style={styles.container}>
         <View style={styles.contentContainer}>
-          <View style={styles.header}>
-            <Image
-              style={styles.mfLogo}
-              source={'../assets/mainframe-logo.svg'}
-              resizeMode="contain"
-            />
-            <Text style={styles.title}>Onyx Staking</Text>
-          </View>
           <ScrollView style={styles.scrollView}>
+            <View style={styles.header}>
+              <Image
+                style={styles.mfLogo}
+                source={'../assets/images/mainframe-logo.svg'}
+                resizeMode="contain"
+              />
+              <Text style={styles.title}>Onyx Staking</Text>
+            </View>
             {this.renderGraphData()}
             {this.renderEvents()}
           </ScrollView>
@@ -190,7 +199,6 @@ export default class App extends Component {
   }
 }
 
-const greyColor = '#777777'
 const redColor = '#c8325a'
 const lightBlueColor = '#00A7E7'
 const darkBlueColor = '#131f38'
@@ -208,13 +216,12 @@ const styles = StyleSheet.create({
     backgroundColor: darkBlueColor,
   },
   header: {
-    padding: 10,
+    marginTop: 25,
     width: '100%',
     backgroundColor: darkBlueColor,
   },
   contentContainer: {
     flex: 1,
-    padding: 40,
     alignItems: 'center',
     backgroundColor: darkBlueColor,
   },
@@ -284,5 +291,18 @@ const styles = StyleSheet.create({
   nodeAddr: {
     fontSize: 14,
     color: whiteColor,
+  },
+  tooltip: {
+    backgroundColor: whiteColor,
+    borderRadius: 20,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+  },
+  boldLabel: {
+    fontWeight: 'bold',
+  },
+  tooltipText: {
+    color: darkGreyBlueColor,
+    fontSize: 11,
   },
 })

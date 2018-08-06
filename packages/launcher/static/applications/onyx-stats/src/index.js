@@ -1,6 +1,6 @@
-import App from './App'
-import React from 'react'
 import { AppRegistry } from 'react-native-web'
+import './index.css'
+import App from './App'
 
 // register the app
 AppRegistry.registerComponent('App', () => App)

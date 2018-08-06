@@ -8,5 +8,6 @@ export default {
   LIGHT_GREY_EE: '#eeeeee',
   GREY_MED_81: '#818181',
   GREY_MED_75: '#757575',
+  GREY_DARK_54: '#545556',
   WHITE: '#FFFFFF',
 }

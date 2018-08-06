@@ -6,7 +6,6 @@ import {
   View,
   TouchableOpacity,
   StyleSheet,
-  Text,
   ActivityIndicator,
   Image,
 } from 'react-native-web'
@@ -15,6 +14,7 @@ import colors from '../colors'
 import type { VaultsData } from '../types'
 import { client, callMainProcess } from '../electronIpc'
 import Button from '../UIComponents/Button'
+import Text from '../UIComponents/Text'
 import ModalView from '../UIComponents/ModalView'
 import logo from '../../assets/images/mf-icon.png'
 import AppInstallModal from './AppInstallModal'
