@@ -6,29 +6,78 @@
 
 Shape of the expected manifest data object.
 
-### ManifestValidationError
-
-Enum of possible validation errors.
-
 ### ManifestValidationResult
 
-Union of `ManifestValidationError` and `valid` string.
+Either `true` if the validation succeeds or `Array<Object>` of validation errors returned by [`fastest-validator`](https://github.com/icebob/fastest-validator).
+
+## Constants
+
+### INVALID_ID_ERROR
+
+Error message for invalid Mainframe ID value using `fastest-validator`.
+
+### INVALID_SEMVER_ERROR
+
+Error message for invalid SemVer value using `fastest-validator`.
+
+### INVALID_URN_ERROR
+
+Error message for invalid URN value using `fastest-validator`.
+
+### MANIFEST_SCHEMA_MESSAGES
+
+Object of the previous error messages for `fastest-validator` configuration.
+
+### ID_SCHEMA
+
+`fastest-validator` schema for a manifest identifier (Mainframe ID).
+
+### SEMVER_SCHEMA
+
+`fastest-validator` schema for a SemVer value.
+
+### URN_SCHEMA
+
+`fastest-validator` schema for an URN value.
+
+### NAME_SCHEMA
+
+`fastest-validator` schema for an application name as validated by the manifest (3 to 50 characters).
+
+### MANIFEST_SCHEMA
+
+`fastest-validator` schema for a full manifest.
 
 ## API
+
+### isValidSemver()
+
+**Arguments**
+
+1.  `value: string`
+
+**Returns** `boolean`
+
+### isValidURN()
+
+**Arguments**
+
+1.  `value: string`
+
+**Returns** `boolean`
 
 ### new ManifestError()
 
 **Arguments**
 
-1.  `reason: ManifestValidationError`
-1.  `message?: string`: defaults to generic message with the `reason`
+1.  `message: string`: error message
+1.  `errors?: Array<Object>`: validation errors
 
 ### validateManifest()
 
 **Arguments**
 
 1.  `manifest: ManifestData`
-1.  `gtVersion?: string`: optional semver value the `manifest.version` must be greater than
 
 **Returns** `ManifestValidationResult`
 

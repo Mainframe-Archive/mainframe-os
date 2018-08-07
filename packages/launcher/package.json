@@ -46,9 +46,9 @@
     "electron": "^2.0.6",
     "electron-builder": "^20.26.1",
     "electron-webpack": "^2.1.2",
-    "flow-bin": "^0.77.0",
+    "flow-bin": "^0.78.0",
     "mocha": "^5.2.0",
     "spectron": "^3.8.0",
-    "webpack": "^4.16.4"
+    "webpack": "^4.16.5"
   }
 }

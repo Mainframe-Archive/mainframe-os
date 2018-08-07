@@ -1,14 +1,12 @@
 // @flow
 
 import type { PermissionsRequirements } from '@mainframe/app-permissions'
-
-// base64url-encoded Ed25519 public key
-export opaque type ManifestID: string = string
+import type { MainframeID } from '@mainframe/data-types'
 
 export type ManifestData = {
-  id: ManifestID,
+  id: MainframeID,
   author: {
-    id: ManifestID,
+    id: MainframeID,
   },
   name: string,
   version: string,

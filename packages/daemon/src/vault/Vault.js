@@ -5,7 +5,6 @@ import { readEncryptedFile, writeEncryptedFile } from '@mainframe/secure-file'
 import {
   decodeBase64,
   encodeBase64,
-  base64Type,
   type base64, // eslint-disable-line import/named
 } from '@mainframe/utils-base64'
 import {
@@ -196,7 +195,7 @@ export default class Vault {
     userID: ID,
     settings: AppUserSettings,
   ): App {
-    let app = this.apps.getByBase64(base64Type(manifest.id))
+    let app = this.apps.getByMainframeID(manifest.id)
     if (app == null) {
       // Add app with user settings
       app = this.apps.add(manifest, userID, settings)

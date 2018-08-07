@@ -10,27 +10,14 @@ import {
 import type { KeyPair } from '@mainframe/utils-crypto'
 import ExtendableError from 'es6-error'
 import Validator from 'fastest-validator'
-import multibase from 'multibase'
-import multicodec from 'multicodec'
 
 import { MANIFEST_SCHEMA, MANIFEST_SCHEMA_MESSAGES } from './schema'
-import type {
-  ManifestID,
-  ManifestData,
-  ManifestValidationResult,
-} from './types'
+import type { ManifestData, ManifestValidationResult } from './types'
 
 export { parse as parseContentsURI } from 'uri-js'
 
 export * from './schema'
 export * from './types'
-
-export const manifestIDType = (value: any): ManifestID => (value: ManifestID)
-
-export const encodeID = (key: Buffer): ManifestID => {
-  const prefixed = multicodec.addPrefix('ed25519-pub', key)
-  return multibase.encode('base64url', prefixed).toString()
-}
 
 export class ManifestError extends ExtendableError {
   errors: ?Array<Object>

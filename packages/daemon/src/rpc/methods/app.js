@@ -51,7 +51,7 @@ type AppInstalled = {
 }
 
 const getContentsPath = (env: Environment, manifest: ManifestData): string => {
-  return getAppContentsPath(env, (manifest.id: string), manifest.version)
+  return getAppContentsPath(env, manifest.id, manifest.version)
 }
 
 const createClientSession = (

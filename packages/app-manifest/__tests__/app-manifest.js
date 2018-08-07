@@ -1,11 +1,10 @@
 /* global getFixture, getTempFile */
 
+import { encodeMainframeID } from '@mainframe/data-types'
 import { signContents } from '@mainframe/secure-file'
 import { createSignKeyPair } from '@mainframe/utils-crypto'
 
 import {
-  encodeID,
-  isValidID,
   ManifestError,
   validateManifest,
   parseManifestData,
@@ -16,9 +15,9 @@ import {
 
 describe('app-manifest', () => {
   const validManifest = {
-    id: encodeID(Buffer.from('id')),
+    id: encodeMainframeID(Buffer.from('id')),
     author: {
-      id: encodeID(Buffer.from('author')),
+      id: encodeMainframeID(Buffer.from('author')),
     },
     name: 'app',
     version: '0.2.0',
@@ -28,12 +27,6 @@ describe('app-manifest', () => {
       optional: {},
     },
   }
-
-  it('encodes and validates manifest IDs', () => {
-    expect(isValidID('test')).toBe(false)
-    const id = encodeID(Buffer.from('test'))
-    expect(isValidID(id)).toBe(true)
-  })
 
   it('ManifestError has an "errors" field', () => {
     const err = new ManifestError('Invalid test', [{ test: true }])
@@ -124,14 +117,14 @@ describe('app-manifest', () => {
         actual: 'bad id',
         expected: null,
         field: 'id',
-        message: "The value 'bad id' is not a valid manifest ID!",
+        message: "The value 'bad id' is not a valid Mainframe ID!",
         type: 'id',
       },
       {
         actual: 'bad id',
         expected: null,
         field: 'author.id',
-        message: "The value 'bad id' is not a valid manifest ID!",
+        message: "The value 'bad id' is not a valid Mainframe ID!",
         type: 'id',
       },
       {
@@ -201,7 +194,7 @@ describe('app-manifest', () => {
           actual: 'test',
           expected: null,
           field: 'id',
-          message: "The value 'test' is not a valid manifest ID!",
+          message: "The value 'test' is not a valid Mainframe ID!",
           type: 'id',
         },
         {

@@ -1,13 +1,12 @@
 // @flow
 
 import { PERMISSIONS_REQUIREMENTS_SCHEMA } from '@mainframe/app-permissions'
-import multibase from 'multibase'
-import multicodec from 'multicodec'
+import { isValidMainframeID } from '@mainframe/data-types'
 import semver from 'semver'
 import { parse as parseURI } from 'uri-js'
 
 export const INVALID_ID_ERROR =
-  "The value '{actual}' is not a valid manifest ID!"
+  "The value '{actual}' is not a valid Mainframe ID!"
 export const INVALID_SEMVER_ERROR = "The value '{actual}' is not valid semver!"
 export const INVALID_URN_ERROR = "The value '{actual}' is not a valid URN!"
 
@@ -15,16 +14,6 @@ export const MANIFEST_SCHEMA_MESSAGES = {
   id: INVALID_ID_ERROR,
   semver: INVALID_SEMVER_ERROR,
   urn: INVALID_URN_ERROR,
-}
-
-export const isValidID = (value: string): boolean => {
-  // The value must be encoded as base64url
-  if (value == null || multibase.isEncoded(value) !== 'base64url') {
-    return false
-  }
-  const decoded = multibase.decode(value)
-  // The buffer must contain an Ed25519 public key
-  return multicodec.getCodec(decoded) === 'ed25519-pub'
 }
 
 export const isValidSemver = (value: string): boolean => {
@@ -37,7 +26,7 @@ export const isValidURN = (value: string): boolean => {
 }
 
 export const idCheck = function(value: string) {
-  return isValidID(value) || this.makeError('id', null, value)
+  return isValidMainframeID(value) || this.makeError('id', null, value)
 }
 
 export const semverCheck = function(value: string) {

@@ -1,5 +1,6 @@
 // @flow
 
+import type { MainframeID } from '@mainframe/data-types'
 import type { KeyPair } from '@mainframe/utils-crypto'
 // eslint-disable-next-line import/named
 import { uniqueID, idType, type ID } from '@mainframe/utils-id'
@@ -7,49 +8,94 @@ import { uniqueID, idType, type ID } from '@mainframe/utils-id'
 import { mapObject } from '../utils'
 
 import type Identity from './Identity'
-import type Keychain from './Keychain'
 import AppIdentity, { type AppIdentitySerialized } from './AppIdentity'
 import DeveloperIdentity, {
   type DeveloperIdentitySerialized,
 } from './DeveloperIdentity'
 import UserIdentity, { type UserIdentitySerialized } from './UserIdentity'
+import OwnAppIdentity, { type OwnAppIdentitySerialized } from './OwnAppIdentity'
+import OwnDeveloperIdentity, {
+  type OwnDeveloperIdentitySerialized,
+} from './OwnDeveloperIdentity'
+import OwnUserIdentity, {
+  type OwnUserIdentitySerialized,
+} from './OwnUserIdentity'
 
 type IdentitiesRepositoryGroupSerialized = {
-  apps?: { [ID]: AppIdentitySerialized },
-  developers?: { [ID]: DeveloperIdentitySerialized },
-  users?: { [ID]: UserIdentitySerialized },
+  apps?: { [id: string]: AppIdentitySerialized },
+  developers?: { [id: string]: DeveloperIdentitySerialized },
+  users?: { [id: string]: UserIdentitySerialized },
+}
+
+type OwnIdentitiesRepositoryGroupSerialized = {
+  apps?: { [id: string]: OwnAppIdentitySerialized },
+  developers?: { [id: string]: OwnDeveloperIdentitySerialized },
+  users?: { [id: string]: OwnUserIdentitySerialized },
 }
 
 export type IdentitiesRepositorySerialized = {
-  own?: IdentitiesRepositoryGroupSerialized,
+  own?: OwnIdentitiesRepositoryGroupSerialized,
   other?: IdentitiesRepositoryGroupSerialized,
 }
 
 type IdentitiesRepositoryGroupParams = {
-  apps?: { [ID]: AppIdentity },
-  developers?: { [ID]: DeveloperIdentity },
-  users?: { [ID]: UserIdentity },
+  apps?: { [id: string]: AppIdentity },
+  developers?: { [id: string]: DeveloperIdentity },
+  users?: { [id: string]: UserIdentity },
+}
+
+type OwnIdentitiesRepositoryGroupParams = {
+  apps?: { [id: string]: OwnAppIdentity },
+  developers?: { [id: string]: OwnDeveloperIdentity },
+  users?: { [id: string]: OwnUserIdentity },
 }
 
 export type IdentitiesRepositoryParams = {
-  own?: IdentitiesRepositoryGroupParams,
+  own?: OwnIdentitiesRepositoryGroupParams,
   other?: IdentitiesRepositoryGroupParams,
 }
 
 type IdentitiesRepositoryGroup = {
-  apps: { [ID]: AppIdentity },
-  developers: { [ID]: DeveloperIdentity },
-  users: { [ID]: UserIdentity },
+  apps: { [id: string]: AppIdentity },
+  developers: { [id: string]: DeveloperIdentity },
+  users: { [id: string]: UserIdentity },
+}
+
+type OwnIdentitiesRepositoryGroup = {
+  apps: { [id: string]: OwnAppIdentity },
+  developers: { [id: string]: OwnDeveloperIdentity },
+  users: { [id: string]: OwnUserIdentity },
 }
 
 type IdentitiesData = {
-  own: IdentitiesRepositoryGroup,
+  own: OwnIdentitiesRepositoryGroup,
   other: IdentitiesRepositoryGroup,
 }
 
 type Domain = $Keys<IdentitiesRepositoryGroup>
 type Ownership = $Keys<IdentitiesData>
 type Reference = { domain: Domain, ownership: Ownership }
+
+const getReference = (identity: Identity): ?Reference => {
+  if (identity instanceof AppIdentity) {
+    return { domain: 'apps', ownership: 'other' }
+  }
+  if (identity instanceof DeveloperIdentity) {
+    return { domain: 'developers', ownership: 'other' }
+  }
+  if (identity instanceof UserIdentity) {
+    return { domain: 'users', ownership: 'other' }
+  }
+  if (identity instanceof OwnAppIdentity) {
+    return { domain: 'apps', ownership: 'own' }
+  }
+  if (identity instanceof OwnDeveloperIdentity) {
+    return { domain: 'developers', ownership: 'own' }
+  }
+  if (identity instanceof OwnUserIdentity) {
+    return { domain: 'users', ownership: 'own' }
+  }
+}
 
 const fromAppIdentity = mapObject(AppIdentity.toJSON)
 const fromDeveloperIdentity = mapObject(DeveloperIdentity.toJSON)
@@ -61,6 +107,18 @@ const fromGroup = group => ({
   developers: fromDeveloperIdentity(group.developers),
   // $FlowFixMe: mapping type
   users: fromUserIdentity(group.users),
+})
+
+const fromOwnAppIdentity = mapObject(OwnAppIdentity.toJSON)
+const fromOwnDeveloperIdentity = mapObject(OwnDeveloperIdentity.toJSON)
+const fromOwnUserIdentity = mapObject(OwnUserIdentity.toJSON)
+const fromOwnGroup = group => ({
+  // $FlowFixMe: mapping type
+  apps: fromOwnAppIdentity(group.apps),
+  // $FlowFixMe: mapping type
+  developers: fromOwnDeveloperIdentity(group.developers),
+  // $FlowFixMe: mapping type
+  users: fromOwnUserIdentity(group.users),
 })
 
 const toAppIdentity = mapObject(AppIdentity.fromJSON)
@@ -75,7 +133,25 @@ const toGroup = group => ({
   users: toUserIdentity(group.users),
 })
 
+const toOwnAppIdentity = mapObject(OwnAppIdentity.fromJSON)
+const toOwnDeveloperIdentity = mapObject(OwnDeveloperIdentity.fromJSON)
+const toOwnUserIdentity = mapObject(OwnUserIdentity.fromJSON)
+const toOwnGroup = group => ({
+  // $FlowFixMe: mapping type
+  apps: toOwnAppIdentity(group.apps),
+  // $FlowFixMe: mapping type
+  developers: toOwnDeveloperIdentity(group.developers),
+  // $FlowFixMe: mapping type
+  users: toOwnUserIdentity(group.users),
+})
+
 const createGroup = (params: IdentitiesRepositoryGroupParams = {}) => ({
+  apps: params.apps == null ? {} : params.apps,
+  developers: params.developers == null ? {} : params.developers,
+  users: params.users == null ? {} : params.users,
+})
+
+const createOwnGroup = (params: OwnIdentitiesRepositoryGroupParams = {}) => ({
   apps: params.apps == null ? {} : params.apps,
   developers: params.developers == null ? {} : params.developers,
   users: params.users == null ? {} : params.users,
@@ -87,7 +163,7 @@ export default class IdentitiesRepository {
   ): IdentitiesRepository => {
     return new IdentitiesRepository({
       // $FlowFixMe: mapper type
-      own: serialized.own ? toGroup(serialized.own) : {},
+      own: serialized.own ? toOwnGroup(serialized.own) : {},
       // $FlowFixMe: mapper type
       other: serialized.other ? toGroup(serialized.other) : {},
     })
@@ -97,30 +173,33 @@ export default class IdentitiesRepository {
     repository: IdentitiesRepository,
   ): IdentitiesRepositorySerialized => ({
     // $FlowFixMe: mapper type
-    own: fromGroup(repository.ownIdentities),
+    own: fromOwnGroup(repository.ownIdentities),
     // $FlowFixMe: mapper type
     other: fromGroup(repository.otherIdentities),
   })
 
+  _byMainframeID: { [mainframeID: string]: ID } = {}
   _identities: IdentitiesData
-  _refs: { [ID]: Reference } = {}
+  _refs: { [id: string]: Reference } = {}
 
   constructor(identities: IdentitiesRepositoryParams = {}) {
     this._identities = {
-      own: createGroup(identities.own),
+      own: createOwnGroup(identities.own),
       other: createGroup(identities.other),
     }
-    // Add references so an identity can be retrieved by ID lookup
+    // Add references so an identity can be retrieved by local ID or Mainframe ID lookup
     Object.keys(this._identities).forEach(ownership => {
       Object.keys(this._identities[ownership]).forEach(domain => {
         Object.keys(this._identities[ownership][domain]).forEach(id => {
-          this._refs[idType(id)] = { ownership, domain }
+          const identity = this._identities[ownership][domain][id]
+          this._byMainframeID[identity.id] = idType(id)
+          this._refs[id] = { ownership, domain }
         })
       })
     })
   }
 
-  get ownIdentities(): IdentitiesRepositoryGroup {
+  get ownIdentities(): OwnIdentitiesRepositoryGroup {
     return this._identities.own
   }
 
@@ -128,109 +207,125 @@ export default class IdentitiesRepository {
     return this._identities.other
   }
 
-  get ownApps(): { [ID]: AppIdentity } {
+  get ownApps(): { [id: string]: OwnAppIdentity } {
     return this._identities.own.apps
   }
 
-  get ownDevelopers(): { [ID]: DeveloperIdentity } {
+  get ownDevelopers(): { [id: string]: OwnDeveloperIdentity } {
     return this._identities.own.developers
   }
 
-  get ownUsers(): { [ID]: UserIdentity } {
+  get ownUsers(): { [id: string]: OwnUserIdentity } {
     return this._identities.own.users
   }
 
-  get otherApps(): { [ID]: AppIdentity } {
+  get otherApps(): { [id: string]: AppIdentity } {
     return this._identities.other.apps
   }
 
-  get otherDevelopers(): { [ID]: DeveloperIdentity } {
+  get otherDevelopers(): { [id: string]: DeveloperIdentity } {
     return this._identities.other.developers
   }
 
-  get otherUsers(): { [ID]: UserIdentity } {
+  get otherUsers(): { [id: string]: UserIdentity } {
     return this._identities.other.users
   }
 
-  addIdentity(ownership: Ownership, domain: Domain, identity: Identity): ID {
+  addIdentity(identity: Identity): ID {
+    const foundID = this._byMainframeID[identity.id]
+    if (foundID !== null) {
+      return foundID
+    }
+
+    const ref = getReference(identity)
+    if (ref == null) {
+      throw new Error('Unsupported identity')
+    }
+
     const id = uniqueID()
-    this._refs[id] = { ownership, domain }
+    this._byMainframeID[identity.id] = id
+    this._refs[id] = ref
     // $FlowFixMe: polymorphic type
-    this._identities[ownership][domain][id] = identity
+    this._identities[ref.ownership][ref.domain][id] = identity
     return id
   }
 
   createOwnApp(keyPair?: KeyPair) {
-    return this.addIdentity('own', 'apps', AppIdentity.create(keyPair))
+    return this.addIdentity(OwnAppIdentity.create(keyPair))
   }
 
   createOwnDeveloper(data: Object, keyPair?: KeyPair) {
-    return this.addIdentity(
-      'own',
-      'developers',
-      DeveloperIdentity.create(data, keyPair),
+    return this.addIdentity(OwnDeveloperIdentity.create(data, keyPair))
+  }
+
+  createOwnUser(data: Object, keyPair?: KeyPair) {
+    return this.addIdentity(OwnUserIdentity.create(keyPair, data))
+  }
+
+  createOtherApp(key: MainframeID | Buffer) {
+    return this.addIdentity(new AppIdentity(key))
+  }
+
+  createOtherDeveloper(key: MainframeID | Buffer) {
+    return this.addIdentity(new DeveloperIdentity(key))
+  }
+
+  createOtherUser(key: MainframeID | Buffer) {
+    return this.addIdentity(new UserIdentity(key))
+  }
+
+  getOwnApp(id: ID): ?OwnAppIdentity {
+    return this._identities.own.apps[id]
+  }
+
+  getOwnDeveloper(id: ID): ?OwnDeveloperIdentity {
+    return this._identities.own.developers[id]
+  }
+
+  getOwnUser(id: ID): ?OwnUserIdentity {
+    return this._identities.own.users[id]
+  }
+
+  getOtherApp(id: ID): ?AppIdentity {
+    return this._identities.other.apps[id]
+  }
+
+  getOtherDeveloper(id: ID): ?DeveloperIdentity {
+    return this._identities.other.developers[id]
+  }
+
+  getOtherUser(id: ID): ?UserIdentity {
+    return this._identities.other.users[id]
+  }
+
+  getApp(id: ID): ?(AppIdentity | OwnAppIdentity) {
+    return this.getOwnApp(id) || this.getOtherApp(id)
+  }
+
+  getDeveloper(id: ID): ?(DeveloperIdentity | OwnDeveloperIdentity) {
+    return this.getOwnDeveloper(id) || this.getOtherDeveloper(id)
+  }
+
+  getUser(id: ID): ?(UserIdentity | OwnUserIdentity) {
+    return this.getOwnUser(id) || this.getOtherUser(id)
+  }
+
+  getOwn(id: ID): ?(OwnAppIdentity | OwnDeveloperIdentity | OwnUserIdentity) {
+    return this.getOwnApp(id) || this.getOwnDeveloper(id) || this.getOwnUser(id)
+  }
+
+  getOther(id: ID): ?(AppIdentity | DeveloperIdentity | UserIdentity) {
+    return (
+      this.getOtherApp(id) ||
+      this.getOtherDeveloper(id) ||
+      this.getOtherUser(id)
     )
   }
 
-  createOwnUser(data: Object, keychain?: Keychain) {
-    return this.addIdentity('own', 'users', UserIdentity.create(data, keychain))
-  }
-
-  createOtherApp(keyPair?: KeyPair) {
-    return this.addIdentity('other', 'apps', AppIdentity.create(keyPair))
-  }
-
-  createOtherDeveloper(keyPair?: KeyPair) {
-    return this.addIdentity(
-      'other',
-      'developers',
-      DeveloperIdentity.create(keyPair),
-    )
-  }
-
-  createOtherUser(keychain?: Keychain) {
-    return this.addIdentity('other', 'users', UserIdentity.create(keychain))
-  }
-
-  getOwnApp(id?: ID): ?AppIdentity {
-    return id == null
-      ? // $FlowFixMe: return type
-        Object.values(this._identities.own.apps)[0]
-      : this._identities.own.apps[id]
-  }
-
-  getOwnDeveloper(id?: ID): ?DeveloperIdentity {
-    return id == null
-      ? // $FlowFixMe: return type
-        Object.values(this._identities.own.developers)[0]
-      : this._identities.own.developers[id]
-  }
-
-  getOwnUser(id?: ID): ?UserIdentity {
-    return id == null
-      ? // $FlowFixMe: return type
-        Object.values(this._identities.own.users)[0]
-      : this._identities.own.users[id]
-  }
-
-  getOtherApp(id?: ID): ?AppIdentity {
-    return id == null
-      ? // $FlowFixMe: return type
-        Object.values(this._identities.other.apps)[0]
-      : this._identities.other.apps[id]
-  }
-
-  getOtherDeveloper(id?: ID): ?DeveloperIdentity {
-    return id == null
-      ? // $FlowFixMe: return type
-        Object.values(this._identities.other.developers)[0]
-      : this._identities.other.developers[id]
-  }
-
-  getOtherUser(id?: ID): ?UserIdentity {
-    return id == null
-      ? // $FlowFixMe: return type
-        Object.values(this._identities.other.users)[0]
-      : this._identities.other.users[id]
+  getIdentity(id: ID): ?Identity {
+    const ref = this._refs[id]
+    if (ref != null) {
+      return this._identities[ref.ownership][ref.domain][id]
+    }
   }
 }
