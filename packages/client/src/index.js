@@ -135,6 +135,32 @@ export default class MainframeClient {
     return this._rpc.request('app_setPermission', { sessID, key, value })
   }
 
+  // Own apps
+
+  createApp(params: {
+    contentsPath: string,
+    developerID?: ?ID,
+    name?: ?string,
+    version?: ?string,
+  }): Promise<{ id: ID }> {
+    return this._rpc.request('app_create', params)
+  }
+
+  publishAppContents(params: {
+    appID: ID,
+    version?: ?string,
+  }): Promise<{ contentsURI: string }> {
+    return this._rpc.request('app_publishContents', params)
+  }
+
+  writeAppManifest(params: {
+    appID: ID,
+    path: string,
+    version?: ?string,
+  }): Promise<void> {
+    return this._rpc.request('app_writeManifest', params)
+  }
+
   // Infrastructure interactions
 
   requestWeb3(sessID: ID, method: string, params?: any): Promise<any> {

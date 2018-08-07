@@ -4,9 +4,9 @@ import {
   readSignedFile,
   verifyContents,
   writeSignedFile,
-  type SecureFile, // eslint-disable-line import/named
   type SignedContents, // eslint-disable-line import/named
 } from '@mainframe/secure-file'
+import { decodeBase64 } from '@mainframe/utils-base64'
 import type { KeyPair } from '@mainframe/utils-crypto'
 import ExtendableError from 'es6-error'
 import Validator from 'fastest-validator'
@@ -59,19 +59,21 @@ export const parseManifestData = (input: ?Buffer): ManifestData => {
 
 export const verifyManifest = (
   contents: SignedContents,
-  keys?: Array<Buffer>,
+  useKeys?: Array<Buffer>,
 ): ManifestData => {
-  return parseManifestData(verifyContents(contents, keys))
+  return parseManifestData(verifyContents(contents, useKeys))
 }
 
 export const readManifestFile = async (
   path: string,
-  keys?: Array<Buffer>,
-): Promise<{ data: ManifestData, file: SecureFile<SignedContents> }> => {
-  const file = await readSignedFile(path, keys)
-  const data = parseManifestData(file.opened)
-  // $FlowFixMe: SecureFile type
-  return { data, file }
+  useKeys?: Array<Buffer>,
+): Promise<{ data: ManifestData, keys: Array<Buffer> }> => {
+  const { file, opened } = await readSignedFile(path, useKeys)
+  const keys = useKeys || file.contents.signed.keys.map(decodeBase64)
+  return {
+    data: parseManifestData(opened),
+    keys,
+  }
 }
 
 export const writeManifestFile = async (

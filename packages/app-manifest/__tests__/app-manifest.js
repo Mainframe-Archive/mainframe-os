@@ -283,7 +283,9 @@ describe('app-manifest', () => {
     await writeManifestFile(path, validManifest, [kp1, kp2])
     const read = await readManifestFile(path)
     expect(read.data).toEqual(validManifest)
-    expect(read.file).toEqual(expect.any(Object))
+    expect(read.keys).toHaveLength(2)
+    expect(kp1.publicKey.equals(read.keys[0])).toBe(true)
+    expect(kp2.publicKey.equals(read.keys[1])).toBe(true)
   })
 
   it('writeSignedFile() throws an error if the manifest is not valid', () => {

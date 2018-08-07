@@ -1,7 +1,11 @@
 // @flow
 
 /* eslint-disable import/named */
-import { parseContentsURI, type ManifestData } from '@mainframe/app-manifest'
+import {
+  SEMVER_SCHEMA,
+  parseContentsURI,
+  type ManifestData,
+} from '@mainframe/app-manifest'
 import {
   PERMISSION_KEY_SCHEMA,
   PERMISSION_GRANT_SCHEMA,
@@ -16,7 +20,8 @@ import { idType, type ID } from '@mainframe/utils-id'
 /* eslint-enable import/named */
 import { ensureDir } from 'fs-extra'
 
-import type { AppUserSettings, SessionData } from '../../app/App'
+import type { AppUserSettings, SessionData } from '../../app/AbstractApp'
+import OwnApp from '../../app/OwnApp'
 
 import { clientError, sessionError } from '../errors'
 import type RequestContext from '../RequestContext'
@@ -60,7 +65,7 @@ const createClientSession = (
   userID: ID,
   session: SessionData,
 ): ClientSession => {
-  const app = ctx.openVault.apps.getByID(appID)
+  const app = ctx.openVault.apps.getAnyByID(appID)
   if (app == null) {
     throw clientError('Invalid appID')
   }
@@ -68,6 +73,12 @@ const createClientSession = (
   if (user == null) {
     throw clientError('Invalid userID')
   }
+
+  const contentsPath =
+    app instanceof OwnApp
+      ? app.contentsPath
+      : getContentsPath(ctx.env, app.manifest)
+
   return {
     user: {
       id: userID,
@@ -79,8 +90,10 @@ const createClientSession = (
     },
     app: {
       id: appID,
+      // TODO: what to provide for OwnApp? what is client need?
+      // $FlowFixMe: temporarily ignore
       manifest: app.manifest,
-      contentsPath: getContentsPath(ctx.env, app.manifest),
+      contentsPath,
     },
   }
 }
@@ -245,5 +258,72 @@ export const setPermission = {
       app.setPermission(session.userID, params.key, params.value)
       await ctx.openVault.save()
     }
+  },
+}
+
+export const create = {
+  params: {
+    contentsPath: 'string',
+    developerID: { ...localIdParam, optional: true },
+    name: 'string',
+    version: { ...SEMVER_SCHEMA, optional: true },
+  },
+  handler: async (
+    ctx: RequestContext,
+    params: {
+      contentsPath: string,
+      developerID?: ?ID,
+      name?: ?string,
+      version?: ?string,
+    },
+  ): Promise<{ id: ID }> => {
+    const app = ctx.openVault.createApp(params)
+    await ctx.openVault.save()
+    return { id: app.id }
+  },
+}
+
+export const publishContents = {
+  params: {
+    appID: localIdParam,
+    version: { ...SEMVER_SCHEMA, optional: true },
+  },
+  handler: async (
+    ctx: RequestContext,
+    params: { appID: ID, version?: ?string },
+  ): Promise<{ contentsURI: string }> => {
+    const app = ctx.openVault.apps.getOwnByID(params.appID)
+    if (app == null) {
+      throw new Error('App not found')
+    }
+
+    const hash = await ctx.bzz.uploadDirectoryTar(app.contentsPath)
+    const contentsURI = `urn:bzz:${hash}`
+    app.setContentsURI(contentsURI, params.version)
+    await ctx.openVault.save()
+
+    return { contentsURI }
+  },
+}
+
+export const writeManifest = {
+  params: {
+    appID: localIdParam,
+    path: 'string',
+    version: { ...SEMVER_SCHEMA, optional: true },
+  },
+  handler: async (
+    ctx: RequestContext,
+    params: {
+      appID: ID,
+      path: string,
+      version?: ?string,
+    },
+  ): Promise<void> => {
+    await ctx.openVault.writeAppManifest(
+      params.appID,
+      params.path,
+      params.version,
+    )
   },
 }

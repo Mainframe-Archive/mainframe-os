@@ -13,6 +13,7 @@
   "dependencies": {
     "@mainframe/data-types": "^0.1.0",
     "@mainframe/secure-file": "^0.1.0",
+    "@mainframe/utils-base64": "^0.1.1",
     "es6-error": "^4.1.1",
     "fastest-validator": "^0.6.10",
     "semver": "^5.5.0",

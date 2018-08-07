@@ -111,7 +111,7 @@ Verifies the provided file path matches a signed manifest and returns its data. 
 1.  `path: string`
 1.  `keys?: Array<Buffer>`: optional list of public keys to use to verify the signatures rather than the ones provided in the file.
 
-**Returns** `Promise<{ data: ManifestData, file: SecureFile<SignedContents> }>`, see the relevant docs for the [`SecureFile`](https://github.com/MainframeHQ/js-tools/tree/master/packages/secure-file#securefile) and [`SignedContents`](https://github.com/MainframeHQ/js-tools/tree/master/packages/secure-file#signedcontents) types.
+**Returns** `Promise<{ data: ManifestData, keys: Array<Buffer> }>`, `keys` being the public keys the manifest is signed with.
 
 ### writeManifestFile()
 

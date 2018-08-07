@@ -16,11 +16,14 @@ export const MANIFEST_SCHEMA_MESSAGES = {
   urn: INVALID_URN_ERROR,
 }
 
-export const isValidSemver = (value: string): boolean => {
-  return semver.valid(value) != null
+export const isValidSemver = (value: ?string): boolean => {
+  return value != null && semver.valid(value) != null
 }
 
-export const isValidURN = (value: string): boolean => {
+export const isValidURN = (value: ?string): boolean => {
+  if (value == null) {
+    return false
+  }
   const parsed = parseURI(value)
   return parsed.scheme === 'urn' && parsed.error == null
 }

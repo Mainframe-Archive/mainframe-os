@@ -21,11 +21,16 @@
 - `client:setup`: ensure the environment has a default vault setup
 - `vault:create`: create a vault
 - `vault:delete`: delete a vault
+- `identity:create`: create an identity
+- `identity:list`: list identities
+- `app:create`: create an app
+- `app:publishContents`: publish the app contents to Swarm
+- `app:writeManifest`: writes the app manifest
 
 ## Environment setup
 
 1.  Run `env:create` to create a new environment, set it as default unless you want to provide it explicitly in the next commands
-1.  Run `daemon:setup` to configure the path to the `daemon` CLI, ex `./bin/run daemon:setup --bin-path=/path/to/js-mainframe/packages/daemon/bin/run`
+1.  Run `daemon:setup` to configure the path to the `daemon` CLI, ex `./bin/run daemon:setup --bin-path=../daemon/bin/run`
 1.  Run `daemon:start` to start the daemon, use `DEBUG="mainframe:*" ./bin/run daemon:start` to see the logs
 1.  Run `client:setup` to create a new vault and configure it to be used by default
 1.  Run `client:repl` to start interacting with the daemon

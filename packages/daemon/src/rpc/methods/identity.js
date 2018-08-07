@@ -1,11 +1,11 @@
 // @flow
 // eslint-disable-next-line import/named
-import { idType, type ID } from '@mainframe/utils-id'
+import { type ID } from '@mainframe/utils-id'
 
 import type RequestContext from '../RequestContext'
 
-type OwnId = {
-  id: ID,
+type OwnIdentity = {
+  id: string,
   data: Object,
 }
 
@@ -37,22 +37,22 @@ export const createUser = {
   },
 }
 
-export const getOwnUsers = (ctx: RequestContext): { users: Array<OwnId> } => {
+export const getOwnUsers = (
+  ctx: RequestContext,
+): { users: Array<OwnIdentity> } => {
   const { ownUsers } = ctx.openVault.identities
   const users = Object.keys(ownUsers).map(id => {
-    const uID = idType(id)
-    return { id: uID, data: ownUsers[uID].data }
+    return { id, data: ownUsers[id].data }
   })
   return { users }
 }
 
 export const getOwnDevelopers = (
   ctx: RequestContext,
-): { developers: Array<OwnId> } => {
+): { developers: Array<OwnIdentity> } => {
   const { ownDevelopers } = ctx.openVault.identities
   const developers = Object.keys(ownDevelopers).map(id => {
-    const uID = idType(id)
-    return { id: uID, data: ownDevelopers[uID].data }
+    return { id, data: ownDevelopers[id].data }
   })
   return { developers }
 }

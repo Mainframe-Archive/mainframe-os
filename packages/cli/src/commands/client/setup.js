@@ -4,15 +4,14 @@ import { VaultConfig } from '@mainframe/config'
 import { prompt } from 'inquirer'
 
 import Command from '../../Command'
-import { createVault } from '../../vault'
 
 export default class SetupCommand extends Command {
   static description = 'Setup the client'
   static flags = Command.flags
 
-  async createVault(cfg: VaultConfig) {
+  async createDefaultVault(cfg: VaultConfig) {
     const path = cfg.createVaultPath()
-    await createVault(this, cfg, path, true)
+    await this.createVault(cfg, path, true)
     this.log(`New vault created at ${path}`)
   }
 
@@ -37,7 +36,7 @@ export default class SetupCommand extends Command {
         },
       ])
       if (create) {
-        this.createVault(cfg)
+        this.createDefaultVault(cfg)
       }
       return
     }
@@ -60,7 +59,7 @@ export default class SetupCommand extends Command {
 
     if (choice === true) {
       // Create new vault
-      this.createVault(cfg)
+      this.createDefaultVault(cfg)
     } else {
       // Set choice as default vault
       cfg.defaultVault = choice

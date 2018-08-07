@@ -2,11 +2,10 @@
 
 import type { PermissionsGrants } from '@mainframe/app-permissions'
 import type { ID } from '@mainframe/utils-id'
-import fs from 'fs-extra'
 import React, { createRef, Component, type ElementRef } from 'react'
 import { View, StyleSheet, Text } from 'react-native-web'
 
-import { client } from '../electronIpc.js'
+import { client } from '../electronIpc'
 import Button from '../UIComponents/Button'
 import ModalView from '../UIComponents/ModalView'
 import PermissionsView, { type PermissionOptions } from './PermissionsView'
@@ -60,17 +59,16 @@ export default class AppInstallModal extends Component<Props, State> {
     this.handleSelectedFiles([...this.fileInput.current.files])
   }
 
-  handleSelectedFiles = (files: Array<Object>) => {
+  handleSelectedFiles = async (files: Array<Object>) => {
     if (files.length) {
-      const file = files[0]
       try {
-        const manifest = fs.readJsonSync(file.path)
+        const manifest = await client.readManifest(files[0].path)
         if (
-          typeof manifest.name === 'string' &&
-          typeof manifest.permissions === 'object'
+          typeof manifest.data.name === 'string' &&
+          typeof manifest.data.permissions === 'object'
         ) {
           this.setState({
-            manifest,
+            manifest: manifest.data,
             installStep: 'identity',
           })
         } else {

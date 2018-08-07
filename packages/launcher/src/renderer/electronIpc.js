@@ -56,6 +56,7 @@ export const client = {
   removeApp: (appID: ID) => callMainClient('removeApp', [appID]),
   openApp: (appID: ID, userID: ID) =>
     callMainClient('openApp', [appID, userID]),
+  readManifest: (path: string) => callMainProcess('readManifest', [path]),
 
   // Identity
   createUserIdentity: (identity: Object) =>
