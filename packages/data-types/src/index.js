@@ -12,6 +12,9 @@ export opaque type MainframeID: string = string
 export const mainframeIDType = (value: any): MainframeID => (value: MainframeID)
 
 export const parseMainframeID = (value: string): false | Object => {
+  if (value == null) {
+    return false
+  }
   const parsed = parseURI(value)
   return parsed.error == null &&
     parsed.scheme === 'urn' &&

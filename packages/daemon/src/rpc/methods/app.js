@@ -16,7 +16,8 @@ import { idType, type ID } from '@mainframe/utils-id'
 /* eslint-enable import/named */
 import { ensureDir } from 'fs-extra'
 
-import type { AppUserSettings, SessionData } from '../../app/App'
+import type { AppUserSettings, SessionData } from '../../app/AbstractApp'
+import OwnApp from '../../app/OwnApp'
 
 import { clientError, sessionError } from '../errors'
 import type RequestContext from '../RequestContext'
@@ -60,7 +61,7 @@ const createClientSession = (
   userID: ID,
   session: SessionData,
 ): ClientSession => {
-  const app = ctx.openVault.apps.getByID(appID)
+  const app = ctx.openVault.apps.getAnyByID(appID)
   if (app == null) {
     throw clientError('Invalid appID')
   }
@@ -68,6 +69,12 @@ const createClientSession = (
   if (user == null) {
     throw clientError('Invalid userID')
   }
+
+  const contentsPath =
+    app instanceof OwnApp
+      ? app.contentsPath
+      : getContentsPath(ctx.env, app.manifest)
+
   return {
     user: {
       id: userID,
@@ -79,8 +86,10 @@ const createClientSession = (
     },
     app: {
       id: appID,
+      // TODO: what to provide for OwnApp? what is client need?
+      // $FlowFixMe: temporarily ignore
       manifest: app.manifest,
-      contentsPath: getContentsPath(ctx.env, app.manifest),
+      contentsPath,
     },
   }
 }

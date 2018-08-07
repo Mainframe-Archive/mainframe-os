@@ -1,6 +1,7 @@
 // @flow
 
-import type { ManifestData } from '@mainframe/app-manifest'
+// eslint-disable-next-line import/named
+import { isValidSemver, type ManifestData } from '@mainframe/app-manifest'
 import { readEncryptedFile, writeEncryptedFile } from '@mainframe/secure-file'
 import {
   decodeBase64,
@@ -15,19 +16,20 @@ import {
   createSecretBoxKeyFromPassword,
 } from '@mainframe/utils-crypto'
 // eslint-disable-next-line import/named
-import { type ID } from '@mainframe/utils-id'
+import { uniqueID, type ID } from '@mainframe/utils-id'
 
-import {
-  type default as App,
-  type AppUserSettings, // eslint-disable-line import/named
-  type SessionData,
-} from '../app/App'
+import type { AppUserSettings, SessionData } from '../app/AbstractApp'
+import type App from '../app/App'
 import AppsRepository, {
-  type AppsRepositorySerialized, // eslint-disable-line import/named
+  type AppsRepositorySerialized,
 } from '../app/AppsRepository'
+import {
+  type default as OwnApp,
+  type AppVersionPublicationState,
+} from '../app/OwnApp'
 import type Session from '../app/Session'
 import IdentitiesRepository, {
-  type IdentitiesRepositorySerialized, // eslint-disable-line import/named
+  type IdentitiesRepositorySerialized,
 } from '../identity/IdentitiesRepository'
 
 type VaultKDF = {
@@ -178,7 +180,7 @@ export default class Vault {
     return this._data.settings
   }
 
-  // App
+  // App lifecycle
 
   closeApp(sessID: ID): void {
     delete this._sessions[sessID]
@@ -210,10 +212,93 @@ export default class Vault {
     this.apps.remove(appID)
   }
 
-  // Session
-
   getSession(id: ID): ?Session {
     return this._sessions[id]
+  }
+
+  // App creation and management
+
+  createApp(
+    contentsPath: string,
+    params: {
+      developerID?: ?ID,
+      name?: ?string,
+      version?: ?string,
+    } = {},
+  ): OwnApp {
+    const appIdentity = this.identities.getOwnApp(
+      this.identities.createOwnApp(),
+    )
+    if (appIdentity == null) {
+      throw new Error('Failed to create app identity')
+    }
+
+    const version =
+      params.version == null || !isValidSemver(params.version)
+        ? '1.0.0'
+        : params.version
+    return this.apps.create({
+      appID: uniqueID(),
+      data: {
+        contentsPath,
+        developerID: params.developerID || this.identities.createOwnDeveloper(),
+        mainframeID: appIdentity.id,
+        name: params.name || 'Untitled',
+        version,
+      },
+      versions: {
+        [version]: {
+          data: {},
+          publicationState: 'unpublished',
+        },
+      },
+    })
+  }
+
+  setAppContentsURI(appID: ID, contentsURI: string, version?: ?string): void {
+    const app = this.apps.getOwnByID(appID)
+    if (app == null) {
+      throw new Error('App not found')
+    }
+    app.setVersionContentURI(contentsURI, version)
+  }
+
+  setAppPublicationState(
+    appID: ID,
+    publicationState: AppVersionPublicationState,
+    version?: ?string,
+  ): void {
+    const app = this.apps.getOwnByID(appID)
+    if (app == null) {
+      throw new Error('App not found')
+    }
+    app.setVersionPublicationState(publicationState, version)
+  }
+
+  createAppManifest(appID: ID, toPath: string, version?: ?string) {
+    const app = this.apps.getOwnByID(appID)
+    if (app == null) {
+      throw new Error('App not found')
+    }
+
+    const appIdentity = this.identities.getByMainframeID(app.mainframeID)
+    if (appIdentity == null) {
+      throw new Error('App identity not found')
+    }
+
+    const versionData = app.getVersionData(version)
+    if (versionData == null) {
+      throw new Error('Invalid app version')
+    }
+
+    if (versionData.publicationState === 'unpublished') {
+      throw new Error(
+        'App contents must be published before manifest can be created',
+      )
+    }
+    if (versionData.publicationState === 'manifest_published') {
+      throw new Error('Manifest has already been published for this version')
+    }
   }
 
   // Settings

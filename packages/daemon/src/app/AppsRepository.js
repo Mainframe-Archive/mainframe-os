@@ -13,12 +13,9 @@ import { uniqueID, idType, type ID } from '@mainframe/utils-id'
 
 import { mapObject } from '../utils'
 
-import App, {
-  type AppSerialized,
-  type AppUserSettings,
-  type SessionData,
-} from './App'
-import OwnApp, { type OwnAppSerialized } from './OwnApp'
+import type { AppUserSettings, SessionData } from './AbstractApp'
+import App, { type AppSerialized } from './App'
+import OwnApp, { type OwnAppParams, type OwnAppSerialized } from './OwnApp'
 
 export type AppUpdate = {
   app: App,
@@ -83,9 +80,9 @@ export default class AppsRepository {
   })
 
   _apps: Apps
-  _byMainframeID: { [mainframeID: string]: ID }
   _updates: AppUpdates
   _ownApps: OwnApps
+  _byMainframeID: { [mainframeID: string]: ID }
 
   constructor(params: AppsRepositoryParams = {}) {
     this._apps = params.apps || {}
@@ -97,6 +94,8 @@ export default class AppsRepository {
     this._updates = params.updates || {}
     this._ownApps = params.ownApps || {}
   }
+
+  // Getters
 
   get apps(): Apps {
     return this._apps
@@ -111,7 +110,7 @@ export default class AppsRepository {
   }
 
   getByID(id: ID): ?App {
-    return this._apps[id]
+    return this._apps[id] || this._ownApps[id]
   }
 
   getByMainframeID(mainframeID: MainframeID): ?App {
@@ -124,6 +123,23 @@ export default class AppsRepository {
   getID(mainframeID: MainframeID): ?ID {
     return this._byMainframeID[mainframeID]
   }
+
+  getOwnByID(id: ID): ?OwnApp {
+    return this._ownApps[id]
+  }
+
+  getOwnByMainframeID(mainframeID: MainframeID): ?OwnApp {
+    const id = this._byMainframeID[mainframeID]
+    if (id != null) {
+      return this._ownApps[id]
+    }
+  }
+
+  getAnyByID(id: ID): ?(App | OwnApp) {
+    return this.getByID(id) || this.getOwnByID(id)
+  }
+
+  // App lifecycle
 
   add(manifest: ManifestData, userID: ID, settings: AppUserSettings): App {
     if (validateManifest(manifest) === 'valid') {
@@ -149,7 +165,7 @@ export default class AppsRepository {
   }
 
   setUserSettings(appID: ID, userID: ID, settings: AppUserSettings): void {
-    const app = this.getByID(appID)
+    const app = this.getAnyByID(appID)
     if (app == null) {
       throw new Error('Invalid app')
     }
@@ -162,7 +178,7 @@ export default class AppsRepository {
     key: PermissionKey,
     value: PermissionGrant,
   ): void {
-    const app = this.getByID(appID)
+    const app = this.getAnyByID(appID)
     if (app == null) {
       throw new Error('Invalid app')
     }
@@ -170,7 +186,7 @@ export default class AppsRepository {
   }
 
   removeUser(appID: ID, userID: ID): void {
-    const app = this.getByID(appID)
+    const app = this.getAnyByID(appID)
     if (app == null) {
       throw new Error('Invalid app')
     }
@@ -178,6 +194,7 @@ export default class AppsRepository {
   }
 
   remove(id: ID): void {
+    // TODO: support removing own apps - might be other method/flag to avoid accidents?
     const app = this.getByID(id)
     if (app != null) {
       // TODO: handle "clean" option to remove the app contents
@@ -187,12 +204,14 @@ export default class AppsRepository {
   }
 
   createSession(appID: ID, userID: ID): SessionData {
-    const app = this.getByID(appID)
+    const app = this.getAnyByID(appID)
     if (app == null) {
       throw new Error('Invalid app')
     }
     return app.createSession(userID)
   }
+
+  // Updates
 
   hasUpdate(id: ID): boolean {
     return this._updates[id] !== null
@@ -240,5 +259,14 @@ export default class AppsRepository {
 
     this._updates[appID] = update
     return update
+  }
+
+  // Own apps
+
+  create(params: OwnAppParams): OwnApp {
+    const app = new OwnApp(params)
+    this._byMainframeID[params.data.mainframeID] = params.appID
+    this._ownApps[params.appID] = app
+    return app
   }
 }

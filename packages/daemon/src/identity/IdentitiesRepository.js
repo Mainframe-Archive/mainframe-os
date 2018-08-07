@@ -199,6 +199,8 @@ export default class IdentitiesRepository {
     })
   }
 
+  // Getters
+
   get ownIdentities(): OwnIdentitiesRepositoryGroup {
     return this._identities.own
   }
@@ -229,49 +231,6 @@ export default class IdentitiesRepository {
 
   get otherUsers(): { [id: string]: UserIdentity } {
     return this._identities.other.users
-  }
-
-  addIdentity(identity: Identity): ID {
-    const foundID = this._byMainframeID[identity.id]
-    if (foundID !== null) {
-      return foundID
-    }
-
-    const ref = getReference(identity)
-    if (ref == null) {
-      throw new Error('Unsupported identity')
-    }
-
-    const id = uniqueID()
-    this._byMainframeID[identity.id] = id
-    this._refs[id] = ref
-    // $FlowFixMe: polymorphic type
-    this._identities[ref.ownership][ref.domain][id] = identity
-    return id
-  }
-
-  createOwnApp(keyPair?: KeyPair) {
-    return this.addIdentity(OwnAppIdentity.create(keyPair))
-  }
-
-  createOwnDeveloper(data: Object, keyPair?: KeyPair) {
-    return this.addIdentity(OwnDeveloperIdentity.create(data, keyPair))
-  }
-
-  createOwnUser(data: Object, keyPair?: KeyPair) {
-    return this.addIdentity(OwnUserIdentity.create(keyPair, data))
-  }
-
-  createOtherApp(key: MainframeID | Buffer) {
-    return this.addIdentity(new AppIdentity(key))
-  }
-
-  createOtherDeveloper(key: MainframeID | Buffer) {
-    return this.addIdentity(new DeveloperIdentity(key))
-  }
-
-  createOtherUser(key: MainframeID | Buffer) {
-    return this.addIdentity(new UserIdentity(key))
   }
 
   getOwnApp(id: ID): ?OwnAppIdentity {
@@ -327,5 +286,61 @@ export default class IdentitiesRepository {
     if (ref != null) {
       return this._identities[ref.ownership][ref.domain][id]
     }
+  }
+
+  getID(mainframeID: MainframeID): ?ID {
+    return this._byMainframeID[mainframeID]
+  }
+
+  getByMainframeID(mainframeID: MainframeID): ?Identity {
+    const id = this._byMainframeID[mainframeID]
+    if (id != null) {
+      return this.getIdentity(id)
+    }
+  }
+
+  // Setters
+
+  addIdentity(identity: Identity): ID {
+    const foundID = this._byMainframeID[identity.id]
+    if (foundID != null) {
+      return foundID
+    }
+
+    const ref = getReference(identity)
+    if (ref == null) {
+      throw new Error('Unsupported identity')
+    }
+
+    const id = uniqueID()
+    this._byMainframeID[identity.id] = id
+    this._refs[id] = ref
+    // $FlowFixMe: polymorphic type
+    this._identities[ref.ownership][ref.domain][id] = identity
+    return id
+  }
+
+  createOwnApp(keyPair?: KeyPair) {
+    return this.addIdentity(OwnAppIdentity.create(keyPair))
+  }
+
+  createOwnDeveloper(data: Object = {}, keyPair?: KeyPair) {
+    return this.addIdentity(OwnDeveloperIdentity.create(keyPair, data))
+  }
+
+  createOwnUser(data: Object = {}, keyPair?: KeyPair) {
+    return this.addIdentity(OwnUserIdentity.create(keyPair, data))
+  }
+
+  createOtherApp(key: MainframeID | Buffer) {
+    return this.addIdentity(new AppIdentity(key))
+  }
+
+  createOtherDeveloper(key: MainframeID | Buffer) {
+    return this.addIdentity(new DeveloperIdentity(key))
+  }
+
+  createOtherUser(key: MainframeID | Buffer) {
+    return this.addIdentity(new UserIdentity(key))
   }
 }
