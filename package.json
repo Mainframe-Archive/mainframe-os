@@ -27,7 +27,6 @@
       "**/form-data",
       "**/fs-extra",
       "**/multibase",
-      "**/multicodec",
       "**/nanoid",
       "**/node-fetch",
       "**/oboe",

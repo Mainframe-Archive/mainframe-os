@@ -92,31 +92,21 @@ export default class OwnApp extends AbstractApp {
 
   // Setters
 
-  setVersionContentURI(contentsURI: string, version?: ?string) {
+  setContentsURI(contentsURI: string, version?: ?string) {
     const v = version || this._data.version
     const versionData = this._versions[v]
     if (versionData == null) {
       throw new Error('Invalid version')
+    }
+    if (versionData.publicationState !== 'unpublished') {
+      throw new Error('Invalid publication state')
     }
 
     if (versionData.data == null) {
       versionData.data = {}
     }
     versionData.data.contentsURI = contentsURI
-    this._versions[v] = versionData
-  }
-
-  setVersionPublicationState(
-    state: AppVersionPublicationState,
-    version?: ?string,
-  ) {
-    const v = version || this._data.version
-    const versionData = this._versions[v]
-    if (versionData == null) {
-      throw new Error('Invalid version')
-    }
-
-    versionData.publicationState = state
+    versionData.publicationState = 'contents_published'
     this._versions[v] = versionData
   }
 

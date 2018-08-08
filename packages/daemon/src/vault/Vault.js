@@ -1,7 +1,11 @@
 // @flow
 
 // eslint-disable-next-line import/named
-import { isValidSemver, type ManifestData } from '@mainframe/app-manifest'
+import {
+  isValidSemver,
+  writeManifestFile,
+  type ManifestData, // eslint-disable-line import/named
+} from '@mainframe/app-manifest'
 import { readEncryptedFile, writeEncryptedFile } from '@mainframe/secure-file'
 import {
   decodeBase64,
@@ -23,10 +27,7 @@ import type App from '../app/App'
 import AppsRepository, {
   type AppsRepositorySerialized,
 } from '../app/AppsRepository'
-import {
-  type default as OwnApp,
-  type AppVersionPublicationState,
-} from '../app/OwnApp'
+import type OwnApp from '../app/OwnApp'
 import type Session from '../app/Session'
 import IdentitiesRepository, {
   type IdentitiesRepositorySerialized,
@@ -218,14 +219,12 @@ export default class Vault {
 
   // App creation and management
 
-  createApp(
+  createApp(params: {
     contentsPath: string,
-    params: {
-      developerID?: ?ID,
-      name?: ?string,
-      version?: ?string,
-    } = {},
-  ): OwnApp {
+    developerID?: ?ID,
+    name?: ?string,
+    version?: ?string,
+  }): OwnApp {
     const appIdentity = this.identities.getOwnApp(
       this.identities.createOwnApp(),
     )
@@ -240,7 +239,7 @@ export default class Vault {
     return this.apps.create({
       appID: uniqueID(),
       data: {
-        contentsPath,
+        contentsPath: params.contentsPath,
         developerID: params.developerID || this.identities.createOwnDeveloper(),
         mainframeID: appIdentity.id,
         name: params.name || 'Untitled',
@@ -260,30 +259,33 @@ export default class Vault {
     if (app == null) {
       throw new Error('App not found')
     }
-    app.setVersionContentURI(contentsURI, version)
+    app.setContentsURI(contentsURI, version)
   }
 
-  setAppPublicationState(
+  // TODO: once directory upload is supported in erebos, add method to upload version using contentsPath and upadte contentsURI and publicationState
+
+  async writeAppManifest(
     appID: ID,
-    publicationState: AppVersionPublicationState,
+    toPath: string,
     version?: ?string,
-  ): void {
-    const app = this.apps.getOwnByID(appID)
-    if (app == null) {
-      throw new Error('App not found')
-    }
-    app.setVersionPublicationState(publicationState, version)
-  }
-
-  createAppManifest(appID: ID, toPath: string, version?: ?string) {
+  ): Promise<void> {
     const app = this.apps.getOwnByID(appID)
     if (app == null) {
       throw new Error('App not found')
     }
 
-    const appIdentity = this.identities.getByMainframeID(app.mainframeID)
+    const appIdentityID = this.identities.getID(app.mainframeID)
+    if (appIdentityID == null) {
+      throw new Error('App identity not found')
+    }
+    const appIdentity = this.identities.getOwnApp(appIdentityID)
     if (appIdentity == null) {
       throw new Error('App identity not found')
+    }
+
+    const devIdentity = this.identities.getOwnDeveloper(app.data.developerID)
+    if (devIdentity == null) {
+      throw new Error('Developer identity not found')
     }
 
     const versionData = app.getVersionData(version)
@@ -299,6 +301,32 @@ export default class Vault {
     if (versionData.publicationState === 'manifest_published') {
       throw new Error('Manifest has already been published for this version')
     }
+
+    if (versionData.data.contentsURI == null) {
+      throw new Error(
+        'App contents URI must be set before manifest can be created',
+      )
+    }
+
+    const manifestData = {
+      id: app.mainframeID,
+      author: {
+        id: devIdentity.id,
+      },
+      name: app.data.name,
+      version: app.data.version,
+      contentsURI: versionData.data.contentsURI,
+      // TODO: permissions from version data
+      permissions: {
+        required: { WEB_REQUEST: [] },
+        optional: { WEB_REQUEST: [] },
+      },
+    }
+
+    await writeManifestFile(toPath, manifestData, [
+      appIdentity.keyPair,
+      devIdentity.keyPair,
+    ])
   }
 
   // Settings

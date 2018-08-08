@@ -1,7 +1,11 @@
 // @flow
 
 /* eslint-disable import/named */
-import { parseContentsURI, type ManifestData } from '@mainframe/app-manifest'
+import {
+  SEMVER_SCHEMA,
+  parseContentsURI,
+  type ManifestData,
+} from '@mainframe/app-manifest'
 import {
   PERMISSION_KEY_SCHEMA,
   PERMISSION_GRANT_SCHEMA,
@@ -254,5 +258,48 @@ export const setPermission = {
       app.setPermission(session.userID, params.key, params.value)
       await ctx.openVault.save()
     }
+  },
+}
+
+export const create = {
+  params: {
+    contentsPath: 'string',
+    developerID: { ...localIdParam, optional: true },
+    name: 'string',
+    version: { ...SEMVER_SCHEMA, optional: true },
+  },
+  handler: (
+    ctx: RequestContext,
+    params: {
+      contentsPath: string,
+      developerID?: ?ID,
+      name?: ?string,
+      version?: ?string,
+    },
+  ): { id: ID } => {
+    const app = ctx.openVault.createApp(params)
+    return { id: app.id }
+  },
+}
+
+export const writeManifest = {
+  params: {
+    appID: localIdParam,
+    path: 'string',
+    version: { ...SEMVER_SCHEMA, optional: true },
+  },
+  handler: async (
+    ctx: RequestContext,
+    params: {
+      appID: ID,
+      path: string,
+      version?: ?string,
+    },
+  ): Promise<void> => {
+    await ctx.openVault.writeAppManifest(
+      params.appID,
+      params.path,
+      params.version,
+    )
   },
 }
