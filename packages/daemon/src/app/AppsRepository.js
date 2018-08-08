@@ -7,18 +7,15 @@ import {
   type PermissionKey, // eslint-disable-line import/named
   type PermissionGrant, // eslint-disable-line import/named
 } from '@mainframe/app-permissions'
-// eslint-disable-next-line import/named
-import { base64Type, type base64 } from '@mainframe/utils-base64'
+import type { MainframeID } from '@mainframe/data-types'
 // eslint-disable-next-line import/named
 import { uniqueID, idType, type ID } from '@mainframe/utils-id'
 
 import { mapObject } from '../utils'
 
-import App, {
-  type AppSerialized,
-  type AppUserSettings,
-  type SessionData,
-} from './App'
+import type { AppUserSettings, SessionData } from './AbstractApp'
+import App, { type AppSerialized } from './App'
+import OwnApp, { type OwnAppParams, type OwnAppSerialized } from './OwnApp'
 
 export type AppUpdate = {
   app: App,
@@ -30,13 +27,9 @@ export type AppUpdateSerialized = {
   hasRequiredPermissionsChanges: boolean,
 }
 
-export type AppsRepositorySerialized = {
-  apps: { [string]: AppSerialized },
-  updates: { [string]: AppUpdateSerialized },
-}
-
-type Apps = { [ID]: App }
-type AppUpdates = { [ID]: AppUpdate }
+type Apps = { [id: string]: App }
+type AppUpdates = { [id: string]: AppUpdate }
+type OwnApps = { [id: string]: OwnApp }
 
 const appsToJSON = mapObject(App.toJSON)
 const appsFromJSON = mapObject(App.fromJSON)
@@ -50,14 +43,31 @@ const updatesFromJSON = mapObject((serialized: AppUpdateSerialized) => ({
   hasRequiredPermissionsChanges: serialized.hasRequiredPermissionsChanges,
 }))
 
+const ownAppsToJSON = mapObject(OwnApp.toJSON)
+const ownAppsFromJSON = mapObject(OwnApp.fromJSON)
+
+export type AppsRepositoryParams = {
+  apps?: Apps,
+  updates?: AppUpdates,
+  ownApps?: OwnApps,
+}
+
+export type AppsRepositorySerialized = {
+  apps: { [string]: AppSerialized },
+  updates: { [string]: AppUpdateSerialized },
+  ownApps: { [string]: OwnAppSerialized },
+}
+
 export default class AppsRepository {
   static fromJSON = (serialized: AppsRepositorySerialized): AppsRepository => {
-    return new AppsRepository(
+    return new AppsRepository({
       // $FlowFixMe: mapping type
-      appsFromJSON(serialized.apps),
+      apps: appsFromJSON(serialized.apps),
       // $FlowFixMe: mapping type
-      updatesFromJSON(serialized.updates),
-    )
+      updates: updatesFromJSON(serialized.updates),
+      // $FlowFixMe: mapping type
+      ownApps: ownAppsFromJSON(serialized.ownApps),
+    })
   }
 
   static toJSON = (registry: AppsRepository): AppsRepositorySerialized => ({
@@ -65,22 +75,27 @@ export default class AppsRepository {
     apps: appsToJSON(registry.apps),
     // $FlowFixMe: mapping type
     updates: updatesToJSON(registry.updates),
+    // $FlowFixMe: mapping type
+    ownApps: ownAppsToJSON(registry.ownApps),
   })
 
   _apps: Apps
-  _byBase64: { [base64]: ID }
   _updates: AppUpdates
+  _ownApps: OwnApps
+  _byMainframeID: { [mainframeID: string]: ID }
 
-  constructor(apps: Apps = {}, updates?: AppUpdates = {}) {
-    this._apps = apps
-    this._byBase64 = Object.keys(apps).reduce((acc, appID) => {
+  constructor(params: AppsRepositoryParams = {}) {
+    this._apps = params.apps || {}
+    this._byMainframeID = Object.keys(this._apps).reduce((acc, appID) => {
       const id = idType(appID)
-      // $FlowFixMe: manifest.id base64 type
-      acc[apps[id].manifest.id] = id
+      acc[(this._apps[id].manifest.id: string)] = id
       return acc
     }, {})
-    this._updates = updates
+    this._updates = params.updates || {}
+    this._ownApps = params.ownApps || {}
   }
+
+  // Getters
 
   get apps(): Apps {
     return this._apps
@@ -90,20 +105,41 @@ export default class AppsRepository {
     return this._updates
   }
 
-  getByID(id: ID): ?App {
-    return this._apps[id]
+  get ownApps(): OwnApps {
+    return this._ownApps
   }
 
-  getByBase64(b64: base64): ?App {
-    const id = this._byBase64[b64]
+  getByID(id: ID): ?App {
+    return this._apps[id] || this._ownApps[id]
+  }
+
+  getByMainframeID(mainframeID: MainframeID): ?App {
+    const id = this._byMainframeID[mainframeID]
     if (id != null) {
       return this._apps[id]
     }
   }
 
-  getID(b64: base64): ?ID {
-    return this._byBase64[b64]
+  getID(mainframeID: MainframeID): ?ID {
+    return this._byMainframeID[mainframeID]
   }
+
+  getOwnByID(id: ID): ?OwnApp {
+    return this._ownApps[id]
+  }
+
+  getOwnByMainframeID(mainframeID: MainframeID): ?OwnApp {
+    const id = this._byMainframeID[mainframeID]
+    if (id != null) {
+      return this._ownApps[id]
+    }
+  }
+
+  getAnyByID(id: ID): ?(App | OwnApp) {
+    return this.getByID(id) || this.getOwnByID(id)
+  }
+
+  // App lifecycle
 
   add(manifest: ManifestData, userID: ID, settings: AppUserSettings): App {
     if (validateManifest(manifest) === 'valid') {
@@ -123,13 +159,13 @@ export default class AppsRepository {
       },
     })
     this._apps[appID] = app
-    this._byBase64[base64Type(manifest.id)] = appID
+    this._byMainframeID[manifest.id] = appID
 
     return app
   }
 
   setUserSettings(appID: ID, userID: ID, settings: AppUserSettings): void {
-    const app = this.getByID(appID)
+    const app = this.getAnyByID(appID)
     if (app == null) {
       throw new Error('Invalid app')
     }
@@ -142,7 +178,7 @@ export default class AppsRepository {
     key: PermissionKey,
     value: PermissionGrant,
   ): void {
-    const app = this.getByID(appID)
+    const app = this.getAnyByID(appID)
     if (app == null) {
       throw new Error('Invalid app')
     }
@@ -150,7 +186,7 @@ export default class AppsRepository {
   }
 
   removeUser(appID: ID, userID: ID): void {
-    const app = this.getByID(appID)
+    const app = this.getAnyByID(appID)
     if (app == null) {
       throw new Error('Invalid app')
     }
@@ -158,21 +194,24 @@ export default class AppsRepository {
   }
 
   remove(id: ID): void {
+    // TODO: support removing own apps - might be other method/flag to avoid accidents?
     const app = this.getByID(id)
     if (app != null) {
       // TODO: handle "clean" option to remove the app contents
-      delete this._byBase64[base64Type(app.manifest.id)]
+      delete this._byMainframeID[app.manifest.id]
       delete this._apps[id]
     }
   }
 
   createSession(appID: ID, userID: ID): SessionData {
-    const app = this.getByID(appID)
+    const app = this.getAnyByID(appID)
     if (app == null) {
       throw new Error('Invalid app')
     }
     return app.createSession(userID)
   }
+
+  // Updates
 
   hasUpdate(id: ID): boolean {
     return this._updates[id] !== null
@@ -220,5 +259,14 @@ export default class AppsRepository {
 
     this._updates[appID] = update
     return update
+  }
+
+  // Own apps
+
+  create(params: OwnAppParams): OwnApp {
+    const app = new OwnApp(params)
+    this._byMainframeID[params.data.mainframeID] = params.appID
+    this._ownApps[params.appID] = app
+    return app
   }
 }

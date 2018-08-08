@@ -23,7 +23,7 @@ export default class DeleteCommand extends Command {
     const { confirmed } = await prompt({
       type: 'confirm',
       name: 'confirmed',
-      message: `Are you sure you want to delete the vault ${name}? This CAN NOT be reversed.`,
+      message: `Are you sure you want to delete the vault "${name}"? This CAN NOT be reversed.`,
       default: false,
     })
     if (confirmed) {

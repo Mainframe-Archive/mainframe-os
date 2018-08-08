@@ -4,28 +4,15 @@ import type { ManifestData } from '@mainframe/app-manifest'
 import {
   createWebRequestGrant,
   mergeGrantsToDetails,
-  type PermissionGrant, // eslint-disable-line import/named
-  type PermissionKey, // eslint-disable-line import/named
-  type PermissionsDetails, // eslint-disable-line import/named
-  type PermissionsGrants, // eslint-disable-line import/named
 } from '@mainframe/app-permissions'
 // eslint-disable-next-line import/named
-import { idType, uniqueID, type ID } from '@mainframe/utils-id'
+import { uniqueID, type ID } from '@mainframe/utils-id'
 
+import AbstractApp, {
+  type AbstractAppParams,
+  type SessionData,
+} from './AbstractApp'
 import Session from './Session'
-
-const DEFAULT_SETTINGS = {
-  permissions: {
-    WEB_REQUEST: [],
-  },
-  permissionsChecked: false,
-}
-
-export type SessionData = {
-  sessID: ID,
-  session: Session,
-  permissions: PermissionsDetails,
-}
 
 export type AppInstallationState =
   | 'pending'
@@ -35,23 +22,17 @@ export type AppInstallationState =
   | 'download_error'
   | 'ready'
 
-export type AppUserSettings = {
-  permissions: PermissionsGrants,
-  permissionsChecked: boolean,
-}
-
-export type AppParams = {
-  appID: ID,
+export type AppParams = AbstractAppParams & {
   manifest: ManifestData,
   installationState: AppInstallationState,
-  settings?: { [ID]: AppUserSettings },
 }
 
 export type AppSerialized = AppParams
 
-export default class App {
+export default class App extends AbstractApp {
   static fromJSON = (params: AppSerialized): App => new App(params)
 
+  // $FlowFixMe: App type
   static toJSON = (app: App): AppSerialized => ({
     appID: app._appID,
     installationState: app._installationState,
@@ -59,23 +40,16 @@ export default class App {
     settings: app._settings,
   })
 
-  _appID: ID
   _installationState: AppInstallationState
   _manifest: ManifestData
-  _settings: { [ID]: AppUserSettings }
 
   constructor(params: AppParams) {
-    this._appID = params.appID
+    super(params)
     this._installationState = params.installationState
     this._manifest = params.manifest
-    this._settings = params.settings == null ? {} : params.settings
   }
 
   // Accessors
-
-  get id(): ID {
-    return this._appID
-  }
 
   get installationState(): AppInstallationState {
     return this._installationState
@@ -87,70 +61,6 @@ export default class App {
 
   get manifest(): ManifestData {
     return this._manifest
-  }
-
-  get settings(): { [ID]: AppUserSettings } {
-    return this._settings
-  }
-
-  get userIDs(): Array<ID> {
-    return Object.keys(this._settings).map(idType)
-  }
-
-  // Settings
-
-  getSettings(userID: ID): AppUserSettings {
-    return this._settings[userID] || { ...DEFAULT_SETTINGS }
-  }
-
-  setSettings(userID: ID, settings: AppUserSettings): void {
-    this._settings[userID] = settings
-  }
-
-  getPermissions(userID: ID): ?PermissionsGrants {
-    const settings = this._settings[userID]
-    if (settings != null && settings.permissions != null) {
-      return settings.permissions
-    }
-  }
-
-  setPermissions(userID: ID, permissions: PermissionsGrants): void {
-    const settings = this.getSettings(userID)
-    settings.permissions = permissions
-    this._settings[userID] = settings
-  }
-
-  getPermission(userID: ID, key: PermissionKey): ?PermissionGrant {
-    const permissions = this.getPermissions(userID)
-    if (permissions != null) {
-      return permissions[key]
-    }
-  }
-
-  setPermission(userID: ID, key: PermissionKey, value: PermissionGrant): void {
-    const { permissions } = this.getSettings(userID)
-    if (
-      (key === 'WEB_REQUEST' && typeof value === 'object') ||
-      (key !== 'WEB_REQUEST' && typeof value === 'boolean')
-    ) {
-      // $FlowFixMe: value polymorphism
-      permissions[key] = value
-      this.setPermissions(userID, permissions)
-    }
-  }
-
-  getPermissionsChecked(userID: ID): boolean {
-    return this.getSettings(userID).permissionsChecked
-  }
-
-  setPermissionsChecked(userID: ID, checked: boolean) {
-    const settings = this.getSettings(userID)
-    settings.permissionsChecked = checked
-    this._settings[userID] = settings
-  }
-
-  removeUser(userID: ID) {
-    delete this._settings[userID]
   }
 
   // Session

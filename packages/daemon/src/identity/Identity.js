@@ -1,56 +1,43 @@
 // @flow
 
 import {
-  getSignature,
-  openSigned,
-  sign,
-  verifySignature,
-  type KeyPair, // eslint-disable-line import/named
-} from '@mainframe/utils-crypto'
-import type { ID } from '@mainframe/utils-id'
-
-import Keychain from './Keychain'
+  decodeMainframeID,
+  encodeMainframeID,
+  mainframeIDType,
+  type MainframeID, // eslint-disable-line import/named
+} from '@mainframe/data-types'
+import { openSigned, verifySignature } from '@mainframe/utils-crypto'
 
 export default class Identity {
-  _keychain: Keychain
+  _id: MainframeID
+  _key: Buffer
 
-  constructor(keychain: Keychain) {
-    this._keychain = keychain
-  }
-
-  get keychain(): Keychain {
-    return this._keychain
-  }
-
-  getPairSign(id?: ID): ?KeyPair {
-    return this._keychain.getPairSign(id)
-  }
-
-  getSignature(message: Buffer, id?: ID): Buffer {
-    const keyPair = this._keychain.getPairSign(id)
-    if (keyPair == null) {
-      throw new Error('No key pair to sign with')
+  constructor(keyOrID: MainframeID | Buffer) {
+    if (Buffer.isBuffer(keyOrID)) {
+      // $FlowFixMe: Buffer type check not detected by Flow
+      const key = (keyOrID: Buffer)
+      this._id = encodeMainframeID(key)
+      this._key = key
+    } else {
+      const id = mainframeIDType(keyOrID)
+      this._id = id
+      this._key = decodeMainframeID(id)
     }
-    return getSignature(message, keyPair.secretKey)
   }
 
-  sign(message: Buffer, id?: ID): Buffer {
-    const keyPair = this._keychain.getPairSign(id)
-    if (keyPair == null) {
-      throw new Error('No key pair to sign with')
-    }
-    return sign(message, keyPair.secretKey)
+  get id(): MainframeID {
+    return this._id
   }
 
-  verifySignature(message: Buffer, signature: Buffer, id?: ID): boolean {
-    const key = this._keychain.getPublicSign(id)
-    return key ? verifySignature(message, signature, key) : false
+  get publicKey(): Buffer {
+    return this._key
   }
 
-  openSigned(signed: Buffer, id?: ID): ?Buffer {
-    const key = this._keychain.getPublicSign(id)
-    if (key != null) {
-      return openSigned(signed, key)
-    }
+  verifySignature(message: Buffer, signature: Buffer): boolean {
+    return verifySignature(message, signature, this._key)
+  }
+
+  openSigned(signed: Buffer): ?Buffer {
+    return openSigned(signed, this._key)
   }
 }

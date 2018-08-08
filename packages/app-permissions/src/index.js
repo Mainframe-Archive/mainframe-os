@@ -13,49 +13,10 @@ import type {
   PermissionsRequirementsDifference,
 } from './types'
 
+export * from './schema'
 export * from './types'
 
 export const EMPTY_DEFINITIONS: PermissionsDefinitions = { WEB_REQUEST: [] }
-
-export const PERMISSION_KEYS_BOOLEAN = [
-  'LOCATION_GET',
-  'NOTIFICATION_DISPLAY',
-  'SWARM_DOWNLOAD',
-  'SWARM_UPLOAD',
-  'WEB3_SEND',
-]
-
-export const PERMISSION_KEYS = [...PERMISSION_KEYS_BOOLEAN, 'WEB_REQUEST']
-
-export const PERMISSION_KEY_SCHEMA = {
-  type: 'enum',
-  values: PERMISSION_KEYS,
-}
-
-export const WEB_REQUEST_GRANT_SCHEMA = {
-  type: 'object',
-  props: {
-    // TODO: better domain validation - possible with custom validator?
-    granted: { type: 'array', items: 'string', optional: true },
-    denied: { type: 'array', items: 'string', optional: true },
-  },
-}
-
-export const PERMISSION_GRANT_SCHEMA = [
-  { type: 'boolean' },
-  WEB_REQUEST_GRANT_SCHEMA,
-]
-
-export const PERMISSIONS_GRANTS_SCHEMA = {
-  type: 'object',
-  props: PERMISSION_KEYS.reduce((acc, key) => {
-    acc[key] =
-      key === 'WEB_REQUEST'
-        ? { ...WEB_REQUEST_GRANT_SCHEMA, optional: true }
-        : { type: 'boolean', optional: true }
-    return acc
-  }, {}),
-}
 
 export const createWebRequestGrant = (
   granted?: WebRequestDefinition = [],

@@ -1,7 +1,11 @@
 // @flow
 
-import type { ManifestData } from '@mainframe/app-manifest'
 /* eslint-disable import/named */
+import {
+  SEMVER_SCHEMA,
+  parseContentsURI,
+  type ManifestData,
+} from '@mainframe/app-manifest'
 import {
   PERMISSION_KEY_SCHEMA,
   PERMISSION_GRANT_SCHEMA,
@@ -16,7 +20,8 @@ import { idType, type ID } from '@mainframe/utils-id'
 /* eslint-enable import/named */
 import { ensureDir } from 'fs-extra'
 
-import type { AppUserSettings, SessionData } from '../../app/App'
+import type { AppUserSettings, SessionData } from '../../app/AbstractApp'
+import OwnApp from '../../app/OwnApp'
 
 import { clientError, sessionError } from '../errors'
 import type RequestContext from '../RequestContext'
@@ -60,7 +65,7 @@ const createClientSession = (
   userID: ID,
   session: SessionData,
 ): ClientSession => {
-  const app = ctx.openVault.apps.getByID(appID)
+  const app = ctx.openVault.apps.getAnyByID(appID)
   if (app == null) {
     throw clientError('Invalid appID')
   }
@@ -68,6 +73,12 @@ const createClientSession = (
   if (user == null) {
     throw clientError('Invalid userID')
   }
+
+  const contentsPath =
+    app instanceof OwnApp
+      ? app.contentsPath
+      : getContentsPath(ctx.env, app.manifest)
+
   return {
     user: {
       id: userID,
@@ -79,8 +90,10 @@ const createClientSession = (
     },
     app: {
       id: appID,
+      // TODO: what to provide for OwnApp? what is client need?
+      // $FlowFixMe: temporarily ignore
       manifest: app.manifest,
-      contentsPath: getContentsPath(ctx.env, app.manifest),
+      contentsPath,
     },
   }
 }
@@ -165,16 +178,21 @@ export const install = {
     // TODO: rather than waiting for contents to be downloaded, return early and let client subscribe to installation state changes
     if (app.installationState !== 'ready') {
       const contentsPath = getContentsPath(ctx.env, params.manifest)
-      try {
-        app.installationState = 'downloading'
-        await ensureDir(contentsPath)
-        await ctx.bzz.downloadDirectoryTo(
-          params.manifest.contentsHash,
-          contentsPath,
-        )
-        app.installationState = 'ready'
-      } catch (err) {
+      const contentsURI = parseContentsURI(params.manifest.contentsURI)
+      if (contentsURI.nid !== 'bzz' || contentsURI.nss == null) {
+        // Unsupported contentsURI
         app.installationState = 'download_error'
+      } else {
+        try {
+          app.installationState = 'downloading'
+          await ensureDir(contentsPath)
+          // contentsURI.nss is expected to be the bzz hash
+          // TODO?: bzz hash validation?
+          await ctx.bzz.downloadDirectoryTo(contentsURI.nss, contentsPath)
+          app.installationState = 'ready'
+        } catch (err) {
+          app.installationState = 'download_error'
+        }
       }
     }
 
@@ -240,5 +258,48 @@ export const setPermission = {
       app.setPermission(session.userID, params.key, params.value)
       await ctx.openVault.save()
     }
+  },
+}
+
+export const create = {
+  params: {
+    contentsPath: 'string',
+    developerID: { ...localIdParam, optional: true },
+    name: 'string',
+    version: { ...SEMVER_SCHEMA, optional: true },
+  },
+  handler: (
+    ctx: RequestContext,
+    params: {
+      contentsPath: string,
+      developerID?: ?ID,
+      name?: ?string,
+      version?: ?string,
+    },
+  ): { id: ID } => {
+    const app = ctx.openVault.createApp(params)
+    return { id: app.id }
+  },
+}
+
+export const writeManifest = {
+  params: {
+    appID: localIdParam,
+    path: 'string',
+    version: { ...SEMVER_SCHEMA, optional: true },
+  },
+  handler: async (
+    ctx: RequestContext,
+    params: {
+      appID: ID,
+      path: string,
+      version?: ?string,
+    },
+  ): Promise<void> => {
+    await ctx.openVault.writeAppManifest(
+      params.appID,
+      params.path,
+      params.version,
+    )
   },
 }

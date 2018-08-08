@@ -31,6 +31,7 @@
     "@mainframe/app-manifest": "*",
     "@mainframe/app-permissions": "*",
     "@mainframe/config": "*",
+    "@mainframe/data-types": "*",
     "@mainframe/rpc-error": "^0.2.1",
     "@mainframe/rpc-handler": "^0.1.0",
     "@mainframe/rpc-node": "^0.2.0",
@@ -45,9 +46,10 @@
     "erebos-api-bzz-node": "^0.3.3",
     "esm": "3.0.74",
     "fs-extra": "^7.0.0",
+    "multibase": "^0.4.0",
     "rxjs": "^6.2.0"
   },
   "devDependencies": {
-    "flow-bin": "^0.77.0"
+    "flow-bin": "^0.78.0"
   }
 }
