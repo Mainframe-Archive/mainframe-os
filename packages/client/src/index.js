@@ -1,9 +1,6 @@
 // @flow
 
-import type {
-  ManifestData,
-  ManifestValidationResult,
-} from '@mainframe/app-manifest'
+import type { ManifestData } from '@mainframe/app-manifest'
 import type {
   PermissionCheckResult,
   PermissionGrant,
@@ -72,21 +69,21 @@ export default class MainframeClient {
   // Vault
 
   createVault(path: string, password: string): Promise<void> {
-    return this._rpc.request('vault_create', [path, password])
+    return this._rpc.request('vault_create', { path, password })
   }
 
   openVault(path: string, password: string): Promise<void> {
-    return this._rpc.request('vault_open', [path, password])
+    return this._rpc.request('vault_open', { path, password })
   }
 
   // Identities
 
   createUserIdentity(data?: Object = {}): Promise<{ id: ID }> {
-    return this._rpc.request('identity_createUser', [data])
+    return this._rpc.request('identity_createUser', { data })
   }
 
   createDeveloperIdentity(data?: Object = {}): Promise<{ id: ID }> {
-    return this._rpc.request('identity_createDeveloper', [data])
+    return this._rpc.request('identity_createDeveloper', { data })
   }
 
   getOwnUserIdentities(): Promise<{ developers: Array<OwnUser> }> {
@@ -95,14 +92,6 @@ export default class MainframeClient {
 
   getOwnDeveloperIdentities(): Promise<{ users: Array<OwnUser> }> {
     return this._rpc.request('identity_getOwnDevelopers')
-  }
-
-  // App creation
-
-  validateManifest(
-    manifest: ManifestData,
-  ): Promise<{ result: ManifestValidationResult }> {
-    return this._rpc.request('app_validateManifest', [manifest])
   }
 
   // App lifecycle
@@ -116,19 +105,19 @@ export default class MainframeClient {
     userID: ID,
     settings: AppUserSettings,
   ): Promise<ID> {
-    return this._rpc.request('app_install', [manifest, userID, settings])
+    return this._rpc.request('app_install', { manifest, userID, settings })
   }
 
   openApp(appID: ID, userID: ID): Promise<ClientSession> {
-    return this._rpc.request('app_open', [appID, userID])
+    return this._rpc.request('app_open', { appID, userID })
   }
 
   closeApp(sessID: string): Promise<void> {
-    return this._rpc.request('app_close', [sessID])
+    return this._rpc.request('app_close', { sessID })
   }
 
   removeApp(appID: ID): Promise<void> {
-    return this._rpc.request('app_remove', [appID])
+    return this._rpc.request('app_remove', { appID })
   }
 
   // App permissions
@@ -138,7 +127,7 @@ export default class MainframeClient {
     key: PermissionKey,
     input?: ?string,
   ): Promise<{ result: PermissionCheckResult }> {
-    return this._rpc.request('app_checkPermission', [sessID, key, input])
+    return this._rpc.request('app_checkPermission', { sessID, key, input })
   }
 
   setAppPermission(
@@ -146,6 +135,6 @@ export default class MainframeClient {
     key: PermissionKey,
     value: PermissionGrant,
   ): Promise<void> {
-    return this._rpc.request('app_setPermission', [sessID, key, value])
+    return this._rpc.request('app_setPermission', { sessID, key, value })
   }
 }

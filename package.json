@@ -21,10 +21,12 @@
       "**/electron-webpack",
       "**/erebos-*",
       "**/es6-error",
+      "**/fastest-validator",
       "**/form-data",
       "**/fs-extra",
       "**/nanoid",
       "**/node-fetch",
+      "**/oboe",
       "**/react",
       "**/react-dom",
       "**/read-config-file",
@@ -54,8 +56,7 @@
     "start": "yarn build && yarn test"
   },
   "resolutions": {
-    "esm": "3.0.72",
-    "rx-socket": "^0.4.0"
+    "esm": "3.0.74"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
@@ -69,7 +70,7 @@
     "babel-preset-env": "^1.7.0",
     "babel-preset-flow": "^6.23.0",
     "del-cli": "^1.1.0",
-    "eslint": "^5.0.1",
+    "eslint": "^5.2.0",
     "eslint-config-mainframe": "^1.4.0",
     "flow-bin": "^0.77.0",
     "flow-copy-source": "^2.0.1",

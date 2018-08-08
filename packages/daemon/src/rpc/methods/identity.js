@@ -9,22 +9,32 @@ type OwnId = {
   data: Object,
 }
 
-export const createDeveloper = async (
-  ctx: RequestContext,
-  [data]: [Object] = [],
-): Promise<{ id: ID }> => {
-  const id = ctx.openVault.identities.createOwnDeveloper(data)
-  await ctx.openVault.save()
-  return { id }
+export const createDeveloper = {
+  params: {
+    data: 'any', // TODO: data schema
+  },
+  handler: async (
+    ctx: RequestContext,
+    params: { data: Object },
+  ): Promise<{ id: ID }> => {
+    const id = ctx.openVault.identities.createOwnDeveloper(params.data)
+    await ctx.openVault.save()
+    return { id }
+  },
 }
 
-export const createUser = async (
-  ctx: RequestContext,
-  [data]: [Object] = [],
-): Promise<{ id: ID }> => {
-  const id = ctx.openVault.identities.createOwnUser(data)
-  await ctx.openVault.save()
-  return { id }
+export const createUser = {
+  params: {
+    data: 'any', // TODO: data schema
+  },
+  handler: async (
+    ctx: RequestContext,
+    params: { data: Object },
+  ): Promise<{ id: ID }> => {
+    const id = ctx.openVault.identities.createOwnUser(params.data)
+    await ctx.openVault.save()
+    return { id }
+  },
 }
 
 export const getOwnUsers = (ctx: RequestContext): { users: Array<OwnId> } => {

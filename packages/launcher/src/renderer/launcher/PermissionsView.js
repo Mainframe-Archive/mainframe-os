@@ -1,7 +1,7 @@
 //@flow
 
 import {
-  createHTTPSRequestGrant,
+  createWebRequestGrant,
   type PermissionKey, // eslint-disable-line import/named
   type PermissionRequirement, // eslint-disable-line import/named
   type PermissionsGrants, // eslint-disable-line import/named
@@ -21,7 +21,7 @@ type Domain = string
 type PermissionGranted = boolean
 
 type PermissionOption = {
-  HTTPS_REQUEST?: Array<Domain>,
+  WEB_REQUEST?: Array<Domain>,
   [PermissionKey]: true,
 }
 
@@ -34,7 +34,7 @@ export type PermissionOptions = {
 
 // Permissions set by user
 type PermissionsSettings = {
-  HTTPS_REQUEST: { [Domain]: PermissionGranted },
+  WEB_REQUEST: { [Domain]: PermissionGranted },
   [PermissionKey]: PermissionGranted,
 }
 
@@ -56,9 +56,9 @@ const PERMISSION_NAMES = {
     description:
       'Allow this app to make transactional calls to the blockchain, e.g. send tokens',
   },
-  HTTPS_REQUEST: {
-    name: 'Make https requests',
-    description: 'Allow this app to make https requests to specified domains',
+  WEB_REQUEST: {
+    name: 'Make Web requests',
+    description: 'Allow this app to make Web requests to specified domains',
   },
   NOTIFICATION_DISPLAY: {
     name: 'Display Notifications',
@@ -73,15 +73,15 @@ const PERMISSION_NAMES = {
 const formatSettings = (
   settings: $Shape<PermissionsSettings>,
 ): $Shape<PermissionsGrants> => {
-  const { HTTPS_REQUEST, ...others } = settings
-  const domains = Object.keys(HTTPS_REQUEST)
-  const granted = domains.filter(k => HTTPS_REQUEST[k])
-  const denied = domains.filter(k => !HTTPS_REQUEST[k])
+  const { WEB_REQUEST, ...others } = settings
+  const domains = Object.keys(WEB_REQUEST)
+  const granted = domains.filter(k => WEB_REQUEST[k])
+  const denied = domains.filter(k => !WEB_REQUEST[k])
   return {
     ...others,
-    HTTPS_REQUEST: HTTPS_REQUEST
-      ? createHTTPSRequestGrant(granted, denied)
-      : createHTTPSRequestGrant(),
+    WEB_REQUEST: WEB_REQUEST
+      ? createWebRequestGrant(granted, denied)
+      : createWebRequestGrant(),
   }
 }
 
@@ -99,7 +99,7 @@ export default class PermissionsView extends Component<Props, State> {
   state = {
     failedValidation: false,
     permissionsSettings: {
-      HTTPS_REQUEST: {},
+      WEB_REQUEST: {},
     },
   }
 
@@ -109,10 +109,10 @@ export default class PermissionsView extends Component<Props, State> {
     const { permissions } = this.props
     const { permissionsSettings } = this.state
     const settings = formatSettings(permissionsSettings)
-    const requiredDomains = permissions.required['HTTPS_REQUEST']
+    const requiredDomains = permissions.required.WEB_REQUEST
     if (requiredDomains && requiredDomains.length) {
-      settings['HTTPS_REQUEST'].granted.push(...requiredDomains)
-      delete permissions.required['HTTPS_REQUEST']
+      settings.WEB_REQUEST.granted.push(...requiredDomains)
+      delete permissions.required.WEB_REQUEST
     }
     this.props.onSubmit({ ...settings, ...permissions.required })
   }
@@ -123,14 +123,14 @@ export default class PermissionsView extends Component<Props, State> {
     option?: string,
   ) => {
     this.setState(({ permissionsSettings }) => {
-      if (key === 'HTTPS_REQUEST') {
+      if (key === 'WEB_REQUEST') {
         if (option == null) {
           return null // Don't update state
         }
         if (granted == null) {
-          delete permissionsSettings.HTTPS_REQUEST[option]
+          delete permissionsSettings.WEB_REQUEST[option]
         } else {
-          permissionsSettings.HTTPS_REQUEST[option] = granted
+          permissionsSettings.WEB_REQUEST[option] = granted
         }
       } else {
         if (granted == null) {
@@ -211,7 +211,7 @@ export default class PermissionsView extends Component<Props, State> {
     const { permissionsSettings } = this.state
     let options, rowStyle
 
-    if (key === 'HTTPS_REQUEST') {
+    if (key === 'WEB_REQUEST') {
       if (Array.isArray(value)) {
         options = (
           <View key={key} style={styles.domains}>
@@ -224,8 +224,8 @@ export default class PermissionsView extends Component<Props, State> {
                   {required
                     ? this.renderRequired()
                     : this.renderToggle(
-                        'HTTPS_REQUEST',
-                        permissionsSettings.HTTPS_REQUEST[domain],
+                        'WEB_REQUEST',
+                        permissionsSettings.WEB_REQUEST[domain],
                         domain,
                       )}
                 </View>
