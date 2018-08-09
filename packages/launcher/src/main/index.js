@@ -5,46 +5,20 @@ import { stringify } from 'querystring'
 import url from 'url'
 // eslint-disable-next-line import/named
 import Client, { type ClientSession } from '@mainframe/client'
-import { Environment, DaemonConfig, VaultConfig } from '@mainframe/config'
+import { Environment, DaemonConfig } from '@mainframe/config'
 import { startDaemon } from '@mainframe/toolbox'
 import { is } from 'electron-util'
 // eslint-disable-next-line import/named
-import { idType, type ID } from '@mainframe/utils-id'
 import { app, BrowserWindow, ipcMain } from 'electron'
 
-import {
-  launcherToDaemonRequestChannel,
-  launcherFromDaemonResponseChannel,
-  mainProcRequestChannel,
-  mainProcResponseChannel,
-} from '../renderer/electronIpc.js'
+import handleIpcRequests from './ipcRequestHandler'
 
 type AppWindows = {
   [window: BrowserWindow]: {
-    appID: ID,
+    appID: string,
     appSession: ClientSession,
   },
 }
-
-type ClientResponse = {
-  id: string,
-  error?: Object,
-  result?: Object,
-}
-
-const sandboxToDaemonRequestChannel = 'ipc-sandbox-request-channel'
-const sandboxFromDaemonResponseChannel = 'ipc-sandbox-response-channel'
-
-const daemonRequestIpcChannels = [
-  {
-    req: launcherToDaemonRequestChannel,
-    res: launcherFromDaemonResponseChannel,
-  },
-  {
-    req: sandboxToDaemonRequestChannel,
-    res: sandboxFromDaemonResponseChannel,
-  },
-]
 
 const PORT = process.env.ELECTRON_WEBPACK_WDS_PORT || ''
 
@@ -59,11 +33,9 @@ const env = Environment.get(envName, envType)
 console.log(`using environment "${env.name}" (${env.type})`)
 
 const daemonConfig = new DaemonConfig(env)
-const vaultConfig = new VaultConfig(env)
 
 let client
 let mainWindow
-let vaultOpen: ?string // currently open vault path
 
 const appWindows: AppWindows = {}
 
@@ -101,8 +73,9 @@ const setupClient = async () => {
 
   await startDaemon(daemonConfig, true)
   daemonConfig.runStatus = 'running'
-
   client = new Client(daemonConfig.socketPath)
+  handleIpcRequests(client, env, onLaunchApp)
+
   // Simple check for API call, not proper versioning logic
   const version = await client.apiVersion()
   if (version !== 0.1) {
@@ -124,25 +97,6 @@ const createLauncherWindow = async () => {
     // })
     mainWindow = null
   })
-}
-
-const launchApp = async (appID: ID, userID: ID) => {
-  const appIds = Object.keys(appWindows).map(w => appWindows[w].appID)
-  if (appIds.includes(appID)) {
-    // Already open
-    return
-  }
-  // $FlowFixMe: ID incompatible with client package ID type
-  const appSession = await client.openApp(appID, userID)
-  const appWindow = newWindow()
-  appWindow.on('closed', async () => {
-    await client.closeApp(appSession.session.id)
-    delete appWindows[appWindow]
-  })
-  appWindows[appWindow] = {
-    appID,
-    appSession,
-  }
 }
 
 app.on('ready', createLauncherWindow)
@@ -184,184 +138,23 @@ ipcMain.on('ready-window', event => {
   window.show()
 })
 
-// Handle calls to main process
+// App Lifecycle
 
-const IPC_ERRORS: Object = {
-  invalidParams: {
-    message: 'Invalid params',
-    code: 32602,
-  },
-  internalError: {
-    message: 'Internal error',
-    code: 32603,
-  },
-  invalidRequest: {
-    message: 'Invalid request',
-    code: 32600,
-  },
-  methodNotFound: {
-    message: 'Method not found',
-    code: 32601,
-  },
-}
-
-const ipcMainHandler = {
-  launchApp: async (event, request) => {
-    const [appID, userID] = request.data.args
-    launchApp(idType(appID), idType(userID))
-    return { id: request.id }
-  },
-
-  installApp: async (event, request) => {
-    const [manifest, userID, settings] = request.data.args
-    const appID = await client.installApp(manifest, userID, settings)
-    return { id: request.id, appID }
-  },
-
-  getVaultsData: async (event, request) => {
-    const vaults = vaultConfig.vaults
-    return {
-      id: request.id,
-      result: {
-        vaults,
-        defaultVault: vaultConfig.defaultVault,
-        vaultOpen: vaultOpen,
-      },
-    }
-  },
-
-  createVault: async (event, request) => {
-    if (request.data.args.length !== 2) {
-      return {
-        error: IPC_ERRORS.invalidParams,
-        id: request.id,
-      }
-    }
-    const path = vaultConfig.createVaultPath()
-    try {
-      await client.createVault(path, request.data.args[0])
-      vaultConfig.setLabel(path, request.data.args[1])
-      vaultConfig.defaultVault = path
-      vaultOpen = path
-      return {
-        id: request.id,
-        result: {
-          path,
-        },
-      }
-    } catch (err) {
-      return {
-        error: {
-          message: err.message,
-          code: IPC_ERRORS.invalidParams.code,
-        },
-        id: request.id,
-      }
-    }
-  },
-
-  openVault: async (event, request) => {
-    if (request.data.args.length !== 2) {
-      return {
-        error: IPC_ERRORS.invalidParams,
-        id: request.id,
-      }
-    }
-    try {
-      await client.openVault(...request.data.args)
-      vaultOpen = request.data.args[0]
-      return {
-        id: request.id,
-        result: {
-          open: true,
-        },
-      }
-    } catch (err) {
-      return {
-        error: {
-          message: err.message,
-          code: IPC_ERRORS.invalidParams.code,
-        },
-        id: request.id,
-      }
-    }
-  },
-}
-
-ipcMain.on(mainProcRequestChannel, async (event, request) => {
-  const res = await ipcMainHandler[request.data.method](event, request)
-  sendIpcResponse(event.sender, mainProcResponseChannel, res)
-})
-
-// Handle calls to daemon client
-
-daemonRequestIpcChannels.forEach(c => {
-  ipcMain.on(c.req, async (event, request) => {
-    const res = await handleRequestToDaemon(request)
-    sendIpcResponse(event.sender, c.res, res)
+const onLaunchApp = async (appSession: ClientSession) => {
+  const appID = appSession.app.id
+  const appIds = Object.keys(appWindows).map(w => appWindows[w].appID)
+  if (appIds.includes(appID)) {
+    // Already open
+    return
+  }
+  // $FlowFixMe: ID incompatible with client package ID type
+  const appWindow = newWindow()
+  appWindow.on('closed', async () => {
+    await client.closeApp(appSession.session.id)
+    delete appWindows[appWindow]
   })
-})
-
-const handleRequestToDaemon = async (
-  request: Object,
-): Promise<ClientResponse> => {
-  if (request == null || !request || !request.data || !request.data.method) {
-    return {
-      error: IPC_ERRORS.invalidRequest,
-      id: request.id,
-    }
+  appWindows[appWindow] = {
+    appID,
+    appSession,
   }
-
-  // Handle nested calls e.g. 'client.web3.func()'
-
-  const nestedCalls = request.data.method.split('.')
-  let daemonClient = client
-  let func = request.data.method
-
-  if (nestedCalls.length > 1) {
-    nestedCalls.forEach((val, i) => {
-      if (i < nestedCalls.length - 1) {
-        daemonClient = daemonClient[val]
-      }
-    })
-    func = nestedCalls[nestedCalls.length - 1]
-  } else {
-    daemonClient = client
-    func = request.data.method
-  }
-  // $FlowFixMe: indexer property
-  if (daemonClient[func]) {
-    const args = request.data.args || []
-    try {
-      // $FlowFixMe: indexer property
-      const res = await daemonClient[func](...args)
-      return {
-        id: request.id,
-        result: res,
-      }
-    } catch (err) {
-      return {
-        error: {
-          message: err.message,
-        },
-        id: request.id,
-      }
-    }
-  }
-  return {
-    error: IPC_ERRORS.methodNotFound,
-    id: request.id,
-  }
-}
-
-// IPC Responder
-
-const sendIpcResponse = (sender, channel, response) => {
-  const window = BrowserWindow.fromWebContents(sender)
-  const send = (channel, response) => {
-    if (!(window && window.isDestroyed())) {
-      sender.send(channel, response)
-    }
-  }
-  send(channel, response)
 }

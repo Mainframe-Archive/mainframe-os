@@ -25,7 +25,7 @@
         }
       }
     ],
-    "flow"
+    "babel-preset-flow"
   ],
   "plugins": ["syntax-class-properties", "transform-class-properties"]
 }

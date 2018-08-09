@@ -3,7 +3,7 @@ import type StreamRPC from '@mainframe/rpc-stream'
 
 export type ContractABI = Array<Object>
 
-export default class Web3Client {
+export default class BlockchainClient {
   _rpc: StreamRPC
 
   constructor(rpc: StreamRPC) {
@@ -11,7 +11,7 @@ export default class Web3Client {
   }
 
   getLatestBlock(): Promise<number> {
-    return this._rpc.request('web3_getLatestBlock')
+    return this._rpc.request('blockchain_getLatestBlock')
   }
 
   readContract(
@@ -20,12 +20,12 @@ export default class Web3Client {
     method: string,
     params: any,
   ): Promise<any> {
-    return this._rpc.request('web3_readContract', [
+    return this._rpc.request('blockchain_readContract', {
       contractAddress,
       abi,
       method,
       params,
-    ])
+    })
   }
 
   getContractEvents(
@@ -38,11 +38,11 @@ export default class Web3Client {
       toBlock: number,
     },
   ): Promise<Array<Object>> {
-    return this._rpc.request('web3_getContractEvents', [
+    return this._rpc.request('blockchain_getContractEvents', {
       contractAddress,
       abi,
       eventName,
       options,
-    ])
+    })
   }
 }

@@ -39,8 +39,8 @@ export default class App extends Component {
       },
     ]
     const mfTokenAddr = '0xe3C2130530D77418b3e367Fe162808887526e74D'
-    const latestBlock = await this.sdk.web3.getLatestBlock()
-    const res = await this.sdk.web3.getContractEvents(
+    const latestBlock = await this.sdk.blockchain.getLatestBlock()
+    const res = await this.sdk.blockchain.getContractEvents(
       mfTokenAddr,
       abi,
       'Staked',
@@ -172,6 +172,12 @@ export default class App extends Component {
           dataKey="transactions"
           stroke={lightBlueColor}
           fill="url(#colorUv)"
+          activeDot={{
+            stroke: redColor,
+            strokeWidth: 2,
+            fill: whiteColor,
+          }}
+          dot={{ stroke: lightBlueColor, strokeWidth: 1, fill: whiteColor }}
         />
       </AreaChart>
     )
@@ -189,6 +195,7 @@ export default class App extends Component {
                 resizeMode="contain"
               />
               <Text style={styles.title}>Onyx Staking</Text>
+              <Text>Onyx staking transactions per 1000 blocks</Text>
             </View>
             {this.renderGraphData()}
             {this.renderEvents()}

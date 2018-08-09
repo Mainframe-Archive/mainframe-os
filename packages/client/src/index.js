@@ -11,7 +11,7 @@ import ipcRPC from '@mainframe/rpc-ipc'
 import type StreamRPC from '@mainframe/rpc-stream'
 import type { ID } from '@mainframe/utils-id'
 
-import Web3Client from './Web3Client'
+import BlockchainClient from './BlockchainClient'
 
 // TODO: extract API types from daemon
 type AppUserSettings = Object
@@ -50,10 +50,11 @@ export type InstalledApp = {
 
 export default class MainframeClient {
   _rpc: StreamRPC
+  blockchain: BlockchainClient
 
   constructor(socketPath: string) {
     this._rpc = ipcRPC(socketPath)
-    this.web3 = new Web3Client(this._rpc)
+    this.blockchain = new BlockchainClient(this._rpc)
   }
 
   close() {

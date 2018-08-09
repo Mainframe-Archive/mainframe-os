@@ -4,6 +4,7 @@
 [ignore]
 <PROJECT_ROOT>/lib/.*
 .*/node_modules/oboe/test/.*
+<PROJECT_ROOT>/static/applications/*
 
 [include]
 

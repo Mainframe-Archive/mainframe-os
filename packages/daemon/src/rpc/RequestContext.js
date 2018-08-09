@@ -19,6 +19,7 @@ type Params = {
 
 export default class RequestContext {
   _bzz: ?Bzz
+  _web3: ?Web3
   _env: Environment
   _notify: NotifyFunc
   _socket: Socket
@@ -39,7 +40,7 @@ export default class RequestContext {
     return this._bzz
   }
 
-  get web3(): Bzz {
+  get web3(): Web3 {
     if (this._web3 == null) {
       this._web3 = new Web3(
         new Web3.providers.HttpProvider(

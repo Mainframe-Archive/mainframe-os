@@ -1,20 +1,33 @@
 // @flow
 
+/*eslint-env browser*/
+
+type Request = {
+  method: string,
+  args?: Array<any>,
+}
+
+type Mainframe = {
+  request: (channel: string, request: Request) => Promise<any>,
+}
+
 class SDK {
+  _mainframe: Mainframe
+
   constructor() {
-    if (window.sandboxIpc) {
-      this._ipc = window.sandboxIpc
+    if (window.mainframe) {
+      this._mainframe = window.mainframe
     } else {
-      throw new Error('Cannot find expected ipc instance')
+      throw new Error('Cannot find expected mainframe client instance')
     }
   }
 
-  makeRequest = request => {
-    return this._ipc.callMain('ipcRequest', request)
+  makeRequest = (request: Request): Promise<any> => {
+    return this._mainframe.request('sdk-request', request)
   }
 }
 
-class Web3 extends SDK {
+class Blockchain extends SDK {
   getContractEvents = (
     contractAddr: string,
     abi: Array<any>,
@@ -22,22 +35,24 @@ class Web3 extends SDK {
     options: Object,
   ): Promise<Array<Object>> => {
     return this.makeRequest({
-      method: 'web3.getContractEvents',
+      method: 'blockchain_getContractEvents',
       args: [contractAddr, abi, eventName, options],
     })
   }
 
   getLatestBlock = (): Promise<number> => {
     return this.makeRequest({
-      method: 'web3.getLatestBlock',
+      method: 'blockchain_getLatestBlock',
     })
   }
 }
 
 export default class MainframeSDK extends SDK {
+  blockchain: Blockchain
+
   constructor() {
     super()
-    this.web3 = new Web3()
+    this.blockchain = new Blockchain()
   }
 
   apiVersion = () => {
