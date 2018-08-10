@@ -109,12 +109,11 @@ export default class PermissionsView extends Component<Props, State> {
     const { permissions } = this.props
     const { permissionsSettings } = this.state
     const settings = formatSettings(permissionsSettings)
-    const requiredDomains = permissions.required.WEB_REQUEST
-    if (requiredDomains && requiredDomains.length) {
-      settings.WEB_REQUEST.granted.push(...requiredDomains)
-      delete permissions.required.WEB_REQUEST
-    }
-    this.props.onSubmit({ ...settings, ...permissions.required })
+    const requiredDomains = permissions.required.WEB_REQUEST || []
+    const requiredPermissions = { ...permissions.required }
+    settings.WEB_REQUEST.granted.push(...requiredDomains)
+    delete requiredPermissions.WEB_REQUEST
+    this.props.onSubmit({ ...settings, ...requiredPermissions })
   }
 
   onSetPermissionGrant = (

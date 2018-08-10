@@ -20,8 +20,8 @@ export const parseKeyPair = (serialized: KeyPairSerialized): KeyPair => ({
 })
 
 export const serializeKeyPair = (keyPair: KeyPair): KeyPairSerialized => ({
-  publicKey: multibase.encode('base64', keyPair.publicKey),
-  secretKey: multibase.encode('base64', keyPair.secretKey),
+  publicKey: multibase.encode('base64', keyPair.publicKey).toString(),
+  secretKey: multibase.encode('base64', keyPair.secretKey).toString(),
 })
 
 export default class OwnIdentity extends Identity {

@@ -3,14 +3,15 @@
 import path from 'path'
 import { stringify } from 'querystring'
 import url from 'url'
+import { readManifestFile } from '@mainframe/app-manifest'
 // eslint-disable-next-line import/named
 import Client, { type ClientSession } from '@mainframe/client'
 import { Environment, DaemonConfig, VaultConfig } from '@mainframe/config'
-import { startDaemon } from '@mainframe/toolbox'
-import { is } from 'electron-util'
 // eslint-disable-next-line import/named
 import { idType, type ID } from '@mainframe/utils-id'
+import { startDaemon } from '@mainframe/toolbox'
 import { app, BrowserWindow, ipcMain } from 'electron'
+import { is } from 'electron-util'
 
 import {
   launcherToDaemonRequestChannel,
@@ -274,6 +275,34 @@ const ipcMainHandler = {
         id: request.id,
         result: {
           open: true,
+        },
+      }
+    } catch (err) {
+      return {
+        error: {
+          message: err.message,
+          code: IPC_ERRORS.invalidParams.code,
+        },
+        id: request.id,
+      }
+    }
+  },
+
+  readManifest: async (event, request) => {
+    if (request.data.args.length !== 1) {
+      return {
+        error: IPC_ERRORS.invalidParams,
+        id: request.id,
+      }
+    }
+    try {
+      const manifest = await readManifestFile(request.data.args[0])
+      return {
+        id: request.id,
+        result: {
+          data: manifest.data,
+          // TODO: lookup keys to check if they match know identities in vault
+          keys: manifest.keys,
         },
       }
     } catch (err) {

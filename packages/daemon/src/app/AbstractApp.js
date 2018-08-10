@@ -122,8 +122,7 @@ export default class AbstractApp {
 
   // Session
 
-  // eslint-disable-next-line no-unused-vars
-  createSession(userID: ID): SessionData {
+  createSession(_userID: ID): SessionData {
     throw new Error('Must be implemented')
   }
 }

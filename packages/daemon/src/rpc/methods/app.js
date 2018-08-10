@@ -268,7 +268,7 @@ export const create = {
     name: 'string',
     version: { ...SEMVER_SCHEMA, optional: true },
   },
-  handler: (
+  handler: async (
     ctx: RequestContext,
     params: {
       contentsPath: string,
@@ -276,9 +276,33 @@ export const create = {
       name?: ?string,
       version?: ?string,
     },
-  ): { id: ID } => {
+  ): Promise<{ id: ID }> => {
     const app = ctx.openVault.createApp(params)
+    await ctx.openVault.save()
     return { id: app.id }
+  },
+}
+
+export const publishContents = {
+  params: {
+    appID: localIdParam,
+    version: { ...SEMVER_SCHEMA, optional: true },
+  },
+  handler: async (
+    ctx: RequestContext,
+    params: { appID: ID, version?: ?string },
+  ): Promise<{ contentsURI: string }> => {
+    const app = ctx.openVault.apps.getOwnByID(params.appID)
+    if (app == null) {
+      throw new Error('App not found')
+    }
+
+    const hash = await ctx.bzz.uploadDirectoryTar(app.contentsPath)
+    const contentsURI = `urn:bzz:${hash}`
+    app.setContentsURI(contentsURI, params.version)
+    await ctx.openVault.save()
+
+    return { contentsURI }
   },
 }
 

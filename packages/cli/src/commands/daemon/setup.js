@@ -20,8 +20,8 @@ export default class SetupCommand extends Command {
 
   async run() {
     setupDaemon(new DaemonConfig(this.env), {
-      binPath: this.flags['bin-path'],
-      socketPath: this.flags['socket-path'],
+      binPath: this.resolvePath(this.flags['bin-path']),
+      socketPath: this.resolvePath(this.flags['socket-path']),
     })
   }
 }

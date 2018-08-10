@@ -146,6 +146,13 @@ export default class MainframeClient {
     return this._rpc.request('app_create', params)
   }
 
+  publishAppContents(params: {
+    appID: ID,
+    version?: ?string,
+  }): Promise<{ contentsURI: string }> {
+    return this._rpc.request('app_publishContents', params)
+  }
+
   writeAppManifest(params: {
     appID: ID,
     path: string,
