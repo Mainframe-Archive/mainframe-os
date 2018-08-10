@@ -4,10 +4,11 @@ import type { PermissionsGrants } from '@mainframe/app-permissions'
 import type { ID } from '@mainframe/utils-id'
 import fs from 'fs-extra'
 import React, { createRef, Component, type ElementRef } from 'react'
-import { View, StyleSheet, Text } from 'react-native-web'
+import { View, StyleSheet } from 'react-native-web'
 
-import { client } from '../electronIpc.js'
+import { ipcClient } from '../electronIpc.js'
 import Button from '../UIComponents/Button'
+import Text from '../UIComponents/Text'
 import ModalView from '../UIComponents/ModalView'
 import PermissionsView, { type PermissionOptions } from './PermissionsView'
 import IdentitySelectorView from './IdentitySelectorView'
@@ -97,7 +98,7 @@ export default class AppInstallModal extends Component<Props, State> {
 
   async getOwnIdentities() {
     try {
-      const res = await client.getOwnUserIdentities()
+      const res = await ipcClient.getOwnUserIdentities()
       this.setState({ ownUsers: res.users })
     } catch (err) {
       // TODO: Handle error
@@ -129,7 +130,7 @@ export default class AppInstallModal extends Component<Props, State> {
         permissions: userPermissions,
         permissionsChecked: true,
       }
-      const res = await client.installApp(manifest, userId, permissions)
+      const res = await ipcClient.installApp(manifest, userId, permissions)
       this.props.onInstallComplete(res.id)
     } catch (err) {
       // eslint-disable-next-line no-console

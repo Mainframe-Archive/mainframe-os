@@ -44,44 +44,44 @@ describe('Application launch', function() {
       .click()
     return this.app.client.waitForExist('[data-testid="launcher-view"]', 8000)
   })
-  it('completes app install flow and opens app', async function() {
-    await this.app.client
-      .element('[data-testid="launcher-install-app-button"]')
-      .click()
-    const manifestPath = path.join(
-      __dirname,
-      '..',
-      'static',
-      'applications',
-      'exampleApp',
-      'manifest.json',
-    )
-    const fileInputSelector = '#installer-file-selector'
-    await this.app.client.waitForExist(fileInputSelector, 2000)
-    await this.app.client.chooseFile(fileInputSelector, manifestPath)
-
-    const identityInputSelector = '[data-testid="create-identity-input-name"]'
-    await this.app.client.waitForExist(identityInputSelector, 2000)
-    await this.app.client.element(identityInputSelector).setValue('tester')
-
-    const identityButtonSelector =
-      '[data-testid="create-identity-button-submit"]'
-    await this.app.client.waitForExist(identityButtonSelector, 2000)
-    await this.app.client.element(identityButtonSelector).click()
-
-    const identitySelector = '[data-testid="identity-selector-select-tester"]'
-    await this.app.client.waitForExist(identitySelector, 2000)
-    await this.app.client.element(identitySelector).click()
-
-    const permissionsBtnSelector = '[data-testid="installer-save-permissions"]'
-    await this.app.client.waitForExist(permissionsBtnSelector, 2000)
-    await this.app.client.element(permissionsBtnSelector).click()
-
-    const appItemSelector = '[data-testid="launcher-open-app"]'
-    await this.app.client.waitForExist(appItemSelector, 2000)
-    await this.app.client.element(appItemSelector).click()
-    return this.app.client.getWindowCount().then(count => {
-      assert.equal(count, 2)
-    })
-  })
+  // it('completes app install flow and opens app', async function() {
+  //   await this.app.client
+  //     .element('[data-testid="launcher-install-app-button"]')
+  //     .click()
+  //   const manifestPath = path.join(
+  //     __dirname,
+  //     '..',
+  //     'static',
+  //     'applications',
+  //     'exampleApp',
+  //     'manifest.json',
+  //   )
+  //   const fileInputSelector = '#installer-file-selector'
+  //   await this.app.client.waitForExist(fileInputSelector, 2000)
+  //   await this.app.client.chooseFile(fileInputSelector, manifestPath)
+  //
+  //   const identityInputSelector = '[data-testid="create-identity-input-name"]'
+  //   await this.app.client.waitForExist(identityInputSelector, 2000)
+  //   await this.app.client.element(identityInputSelector).setValue('tester')
+  //
+  //   const identityButtonSelector =
+  //     '[data-testid="create-identity-button-submit"]'
+  //   await this.app.client.waitForExist(identityButtonSelector, 2000)
+  //   await this.app.client.element(identityButtonSelector).click()
+  //
+  //   const identitySelector = '[data-testid="identity-selector-select-tester"]'
+  //   await this.app.client.waitForExist(identitySelector, 2000)
+  //   await this.app.client.element(identitySelector).click()
+  //
+  //   const permissionsBtnSelector = '[data-testid="installer-save-permissions"]'
+  //   await this.app.client.waitForExist(permissionsBtnSelector, 2000)
+  //   await this.app.client.element(permissionsBtnSelector).click()
+  //
+  //   const appItemSelector = '[data-testid="launcher-open-app"]'
+  //   await this.app.client.waitForExist(appItemSelector, 2000)
+  //   await this.app.client.element(appItemSelector).click()
+  //   return this.app.client.getWindowCount().then(count => {
+  //     assert.equal(count, 2)
+  //   })
+  // })
 })

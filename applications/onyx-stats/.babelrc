@@ -1,0 +1,14 @@
+{
+  "presets": [
+    [
+      "env",
+      {
+        "targets": {
+          "browsers": ["last 2 Chrome versions"]
+        }
+      }
+    ],
+    "react"
+  ],
+  "plugins": ["inline-react-svg", "transform-class-properties"]
+}

@@ -1,7 +1,7 @@
 {
-  "id": "test-app",
+  "id": "onyx-stats",
   "version": "0.1",
-  "name": "Test App",
+  "name": "Onyx Stats",
   "developer": {
     "id": "dev3",
     "name": "Dapp Dev 3"

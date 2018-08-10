@@ -11,8 +11,12 @@ import ipcRPC from '@mainframe/rpc-ipc'
 import type StreamRPC from '@mainframe/rpc-stream'
 import type { ID } from '@mainframe/utils-id'
 
+import BlockchainClient from './BlockchainClient'
+
 // TODO: extract API types from daemon
 type AppUserSettings = Object
+
+export type { ID } from '@mainframe/utils-id'
 
 export type User = {
   id: ID,
@@ -48,9 +52,11 @@ export type InstalledApp = {
 
 export default class MainframeClient {
   _rpc: StreamRPC
+  blockchain: BlockchainClient
 
   constructor(socketPath: string) {
     this._rpc = ipcRPC(socketPath)
+    this.blockchain = new BlockchainClient(this._rpc)
   }
 
   close() {
@@ -133,11 +139,5 @@ export default class MainframeClient {
     value: PermissionGrant,
   ): Promise<void> {
     return this._rpc.request('app_setPermission', { sessID, key, value })
-  }
-
-  // Infrastructure interactions
-
-  requestWeb3(sessID: ID, method: string, params?: any): Promise<any> {
-    return this._rpc.request('web3_request', { sessID, method, params })
   }
 }

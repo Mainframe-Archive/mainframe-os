@@ -6,15 +6,15 @@ import {
   View,
   TouchableOpacity,
   StyleSheet,
-  Text,
   ActivityIndicator,
   Image,
 } from 'react-native-web'
 
 import colors from '../colors'
 import type { VaultsData } from '../types'
-import { client, callMainProcess } from '../electronIpc'
+import { ipcClient } from '../electronIpc'
 import Button from '../UIComponents/Button'
+import Text from '../UIComponents/Text'
 import ModalView from '../UIComponents/ModalView'
 import logo from '../../assets/images/mf-icon.png'
 import AppInstallModal from './AppInstallModal'
@@ -40,7 +40,7 @@ export default class App extends Component<{}, State> {
 
   async getVaultsData() {
     try {
-      const vaultsData = await client.getVaultsData()
+      const vaultsData = await ipcClient.getVaultsData()
       this.setState({
         vaultsData,
       })
@@ -55,7 +55,7 @@ export default class App extends Component<{}, State> {
 
   async getInstalledApps() {
     try {
-      const res = await client.getInstalledApps()
+      const res = await ipcClient.getInstalledApps()
       this.setState({
         installedApps: res.apps,
       })
@@ -115,7 +115,7 @@ export default class App extends Component<{}, State> {
   }
 
   async openApp(appID: ID, userID: ID) {
-    await callMainProcess('launchApp', [appID, userID])
+    await ipcClient.launchApp(appID, userID)
     this.setState({
       selectIdForApp: undefined,
     })
@@ -149,7 +149,7 @@ export default class App extends Component<{}, State> {
       }
 
       const onClickDelete = () => {
-        client.removeApp(app.appID)
+        ipcClient.removeApp(app.appID)
         this.getInstalledApps()
       }
 
