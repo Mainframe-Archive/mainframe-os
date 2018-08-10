@@ -15,7 +15,6 @@ import handleIpcRequests from './ipcRequestHandler'
 
 type AppWindows = {
   [window: BrowserWindow]: {
-    appID: string,
     appSession: ClientSession,
   },
 }
@@ -142,7 +141,9 @@ ipcMain.on('ready-window', event => {
 
 const onLaunchApp = async (appSession: ClientSession) => {
   const appID = appSession.app.id
-  const appIds = Object.keys(appWindows).map(w => appWindows[w].appID)
+  const appIds = Object.keys(appWindows).map(
+    w => appWindows[w].appSession.app.id,
+  )
   if (appIds.includes(appID)) {
     // Already open
     return
@@ -154,7 +155,6 @@ const onLaunchApp = async (appSession: ClientSession) => {
     delete appWindows[appWindow]
   })
   appWindows[appWindow] = {
-    appID,
     appSession,
   }
 }

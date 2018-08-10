@@ -10,12 +10,20 @@ import {
 } from 'react-native-web'
 import MainframeSDK from '@mainframe/sdk'
 
+import Logo from '../../assets/images/mainframe-logo.svg'
 import StakingGraph from './StakingGraph'
 import StakingTimeline from './StakingTimeline'
 import Text from './ui-kit/Text'
 import colors from './ui-kit/Colors'
 
-export default class App extends Component {
+type State = {
+  stakingData?: Array<Object>,
+  requestErr?: string,
+}
+
+export default class App extends Component<null, State> {
+  sdk: MainframeSDK
+
   constructor() {
     super()
     this.sdk = new MainframeSDK()
@@ -87,7 +95,7 @@ export default class App extends Component {
       return res
     }, {})
 
-    const graphData = Object.keys(data).map(key => {
+    const graphData: Array<Object> = Object.keys(data).map(key => {
       const value = data[key]
       return {
         name: key,
@@ -125,11 +133,7 @@ export default class App extends Component {
         <View style={styles.contentContainer}>
           <ScrollView style={styles.scrollView}>
             <View style={styles.header}>
-              <Image
-                style={styles.mfLogo}
-                source={'../assets/images/mainframe-logo.svg'}
-                resizeMode="contain"
-              />
+              <Logo />
               <Text style={styles.title}>Onyx Staking</Text>
               <Text style={styles.descriptionLabel}>
                 Onyx staking transactions per 1000 blocks

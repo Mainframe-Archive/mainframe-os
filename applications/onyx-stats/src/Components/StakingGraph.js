@@ -11,7 +11,7 @@ type Props = {
 }
 
 export default class StakingGraph extends Component<Props> {
-  renderTooltip = item => {
+  renderTooltip = (item: Object) => {
     if (item.payload.length) {
       return (
         <View style={styles.tooltip}>

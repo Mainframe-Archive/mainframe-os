@@ -33,5 +33,8 @@ export const readContract = async (
   },
 ): Promise<any> => {
   const contract = new ctx.web3.eth.Contract(params.abi, params.contractAddress)
+  if (!contract.methods[params.method]) {
+    throw new Error('Contract method not found in provided ABI')
+  }
   return await contract.methods[params.method](...params.args).call()
 }

@@ -10,6 +10,7 @@ const responseChannel = 'sdk-response-channel'
 
 const request = (channel, data) =>
   new Promise((resolve, reject) => {
+    console.log('new request: ', channel, data)
     const request = {
       id: generateId(),
       data,

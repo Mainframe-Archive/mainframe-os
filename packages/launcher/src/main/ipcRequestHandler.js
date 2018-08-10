@@ -1,7 +1,7 @@
 // @flow
-import { BrowserWindow, ipcMain } from 'electron'
+import { ipcMain } from 'electron'
 import { VaultConfig } from '@mainframe/config'
-import type Client, { ClientSession } from '@mainframe/client'
+import type Client, { ClientSession, ID } from '@mainframe/client'
 import type { Environment } from '@mainframe/config'
 
 import {
@@ -71,12 +71,12 @@ const handleIpcRequests = (
 
   ipcMain.on(sdkRequestChannel, async (event, request) => {
     const res = await handleRequest(request, sdkRequests)
-    sendIpcResponse(event.sender, sdkResponseChannel, res)
+    event.sender.send(sdkResponseChannel, res)
   })
 
   ipcMain.on(trustedRequestChannel, async (event, request) => {
     const res = await handleRequest(request, trustedRequests)
-    sendIpcResponse(event.sender, trustedResponseChannel, res)
+    event.sender.send(trustedResponseChannel, res)
   })
 
   const handleRequest = async (
@@ -115,16 +115,6 @@ const handleIpcRequests = (
     }
   }
 
-  const sendIpcResponse = (sender, channel, response) => {
-    const window = BrowserWindow.fromWebContents(sender)
-    const send = (channel, response) => {
-      if (!(window && window.isDestroyed())) {
-        sender.send(channel, response)
-      }
-    }
-    send(channel, response)
-  }
-
   const getVaultsData = () => {
     const vaults = vaultConfig.vaults
     return {
@@ -154,7 +144,7 @@ const handleIpcRequests = (
     }
   }
 
-  const launchApp = async (appID: string, userID: string) => {
+  const launchApp = async (appID: ID, userID: ID) => {
     const appSession = await mfClient.openApp(appID, userID)
     onLaunchApp(appSession)
   }

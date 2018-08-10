@@ -6,17 +6,16 @@ import { View, StyleSheet } from 'react-native-web'
 import Text from './ui-kit/Text'
 import colors from './ui-kit/Colors'
 type Props = {
-  stakingData: Object,
+  stakingData: Array<Object>,
 }
 
 export default class StakingTimeline extends Component<Props> {
   render() {
-    const rows = Object.keys(this.props.stakingData).reduce((res, key) => {
-      const obj = this.props.stakingData[key]
+    const rows = this.props.stakingData.reduce((res, obj) => {
       const eventsInRange = obj.events.map(e => {
         if (e.event === 'Staked') {
           return (
-            <View style={styles.row}>
+            <View style={styles.row} key={e.id}>
               <View style={styles.rowSection}>
                 <Text style={styles.nodeLabel}>Node: </Text>
                 <Text style={styles.nodeAddr}>

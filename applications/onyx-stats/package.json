@@ -2,18 +2,19 @@
   "name": "onyx-stats",
   "version": "0.1.0",
   "private": true,
-  "dependencies": {
-    "react": "^16.4.2",
-    "react-dom": "^16.4.2",
-    "react-native-web": "^0.8.9",
-    "react-scripts": "1.1.4",
-    "recharts": "^1.1.0"
-  },
   "scripts": {
     "start": "webpack --mode development --watch",
     "build": "webpack --mode production",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
+  },
+  "dependencies": {
+    "@mainframe/sdk": "*",
+    "react": "^16.4.2",
+    "react-dom": "^16.4.2",
+    "react-native-web": "^0.8.9",
+    "react-scripts": "1.1.4",
+    "recharts": "^1.1.0"
   },
   "devDependencies": {
     "babel-core": "^6.26.3",

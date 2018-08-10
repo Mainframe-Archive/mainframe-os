@@ -16,6 +16,8 @@ import BlockchainClient from './BlockchainClient'
 // TODO: extract API types from daemon
 type AppUserSettings = Object
 
+export type { ID } from '@mainframe/utils-id'
+
 export type User = {
   id: ID,
   data: Object,
