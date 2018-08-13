@@ -5,11 +5,12 @@ const generateId = () =>
     .toString(36)
     .slice(2)
 
-const requestChannel = 'ipc-sandbox-request-channel'
-const responseChannel = 'ipc-sandbox-response-channel'
+const requestChannel = 'sdk-request-channel'
+const responseChannel = 'sdk-response-channel'
 
-const callMain = (channel, data) =>
+const request = (channel, data) =>
   new Promise((resolve, reject) => {
+    console.log('new request: ', channel, data)
     const request = {
       id: generateId(),
       data,
@@ -28,6 +29,4 @@ const callMain = (channel, data) =>
     ipcRenderer.send(requestChannel, request)
   })
 
-const ipc = { callMain }
-
-window.ipc = ipc
+window.mainframe = { request }

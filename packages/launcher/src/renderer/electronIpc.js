@@ -8,19 +8,17 @@ const generateId = () =>
     .toString(36)
     .slice(2)
 
-export const launcherToDaemonRequestChannel =
-  'ipc-launcher-daemon-request-channel'
-export const launcherFromDaemonResponseChannel =
-  'ipc-launcher-daemon-response-channel'
+export const trustedRequestChannel = 'ipc-trusted-request-channel'
+export const trustedResponseChannel = 'ipc-trusted-response-channel'
 
-export const mainProcRequestChannel = 'ipc-main-request-channel'
-export const mainProcResponseChannel = 'ipc-main-response-channel'
-
-const callMain = (requestChan, responseChan, data) =>
+const request = (method, args) =>
   new Promise((resolve, reject) => {
     const request = {
       id: generateId(),
-      data,
+      data: {
+        method,
+        args,
+      },
     }
     const listener = (event, msg) => {
       if (msg.id === request.id) {
@@ -29,44 +27,31 @@ const callMain = (requestChan, responseChan, data) =>
         } else {
           resolve(msg.result)
         }
-        ipcRenderer.removeListener(responseChan, listener)
+        ipcRenderer.removeListener(trustedResponseChannel, listener)
       }
     }
-    ipcRenderer.on(responseChan, listener)
-    ipcRenderer.send(requestChan, request)
+    ipcRenderer.on(trustedResponseChannel, listener)
+    ipcRenderer.send(trustedRequestChannel, request)
   })
 
-export const callMainProcess = (method: string, args?: Array<any>) =>
-  callMain(mainProcRequestChannel, mainProcResponseChannel, {
-    method,
-    args,
-  })
-
-const callMainClient = (method: string, args?: Array<any>) =>
-  callMain(launcherToDaemonRequestChannel, launcherFromDaemonResponseChannel, {
-    method,
-    args,
-  })
-
-export const client = {
+export const ipcClient = {
   // Apps
-  getInstalledApps: () => callMainClient('getInstalledApps'),
+  getInstalledApps: () => request('getInstalledApps'),
   installApp: (manifest: Object, userId: ID, settings: Object) =>
-    callMainClient('installApp', [manifest, userId, settings]),
-  removeApp: (appID: ID) => callMainClient('removeApp', [appID]),
-  openApp: (appID: ID, userID: ID) =>
-    callMainClient('openApp', [appID, userID]),
-  readManifest: (path: string) => callMainProcess('readManifest', [path]),
+    request('installApp', [manifest, userId, settings]),
+  removeApp: (appID: ID) => request('removeApp', [appID]),
+  launchApp: (appID: ID, userID: ID) => request('launchApp', [appID, userID]),
+  readManifest: (path: string) => request('readManifest', [path]),
 
   // Identity
   createUserIdentity: (identity: Object) =>
-    callMainClient('createUserIdentity', [identity]),
-  getOwnUserIdentities: () => callMainClient('getOwnUserIdentities'),
+    request('createUserIdentity', [identity]),
+  getOwnUserIdentities: () => request('getOwnUserIdentities'),
 
   // Main process
-  getVaultsData: () => callMainProcess('getVaultsData'),
+  getVaultsData: () => request('getVaultsData'),
   createVault: (password: string, label: string) =>
-    callMainProcess('createVault', [password, label]),
+    request('createVault', [password, label]),
   openVault: (path: string, password: string) =>
-    callMainProcess('openVault', [path, password]),
+    request('openVault', [path, password]),
 }

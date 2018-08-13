@@ -1,9 +1,10 @@
 //@flow
 
 import React, { Component } from 'react'
-import { TouchableOpacity, StyleSheet, Text } from 'react-native-web'
+import { TouchableOpacity, StyleSheet } from 'react-native-web'
 
 import { COLORS } from '../styles'
+import Text from './Text'
 
 type Props = {
   onPress: () => void,
@@ -32,10 +33,11 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.red,
     paddingHorizontal: 30,
     borderRadius: 30,
-    maxWidth: 200,
+    maxWidth: 250,
   },
   label: {
     textAlign: 'center',
     color: COLORS.white,
+    fontWeight: 'bold,',
   },
 })

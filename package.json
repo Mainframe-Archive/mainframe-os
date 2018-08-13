@@ -5,9 +5,7 @@
   "license": "MIT",
   "private": true,
   "workspaces": {
-    "packages": [
-      "packages/*"
-    ],
+    "packages": ["packages/*", "applications/*"],
     "nohoist": [
       "**/@mainframe/rpc-*",
       "**/@mainframe/secure-file",
@@ -17,6 +15,8 @@
       "**/@babel",
       "**/babel-core",
       "**/babel-jest",
+      "**/babel-loader",
+      "**/create-react-class",
       "**/electron",
       "**/electron-better-ipc",
       "**/electron-builder",
@@ -33,6 +33,7 @@
       "**/react",
       "**/react-dom",
       "**/read-config-file",
+      "**/react-native-web",
       "**/rx-socket",
       "**/rxjs",
       "**/sodium-universal",

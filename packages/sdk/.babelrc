@@ -1,0 +1,31 @@
+{
+  "presets": [
+    [
+      "env",
+      {
+        "targets": {
+          "browsers": ["last 2 versions", "ie >= 11"]
+        },
+        "modules": false,
+        "loose": true,
+        "browser-cjs": {
+          "presets": [
+            [
+              "env",
+              {
+                "targets": {
+                  "browsers": ["last 2 versions"]
+                },
+                "modules": "commonjs",
+                "loose": true
+              }
+            ]
+          ],
+          "plugins": ["syntax-class-properties", "transform-class-properties"]
+        }
+      }
+    ],
+    "babel-preset-flow"
+  ],
+  "plugins": ["syntax-class-properties", "transform-class-properties"]
+}

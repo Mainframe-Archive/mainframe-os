@@ -113,6 +113,7 @@ export const readVaultFile = async (
 
 export type UserSettings = {
   bzzURL: string,
+  web3HTTPProvider: string,
 }
 
 export type VaultData = {
@@ -158,6 +159,7 @@ export default class Vault {
       identities: new IdentitiesRepository(),
       settings: {
         bzzURL: 'http://localhost:8500',
+        web3HTTPProvider: 'https://mainnet.infura.io/KWLG1YOMaYgl4wiFlcJv',
       },
     }
     this._data = data ? Object.assign(vaultData, data) : vaultData
@@ -333,6 +335,10 @@ export default class Vault {
 
   setBzzURL(url: string): void {
     this._data.settings.bzzURL = url
+  }
+
+  setWeb3HTTPProvider(provider: string): void {
+    this._data.settings.web3HTTPProvider = provider
   }
 
   // Vault lifecycle

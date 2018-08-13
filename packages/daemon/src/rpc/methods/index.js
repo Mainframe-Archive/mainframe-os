@@ -4,7 +4,7 @@ import * as app from './app'
 import * as identity from './identity'
 import * as sub from './subscription'
 import * as vault from './vault'
-import * as web3 from './web3'
+import * as blockchain from './blockchain'
 
 const noop = () => {}
 
@@ -36,5 +36,7 @@ export default {
   sub_unsubscribe: sub.unsubscribe,
   vault_create: vault.create,
   vault_open: vault.open,
-  web3_request: web3.request,
+  blockchain_getContractEvents: blockchain.getContractEvents,
+  blockchain_getLatestBlock: blockchain.getLatestBlock,
+  blockchain_readContract: blockchain.readContract,
 }

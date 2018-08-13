@@ -1,17 +1,12 @@
 //@flow
 
 import React, { Component } from 'react'
-import {
-  View,
-  TouchableOpacity,
-  StyleSheet,
-  Text,
-  TextInput,
-} from 'react-native-web'
+import { View, TouchableOpacity, StyleSheet, TextInput } from 'react-native-web'
 import type { ID } from '@mainframe/utils-id'
 
-import { client } from '../electronIpc.js'
+import { ipcClient } from '../electronIpc.js'
 import Button from '../UIComponents/Button'
+import Text from '../UIComponents/Text'
 import colors from '../colors'
 
 type User = {
@@ -46,7 +41,9 @@ export default class IdentitySelectorView extends Component<Props, State> {
 
   async createId() {
     try {
-      const res = await client.createUserIdentity({ name: this.state.newName })
+      const res = await ipcClient.createUserIdentity({
+        name: this.state.newName,
+      })
       this.setState({ newName: '' })
       if (this.props.onCreatedId) {
         this.props.onCreatedId(res.id)
