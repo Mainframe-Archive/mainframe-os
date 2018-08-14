@@ -97,7 +97,9 @@ export const checkPermission = (
       }
       return 'not_set'
 
-    case 'WEB3_CALL':
+    case 'SWARM_UPLOAD':
+    case 'SWARM_DOWNLOAD':
+    case 'WEB3_SEND':
       if (permissions[key] == null) {
         return 'not_set'
       }

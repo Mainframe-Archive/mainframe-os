@@ -11,9 +11,10 @@ import { is } from 'electron-util'
 // eslint-disable-next-line import/named
 import { app, BrowserWindow, ipcMain } from 'electron'
 
+import { interceptWebRequests } from './permissionsManager'
 import handleIpcRequests from './ipcRequestHandler'
 
-type AppWindows = {
+export type AppWindows = {
   [window: BrowserWindow]: {
     appSession: ClientSession,
   },
@@ -73,7 +74,8 @@ const setupClient = async () => {
   await startDaemon(daemonConfig, true)
   daemonConfig.runStatus = 'running'
   client = new Client(daemonConfig.socketPath)
-  handleIpcRequests(client, env, onLaunchApp)
+  handleIpcRequests(client, env, appWindows, onLaunchApp)
+  interceptWebRequests(appWindows)
 
   // Simple check for API call, not proper versioning logic
   const version = await client.apiVersion()

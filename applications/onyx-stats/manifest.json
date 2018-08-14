@@ -9,11 +9,11 @@
   "permissions": {
     "required": {
       "SWARM_DOWNLOAD": true,
-      "WEB3_CALL": true,
-      "HTTPS_REQUEST": ["mainframe.com"]
+      "WEB_REQUEST": ["mainframe.com"]
     },
     "optional": {
-      "HTTPS_REQUEST": ["facebook.com", "google.com"],
+      "WEB3_SEND": true,
+      "WEB_REQUEST": ["facebook.com", "google.com"],
       "LOCATION_GET": true
     }
   }

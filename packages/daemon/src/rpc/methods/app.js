@@ -215,7 +215,6 @@ export const setPermission = {
     sessID: localIdParam,
     key: PERMISSION_KEY_SCHEMA,
     value: PERMISSION_GRANT_SCHEMA,
-    persist: { type: 'boolean', optional: true },
   },
   handler: async (
     ctx: RequestContext,
@@ -223,7 +222,6 @@ export const setPermission = {
       sessID: ID,
       key: PermissionKey,
       value: PermissionGrant,
-      persist: ?boolean,
     },
   ): Promise<void> => {
     const session = ctx.openVault.getSession(params.sessID)
@@ -232,13 +230,11 @@ export const setPermission = {
     }
     session.setPermission(params.key, params.value)
 
-    if (params.persist === true) {
-      const app = ctx.openVault.apps.getByID(session.appID)
-      if (app == null) {
-        throw sessionError('Invalid app')
-      }
-      app.setPermission(session.userID, params.key, params.value)
-      await ctx.openVault.save()
+    const app = ctx.openVault.apps.getByID(session.appID)
+    if (app == null) {
+      throw sessionError('Invalid app')
     }
+    app.setPermission(session.userID, params.key, params.value)
+    await ctx.openVault.save()
   },
 }

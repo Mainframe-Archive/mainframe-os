@@ -2,7 +2,7 @@
 
 // UI
 
-export type Style = number | Array<Object | number> | Object
+export type Style = ?number | ?Array<Style> | ?Object
 
 // Vault
 

@@ -138,6 +138,10 @@ export default class MainframeClient {
     key: PermissionKey,
     value: PermissionGrant,
   ): Promise<void> {
-    return this._rpc.request('app_setPermission', { sessID, key, value })
+    return this._rpc.request('app_setPermission', {
+      sessID,
+      key,
+      value,
+    })
   }
 }

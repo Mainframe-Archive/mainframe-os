@@ -4,10 +4,9 @@ import { VaultConfig } from '@mainframe/config'
 import type Client, { ClientSession, ID } from '@mainframe/client'
 import type { Environment } from '@mainframe/config'
 
-import {
-  trustedRequestChannel,
-  trustedResponseChannel,
-} from '../renderer/electronIpc.js'
+import { channels, IPC_ERRORS } from '../ipcRequest'
+import { checkPermission } from './permissionsManager'
+import type { AppWindows } from './index'
 
 type ClientResponse = {
   id: string,
@@ -18,30 +17,12 @@ type ClientResponse = {
 const sdkRequestChannel = 'sdk-request-channel'
 const sdkResponseChannel = 'sdk-response-channel'
 
-const IPC_ERRORS: Object = {
-  invalidParams: {
-    message: 'Invalid params',
-    code: 32602,
-  },
-  internalError: {
-    message: 'Internal error',
-    code: 32603,
-  },
-  invalidRequest: {
-    message: 'Invalid request',
-    code: 32600,
-  },
-  methodNotFound: {
-    message: 'Method not found',
-    code: 32601,
-  },
-}
-
 let vaultOpen = false
 
 const handleIpcRequests = (
   mfClient: Client,
   env: Environment,
+  appWindows: AppWindows,
   onLaunchApp: (session: ClientSession) => Promise<any>,
 ) => {
   const vaultConfig = new VaultConfig(env)
@@ -70,13 +51,39 @@ const handleIpcRequests = (
   }
 
   ipcMain.on(sdkRequestChannel, async (event, request) => {
-    const res = await handleRequest(request, sdkRequests)
-    event.sender.send(sdkResponseChannel, res)
+    const window = event.sender.getOwnerBrowserWindow()
+    const appWindow = appWindows[window]
+    try {
+      const granted = await checkPermission(
+        request,
+        appWindow.appSession,
+        window,
+        mfClient,
+      )
+
+      if (granted) {
+        const res = await handleRequest(request, sdkRequests)
+        event.sender.send(sdkResponseChannel, res)
+      } else {
+        event.sender.send(sdkResponseChannel, {
+          error: {
+            message: 'User denied permission',
+            code: 32600,
+          },
+          id: request.id,
+        })
+      }
+    } catch (err) {
+      event.sender.send(sdkResponseChannel, {
+        error: err,
+        id: request.id,
+      })
+    }
   })
 
-  ipcMain.on(trustedRequestChannel, async (event, request) => {
+  ipcMain.on(channels.appToMain.request, async (event, request) => {
     const res = await handleRequest(request, trustedRequests)
-    event.sender.send(trustedResponseChannel, res)
+    event.sender.send(channels.appToMain.response, res)
   })
 
   const handleRequest = async (

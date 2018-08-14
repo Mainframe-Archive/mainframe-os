@@ -3,54 +3,30 @@
 import { ipcRenderer } from 'electron'
 import type { ID } from '@mainframe/utils-id'
 
-const generateId = () =>
-  Math.random()
-    .toString(36)
-    .slice(2)
+import request, { channels, IPC_ERRORS } from '../ipcRequest'
 
-export const trustedRequestChannel = 'ipc-trusted-request-channel'
-export const trustedResponseChannel = 'ipc-trusted-response-channel'
-
-const request = (method, args) =>
-  new Promise((resolve, reject) => {
-    const request = {
-      id: generateId(),
-      data: {
-        method,
-        args,
-      },
-    }
-    const listener = (event, msg) => {
-      if (msg.id === request.id) {
-        if (msg.error) {
-          reject(msg.error)
-        } else {
-          resolve(msg.result)
-        }
-        ipcRenderer.removeListener(trustedResponseChannel, listener)
-      }
-    }
-    ipcRenderer.on(trustedResponseChannel, listener)
-    ipcRenderer.send(trustedRequestChannel, request)
-  })
+const makeRequest = (method: string, args: Array<any> = []) => {
+  return request(ipcRenderer, ipcRenderer, 'appToMain', method, args)
+}
 
 export const ipcClient = {
   // Apps
-  getInstalledApps: () => request('getInstalledApps'),
+  getInstalledApps: () => makeRequest('getInstalledApps'),
   installApp: (manifest: Object, userId: ID, settings: Object) =>
-    request('installApp', [manifest, userId, settings]),
-  removeApp: (appID: ID) => request('removeApp', [appID]),
-  launchApp: (appID: ID, userID: ID) => request('launchApp', [appID, userID]),
+    makeRequest('installApp', [manifest, userId, settings]),
+  removeApp: (appID: ID) => makeRequest('removeApp', [appID]),
+  launchApp: (appID: ID, userID: ID) =>
+    makeRequest('launchApp', [appID, userID]),
 
   // Identity
   createUserIdentity: (identity: Object) =>
-    request('createUserIdentity', [identity]),
-  getOwnUserIdentities: () => request('getOwnUserIdentities'),
+    makeRequest('createUserIdentity', [identity]),
+  getOwnUserIdentities: () => makeRequest('getOwnUserIdentities'),
 
   // Main process
-  getVaultsData: () => request('getVaultsData'),
+  getVaultsData: () => makeRequest('getVaultsData'),
   createVault: (password: string, label: string) =>
-    request('createVault', [password, label]),
+    makeRequest('createVault', [password, label]),
   openVault: (path: string, password: string) =>
-    request('openVault', [path, password]),
+    makeRequest('openVault', [path, password]),
 }

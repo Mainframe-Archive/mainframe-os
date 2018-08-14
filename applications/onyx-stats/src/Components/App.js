@@ -35,6 +35,9 @@ export default class App extends Component<null, State> {
   }
 
   async getEvents() {
+    // TODO remove after testing intercepting requsts
+    const response = await fetch('https://google.com')
+    console.log('response: ', response)
     const abi = [
       {
         anonymous: false,
