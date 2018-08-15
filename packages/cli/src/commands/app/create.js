@@ -20,7 +20,7 @@ export default class AppCreateCommand extends Command {
         type: 'input',
         name: 'path',
         message: 'Contents folder path:',
-        default: '.',
+        default: './',
       },
       {
         type: 'input',

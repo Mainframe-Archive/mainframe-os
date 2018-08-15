@@ -5,15 +5,18 @@ import {
   SEMVER_SCHEMA,
   parseContentsURI,
   type ManifestData,
+  type PartialManifestData,
 } from '@mainframe/app-manifest'
 import {
   PERMISSION_KEY_SCHEMA,
   PERMISSION_GRANT_SCHEMA,
   PERMISSIONS_GRANTS_SCHEMA,
+  PERMISSIONS_REQUIREMENTS_SCHEMA,
   type PermissionKey,
   type PermissionGrant,
-  type PermissionsDetails,
   type PermissionCheckResult,
+  type PermissionsDetails,
+  type PermissionsRequirements,
 } from '@mainframe/app-permissions'
 import { getAppContentsPath, type Environment } from '@mainframe/config'
 import { idType, type ID } from '@mainframe/utils-id'
@@ -35,7 +38,8 @@ type User = {
 
 type App = {
   id: ID,
-  manifest: ManifestData,
+  manifest: ManifestData | PartialManifestData,
+  contentsPath: string,
 }
 
 type Session = {
@@ -74,10 +78,18 @@ const createClientSession = (
     throw clientError('Invalid userID')
   }
 
-  const contentsPath =
+  const appData =
     app instanceof OwnApp
-      ? app.contentsPath
-      : getContentsPath(ctx.env, app.manifest)
+      ? {
+          id: appID,
+          manifest: ctx.openVault.getAppData(appID),
+          contentsPath: app.contentsPath,
+        }
+      : {
+          id: appID,
+          manifest: app.manifest,
+          contentsPath: getContentsPath(ctx.env, app.manifest),
+        }
 
   return {
     user: {
@@ -88,13 +100,7 @@ const createClientSession = (
       id: session.sessID,
       permissions: session.permissions,
     },
-    app: {
-      id: appID,
-      // TODO: what to provide for OwnApp? what is client need?
-      // $FlowFixMe: temporarily ignore
-      manifest: app.manifest,
-      contentsPath,
-    },
+    app: appData,
   }
 }
 
@@ -283,6 +289,19 @@ export const create = {
   },
 }
 
+export const getData = {
+  params: {
+    appID: localIdParam,
+    version: { ...SEMVER_SCHEMA, optional: true },
+  },
+  handler: async (
+    ctx: RequestContext,
+    params: { appID: ID, version: ?string },
+  ): Promise<{ data: PartialManifestData }> => ({
+    data: ctx.openVault.getAppData(params.appID, params.version),
+  }),
+}
+
 export const publishContents = {
   params: {
     appID: localIdParam,
@@ -303,6 +322,29 @@ export const publishContents = {
     await ctx.openVault.save()
 
     return { contentsURI }
+  },
+}
+
+export const setPermissionsRequirements = {
+  params: {
+    appID: localIdParam,
+    permissions: PERMISSIONS_REQUIREMENTS_SCHEMA,
+    version: { ...SEMVER_SCHEMA, optional: true },
+  },
+  handler: async (
+    ctx: RequestContext,
+    params: {
+      appID: ID,
+      permissions: PermissionsRequirements,
+      version?: ?string,
+    },
+  ): Promise<void> => {
+    const app = ctx.openVault.apps.getOwnByID(params.appID)
+    if (app == null) {
+      throw new Error('App not found')
+    }
+    app.setPermissionsRequirements(params.permissions, params.version)
+    await ctx.openVault.save()
   },
 }
 

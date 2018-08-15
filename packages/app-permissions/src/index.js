@@ -6,6 +6,7 @@ import type {
   PermissionCheckResult,
   PermissionKey,
   PermissionsDefinitions,
+  StrictPermissionsDefinitions,
   PermissionsDefinitionsDifference,
   PermissionsDetails,
   PermissionsGrants,
@@ -22,6 +23,23 @@ export const createWebRequestGrant = (
   granted?: WebRequestDefinition = [],
   denied?: WebRequestDefinition = [],
 ): WebRequestGrant => ({ granted, denied })
+
+export const createDefinitions = (
+  definitions?: PermissionsDefinitions = {},
+): StrictPermissionsDefinitions => ({
+  ...definitions,
+  WEB_REQUEST: Array.isArray(definitions.WEB_REQUEST)
+    ? definitions.WEB_REQUEST
+    : [],
+})
+
+export const createRequirements = (
+  required?: PermissionsDefinitions,
+  optional?: PermissionsDefinitions,
+): PermissionsRequirements => ({
+  required: createDefinitions(required),
+  optional: createDefinitions(optional),
+})
 
 export const mergeGrantsToDetails = (
   app: PermissionsGrants,
@@ -81,15 +99,22 @@ export const getDefinitionsDifference = (
   const { WEB_REQUEST: currHR, ...currOthers } = current
   const { WEB_REQUEST: nextHR, ...nextOthers } = next
 
-  if (currHR.length === 0) {
-    if (nextHR.length === 0) {
+  const emptyCurrHR = currHR == null || currHR.length === 0
+  const emptyNextHR = nextHR == null || nextHR.length === 0
+
+  if (emptyCurrHR) {
+    if (emptyNextHR) {
       unchanged.WEB_REQUEST = []
     } else {
       added.WEB_REQUEST = nextHR
     }
-  } else if (nextHR.length === 0) {
+  } else if (emptyNextHR) {
     removed.WEB_REQUEST = currHR
-  } else if (nextHR.length === currHR.length) {
+  } else if (
+    currHR != null &&
+    nextHR != null &&
+    nextHR.length === currHR.length
+  ) {
     // Same length, need to compare values
     const currStable = [...currHR].sort().toString()
     const nextStable = [...nextHR].sort().toString()

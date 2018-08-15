@@ -5,7 +5,10 @@
   "license": "MIT",
   "private": true,
   "workspaces": {
-    "packages": ["packages/*", "applications/*"],
+    "packages": [
+      "packages/*",
+      "applications/*"
+    ],
     "nohoist": [
       "**/@mainframe/rpc-*",
       "**/@mainframe/secure-file",
@@ -62,7 +65,7 @@
     "start": "yarn build && yarn test"
   },
   "resolutions": {
-    "esm": "3.0.74"
+    "esm": "3.0.76"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
@@ -83,9 +86,9 @@
     "flow-mono-cli": "^1.3.3",
     "flow-remove-types": "^1.2.3",
     "flow-typed": "^2.4.0",
-    "jest": "^23.4.2",
+    "jest": "^23.5.0",
     "jest-junit": "^5.0.0",
-    "lerna": "^3.0.1",
+    "lerna": "^3.0.5",
     "prettier": "^1.14.2"
   }
 }

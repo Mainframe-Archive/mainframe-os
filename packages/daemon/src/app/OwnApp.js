@@ -3,7 +3,7 @@
 import {
   createWebRequestGrant,
   mergeGrantsToDetails,
-  type PartialPermissionsDefinitions, // eslint-disable-line import/named
+  type PermissionsRequirements, // eslint-disable-line import/named
 } from '@mainframe/app-permissions'
 import type { MainframeID } from '@mainframe/data-types'
 import { uniqueID, type ID } from '@mainframe/utils-id'
@@ -27,16 +27,9 @@ export type OwnAppData = {
   version: string,
 }
 
-export type AppVersionData = {
-  contentsURI?: ?string,
-  permissions?: ?{
-    required: PartialPermissionsDefinitions,
-    optional: PartialPermissionsDefinitions,
-  },
-}
-
 export type AppVersion = {
-  data: AppVersionData,
+  contentsURI?: ?string,
+  permissions: PermissionsRequirements,
   publicationState: AppVersionPublicationState,
 }
 
@@ -101,21 +94,36 @@ export default class OwnApp extends AbstractApp {
     if (versionData.publicationState !== 'unpublished') {
       throw new Error('Invalid publication state')
     }
-
-    if (versionData.data == null) {
-      versionData.data = {}
-    }
-    versionData.data.contentsURI = contentsURI
+    versionData.contentsURI = contentsURI
     versionData.publicationState = 'contents_published'
+    this._versions[v] = versionData
+  }
+
+  setPermissionsRequirements(
+    permissions: PermissionsRequirements,
+    version?: ?string,
+  ) {
+    const v = version || this._data.version
+    const versionData = this._versions[v]
+    if (versionData == null) {
+      throw new Error('Invalid version')
+    }
+    versionData.permissions = permissions
     this._versions[v] = versionData
   }
 
   // Session
 
   createSession(userID: ID): SessionData {
-    // TODO: use permissions from partial app version data
+    const versionData = this._versions[this._data.version]
+    if (versionData == null) {
+      throw new Error('Invalid version')
+    }
     const appPermissions = {
-      WEB_REQUEST: createWebRequestGrant(),
+      ...versionData.permissions.required,
+      WEB_REQUEST: createWebRequestGrant(
+        versionData.permissions.required.WEB_REQUEST,
+      ),
     }
     const userPermissions = this.getPermissions(userID) || {
       WEB_REQUEST: createWebRequestGrant(),

@@ -1,6 +1,7 @@
 // @flow
 
 import repl from 'repl'
+import { DaemonConfig, VaultConfig } from '@mainframe/config'
 
 import Command from '../../Command'
 
@@ -26,6 +27,18 @@ export default class REPLCommand extends Command {
       configurable: false,
       enumerable: true,
       value: this.env,
+    })
+    // $FlowFixMe: VM context
+    Object.defineProperty(r.context, 'daemonConfig', {
+      configurable: false,
+      enumerable: true,
+      value: new DaemonConfig(this.env),
+    })
+    // $FlowFixMe: VM context
+    Object.defineProperty(r.context, 'vaultConfig', {
+      configurable: false,
+      enumerable: true,
+      value: new VaultConfig(this.env),
     })
 
     r.on('reset', initializeContext)

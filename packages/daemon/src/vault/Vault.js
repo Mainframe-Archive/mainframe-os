@@ -5,7 +5,12 @@ import {
   isValidSemver,
   writeManifestFile,
   type ManifestData, // eslint-disable-line import/named
+  type PartialManifestData, // eslint-disable-line import/named
 } from '@mainframe/app-manifest'
+import {
+  createRequirements,
+  type PermissionsRequirements, // eslint-disable-line import/named
+} from '@mainframe/app-permissions'
 import { readEncryptedFile, writeEncryptedFile } from '@mainframe/secure-file'
 import {
   decodeBase64,
@@ -234,22 +239,33 @@ export default class Vault {
       throw new Error('Failed to create app identity')
     }
 
+    let developerID = params.developerID
+    if (developerID == null) {
+      developerID = this.identities.createOwnDeveloper()
+    } else {
+      const devIdentity = this.identities.getOwnDeveloper(developerID)
+      if (devIdentity == null) {
+        throw new Error('Developer identity not found')
+      }
+    }
+
     const version =
       params.version == null || !isValidSemver(params.version)
         ? '1.0.0'
         : params.version
+
     return this.apps.create({
       appID: uniqueID(),
       data: {
         contentsPath: params.contentsPath,
-        developerID: params.developerID || this.identities.createOwnDeveloper(),
+        developerID,
         mainframeID: appIdentity.id,
         name: params.name || 'Untitled',
         version,
       },
       versions: {
         [version]: {
-          data: {},
+          permissions: createRequirements(),
           publicationState: 'unpublished',
         },
       },
@@ -264,7 +280,43 @@ export default class Vault {
     app.setContentsURI(contentsURI, version)
   }
 
-  // TODO: once directory upload is supported in erebos, add method to upload version using contentsPath and upadte contentsURI and publicationState
+  setAppPermissionsRequirements(
+    appID: ID,
+    permissions: PermissionsRequirements,
+    version?: ?string,
+  ): void {
+    const app = this.apps.getOwnByID(appID)
+    if (app == null) {
+      throw new Error('App not found')
+    }
+    app.setPermissionsRequirements(permissions, version)
+  }
+
+  getAppData(appID: ID, version?: ?string): PartialManifestData {
+    const app = this.apps.getOwnByID(appID)
+    if (app == null) {
+      throw new Error('App not found')
+    }
+    const devIdentity = this.identities.getOwnDeveloper(app.data.developerID)
+    if (devIdentity == null) {
+      throw new Error('Developer identity not found')
+    }
+    const versionData = app.getVersionData(version)
+    if (versionData == null) {
+      throw new Error('Invalid app version')
+    }
+
+    return {
+      id: app.mainframeID,
+      author: {
+        id: devIdentity.id,
+      },
+      name: app.data.name,
+      version: app.data.version,
+      contentsURI: versionData.contentsURI,
+      permissions: versionData.permissions,
+    }
+  }
 
   async writeAppManifest(
     appID: ID,
@@ -304,7 +356,7 @@ export default class Vault {
       throw new Error('Manifest has already been published for this version')
     }
 
-    if (versionData.data.contentsURI == null) {
+    if (versionData.contentsURI == null) {
       throw new Error(
         'App contents URI must be set before manifest can be created',
       )
@@ -317,12 +369,8 @@ export default class Vault {
       },
       name: app.data.name,
       version: app.data.version,
-      contentsURI: versionData.data.contentsURI,
-      // TODO: permissions from version data
-      permissions: {
-        required: { WEB_REQUEST: [] },
-        optional: { WEB_REQUEST: [] },
-      },
+      contentsURI: versionData.contentsURI,
+      permissions: versionData.permissions,
     }
 
     await writeManifestFile(toPath, manifestData, [
