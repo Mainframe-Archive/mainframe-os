@@ -26,16 +26,15 @@ Each package contains (or will contain) a readme with further information pertai
 In the root of the project, install node dependencies:
 
 ```
-$ yarn install
-$ yarn bootstrap
-$ yarn build
+yarn bootstrap
+yarn build
 ```
 
 Next, set up the daemon using the CLI:
 
 ```
-$ packages/cli/bin/run env:create
-$ packages/cli/bin/run daemon:setup --bin-path=$(pwd)/packages/daemon/bin/run
+packages/cli/bin/run env:create
+packages/cli/bin/run daemon:setup --bin-path=./packages/daemon/bin/run
 ```
 
 ## Run
