@@ -82,7 +82,7 @@ const createClientSession = (
     app instanceof OwnApp
       ? {
           id: appID,
-          manifest: ctx.openVault.getAppData(appID),
+          manifest: ctx.openVault.getAppManifestData(appID),
           contentsPath: app.contentsPath,
         }
       : {
@@ -304,7 +304,7 @@ export const getManifestData = {
     ctx: RequestContext,
     params: { appID: ID, version: ?string },
   ): Promise<{ data: PartialManifestData }> => ({
-    data: ctx.openVault.getAppData(params.appID, params.version),
+    data: ctx.openVault.getAppManifestData(params.appID, params.version),
   }),
 }
 

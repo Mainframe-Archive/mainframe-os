@@ -292,7 +292,7 @@ export default class Vault {
     app.setPermissionsRequirements(permissions, version)
   }
 
-  getAppData(appID: ID, version?: ?string): PartialManifestData {
+  getAppManifestData(appID: ID, version?: ?string): PartialManifestData {
     const app = this.apps.getOwnByID(appID)
     if (app == null) {
       throw new Error('App not found')
