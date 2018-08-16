@@ -1,11 +1,12 @@
 // @flow
 
-import type { ManifestData } from '@mainframe/app-manifest'
+import type { ManifestData, PartialManifestData } from '@mainframe/app-manifest'
 import type {
   PermissionCheckResult,
   PermissionGrant,
   PermissionKey,
   PermissionsDetails,
+  PermissionsRequirements,
 } from '@mainframe/app-permissions'
 import ipcRPC from '@mainframe/rpc-ipc'
 import type StreamRPC from '@mainframe/rpc-stream'
@@ -30,7 +31,7 @@ export type OwnUser = {
 
 export type App = {
   id: ID,
-  manifest: ManifestData,
+  manifest: PartialManifestData,
   contentsPath: string,
 }
 
@@ -139,5 +140,45 @@ export default class MainframeClient {
     value: PermissionGrant,
   ): Promise<void> {
     return this._rpc.request('app_setPermission', { sessID, key, value })
+  }
+
+  // Own apps
+
+  createApp(params: {
+    contentsPath: string,
+    developerID?: ?ID,
+    name?: ?string,
+    version?: ?string,
+  }): Promise<{ id: ID }> {
+    return this._rpc.request('app_create', params)
+  }
+
+  getAppManifestData(params: {
+    appID: ID,
+  }): Promise<{ data: PartialManifestData }> {
+    return this._rpc.request('app_getManifestData', params)
+  }
+
+  setAppPermissionsRequirements(params: {
+    appID: ID,
+    permissions: PermissionsRequirements,
+    version?: ?string,
+  }): Promise<void> {
+    return this._rpc.request('app_setPermissionsRequirements', params)
+  }
+
+  publishAppContents(params: {
+    appID: ID,
+    version?: ?string,
+  }): Promise<{ contentsURI: string }> {
+    return this._rpc.request('app_publishContents', params)
+  }
+
+  writeAppManifest(params: {
+    appID: ID,
+    path: string,
+    version?: ?string,
+  }): Promise<void> {
+    return this._rpc.request('app_writeManifest', params)
   }
 }

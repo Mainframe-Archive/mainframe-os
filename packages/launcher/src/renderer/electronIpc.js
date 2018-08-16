@@ -41,6 +41,7 @@ export const ipcClient = {
     request('installApp', [manifest, userId, settings]),
   removeApp: (appID: ID) => request('removeApp', [appID]),
   launchApp: (appID: ID, userID: ID) => request('launchApp', [appID, userID]),
+  readManifest: (path: string) => request('readManifest', [path]),
 
   // Identity
   createUserIdentity: (identity: Object) =>

@@ -3,18 +3,17 @@
 import type Client from '@mainframe/client'
 import { prompt } from 'inquirer'
 
-import Command from '../../Command'
-import { openDefaultVault } from '../../vault'
+import Command from '../../OpenVaultCommand'
 
 export default class IdentityCreateCommand extends Command {
-  static description = 'Manage Identities'
+  static description = 'Create identitiy'
+  static flags = Command.flags
 
   async run() {
     const client = this.createClient()
     if (client == null) {
       return
     }
-    await openDefaultVault(this, client)
     const command = await promptSelectCommand()
     const res = await identityCreateCommands[command](this, client)
     this.log(res)

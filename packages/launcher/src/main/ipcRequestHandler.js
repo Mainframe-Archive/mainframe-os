@@ -1,8 +1,10 @@
 // @flow
-import { ipcMain } from 'electron'
-import { VaultConfig } from '@mainframe/config'
+
+import { readManifestFile } from '@mainframe/app-manifest'
 import type Client, { ClientSession, ID } from '@mainframe/client'
-import type { Environment } from '@mainframe/config'
+// eslint-disable-next-line import/named
+import { VaultConfig, type Environment } from '@mainframe/config'
+import { ipcMain } from 'electron'
 
 import {
   trustedRequestChannel,
@@ -62,7 +64,7 @@ const handleIpcRequests = (
       mfClient.createUserIdentity(...params),
     getOwnUserIdentities: (params: Array<any>) =>
       mfClient.getOwnUserIdentities(...params),
-
+    readManifest: (params: Array<any>) => readManifest(...params),
     launchApp: (params: Array<any>) => launchApp(...params),
     getVaultsData: () => getVaultsData(),
     openVault: (params: Array<any>) => openVault(...params),
@@ -147,6 +149,18 @@ const handleIpcRequests = (
   const launchApp = async (appID: ID, userID: ID) => {
     const appSession = await mfClient.openApp(appID, userID)
     onLaunchApp(appSession)
+  }
+
+  const readManifest = async (path: string) => {
+    if (path == null) {
+      throw new Error(IPC_ERRORS.invalidParams)
+    }
+    const manifest = await readManifestFile(path)
+    return {
+      data: manifest.data,
+      // TODO: lookup keys to check if they match know identities in vault
+      keys: manifest.keys,
+    }
   }
 }
 

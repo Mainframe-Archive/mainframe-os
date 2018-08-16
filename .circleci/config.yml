@@ -3,6 +3,8 @@ jobs:
   build:
     docker:
       - image: circleci/node:10-browsers
+      - image: mainframehq/swarm
+        command: [./start_swarm_node.sh, tmp]
 
     working_directory: ~/repo
 
@@ -30,7 +32,7 @@ jobs:
             JEST_JUNIT_OUTPUT: "/tmp/test-reports/jest/results.xml"
       - run:
           name: Setup test env
-          command: "./packages/cli/bin/run env:create -n tests -t testing -d && ./packages/cli/bin/run daemon:setup --bin-path=$(pwd)/packages/daemon/bin/run"
+          command: "./packages/cli/bin/run env:create -n tests -t testing -d && ./packages/cli/bin/run daemon:setup --bin-path=./packages/daemon/bin/run"
       - run:
           name: Start test daemon
           command: ./packages/cli/bin/run daemon:start

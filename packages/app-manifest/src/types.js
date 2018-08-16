@@ -1,28 +1,28 @@
 // @flow
 
 import type { PermissionsRequirements } from '@mainframe/app-permissions'
-import type { base64 } from '@mainframe/utils-base64'
+import type { MainframeID } from '@mainframe/data-types'
 
 export type ManifestData = {
-  id: base64,
+  id: MainframeID,
   author: {
-    id: base64,
+    id: MainframeID,
   },
   name: string,
   version: string,
-  contentsHash: string,
+  contentsURI: string,
   permissions: PermissionsRequirements,
 }
 
-export type ManifestValidationError =
-  | 'invalid_signature'
-  | 'invalid_input'
-  | 'invalid_id'
-  | 'invalid_author'
-  | 'invalid_name'
-  | 'invalid_version'
-  | 'invalid_min_version'
-  | 'invalid_hash'
-  | 'invalid_permissions'
+export type PartialManifestData = {
+  id: MainframeID,
+  author: {
+    id: MainframeID,
+  },
+  name: string,
+  version: string,
+  contentsURI: ?string,
+  permissions: PermissionsRequirements,
+}
 
-export type ManifestValidationResult = ManifestValidationError | 'valid'
+export type ManifestValidationResult = true | Array<Object>

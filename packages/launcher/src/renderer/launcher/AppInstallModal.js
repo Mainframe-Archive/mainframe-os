@@ -2,7 +2,6 @@
 
 import type { PermissionsGrants } from '@mainframe/app-permissions'
 import type { ID } from '@mainframe/utils-id'
-import fs from 'fs-extra'
 import React, { createRef, Component, type ElementRef } from 'react'
 import { View, StyleSheet } from 'react-native-web'
 
@@ -61,17 +60,16 @@ export default class AppInstallModal extends Component<Props, State> {
     this.handleSelectedFiles([...this.fileInput.current.files])
   }
 
-  handleSelectedFiles = (files: Array<Object>) => {
+  handleSelectedFiles = async (files: Array<Object>) => {
     if (files.length) {
-      const file = files[0]
       try {
-        const manifest = fs.readJsonSync(file.path)
+        const manifest = await ipcClient.readManifest(files[0].path)
         if (
-          typeof manifest.name === 'string' &&
-          typeof manifest.permissions === 'object'
+          typeof manifest.data.name === 'string' &&
+          typeof manifest.data.permissions === 'object'
         ) {
           this.setState({
-            manifest,
+            manifest: manifest.data,
             installStep: 'identity',
           })
         } else {

@@ -7,9 +7,9 @@ import url from 'url'
 import Client, { type ClientSession } from '@mainframe/client'
 import { Environment, DaemonConfig } from '@mainframe/config'
 import { startDaemon } from '@mainframe/toolbox'
-import { is } from 'electron-util'
 // eslint-disable-next-line import/named
 import { app, BrowserWindow, ipcMain } from 'electron'
+import { is } from 'electron-util'
 
 import handleIpcRequests from './ipcRequestHandler'
 

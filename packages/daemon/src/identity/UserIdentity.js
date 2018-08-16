@@ -1,36 +1,31 @@
 // @flow
 
+// eslint-disable-next-line import/named
+import { mainframeIDType, type MainframeID } from '@mainframe/data-types'
+
 import Identity from './Identity'
-import Keychain, { type KeychainSerialized } from './Keychain'
 
 export type UserIdentitySerialized = {
-  keychain: KeychainSerialized,
+  id: string,
   data: Object,
 }
 
 export default class UserIdentity extends Identity {
-  static create = (data?: Object = {}, keychain?: Keychain): UserIdentity => {
-    return new UserIdentity(data, keychain || new Keychain())
-  }
-
   static fromJSON = (serialized: UserIdentitySerialized): UserIdentity => {
-    return new UserIdentity(
-      serialized.data,
-      Keychain.fromJSON(serialized.keychain),
-    )
+    return new UserIdentity(mainframeIDType(serialized.id), serialized.data)
   }
 
   static toJSON = (identity: UserIdentity): UserIdentitySerialized => {
     return {
-      keychain: Keychain.toJSON(identity.keychain),
+      id: identity.id,
       data: identity.data,
     }
   }
 
   data: Object
 
-  constructor(data: Object = {}, keychain: Keychain) {
-    super(keychain)
+  constructor(key: MainframeID | Buffer, data: Object = {}) {
+    super(key)
     this.data = data
   }
 }

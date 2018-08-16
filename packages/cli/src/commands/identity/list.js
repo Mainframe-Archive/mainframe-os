@@ -2,18 +2,17 @@
 
 import { prompt } from 'inquirer'
 
-import Command from '../../Command'
-import { openDefaultVault } from '../../vault'
+import Command from '../../OpenVaultCommand'
 
 export default class IdentityListCommand extends Command {
   static description = 'Manage Identities'
+  static flags = Command.flags
 
   async run() {
     const client = this.createClient()
     if (client == null) {
       return
     }
-    await openDefaultVault(this, client)
     const func = await promptSelectCommand()
     // $FlowFixMe: indexer property
     const res = await client[func]()

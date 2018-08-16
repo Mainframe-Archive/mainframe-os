@@ -12,20 +12,19 @@ export type PermissionKey = 'WEB_REQUEST' | PermissionKeyBasic
 export type WebRequestDefinition = Array<string>
 
 export type PermissionsDefinitions = {
-  WEB_REQUEST: WebRequestDefinition,
-  [PermissionKeyBasic]: boolean,
-}
-
-export type PartialPermissionsDefinitions = {
   WEB_REQUEST?: WebRequestDefinition,
   [PermissionKeyBasic]: boolean,
 }
 
 export type PermissionsDefinitionsDifference = {
-  added: PartialPermissionsDefinitions,
-  changed: PartialPermissionsDefinitions,
-  removed: PartialPermissionsDefinitions,
-  unchanged: PartialPermissionsDefinitions,
+  added: PermissionsDefinitions,
+  changed: PermissionsDefinitions,
+  removed: PermissionsDefinitions,
+  unchanged: PermissionsDefinitions,
+}
+
+export type StrictPermissionsDefinitions = PermissionsDefinitions & {
+  WEB_REQUEST: WebRequestDefinition,
 }
 
 export type WebRequestGrant = {
@@ -53,6 +52,11 @@ export type PermissionsRequirements = {
 
 export type PermissionsRequirementsDifference = {
   [PermissionRequirement]: PermissionsDefinitionsDifference,
+}
+
+export type StrictPermissionsRequirements = {
+  required: StrictPermissionsDefinitions,
+  optional: StrictPermissionsDefinitions,
 }
 
 export type PermissionsDetails = { [PermissionLifetime]: PermissionsGrants }
