@@ -27,7 +27,7 @@ export default {
   app_uninstall: noop,
   app_update: noop, // TODO: similar to install
   app_create: app.create,
-  app_getData: app.getData,
+  app_getManifestData: app.getManifestData,
   app_setPermissionsRequirements: app.setPermissionsRequirements,
   app_publishContents: app.publishContents,
   app_writeManifest: app.writeManifest,

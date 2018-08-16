@@ -153,8 +153,10 @@ export default class MainframeClient {
     return this._rpc.request('app_create', params)
   }
 
-  getAppData(params: { appID: ID }): Promise<{ data: PartialManifestData }> {
-    return this._rpc.request('app_getData', params)
+  getAppManifestData(params: {
+    appID: ID,
+  }): Promise<{ data: PartialManifestData }> {
+    return this._rpc.request('app_getManifestData', params)
   }
 
   setAppPermissionsRequirements(params: {

@@ -11,10 +11,12 @@ The main components (packages) of the Mainframe Browser are as follows:
 
 In addition, there are several auxiliary packages:
 
-- `app-permissions`: a utility library for distributed app permissions
+- `app-manifest`: an utility library for app manifests creation an validation
+- `app-permissions`: an utility library for distributed app permissions
 - `cli`: a command-line interface to communicate with the daemon
 - `client`: a library used by the CLI & launcher to communicate with the daemon
 - `config`: shared configuration utilities used by several packages
+- `data-types`: shared data primitives
 - `toolbox`: a set of functions that both the launcher and the cli use
 
 In order to make it easier to share code among packages, this project uses [lerna](https://lernajs.io/). Whenever code changes, it's expected that you run `yarn build` from the root of the project directory, and it will kick off the necessary `lerna` build processes in the package folders.
