@@ -1,64 +1,52 @@
 // @flow
 
-/*eslint-env browser*/
+/* eslint-env browser */
 
-type Request = {
-  method: string,
-  args?: Array<any>,
-}
+import type StreamRPC from '@mainframe/rpc-stream'
 
-type Mainframe = {
-  request: (channel: string, request: Request) => Promise<any>,
-}
+class API {
+  _rpc: StreamRPC
 
-class SDK {
-  _mainframe: Mainframe
-
-  constructor() {
-    if (window.mainframe) {
-      this._mainframe = window.mainframe
-    } else {
-      throw new Error('Cannot find expected mainframe client instance')
-    }
-  }
-
-  makeRequest = (request: Request): Promise<any> => {
-    return this._mainframe.request('sdk-request', request)
+  constructor(rpc: StreamRPC) {
+    this._rpc = rpc
   }
 }
 
-class Blockchain extends SDK {
-  getContractEvents = (
+class BlockchainAPI extends API {
+  getContractEvents(
     contractAddr: string,
     abi: Array<any>,
     eventName: string,
     options: Object,
-  ): Promise<Array<Object>> => {
-    return this.makeRequest({
-      method: 'blockchain_getContractEvents',
-      args: [contractAddr, abi, eventName, options],
+  ): Promise<Array<Object>> {
+    return this._rpc.request('blockchain_getContractEvents', {
+      contractAddr,
+      abi,
+      eventName,
+      options,
     })
   }
 
   getLatestBlock = (): Promise<number> => {
-    return this.makeRequest({
-      method: 'blockchain_getLatestBlock',
-    })
+    return this._rpc.request('blockchain_getLatestBlock')
   }
 }
 
-export default class MainframeSDK extends SDK {
-  blockchain: Blockchain
+export default class MainframeSDK {
+  _rpc: StreamRPC
+  blockchain: BlockchainAPI
 
   constructor() {
-    super()
-    this.blockchain = new Blockchain()
+    if (window.mainframe) {
+      this._rpc = window.mainframe.rpc
+    } else {
+      throw new Error('Cannot find expected mainframe client instance')
+    }
+
+    this.blockchain = new BlockchainAPI(this._rpc)
   }
 
   apiVersion = () => {
-    return this.makeRequest({
-      method: 'apiVersion',
-      args: [],
-    })
+    return this._rpc.request('api_version')
   }
 }

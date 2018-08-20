@@ -2,6 +2,7 @@
 
 import type { Socket } from 'net'
 import { inspect } from 'util'
+import { MANIFEST_SCHEMA_MESSAGES } from '@mainframe/app-manifest'
 import type { Environment } from '@mainframe/config'
 import createHandler, {
   parseJSON,
@@ -49,6 +50,9 @@ export default (socket: Socket, env: Environment, vaults: VaultRegistry) => {
     },
     onNotification: (ctx: RequestContext, msg: IncomingMessage) => {
       log('notification received', msg)
+    },
+    validatorOptions: {
+      messages: MANIFEST_SCHEMA_MESSAGES,
     },
   })
 

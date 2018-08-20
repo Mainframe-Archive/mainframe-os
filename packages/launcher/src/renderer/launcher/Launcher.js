@@ -1,6 +1,6 @@
 //@flow
 
-import type { ID } from '@mainframe/utils-id'
+import type { ID } from '@mainframe/client'
 import React, { Component } from 'react'
 import {
   View,

@@ -39,12 +39,12 @@ export default class AppCreateCommand extends Command {
       throw new Error('Contents folder must be provided')
     }
 
-    const res = await client.createApp({
+    const res = await client.app.create({
       contentsPath: this.resolvePath(answers.path),
       name: answers.name,
       version: answers.version,
     })
 
-    this.log(`App created with ID ${res.id}`)
+    this.log(`App created with ID ${res.appID}`)
   }
 }

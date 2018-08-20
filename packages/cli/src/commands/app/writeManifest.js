@@ -23,7 +23,7 @@ export default class AppWriteManifestCommand extends Command {
       return
     }
 
-    await client.writeAppManifest({
+    await client.app.writeManifest({
       appID: this.flags.id,
       path: this.resolvePath(this.flags.path),
     })

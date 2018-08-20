@@ -1,7 +1,7 @@
 //@flow
 
 import type { PermissionsGrants } from '@mainframe/app-permissions'
-import type { ID } from '@mainframe/utils-id'
+import type { ID } from '@mainframe/client'
 import React, { createRef, Component, type ElementRef } from 'react'
 import { View, StyleSheet } from 'react-native-web'
 

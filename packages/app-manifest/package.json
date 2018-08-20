@@ -16,12 +16,12 @@
     "@mainframe/utils-base64": "^0.1.1",
     "es6-error": "^4.1.1",
     "fastest-validator": "^0.6.10",
-    "semver": "^5.5.0",
+    "semver": "^5.5.1",
     "uri-js": "^4.2.2"
   },
   "devDependencies": {
     "@mainframe/app-permissions": "*",
     "@mainframe/utils-crypto": "^0.2.1",
-    "flow-bin": "^0.78.0"
+    "flow-bin": "^0.79.0"
   }
 }

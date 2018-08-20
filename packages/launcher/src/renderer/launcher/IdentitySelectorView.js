@@ -1,8 +1,8 @@
 //@flow
 
+import type { ID } from '@mainframe/client'
 import React, { Component } from 'react'
 import { View, TouchableOpacity, StyleSheet, TextInput } from 'react-native-web'
-import type { ID } from '@mainframe/utils-id'
 
 import { ipcClient } from '../electronIpc.js'
 import Button from '../UIComponents/Button'
