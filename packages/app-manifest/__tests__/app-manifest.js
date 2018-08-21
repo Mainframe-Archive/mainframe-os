@@ -1,5 +1,6 @@
 /* global getFixture, getTempFile */
 
+import { encodeMainframeID } from '@mainframe/data-types'
 import { signContents } from '@mainframe/secure-file'
 import { createSignKeyPair } from '@mainframe/utils-crypto'
 
@@ -14,201 +15,170 @@ import {
 
 describe('app-manifest', () => {
   const validManifest = {
-    id: 'test',
-    author: { id: 'author' },
+    id: encodeMainframeID(Buffer.from('id')),
+    author: {
+      id: encodeMainframeID(Buffer.from('author')),
+    },
     name: 'app',
     version: '0.2.0',
-    contentsHash: '1234abcd',
+    contentsURI: 'urn:bzz:1234',
     permissions: {
       required: {},
       optional: {},
     },
   }
 
-  it('ManifestError has a "reason" field', () => {
-    const err = new ManifestError('invalid_test', 'Error message')
-    expect(err.message).toBe('Error message')
-    expect(err.reason).toBe('invalid_test')
+  it('ManifestError has an "errors" field', () => {
+    const err = new ManifestError('Invalid test', [{ test: true }])
+    expect(err.message).toBe('Invalid test')
+    expect(err.errors).toEqual([{ test: true }])
   })
 
-  it('ManifestError defaults its "message"', () => {
-    const err = new ManifestError('invalid_test')
-    expect(err.message).toBe('Manifest error: invalid_test')
+  it('validateManifest() returns a list of errors for missing fields', () => {
+    expect(validateManifest({})).toEqual([
+      {
+        actual: undefined,
+        expected: undefined,
+        field: 'id',
+        message: "The 'id' field is required!",
+        type: 'required',
+      },
+      {
+        actual: undefined,
+        expected: undefined,
+        field: 'author',
+        message: "The 'author' field is required!",
+        type: 'required',
+      },
+      {
+        actual: undefined,
+        expected: undefined,
+        field: 'author',
+        message: "The 'author' field is required!",
+        type: 'required',
+      },
+      {
+        actual: undefined,
+        expected: undefined,
+        field: 'name',
+        message: "The 'name' field is required!",
+        type: 'required',
+      },
+      {
+        actual: undefined,
+        expected: undefined,
+        field: 'version',
+        message: "The 'version' field is required!",
+        type: 'required',
+      },
+      {
+        actual: undefined,
+        expected: undefined,
+        field: 'contentsURI',
+        message: "The 'contentsURI' field is required!",
+        type: 'required',
+      },
+      {
+        actual: undefined,
+        expected: undefined,
+        field: 'permissions',
+        message: "The 'permissions' field is required!",
+        type: 'required',
+      },
+      {
+        actual: undefined,
+        expected: undefined,
+        field: 'permissions',
+        message: "The 'permissions' field is required!",
+        type: 'required',
+      },
+    ])
   })
 
-  it('validateManifest() returns "invalid_input" if the manifest is not an object', () => {
-    expect(validateManifest('test')).toBe('invalid_input')
-  })
-
-  it('validateManifest() returns "invalid_id" if the "id" is not a string or an empty one', () => {
-    expect(validateManifest({ id: 1 })).toBe('invalid_id')
-    expect(validateManifest({ id: '' })).toBe('invalid_id')
-  })
-
-  it('validateManifest() returns "invalid_author" if the "author" field is not an object with a valid "id"', () => {
+  it('validateManifest() returns a list of errors for invalid fields', () => {
     expect(
       validateManifest({
-        id: 'test',
-        author: 1,
-      }),
-    ).toBe('invalid_author')
-    expect(
-      validateManifest({
-        id: 'test',
-        author: { id: 1 },
-      }),
-    ).toBe('invalid_author')
-    expect(
-      validateManifest({
-        id: 'test',
-        author: { id: '' },
-      }),
-    ).toBe('invalid_author')
-  })
-
-  it('validateManifest() returns "invalid_name" if the "name" is not a valid string', () => {
-    expect(
-      validateManifest({
-        id: 'test',
-        author: { id: 'author' },
-        name: [],
-      }),
-    ).toBe('invalid_name')
-    expect(
-      validateManifest({
-        id: 'test',
-        author: { id: 'author' },
-        name: '',
-      }),
-    ).toBe('invalid_name')
-  })
-
-  it('validateManifest() returns "invalid_version" if the "version" is not a valid semver string', () => {
-    expect(
-      validateManifest({
-        id: 'test',
-        author: { id: 'author' },
-        name: 'app',
-        version: 'not semver',
-      }),
-    ).toBe('invalid_version')
-  })
-
-  it('validateManifest() returns "invalid_min_version" if the "version" is not higher than the provided value', () => {
-    expect(
-      validateManifest(
-        {
-          id: 'test',
-          author: { id: 'author' },
-          name: 'app',
-          version: '0.2.0',
+        id: 'bad id',
+        author: {
+          id: 'bad id',
         },
-        '0.3.1',
-      ),
-    ).toBe('invalid_min_version')
-  })
-
-  it('validateManifest() returns "invalid_hash" if the "contentsHash" is not valid', () => {
-    expect(
-      validateManifest({
-        id: 'test',
-        author: { id: 'author' },
-        name: 'app',
-        version: '0.2.0',
-      }),
-    ).toBe('invalid_hash')
-    expect(
-      validateManifest({
-        id: 'test',
-        author: { id: 'author' },
-        name: 'app',
-        version: '0.2.0',
-        contentsHash: '',
-      }),
-    ).toBe('invalid_hash')
-  })
-
-  it('validateManifest() returns "invalid_permissions" if the "permissions" object is not properly set', () => {
-    expect(
-      validateManifest({
-        id: 'test',
-        author: { id: 'author' },
-        name: 'app',
-        version: '0.2.0',
-        contentsHash: '1234',
-        permissions: true,
-      }),
-    ).toBe('invalid_permissions')
-    expect(
-      validateManifest({
-        id: 'test',
-        author: { id: 'author' },
-        name: 'app',
-        version: '0.2.0',
-        contentsHash: '1234',
-        permissions: {},
-      }),
-    ).toBe('invalid_permissions')
-    expect(
-      validateManifest({
-        id: 'test',
-        author: { id: 'author' },
-        name: 'app',
-        version: '0.2.0',
-        contentsHash: '1234',
+        name: 'no',
+        version: 2,
+        contentsURI: 'urn:invalid',
         permissions: {
-          required: true,
-        },
-      }),
-    ).toBe('invalid_permissions')
-    expect(
-      validateManifest({
-        id: 'test',
-        author: { id: 'author' },
-        name: 'app',
-        version: '0.2.0',
-        contentsHash: '1234',
-        permissions: {
-          required: {},
-          optional: false,
-        },
-      }),
-    ).toBe('invalid_permissions')
-    expect(validateManifest(validManifest)).toBe('valid')
-  })
-
-  it('validateManifest() returns "valid" if the expected fields are provided', () => {
-    expect(
-      validateManifest(
-        {
-          id: 'test',
-          author: { id: 'author' },
-          name: 'app',
-          version: '0.4.0',
-          contentsHash: '1234',
-          permissions: {
-            required: {},
-            optional: {},
+          required: {
+            WEB_REQUEST: true,
           },
+          optional: {},
         },
-        '0.3.1',
-      ),
-    ).toBe('valid')
+      }),
+    ).toEqual([
+      {
+        actual: 'bad id',
+        expected: null,
+        field: 'id',
+        message: "The value 'bad id' is not a valid Mainframe ID!",
+        type: 'id',
+      },
+      {
+        actual: 'bad id',
+        expected: null,
+        field: 'author.id',
+        message: "The value 'bad id' is not a valid Mainframe ID!",
+        type: 'id',
+      },
+      {
+        actual: 2,
+        expected: 3,
+        field: 'name',
+        message:
+          "The 'name' field length must be larger than or equal to 3 characters long!",
+        type: 'stringMin',
+      },
+      {
+        actual: 2,
+        expected: null,
+        field: 'version',
+        message: "The value '2' is not valid semver!",
+        type: 'semver',
+      },
+      {
+        actual: 'urn:invalid',
+        expected: null,
+        field: 'contentsURI',
+        message: "The value 'urn:invalid' is not a valid URN!",
+        type: 'urn',
+      },
+      {
+        actual: undefined,
+        expected: undefined,
+        field: 'permissions.required.WEB_REQUEST',
+        message:
+          "The 'permissions.required.WEB_REQUEST' field must be an array!",
+        type: 'array',
+      },
+    ])
   })
 
-  it('parseManifestData() throws an "invalid_signature" ManifestError if the data is not provided', () => {
-    expect(() => parseManifestData()).toThrow(
-      'Manifest error: invalid_signature',
-    )
+  it('validateManifest() returns true if the manifest is valid', () => {
+    expect(validateManifest(validManifest)).toBe(true)
   })
 
-  it('parseManifestData() throws an "invalid_input" ManifestError if the data cannot be parsed', () => {
+  it('parseManifestData() throws an "Invalid input" ManifestError if the data is not provided', () => {
+    try {
+      parseManifestData()
+    } catch (err) {
+      expect(err instanceof ManifestError).toBe(true)
+      expect(err.message).toBe('Missing input')
+    }
+  })
+
+  it('parseManifestData() throws an "Invalid JSON data" ManifestError if the data cannot be parsed', () => {
     try {
       parseManifestData(Buffer.from('test'))
     } catch (err) {
       expect(err instanceof ManifestError).toBe(true)
-      expect(err.message).toBe('Unexpected token e in JSON at position 1')
-      expect(err.reason).toBe('invalid_input')
+      expect(err.message).toBe('Invalid JSON input')
     }
   })
 
@@ -218,7 +188,58 @@ describe('app-manifest', () => {
       parseManifestData(data)
     } catch (err) {
       expect(err instanceof ManifestError).toBe(true)
-      expect(err.reason).toBe('invalid_author')
+      expect(err.message).toBe('Invalid manifest data')
+      expect(err.errors).toEqual([
+        {
+          actual: 'test',
+          expected: null,
+          field: 'id',
+          message: "The value 'test' is not a valid Mainframe ID!",
+          type: 'id',
+        },
+        {
+          actual: undefined,
+          expected: undefined,
+          field: 'author.id',
+          message: "The 'author.id' field is required!",
+          type: 'required',
+        },
+        {
+          actual: undefined,
+          expected: undefined,
+          field: 'name',
+          message: "The 'name' field is required!",
+          type: 'required',
+        },
+        {
+          actual: undefined,
+          expected: undefined,
+          field: 'version',
+          message: "The 'version' field is required!",
+          type: 'required',
+        },
+        {
+          actual: undefined,
+          expected: undefined,
+          field: 'contentsURI',
+          message: "The 'contentsURI' field is required!",
+          type: 'required',
+        },
+        {
+          actual: undefined,
+          expected: undefined,
+          field: 'permissions',
+          message: "The 'permissions' field is required!",
+          type: 'required',
+        },
+        {
+          actual: undefined,
+          expected: undefined,
+          field: 'permissions',
+          message: "The 'permissions' field is required!",
+          type: 'required',
+        },
+      ])
     }
   })
 
@@ -242,7 +263,7 @@ describe('app-manifest', () => {
       verifyManifest(contents, [kp1.publicKey])
     } catch (err) {
       expect(err instanceof ManifestError).toBe(true)
-      expect(err.reason).toBe('invalid_signature')
+      expect(err.message).toBe('Missing input')
     }
   })
 
@@ -262,7 +283,9 @@ describe('app-manifest', () => {
     await writeManifestFile(path, validManifest, [kp1, kp2])
     const read = await readManifestFile(path)
     expect(read.data).toEqual(validManifest)
-    expect(read.file).toEqual(expect.any(Object))
+    expect(read.keys).toHaveLength(2)
+    expect(kp1.publicKey.equals(read.keys[0])).toBe(true)
+    expect(kp2.publicKey.equals(read.keys[1])).toBe(true)
   })
 
   it('writeSignedFile() throws an error if the manifest is not valid', () => {

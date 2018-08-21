@@ -45,21 +45,8 @@ export default class AppContainer extends Component<Props> {
       return <View />
     }
 
-    // TODO: Revert to provided path
-    // const appUrl = url.format({
-    //   pathname: path.join(appSession.app.contentsPath, 'index.html'),
-    //   protocol: 'file:',
-    //   slashes: true,
-    // })
-
     const appUrl = url.format({
-      pathname: path.join(
-        __static,
-        'applications',
-        'onyx-stats',
-        'dist',
-        'index.html',
-      ),
+      pathname: path.join(appSession.app.contentsPath, 'index.html'),
       protocol: 'file:',
       slashes: true,
     })

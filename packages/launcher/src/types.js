@@ -18,6 +18,12 @@ export type VaultsData = {
   vaultOpen: boolean,
 }
 
+// Main
+
+export type AppSessions = {
+  [window: BrowserWindow]: ClientSession,
+}
+
 // Request
 
 export type ClientResponse = {

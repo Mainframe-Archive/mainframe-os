@@ -1,12 +1,17 @@
 // @flow
 
+import { resolve } from 'path'
+
 import Client from '@mainframe/client'
 import {
   getDaemonRunStatus,
   getDaemonSocketPath,
   Environment,
+  type VaultConfig,
 } from '@mainframe/config'
 import { Command as Cmd, flags } from '@oclif/command'
+
+import { promptCreateVault } from './prompts'
 
 export default class Command extends Cmd {
   static flags = {
@@ -14,6 +19,11 @@ export default class Command extends Cmd {
       char: 'e',
       description: 'Mainframe environment to run the command in',
       env: 'MAINFRAME_ENV',
+    }),
+    vault: flags.string({
+      char: 'v',
+      description: 'vault path',
+      env: 'MAINFRAME_VAULT',
     }),
   }
 
@@ -34,6 +44,38 @@ export default class Command extends Cmd {
       return new Client(getDaemonSocketPath(this.env))
     }
     this.error('Daemon is not running, use `daemon:start` first')
+  }
+
+  resolvePath(path: string): string {
+    return resolve(process.cwd(), path)
+  }
+
+  async createVault(
+    cfg: VaultConfig,
+    path: string,
+    setDefault: ?boolean = false,
+    client: ?Client = this.client,
+  ): Promise<void> {
+    if (client == null) {
+      return
+    }
+
+    let vault
+    while (vault == null) {
+      try {
+        vault = await promptCreateVault(setDefault)
+      } catch (err) {
+        this.warn(err)
+      }
+    }
+
+    await client.vault.create({ path, password: vault.password })
+
+    // Update config after successful creation by daemon
+    cfg.setLabel(path, vault.label)
+    if (vault.setDefault) {
+      cfg.defaultVault = path
+    }
   }
 
   async init() {

@@ -4,114 +4,76 @@ import {
   readSignedFile,
   verifyContents,
   writeSignedFile,
-  type SecureFile, // eslint-disable-line import/named
   type SignedContents, // eslint-disable-line import/named
 } from '@mainframe/secure-file'
+import { decodeBase64 } from '@mainframe/utils-base64'
 import type { KeyPair } from '@mainframe/utils-crypto'
 import ExtendableError from 'es6-error'
-import semver from 'semver'
+import Validator from 'fastest-validator'
 
-import type {
-  ManifestData,
-  ManifestValidationError,
-  ManifestValidationResult,
-} from './types'
+import { MANIFEST_SCHEMA_MESSAGES, MANIFEST_SCHEMA_PROPS } from './schema'
+import type { ManifestData, ManifestValidationResult } from './types'
 
+export { parse as parseContentsURI } from 'uri-js'
+
+export * from './schema'
 export * from './types'
 
 export class ManifestError extends ExtendableError {
-  reason: ManifestValidationError
+  errors: ?Array<Object>
 
-  constructor(reason: ManifestValidationError, message?: string) {
-    super(message || `Manifest error: ${reason}`)
-    this.reason = reason
+  constructor(message: string, errors?: ?Array<Object>) {
+    super(message)
+    this.errors = errors
   }
 }
 
+const v = new Validator({ messages: MANIFEST_SCHEMA_MESSAGES })
+const check = v.compile(MANIFEST_SCHEMA_PROPS)
+
 export const validateManifest = (
   manifest: ManifestData,
-  gtVersion?: string,
 ): ManifestValidationResult => {
-  if (typeof manifest !== 'object') {
-    return 'invalid_input'
-  }
-
-  if (typeof manifest.id !== 'string' || manifest.id.length === 0) {
-    return 'invalid_id'
-  }
-
-  if (
-    typeof manifest.author !== 'object' ||
-    typeof manifest.author.id !== 'string' ||
-    manifest.author.id.length === 0
-  ) {
-    return 'invalid_author'
-  }
-
-  if (typeof manifest.name !== 'string' || manifest.name.length === 0) {
-    return 'invalid_name'
-  }
-
-  if (semver.valid(manifest.version) == null) {
-    return 'invalid_version'
-  }
-  if (gtVersion != null && semver.gte(gtVersion, manifest.version)) {
-    return 'invalid_min_version'
-  }
-
-  if (
-    typeof manifest.contentsHash !== 'string' ||
-    manifest.contentsHash.length === 0
-  ) {
-    return 'invalid_hash'
-  }
-
-  if (
-    typeof manifest.permissions !== 'object' ||
-    typeof manifest.permissions.required !== 'object' ||
-    typeof manifest.permissions.optional !== 'object'
-  ) {
-    return 'invalid_permissions'
-  }
-
-  return 'valid'
+  return check(manifest)
 }
 
 export const parseManifestData = (input: ?Buffer): ManifestData => {
   if (input == null) {
-    throw new ManifestError('invalid_signature')
+    throw new ManifestError('Missing input')
   }
 
   let data
   try {
     data = JSON.parse(input.toString())
   } catch (err) {
-    throw new ManifestError('invalid_input', err.message)
+    throw new ManifestError('Invalid JSON input')
   }
 
   const result = validateManifest(data)
-  if (result === 'valid') {
+  if (result === true) {
     return data
   } else {
-    throw new ManifestError(result)
+    throw new ManifestError('Invalid manifest data', result)
   }
 }
 
 export const verifyManifest = (
   contents: SignedContents,
-  keys?: Array<Buffer>,
+  useKeys?: Array<Buffer>,
 ): ManifestData => {
-  return parseManifestData(verifyContents(contents, keys))
+  return parseManifestData(verifyContents(contents, useKeys))
 }
 
 export const readManifestFile = async (
   path: string,
-  keys?: Array<Buffer>,
-): Promise<{ data: ManifestData, file: SecureFile<SignedContents> }> => {
-  const file = await readSignedFile(path, keys)
-  const data = parseManifestData(file.opened)
-  // $FlowFixMe: SecureFile type
-  return { data, file }
+  useKeys?: Array<Buffer>,
+): Promise<{ data: ManifestData, keys: Array<Buffer> }> => {
+  const { file, opened } = await readSignedFile(path, useKeys)
+  const keys = useKeys || file.contents.signed.keys.map(decodeBase64)
+  return {
+    data: parseManifestData(opened),
+    keys,
+  }
 }
 
 export const writeManifestFile = async (
@@ -120,8 +82,8 @@ export const writeManifestFile = async (
   keyPairs: Array<KeyPair>,
 ): Promise<void> => {
   const result = validateManifest(data)
-  if (result !== 'valid') {
-    throw new ManifestError(result)
+  if (result !== true) {
+    throw new ManifestError('Invalid manifest data', result)
   }
   await writeSignedFile(path, Buffer.from(JSON.stringify(data)), keyPairs)
 }

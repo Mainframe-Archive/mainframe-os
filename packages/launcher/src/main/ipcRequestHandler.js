@@ -4,11 +4,10 @@ import { VaultConfig } from '@mainframe/config'
 import type Client, { ClientSession, ID } from '@mainframe/client'
 import type { Environment } from '@mainframe/config'
 
-import type { ClientResponse, RequestContext } from '../types'
+import type { ClientResponse, RequestContext, AppSessions } from '../types'
 
 import { channels, IPC_ERRORS } from '../ipcRequest'
 import { withPermission } from './permissionsManager'
-import type { AppSessions } from './index'
 
 const sdkRequestChannel = 'sdk-request-channel'
 const sdkResponseChannel = 'sdk-response-channel'

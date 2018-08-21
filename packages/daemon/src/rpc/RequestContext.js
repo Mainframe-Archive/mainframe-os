@@ -10,7 +10,10 @@ import type { Vault, VaultRegistry } from '../vault'
 
 import type { NotifyFunc } from './handleClient'
 
+type LogFunc = (...args: Array<any>) => void
+
 type Params = {
+  log: LogFunc,
   env: Environment,
   notify: NotifyFunc,
   socket: Socket,
@@ -25,12 +28,14 @@ export default class RequestContext {
   _socket: Socket
   _vaults: VaultRegistry
   _subscriptions: { [ID]: string } = {}
+  log: LogFunc
 
   constructor(params: Params) {
     this._env = params.env
     this._notify = params.notify
     this._socket = params.socket
     this._vaults = params.vaults
+    this.log = params.log
   }
 
   get bzz(): Bzz {

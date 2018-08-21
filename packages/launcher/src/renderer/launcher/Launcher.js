@@ -1,6 +1,6 @@
 //@flow
 
-import type { ID } from '@mainframe/utils-id'
+import type { ID } from '@mainframe/client'
 import React, { Component } from 'react'
 import {
   View,
@@ -12,7 +12,7 @@ import {
 
 import colors from '../colors'
 import type { VaultsData } from '../../types'
-import { ipcClient } from '../electronIpc'
+import rpc from '../rpc'
 import Button from '../UIComponents/Button'
 import Text from '../UIComponents/Text'
 import ModalView from '../UIComponents/ModalView'
@@ -40,7 +40,7 @@ export default class App extends Component<{}, State> {
 
   async getVaultsData() {
     try {
-      const vaultsData = await ipcClient.getVaultsData()
+      const vaultsData = await rpc.getVaultsData()
       this.setState({
         vaultsData,
       })
@@ -55,7 +55,7 @@ export default class App extends Component<{}, State> {
 
   async getInstalledApps() {
     try {
-      const res = await ipcClient.getInstalledApps()
+      const res = await rpc.getInstalledApps()
       this.setState({
         installedApps: res.apps,
       })
@@ -115,7 +115,7 @@ export default class App extends Component<{}, State> {
   }
 
   async openApp(appID: ID, userID: ID) {
-    await ipcClient.launchApp(appID, userID)
+    await rpc.launchApp(appID, userID)
     this.setState({
       selectIdForApp: undefined,
     })
@@ -144,12 +144,12 @@ export default class App extends Component<{}, State> {
       return this.renderVaultManager()
     }
     const appRows = this.state.installedApps.map(app => {
-      const onClick = async () => {
+      const onClick = () => {
         this.onOpenApp(app.appID)
       }
 
-      const onClickDelete = () => {
-        ipcClient.removeApp(app.appID)
+      const onClickDelete = async () => {
+        await rpc.removeApp(app.appID)
         this.getInstalledApps()
       }
 

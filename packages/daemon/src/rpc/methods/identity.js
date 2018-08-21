@@ -1,13 +1,17 @@
 // @flow
-// eslint-disable-next-line import/named
-import { idType, type ID } from '@mainframe/utils-id'
+
+import {
+  idType as toClientID,
+  /* eslint-disable import/named */
+  type IdentityCreateDeveloperParams,
+  type IdentityCreateUserParams,
+  type IdentityCreateResult,
+  type IdentityGetOwnDevelopersResult,
+  type IdentityGetOwnUsersResult,
+  /* eslint-enable import/named */
+} from '@mainframe/client'
 
 import type RequestContext from '../RequestContext'
-
-type OwnId = {
-  id: ID,
-  data: Object,
-}
 
 export const createDeveloper = {
   params: {
@@ -15,11 +19,11 @@ export const createDeveloper = {
   },
   handler: async (
     ctx: RequestContext,
-    params: { data: Object },
-  ): Promise<{ id: ID }> => {
+    params: IdentityCreateDeveloperParams,
+  ): Promise<IdentityCreateResult> => {
     const id = ctx.openVault.identities.createOwnDeveloper(params.data)
     await ctx.openVault.save()
-    return { id }
+    return { id: toClientID(id) }
   },
 }
 
@@ -29,30 +33,28 @@ export const createUser = {
   },
   handler: async (
     ctx: RequestContext,
-    params: { data: Object },
-  ): Promise<{ id: ID }> => {
+    params: IdentityCreateUserParams,
+  ): Promise<IdentityCreateResult> => {
     const id = ctx.openVault.identities.createOwnUser(params.data)
     await ctx.openVault.save()
-    return { id }
+    return { id: toClientID(id) }
   },
-}
-
-export const getOwnUsers = (ctx: RequestContext): { users: Array<OwnId> } => {
-  const { ownUsers } = ctx.openVault.identities
-  const users = Object.keys(ownUsers).map(id => {
-    const uID = idType(id)
-    return { id: uID, data: ownUsers[uID].data }
-  })
-  return { users }
 }
 
 export const getOwnDevelopers = (
   ctx: RequestContext,
-): { developers: Array<OwnId> } => {
+): IdentityGetOwnDevelopersResult => {
   const { ownDevelopers } = ctx.openVault.identities
   const developers = Object.keys(ownDevelopers).map(id => {
-    const uID = idType(id)
-    return { id: uID, data: ownDevelopers[uID].data }
+    return { id: toClientID(id), data: ownDevelopers[id].data }
   })
   return { developers }
+}
+
+export const getOwnUsers = (ctx: RequestContext): IdentityGetOwnUsersResult => {
+  const { ownUsers } = ctx.openVault.identities
+  const users = Object.keys(ownUsers).map(id => {
+    return { id: toClientID(id), data: ownUsers[id].data }
+  })
+  return { users }
 }

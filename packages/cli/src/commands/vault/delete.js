@@ -2,20 +2,13 @@
 
 import { VaultConfig } from '@mainframe/config'
 import { deleteVault } from '@mainframe/toolbox'
-import { flags } from '@oclif/command'
 import { prompt } from 'inquirer'
 
 import Command from '../../Command'
 
 export default class DeleteCommand extends Command {
   static description = 'Delete a vault'
-  static flags = {
-    ...Command.flags,
-    path: flags.string({
-      char: 'p',
-      description: 'vault path',
-    }),
-  }
+  static flags = Command.flags
 
   async deleteVault(cfg: VaultConfig, path: string) {
     const label = cfg.getLabel(path)
@@ -23,7 +16,7 @@ export default class DeleteCommand extends Command {
     const { confirmed } = await prompt({
       type: 'confirm',
       name: 'confirmed',
-      message: `Are you sure you want to delete the vault ${name}? This CAN NOT be reversed.`,
+      message: `Are you sure you want to delete the vault "${name}"? This CAN NOT be reversed.`,
       default: false,
     })
     if (confirmed) {
@@ -36,8 +29,8 @@ export default class DeleteCommand extends Command {
     const cfg = new VaultConfig(this.env)
 
     // When the path is provided as a flag, only try to delete this vault
-    if (this.flags.path != null) {
-      this.deleteVault(cfg, this.flags.path)
+    if (this.flags.vault != null) {
+      this.deleteVault(cfg, this.flags.vault)
       return
     }
 

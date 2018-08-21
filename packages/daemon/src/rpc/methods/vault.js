@@ -1,17 +1,13 @@
 // @flow
 
+// eslint-disable-next-line import/named
+import { VAULT_SCHEMA, type VaultParams } from '@mainframe/client'
+
 import { vaultError } from '../errors'
 import type RequestContext from '../RequestContext'
 
-const vaultParams = {
-  path: { type: 'string', empty: false },
-  password: { type: 'string', empty: false },
-}
-
-type VaultParams = { path: string, password: string }
-
 export const create = {
-  params: vaultParams,
+  params: VAULT_SCHEMA,
   handler: async (ctx: RequestContext, params: VaultParams) => {
     try {
       await ctx.vaults.create(
@@ -27,7 +23,7 @@ export const create = {
 }
 
 export const open = {
-  params: vaultParams,
+  params: VAULT_SCHEMA,
   handler: async (ctx: RequestContext, params: VaultParams) => {
     try {
       await ctx.vaults.open(

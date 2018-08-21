@@ -2,6 +2,7 @@
 
 import type { Socket } from 'net'
 import { inspect } from 'util'
+import { MANIFEST_SCHEMA_MESSAGES } from '@mainframe/app-manifest'
 import type { Environment } from '@mainframe/config'
 import createHandler, {
   parseJSON,
@@ -16,6 +17,22 @@ import methods from './methods'
 import RequestContext from './RequestContext'
 
 export type NotifyFunc = (method: string, params: Object) => void
+
+const handleMessage = createHandler({
+  methods,
+  onHandlerError: (ctx: RequestContext, msg: IncomingMessage, err: Error) => {
+    ctx.log('handler error', msg, err.stack)
+  },
+  onInvalidMessage: (ctx: RequestContext, msg: IncomingMessage) => {
+    ctx.log('invalid message', msg)
+  },
+  onNotification: (ctx: RequestContext, msg: IncomingMessage) => {
+    ctx.log('notification received', msg)
+  },
+  validatorOptions: {
+    messages: MANIFEST_SCHEMA_MESSAGES,
+  },
+})
 
 export default (socket: Socket, env: Environment, vaults: VaultRegistry) => {
   const ns = `mainframe:daemon:rpc:client:${uniqueID()}`
@@ -36,20 +53,11 @@ export default (socket: Socket, env: Environment, vaults: VaultRegistry) => {
   }
 
   const context = new RequestContext({
+    log,
     env,
     notify: sendNotification,
     socket,
     vaults,
-  })
-
-  const handle = createHandler({
-    methods,
-    onInvalidMessage: (ctx: RequestContext, msg: IncomingMessage) => {
-      log('invalid message', msg)
-    },
-    onNotification: (ctx: RequestContext, msg: IncomingMessage) => {
-      log('notification received', msg)
-    },
   })
 
   socket.on('data', async (chunk: Buffer) => {
@@ -62,7 +70,7 @@ export default (socket: Socket, env: Environment, vaults: VaultRegistry) => {
 
     logJSON('==>', msg)
 
-    const reply = await handle(context, msg)
+    const reply = await handleMessage(context, msg)
     if (reply != null) {
       sendJSON(reply)
     }

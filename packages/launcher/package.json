@@ -17,6 +17,7 @@
   "electronWebpack": {
     "title": "Mainframe",
     "whiteListedModules": [
+      "@mainframe/app-manifest",
       "@mainframe/app-permissions",
       "@mainframe/client",
       "@mainframe/config",
@@ -24,32 +25,35 @@
     ]
   },
   "dependencies": {
+    "@mainframe/app-manifest": "*",
     "@mainframe/app-permissions": "*",
     "@mainframe/client": "*",
     "@mainframe/config": "*",
+    "@mainframe/rpc-electron": "^0.1.0",
+    "@mainframe/rpc-handler": "^0.2.1",
     "@mainframe/toolbox": "*",
-    "babel-loader": "^8.0.0-beta.4",
     "electron-util": "^0.9.0",
-    "fs-extra": "^7.0.0",
     "react": "^16.4.2",
     "react-art": "^16.4.2",
     "react-dom": "^16.4.2",
     "react-modal": "^3.4.5",
     "react-native-web": "^0.8.0",
-    "source-map-support": "^0.5.5"
+    "rxjs": "^6.2.2",
+    "source-map-support": "^0.5.9"
   },
   "devDependencies": {
-    "@babel/core": "7.0.0-beta.47",
-    "@babel/preset-flow": "7.0.0-beta.47",
-    "@babel/preset-react": "7.0.0-beta.47",
+    "@babel/core": "7.0.0-rc.1",
+    "@babel/preset-flow": "7.0.0-rc.1",
+    "@babel/preset-react": "7.0.0-rc.1",
     "@mainframe/utils-id": "^0.1.0",
+    "babel-loader": "^8.0.0-beta.4",
     "babel-plugin-react-native-web": "^0.8.6",
-    "electron": "^2.0.6",
-    "electron-builder": "^20.26.1",
-    "electron-webpack": "^2.1.2",
-    "flow-bin": "^0.77.0",
+    "electron": "^2.0.7",
+    "electron-builder": "^20.28.2",
+    "electron-webpack": "^2.2.1",
+    "flow-bin": "^0.79.1",
     "mocha": "^5.2.0",
     "spectron": "^3.8.0",
-    "webpack": "^4.16.4"
+    "webpack": "^4.17.0"
   }
 }

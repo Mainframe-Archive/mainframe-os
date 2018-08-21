@@ -4,19 +4,16 @@ import path from 'path'
 import { stringify } from 'querystring'
 import url from 'url'
 // eslint-disable-next-line import/named
-import Client, { type ClientSession } from '@mainframe/client'
+import Client, { type AppOpenResult as ClientSession } from '@mainframe/client'
 import { Environment, DaemonConfig } from '@mainframe/config'
 import { startDaemon } from '@mainframe/toolbox'
-import { is } from 'electron-util'
 // eslint-disable-next-line import/named
 import { app, BrowserWindow, ipcMain } from 'electron'
+import { is } from 'electron-util'
 
+import type { AppSessions } from '../types'
 import { interceptWebRequests } from './permissionsManager'
-import handleIpcRequests from './ipcRequestHandler'
-
-export type AppSessions = {
-  [window: BrowserWindow]: ClientSession,
-}
+import createRPCChannels from './createRPCChannels'
 
 const PORT = process.env.ELECTRON_WEBPACK_WDS_PORT || ''
 
@@ -59,6 +56,24 @@ const newWindow = (params: Object = {}) => {
   return window
 }
 
+// App Lifecycle
+
+const launchApp = async (appSession: ClientSession) => {
+  const appID = appSession.app.id
+  const appIds = Object.keys(appSessions).map(w => appSessions[w].app.id)
+  if (appIds.includes(appID)) {
+    // Already open
+    return
+  }
+  // $FlowFixMe: ID incompatible with client package ID type
+  const appWindow = newWindow()
+  appWindow.on('closed', async () => {
+    await client.closeApp(appSession.session.id)
+    delete appSessions[appWindow]
+  })
+  appSessions[appWindow] = appSession
+}
+
 // TODO: proper setup, this is just temporary logic to simplify development flow
 const setupClient = async () => {
   // /!\ Temporary only, should be handled by toolbox with installation flow
@@ -72,7 +87,7 @@ const setupClient = async () => {
   await startDaemon(daemonConfig, true)
   daemonConfig.runStatus = 'running'
   client = new Client(daemonConfig.socketPath)
-  handleIpcRequests(client, env, appSessions, onLaunchApp)
+  createRPCChannels({ client, env, launchApp })
   interceptWebRequests(client, appSessions)
 
   // Simple check for API call, not proper versioning logic
@@ -115,8 +130,6 @@ app.on('activate', () => {
   }
 })
 
-// IPC COMMS
-
 // Window lifecycle events
 
 ipcMain.on('init-window', event => {
@@ -133,24 +146,5 @@ ipcMain.on('init-window', event => {
 })
 
 ipcMain.on('ready-window', event => {
-  const window = BrowserWindow.fromWebContents(event.sender)
-  window.show()
+  BrowserWindow.fromWebContents(event.sender).show()
 })
-
-// App Lifecycle
-
-const onLaunchApp = async (appSession: ClientSession) => {
-  const appID = appSession.app.id
-  const appIds = Object.keys(appSessions).map(w => appSessions[w].app.id)
-  if (appIds.includes(appID)) {
-    // Already open
-    return
-  }
-  // $FlowFixMe: ID incompatible with client package ID type
-  const appWindow = newWindow()
-  appWindow.on('closed', async () => {
-    await client.closeApp(appSession.session.id)
-    delete appSessions[appWindow]
-  })
-  appSessions[appWindow] = appSession
-}

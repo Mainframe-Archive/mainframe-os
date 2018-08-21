@@ -1,12 +1,11 @@
 //@flow
 
 import type { PermissionsGrants } from '@mainframe/app-permissions'
-import type { ID } from '@mainframe/utils-id'
-import fs from 'fs-extra'
+import type { ID } from '@mainframe/client'
 import React, { createRef, Component, type ElementRef } from 'react'
 import { View, StyleSheet } from 'react-native-web'
 
-import { ipcClient } from '../electronIpc.js'
+import rpc from '../rpc'
 import Button from '../UIComponents/Button'
 import Text from '../UIComponents/Text'
 import ModalView from '../UIComponents/ModalView'
@@ -61,17 +60,16 @@ export default class AppInstallModal extends Component<Props, State> {
     this.handleSelectedFiles([...this.fileInput.current.files])
   }
 
-  handleSelectedFiles = (files: Array<Object>) => {
+  handleSelectedFiles = async (files: Array<Object>) => {
     if (files.length) {
-      const file = files[0]
       try {
-        const manifest = fs.readJsonSync(file.path)
+        const manifest = await rpc.readManifest(files[0].path)
         if (
-          typeof manifest.name === 'string' &&
-          typeof manifest.permissions === 'object'
+          typeof manifest.data.name === 'string' &&
+          typeof manifest.data.permissions === 'object'
         ) {
           this.setState({
-            manifest,
+            manifest: manifest.data,
             installStep: 'identity',
           })
         } else {
@@ -98,7 +96,7 @@ export default class AppInstallModal extends Component<Props, State> {
 
   async getOwnIdentities() {
     try {
-      const res = await ipcClient.getOwnUserIdentities()
+      const res = await rpc.getOwnUserIdentities()
       this.setState({ ownUsers: res.users })
     } catch (err) {
       // TODO: Handle error
@@ -130,7 +128,7 @@ export default class AppInstallModal extends Component<Props, State> {
         permissions: userPermissions,
         permissionsChecked: true,
       }
-      const res = await ipcClient.installApp(manifest, userId, permissions)
+      const res = await rpc.installApp(manifest, userId, permissions)
       this.props.onInstallComplete(res.id)
     } catch (err) {
       // eslint-disable-next-line no-console
