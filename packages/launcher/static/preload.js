@@ -17,7 +17,9 @@ const request = (channel, data) =>
     }
     const listener = (event, msg) => {
       if (msg.id === request.id) {
+        console.log('msg: ', msg)
         if (msg.error || !msg.result) {
+          console.log('rejecting...')
           reject(msg.error)
         } else {
           resolve(msg.result)

@@ -9,10 +9,12 @@ export const channels = {
   mainToApp: {
     request: 'main-to-app-request',
     response: 'main-to-app-response',
+    notification: 'main-to-app-notification',
   },
   appToMain: {
     request: 'app-to-main-request',
     response: 'app-to-main-response',
+    notification: 'app-to-main-notification',
   },
 }
 
@@ -63,3 +65,8 @@ export default (
     receiver.on(channels[chanKey].response, listener)
     sender.send(channels[chanKey].request, request)
   })
+
+export const ipcNotify = (sender: Object, chanKey: string, data: Object) => {
+  data.id = generateId()
+  sender.send(channels[chanKey].notification, data)
+}

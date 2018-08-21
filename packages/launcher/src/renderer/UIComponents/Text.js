@@ -3,7 +3,7 @@
 import React, { type Node, Component } from 'react'
 import { Text as RNText, StyleSheet } from 'react-native-web'
 
-import type { Style } from '../types'
+import type { Style } from '../../types'
 
 type Props = {
   style?: Style,

@@ -15,7 +15,7 @@ import MFTextInput from '../UIComponents/TextInput'
 import Icon from '../UIComponents/Icon'
 import Text from '../UIComponents/Text'
 import colors from '../colors'
-import type { VaultsData, VaultPath } from '../types'
+import type { VaultsData, VaultPath } from '../../types'
 
 type Props = {
   vaultsData: VaultsData,

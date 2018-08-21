@@ -9,6 +9,7 @@ export default {
   LIGHT_GREY_E5: '#e5e5e5',
   LIGHT_GREY_EE: '#eeeeee',
   LIGHT_GREY_F7: '#f7f7f7',
+  LIGHT_GREY_BLUE: '#9ba3b5',
   GREY_MED_81: '#818181',
   GREY_MED_75: '#757575',
   GREY_DARK_54: '#545556',

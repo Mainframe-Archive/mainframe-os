@@ -4,7 +4,7 @@ import React, { Component } from 'react'
 import { TouchableOpacity, StyleSheet } from 'react-native-web'
 
 import COLORS from '../colors'
-import type { Style } from '../types'
+import type { Style } from '../../types'
 import Text from './Text'
 
 type Props = {

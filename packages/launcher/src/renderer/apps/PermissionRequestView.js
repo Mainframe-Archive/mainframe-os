@@ -1,11 +1,11 @@
 // @flow
 
 import React, { Component } from 'react'
-import { View, StyleSheet, TouchableOpacity, Switch } from 'react-native-web'
+import { View, StyleSheet, Switch } from 'react-native-web'
 import { ipcRenderer } from 'electron'
 
+import type { Notification } from '../../types'
 import colors from '../colors'
-import ModalView from '../UIComponents/ModalView'
 import Text from '../UIComponents/Text'
 import Button from '../UIComponents/Button'
 import { channels, IPC_ERRORS } from '../../ipcRequest'
@@ -21,18 +21,61 @@ type State = {
     data: Object,
     sender: Object,
   },
+  permissionDeniedNotifs: {
+    [string]: ?{
+      key: string,
+      input: ?string,
+    },
+  },
   persistGrant?: boolean,
 }
 
 const permissionDescriptions = {
-  WEB3_SEND: 'make a transaction to Ethereum blockchain',
+  WEB3_SEND: 'Ethereum blockchain transaction',
+}
+
+const getPermissionDescription = (key: string, input: ?string): ?string => {
+  if (key === 'WEB_REQUEST' && input) {
+    return `web request to ${input}`
+  }
+  if (permissionDescriptions[key]) {
+    return permissionDescriptions[key]
+  }
+  return null
 }
 
 export default class PermissionsManagerView extends Component<Props, State> {
-  state = {}
+  state: State = {
+    permissionDeniedNotifs: {},
+  }
 
   componentDidMount() {
     this.handlePermissionRequest()
+    this.handleNotifications()
+  }
+
+  handleNotifications() {
+    ipcRenderer.on(
+      channels.mainToApp.notification,
+      (event, msg: Notification) => {
+        if (msg.type === 'permission-denied') {
+          const notifs = this.state.permissionDeniedNotifs
+          notifs[msg.id] = msg.data
+          this.setState(
+            {
+              permissionDeniedNotifs: notifs,
+            },
+            () => {
+              setTimeout(() => {
+                const nextNotifs = this.state.permissionDeniedNotifs
+                delete nextNotifs[msg.id]
+                this.setState({ permissionDeniedNotifs: nextNotifs })
+              }, 3000)
+            },
+          )
+        }
+      },
+    )
   }
 
   async handlePermissionRequest() {
@@ -85,16 +128,35 @@ export default class PermissionsManagerView extends Component<Props, State> {
     })
   }
 
+  renderDeniedNotifs = () => {
+    const { permissionDeniedNotifs } = this.state
+    const alerts = Object.keys(permissionDeniedNotifs).map(k => {
+      const notif = permissionDeniedNotifs[k]
+      if (notif) {
+        const label = getPermissionDescription(notif.key, notif.input)
+        return (
+          <Text key={k} style={styles.permissionDeniedLabel}>
+            <Text style={styles.boldText}>Blocked:</Text> {label}
+          </Text>
+        )
+      }
+      return null
+    })
+    return alerts.length ? (
+      <View style={styles.permissionDeniedAlerts}>{alerts}</View>
+    ) : null
+  }
+
   render() {
-    console.log(this.state.permissionRequest)
     const { permissionRequest, persistGrant } = this.state
+    const deniedNotifs = this.renderDeniedNotifs()
     let content
     if (permissionRequest) {
       const key = permissionRequest.data.args[0]
-      if (permissionDescriptions[key]) {
-        const message = `This app is requesting to ${
-          permissionDescriptions[key]
-        }.`
+      const input = permissionRequest.data.args[1]
+      const permissionLabel = getPermissionDescription(key, input)
+      if (permissionLabel) {
+        const message = `This app is asking permission to make a ${permissionLabel}.`
         content = (
           <View style={styles.container}>
             <View style={styles.requestContainer}>
@@ -142,7 +204,12 @@ export default class PermissionsManagerView extends Component<Props, State> {
         )
       }
     }
-    return content || <View />
+    return (
+      <View>
+        {content}
+        {deniedNotifs}
+      </View>
+    )
   }
 }
 
@@ -191,5 +258,21 @@ const styles = StyleSheet.create({
   },
   declineButton: {
     backgroundColor: colors.GREY_MED_81,
+  },
+  permissionDeniedAlerts: {
+    top: 0,
+    right: 0,
+    bottom: 0,
+    position: 'absolute',
+  },
+  permissionDeniedLabel: {
+    fontSize: 11,
+    backgroundColor: blueBGColor,
+    color: colors.LIGHT_GREY_BLUE,
+    paddingVertical: 4,
+    paddingHorizontal: 6,
+  },
+  boldText: {
+    fontWeight: 'bold',
   },
 })

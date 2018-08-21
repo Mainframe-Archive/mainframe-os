@@ -3,7 +3,7 @@
 import { ipcRenderer } from 'electron'
 import type { ID } from '@mainframe/utils-id'
 
-import request, { channels, IPC_ERRORS } from '../ipcRequest'
+import request from '../ipcRequest'
 
 const makeRequest = (method: string, args: Array<any> = []) => {
   return request(ipcRenderer, ipcRenderer, 'appToMain', method, args)

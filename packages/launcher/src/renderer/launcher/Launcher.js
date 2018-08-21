@@ -11,7 +11,7 @@ import {
 } from 'react-native-web'
 
 import colors from '../colors'
-import type { VaultsData } from '../types'
+import type { VaultsData } from '../../types'
 import { ipcClient } from '../electronIpc'
 import Button from '../UIComponents/Button'
 import Text from '../UIComponents/Text'

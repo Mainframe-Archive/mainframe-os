@@ -8,7 +8,7 @@ import { View, StyleSheet } from 'react-native-web'
 
 import colors from '../colors'
 import Text from '../UIComponents/Text'
-import PermissionsManagerView from './PermissionsManagerView'
+import PermissionRequestView from './PermissionRequestView'
 
 declare var __static: string
 
@@ -86,9 +86,9 @@ export default class AppContainer extends Component<Props> {
             </Text>
           </View>
         </View>
-        <PermissionsManagerView appSession={this.props.appSession} />
+        <PermissionRequestView appSession={this.props.appSession} />
         <webview
-          id="foo"
+          id="sandbox-webview"
           src={appUrl}
           preload={preloadPath}
           style={{ flex: 1 }} // eslint-disable-line react-native/no-inline-styles

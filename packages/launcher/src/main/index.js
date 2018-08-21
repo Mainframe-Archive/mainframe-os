@@ -14,10 +14,8 @@ import { app, BrowserWindow, ipcMain } from 'electron'
 import { interceptWebRequests } from './permissionsManager'
 import handleIpcRequests from './ipcRequestHandler'
 
-export type AppWindows = {
-  [window: BrowserWindow]: {
-    appSession: ClientSession,
-  },
+export type AppSessions = {
+  [window: BrowserWindow]: ClientSession,
 }
 
 const PORT = process.env.ELECTRON_WEBPACK_WDS_PORT || ''
@@ -37,7 +35,7 @@ const daemonConfig = new DaemonConfig(env)
 let client
 let mainWindow
 
-const appWindows: AppWindows = {}
+const appSessions: AppSessions = {}
 
 const newWindow = (params: Object = {}) => {
   const window = new BrowserWindow({
@@ -74,8 +72,8 @@ const setupClient = async () => {
   await startDaemon(daemonConfig, true)
   daemonConfig.runStatus = 'running'
   client = new Client(daemonConfig.socketPath)
-  handleIpcRequests(client, env, appWindows, onLaunchApp)
-  interceptWebRequests(appWindows)
+  handleIpcRequests(client, env, appSessions, onLaunchApp)
+  interceptWebRequests(client, appSessions)
 
   // Simple check for API call, not proper versioning logic
   const version = await client.apiVersion()
@@ -126,10 +124,10 @@ ipcMain.on('init-window', event => {
   if (window === mainWindow) {
     window.webContents.send('start', { type: 'launcher' })
   } else {
-    const appWindowData = appWindows[window]
+    const appSession = appSessions[window]
     window.webContents.send('start', {
       type: 'app',
-      appSession: appWindowData.appSession,
+      appSession,
     })
   }
 })
@@ -143,9 +141,7 @@ ipcMain.on('ready-window', event => {
 
 const onLaunchApp = async (appSession: ClientSession) => {
   const appID = appSession.app.id
-  const appIds = Object.keys(appWindows).map(
-    w => appWindows[w].appSession.app.id,
-  )
+  const appIds = Object.keys(appSessions).map(w => appSessions[w].app.id)
   if (appIds.includes(appID)) {
     // Already open
     return
@@ -154,9 +150,7 @@ const onLaunchApp = async (appSession: ClientSession) => {
   const appWindow = newWindow()
   appWindow.on('closed', async () => {
     await client.closeApp(appSession.session.id)
-    delete appWindows[appWindow]
+    delete appSessions[appWindow]
   })
-  appWindows[appWindow] = {
-    appSession,
-  }
+  appSessions[appWindow] = appSession
 }
