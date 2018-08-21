@@ -69,7 +69,7 @@ export default class Command extends Cmd {
       }
     }
 
-    await client.createVault(path, vault.password)
+    await client.vault.create({ path, password: vault.password })
 
     // Update config after successful creation by daemon
     cfg.setLabel(path, vault.label)

@@ -1,63 +1,49 @@
 // @flow
 
 /* eslint-disable import/named */
+import { parseContentsURI, type ManifestData } from '@mainframe/app-manifest'
 import {
-  SEMVER_SCHEMA,
-  parseContentsURI,
-  type ManifestData,
-  type PartialManifestData,
-} from '@mainframe/app-manifest'
-import {
-  PERMISSION_KEY_SCHEMA,
-  PERMISSION_GRANT_SCHEMA,
-  PERMISSIONS_GRANTS_SCHEMA,
-  PERMISSIONS_REQUIREMENTS_SCHEMA,
-  type PermissionKey,
-  type PermissionGrant,
-  type PermissionCheckResult,
-  type PermissionsDetails,
-  type PermissionsRequirements,
-} from '@mainframe/app-permissions'
+  idType as toClientID,
+  APP_CHECK_PERMISSION_SCHEMA,
+  type AppCheckPermissionParams,
+  type AppCheckPermissionResult,
+  APP_CLOSE_SCHEMA,
+  type AppCloseParams,
+  APP_CREATE_SCHEMA,
+  type AppCreateParams,
+  type AppCreateResult,
+  type AppGetInstalledResult,
+  APP_GET_MANIFEST_DATA_SCHEMA,
+  type AppGetManifestDataParams,
+  type AppGetManifestDataResult,
+  APP_INSTALL_SCHEMA,
+  type AppInstallParams,
+  type AppInstallResult,
+  APP_OPEN_SCHEMA,
+  type AppOpenParams,
+  type AppOpenResult,
+  APP_PUBLISH_CONTENTS_SCHEMA,
+  type AppPublishContentsParams,
+  type AppPublishContentsResult,
+  APP_REMOVE_SCHEMA,
+  type AppRemoveParams,
+  APP_SET_PERMISSION_SCHEMA,
+  type AppSetPermissionParams,
+  APP_SET_PERMISSIONS_REQUIREMENTS_SCHEMA,
+  type AppSetPermissionsRequirementsParams,
+  APP_WRITE_MANIFEST_SCHEMA,
+  type AppWriteManifestParams,
+} from '@mainframe/client'
 import { getAppContentsPath, type Environment } from '@mainframe/config'
-import { idType, type ID } from '@mainframe/utils-id'
+import { idType as fromClientID, type ID } from '@mainframe/utils-id'
 /* eslint-enable import/named */
 import { ensureDir } from 'fs-extra'
 
-import type { AppUserSettings, SessionData } from '../../app/AbstractApp'
+import type { SessionData } from '../../app/AbstractApp'
 import OwnApp from '../../app/OwnApp'
 
 import { clientError, sessionError } from '../errors'
 import type RequestContext from '../RequestContext'
-
-import { localIdParam } from './parameters'
-
-type User = {
-  id: ID,
-  data: Object,
-}
-
-type App = {
-  id: ID,
-  manifest: ManifestData | PartialManifestData,
-  contentsPath: string,
-}
-
-type Session = {
-  id: ID,
-  permissions: PermissionsDetails,
-}
-
-type ClientSession = {
-  session: Session,
-  user: User,
-  app: App,
-}
-
-type AppInstalled = {
-  appID: ID,
-  manifest: ManifestData,
-  users: Array<User>,
-}
 
 const getContentsPath = (env: Environment, manifest: ManifestData): string => {
   return getAppContentsPath(env, manifest.id, manifest.version)
@@ -68,7 +54,7 @@ const createClientSession = (
   appID: ID,
   userID: ID,
   session: SessionData,
-): ClientSession => {
+): AppOpenResult => {
   const app = ctx.openVault.apps.getAnyByID(appID)
   if (app == null) {
     throw clientError('Invalid appID')
@@ -81,42 +67,36 @@ const createClientSession = (
   const appData =
     app instanceof OwnApp
       ? {
-          id: appID,
+          appID: toClientID(appID),
           manifest: ctx.openVault.getAppManifestData(appID),
           contentsPath: app.contentsPath,
         }
       : {
-          id: appID,
+          appID: toClientID(appID),
           manifest: app.manifest,
           contentsPath: getContentsPath(ctx.env, app.manifest),
         }
 
   return {
     user: {
-      id: userID,
+      id: toClientID(userID),
       data: user.data,
     },
     session: {
-      id: session.sessID,
+      sessID: toClientID(session.sessID),
       permissions: session.permissions,
     },
     app: appData,
   }
 }
 
-// All apps (created or installed) APIs
-
 export const checkPermission = {
-  params: {
-    sessID: localIdParam,
-    key: PERMISSION_KEY_SCHEMA,
-    input: { type: 'string', optional: true, empty: false },
-  },
+  params: APP_CHECK_PERMISSION_SCHEMA,
   handler: (
     ctx: RequestContext,
-    params: { sessID: ID, key: PermissionKey, input?: ?string },
-  ): { result: PermissionCheckResult } => {
-    const session = ctx.openVault.getSession(params.sessID)
+    params: AppCheckPermissionParams,
+  ): AppCheckPermissionResult => {
+    const session = ctx.openVault.getSession(fromClientID(params.sessID))
     if (session == null) {
       throw clientError('Invalid session')
     }
@@ -127,95 +107,46 @@ export const checkPermission = {
 }
 
 export const close = {
-  params: {
-    sessID: localIdParam,
-  },
-  handler: (ctx: RequestContext, params: { sessID: ID }): void => {
-    ctx.openVault.closeApp(params.sessID)
+  params: APP_CLOSE_SCHEMA,
+  handler: (ctx: RequestContext, params: AppCloseParams): void => {
+    ctx.openVault.closeApp(fromClientID(params.sessID))
   },
 }
 
-export const remove = {
-  params: {
-    appID: localIdParam,
-  },
+export const create = {
+  params: APP_CREATE_SCHEMA,
   handler: async (
     ctx: RequestContext,
-    params: { appID: ID },
-  ): Promise<void> => {
-    ctx.openVault.removeApp(params.appID)
+    params: AppCreateParams,
+  ): Promise<AppCreateResult> => {
+    const app = ctx.openVault.createApp({
+      contentsPath: params.contentsPath,
+      developerID: fromClientID(params.developerID),
+      name: params.name,
+      version: params.version,
+    })
     await ctx.openVault.save()
+    return { appID: toClientID(app.id) }
   },
 }
-
-export const open = {
-  params: {
-    appID: localIdParam,
-    userID: localIdParam,
-  },
-  handler: (
-    ctx: RequestContext,
-    params: { appID: ID, userID: ID },
-  ): ClientSession => {
-    const session = ctx.openVault.openApp(params.appID, params.userID)
-    return createClientSession(ctx, params.appID, params.userID, session)
-  },
-}
-
-export const setPermission = {
-  params: {
-    sessID: localIdParam,
-    key: PERMISSION_KEY_SCHEMA,
-    value: PERMISSION_GRANT_SCHEMA,
-    persist: { type: 'boolean', optional: true },
-  },
-  handler: async (
-    ctx: RequestContext,
-    params: {
-      sessID: ID,
-      key: PermissionKey,
-      value: PermissionGrant,
-      persist: ?boolean,
-    },
-  ): Promise<void> => {
-    const session = ctx.openVault.getSession(params.sessID)
-    if (session == null) {
-      throw clientError('Invalid session')
-    }
-    session.setPermission(params.key, params.value)
-
-    if (params.persist === true) {
-      const app = ctx.openVault.apps.getByID(session.appID)
-      if (app == null) {
-        throw sessionError('Invalid app')
-      }
-      app.setPermission(session.userID, params.key, params.value)
-      await ctx.openVault.save()
-    }
-  },
-}
-
-// Other apps APIs
 
 // TODO: replace by list with filters
-export const getInstalled = (
-  ctx: RequestContext,
-): { apps: Array<AppInstalled> } => {
+export const getInstalled = (ctx: RequestContext): AppGetInstalledResult => {
   const { apps } = ctx.openVault.apps
   const installedApps = Object.keys(apps).map(appID => {
-    const app = apps[idType(appID)]
+    const app = apps[appID]
     const users = app.userIDs.reduce((acc, id) => {
       const user = ctx.openVault.identities.getOwnUser(id)
       if (user) {
         acc.push({
-          id: idType(id),
+          id: toClientID(id),
           data: user.data,
         })
       }
       return acc
     }, [])
     return {
-      appID: idType(appID),
+      appID: toClientID(appID),
       manifest: app.manifest,
       users: users,
     }
@@ -223,25 +154,28 @@ export const getInstalled = (
   return { apps: installedApps }
 }
 
-export const install = {
-  params: {
-    manifest: 'any', // TODO: manifest schema - maybe use validator in app-manifest package as well?
-    userID: localIdParam,
-    settings: {
-      type: 'object',
-      props: {
-        permissions: PERMISSIONS_GRANTS_SCHEMA,
-        permissionsChecked: 'boolean',
-      },
-    },
-  },
+export const getManifestData = {
+  params: APP_GET_MANIFEST_DATA_SCHEMA,
   handler: async (
     ctx: RequestContext,
-    params: { manifest: ManifestData, userID: ID, settings: AppUserSettings },
-  ): Promise<ID> => {
+    params: AppGetManifestDataParams,
+  ): Promise<AppGetManifestDataResult> => ({
+    data: ctx.openVault.getAppManifestData(
+      fromClientID(params.appID),
+      params.version,
+    ),
+  }),
+}
+
+export const install = {
+  params: APP_INSTALL_SCHEMA,
+  handler: async (
+    ctx: RequestContext,
+    params: AppInstallParams,
+  ): Promise<AppInstallResult> => {
     const app = ctx.openVault.installApp(
       params.manifest,
-      params.userID,
+      fromClientID(params.userID),
       params.settings,
     )
 
@@ -267,57 +201,27 @@ export const install = {
     }
 
     await ctx.openVault.save()
-    return app.id
+    return { appID: toClientID(app.id) }
   },
 }
 
-// Own apps APIs
-
-export const create = {
-  params: {
-    contentsPath: 'string',
-    developerID: { ...localIdParam, optional: true },
-    name: 'string',
-    version: { ...SEMVER_SCHEMA, optional: true },
+export const open = {
+  params: APP_OPEN_SCHEMA,
+  handler: (ctx: RequestContext, params: AppOpenParams): AppOpenResult => {
+    const appID = fromClientID(params.appID)
+    const userID = fromClientID(params.userID)
+    const session = ctx.openVault.openApp(appID, userID)
+    return createClientSession(ctx, appID, userID, session)
   },
-  handler: async (
-    ctx: RequestContext,
-    params: {
-      contentsPath: string,
-      developerID?: ?ID,
-      name?: ?string,
-      version?: ?string,
-    },
-  ): Promise<{ id: ID }> => {
-    const app = ctx.openVault.createApp(params)
-    await ctx.openVault.save()
-    return { id: app.id }
-  },
-}
-
-export const getManifestData = {
-  params: {
-    appID: localIdParam,
-    version: { ...SEMVER_SCHEMA, optional: true },
-  },
-  handler: async (
-    ctx: RequestContext,
-    params: { appID: ID, version: ?string },
-  ): Promise<{ data: PartialManifestData }> => ({
-    data: ctx.openVault.getAppManifestData(params.appID, params.version),
-  }),
 }
 
 export const publishContents = {
-  params: {
-    appID: localIdParam,
-    version: { ...SEMVER_SCHEMA, optional: true },
-  },
+  params: APP_PUBLISH_CONTENTS_SCHEMA,
   handler: async (
     ctx: RequestContext,
-    params: { appID: ID, version?: ?string },
-  ): Promise<{ contentsURI: string }> => {
-    const app = ctx.openVault.apps.getOwnByID(params.appID)
+    params: AppPublishContentsParams,
+  ): Promise<AppPublishContentsResult> => {
+    const app = ctx.openVault.apps.getOwnByID(fromClientID(params.appID))
     if (app == null) {
       throw new Error('App not found')
     }
@@ -331,21 +235,47 @@ export const publishContents = {
   },
 }
 
-export const setPermissionsRequirements = {
-  params: {
-    appID: localIdParam,
-    permissions: PERMISSIONS_REQUIREMENTS_SCHEMA,
-    version: { ...SEMVER_SCHEMA, optional: true },
-  },
+export const remove = {
+  params: APP_REMOVE_SCHEMA,
   handler: async (
     ctx: RequestContext,
-    params: {
-      appID: ID,
-      permissions: PermissionsRequirements,
-      version?: ?string,
-    },
+    params: AppRemoveParams,
   ): Promise<void> => {
-    const app = ctx.openVault.apps.getOwnByID(params.appID)
+    ctx.openVault.removeApp(fromClientID(params.appID))
+    await ctx.openVault.save()
+  },
+}
+
+export const setPermission = {
+  params: APP_SET_PERMISSION_SCHEMA,
+  handler: async (
+    ctx: RequestContext,
+    params: AppSetPermissionParams,
+  ): Promise<void> => {
+    const session = ctx.openVault.getSession(fromClientID(params.sessID))
+    if (session == null) {
+      throw clientError('Invalid session')
+    }
+    session.setPermission(params.key, params.value)
+
+    if (params.persist === true) {
+      const app = ctx.openVault.apps.getByID(session.appID)
+      if (app == null) {
+        throw sessionError('Invalid app')
+      }
+      app.setPermission(session.userID, params.key, params.value)
+      await ctx.openVault.save()
+    }
+  },
+}
+
+export const setPermissionsRequirements = {
+  params: APP_SET_PERMISSIONS_REQUIREMENTS_SCHEMA,
+  handler: async (
+    ctx: RequestContext,
+    params: AppSetPermissionsRequirementsParams,
+  ): Promise<void> => {
+    const app = ctx.openVault.apps.getOwnByID(fromClientID(params.appID))
     if (app == null) {
       throw new Error('App not found')
     }
@@ -355,21 +285,13 @@ export const setPermissionsRequirements = {
 }
 
 export const writeManifest = {
-  params: {
-    appID: localIdParam,
-    path: 'string',
-    version: { ...SEMVER_SCHEMA, optional: true },
-  },
+  params: APP_WRITE_MANIFEST_SCHEMA,
   handler: async (
     ctx: RequestContext,
-    params: {
-      appID: ID,
-      path: string,
-      version?: ?string,
-    },
+    params: AppWriteManifestParams,
   ): Promise<void> => {
     await ctx.openVault.writeAppManifest(
-      params.appID,
+      fromClientID(params.appID),
       params.path,
       params.version,
     )

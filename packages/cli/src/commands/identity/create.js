@@ -69,7 +69,7 @@ export const createDeveloperIdentity = async (
     }
   }
 
-  const res = await client.createDeveloperIdentity(data)
+  const res = await client.identity.createDeveloper(data)
   client.close()
   return `Created developer identity: ${res.id}`
 }
@@ -87,7 +87,7 @@ export const createUserIdentity = async (
     }
   }
 
-  const res = await client.createUserIdentity(data)
+  const res = await client.identity.createUser(data)
   client.close()
   return `Created user identity: ${res.id}`
 }

@@ -4,14 +4,14 @@ import path from 'path'
 import { stringify } from 'querystring'
 import url from 'url'
 // eslint-disable-next-line import/named
-import Client, { type ClientSession } from '@mainframe/client'
+import Client, { type AppOpenResult as ClientSession } from '@mainframe/client'
 import { Environment, DaemonConfig } from '@mainframe/config'
 import { startDaemon } from '@mainframe/toolbox'
 // eslint-disable-next-line import/named
 import { app, BrowserWindow, ipcMain } from 'electron'
 import { is } from 'electron-util'
 
-import handleIpcRequests from './ipcRequestHandler'
+import createRPCChannels from './createRPCChannels'
 
 type AppWindows = {
   [window: BrowserWindow]: {
@@ -60,6 +60,28 @@ const newWindow = (params: Object = {}) => {
   return window
 }
 
+// App Lifecycle
+
+const launchApp = async (appSession: ClientSession) => {
+  const appID = appSession.app.appID
+  const appIds = Object.keys(appWindows).map(
+    w => appWindows[w].appSession.app.appID,
+  )
+  if (appIds.includes(appID)) {
+    // Already open
+    return
+  }
+  // $FlowFixMe: ID incompatible with client package ID type
+  const appWindow = newWindow()
+  appWindow.on('closed', async () => {
+    await client.app.close({ sessID: appSession.session.sessID })
+    delete appWindows[appWindow]
+  })
+  appWindows[appWindow] = {
+    appSession,
+  }
+}
+
 // TODO: proper setup, this is just temporary logic to simplify development flow
 const setupClient = async () => {
   // /!\ Temporary only, should be handled by toolbox with installation flow
@@ -73,7 +95,7 @@ const setupClient = async () => {
   await startDaemon(daemonConfig, true)
   daemonConfig.runStatus = 'running'
   client = new Client(daemonConfig.socketPath)
-  handleIpcRequests(client, env, onLaunchApp)
+  createRPCChannels({ client, env, launchApp })
 
   // Simple check for API call, not proper versioning logic
   const version = await client.apiVersion()
@@ -115,8 +137,6 @@ app.on('activate', () => {
   }
 })
 
-// IPC COMMS
-
 // Window lifecycle events
 
 ipcMain.on('init-window', event => {
@@ -133,28 +153,5 @@ ipcMain.on('init-window', event => {
 })
 
 ipcMain.on('ready-window', event => {
-  const window = BrowserWindow.fromWebContents(event.sender)
-  window.show()
+  BrowserWindow.fromWebContents(event.sender).show()
 })
-
-// App Lifecycle
-
-const onLaunchApp = async (appSession: ClientSession) => {
-  const appID = appSession.app.id
-  const appIds = Object.keys(appWindows).map(
-    w => appWindows[w].appSession.app.id,
-  )
-  if (appIds.includes(appID)) {
-    // Already open
-    return
-  }
-  // $FlowFixMe: ID incompatible with client package ID type
-  const appWindow = newWindow()
-  appWindow.on('closed', async () => {
-    await client.closeApp(appSession.session.id)
-    delete appWindows[appWindow]
-  })
-  appWindows[appWindow] = {
-    appSession,
-  }
-}

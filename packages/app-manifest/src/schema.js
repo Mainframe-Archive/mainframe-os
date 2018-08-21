@@ -61,7 +61,7 @@ export const NAME_SCHEMA = {
   max: 50,
 }
 
-export const MANIFEST_SCHEMA = {
+export const MANIFEST_SCHEMA_PROPS = {
   id: ID_SCHEMA,
   author: {
     type: 'object',
@@ -73,4 +73,9 @@ export const MANIFEST_SCHEMA = {
   version: SEMVER_SCHEMA,
   contentsURI: URN_SCHEMA,
   permissions: PERMISSIONS_REQUIREMENTS_SCHEMA,
+}
+
+export const MANIFEST_SCHEMA = {
+  type: 'object',
+  props: MANIFEST_SCHEMA_PROPS,
 }

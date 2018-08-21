@@ -19,7 +19,7 @@ export default class AppPublishContentsCommand extends Command {
       return
     }
 
-    const res = await client.publishAppContents({
+    const res = await client.app.publishContents({
       appID: this.flags.id,
     })
     this.log(`App contents published with URI ${res.contentsURI}`)

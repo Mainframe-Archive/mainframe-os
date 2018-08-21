@@ -16,12 +16,12 @@ export default class OpenVaultCommand extends Command {
       return
     }
 
-    const vault = this.flags.vault || getDefaultVault(this.env)
-    if (vault == null) {
+    const path = this.flags.vault || getDefaultVault(this.env)
+    if (path == null) {
       throw new Error('No vault provided or found')
     }
 
-    const vaultPassword = await promptOpenVault()
-    await client.openVault(vault, vaultPassword)
+    const password = await promptOpenVault()
+    await client.vault.open({ path, password })
   }
 }

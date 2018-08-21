@@ -30,13 +30,13 @@
     "@mainframe/client": "*",
     "@mainframe/config": "*",
     "@mainframe/toolbox": "*",
-    "@oclif/command": "^1.4.36",
-    "@oclif/config": "^1.6.28",
-    "@oclif/plugin-help": "^2.0.5",
+    "@oclif/command": "^1.5.0",
+    "@oclif/config": "^1.7.0",
+    "@oclif/plugin-help": "^2.1.0",
     "cli-table": "^0.3.1",
     "inquirer": "^6.1.0"
   },
   "devDependencies": {
-    "flow-bin": "^0.78.0"
+    "flow-bin": "^0.79.1"
   }
 }
