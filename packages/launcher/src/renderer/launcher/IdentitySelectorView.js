@@ -4,7 +4,7 @@ import type { ID } from '@mainframe/client'
 import React, { Component } from 'react'
 import { View, TouchableOpacity, StyleSheet, TextInput } from 'react-native-web'
 
-import { ipcClient } from '../electronIpc.js'
+import rpc from '../rpc'
 import Button from '../UIComponents/Button'
 import Text from '../UIComponents/Text'
 import colors from '../colors'
@@ -41,7 +41,7 @@ export default class IdentitySelectorView extends Component<Props, State> {
 
   async createId() {
     try {
-      const res = await ipcClient.createUserIdentity({
+      const res = await rpc.createUserIdentity({
         name: this.state.newName,
       })
       this.setState({ newName: '' })

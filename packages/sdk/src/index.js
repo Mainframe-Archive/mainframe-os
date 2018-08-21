@@ -14,13 +14,13 @@ class API {
 
 class BlockchainAPI extends API {
   getContractEvents(
-    contractAddr: string,
+    contractAddress: string,
     abi: Array<any>,
     eventName: string,
     options: Object,
   ): Promise<Array<Object>> {
     return this._rpc.request('blockchain_getContractEvents', {
-      contractAddr,
+      contractAddress,
       abi,
       eventName,
       options,

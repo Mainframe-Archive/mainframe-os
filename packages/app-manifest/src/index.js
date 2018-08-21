@@ -11,7 +11,7 @@ import type { KeyPair } from '@mainframe/utils-crypto'
 import ExtendableError from 'es6-error'
 import Validator from 'fastest-validator'
 
-import { MANIFEST_SCHEMA, MANIFEST_SCHEMA_MESSAGES } from './schema'
+import { MANIFEST_SCHEMA_MESSAGES, MANIFEST_SCHEMA_PROPS } from './schema'
 import type { ManifestData, ManifestValidationResult } from './types'
 
 export { parse as parseContentsURI } from 'uri-js'
@@ -29,7 +29,7 @@ export class ManifestError extends ExtendableError {
 }
 
 const v = new Validator({ messages: MANIFEST_SCHEMA_MESSAGES })
-const check = v.compile(MANIFEST_SCHEMA)
+const check = v.compile(MANIFEST_SCHEMA_PROPS)
 
 export const validateManifest = (
   manifest: ManifestData,
