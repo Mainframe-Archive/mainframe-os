@@ -8,7 +8,15 @@ export const PERMISSIONS_SCHEMA_MESSAGES = {
 }
 
 export const isValidWebHost = (value: ?string): boolean => {
-  return value != null && new URL(value).host === value
+  if (value == null || value.length === 0) {
+    return false
+  }
+  try {
+    return new URL(value).host === value
+  } catch (err) {
+    // Likely invalid URL
+    return false
+  }
 }
 
 export const webHostCheck = function(value: string) {
