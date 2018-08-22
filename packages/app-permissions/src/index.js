@@ -58,6 +58,23 @@ export const mergeGrantsToDetails = (
   },
 })
 
+export const checkURL = (
+  input: ?string,
+  allowedProtocols?: Array<string> = ['https:', 'wss:'],
+): ?string => {
+  if (input == null || input.length === 0) {
+    return
+  }
+  try {
+    const url = new URL(input)
+    if (allowedProtocols.includes(url.protocol)) {
+      return url.host
+    }
+  } catch (err) {
+    // Ignore invalid URL
+  }
+}
+
 export const checkPermission = (
   permissions: PermissionsGrants,
   key: PermissionKey,
