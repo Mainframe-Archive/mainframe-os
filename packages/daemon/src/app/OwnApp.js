@@ -91,8 +91,8 @@ export default class OwnApp extends AbstractApp {
     if (versionData == null) {
       throw new Error('Invalid version')
     }
-    if (versionData.publicationState !== 'unpublished') {
-      throw new Error('Invalid publication state')
+    if (versionData.publicationState === 'manifest_published') {
+      throw new Error('Manifest has already been published')
     }
     versionData.contentsURI = contentsURI
     versionData.publicationState = 'contents_published'

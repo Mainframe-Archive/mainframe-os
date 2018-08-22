@@ -163,7 +163,7 @@ export default class Vault {
       apps: new AppsRepository(),
       identities: new IdentitiesRepository(),
       settings: {
-        bzzURL: 'http://localhost:8500',
+        bzzURL: 'http://swarm-gateways.net',
         web3HTTPProvider: 'https://mainnet.infura.io/KWLG1YOMaYgl4wiFlcJv',
       },
     }
