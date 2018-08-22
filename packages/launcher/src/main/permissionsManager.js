@@ -29,6 +29,7 @@ export const interceptWebRequests = (
       if (
         whitelistedDomains.includes(requestUrl.hostname) ||
         requestUrl.protocol === 'file:'
+        // TODO specify only assets
       ) {
         callback({ cancel: false })
         return

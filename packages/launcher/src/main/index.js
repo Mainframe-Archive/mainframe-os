@@ -59,8 +59,8 @@ const newWindow = (params: Object = {}) => {
 // App Lifecycle
 
 const launchApp = async (appSession: ClientSession) => {
-  const appID = appSession.app.id
-  const appIds = Object.keys(appSessions).map(w => appSessions[w].app.id)
+  const appID = appSession.app.appID
+  const appIds = Object.keys(appSessions).map(w => appSessions[w].app.appID)
   if (appIds.includes(appID)) {
     // Already open
     return
@@ -68,7 +68,7 @@ const launchApp = async (appSession: ClientSession) => {
   // $FlowFixMe: ID incompatible with client package ID type
   const appWindow = newWindow()
   appWindow.on('closed', async () => {
-    await client.closeApp(appSession.session.id)
+    await client.app.close({ sessID: appSession.session.sessID })
     delete appSessions[appWindow]
   })
   appSessions[appWindow] = appSession

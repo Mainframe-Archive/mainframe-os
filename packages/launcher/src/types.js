@@ -1,6 +1,6 @@
 // @flow
 
-import type Client, { ClientSession } from '@mainframe/client'
+import type Client, { AppOpenResult as ClientSession } from '@mainframe/client'
 import type { BrowserWindow } from 'electron'
 
 // UI
