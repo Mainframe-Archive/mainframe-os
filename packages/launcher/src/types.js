@@ -1,6 +1,6 @@
 // @flow
 
-import type Client, { AppOpenResult as ClientSession } from '@mainframe/client'
+import type Client, { AppOpenResult } from '@mainframe/client'
 import type { BrowserWindow } from 'electron'
 
 // UI
@@ -20,8 +20,10 @@ export type VaultsData = {
 
 // Main
 
+export type AppSession = AppOpenResult
+
 export type AppSessions = {
-  [window: BrowserWindow]: ClientSession,
+  [window: BrowserWindow]: AppSession,
 }
 
 // Request
@@ -34,7 +36,7 @@ export type ClientResponse = {
 
 export type RequestContext = {
   request: Object,
-  appSession: ClientSession,
+  appSession: AppSession,
   window: BrowserWindow,
   client: Client,
 }

@@ -7,6 +7,8 @@ import { VaultConfig, type Environment } from '@mainframe/config'
 import createHandler, { type Methods } from '@mainframe/rpc-handler'
 // eslint-disable-next-line import/named
 import { ipcMain, type WebContents } from 'electron'
+import { type AppOpenResult as AppSession } from '@mainframe/client'
+import type { AppSessions } from '../types'
 
 import {
   SANBOXED_CHANNEL,
@@ -24,16 +26,19 @@ export type ChannelsParams = {
   client: Client,
   env: Environment,
   launchApp: LaunchAppFunc,
+  appSessions: AppSessions,
 }
 
 const validatorOptions = { messages: MANIFEST_SCHEMA_MESSAGES }
 
-const createGetContext = <T>(createContext: () => T) => {
+const createGetContext = <T>(
+  createContext: (sender: WebContents, appSession: AppSession) => T,
+) => {
   const contexts: WeakMap<WebContents, T> = new WeakMap()
-  return (sender: WebContents): T => {
+  return (sender: WebContents, appSession: AppSession): T => {
     let ctx = contexts.get(sender)
     if (ctx == null) {
-      ctx = createContext()
+      ctx = createContext(sender, appSession)
       contexts.set(sender, ctx)
     }
     return ctx
@@ -43,11 +48,14 @@ const createGetContext = <T>(createContext: () => T) => {
 const createChannel = <T>(
   name: string,
   methods: Methods,
-  getContext: (sender: WebContents) => T,
+  appSessions: AppSessions,
+  getContext: (sender: WebContents, appSession: AppSession) => T,
 ) => {
   const handleMessage = createHandler({ methods, validatorOptions })
   ipcMain.on(name, async (event, incoming) => {
-    const ctx = getContext(event.sender)
+    const window = event.sender.getOwnerBrowserWindow()
+    const appSession = appSessions[window]
+    const ctx = getContext(event.sender, appSession)
     const outgoing = await handleMessage(ctx, incoming)
     if (outgoing != null) {
       event.sender.send(name, outgoing)
@@ -57,13 +65,15 @@ const createChannel = <T>(
 
 export default (params: ChannelsParams) => {
   const vaultConfig = new VaultConfig(params.env)
-
   createChannel(
     SANBOXED_CHANNEL,
     sandboxedMethods,
+    params.appSessions,
     createGetContext(
-      (): SandboxedContext => ({
+      (sender, appSession): SandboxedContext => ({
+        sender,
         client: params.client,
+        appSession,
       }),
     ),
   )
@@ -71,6 +81,7 @@ export default (params: ChannelsParams) => {
   createChannel(
     TRUSTED_CHANNEL,
     trustedMethods,
+    params.appSessions,
     createGetContext(
       (): TrustedContext => ({
         client: params.client,

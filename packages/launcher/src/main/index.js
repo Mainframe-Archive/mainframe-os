@@ -4,14 +4,14 @@ import path from 'path'
 import { stringify } from 'querystring'
 import url from 'url'
 // eslint-disable-next-line import/named
-import Client, { type AppOpenResult as ClientSession } from '@mainframe/client'
+import Client from '@mainframe/client'
 import { Environment, DaemonConfig } from '@mainframe/config'
 import { startDaemon } from '@mainframe/toolbox'
 // eslint-disable-next-line import/named
 import { app, BrowserWindow, ipcMain } from 'electron'
 import { is } from 'electron-util'
 
-import type { AppSessions } from '../types'
+import type { AppSessions, AppSession } from '../types'
 import { interceptWebRequests } from './permissionsManager'
 import createRPCChannels from './createRPCChannels'
 
@@ -58,7 +58,7 @@ const newWindow = (params: Object = {}) => {
 
 // App Lifecycle
 
-const launchApp = async (appSession: ClientSession) => {
+const launchApp = async (appSession: AppSession) => {
   const appID = appSession.app.appID
   const appIds = Object.keys(appSessions).map(w => appSessions[w].app.appID)
   if (appIds.includes(appID)) {
@@ -87,7 +87,7 @@ const setupClient = async () => {
   await startDaemon(daemonConfig, true)
   daemonConfig.runStatus = 'running'
   client = new Client(daemonConfig.socketPath)
-  createRPCChannels({ client, env, launchApp })
+  createRPCChannels({ client, env, launchApp, appSessions })
   interceptWebRequests(client, appSessions)
 
   // Simple check for API call, not proper versioning logic

@@ -105,7 +105,6 @@ export type AppSetPermissionParams = {
   sessID: ID,
   key: PermissionKey,
   value: PermissionGrant,
-  persist?: ?boolean,
 }
 
 export type AppSetPermissionsRequirementsParams = {
