@@ -11,7 +11,7 @@
       "WEB_REQUEST": ["mainframe.com"]
     },
     "optional": {
-      "WEB3_SEND": true,
+      "BLOCKCHAIN_SEND": true,
       "WEB_REQUEST": ["facebook.com", "google.com"]
     }
   }

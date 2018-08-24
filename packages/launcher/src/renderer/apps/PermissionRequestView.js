@@ -32,7 +32,7 @@ type State = {
 }
 
 const permissionDescriptions = {
-  WEB3_SEND: 'Ethereum blockchain transaction',
+  BLOCKCHAIN_SEND: 'Ethereum blockchain transaction',
 }
 
 const getPermissionDescription = (key: string, input: ?string): ?string => {

@@ -12,7 +12,7 @@ import { app, BrowserWindow, ipcMain } from 'electron'
 import { is } from 'electron-util'
 
 import type { ActiveApps, AppSession } from '../types'
-import { interceptWebRequests } from './permissionsManager'
+import { interceptWebRequests } from './permissions'
 import createRPCChannels from './createRPCChannels'
 import electronMainRPC from './electronMainRPC'
 import { TRUSTED_CHANNEL } from './rpc/trusted'

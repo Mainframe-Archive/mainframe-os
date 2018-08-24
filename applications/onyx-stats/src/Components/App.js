@@ -56,8 +56,6 @@ export default class App extends Component<null, State> {
     ]
     const mfTokenAddr = '0xe3C2130530D77418b3e367Fe162808887526e74D'
     try {
-      // TODO remove after testing intercepting requsts
-      const response = await fetch('https://www.google.com')
       const latestBlock = await this.sdk.blockchain.getLatestBlock()
       const res = await this.sdk.blockchain.getContractEvents(
         mfTokenAddr,
@@ -70,7 +68,6 @@ export default class App extends Component<null, State> {
         stakingData: data,
       })
     } catch (err) {
-      console.log('got error: ', err)
       this.setState({ requestErr: err })
     }
   }

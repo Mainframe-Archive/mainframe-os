@@ -9,7 +9,7 @@ const permissionOptions = {
   WEB_REQUEST: 'Web Request',
   SWARM_DOWNLOAD: 'Download from Swarm',
   SWARM_UPLOAD: 'Upload to Swarm',
-  WEB3_SEND: 'Make Blockchain Transactions',
+  BLOCKCHAIN_SEND: 'Make Blockchain Transactions',
   LOCATION: 'Access Location',
 }
 

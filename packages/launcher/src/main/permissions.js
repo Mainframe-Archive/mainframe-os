@@ -61,6 +61,7 @@ export const interceptWebRequests = (
       const domain = sanitizeDomain(urlParts.host)
       if (!domain) {
         notifyCancelled(request.url)
+        callback({ cancel: true })
         return
       }
       let shouldCancel = true
