@@ -2,6 +2,7 @@
 
 import type Client, { AppOpenResult } from '@mainframe/client'
 import type { BrowserWindow } from 'electron'
+import type StreamRPC from '@mainframe/rpc-stream'
 
 // UI
 
@@ -22,8 +23,13 @@ export type VaultsData = {
 
 export type AppSession = AppOpenResult
 
-export type AppSessions = {
-  [window: BrowserWindow]: AppSession,
+export type ActiveApp = {
+  appSession: AppSession,
+  rpc: StreamRPC,
+}
+
+export type ActiveApps = {
+  [window: BrowserWindow]: ActiveApp,
 }
 
 // Request

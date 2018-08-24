@@ -11,9 +11,11 @@ import { startDaemon } from '@mainframe/toolbox'
 import { app, BrowserWindow, ipcMain } from 'electron'
 import { is } from 'electron-util'
 
-import type { AppSessions, AppSession } from '../types'
+import type { ActiveApps, AppSession } from '../types'
 import { interceptWebRequests } from './permissionsManager'
 import createRPCChannels from './createRPCChannels'
+import electronMainRPC from './electronMainRPC'
+import { TRUSTED_CHANNEL } from './rpc/trusted'
 
 const PORT = process.env.ELECTRON_WEBPACK_WDS_PORT || ''
 
@@ -32,7 +34,7 @@ const daemonConfig = new DaemonConfig(env)
 let client
 let mainWindow
 
-const appSessions: AppSessions = {}
+const activeApps: ActiveApps = {}
 
 const newWindow = (params: Object = {}) => {
   const window = new BrowserWindow({
@@ -60,7 +62,9 @@ const newWindow = (params: Object = {}) => {
 
 const launchApp = async (appSession: AppSession) => {
   const appID = appSession.app.appID
-  const appIds = Object.keys(appSessions).map(w => appSessions[w].app.appID)
+  const appIds = Object.keys(activeApps).map(
+    w => activeApps[w].appSession.app.appID,
+  )
   if (appIds.includes(appID)) {
     // Already open
     return
@@ -69,9 +73,12 @@ const launchApp = async (appSession: AppSession) => {
   const appWindow = newWindow()
   appWindow.on('closed', async () => {
     await client.app.close({ sessID: appSession.session.sessID })
-    delete appSessions[appWindow]
+    delete activeApps[appWindow]
   })
-  appSessions[appWindow] = appSession
+  activeApps[appWindow] = {
+    appSession,
+    rpc: electronMainRPC(appWindow, TRUSTED_CHANNEL),
+  }
 }
 
 // TODO: proper setup, this is just temporary logic to simplify development flow
@@ -87,8 +94,8 @@ const setupClient = async () => {
   await startDaemon(daemonConfig, true)
   daemonConfig.runStatus = 'running'
   client = new Client(daemonConfig.socketPath)
-  createRPCChannels({ client, env, launchApp, appSessions })
-  interceptWebRequests(client, appSessions)
+  createRPCChannels({ client, env, launchApp, activeApps })
+  interceptWebRequests(client, activeApps)
 
   // Simple check for API call, not proper versioning logic
   const version = await client.apiVersion()
@@ -137,10 +144,11 @@ ipcMain.on('init-window', event => {
   if (window === mainWindow) {
     window.webContents.send('start', { type: 'launcher' })
   } else {
-    const appSession = appSessions[window]
+    const app = activeApps[window]
+
     window.webContents.send('start', {
       type: 'app',
-      appSession,
+      appSession: app.appSession,
     })
   }
 })

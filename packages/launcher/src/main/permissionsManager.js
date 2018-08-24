@@ -5,11 +5,11 @@ import type Client from '@mainframe/client'
 import { checkPermission } from '@mainframe/app-permissions'
 import type { PermissionKey } from '@mainframe/app-permissions'
 
-import type { AppSessions } from '../types'
+import type { ActiveApps } from '../types'
 import type { SandboxedContext } from './rpc/sandboxed'
-import request, { notifyApp } from './mainToAppRequest'
+import { notifyApp } from './electronMainRPC'
 
-const sanitizeDomain = (domain: string) => {
+const sanitizeDomain = (domain?: string) => {
   // Removes www.
   if (domain && domain.startsWith('www.')) {
     domain = domain.slice(4, domain.length)
@@ -19,36 +19,50 @@ const sanitizeDomain = (domain: string) => {
 
 export const interceptWebRequests = (
   client: Client,
-  appSessions: AppSessions,
+  activeApps: ActiveApps,
 ) => {
   session.defaultSession.webRequest.onBeforeRequest(
     [],
     async (request, callback) => {
-      const requestUrl = url.parse(request.url, true)
+      const urlParts = url.parse(request.url, true)
+
       if (
-        requestUrl.hostname === 'localhost' ||
-        requestUrl.protocol === 'chrome-devtools:'
+        urlParts.hostname === 'localhost' ||
+        urlParts.protocol === 'chrome-devtools:'
       ) {
         callback({ cancel: false })
         return
       }
-      const domain = sanitizeDomain(requestUrl.host)
-      const reqWebContents = webContents.fromId(request.webContentsId)
-      const window = BrowserWindow.fromWebContents(
-        reqWebContents.hostWebContents,
-      )
-      const appSession = appSessions[window]
-      const permissions = appSession.session.permissions.session
+      const key = 'WEB_REQUEST'
+      const appWebContents = webContents.fromId(request.webContentsId)
+      const appContainer = appWebContents.hostWebContents
+      const window = BrowserWindow.fromWebContents(appContainer)
+      const activeApp = activeApps[window]
+      const permissions = activeApp.appSession.session.permissions.session
 
-      if (requestUrl.protocol === 'file:' && appSession) {
-        const appPath = encodeURI(appSession.app.contentsPath)
-        if (requestUrl.path && requestUrl.path.startsWith(appPath)) {
+      if (urlParts.protocol === 'file:' && activeApp) {
+        const appPath = encodeURI(activeApp.appSession.app.contentsPath)
+        if (urlParts.path && urlParts.path.startsWith(appPath)) {
           // Loading app contents
           callback({ cancel: false })
           return
         }
       }
-      const key = 'WEB_REQUEST'
+
+      const notifyCancelled = (domain: string) =>
+        notifyApp(window, {
+          type: 'permission-denied',
+          data: {
+            key,
+            input: domain,
+          },
+        })
+
+      const domain = sanitizeDomain(urlParts.host)
+      if (!domain) {
+        notifyCancelled(request.url)
+        return
+      }
       let shouldCancel = true
       try {
         let granted = checkPermission(permissions, key, domain)
@@ -60,15 +74,17 @@ export const interceptWebRequests = (
             break
           case 'not_set':
           default: {
-            const res = await askPermission(window, key, domain)
-            const urlSessionGrants = appSession.session.permissions.session[key]
+            const res = await activeApp.rpc.request('permissionsAsk', {
+              key,
+              input: domain,
+            })
             granted = res.granted ? 'granted' : 'denied'
-            urlSessionGrants[granted].push(domain)
+            permissions[key][granted].push(domain)
             if (res.persist) {
               await client.app.setPermission({
-                sessID: appSession.session.sessID,
+                sessID: activeApp.appSession.session.sessID,
                 key,
-                value: urlSessionGrants,
+                value: permissions[key],
               })
             }
             shouldCancel = !res.granted
@@ -78,15 +94,8 @@ export const interceptWebRequests = (
         // eslint-disable-next-line no-console
         console.warn(err)
       }
-      // Alert user
       if (shouldCancel) {
-        notifyApp(window.webContents, {
-          type: 'permission-denied',
-          data: {
-            key,
-            input: domain,
-          },
-        })
+        notifyCancelled(domain)
       }
       callback({ cancel: shouldCancel })
     },
@@ -98,19 +107,17 @@ export const withPermission = (
   handler: (ctx: SandboxedContext, params: any) => Promise<any>,
 ) => {
   return async (ctx: Object, params: Object) => {
-    const permissions = ctx.appSession.session.permissions.session
+    const permissions = ctx.app.appSession.session.permissions.session
     let granted = checkPermission(permissions, key)
     if (granted === 'not_set') {
-      // Sender is the Webview, need to send request to containing window
-      const window = ctx.sender.getOwnerBrowserWindow()
-      const res = await askPermission(window, key)
+      const res = await ctx.app.rpc.request('permissionsAsk', { key })
       if (key !== 'WEB_REQUEST') {
         // To satisfy flow, will never be a WEB_REQUEST permission, they are handled separately
-        ctx.appSession.session.permissions.session[key] = res.granted
+        permissions[key] = res.granted
       }
       if (res.persist) {
         await ctx.client.app.setPermission({
-          sessID: ctx.appSession.session.sessID,
+          sessID: ctx.app.appSession.session.sessID,
           key,
           value: res.granted,
         })
@@ -127,15 +134,4 @@ export const withPermission = (
         throw new Error(`Unknown permission: ${key}`)
     }
   }
-}
-
-const askPermission = async (
-  webContents: BrowserWindow,
-  key: string,
-  input?: any,
-): Promise<{
-  granted: boolean,
-  persist?: boolean,
-}> => {
-  return await request(webContents, 'permissions-ask', [key, input])
 }

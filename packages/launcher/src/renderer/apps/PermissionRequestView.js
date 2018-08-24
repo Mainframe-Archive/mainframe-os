@@ -3,12 +3,13 @@
 import React, { Component } from 'react'
 import { View, StyleSheet, Switch } from 'react-native-web'
 import { ipcRenderer } from 'electron'
+import createHandler from '@mainframe/rpc-handler'
+import { MANIFEST_SCHEMA_MESSAGES } from '@mainframe/app-manifest'
 
 import type { Notification } from '../../types'
 import colors from '../colors'
 import Text from '../UIComponents/Text'
 import Button from '../UIComponents/Button'
-import { channels, IPC_ERRORS } from '../../ipcRequest'
 import type { AppSessionData } from './AppContainer'
 
 type Props = {
@@ -55,53 +56,57 @@ export default class PermissionsManagerView extends Component<Props, State> {
   }
 
   handleNotifications() {
-    ipcRenderer.on(
-      channels.mainToApp.notification,
-      (event, msg: Notification) => {
-        if (msg.type === 'permission-denied') {
-          const notifs = this.state.permissionDeniedNotifs
-          notifs[msg.id] = msg.data
-          this.setState(
-            {
-              permissionDeniedNotifs: notifs,
-            },
-            () => {
-              setTimeout(() => {
-                const nextNotifs = this.state.permissionDeniedNotifs
-                delete nextNotifs[msg.id]
-                this.setState({ permissionDeniedNotifs: nextNotifs })
-              }, 3000)
-            },
-          )
-        }
-      },
-    )
+    ipcRenderer.on('notify-app', (event, msg: Notification) => {
+      if (msg.type === 'permission-denied') {
+        const notifs = this.state.permissionDeniedNotifs
+        notifs[msg.id] = msg.data
+        this.setState(
+          {
+            permissionDeniedNotifs: notifs,
+          },
+          () => {
+            setTimeout(() => {
+              const nextNotifs = this.state.permissionDeniedNotifs
+              delete nextNotifs[msg.id]
+              this.setState({ permissionDeniedNotifs: nextNotifs })
+            }, 3000)
+          },
+        )
+      }
+    })
   }
 
   async handlePermissionRequest() {
-    ipcRenderer.on(channels.mainToApp.request, (event, msg) => {
-      if (!msg.data || !msg.data.method || !msg.data.args) {
-        return {
-          error: IPC_ERRORS.invalidRequest,
-          id: msg.id,
-        }
-      }
-      if (msg.data.method === 'permissions-ask') {
+    const methods = {
+      permissionsAsk: (ctx, data) => {
         this.setState({
           permissionRequest: {
-            id: msg.id,
-            data: msg.data,
-            sender: event.sender,
+            id: ctx.requestID,
+            data: data,
+            sender: ctx.sender,
           },
         })
-      }
+      },
+    }
+    const validatorOptions = { messages: MANIFEST_SCHEMA_MESSAGES }
+
+    const handleMessage = createHandler({ methods, validatorOptions })
+
+    ipcRenderer.on('rpc-trusted', async (event, incoming) => {
+      await handleMessage(
+        {
+          sender: event.sender,
+          requestID: incoming.id,
+        },
+        incoming,
+      )
     })
   }
 
   onSetPermissionGrant = (granted: boolean) => {
     const { permissionRequest } = this.state
     if (permissionRequest) {
-      ipcRenderer.send(channels.mainToApp.response, {
+      permissionRequest.sender.send('rpc-trusted', {
         id: permissionRequest.id,
         result: {
           granted,
@@ -152,8 +157,8 @@ export default class PermissionsManagerView extends Component<Props, State> {
     const deniedNotifs = this.renderDeniedNotifs()
     let content
     if (permissionRequest) {
-      const key = permissionRequest.data.args[0]
-      const input = permissionRequest.data.args[1]
+      const key = permissionRequest.data.key
+      const input = permissionRequest.data.input
       const permissionLabel = getPermissionDescription(key, input)
       if (permissionLabel) {
         const message = `This app is asking permission to make a ${permissionLabel}.`

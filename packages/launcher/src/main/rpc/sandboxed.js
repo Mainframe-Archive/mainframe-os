@@ -6,7 +6,7 @@ import type Client, {
 } from '@mainframe/client'
 import { type WebContents } from 'electron'
 
-import type { AppSession } from '../../types'
+import type { ActiveApp } from '../../types'
 import { withPermission } from '../permissionsManager'
 
 export const SANBOXED_CHANNEL = 'rpc-sandboxed'
@@ -14,7 +14,7 @@ export const SANBOXED_CHANNEL = 'rpc-sandboxed'
 export type SandboxedContext = {
   client: Client,
   sender: WebContents,
-  appSession: AppSession,
+  app: ActiveApp,
 }
 
 export const sandboxedMethods = {
