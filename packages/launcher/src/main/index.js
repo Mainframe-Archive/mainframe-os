@@ -75,10 +75,12 @@ const launchApp = async (appSession: AppSession) => {
     await client.app.close({ sessID: appSession.session.sessID })
     delete activeApps[appWindow]
   })
-  activeApps[appWindow] = {
+  const activeApp = {
     appSession,
     rpc: electronMainRPC(appWindow, TRUSTED_CHANNEL),
   }
+  activeApps[appWindow] = activeApp
+  interceptWebRequests(client, appWindow, activeApp)
 }
 
 // TODO: proper setup, this is just temporary logic to simplify development flow
@@ -95,7 +97,6 @@ const setupClient = async () => {
   daemonConfig.runStatus = 'running'
   client = new Client(daemonConfig.socketPath)
   createRPCChannels({ client, env, launchApp, activeApps })
-  interceptWebRequests(client, activeApps)
 
   // Simple check for API call, not proper versioning logic
   const version = await client.apiVersion()

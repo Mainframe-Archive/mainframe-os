@@ -1,11 +1,11 @@
 // @flow
 import url from 'url'
-import { session, BrowserWindow, webContents } from 'electron'
+import { type BrowserWindow } from 'electron'
 import type Client from '@mainframe/client'
 import { checkPermission } from '@mainframe/app-permissions'
 import type { PermissionKey } from '@mainframe/app-permissions'
 
-import type { ActiveApps } from '../types'
+import type { ActiveApp } from '../types'
 import type { SandboxedContext } from './rpc/sandboxed'
 import { notifyApp } from './electronMainRPC'
 
@@ -19,12 +19,15 @@ const sanitizeDomain = (domain?: string) => {
 
 export const interceptWebRequests = (
   client: Client,
-  activeApps: ActiveApps,
+  appWindow: BrowserWindow,
+  activeApp: ActiveApp,
 ) => {
-  session.defaultSession.webRequest.onBeforeRequest(
+  appWindow.webContents.session.webRequest.onBeforeRequest(
     [],
     async (request, callback) => {
       const urlParts = url.parse(request.url, true)
+
+      // Allowing localhost and devtools requests
 
       if (
         urlParts.hostname === 'localhost' ||
@@ -33,12 +36,8 @@ export const interceptWebRequests = (
         callback({ cancel: false })
         return
       }
-      const key = 'WEB_REQUEST'
-      const appWebContents = webContents.fromId(request.webContentsId)
-      const appContainer = appWebContents.hostWebContents
-      const window = BrowserWindow.fromWebContents(appContainer)
-      const activeApp = activeApps[window]
-      const permissions = activeApp.appSession.session.permissions.session
+
+      // Allowing files loaded from apps contents
 
       if (urlParts.protocol === 'file:' && activeApp) {
         const appPath = encodeURI(activeApp.appSession.app.contentsPath)
@@ -48,6 +47,9 @@ export const interceptWebRequests = (
           return
         }
       }
+
+      const key = 'WEB_REQUEST'
+      const permissions = activeApp.appSession.session.permissions.session
 
       const notifyCancelled = (domain: string) =>
         notifyApp(window, {
