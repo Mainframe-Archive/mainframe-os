@@ -124,11 +124,12 @@ export default class PermissionsManagerView extends Component<Props, State> {
         id: permissionRequest.id,
         result: {
           granted,
-          persist: !!this.state.persistGrant, // TODO
+          persist: !!this.state.persistGrant,
         },
       })
       this.setState({
         permissionRequest: undefined,
+        persistGrant: false,
       })
     }
   }

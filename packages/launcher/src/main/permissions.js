@@ -9,14 +9,6 @@ import type { ActiveApp } from '../types'
 import type { SandboxedContext } from './rpc/sandboxed'
 import { notifyApp } from './electronMainRPC'
 
-const sanitizeDomain = (domain?: string) => {
-  // Removes www.
-  if (domain && domain.startsWith('www.')) {
-    domain = domain.slice(4, domain.length)
-  }
-  return domain
-}
-
 export const interceptWebRequests = (
   client: Client,
   appWindow: BrowserWindow,
@@ -52,7 +44,7 @@ export const interceptWebRequests = (
       const permissions = activeApp.appSession.session.permissions.session
 
       const notifyCancelled = (domain: string) =>
-        notifyApp(window, {
+        notifyApp(appWindow, {
           type: 'permission-denied',
           data: {
             key,
@@ -60,7 +52,7 @@ export const interceptWebRequests = (
           },
         })
 
-      const domain = sanitizeDomain(urlParts.host)
+      const domain = urlParts.host
       if (!domain) {
         notifyCancelled(request.url)
         callback({ cancel: true })
