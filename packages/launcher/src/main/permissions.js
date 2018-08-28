@@ -25,7 +25,7 @@ export const interceptWebRequests = (
   appWindow.webContents.session.webRequest.onBeforeRequest(
     [],
     async (request, callback) => {
-      const urlParts = url.parse(request.url, true)
+      const urlParts = url.parse(request.url)
 
       // Allowing localhost and devtools requests
 
@@ -109,7 +109,7 @@ export const withPermission = (
   key: PermissionKey,
   handler: (ctx: SandboxedContext, params: any) => Promise<any>,
 ) => {
-  return async (ctx: Object, params: Object) => {
+  return async (ctx: SandboxedContext, params: Object) => {
     const permissions = ctx.app.appSession.session.permissions.session
     let granted = checkPermission(permissions, key)
     if (granted === 'not_set') {
@@ -130,8 +130,14 @@ export const withPermission = (
     switch (granted) {
       case 'granted':
         return await handler(ctx, params)
-      case 'denied':
+      case 'denied': {
+        const appWindow = ctx.sender.getOwnerBrowserWindow()
+        notifyApp(appWindow, {
+          type: 'permission-denied',
+          data: { key },
+        })
         throw new Error(`User denied permission: ${key}`)
+      }
       case 'unknown':
       default:
         throw new Error(`Unknown permission: ${key}`)

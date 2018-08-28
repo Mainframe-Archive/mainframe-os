@@ -8,7 +8,7 @@ import createHandler, { type Methods } from '@mainframe/rpc-handler'
 // eslint-disable-next-line import/named
 import { ipcMain, type WebContents } from 'electron'
 
-import type { ActiveApps, ActiveApp } from '../types'
+import type { ActiveApps } from '../types'
 
 import {
   SANBOXED_CHANNEL,
@@ -31,14 +31,12 @@ export type ChannelsParams = {
 
 const validatorOptions = { messages: MANIFEST_SCHEMA_MESSAGES }
 
-const createGetContext = <T>(
-  createContext: (sender: WebContents, app: ActiveApp) => T,
-) => {
+const createGetContext = <T>(createContext: (sender: WebContents) => T) => {
   const contexts: WeakMap<WebContents, T> = new WeakMap()
-  return (sender: WebContents, app: ActiveApp): T => {
+  return (sender: WebContents): T => {
     let ctx = contexts.get(sender)
     if (ctx == null) {
-      ctx = createContext(sender, app)
+      ctx = createContext(sender)
       contexts.set(sender, ctx)
     }
     return ctx
@@ -49,13 +47,11 @@ const createChannel = <T>(
   name: string,
   methods: Methods,
   activeApps: ActiveApps,
-  getContext: (sender: WebContents, app: ActiveApp) => T,
+  getContext: (sender: WebContents) => T,
 ) => {
   const handleMessage = createHandler({ methods, validatorOptions })
   ipcMain.on(name, async (event, incoming) => {
-    const window = event.sender.getOwnerBrowserWindow()
-    const app = activeApps[window]
-    const ctx = getContext(event.sender, app)
+    const ctx = getContext(event.sender)
     const outgoing = await handleMessage(ctx, incoming)
     if (outgoing != null) {
       event.sender.send(name, outgoing)
@@ -70,11 +66,17 @@ export default (params: ChannelsParams) => {
     sandboxedMethods,
     params.activeApps,
     createGetContext(
-      (sender, app): SandboxedContext => ({
-        sender,
-        client: params.client,
-        app,
-      }),
+      (sender): SandboxedContext => {
+        const app = params.activeApps.get(sender.getOwnerBrowserWindow())
+        if (app) {
+          return {
+            sender,
+            client: params.client,
+            app,
+          }
+        }
+        throw new Error('App window not found')
+      },
     ),
   )
 

@@ -63,8 +63,9 @@ export default class SetPermissionsCommand extends Command {
           hostAnswers.host,
         )
       } else {
-        const index = Object.values(permissionOptions).indexOf(answers.type)
-        const key = Object.keys(permissionOptions)[index]
+        const key = Object.keys(permissionOptions).find(
+          k => permissionOptions[k] === answers.type,
+        )
         //$FlowFixMe type keys
         permissionRequirements[answers.required][key] = true
       }

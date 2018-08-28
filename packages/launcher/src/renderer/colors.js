@@ -14,4 +14,5 @@ export default {
   GREY_MED_75: '#757575',
   GREY_DARK_54: '#545556',
   WHITE: '#FFFFFF',
+  TRANSPARENT_BLUE_BG: 'rgba(14, 18, 28, 0.85)',
 }

@@ -49,31 +49,43 @@ export default class PermissionsManagerView extends Component<Props, State> {
   state: State = {
     permissionDeniedNotifs: {},
   }
+  notifListener: (Object, Notification) => void
+  mainProcListener: (Object, Object) => Promise<any>
 
   componentDidMount() {
     this.handlePermissionRequest()
     this.handleNotifications()
   }
 
+  componentWillUnmount() {
+    ipcRenderer.removeListener('notify-app', this.notifListener)
+    ipcRenderer.removeListener('rpc-trusted', this.mainProcListener)
+  }
+
   handleNotifications() {
-    ipcRenderer.on('notify-app', (event, msg: Notification) => {
+    this.notifListener = (event: Object, msg: Notification) => {
       if (msg.type === 'permission-denied') {
         const notifs = this.state.permissionDeniedNotifs
         notifs[msg.id] = msg.data
         this.setState(
-          {
-            permissionDeniedNotifs: notifs,
-          },
+          ({ permissionDeniedNotifs }) => ({
+            permissionDeniedNotifs: {
+              ...permissionDeniedNotifs,
+              [msg.id]: msg.data,
+            },
+          }),
           () => {
             setTimeout(() => {
-              const nextNotifs = this.state.permissionDeniedNotifs
-              delete nextNotifs[msg.id]
-              this.setState({ permissionDeniedNotifs: nextNotifs })
+              this.setState(({ permissionDeniedNotifs }) => {
+                const { [msg.id]: _ignore, ...notifs } = permissionDeniedNotifs
+                return { permissionDeniedNotifs: notifs }
+              })
             }, 3000)
           },
         )
       }
-    })
+    }
+    ipcRenderer.on('notify-app', this.notifListener)
   }
 
   async handlePermissionRequest() {
@@ -92,7 +104,7 @@ export default class PermissionsManagerView extends Component<Props, State> {
 
     const handleMessage = createHandler({ methods, validatorOptions })
 
-    ipcRenderer.on('rpc-trusted', async (event, incoming) => {
+    this.mainProcListener = async (event: Object, incoming: Object) => {
       await handleMessage(
         {
           sender: event.sender,
@@ -100,7 +112,9 @@ export default class PermissionsManagerView extends Component<Props, State> {
         },
         incoming,
       )
-    })
+    }
+
+    ipcRenderer.on('rpc-trusted', this.mainProcListener)
   }
 
   onSetPermissionGrant = (granted: boolean) => {
@@ -218,8 +232,6 @@ export default class PermissionsManagerView extends Component<Props, State> {
   }
 }
 
-const blueBGColor = 'rgba(14, 18, 28, 0.85)'
-
 const styles = StyleSheet.create({
   container: {
     top: 25,
@@ -227,7 +239,7 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     position: 'fixed',
-    backgroundColor: blueBGColor,
+    backgroundColor: colors.TRANSPARENT_BLUE_BG,
     height: '100%',
   },
   requestContainer: {
@@ -272,7 +284,7 @@ const styles = StyleSheet.create({
   },
   permissionDeniedLabel: {
     fontSize: 11,
-    backgroundColor: blueBGColor,
+    backgroundColor: colors.TRANSPARENT_BLUE_BG,
     color: colors.LIGHT_GREY_BLUE,
     paddingVertical: 4,
     paddingHorizontal: 6,

@@ -83,7 +83,7 @@ describe('Application launch', function() {
     await this.app.client.element(permissionsBtnSelector).click()
 
     const appItemSelector = '[data-testid="launcher-open-app"]'
-    await this.app.client.waitForExist(appItemSelector, 2000)
+    await this.app.client.waitForExist(appItemSelector, 5000)
     await this.app.client.element(appItemSelector).click()
 
     const count = await this.app.client.getWindowCount()

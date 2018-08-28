@@ -1,6 +1,6 @@
 // @flow
 
-import type Client, { AppOpenResult } from '@mainframe/client'
+import type Client, { ID, AppOpenResult } from '@mainframe/client'
 import type { BrowserWindow } from 'electron'
 import type StreamRPC from '@mainframe/rpc-stream'
 
@@ -23,14 +23,18 @@ export type VaultsData = {
 
 export type AppSession = AppOpenResult
 
+export type AppSessions = {
+  [appID: ID]: {
+    [userID: ID]: AppSession,
+  },
+}
+
 export type ActiveApp = {
   appSession: AppSession,
   rpc: StreamRPC,
 }
 
-export type ActiveApps = {
-  [window: BrowserWindow]: ActiveApp,
-}
+export type ActiveApps = WeakMap<BrowserWindow, ActiveApp>
 
 // Request
 

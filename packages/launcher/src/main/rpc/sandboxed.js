@@ -7,7 +7,6 @@ import type Client, {
 import { type WebContents } from 'electron'
 
 import type { ActiveApp } from '../../types'
-import { withPermission } from '../permissions'
 
 export const SANBOXED_CHANNEL = 'rpc-sandboxed'
 
@@ -25,8 +24,6 @@ export const sandboxedMethods = {
   ): Promise<BlockchainGetContractEventsResult> => {
     return ctx.client.blockchain.getContractEvents(params)
   },
-  blockchain_getLatestBlock: withPermission(
-    'BLOCKCHAIN_SEND',
-    (ctx: SandboxedContext) => ctx.client.blockchain.getLatestBlock(),
-  ),
+  blockchain_getLatestBlock: (ctx: SandboxedContext) =>
+    ctx.client.blockchain.getLatestBlock(),
 }

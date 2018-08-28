@@ -11,7 +11,7 @@ import { startDaemon } from '@mainframe/toolbox'
 import { app, BrowserWindow, ipcMain } from 'electron'
 import { is } from 'electron-util'
 
-import type { ActiveApps, AppSession } from '../types'
+import type { ActiveApps, AppSession, AppSessions } from '../types'
 import { interceptWebRequests } from './permissions'
 import createRPCChannels from './createRPCChannels'
 import electronMainRPC from './electronMainRPC'
@@ -34,7 +34,8 @@ const daemonConfig = new DaemonConfig(env)
 let client
 let mainWindow
 
-const activeApps: ActiveApps = {}
+const activeApps: ActiveApps = new WeakMap()
+const appSessions: AppSessions = {}
 
 const newWindow = (params: Object = {}) => {
   const window = new BrowserWindow({
@@ -62,10 +63,9 @@ const newWindow = (params: Object = {}) => {
 
 const launchApp = async (appSession: AppSession) => {
   const appID = appSession.app.appID
-  const appIds = Object.keys(activeApps).map(
-    w => activeApps[w].appSession.app.appID,
-  )
-  if (appIds.includes(appID)) {
+  const userID = appSession.user.id
+  const appOpen = appSessions[appID] && appSessions[appID][userID]
+  if (appOpen) {
     // Already open
     return
   }
@@ -73,13 +73,20 @@ const launchApp = async (appSession: AppSession) => {
   const appWindow = newWindow()
   appWindow.on('closed', async () => {
     await client.app.close({ sessID: appSession.session.sessID })
-    delete activeApps[appWindow]
+    delete appSessions[appID][userID]
+    activeApps.delete(appWindow)
   })
   const activeApp = {
     appSession,
     rpc: electronMainRPC(appWindow, TRUSTED_CHANNEL),
   }
-  activeApps[appWindow] = activeApp
+  activeApps.set(appWindow, activeApp)
+  if (appSessions[appID]) {
+    appSessions[appID][userID] = appSession
+  } else {
+    // $FlowFixMe: can't assign ID type
+    appSessions[appID] = { [userID]: appSession }
+  }
   interceptWebRequests(client, appWindow, activeApp)
 }
 
@@ -145,12 +152,13 @@ ipcMain.on('init-window', event => {
   if (window === mainWindow) {
     window.webContents.send('start', { type: 'launcher' })
   } else {
-    const app = activeApps[window]
-
-    window.webContents.send('start', {
-      type: 'app',
-      appSession: app.appSession,
-    })
+    const app = activeApps.get(window)
+    if (app) {
+      window.webContents.send('start', {
+        type: 'app',
+        appSession: app.appSession,
+      })
+    }
   }
 })
 
