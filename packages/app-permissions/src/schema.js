@@ -1,5 +1,7 @@
 // @flow
 
+import { parse as parseURL } from 'url'
+
 export const INVALID_WEB_HOST_ERROR =
   "The value '{actual}' is not a valid Web host!"
 
@@ -12,7 +14,7 @@ export const isValidWebHost = (value: ?string): boolean => {
     return false
   }
   try {
-    return new URL(value).host === value
+    return parseURL(value).host === value
   } catch (err) {
     // Likely invalid URL
     return false
