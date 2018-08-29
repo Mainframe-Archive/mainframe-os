@@ -226,7 +226,7 @@ export const publishContents = {
       throw new Error('App not found')
     }
 
-    const hash = await ctx.bzz.uploadDirectoryTar(app.contentsPath)
+    const hash = await ctx.bzz.uploadDirectoryFrom(app.contentsPath)
     const contentsURI = `urn:bzz:${hash}`
     app.setContentsURI(contentsURI, params.version)
     await ctx.openVault.save()

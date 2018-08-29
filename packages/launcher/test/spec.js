@@ -2,6 +2,9 @@ const assert = require('assert')
 const path = require('path')
 const os = require('os')
 const Application = require('spectron').Application
+const BzzAPI = require('erebos-api-bzz-node').default
+
+const getFixture = fixture => path.join(__dirname, '../../../fixtures', fixture)
 
 describe('Application launch', function() {
   // mocha requires non arrow style function to bind context
@@ -57,10 +60,11 @@ describe('Application launch', function() {
       .element('[data-testid="launcher-install-app-button"]')
       .click()
 
-    const manifestPath = path.join(
-      __dirname,
-      '../../../fixtures/test-app-manifest.json',
-    )
+    // Ensure test app is uploaded to Swarm before trying to install it
+    const bzz = new BzzAPI('http://swarm-gateways.net')
+    await bzz.uploadDirectoryFrom(getFixture('test-app'))
+    const manifestPath = getFixture('test-app-manifest.json')
+
     const fileInputSelector = '#installer-file-selector'
     await this.app.client.waitForExist(fileInputSelector, 2000)
     await this.app.client.chooseFile(fileInputSelector, manifestPath)
