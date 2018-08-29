@@ -258,14 +258,12 @@ export const setPermission = {
     }
     session.setPermission(params.key, params.value)
 
-    if (params.persist === true) {
-      const app = ctx.openVault.apps.getByID(session.appID)
-      if (app == null) {
-        throw sessionError('Invalid app')
-      }
-      app.setPermission(session.userID, params.key, params.value)
-      await ctx.openVault.save()
+    const app = ctx.openVault.apps.getByID(session.appID)
+    if (app == null) {
+      throw sessionError('Invalid app')
     }
+    app.setPermission(session.userID, params.key, params.value)
+    await ctx.openVault.save()
   },
 }
 

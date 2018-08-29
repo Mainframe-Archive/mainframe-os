@@ -9,7 +9,7 @@ describe('EMPTY_DEFINITIONS', () => {
 describe('mergeGrantsToDetails', () => {
   it('merges', () => {
     const appGrants = {
-      WEB3_SEND: false,
+      BLOCKCHAIN_SEND: false,
       WEB_REQUEST: {
         granted: ['https://google.com', 'https://twitter.com'],
         denied: [],
@@ -36,7 +36,7 @@ describe('mergeGrantsToDetails', () => {
           denied: ['https://facebook.com'],
         },
         LOCATION_GET: true,
-        WEB3_SEND: false,
+        BLOCKCHAIN_SEND: false,
       },
     }
 

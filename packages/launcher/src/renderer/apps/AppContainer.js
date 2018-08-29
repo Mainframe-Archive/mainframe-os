@@ -8,6 +8,7 @@ import { View, StyleSheet } from 'react-native-web'
 
 import colors from '../colors'
 import Text from '../UIComponents/Text'
+import PermissionRequestView from './PermissionRequestView'
 
 declare var __static: string
 
@@ -27,7 +28,7 @@ type Session = {
   permission: Object,
 }
 
-type AppSessionData = {
+export type AppSessionData = {
   app: App,
   user: User,
   session: Session,
@@ -72,8 +73,9 @@ export default class AppContainer extends Component<Props> {
             </Text>
           </View>
         </View>
+        <PermissionRequestView appSession={this.props.appSession} />
         <webview
-          id="foo"
+          id="sandbox-webview"
           src={appUrl}
           preload={preloadPath}
           style={{ flex: 1 }} // eslint-disable-line react-native/no-inline-styles
@@ -84,9 +86,6 @@ export default class AppContainer extends Component<Props> {
   }
 }
 
-const COLOR_WHITE = '#ffffff'
-const COLOR_GREY = '#f7f7f7'
-
 const styles = StyleSheet.create({
   outerContainer: {
     flex: 1,
@@ -94,7 +93,7 @@ const styles = StyleSheet.create({
   header: {
     height: 25,
     flexDirection: 'row',
-    backgroundColor: COLOR_GREY,
+    backgroundColor: colors.LIGHT_GREY_F7,
   },
   appInfo: {
     paddingTop: 5,
@@ -104,7 +103,7 @@ const styles = StyleSheet.create({
   identity: {
     height: 25,
     paddingHorizontal: 10,
-    backgroundColor: COLOR_WHITE,
+    backgroundColor: colors.WHITE,
     justifyContent: 'center',
   },
   headerLabel: {
