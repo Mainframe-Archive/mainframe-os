@@ -17,10 +17,12 @@ type Props = {
 }
 
 type State = {
-  permissionRequest?: {
-    id: string,
-    data: Object,
-    sender: Object,
+  permissionRequests: {
+    [id: string]: {
+      id: string,
+      data: Object,
+      sender: Object,
+    },
   },
   permissionDeniedNotifs: {
     [string]: ?{
@@ -48,6 +50,7 @@ const getPermissionDescription = (key: string, input: ?string): ?string => {
 export default class PermissionsManagerView extends Component<Props, State> {
   state: State = {
     permissionDeniedNotifs: {},
+    permissionRequests: {},
   }
   notifListener: (Object, Notification) => void
   mainProcListener: (Object, Object) => Promise<any>
@@ -91,13 +94,16 @@ export default class PermissionsManagerView extends Component<Props, State> {
   async handlePermissionRequest() {
     const methods = {
       permissionsAsk: (ctx, data) => {
-        this.setState({
-          permissionRequest: {
-            id: ctx.requestID,
-            data: data,
-            sender: ctx.sender,
+        this.setState(({ permissionRequests }) => ({
+          permissionRequests: {
+            ...permissionRequests,
+            [ctx.requestID]: {
+              id: ctx.requestID,
+              data: data,
+              sender: ctx.sender,
+            },
           },
-        })
+        }))
       },
     }
     const validatorOptions = { messages: MANIFEST_SCHEMA_MESSAGES }
@@ -117,29 +123,30 @@ export default class PermissionsManagerView extends Component<Props, State> {
     ipcRenderer.on('rpc-trusted', this.mainProcListener)
   }
 
-  onSetPermissionGrant = (granted: boolean) => {
-    const { permissionRequest } = this.state
-    if (permissionRequest) {
-      permissionRequest.sender.send('rpc-trusted', {
-        id: permissionRequest.id,
+  onSetPermissionGrant = (id: string, granted: boolean) => {
+    const { permissionRequests } = this.state
+    const request = permissionRequests[id]
+    if (request) {
+      request.sender.send('rpc-trusted', {
+        id: request.id,
         result: {
           granted,
           persist: !!this.state.persistGrant,
         },
       })
-      this.setState({
-        permissionRequest: undefined,
-        persistGrant: false,
+      this.setState(({ permissionRequests }) => {
+        const { [id]: _ignore, ...requests } = permissionRequests
+        return { permissionRequests: requests, persistGrant: false }
       })
     }
   }
 
-  acceptPermission = () => {
-    this.onSetPermissionGrant(true)
+  acceptPermission = (id: string) => {
+    this.onSetPermissionGrant(id, true)
   }
 
-  declinePermission = () => {
-    this.onSetPermissionGrant(false)
+  declinePermission = (id: string) => {
+    this.onSetPermissionGrant(id, false)
   }
 
   onTogglePersist = (value: boolean) => {
@@ -167,17 +174,20 @@ export default class PermissionsManagerView extends Component<Props, State> {
     ) : null
   }
 
-  render() {
-    const { permissionRequest, persistGrant } = this.state
-    const deniedNotifs = this.renderDeniedNotifs()
-    let content
-    if (permissionRequest) {
+  renderPermissionRequest = () => {
+    const { persistGrant, permissionRequests } = this.state
+    const keys = Object.keys(permissionRequests)
+    let request
+    if (keys.length) {
+      const permissionRequest = this.state.permissionRequests[keys[0]]
       const key = permissionRequest.data.key
       const input = permissionRequest.data.input
       const permissionLabel = getPermissionDescription(key, input)
+      const accept = () => this.acceptPermission(permissionRequest.id)
+      const decline = () => this.declinePermission(permissionRequest.id)
       if (permissionLabel) {
         const message = `This app is asking permission to make a ${permissionLabel}.`
-        content = (
+        request = (
           <View style={styles.container}>
             <View style={styles.requestContainer}>
               <Text style={styles.headerText}>Permission Required</Text>
@@ -192,12 +202,12 @@ export default class PermissionsManagerView extends Component<Props, State> {
               <View style={styles.buttonsContainer}>
                 <Button
                   title="ACCEPT"
-                  onPress={this.acceptPermission}
+                  onPress={accept}
                   style={styles.acceptButton}
                 />
                 <Button
                   title="DECLINE"
-                  onPress={this.declinePermission}
+                  onPress={decline}
                   style={styles.declineButton}
                 />
               </View>
@@ -205,7 +215,7 @@ export default class PermissionsManagerView extends Component<Props, State> {
           </View>
         )
       } else {
-        content = (
+        request = (
           <View style={styles.container}>
             <View style={styles.requestContainer}>
               <Text style={styles.headerText}>Unknown Permission</Text>
@@ -215,7 +225,7 @@ export default class PermissionsManagerView extends Component<Props, State> {
               <View style={styles.buttonsContainer}>
                 <Button
                   title="DECLINE"
-                  onPress={this.acceptPermission}
+                  onPress={decline}
                   style={styles.declineButton}
                 />
               </View>
@@ -224,9 +234,15 @@ export default class PermissionsManagerView extends Component<Props, State> {
         )
       }
     }
+    return request
+  }
+
+  render() {
+    const deniedNotifs = this.renderDeniedNotifs()
+    const permissionRequest = this.renderPermissionRequest()
     return (
       <View>
-        {content}
+        {permissionRequest}
         {deniedNotifs}
       </View>
     )
