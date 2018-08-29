@@ -2,7 +2,7 @@
 import React, { Component } from 'react'
 import { View, Image } from 'react-native-web'
 
-import type { Style } from '../types'
+import type { Style } from '../../types'
 
 type Props = {
   name: string,

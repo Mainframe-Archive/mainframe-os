@@ -3,7 +3,8 @@
 import React, { Component } from 'react'
 import { TouchableOpacity, StyleSheet } from 'react-native-web'
 
-import { COLORS } from '../styles'
+import COLORS from '../colors'
+import type { Style } from '../../types'
 import Text from './Text'
 
 type Props = {
@@ -11,6 +12,8 @@ type Props = {
   testID?: string,
   title: string,
   disabled?: boolean,
+  style?: Style,
+  textStyle?: Style,
 }
 
 export default class AppInstallModal extends Component<Props> {
@@ -18,10 +21,12 @@ export default class AppInstallModal extends Component<Props> {
     return (
       <TouchableOpacity
         testID={this.props.testID}
-        style={styles.button}
+        style={[styles.button, this.props.style]}
         onPress={this.props.onPress}
         disabled={this.props.disabled}>
-        <Text style={styles.label}>{this.props.title}</Text>
+        <Text style={[styles.label, this.props.textStyle]}>
+          {this.props.title}
+        </Text>
       </TouchableOpacity>
     )
   }
@@ -30,14 +35,14 @@ export default class AppInstallModal extends Component<Props> {
 const styles = StyleSheet.create({
   button: {
     paddingVertical: 10,
-    backgroundColor: COLORS.red,
+    backgroundColor: COLORS.PRIMARY_RED,
     paddingHorizontal: 30,
     borderRadius: 30,
     maxWidth: 250,
   },
   label: {
     textAlign: 'center',
-    color: COLORS.white,
+    color: COLORS.WHITE,
     fontWeight: 'bold,',
   },
 })

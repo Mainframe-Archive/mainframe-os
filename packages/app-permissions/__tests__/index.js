@@ -19,7 +19,7 @@ describe('app-permissions', () => {
 
   it('mergeGrantsToDetails() merges app and user grants', () => {
     const appGrants = {
-      WEB3_SEND: false,
+      BLOCKCHAIN_SEND: false,
       WEB_REQUEST: {
         granted: ['https://google.com', 'https://twitter.com'],
         denied: [],
@@ -46,7 +46,7 @@ describe('app-permissions', () => {
           denied: ['https://facebook.com'],
         },
         LOCATION_GET: true,
-        WEB3_SEND: false,
+        BLOCKCHAIN_SEND: false,
       },
     }
 

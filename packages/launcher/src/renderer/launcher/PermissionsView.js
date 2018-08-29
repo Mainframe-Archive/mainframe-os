@@ -47,11 +47,7 @@ const PERMISSION_NAMES = {
     name: 'Upload To Swarm',
     description: 'Allow this app to upload files from swarm',
   },
-  WEB3_CALL: {
-    name: 'Read from Blockchain',
-    description: 'Allow this app to make read only calls to the blockchain',
-  },
-  WEB3_SEND: {
+  BLOCKCHAIN_SEND: {
     name: 'Write to the Blockchain',
     description:
       'Allow this app to make transactional calls to the blockchain, e.g. send tokens',

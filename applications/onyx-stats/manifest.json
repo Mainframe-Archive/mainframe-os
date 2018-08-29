@@ -2,19 +2,17 @@
   "id": "onyx-stats",
   "version": "0.1",
   "name": "Onyx Stats",
-  "developer": {
-    "id": "dev3",
-    "name": "Dapp Dev 3"
+  "author": {
+    "id": "dev3"
   },
   "permissions": {
     "required": {
       "SWARM_DOWNLOAD": true,
-      "WEB3_CALL": true,
-      "HTTPS_REQUEST": ["mainframe.com"]
+      "WEB_REQUEST": ["mainframe.com"]
     },
     "optional": {
-      "HTTPS_REQUEST": ["facebook.com", "google.com"],
-      "LOCATION_GET": true
+      "BLOCKCHAIN_SEND": true,
+      "WEB_REQUEST": ["facebook.com", "google.com"]
     }
   }
 }

@@ -4,20 +4,18 @@ import path from 'path'
 import { stringify } from 'querystring'
 import url from 'url'
 // eslint-disable-next-line import/named
-import Client, { type AppOpenResult as ClientSession } from '@mainframe/client'
+import Client from '@mainframe/client'
 import { Environment, DaemonConfig } from '@mainframe/config'
 import { startDaemon } from '@mainframe/toolbox'
 // eslint-disable-next-line import/named
 import { app, BrowserWindow, ipcMain } from 'electron'
 import { is } from 'electron-util'
 
+import type { ActiveApps, AppSession, AppSessions } from '../types'
+import { interceptWebRequests } from './permissions'
 import createRPCChannels from './createRPCChannels'
-
-type AppWindows = {
-  [window: BrowserWindow]: {
-    appSession: ClientSession,
-  },
-}
+import electronMainRPC from './electronMainRPC'
+import { TRUSTED_CHANNEL } from './rpc/trusted'
 
 const PORT = process.env.ELECTRON_WEBPACK_WDS_PORT || ''
 
@@ -36,7 +34,8 @@ const daemonConfig = new DaemonConfig(env)
 let client
 let mainWindow
 
-const appWindows: AppWindows = {}
+const activeApps: ActiveApps = new WeakMap()
+const appSessions: AppSessions = {}
 
 const newWindow = (params: Object = {}) => {
   const window = new BrowserWindow({
@@ -62,12 +61,11 @@ const newWindow = (params: Object = {}) => {
 
 // App Lifecycle
 
-const launchApp = async (appSession: ClientSession) => {
+const launchApp = async (appSession: AppSession) => {
   const appID = appSession.app.appID
-  const appIds = Object.keys(appWindows).map(
-    w => appWindows[w].appSession.app.appID,
-  )
-  if (appIds.includes(appID)) {
+  const userID = appSession.user.id
+  const appOpen = appSessions[appID] && appSessions[appID][userID]
+  if (appOpen) {
     // Already open
     return
   }
@@ -75,11 +73,21 @@ const launchApp = async (appSession: ClientSession) => {
   const appWindow = newWindow()
   appWindow.on('closed', async () => {
     await client.app.close({ sessID: appSession.session.sessID })
-    delete appWindows[appWindow]
+    delete appSessions[appID][userID]
+    activeApps.delete(appWindow)
   })
-  appWindows[appWindow] = {
+  const activeApp = {
     appSession,
+    rpc: electronMainRPC(appWindow, TRUSTED_CHANNEL),
   }
+  activeApps.set(appWindow, activeApp)
+  if (appSessions[appID]) {
+    appSessions[appID][userID] = appSession
+  } else {
+    // $FlowFixMe: can't assign ID type
+    appSessions[appID] = { [userID]: appSession }
+  }
+  interceptWebRequests(client, appWindow, activeApp)
 }
 
 // TODO: proper setup, this is just temporary logic to simplify development flow
@@ -95,7 +103,7 @@ const setupClient = async () => {
   await startDaemon(daemonConfig, true)
   daemonConfig.runStatus = 'running'
   client = new Client(daemonConfig.socketPath)
-  createRPCChannels({ client, env, launchApp })
+  createRPCChannels({ client, env, launchApp, activeApps })
 
   // Simple check for API call, not proper versioning logic
   const version = await client.apiVersion()
@@ -144,11 +152,13 @@ ipcMain.on('init-window', event => {
   if (window === mainWindow) {
     window.webContents.send('start', { type: 'launcher' })
   } else {
-    const appWindowData = appWindows[window]
-    window.webContents.send('start', {
-      type: 'app',
-      appSession: appWindowData.appSession,
-    })
+    const app = activeApps.get(window)
+    if (app) {
+      window.webContents.send('start', {
+        type: 'app',
+        appSession: app.appSession,
+      })
+    }
   }
 })
 

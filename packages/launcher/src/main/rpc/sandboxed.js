@@ -4,11 +4,16 @@ import type Client, {
   BlockchainGetContractEventsParams,
   BlockchainGetContractEventsResult,
 } from '@mainframe/client'
+import { type WebContents } from 'electron'
+
+import type { ActiveApp } from '../../types'
 
 export const SANBOXED_CHANNEL = 'rpc-sandboxed'
 
 export type SandboxedContext = {
   client: Client,
+  sender: WebContents,
+  app: ActiveApp,
 }
 
 export const sandboxedMethods = {
@@ -19,7 +24,6 @@ export const sandboxedMethods = {
   ): Promise<BlockchainGetContractEventsResult> => {
     return ctx.client.blockchain.getContractEvents(params)
   },
-  blockchain_getLatestBlock: (ctx: SandboxedContext) => {
-    return ctx.client.blockchain.getLatestBlock()
-  },
+  blockchain_getLatestBlock: (ctx: SandboxedContext) =>
+    ctx.client.blockchain.getLatestBlock(),
 }
