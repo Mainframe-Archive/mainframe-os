@@ -56,14 +56,6 @@ const PERMISSION_NAMES = {
     name: 'Make Web requests',
     description: 'Allow this app to make Web requests to specified domains',
   },
-  NOTIFICATION_DISPLAY: {
-    name: 'Display Notifications',
-    description: 'Allow this app to display notifications',
-  },
-  LOCATION_GET: {
-    name: 'Read Location',
-    description: 'Allow this app to read your current location',
-  },
 }
 
 const formatSettings = (

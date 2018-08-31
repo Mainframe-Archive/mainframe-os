@@ -1,8 +1,6 @@
 // @flow
 
 export type PermissionKeyBasic =
-  | 'LOCATION_GET'
-  | 'NOTIFICATION_DISPLAY'
   | 'SWARM_DOWNLOAD'
   | 'SWARM_UPLOAD'
   | 'BLOCKCHAIN_SEND'
