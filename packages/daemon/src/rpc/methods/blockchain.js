@@ -32,5 +32,5 @@ export const readContract = async (
     throw new Error('Contract method not found in provided ABI')
   }
   const args = params.args || []
-  return await contract.methods[params.method](...args).call()
+  return contract.methods[params.method](...args).call()
 }
