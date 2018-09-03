@@ -13,6 +13,20 @@ class API {
 }
 
 class BlockchainAPI extends API {
+  readContract(
+    contractAddress: string,
+    abi: Array<any>,
+    method: string,
+    args?: ?Array<any>,
+  ): Promise<Array<Object>> {
+    return this._rpc.request('blockchain_readContract', {
+      contractAddress,
+      abi,
+      method,
+      args,
+    })
+  }
+
   getContractEvents(
     contractAddress: string,
     abi: Array<any>,

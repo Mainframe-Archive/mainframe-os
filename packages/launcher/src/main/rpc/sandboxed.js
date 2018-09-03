@@ -3,6 +3,8 @@
 import type Client, {
   BlockchainGetContractEventsParams,
   BlockchainGetContractEventsResult,
+  BlockchainReadContractParams,
+  BlockchainReadContractResult,
 } from '@mainframe/client'
 import { type WebContents } from 'electron'
 
@@ -23,6 +25,12 @@ export const sandboxedMethods = {
     params: BlockchainGetContractEventsParams,
   ): Promise<BlockchainGetContractEventsResult> => {
     return ctx.client.blockchain.getContractEvents(params)
+  },
+  blockchain_readContract: (
+    ctx: SandboxedContext,
+    params: BlockchainReadContractParams,
+  ): Promise<BlockchainReadContractResult> => {
+    return ctx.client.blockchain.readContract(params)
   },
   blockchain_getLatestBlock: (ctx: SandboxedContext) =>
     ctx.client.blockchain.getLatestBlock(),
