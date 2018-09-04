@@ -1,11 +1,34 @@
 // @flow
 
+import { parse as parseURL } from 'url'
+
+export const INVALID_WEB_HOST_ERROR =
+  "The value '{actual}' is not a valid Web host!"
+
+export const PERMISSIONS_SCHEMA_MESSAGES = {
+  webHost: INVALID_WEB_HOST_ERROR,
+}
+
+export const isValidWebHost = (value: ?string): boolean => {
+  if (value == null || value.length === 0) {
+    return false
+  }
+  try {
+    return parseURL(value).host === value
+  } catch (err) {
+    // Likely invalid URL
+    return false
+  }
+}
+
+export const webHostCheck = function(value: string) {
+  return isValidWebHost(value) || this.makeError('host', null, value)
+}
+
 export const PERMISSION_KEYS_BOOLEAN = [
-  'LOCATION_GET',
-  'NOTIFICATION_DISPLAY',
   'SWARM_DOWNLOAD',
   'SWARM_UPLOAD',
-  'WEB3_SEND',
+  'BLOCKCHAIN_SEND',
 ]
 
 export const PERMISSION_KEYS = [...PERMISSION_KEYS_BOOLEAN, 'WEB_REQUEST']
@@ -15,18 +38,22 @@ export const PERMISSION_KEY_SCHEMA = {
   values: PERMISSION_KEYS,
 }
 
-// TODO: better domain validation - possible with custom validator?
-export const WEB_DOMAINS_SCHEMA = {
+export const WEB_HOST_SCHEMA = {
+  type: 'custom',
+  check: webHostCheck,
+}
+
+export const WEB_HOSTS_SCHEMA = {
   type: 'array',
-  items: 'string',
+  items: WEB_HOST_SCHEMA,
   optional: true,
 }
 
 export const WEB_REQUEST_GRANT_SCHEMA = {
   type: 'object',
   props: {
-    granted: WEB_DOMAINS_SCHEMA,
-    denied: WEB_DOMAINS_SCHEMA,
+    granted: WEB_HOSTS_SCHEMA,
+    denied: WEB_HOSTS_SCHEMA,
   },
 }
 
@@ -51,7 +78,7 @@ export const PERMISSIONS_DEFINITIONS_SCHEMA = {
   props: PERMISSION_KEYS.reduce((acc, key) => {
     acc[key] =
       key === 'WEB_REQUEST'
-        ? WEB_DOMAINS_SCHEMA
+        ? WEB_HOSTS_SCHEMA
         : { type: 'boolean', optional: true }
     return acc
   }, {}),

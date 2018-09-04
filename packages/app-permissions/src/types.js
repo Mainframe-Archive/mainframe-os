@@ -1,12 +1,9 @@
 // @flow
 
 export type PermissionKeyBasic =
-  | 'LOCATION_GET'
-  | 'NOTIFICATION_DISPLAY'
   | 'SWARM_DOWNLOAD'
   | 'SWARM_UPLOAD'
-  | 'WEB3_CALL'
-  | 'WEB3_SEND'
+  | 'BLOCKCHAIN_SEND'
 export type PermissionKey = 'WEB_REQUEST' | PermissionKeyBasic
 
 export type WebRequestDefinition = Array<string>

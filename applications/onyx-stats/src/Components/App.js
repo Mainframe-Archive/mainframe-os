@@ -112,7 +112,7 @@ export default class App extends Component<null, State> {
       content = (
         <View style={styles.errorContainer}>
           <Text style={styles.errorLabel}>
-            Sorry, there was a problem reading data from the blockchain
+            Sorry, there was a problem reading from the blockchain
           </Text>
         </View>
       )

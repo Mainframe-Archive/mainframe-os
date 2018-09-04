@@ -58,6 +58,23 @@ export const mergeGrantsToDetails = (
   },
 })
 
+export const checkURL = (
+  input: ?string,
+  allowedProtocols?: Array<string> = ['https:', 'wss:'],
+): ?string => {
+  if (input == null || input.length === 0) {
+    return
+  }
+  try {
+    const url = new URL(input)
+    if (allowedProtocols.includes(url.protocol)) {
+      return url.host
+    }
+  } catch (err) {
+    // Ignore invalid URL
+  }
+}
+
 export const checkPermission = (
   permissions: PermissionsGrants,
   key: PermissionKey,
@@ -76,7 +93,9 @@ export const checkPermission = (
       }
       return 'not_set'
 
-    case 'WEB3_CALL':
+    case 'SWARM_UPLOAD':
+    case 'SWARM_DOWNLOAD':
+    case 'BLOCKCHAIN_SEND':
       if (permissions[key] == null) {
         return 'not_set'
       }
