@@ -42,7 +42,6 @@
     "source-map-support": "^0.5.9"
   },
   "devDependencies": {
-    "@babel/preset-react": "7.0.0",
     "@mainframe/utils-id": "^0.1.0",
     "babel-loader": "^8.0.0",
     "babel-plugin-react-native-web": "^0.8.6",
