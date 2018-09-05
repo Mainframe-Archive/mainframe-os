@@ -1,14 +1,19 @@
 {
+  "plugins": [
+    "@babel/plugin-proposal-class-properties",
+    "@babel/plugin-transform-runtime",
+    "inline-react-svg"
+  ],
   "presets": [
     [
-      "env",
+      "@babel/preset-env",
       {
         "targets": {
-          "browsers": ["last 2 Chrome versions"]
+          "chrome": "61"
         }
       }
     ],
-    "react"
-  ],
-  "plugins": ["inline-react-svg", "transform-class-properties"]
+    "@babel/preset-flow",
+    "@babel/preset-react"
+  ]
 }

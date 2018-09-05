@@ -38,23 +38,21 @@
     "react-dom": "^16.4.2",
     "react-modal": "^3.4.5",
     "react-native-web": "^0.8.0",
-    "rxjs": "^6.2.2",
+    "rxjs": "^6.3.2",
     "source-map-support": "^0.5.9"
   },
   "devDependencies": {
-    "@babel/core": "7.0.0-rc.1",
-    "@babel/preset-flow": "7.0.0-rc.1",
-    "@babel/preset-react": "7.0.0-rc.1",
+    "@babel/preset-react": "7.0.0",
     "@mainframe/utils-id": "^0.1.0",
-    "babel-loader": "^8.0.0-beta.4",
+    "babel-loader": "^8.0.0",
     "babel-plugin-react-native-web": "^0.8.6",
-    "electron": "^2.0.7",
-    "electron-builder": "^20.28.2",
-    "electron-webpack": "^2.2.1",
+    "electron": "^2.0.8",
+    "electron-builder": "^20.28.3",
+    "electron-webpack": "^2.3.1",
     "erebos-api-bzz-node": "^0.3.5",
-    "flow-bin": "^0.79.1",
+    "flow-bin": "^0.80.0",
     "mocha": "^5.2.0",
-    "spectron": "^3.8.0",
-    "webpack": "^4.17.0"
+    "spectron": "^4.0.0",
+    "webpack": "^4.17.2"
   }
 }

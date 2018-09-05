@@ -12,13 +12,13 @@
   },
   "dependencies": {
     "@mainframe/rpc-ipc": "^0.2.3",
-    "rxjs": "^6.2.1"
+    "rxjs": "^6.3.2"
   },
   "devDependencies": {
     "@mainframe/app-manifest": "*",
     "@mainframe/app-permissions": "*",
     "@mainframe/rpc-stream": "^0.2.3",
     "@mainframe/utils-id": "^0.1.0",
-    "flow-bin": "^0.79.1"
+    "flow-bin": "^0.80.0"
   }
 }

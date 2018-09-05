@@ -40,17 +40,17 @@
     "@mainframe/utils-crypto": "^0.2.1",
     "@mainframe/utils-id": "^0.1.0",
     "@oclif/command": "^1.5.0",
-    "@oclif/config": "^1.7.0",
-    "@oclif/plugin-help": "^2.1.0",
+    "@oclif/config": "^1.7.4",
+    "@oclif/plugin-help": "^2.1.1",
     "debug": "^3.1.0",
     "erebos-api-bzz-node": "^0.3.5",
-    "esm": "3.0.79",
+    "esm": "3.0.82",
     "fs-extra": "^7.0.0",
-    "multibase": "^0.4.0",
-    "rxjs": "^6.2.0",
-    "web3": "^1.0.0-beta.35"
+    "multibase": "^0.5.0",
+    "rxjs": "^6.3.2",
+    "web3": "^1.0.0-beta.36"
   },
   "devDependencies": {
-    "flow-bin": "^0.79.1"
+    "flow-bin": "^0.80.0"
   }
 }
