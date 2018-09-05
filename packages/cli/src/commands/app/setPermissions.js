@@ -26,6 +26,11 @@ export default class SetPermissionsCommand extends Command {
       return
     }
 
+    if (!this.flags.id) {
+      this.log('Please provide an app ID (--d <APP_ID>)')
+      return
+    }
+
     const permissionRequirements = {
       optional: {
         WEB_REQUEST: [],

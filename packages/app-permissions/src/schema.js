@@ -14,7 +14,7 @@ export const isValidWebHost = (value: ?string): boolean => {
     return false
   }
   try {
-    return parseURL(value).host === value
+    return parseURL(`http://${value}`).host === value
   } catch (err) {
     // Likely invalid URL
     return false
