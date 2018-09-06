@@ -1,42 +1,49 @@
 // @flow
 
+import { MANIFEST_SCHEMA_MESSAGES } from '@mainframe/app-manifest'
+import createHandler from '@mainframe/rpc-handler'
+import { uniqueID } from '@mainframe/utils-id'
+import { ipcRenderer } from 'electron'
 import React, { Component } from 'react'
 import { View, StyleSheet, Switch } from 'react-native-web'
-import { ipcRenderer } from 'electron'
-import createHandler from '@mainframe/rpc-handler'
-import { MANIFEST_SCHEMA_MESSAGES } from '@mainframe/app-manifest'
+import type { Subscription } from 'rxjs'
 
-import type { Notification } from '../../types'
+import { TRUSTED_CHANNEL } from '../../constants'
+
 import colors from '../colors'
+import rpc from '../rpc'
 import Text from '../UIComponents/Text'
 import Button from '../UIComponents/Button'
+
 import type { AppSessionData } from './AppContainer'
 
-type Props = {
-  appSession: AppSessionData,
-}
+type PermissionGrantData = { key: string, input?: string }
+type PermissionGrantResult = { granted: boolean, persist: boolean }
 
-type State = {
-  permissionRequests: {
-    [id: string]: {
-      id: string,
-      data: Object,
-      sender: Object,
-    },
+const methods = {
+  permission_ask: (
+    ctx,
+    params: PermissionGrantData,
+  ): Promise<PermissionGrantResult> => {
+    return new Promise(resolve => {
+      ctx.setState(({ permissionRequests }) => ({
+        permissionRequests: {
+          ...permissionRequests,
+          [uniqueID()]: {
+            data: params,
+            resolve,
+          },
+        },
+      }))
+    })
   },
-  permissionDeniedNotifs: {
-    [string]: ?{
-      key: string,
-      input: ?string,
-    },
-  },
-  persistGrant?: boolean,
 }
+const validatorOptions = { messages: MANIFEST_SCHEMA_MESSAGES }
+const handleMessage = createHandler({ methods, validatorOptions })
 
 const permissionDescriptions = {
   BLOCKCHAIN_SEND: 'Ethereum blockchain transaction',
 }
-
 const getPermissionDescription = (key: string, input: ?string): ?string => {
   if (key === 'WEB_REQUEST' && input) {
     return `web request to ${input}`
@@ -47,92 +54,84 @@ const getPermissionDescription = (key: string, input: ?string): ?string => {
   return null
 }
 
-export default class PermissionsManagerView extends Component<Props, State> {
-  state: State = {
-    permissionDeniedNotifs: {},
-    permissionRequests: {},
-  }
-  notifListener: (Object, Notification) => void
-  mainProcListener: (Object, Object) => Promise<any>
+type Props = {
+  appSession: AppSessionData,
+}
 
-  componentDidMount() {
-    this.handlePermissionRequest()
+type State = {
+  permissionDeniedNotifs: Array<PermissionGrantData>,
+  permissionRequests: {
+    [id: string]: {
+      data: PermissionGrantData,
+      resolve: (result: PermissionGrantResult) => void,
+    },
+  },
+  persistGrant: boolean,
+}
+
+export default class PermissionsManagerView extends Component<Props, State> {
+  state = {
+    permissionDeniedNotifs: [],
+    permissionRequests: {},
+    persistGrant: false,
+  }
+
+  _onRPCMessage: (Object, Object) => Promise<void>
+  _permissionDeniedSubscription: ?Subscription
+
+  constructor(props: Props) {
+    super(props)
     this.handleNotifications()
+    this.handlePermissionRequest()
   }
 
   componentWillUnmount() {
-    ipcRenderer.removeListener('notify-app', this.notifListener)
-    ipcRenderer.removeListener('rpc-trusted', this.mainProcListener)
+    ipcRenderer.removeListener(TRUSTED_CHANNEL, this._onRPCMessage)
+    if (this._permissionDeniedSubscription != null) {
+      this._permissionDeniedSubscription.unsubscribe()
+    }
   }
 
-  handleNotifications() {
-    this.notifListener = (event: Object, msg: Notification) => {
-      if (msg.type === 'permission-denied') {
-        const notifs = this.state.permissionDeniedNotifs
-        notifs[msg.id] = msg.data
+  async handleNotifications() {
+    const notifications = await rpc.createPermissionDeniedSubscription()
+    this._permissionDeniedSubscription = notifications.subscribe(
+      (data: PermissionGrantData) => {
         this.setState(
           ({ permissionDeniedNotifs }) => ({
-            permissionDeniedNotifs: {
-              ...permissionDeniedNotifs,
-              [msg.id]: msg.data,
-            },
+            permissionDeniedNotifs: [...permissionDeniedNotifs, data],
           }),
           () => {
             setTimeout(() => {
-              this.setState(({ permissionDeniedNotifs }) => {
-                const { [msg.id]: _ignore, ...notifs } = permissionDeniedNotifs
-                return { permissionDeniedNotifs: notifs }
+              this.setState(({ permissionDeniedNotifs: notifs }) => {
+                const index = notifs.indexOf(data)
+                return index > -1
+                  ? { permissionDeniedNotifs: notifs.splice(index, 1) }
+                  : null
               })
             }, 3000)
           },
         )
-      }
-    }
-    ipcRenderer.on('notify-app', this.notifListener)
+      },
+    )
   }
 
-  async handlePermissionRequest() {
-    const methods = {
-      permissionsAsk: (ctx, data) => {
-        this.setState(({ permissionRequests }) => ({
-          permissionRequests: {
-            ...permissionRequests,
-            [ctx.requestID]: {
-              id: ctx.requestID,
-              data: data,
-              sender: ctx.sender,
-            },
-          },
-        }))
-      },
+  handlePermissionRequest() {
+    const context = { setState: this.setState.bind(this) }
+    this._onRPCMessage = async (event: Object, incoming: Object) => {
+      const outgoing = await handleMessage(context, incoming)
+      if (outgoing != null) {
+        ipcRenderer.send(TRUSTED_CHANNEL, outgoing)
+      }
     }
-    const validatorOptions = { messages: MANIFEST_SCHEMA_MESSAGES }
-
-    const handleMessage = createHandler({ methods, validatorOptions })
-
-    this.mainProcListener = async (event: Object, incoming: Object) => {
-      await handleMessage(
-        {
-          sender: event.sender,
-          requestID: incoming.id,
-        },
-        incoming,
-      )
-    }
-
-    ipcRenderer.on('rpc-trusted', this.mainProcListener)
+    ipcRenderer.on(TRUSTED_CHANNEL, this._onRPCMessage)
   }
 
   onSetPermissionGrant = (id: string, granted: boolean) => {
-    const { permissionRequests } = this.state
-    const request = permissionRequests[id]
-    if (request) {
-      request.sender.send('rpc-trusted', {
-        id: request.id,
-        result: {
-          granted,
-          persist: !!this.state.persistGrant,
-        },
+    const request = this.state.permissionRequests[id]
+    if (request != null) {
+      request.resolve({
+        granted,
+        persist: this.state.persistGrant,
       })
       this.setState(({ permissionRequests }) => {
         const { [id]: _ignore, ...requests } = permissionRequests
@@ -156,19 +155,12 @@ export default class PermissionsManagerView extends Component<Props, State> {
   }
 
   renderDeniedNotifs = () => {
-    const { permissionDeniedNotifs } = this.state
-    const alerts = Object.keys(permissionDeniedNotifs).map(k => {
-      const notif = permissionDeniedNotifs[k]
-      if (notif) {
-        const label = getPermissionDescription(notif.key, notif.input)
-        return (
-          <Text key={k} style={styles.permissionDeniedLabel}>
-            <Text style={styles.boldText}>Blocked:</Text> {label}
-          </Text>
-        )
-      }
-      return null
-    })
+    const alerts = this.state.permissionDeniedNotifs.map((data, i) => (
+      <Text key={`alert${i}`} style={styles.permissionDeniedLabel}>
+        <Text style={styles.boldText}>Blocked:</Text>{' '}
+        {getPermissionDescription(data.key, data.input)}
+      </Text>
+    ))
     return alerts.length ? (
       <View style={styles.permissionDeniedAlerts}>{alerts}</View>
     ) : null
@@ -177,64 +169,63 @@ export default class PermissionsManagerView extends Component<Props, State> {
   renderPermissionRequest = () => {
     const { persistGrant, permissionRequests } = this.state
     const keys = Object.keys(permissionRequests)
-    let request
-    if (keys.length) {
-      const permissionRequest = this.state.permissionRequests[keys[0]]
-      const key = permissionRequest.data.key
-      const input = permissionRequest.data.input
-      const permissionLabel = getPermissionDescription(key, input)
-      const accept = () => this.acceptPermission(permissionRequest.id)
-      const decline = () => this.declinePermission(permissionRequest.id)
-      if (permissionLabel) {
-        const message = `This app is asking permission to make a ${permissionLabel}.`
-        request = (
-          <View style={styles.container}>
-            <View style={styles.requestContainer}>
-              <Text style={styles.headerText}>Permission Required</Text>
-              <Text style={styles.descriptionText}>{message}</Text>
-              <View style={styles.persistOption}>
-                <Text style={styles.persistLabel}>{`Don't ask me again?`}</Text>
-                <Switch
-                  value={persistGrant}
-                  onValueChange={this.onTogglePersist}
-                />
-              </View>
-              <View style={styles.buttonsContainer}>
-                <Button
-                  title="ACCEPT"
-                  onPress={accept}
-                  style={styles.acceptButton}
-                />
-                <Button
-                  title="DECLINE"
-                  onPress={decline}
-                  style={styles.declineButton}
-                />
-              </View>
-            </View>
-          </View>
-        )
-      } else {
-        request = (
-          <View style={styles.container}>
-            <View style={styles.requestContainer}>
-              <Text style={styles.headerText}>Unknown Permission</Text>
-              <Text style={styles.descriptionText}>
-                This app is asking for permission to perform an unknown request
-              </Text>
-              <View style={styles.buttonsContainer}>
-                <Button
-                  title="DECLINE"
-                  onPress={decline}
-                  style={styles.declineButton}
-                />
-              </View>
-            </View>
-          </View>
-        )
-      }
+
+    if (keys.length === 0) {
+      return null
     }
-    return request
+
+    const id = keys[0]
+    const permissionData = permissionRequests[id].data
+    const permissionLabel = getPermissionDescription(
+      permissionData.key,
+      permissionData.input,
+    )
+
+    const declineButton = (
+      <Button
+        title="DECLINE"
+        onPress={() => this.declinePermission(id)}
+        style={styles.declineButton}
+      />
+    )
+
+    if (permissionLabel == null) {
+      return (
+        <View style={styles.container}>
+          <View style={styles.requestContainer}>
+            <Text style={styles.headerText}>Unknown Permission</Text>
+            <Text style={styles.descriptionText}>
+              This app is asking for permission to perform an unknown request
+            </Text>
+            <View style={styles.buttonsContainer}>{declineButton}</View>
+          </View>
+        </View>
+      )
+    }
+
+    return (
+      <View style={styles.container}>
+        <View style={styles.requestContainer}>
+          <Text style={styles.headerText}>Permission Required</Text>
+          <Text
+            style={
+              styles.descriptionText
+            }>{`This app is asking permission to make a ${permissionLabel}.`}</Text>
+          <View style={styles.persistOption}>
+            <Text style={styles.persistLabel}>{`Don't ask me again?`}</Text>
+            <Switch value={persistGrant} onValueChange={this.onTogglePersist} />
+          </View>
+          <View style={styles.buttonsContainer}>
+            <Button
+              title="ACCEPT"
+              onPress={() => this.acceptPermission(id)}
+              style={styles.acceptButton}
+            />
+            {declineButton}
+          </View>
+        </View>
+      </View>
+    )
   }
 
   render() {

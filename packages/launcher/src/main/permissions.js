@@ -1,20 +1,12 @@
 // @flow
 import url from 'url'
-import { type BrowserWindow } from 'electron'
-import type Client from '@mainframe/client'
 import { checkPermission } from '@mainframe/app-permissions'
 import type { PermissionKey } from '@mainframe/app-permissions'
 
-import type { ActiveApp } from '../types'
-import type { SandboxedContext } from './rpc/sandboxed'
-import { notifyApp } from './electronMainRPC'
+import type AppContext from './AppContext'
 
-export const interceptWebRequests = (
-  client: Client,
-  appWindow: BrowserWindow,
-  activeApp: ActiveApp,
-) => {
-  appWindow.webContents.session.webRequest.onBeforeRequest(
+export const interceptWebRequests = (context: AppContext) => {
+  context.window.webContents.session.webRequest.onBeforeRequest(
     [],
     async (request, callback) => {
       const urlParts = url.parse(request.url)
@@ -31,8 +23,8 @@ export const interceptWebRequests = (
 
       // Allowing files loaded from apps contents
 
-      if (urlParts.protocol === 'file:' && activeApp) {
-        const appPath = encodeURI(activeApp.appSession.app.contentsPath)
+      if (urlParts.protocol === 'file:') {
+        const appPath = encodeURI(context.appSession.app.contentsPath)
         if (urlParts.path && urlParts.path.startsWith(appPath)) {
           // Loading app contents
           callback({ cancel: false })
@@ -41,16 +33,11 @@ export const interceptWebRequests = (
       }
 
       const key = 'WEB_REQUEST'
-      const permissions = activeApp.appSession.session.permissions.session
+      const permissions = context.appSession.session.permissions.session
 
-      const notifyCancelled = (domain: string) =>
-        notifyApp(appWindow, {
-          type: 'permission-denied',
-          data: {
-            key,
-            input: domain,
-          },
-        })
+      const notifyCancelled = (domain: string) => {
+        context.notifyPermissionDenied({ key, input: domain })
+      }
 
       const domain = urlParts.host
       if (!domain) {
@@ -69,15 +56,15 @@ export const interceptWebRequests = (
             break
           case 'not_set':
           default: {
-            const res = await activeApp.rpc.request('permissionsAsk', {
+            const res = await context.trustedRPC.request('permission_ask', {
               key,
               input: domain,
             })
             granted = res.granted ? 'granted' : 'denied'
             permissions[key][granted].push(domain)
             if (res.persist) {
-              await client.app.setPermission({
-                sessID: activeApp.appSession.session.sessID,
+              await context.client.app.setPermission({
+                sessID: context.appSession.session.sessID,
                 key,
                 value: permissions[key],
               })
@@ -99,20 +86,20 @@ export const interceptWebRequests = (
 
 export const withPermission = (
   key: PermissionKey,
-  handler: (ctx: SandboxedContext, params: any) => Promise<any>,
+  handler: (ctx: AppContext, params: Object) => Promise<any>,
 ) => {
-  return async (ctx: SandboxedContext, params: Object) => {
-    const permissions = ctx.app.appSession.session.permissions.session
+  return async (ctx: AppContext, params: Object) => {
+    const permissions = ctx.appSession.session.permissions.session
     let granted = checkPermission(permissions, key)
     if (granted === 'not_set') {
-      const res = await ctx.app.rpc.request('permissionsAsk', { key })
+      const res = await ctx.trustedRPC.request('permission_ask', { key })
       if (key !== 'WEB_REQUEST') {
         // To satisfy flow, will never be a WEB_REQUEST permission, they are handled separately
         permissions[key] = res.granted
       }
       if (res.persist) {
         await ctx.client.app.setPermission({
-          sessID: ctx.app.appSession.session.sessID,
+          sessID: ctx.appSession.session.sessID,
           key,
           value: res.granted,
         })
@@ -123,11 +110,7 @@ export const withPermission = (
       case 'granted':
         return await handler(ctx, params)
       case 'denied': {
-        const appWindow = ctx.sender.getOwnerBrowserWindow()
-        notifyApp(appWindow, {
-          type: 'permission-denied',
-          data: { key },
-        })
+        ctx.notifyPermissionDenied({ key })
         throw new Error(`User denied permission: ${key}`)
       }
       case 'unknown':

@@ -2,7 +2,6 @@
 
 import type Client, { ID, AppOpenResult } from '@mainframe/client'
 import type { BrowserWindow } from 'electron'
-import type StreamRPC from '@mainframe/rpc-stream'
 
 // UI
 
@@ -29,13 +28,6 @@ export type AppSessions = {
   },
 }
 
-export type ActiveApp = {
-  appSession: AppSession,
-  rpc: StreamRPC,
-}
-
-export type ActiveApps = WeakMap<BrowserWindow, ActiveApp>
-
 // Request
 
 export type ClientResponse = {
@@ -49,10 +41,4 @@ export type RequestContext = {
   appSession: AppSession,
   window: BrowserWindow,
   client: Client,
-}
-
-export type Notification = {
-  id: string,
-  type: string,
-  data: Object,
 }
