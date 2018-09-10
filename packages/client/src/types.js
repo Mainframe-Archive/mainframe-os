@@ -167,3 +167,11 @@ export type VaultParams = {
   path: string,
   password: string,
 }
+
+export type VaultSettings = {
+  bzzURL: string,
+  pssURL: string,
+  web3HTTPProvider: string,
+}
+
+export type VaultSettingsParams = $Shape<VaultSettings>
