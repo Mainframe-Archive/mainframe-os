@@ -1363,34 +1363,12 @@
     "@mainframe/rpc-error" "^0.2.1"
     fastest-validator "^0.6.10"
 
-"@mainframe/rpc-http-node@^0.1.1":
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/@mainframe/rpc-http-node/-/rpc-http-node-0.1.1.tgz#a46d10af7b8dd48d1fe361967886114893f71665"
-  dependencies:
-    "@mainframe/rpc-request" "^0.1.2"
-    "@mainframe/transport-http-node" "^0.1.1"
-
-"@mainframe/rpc-ipc@^0.2.1", "@mainframe/rpc-ipc@^0.2.3":
+"@mainframe/rpc-ipc@^0.2.3":
   version "0.2.3"
   resolved "https://registry.yarnpkg.com/@mainframe/rpc-ipc/-/rpc-ipc-0.2.3.tgz#7b2ab6f64a6ef53a4cc962f7945cdb093919efc7"
   dependencies:
     "@mainframe/rpc-stream" "^0.2.4"
     "@mainframe/transport-ipc" "^0.2.3"
-
-"@mainframe/rpc-node@^0.2.0":
-  version "0.2.1"
-  resolved "https://registry.yarnpkg.com/@mainframe/rpc-node/-/rpc-node-0.2.1.tgz#e7f67ac7b8cebc52c6f72d651cf1e6f95275598a"
-  dependencies:
-    "@mainframe/rpc-http-node" "^0.1.1"
-    "@mainframe/rpc-ipc" "^0.2.1"
-    "@mainframe/rpc-ws-node" "^0.2.3"
-
-"@mainframe/rpc-request@^0.1.2":
-  version "0.1.2"
-  resolved "https://registry.yarnpkg.com/@mainframe/rpc-request/-/rpc-request-0.1.2.tgz#c085cae8caf49dad37b267478139fc1319c47e40"
-  dependencies:
-    "@mainframe/rpc-base" "^0.1.1"
-    "@mainframe/rpc-error" "^0.1.1"
 
 "@mainframe/rpc-stream@^0.2.3", "@mainframe/rpc-stream@^0.2.4":
   version "0.2.4"
@@ -1414,20 +1392,9 @@
     "@mainframe/utils-crypto" "^0.2.2"
     fs-extra "^7.0.0"
 
-"@mainframe/transport-create-http@^0.1.1":
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/@mainframe/transport-create-http/-/transport-create-http-0.1.1.tgz#2e558ec8e0ada7dce939bd11ff11fb616454d02c"
-
 "@mainframe/transport-electron@^0.1.0":
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/@mainframe/transport-electron/-/transport-electron-0.1.0.tgz#cea8b6aea3532b7bd6f5d07e5bd701a1bb3c38b0"
-
-"@mainframe/transport-http-node@^0.1.1":
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/@mainframe/transport-http-node/-/transport-http-node-0.1.1.tgz#abbf98d401964a38571985c189baf659591a3ea2"
-  dependencies:
-    "@mainframe/transport-create-http" "^0.1.1"
-    node-fetch "^2.1.2"
 
 "@mainframe/transport-ipc@^0.2.3":
   version "0.2.3"
@@ -1450,6 +1417,10 @@
   resolved "https://registry.yarnpkg.com/@mainframe/utils-crypto/-/utils-crypto-0.2.2.tgz#43b726a449fe9c627fa916c40c0e04e1034e4567"
   dependencies:
     sodium-universal "^2.0.0"
+
+"@mainframe/utils-hex@^0.1.1":
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/@mainframe/utils-hex/-/utils-hex-0.1.1.tgz#2ec97e3b7358960c1b39ee60fc5a17986a3921ae"
 
 "@mainframe/utils-id@^0.1.0", "@mainframe/utils-id@^0.1.1":
   version "0.1.1"
@@ -5243,6 +5214,12 @@ erebos-api-bzz-node@^0.3.5:
     node-fetch "^2.2.0"
     tar-fs "^1.16.3"
     tar-stream "^1.6.1"
+
+erebos-api-pss@^0.3.1:
+  version "0.3.1"
+  resolved "https://registry.yarnpkg.com/erebos-api-pss/-/erebos-api-pss-0.3.1.tgz#e9237fef693bc19e687f988a0855a2be043b27ae"
+  dependencies:
+    "@mainframe/utils-hex" "^0.1.1"
 
 err-code@^1.0.0:
   version "1.1.2"
@@ -9215,7 +9192,7 @@ node-fetch@^1.0.1:
     encoding "^0.1.11"
     is-stream "^1.0.1"
 
-node-fetch@^2.1.1, node-fetch@^2.1.2, node-fetch@^2.2.0:
+node-fetch@^2.1.1, node-fetch@^2.2.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.2.0.tgz#4ee79bde909262f9775f731e3656d0db55ced5b5"
 
