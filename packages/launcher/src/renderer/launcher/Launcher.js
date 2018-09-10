@@ -1,37 +1,54 @@
 //@flow
 
-import type { ID } from '@mainframe/client'
+import type {
+  ID,
+  AppGetAllResult as Apps,
+  IdentityGetOwnUsersResult as OwnIdentities,
+  AppOwnData,
+  AppInstalledData,
+} from '@mainframe/client'
 import React, { Component } from 'react'
 import {
   View,
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
-  Image,
 } from 'react-native-web'
 
 import colors from '../colors'
 import type { VaultsData } from '../../types'
 import rpc from '../rpc'
-import Button from '../UIComponents/Button'
 import Text from '../UIComponents/Text'
 import ModalView from '../UIComponents/ModalView'
-import logo from '../../assets/images/mf-icon.png'
 import AppInstallModal from './AppInstallModal'
 import IdentitySelectorView from './IdentitySelectorView'
 import VaultManagerModal from './VaultManagerModal'
+import SideMenu from './SideMenu'
+
+const GRID_ITEMS_PER_ROW = 3
 
 type State = {
+  devMode: boolean,
   showAppInstallModal: boolean,
   vaultsData?: VaultsData,
-  selectIdForApp?: ?Object,
-  installedApps: Array<Object>,
+  selectIdForApp?: Object,
+  apps: Apps,
+  identities: OwnIdentities,
 }
+
+type AppData = AppOwnData | AppInstalledData
 
 export default class App extends Component<{}, State> {
   state = {
+    devMode: false,
     showAppInstallModal: false,
-    installedApps: [],
+    identities: {
+      users: [],
+    },
+    apps: {
+      installed: [],
+      own: [],
+    },
   }
 
   componentDidMount() {
@@ -45,7 +62,7 @@ export default class App extends Component<{}, State> {
         vaultsData,
       })
       if (vaultsData.vaultOpen) {
-        this.getInstalledApps()
+        this.getApps()
       }
     } catch (err) {
       // eslint-disable-next-line no-console
@@ -53,11 +70,13 @@ export default class App extends Component<{}, State> {
     }
   }
 
-  async getInstalledApps() {
+  async getApps() {
     try {
-      const res = await rpc.getInstalledApps()
+      const res = await rpc.getApps()
+      const identities = await rpc.getOwnUserIdentities()
       this.setState({
-        installedApps: res.apps,
+        apps: res,
+        identities,
       })
     } catch (err) {
       // eslint-disable-next-line no-console
@@ -85,21 +104,16 @@ export default class App extends Component<{}, State> {
 
   onInstallComplete = () => {
     this.onCloseInstallModal()
-    this.getInstalledApps()
+    this.getApps()
   }
 
-  onOpenApp = async (appID: ID) => {
-    const app = this.state.installedApps.find(a => a.appID === appID)
-    if (!app) {
-      return
-    }
-    if (app.users.length > 1) {
-      this.setState({
-        selectIdForApp: app,
-      })
-    } else {
-      this.openApp(app.appID, app.users[0].id)
-    }
+  onOpenApp = async (app: AppData) => {
+    this.setState({
+      selectIdForApp: {
+        type: this.state.devMode ? 'own' : 'installed',
+        app,
+      },
+    })
   }
 
   onCloseIdSelector = () => {
@@ -108,16 +122,53 @@ export default class App extends Component<{}, State> {
     })
   }
 
-  onSelectAppUser = (userID: ID) => {
+  onSelectAppUser = async (userID: ID) => {
     if (this.state.selectIdForApp) {
-      this.openApp(this.state.selectIdForApp.appID, userID)
+      const { selectIdForApp } = this.state
+      if (selectIdForApp.app.users.findIndex(u => u.id === userID) === -1) {
+        // TODO add to app
+        try {
+          await rpc.setAppUserSettings(selectIdForApp.app.appID, userID, {
+            permissions: {
+              WEB_REQUEST: { granted: [], denied: [] },
+            },
+            permissionsChecked: false,
+          })
+        } catch (err) {
+          // eslint-disable-next-line no-console
+          console.warn(err)
+        }
+      }
+      switch (selectIdForApp.type) {
+        case 'own':
+          this.openOwn(selectIdForApp.app.appID, userID)
+          break
+        case 'installed':
+          this.openInstalled(selectIdForApp.app.appID, userID)
+          break
+        default:
+          return
+      }
     }
   }
 
-  async openApp(appID: ID, userID: ID) {
+  async openInstalled(appID: ID, userID: ID) {
     await rpc.launchApp(appID, userID)
     this.setState({
       selectIdForApp: undefined,
+    })
+  }
+
+  async openOwn(appID: ID, userID: ID) {
+    await rpc.launchApp(appID, userID)
+    this.setState({
+      selectIdForApp: undefined,
+    })
+  }
+
+  onToggleDevMode = () => {
+    this.setState({
+      devMode: !this.state.devMode,
     })
   }
 
@@ -139,44 +190,96 @@ export default class App extends Component<{}, State> {
     )
   }
 
+  renderAppItem = (app: AppData) => {
+    const onClick = () => this.onOpenApp(app)
+
+    const onClickDelete = async () => {
+      await rpc.removeApp(app.appID)
+      this.getApps()
+    }
+
+    const nameStyles = [styles.appName]
+    if (this.state.devMode) {
+      nameStyles.push(styles.lightText)
+    }
+
+    const rightItem = !this.state.devMode ? (
+      <TouchableOpacity
+        onPress={onClickDelete}
+        style={styles.deleteApp}
+        key={app.appID}>
+        <Text style={styles.deleteLabel}>Delete</Text>
+      </TouchableOpacity>
+    ) : (
+      <Text style={styles.versionText}>{app.manifest.version}</Text>
+    )
+
+    return (
+      <TouchableOpacity
+        key={app.appID}
+        style={styles.appItem}
+        onPress={onClick}
+        testID={'launcher-open-app'}>
+        <View style={styles.appItemInner}>
+          <View style={styles.appIcon} />
+          <View style={styles.appInfo}>
+            <Text style={nameStyles}>
+              {app.manifest ? app.manifest.name : app.appID}
+            </Text>
+            {rightItem}
+          </View>
+        </View>
+      </TouchableOpacity>
+    )
+  }
+
+  renderAppsGrid = (apps: Array<AppData>) => {
+    if (!apps) {
+      return null
+    }
+    const appRows = apps.reduce((rows, app, i) => {
+      const rowIndex = Math.floor(i / GRID_ITEMS_PER_ROW)
+      if (!rows[rowIndex]) {
+        rows[rowIndex] = []
+      }
+      rows[rowIndex].push(this.renderAppItem(app))
+      return rows
+    }, [])
+    const installButton = (
+      <TouchableOpacity
+        key="install"
+        style={styles.appItem}
+        onPress={this.onPressInstall}>
+        <View style={styles.installAppButton}>
+          <Text style={styles.installButtonText}>Install App</Text>
+        </View>
+      </TouchableOpacity>
+    )
+
+    if (!this.state.devMode) {
+      const lastRow = appRows[appRows.length - 1]
+      if (lastRow && lastRow.length < GRID_ITEMS_PER_ROW) {
+        lastRow.push(installButton)
+      } else {
+        appRows.push([installButton])
+      }
+    }
+
+    return appRows.map((row, i) => (
+      <View key={i} style={styles.gridRow}>
+        {row}
+      </View>
+    ))
+  }
+
   render() {
     if (!this.state.vaultsData || !this.state.vaultsData.vaultOpen) {
       return this.renderVaultManager()
     }
-    const appRows = this.state.installedApps.map(app => {
-      const onClick = () => {
-        this.onOpenApp(app.appID)
-      }
 
-      const onClickDelete = async () => {
-        await rpc.removeApp(app.appID)
-        this.getInstalledApps()
-      }
+    const { apps, devMode } = this.state
 
-      return (
-        <TouchableOpacity
-          key={app.appID}
-          style={styles.appRow}
-          onPress={onClick}
-          testID={'launcher-open-app'}>
-          <View style={styles.appIcon} />
-          <View style={styles.appInfo}>
-            <View style={styles.openApp}>
-              <Text style={styles.appName}>{app.manifest.name}</Text>
-              <Text style={styles.appUsers}>
-                {`Identities: ${app.users.map(u => u.data.name).join(', ')}`}
-              </Text>
-            </View>
-          </View>
-          <TouchableOpacity
-            onPress={onClickDelete}
-            style={styles.deleteApp}
-            key={app.appID}>
-            <Text style={styles.deleteLabel}>Delete</Text>
-          </TouchableOpacity>
-        </TouchableOpacity>
-      )
-    })
+    const appsGrid = this.renderAppsGrid(devMode ? apps.own : apps.installed)
 
     const installModal = this.state.showAppInstallModal ? (
       <AppInstallModal
@@ -184,26 +287,32 @@ export default class App extends Component<{}, State> {
         onInstallComplete={this.onInstallComplete}
       />
     ) : null
-
     const appIdentitySelector = this.state.selectIdForApp ? (
       <ModalView isOpen={true} onRequestClose={this.onCloseIdSelector}>
         <IdentitySelectorView
-          users={this.state.selectIdForApp.users}
+          enableCreate
+          users={this.state.identities.users}
           onSelectId={this.onSelectAppUser}
         />
       </ModalView>
     ) : null
 
+    const sideBarStyles = [styles.sideBarView]
+    const appsContainerStyles = [styles.appsView]
+    if (this.state.devMode) {
+      sideBarStyles.push(styles.sideBarDark)
+      appsContainerStyles.push(styles.appsViewDev)
+    }
+
     return (
       <View style={styles.container} testID="launcher-view">
-        <Image style={styles.mfLogo} source={logo} resizeMode="contain" />
-        <View style={styles.apps}>{appRows}</View>
-        <View style={styles.installButtonContainer}>
-          <Button
-            testID="launcher-install-app-button"
-            title="Install New App"
-            onPress={this.onPressInstall}
-          />
+        <SideMenu
+          devMode={this.state.devMode}
+          identities={this.state.identities}
+          onToggleDevMode={this.onToggleDevMode}
+        />
+        <View style={appsContainerStyles}>
+          <View style={styles.appsGrid}>{appsGrid}</View>
         </View>
         {installModal}
         {appIdentitySelector}
@@ -214,35 +323,47 @@ export default class App extends Component<{}, State> {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 30,
+    flexDirection: 'row',
+    height: '100vh',
+  },
+  appsView: {
+    padding: 10,
+    alignItems: 'center',
+    flex: 1,
+  },
+  appsViewDev: {
+    backgroundColor: colors.GREY_DARK_54,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
   },
-  mfLogo: {
-    height: 40,
-  },
-  apps: {
+  appsGrid: {
     marginTop: 20,
-    flex: 1,
+    width: 800,
+    flexDirection: 'column',
+    alignItems: 'left',
   },
-  appRow: {
-    padding: 10,
-    marginBottom: 10,
-    borderColor: colors.LIGHT_GREY_E8,
-    borderWidth: 1,
+  gridRow: {
+    marginTop: 20,
+    height: 250,
     flexDirection: 'row',
-    borderRadius: 50,
+  },
+  appItem: {
+    flex: 3,
+    marginHorizontal: 25,
+    alignItems: 'center',
+  },
+  appItemInner: {
+    width: 210,
+    height: 230,
+    marginBottom: 10,
   },
   appIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 210,
+    height: 180,
+    borderRadius: 4,
     backgroundColor: colors.LIGHT_GREY_E8,
-  },
-  openApp: {
-    flex: 1,
   },
   deleteApp: {
     backgroundColor: colors.GREY_MED_81,
@@ -256,20 +377,36 @@ const styles = StyleSheet.create({
     fontSize: 10,
   },
   appInfo: {
-    marginLeft: 10,
+    flexDirection: 'row',
+    marginTop: 10,
     flex: 1,
   },
   appName: {
+    flex: 1,
+    fontSize: 13,
     fontWeight: 'bold',
   },
-  appUsers: {
-    marginTop: 5,
+  versionText: {
+    color: colors.LIGHT_GREY_AE,
+    paddingLeft: 10,
     fontSize: 12,
-    color: colors.GREY_MED_81,
   },
-  installButtonContainer: {
-    paddingTop: 10,
+  lightText: {
+    color: colors.LIGHT_GREY_DE,
+  },
+  installAppButton: {
+    width: 210,
+    height: 180,
     alignItems: 'center',
-    flex: 1,
+    justifyContent: 'center',
+    borderRadius: 4,
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    borderColor: colors.GREY_MED_81,
+  },
+  installButtonText: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: colors.GREY_DARK_54,
   },
 })

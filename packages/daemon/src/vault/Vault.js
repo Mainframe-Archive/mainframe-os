@@ -292,6 +292,10 @@ export default class Vault {
     app.setPermissionsRequirements(permissions, version)
   }
 
+  setAppUserSettings(appID: ID, userID: ID, settings: AppUserSettings): void {
+    this.apps.setUserSettings(appID, userID, settings)
+  }
+
   getAppManifestData(appID: ID, version?: ?string): PartialManifestData {
     const app = this.apps.getOwnByID(appID)
     if (app == null) {

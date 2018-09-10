@@ -10,6 +10,7 @@ import type {
   PermissionsDefinitionsDifference,
   PermissionsDetails,
   PermissionsGrants,
+  StrictPermissionsGrants,
   PermissionsRequirements,
   PermissionsRequirementsDifference,
 } from './types'
@@ -42,8 +43,8 @@ export const createRequirements = (
 })
 
 export const mergeGrantsToDetails = (
-  app: PermissionsGrants,
-  user: PermissionsGrants,
+  app: StrictPermissionsGrants,
+  user: StrictPermissionsGrants,
 ): PermissionsDetails => ({
   app,
   user,
@@ -57,6 +58,15 @@ export const mergeGrantsToDetails = (
     },
   },
 })
+
+export const createStrictPermissionGrants = (
+  permissions: PermissionsGrants | StrictPermissionsGrants,
+): StrictPermissionsGrants => {
+  return {
+    ...permissions,
+    WEB_REQUEST: permissions.WEB_REQUEST || createWebRequestGrant(),
+  }
+}
 
 export const checkURL = (
   input: ?string,
@@ -76,7 +86,7 @@ export const checkURL = (
 }
 
 export const checkPermission = (
-  permissions: PermissionsGrants,
+  permissions: StrictPermissionsGrants,
   key: PermissionKey,
   input?: ?string,
 ): PermissionCheckResult => {

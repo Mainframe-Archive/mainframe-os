@@ -4,7 +4,7 @@ import { readManifestFile } from '@mainframe/app-manifest'
 import {
   type default as Client,
   /* eslint-disable import/named */
-  type AppGetInstalledResult,
+  type AppGetAllResult,
   APP_INSTALL_SCHEMA,
   type AppInstallParams,
   type AppInstallResult,
@@ -13,6 +13,8 @@ import {
   type AppOpenResult,
   APP_REMOVE_SCHEMA,
   type AppRemoveParams,
+  type AppSetUserSettingsParams,
+  APP_SET_USER_SETTINGS_SCHEMA,
   type IdentityCreateResult,
   type IdentityGetOwnUsersResult,
   VAULT_SCHEMA,
@@ -57,8 +59,8 @@ export const trustedMethods = {
       return path
     },
   },
-  getInstalledApps: (ctx: TrustedContext): Promise<AppGetInstalledResult> => {
-    return ctx.client.app.getInstalled()
+  getApps: (ctx: TrustedContext): Promise<AppGetAllResult> => {
+    return ctx.client.app.getAll()
   },
   getOwnUserIdentities: (
     ctx: TrustedContext,
@@ -111,6 +113,12 @@ export const trustedMethods = {
     params: APP_REMOVE_SCHEMA,
     handler: (ctx: TrustedContext, params: AppRemoveParams) => {
       return ctx.client.app.remove(params)
+    },
+  },
+  setAppUserSettings: {
+    params: APP_SET_USER_SETTINGS_SCHEMA,
+    handler: (ctx: TrustedContext, params: AppSetUserSettingsParams) => {
+      return ctx.client.app.setUserSettings(params)
     },
   },
 }

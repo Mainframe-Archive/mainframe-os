@@ -7,7 +7,7 @@ import type {
   AppCloseParams,
   AppCreateParams,
   AppCreateResult,
-  AppGetInstalledResult,
+  AppGetAllResult,
   AppGetManifestDataParams,
   AppGetManifestDataResult,
   AppInstallParams,
@@ -19,6 +19,7 @@ import type {
   AppRemoveParams,
   AppSetPermissionParams,
   AppSetPermissionsRequirementsParams,
+  AppSetUserSettingsParams,
   AppWriteManifestParams,
 } from '../types'
 
@@ -37,8 +38,8 @@ export default class AppAPIs extends ClientAPIs {
     return this._rpc.request('app_create', params)
   }
 
-  getInstalled(): Promise<AppGetInstalledResult> {
-    return this._rpc.request('app_getInstalled')
+  getAll(): Promise<AppGetAllResult> {
+    return this._rpc.request('app_getAll')
   }
 
   getManifestData(
@@ -63,6 +64,10 @@ export default class AppAPIs extends ClientAPIs {
 
   remove(params: AppRemoveParams): Promise<void> {
     return this._rpc.request('app_remove', params)
+  }
+
+  setUserSettings(params: AppSetUserSettingsParams): Promise<void> {
+    return this._rpc.request('app_setUserSettings', params)
   }
 
   setPermission(params: AppSetPermissionParams): Promise<void> {

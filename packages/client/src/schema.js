@@ -67,6 +67,18 @@ export const APP_REMOVE_SCHEMA = {
   appID: LOCAL_ID_SCHEMA,
 }
 
+export const APP_SET_USER_SETTINGS_SCHEMA = {
+  appID: LOCAL_ID_SCHEMA,
+  userID: LOCAL_ID_SCHEMA,
+  settings: {
+    type: 'object',
+    props: {
+      permissions: PERMISSIONS_GRANTS_SCHEMA,
+      permissionsChecked: 'boolean',
+    },
+  },
+}
+
 export const APP_SET_PERMISSION_SCHEMA = {
   sessID: LOCAL_ID_SCHEMA,
   key: PERMISSION_KEY_SCHEMA,

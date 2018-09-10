@@ -19,7 +19,7 @@ type User = {
 type Props = {
   users: Array<User>,
   enableCreate?: boolean,
-  onSelectId: (id: ID) => void,
+  onSelectId: (id: ID) => any,
   onCreatedId?: (id: ID) => void,
 }
 

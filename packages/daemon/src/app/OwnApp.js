@@ -119,6 +119,8 @@ export default class OwnApp extends AbstractApp {
     if (versionData == null) {
       throw new Error('Invalid version')
     }
+    // TODO: Make permissions experience similar to installed
+    //       apps to allow developers to fully test flows
     const appPermissions = {
       ...versionData.permissions.required,
       WEB_REQUEST: createWebRequestGrant(

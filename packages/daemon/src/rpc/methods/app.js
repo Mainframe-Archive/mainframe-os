@@ -12,7 +12,7 @@ import {
   APP_CREATE_SCHEMA,
   type AppCreateParams,
   type AppCreateResult,
-  type AppGetInstalledResult,
+  type AppGetAllResult,
   APP_GET_MANIFEST_DATA_SCHEMA,
   type AppGetManifestDataParams,
   type AppGetManifestDataResult,
@@ -31,6 +31,8 @@ import {
   type AppSetPermissionParams,
   APP_SET_PERMISSIONS_REQUIREMENTS_SCHEMA,
   type AppSetPermissionsRequirementsParams,
+  APP_SET_USER_SETTINGS_SCHEMA,
+  type AppSetUserSettingsParams,
   APP_WRITE_MANIFEST_SCHEMA,
   type AppWriteManifestParams,
 } from '@mainframe/client'
@@ -130,28 +132,32 @@ export const create = {
   },
 }
 
-// TODO: replace by list with filters
-export const getInstalled = (ctx: RequestContext): AppGetInstalledResult => {
-  const { apps } = ctx.openVault.apps
-  const installedApps = Object.keys(apps).map(appID => {
-    const app = apps[appID]
-    const users = app.userIDs.reduce((acc, id) => {
-      const user = ctx.openVault.identities.getOwnUser(id)
-      if (user) {
-        acc.push({
-          id: toClientID(id),
-          data: user.data,
-        })
+export const getAll = (ctx: RequestContext): AppGetAllResult => {
+  const { apps, ownApps } = ctx.openVault.apps
+  const mapList = (mapApps: Object) => {
+    return Object.keys(mapApps).map(appID => {
+      const app = mapApps[appID]
+      const users = app.userIDs.reduce((acc, id) => {
+        const user = ctx.openVault.identities.getOwnUser(id)
+        if (user) {
+          acc.push({
+            id: toClientID(id),
+            data: user.data,
+          })
+        }
+        return acc
+      }, [])
+      return {
+        appID: toClientID(appID),
+        manifest: app.manifest || app._data,
+        users: users,
       }
-      return acc
-    }, [])
-    return {
-      appID: toClientID(appID),
-      manifest: app.manifest,
-      users: users,
-    }
-  })
-  return { apps: installedApps }
+    })
+  }
+  return {
+    own: mapList(ownApps),
+    installed: mapList(apps),
+  }
 }
 
 export const getManifestData = {
@@ -242,6 +248,18 @@ export const remove = {
     params: AppRemoveParams,
   ): Promise<void> => {
     ctx.openVault.removeApp(fromClientID(params.appID))
+    await ctx.openVault.save()
+  },
+}
+export const setUserSettings = {
+  params: APP_SET_USER_SETTINGS_SCHEMA,
+  handler: async (
+    ctx: RequestContext,
+    params: AppSetUserSettingsParams,
+  ): Promise<void> => {
+    const appID = fromClientID(params.appID)
+    const userID = fromClientID(params.userID)
+    ctx.openVault.setAppUserSettings(appID, userID, params.settings)
     await ctx.openVault.save()
   },
 }

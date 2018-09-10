@@ -115,7 +115,7 @@ const setupClient = async () => {
 const createLauncherWindow = async () => {
   await setupClient()
 
-  mainWindow = newWindow({ width: 480 })
+  mainWindow = newWindow({ width: 800 })
 
   // Emitted when the window is closed.
   mainWindow.on('closed', () => {

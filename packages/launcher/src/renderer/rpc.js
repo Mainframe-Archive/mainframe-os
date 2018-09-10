@@ -1,13 +1,13 @@
 // @flow
 
-import type { ID } from '@mainframe/client'
+import type { ID, AppUserSettings } from '@mainframe/client'
 import electronRPC from '@mainframe/rpc-electron'
 
 const rpc = electronRPC('rpc-trusted')
 
 export default {
   // Apps
-  getInstalledApps: () => rpc.request('getInstalledApps'),
+  getApps: () => rpc.request('getApps'),
   installApp: (manifest: Object, userID: ID, settings: Object) => {
     return rpc.request('installApp', { manifest, userID, settings })
   },
@@ -16,7 +16,9 @@ export default {
     return rpc.request('launchApp', { appID, userID })
   },
   readManifest: (path: string) => rpc.request('readManifest', { path }),
-
+  setAppUserSettings: (appID: ID, userID: ID, settings: AppUserSettings) => {
+    rpc.request('setAppUserSettings', { appID, userID, settings })
+  },
   // Identity
   createUserIdentity: (data: Object) => {
     return rpc.request('createUserIdentity', { data })
