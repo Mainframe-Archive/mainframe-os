@@ -1,15 +1,16 @@
 // @flow
 
-import type {
-  BlockchainGetContractEventsParams,
-  BlockchainGetContractEventsResult,
-  BlockchainReadContractParams,
-  BlockchainReadContractResult,
+import {
+  LOCAL_ID_SCHEMA,
+  type BlockchainGetContractEventsParams,
+  type BlockchainGetContractEventsResult,
+  type BlockchainReadContractParams,
+  type BlockchainReadContractResult,
 } from '@mainframe/client'
 
-import type AppContext from '../AppContext'
+import type { AppContext } from '../contexts'
 
-export default {
+export const sandboxed = {
   api_version: (ctx: AppContext) => ctx.client.apiVersion(),
   blockchain_getContractEvents: (
     ctx: AppContext,
@@ -25,4 +26,18 @@ export default {
   },
   blockchain_getLatestBlock: (ctx: AppContext) =>
     ctx.client.blockchain.getLatestBlock(),
+}
+
+export const trusted = {
+  sub_createPermissionDenied: (ctx: AppContext): { id: string } => ({
+    id: ctx.createPermissionDeniedSubscription(),
+  }),
+  sub_unsubscribe: {
+    params: {
+      id: LOCAL_ID_SCHEMA,
+    },
+    handler: (ctx: AppContext, params: { id: string }): void => {
+      ctx.removeSubscription(params.id)
+    },
+  },
 }

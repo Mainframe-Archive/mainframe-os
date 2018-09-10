@@ -13,23 +13,22 @@ import {
   type AppRemoveParams,
   type IdentityCreateResult,
   type IdentityGetOwnUsersResult,
-  LOCAL_ID_SCHEMA,
   VAULT_SCHEMA,
   type VaultParams,
   /* eslint-enable import/named */
 } from '@mainframe/client'
 
-import type AppContext from '../AppContext'
+import type { LauncherContext } from '../contexts'
 
 export default {
   // Apps
-  app_getInstalled: (ctx: AppContext): Promise<AppGetInstalledResult> => {
+  app_getInstalled: (ctx: LauncherContext): Promise<AppGetInstalledResult> => {
     return ctx.client.app.getInstalled()
   },
   app_install: {
     params: APP_INSTALL_SCHEMA,
     handler: (
-      ctx: AppContext,
+      ctx: LauncherContext,
       params: AppInstallParams,
     ): Promise<AppInstallResult> => {
       return ctx.client.app.install(params)
@@ -37,7 +36,7 @@ export default {
   },
   app_launch: {
     params: APP_OPEN_SCHEMA,
-    handler: async (ctx: AppContext, params: AppOpenParams) => {
+    handler: async (ctx: LauncherContext, params: AppOpenParams) => {
       const appSession = await ctx.client.app.open(params)
       ctx.launchApp(appSession)
     },
@@ -46,7 +45,7 @@ export default {
     params: {
       path: 'string',
     },
-    handler: async (ctx: AppContext, params: { path: string }) => {
+    handler: async (ctx: LauncherContext, params: { path: string }) => {
       const manifest = await readManifestFile(params.path)
       return {
         data: manifest.data,
@@ -57,7 +56,7 @@ export default {
   },
   app_remove: {
     params: APP_REMOVE_SCHEMA,
-    handler: (ctx: AppContext, params: AppRemoveParams) => {
+    handler: (ctx: LauncherContext, params: AppRemoveParams) => {
       return ctx.client.app.remove(params)
     },
   },
@@ -68,35 +67,22 @@ export default {
       data: 'any',
     },
     handler: (
-      ctx: AppContext,
+      ctx: LauncherContext,
       params: { data?: Object },
     ): Promise<IdentityCreateResult> => {
       return ctx.client.identity.createUser(params)
     },
   },
   identity_getOwnUsers: (
-    ctx: AppContext,
+    ctx: LauncherContext,
   ): Promise<IdentityGetOwnUsersResult> => {
     return ctx.client.identity.getOwnUsers()
-  },
-
-  // Subscriptions
-  sub_createPermissionDenied: (ctx: AppContext): { id: string } => ({
-    id: ctx.createPermissionDeniedSubscription(),
-  }),
-  sub_unsubscribe: {
-    params: {
-      id: LOCAL_ID_SCHEMA,
-    },
-    handler: (ctx: AppContext, params: { id: string }): void => {
-      ctx.removeSubscription(params.id)
-    },
   },
 
   // Vaults
   vault_create: {
     handler: async (
-      ctx: AppContext,
+      ctx: LauncherContext,
       params: { label: string, password: string },
     ): Promise<string> => {
       const path = ctx.vaultConfig.createVaultPath()
@@ -107,14 +93,14 @@ export default {
       return path
     },
   },
-  vault_getVaultsData: (ctx: AppContext) => ({
+  vault_getVaultsData: (ctx: LauncherContext) => ({
     vaults: ctx.vaultConfig.vaults,
     defaultVault: ctx.vaultConfig.defaultVault,
     vaultOpen: ctx.vaultOpen,
   }),
   vault_open: {
     params: VAULT_SCHEMA,
-    handler: async (ctx: AppContext, params: VaultParams) => {
+    handler: async (ctx: LauncherContext, params: VaultParams) => {
       await ctx.client.vault.open(params)
       ctx.vaultOpen = params.path
       return { open: true }

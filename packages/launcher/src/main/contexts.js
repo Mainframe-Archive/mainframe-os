@@ -8,7 +8,7 @@ import type { BrowserWindow, WebContents } from 'electron'
 
 import type { AppSession } from '../types'
 
-import { SANDBOXED_CHANNEL } from '../constants'
+import { APP_SANDBOXED_CHANNEL, APP_TRUSTED_CHANNEL } from '../constants'
 
 export type LaunchAppFunc = (data: AppOpenResult) => Promise<void>
 
@@ -34,35 +34,8 @@ export class ContextSubscription<T = ?mixed> {
   async dispose() {}
 }
 
-export type AppContextParams = {
-  appSession: AppSession,
-  client: Client,
-  launchApp: LaunchAppFunc,
-  trustedRPC: StreamRPC,
-  vaultConfig: VaultConfig,
-  window: BrowserWindow,
-}
-
-export default class AppContext {
-  appSession: AppSession
-  client: Client
-  launchApp: LaunchAppFunc
-  sandbox: ?WebContents
-  trustedRPC: StreamRPC
-  vaultConfig: VaultConfig
-  vaultOpen: ?string
-  window: BrowserWindow
-  _permissionDeniedID: ?string
+export class Context {
   _subscriptions: { [string]: ContextSubscription<any> } = {}
-
-  constructor(params: AppContextParams) {
-    this.appSession = params.appSession
-    this.client = params.client
-    this.launchApp = params.launchApp
-    this.trustedRPC = params.trustedRPC
-    this.vaultConfig = params.vaultConfig
-    this.window = params.window
-  }
 
   async clear() {
     const disposeSubs = Object.values(this._subscriptions).map(sub => {
@@ -92,11 +65,35 @@ export default class AppContext {
       delete this._subscriptions[id]
     }
   }
+}
+
+export type AppContextParams = {
+  appSession: AppSession,
+  client: Client,
+  trustedRPC: StreamRPC,
+  window: BrowserWindow,
+}
+
+export class AppContext extends Context {
+  appSession: AppSession
+  client: Client
+  sandbox: ?WebContents
+  trustedRPC: StreamRPC
+  window: BrowserWindow
+  _permissionDeniedID: ?string
+
+  constructor(params: AppContextParams) {
+    super()
+    this.appSession = params.appSession
+    this.client = params.client
+    this.trustedRPC = params.trustedRPC
+    this.window = params.window
+  }
 
   notifyTrusted(id: string, result?: Object = {}) {
     const sub = this._subscriptions[id]
     if (sub != null) {
-      this.trustedRPC._transport.next({
+      this.window.send(APP_TRUSTED_CHANNEL, {
         jsonrpc: '2.0',
         method: sub.method,
         params: { subscription: id, result },
@@ -110,7 +107,7 @@ export default class AppContext {
     } else {
       const sub = this._subscriptions[id]
       if (sub != null) {
-        this.sandbox.send(SANDBOXED_CHANNEL, {
+        this.sandbox.send(APP_SANDBOXED_CHANNEL, {
           jsonrpc: '2.0',
           method: sub.method,
           params: { subscription: id, result },
@@ -132,5 +129,25 @@ export default class AppContext {
     if (this._permissionDeniedID != null) {
       this.notifyTrusted(this._permissionDeniedID, result)
     }
+  }
+}
+
+export type LauncherContextParams = {
+  client: Client,
+  launchApp: LaunchAppFunc,
+  vaultConfig: VaultConfig,
+}
+
+export class LauncherContext extends Context {
+  client: Client
+  launchApp: LaunchAppFunc
+  vaultConfig: VaultConfig
+  vaultOpen: ?string
+
+  constructor(params: LauncherContextParams) {
+    super()
+    this.client = params.client
+    this.launchApp = params.launchApp
+    this.vaultConfig = params.vaultConfig
   }
 }

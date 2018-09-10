@@ -8,14 +8,16 @@ import {
   ActivityIndicator,
 } from 'react-native-web'
 
-import rpc from '../rpc'
+import type { VaultsData, VaultPath } from '../../types'
+
 import Button from '../UIComponents/Button'
 import ModalView from '../UIComponents/ModalView'
 import MFTextInput from '../UIComponents/TextInput'
 import Icon from '../UIComponents/Icon'
 import Text from '../UIComponents/Text'
 import colors from '../colors'
-import type { VaultsData, VaultPath } from '../../types'
+
+import rpc from './rpc'
 
 type Props = {
   vaultsData: VaultsData,

@@ -10,13 +10,15 @@ import {
   Image,
 } from 'react-native-web'
 
-import colors from '../colors'
 import type { VaultsData } from '../../types'
-import rpc from '../rpc'
+
+import colors from '../colors'
 import Button from '../UIComponents/Button'
 import Text from '../UIComponents/Text'
 import ModalView from '../UIComponents/ModalView'
 import logo from '../../assets/images/mf-icon.png'
+
+import rpc from './rpc'
 import AppInstallModal from './AppInstallModal'
 import IdentitySelectorView from './IdentitySelectorView'
 import VaultManagerModal from './VaultManagerModal'

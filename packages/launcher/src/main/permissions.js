@@ -3,7 +3,7 @@ import url from 'url'
 import { checkPermission } from '@mainframe/app-permissions'
 import type { PermissionKey } from '@mainframe/app-permissions'
 
-import type AppContext from './AppContext'
+import type { AppContext } from './contexts'
 
 export const interceptWebRequests = (context: AppContext) => {
   context.window.webContents.session.webRequest.onBeforeRequest(

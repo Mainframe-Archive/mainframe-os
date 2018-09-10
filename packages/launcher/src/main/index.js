@@ -12,10 +12,10 @@ import { startDaemon } from '@mainframe/toolbox'
 import { app, BrowserWindow, ipcMain } from 'electron'
 import { is } from 'electron-util'
 
-import { TRUSTED_CHANNEL } from '../constants'
+import { APP_TRUSTED_REQUEST_CHANNEL } from '../constants'
 import type { AppSession, AppSessions } from '../types'
 
-import AppContext from './AppContext'
+import { AppContext, LauncherContext } from './contexts'
 import { interceptWebRequests } from './permissions'
 import createElectronTransport from './createElectronTransport'
 import createRPCChannels from './rpc/createChannels'
@@ -40,7 +40,6 @@ let launcherWindow
 
 const appSessions: AppSessions = {}
 const appContexts: WeakMap<BrowserWindow, AppContext> = new WeakMap()
-createRPCChannels(appContexts)
 
 const newWindow = (params: Object = {}) => {
   const window = new BrowserWindow({
@@ -89,11 +88,9 @@ const launchApp = async (appSession: AppSession) => {
   const appContext = new AppContext({
     appSession,
     client,
-    launchApp,
     trustedRPC: new StreamRPC(
-      createElectronTransport(appWindow, TRUSTED_CHANNEL),
+      createElectronTransport(appWindow, APP_TRUSTED_REQUEST_CHANNEL),
     ),
-    vaultConfig,
     window: appWindow,
   })
   appContexts.set(appWindow, appContext)
@@ -132,6 +129,13 @@ const createLauncherWindow = async () => {
   await setupClient()
 
   launcherWindow = newWindow({ width: 480 })
+
+  const launcherContext = new LauncherContext({
+    client,
+    launchApp,
+    vaultConfig,
+  })
+  createRPCChannels(launcherContext, appContexts)
 
   // Emitted when the window is closed.
   launcherWindow.on('closed', () => {

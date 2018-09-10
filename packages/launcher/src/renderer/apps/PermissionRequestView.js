@@ -8,13 +8,13 @@ import React, { Component } from 'react'
 import { View, StyleSheet, Switch } from 'react-native-web'
 import type { Subscription } from 'rxjs'
 
-import { TRUSTED_CHANNEL } from '../../constants'
+import { APP_TRUSTED_REQUEST_CHANNEL } from '../../constants'
 
 import colors from '../colors'
-import rpc from '../rpc'
 import Text from '../UIComponents/Text'
 import Button from '../UIComponents/Button'
 
+import rpc from './rpc'
 import type { AppSessionData } from './AppContainer'
 
 type PermissionGrantData = { key: string, input?: string }
@@ -86,7 +86,7 @@ export default class PermissionsManagerView extends Component<Props, State> {
   }
 
   componentWillUnmount() {
-    ipcRenderer.removeListener(TRUSTED_CHANNEL, this._onRPCMessage)
+    ipcRenderer.removeListener(APP_TRUSTED_REQUEST_CHANNEL, this._onRPCMessage)
     if (this._permissionDeniedSubscription != null) {
       this._permissionDeniedSubscription.unsubscribe()
     }
@@ -120,10 +120,10 @@ export default class PermissionsManagerView extends Component<Props, State> {
     this._onRPCMessage = async (event: Object, incoming: Object) => {
       const outgoing = await handleMessage(context, incoming)
       if (outgoing != null) {
-        ipcRenderer.send(TRUSTED_CHANNEL, outgoing)
+        ipcRenderer.send(APP_TRUSTED_REQUEST_CHANNEL, outgoing)
       }
     }
-    ipcRenderer.on(TRUSTED_CHANNEL, this._onRPCMessage)
+    ipcRenderer.on(APP_TRUSTED_REQUEST_CHANNEL, this._onRPCMessage)
   }
 
   onSetPermissionGrant = (id: string, granted: boolean) => {

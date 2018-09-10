@@ -5,19 +5,23 @@ import createHandler, { type Methods } from '@mainframe/rpc-handler'
 // eslint-disable-next-line import/named
 import { ipcMain, type BrowserWindow, type WebContents } from 'electron'
 
-import { SANDBOXED_CHANNEL, TRUSTED_CHANNEL } from '../../constants'
+import {
+  APP_SANDBOXED_CHANNEL,
+  APP_TRUSTED_CHANNEL,
+  LAUNCHER_CHANNEL,
+} from '../../constants'
 
-import type AppContext from '../AppContext'
+import type { Context, AppContext, LauncherContext } from '../contexts'
 
-import sandboxedMethods from './sandboxed'
-import trustedMethods from './trusted'
+import { sandboxed as sandboxedMethods, trusted as trustedMethods } from './app'
+import launcherMethods from './launcher'
 
 const validatorOptions = { messages: MANIFEST_SCHEMA_MESSAGES }
 
 const createChannel = (
   name: string,
   methods: Methods,
-  getContext: (sender: WebContents) => AppContext,
+  getContext: (sender: WebContents) => Context,
 ) => {
   const handleMessage = createHandler({ methods, validatorOptions })
   ipcMain.on(name, async (event, incoming) => {
@@ -29,8 +33,11 @@ const createChannel = (
   })
 }
 
-export default (appContexts: WeakMap<BrowserWindow, AppContext>) => {
-  const getContext = (sender: WebContents): AppContext => {
+export default (
+  launcherContext: LauncherContext,
+  appContexts: WeakMap<BrowserWindow, AppContext>,
+) => {
+  const getAppContext = (sender: WebContents): AppContext => {
     const context = appContexts.get(sender.getOwnerBrowserWindow())
     if (context == null) {
       throw new Error('AppContext not found')
@@ -39,10 +46,10 @@ export default (appContexts: WeakMap<BrowserWindow, AppContext>) => {
   }
 
   createChannel(
-    SANDBOXED_CHANNEL,
+    APP_SANDBOXED_CHANNEL,
     sandboxedMethods,
     (sender: WebContents): AppContext => {
-      const context = getContext(sender)
+      const context = getAppContext(sender)
       if (context.sandbox == null) {
         context.sandbox = sender
       }
@@ -50,5 +57,7 @@ export default (appContexts: WeakMap<BrowserWindow, AppContext>) => {
     },
   )
 
-  createChannel(TRUSTED_CHANNEL, trustedMethods, getContext)
+  createChannel(APP_TRUSTED_CHANNEL, trustedMethods, getAppContext)
+
+  createChannel(LAUNCHER_CHANNEL, launcherMethods, () => launcherContext)
 }
