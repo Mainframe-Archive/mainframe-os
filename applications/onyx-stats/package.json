@@ -11,8 +11,8 @@
   "dependencies": {
     "@babel/runtime": "^7.0.0",
     "@mainframe/sdk": "*",
-    "react": "^16.5.0",
-    "react-dom": "^16.5.0",
+    "react": "~16.4.2",
+    "react-dom": "~16.4.2",
     "react-native-web": "^0.8.10",
     "recharts": "^1.2.0"
   },
