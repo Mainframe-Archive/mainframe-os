@@ -1,31 +1,19 @@
 {
+  "plugins": [
+    "@babel/plugin-proposal-class-properties",
+    "@babel/plugin-transform-runtime"
+  ],
   "presets": [
     [
-      "env",
+      "@babel/preset-env",
       {
         "targets": {
-          "browsers": ["last 2 versions", "ie >= 11"]
+          "chrome": "61"
         },
         "modules": false,
-        "loose": true,
-        "browser-cjs": {
-          "presets": [
-            [
-              "env",
-              {
-                "targets": {
-                  "browsers": ["last 2 versions"]
-                },
-                "modules": "commonjs",
-                "loose": true
-              }
-            ]
-          ],
-          "plugins": ["syntax-class-properties", "transform-class-properties"]
-        }
+        "loose": true
       }
     ],
-    "babel-preset-flow"
-  ],
-  "plugins": ["syntax-class-properties", "transform-class-properties"]
+    "@babel/preset-flow"
+  ]
 }

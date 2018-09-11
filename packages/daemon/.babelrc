@@ -1,7 +1,11 @@
 {
+  "plugins": [
+    "@babel/plugin-proposal-class-properties",
+    "@babel/plugin-proposal-object-rest-spread"
+  ],
   "presets": [
     [
-      "env",
+      "@babel/preset-env",
       {
         "targets": {
           "node": 8
@@ -10,17 +14,6 @@
         "loose": true
       }
     ],
-    "flow"
-  ],
-  "plugins": [
-    "syntax-class-properties",
-    "syntax-object-rest-spread",
-    "transform-class-properties",
-    "transform-object-rest-spread"
-  ],
-  "env": {
-    "test": {
-      "presets": ["env", "flow"]
-    }
-  }
+    "@babel/preset-flow"
+  ]
 }
