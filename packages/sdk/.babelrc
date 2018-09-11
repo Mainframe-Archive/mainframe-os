@@ -3,17 +3,38 @@
     "@babel/plugin-proposal-class-properties",
     "@babel/plugin-transform-runtime"
   ],
-  "presets": [
-    [
-      "@babel/preset-env",
-      {
-        "targets": {
-          "chrome": "61"
-        },
-        "modules": false,
-        "loose": true
-      }
-    ],
-    "@babel/preset-flow"
-  ]
+  "presets": ["@babel/preset-flow"],
+  "env": {
+    "browser-cjs": {
+      "presets": [
+        [
+          "@babel/preset-env",
+          {
+            "targets": {
+              "browsers": ["last 2 versions"]
+            },
+            "modules": "commonjs",
+            "loose": true
+          }
+        ]
+      ]
+    },
+    "browser-esm": {
+      "plugins": [
+        ["@babel/plugin-transform-runtime", { "useESModules": true }]
+      ],
+      "presets": [
+        [
+          "@babel/preset-env",
+          {
+            "targets": {
+              "browsers": ["last 2 versions"]
+            },
+            "modules": false,
+            "loose": true
+          }
+        ]
+      ]
+    }
+  }
 }

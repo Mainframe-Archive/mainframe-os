@@ -4,8 +4,8 @@ module.exports = {
   mode: 'production',
   entry: './src/index.js',
   output: {
-    path: path.resolve(__dirname, 'lib'),
-    filename: 'index.js',
+    path: path.resolve(__dirname, 'dist'),
+    filename: 'mainframe.production.js',
     library: 'MainframeSDK',
     libraryTarget: 'umd',
   },

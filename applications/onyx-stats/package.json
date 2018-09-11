@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "webpack --mode development --watch",
-    "build": "webpack --mode production",
+    "build:app": "webpack --mode production",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
   },

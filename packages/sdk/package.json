@@ -1,14 +1,14 @@
 {
   "name": "@mainframe/sdk",
   "version": "0.1.0",
-  "main": "lib/index.js",
+  "main": "cjs/index.js",
   "license": "MIT",
   "scripts": {
-    "clean": "del lib && del cjs",
-    "build:js": "yarn webpack",
+    "clean": "del cjs && del dist",
+    "build:dist": "BABEL_ENV='browser-esm' yarn webpack",
     "build:cjs": "BABEL_ENV='browser-cjs' babel src --out-dir cjs",
-    "build:flow": "flow-copy-source src lib",
-    "build": "yarn clean && yarn build:js && yarn build:cjs && yarn build:flow",
+    "build:flow": "flow-copy-source src cjs",
+    "build:sdk": "yarn clean && yarn build:dist && yarn build:cjs && yarn build:flow",
     "test:types": "flow check"
   },
   "dependencies": {
