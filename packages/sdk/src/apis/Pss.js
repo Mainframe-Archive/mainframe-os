@@ -9,12 +9,10 @@ export default class PssAPIs extends ClientAPIs {
     return this._rpc.request('pss_baseAddr')
   }
 
-  async createTopicSubscription(params: {
-    topic: string,
-  }): Promise<Observable<Object>> {
+  async createTopicSubscription(topic: string): Promise<Observable<Object>> {
     const subscription = await this._rpc.request(
       'pss_createTopicSubscription',
-      { topic: params.topic },
+      { topic },
     )
     const unsubscribe = () => {
       return this._rpc.request('sub_unsubscribe', { id: subscription })
@@ -57,19 +55,15 @@ export default class PssAPIs extends ClientAPIs {
     return this._rpc.request('pss_getPublicKey')
   }
 
-  sendAsym(params: {
-    key: string,
-    topic: string,
-    message: string,
-  }): Promise<null> {
-    return this._rpc.request('pss_sendAsym', params)
+  sendAsym(key: string, topic: string, message: string): Promise<null> {
+    return this._rpc.request('pss_sendAsym', { key, topic, message })
   }
 
-  setPeerPublicKey(params: { key: string, topic: string }): Promise<null> {
-    return this._rpc.request('pss_setPeerPublicKey', params)
+  setPeerPublicKey(key: string, topic: string): Promise<null> {
+    return this._rpc.request('pss_setPeerPublicKey', { key, topic })
   }
 
-  stringToTopic(params: { string: string }): Promise<string> {
-    return this._rpc.request('pss_stringToTopic', params)
+  stringToTopic(string: string): Promise<string> {
+    return this._rpc.request('pss_stringToTopic', { string })
   }
 }
