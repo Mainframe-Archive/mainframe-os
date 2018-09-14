@@ -90,3 +90,11 @@ export const VAULT_SCHEMA = {
   path: 'string',
   password: 'string',
 }
+
+const VAULT_SETTING_SCHEMA = { type: 'string', empty: false, optional: true }
+
+export const VAULT_SETTINGS_SCHEMA = {
+  bzzURL: VAULT_SETTING_SCHEMA,
+  pssURL: VAULT_SETTING_SCHEMA,
+  web3HTTPProvider: VAULT_SETTING_SCHEMA,
+}
