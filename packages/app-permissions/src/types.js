@@ -20,8 +20,9 @@ export type PermissionsDefinitionsDifference = {
   unchanged: PermissionsDefinitions,
 }
 
-export type StrictPermissionsDefinitions = PermissionsDefinitions & {
+export type StrictPermissionsDefinitions = {
   WEB_REQUEST: WebRequestDefinition,
+  [PermissionKeyBasic]: boolean,
 }
 
 export type WebRequestGrant = {

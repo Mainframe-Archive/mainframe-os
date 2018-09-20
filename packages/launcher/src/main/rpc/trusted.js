@@ -5,6 +5,9 @@ import {
   type default as Client,
   /* eslint-disable import/named */
   type AppGetAllResult,
+  APP_CREATE_SCHEMA,
+  type AppCreateParams,
+  type AppCreateResult,
   APP_INSTALL_SCHEMA,
   type AppInstallParams,
   type AppInstallResult,
@@ -13,10 +16,13 @@ import {
   type AppOpenResult,
   APP_REMOVE_SCHEMA,
   type AppRemoveParams,
+  APP_REMOVE_OWN_SCHEMA,
+  type AppRemoveOwnParams,
   type AppSetUserSettingsParams,
   APP_SET_USER_SETTINGS_SCHEMA,
   type IdentityCreateResult,
   type IdentityGetOwnUsersResult,
+  type IdentityGetOwnDevelopersResult,
   VAULT_SCHEMA,
   type VaultParams,
   /* eslint-enable import/named */
@@ -46,6 +52,17 @@ export const trustedMethods = {
       return ctx.client.identity.createUser(params)
     },
   },
+  createDeveloperIdentity: {
+    params: {
+      data: 'any',
+    },
+    handler: (
+      ctx: TrustedContext,
+      params: { data?: Object },
+    ): Promise<IdentityCreateResult> => {
+      return ctx.client.identity.createDeveloper(params)
+    },
+  },
   createVault: {
     handler: async (
       ctx: TrustedContext,
@@ -67,11 +84,25 @@ export const trustedMethods = {
   ): Promise<IdentityGetOwnUsersResult> => {
     return ctx.client.identity.getOwnUsers()
   },
+  getOwnDevIdentities: (
+    ctx: TrustedContext,
+  ): Promise<IdentityGetOwnDevelopersResult> => {
+    return ctx.client.identity.getOwnDevelopers()
+  },
   getVaultsData: (ctx: TrustedContext) => ({
     vaults: ctx.vaultConfig.vaults,
     defaultVault: ctx.vaultConfig.defaultVault,
     vaultOpen: ctx.vaultOpen,
   }),
+  createApp: {
+    params: APP_CREATE_SCHEMA,
+    handler: (
+      ctx: TrustedContext,
+      params: AppCreateParams,
+    ): Promise<AppCreateResult> => {
+      return ctx.client.app.create(params)
+    },
+  },
   installApp: {
     params: APP_INSTALL_SCHEMA,
     handler: (
@@ -113,6 +144,12 @@ export const trustedMethods = {
     params: APP_REMOVE_SCHEMA,
     handler: (ctx: TrustedContext, params: AppRemoveParams) => {
       return ctx.client.app.remove(params)
+    },
+  },
+  removeOwnApp: {
+    params: APP_REMOVE_OWN_SCHEMA,
+    handler: (ctx: TrustedContext, params: AppRemoveOwnParams) => {
+      return ctx.client.app.removeOwn(params)
     },
   },
   setAppUserSettings: {

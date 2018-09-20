@@ -27,6 +27,8 @@ import {
   type AppPublishContentsResult,
   APP_REMOVE_SCHEMA,
   type AppRemoveParams,
+  APP_REMOVE_OWN_SCHEMA,
+  type AppRemoveOwnParams,
   APP_SET_PERMISSION_SCHEMA,
   type AppSetPermissionParams,
   APP_SET_PERMISSIONS_REQUIREMENTS_SCHEMA,
@@ -126,6 +128,7 @@ export const create = {
       developerID: fromClientID(params.developerID),
       name: params.name,
       version: params.version,
+      permissionsRequirements: params.permissionsRequirements,
     })
     await ctx.openVault.save()
     return { appID: toClientID(app.id) }
@@ -238,6 +241,17 @@ export const publishContents = {
     await ctx.openVault.save()
 
     return { contentsURI }
+  },
+}
+
+export const removeOwn = {
+  params: APP_REMOVE_OWN_SCHEMA,
+  handler: async (
+    ctx: RequestContext,
+    params: AppRemoveOwnParams,
+  ): Promise<void> => {
+    ctx.openVault.removeOwnApp(fromClientID(params.appID))
+    await ctx.openVault.save()
   },
 }
 

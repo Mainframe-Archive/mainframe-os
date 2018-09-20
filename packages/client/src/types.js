@@ -7,6 +7,7 @@ import type {
   PermissionKey,
   PermissionsDetails,
   PermissionsRequirements,
+  StrictPermissionsRequirements,
   StrictPermissionsGrants,
 } from '@mainframe/app-permissions'
 import type { ID } from '@mainframe/utils-id'
@@ -32,6 +33,7 @@ export type AppCreateParams = {
   developerID?: ?ID,
   name?: ?string,
   version?: ?string,
+  permissionsRequirements?: ?StrictPermissionsRequirements,
 }
 
 export type AppCreateResult = { appID: ID }
@@ -111,6 +113,8 @@ export type AppPublishContentsResult = {
 }
 
 export type AppRemoveParams = { appID: ID }
+
+export type AppRemoveOwnParams = { appID: ID }
 
 export type AppSetUserSettingsParams = {
   appID: ID,

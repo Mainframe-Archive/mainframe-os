@@ -2,14 +2,20 @@
 
 import type { ID } from '@mainframe/client'
 import React, { Component } from 'react'
-import { View, TouchableOpacity, StyleSheet, TextInput } from 'react-native-web'
+import {
+  View,
+  TouchableOpacity,
+  StyleSheet,
+  TextInput,
+  ScrollView,
+} from 'react-native-web'
 
 import rpc from '../rpc'
 import Button from '../UIComponents/Button'
 import Text from '../UIComponents/Text'
 import colors from '../colors'
 
-type User = {
+type Identity = {
   id: ID,
   data: {
     name: string,
@@ -17,7 +23,8 @@ type User = {
 }
 
 type Props = {
-  users: Array<User>,
+  type: 'user' | 'developer',
+  identities: Array<Identity>,
   enableCreate?: boolean,
   onSelectId: (id: ID) => any,
   onCreatedId?: (id: ID) => void,
@@ -25,13 +32,13 @@ type Props = {
 
 type State = {
   newName: string,
-  users: Array<User>,
+  identities: Array<Identity>,
   showCreateIdForm?: boolean,
 }
 
 export default class IdentitySelectorView extends Component<Props, State> {
   state = {
-    users: [],
+    identities: [],
     newName: '',
   }
 
@@ -41,7 +48,16 @@ export default class IdentitySelectorView extends Component<Props, State> {
 
   async createId() {
     try {
-      const res = await rpc.createUserIdentity({
+      let createIdentity
+      switch (this.props.type) {
+        case 'developer':
+          createIdentity = rpc.createDeveloperIdentity
+          break
+        case 'user':
+        default:
+          createIdentity = rpc.createUserIdentity
+      }
+      const res = await createIdentity({
         name: this.state.newName,
       })
       this.setState({ newName: '' })
@@ -62,7 +78,7 @@ export default class IdentitySelectorView extends Component<Props, State> {
   }
 
   render() {
-    const header = `Select User ID`
+    const header = `Select ${this.props.type} ID`
     const rowRender = (id, name, handler) => {
       return (
         <TouchableOpacity
@@ -76,7 +92,7 @@ export default class IdentitySelectorView extends Component<Props, State> {
       )
     }
 
-    const idRows = this.props.users.map(user => {
+    const idRows = this.props.identities.map(user => {
       const handler = () => this.props.onSelectId(user.id)
       return rowRender(user.id, user.data.name, handler)
     })
@@ -102,17 +118,24 @@ export default class IdentitySelectorView extends Component<Props, State> {
       </View>
     ) : null
 
+    // TODO: scroll with max height
+
     return (
       <View>
         <Text style={styles.header}>{header}</Text>
-        {idRows}
         {createIdentity}
+        <ScrollView>
+          <View style={styles.scrollInner}>{idRows}</View>
+        </ScrollView>
       </View>
     )
   }
 }
 
 const styles = StyleSheet.create({
+  scrollInner: {
+    maxHeight: 260,
+  },
   idRow: {
     padding: 10,
     borderRadius: 3,
@@ -131,7 +154,7 @@ const styles = StyleSheet.create({
   createIdContainer: {
     padding: 12,
     borderWidth: 1,
-    marginTop: 10,
+    marginVertical: 10,
     borderColor: colors.LIGHT_GREY_E8,
     backgroundColor: colors.WHITE,
   },

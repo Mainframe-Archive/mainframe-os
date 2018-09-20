@@ -14,6 +14,7 @@ export default {
   app_close: app.close,
   app_install: app.install,
   app_remove: app.remove,
+  app_removeOwn: app.removeOwn,
   app_open: app.open,
   app_getAll: app.getAll,
   app_setPermission: app.setPermission,

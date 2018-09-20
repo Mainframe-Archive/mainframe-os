@@ -40,7 +40,7 @@ const appSessions: AppSessions = {}
 const newWindow = (params: Object = {}) => {
   const window = new BrowserWindow({
     width: params.width || 800,
-    height: 600,
+    height: params.height || 600,
     show: false,
   })
   const stringParams = stringify(params)
@@ -115,7 +115,7 @@ const setupClient = async () => {
 const createLauncherWindow = async () => {
   await setupClient()
 
-  mainWindow = newWindow({ width: 800 })
+  mainWindow = newWindow({ width: 950, height: 650 })
 
   // Emitted when the window is closed.
   mainWindow.on('closed', () => {

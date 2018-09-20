@@ -2,9 +2,8 @@
 
 import type { IdentityGetOwnUsersResult as OwnIdentities } from '@mainframe/client'
 import React, { Component } from 'react'
-import { View, TouchableOpacity, StyleSheet, Image } from 'react-native-web'
+import { View, TouchableOpacity, StyleSheet } from 'react-native-web'
 
-import logo from '../../assets/images/mf-icon.png'
 import Text from '../UIComponents/Text'
 import Icon from '../UIComponents/Icon'
 import colors from '../colors'
@@ -21,23 +20,16 @@ export default class SideMenu extends Component<Props> {
       return null
     }
 
-    const headerStyles = [styles.sideBarHeader]
-    const labelStyles = [styles.sideBarLabel]
-    if (this.props.devMode) {
-      headerStyles.push(styles.sideBarLabelDark)
-      labelStyles.push(styles.sideBarLabelDark)
-    }
-
     const userList = this.props.identities.users.map(u => {
       return (
         <View key={u.id}>
-          <Text style={labelStyles}>{u.data.name}</Text>
+          <Text style={styles.sideBarLabel}>{u.data.name}</Text>
         </View>
       )
     })
     return (
       <View>
-        <Text style={headerStyles}>Identities</Text>
+        <Text style={styles.sideBarHeader}>IDENTITIES</Text>
         {userList}
       </View>
     )
@@ -47,13 +39,12 @@ export default class SideMenu extends Component<Props> {
     const sideBarStyles = [styles.sideBarView]
     const devToggleStyles = [styles.devToggleButton]
     if (this.props.devMode) {
-      sideBarStyles.push(styles.sideBarDark)
+      sideBarStyles.push(styles.sideBarDev)
       devToggleStyles.push(styles.devToggleDark)
     }
 
     return (
       <View style={sideBarStyles}>
-        <Image style={styles.mfLogo} source={logo} resizeMode="contain" />
         {this.renderUsers()}
         <TouchableOpacity
           style={devToggleStyles}
@@ -73,27 +64,22 @@ const styles = StyleSheet.create({
   sideBarView: {
     width: 220,
     padding: 20,
-    backgroundColor: colors.LIGHT_GREY_E8,
+    backgroundColor: colors.DARK_BLUE,
   },
-  sideBarDark: {
-    backgroundColor: colors.GREY_DARK_2A,
+  sideBarDev: {
+    backgroundColor: colors.DARK_BLUE_2,
   },
   sideBarHeader: {
     paddingTop: 20,
-    color: colors.GREY_DARK_38,
+    color: colors.LIGHT_GREY_BLUE,
     fontWeight: 'bold',
-    fontSize: 14,
+    fontSize: 11,
+    letterSpacing: 2,
   },
   sideBarLabel: {
     paddingTop: 10,
     fontSize: 13,
-    color: colors.GREY_DARK_54,
-  },
-  sideBarLabelDark: {
-    color: colors.LIGHT_GREY_E8,
-  },
-  mfLogo: {
-    height: 40,
+    color: colors.WHITE,
   },
   devToggleButton: {
     position: 'absolute',
@@ -101,16 +87,17 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     padding: 15,
-    backgroundColor: colors.LIGHT_GREY_DE,
-    color: colors.GREY_DARK_54,
+    backgroundColor: colors.DARK_BLUE_SHADE_1,
+    color: colors.WHITE,
     flexDirection: 'row',
   },
   devToggleDark: {
-    backgroundColor: colors.GREY_DARK_38,
+    backgroundColor: colors.TRANSPARENT_BLACK_30,
     color: colors.LIGHT_GREY_DE,
   },
   devToggleLabel: {
     flex: 1,
+    fontSize: 12,
   },
   arrowIcon: {
     paddingTop: 3,

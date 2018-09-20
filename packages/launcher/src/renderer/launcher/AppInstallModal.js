@@ -164,9 +164,10 @@ export default class AppInstallModal extends Component<Props, State> {
   renderSetIdentity() {
     return (
       <IdentitySelectorView
+        type="user"
         enableCreate
         onSelectId={this.onSelectId}
-        users={this.state.ownUsers}
+        identities={this.state.ownUsers}
         onCreatedId={this.onCreatedId}
       />
     )

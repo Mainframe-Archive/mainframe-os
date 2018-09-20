@@ -17,6 +17,7 @@ import type {
   AppPublishContentsParams,
   AppPublishContentsResult,
   AppRemoveParams,
+  AppRemoveOwnParams,
   AppSetPermissionParams,
   AppSetPermissionsRequirementsParams,
   AppSetUserSettingsParams,
@@ -64,6 +65,10 @@ export default class AppAPIs extends ClientAPIs {
 
   remove(params: AppRemoveParams): Promise<void> {
     return this._rpc.request('app_remove', params)
+  }
+
+  removeOwn(params: AppRemoveOwnParams): Promise<void> {
+    return this._rpc.request('app_removeOwn', params)
   }
 
   setUserSettings(params: AppSetUserSettingsParams): Promise<void> {

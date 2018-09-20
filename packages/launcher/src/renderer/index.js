@@ -6,8 +6,8 @@ import { AppRegistry } from 'react-native-web'
 import { ipcRenderer } from 'electron'
 import './styles.css'
 
-import Launcher from './launcher/Launcher.js'
-import AppContainer from './apps/AppContainer.js'
+import Launcher from './Launcher/Launcher.js'
+import AppContainer from './App/AppContainer.js'
 
 const callback = () => ipcRenderer.send('ready-window')
 const rootTag = document.getElementById('app')

@@ -8,7 +8,7 @@ import type { Style } from '../../types'
 import Text from './Text'
 
 type Props = {
-  onPress: () => void,
+  onPress: () => void | Promise<any>,
   testID?: string,
   title: string,
   disabled?: boolean,
