@@ -23,7 +23,7 @@ import ModalView from '../UIComponents/ModalView'
 import rpc from './rpc'
 import AppInstallModal from './AppInstallModal'
 import AppGridItem from './AppGridItem'
-import CreateAppModal from './DeveloperMode/CreateAppModal'
+import CreateAppModal from './developer/CreateAppModal'
 import IdentitySelectorView from './IdentitySelectorView'
 import VaultManagerModal from './VaultManagerModal'
 import SideMenu from './SideMenu'
@@ -229,9 +229,13 @@ export default class App extends Component<{}, State> {
     if (this.state.devMode) {
       btnStyles.push(styles.createButtonText)
     }
+    const testID = this.state.devMode
+      ? 'launcher-create-app-button'
+      : 'launcher-install-app-button'
     const installButton = (
       <TouchableOpacity
         key="install"
+        testID={testID}
         style={styles.newAppButton}
         onPress={onPress}>
         <View style={styles.installAppButton}>
