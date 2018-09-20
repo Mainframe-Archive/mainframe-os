@@ -15,11 +15,12 @@ import {
   ActivityIndicator,
 } from 'react-native-web'
 
-import colors from '../colors'
 import type { VaultsData } from '../../types'
-import rpc from '../rpc'
+
+import colors from '../colors'
 import Text from '../UIComponents/Text'
 import ModalView from '../UIComponents/ModalView'
+import rpc from './rpc'
 import AppInstallModal from './AppInstallModal'
 import AppGridItem from './AppGridItem'
 import CreateAppModal from './DeveloperMode/CreateAppModal'

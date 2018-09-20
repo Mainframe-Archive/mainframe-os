@@ -10,7 +10,7 @@ import { isValidSemver } from '@mainframe/app-manifest'
 import React, { createRef, Component, type ElementRef } from 'react'
 import { View, StyleSheet, TouchableOpacity } from 'react-native-web'
 
-import rpc from '../../rpc'
+import rpc from '../rpc'
 import colors from '../../colors'
 import globalStyles from '../../styles'
 import Button from '../../UIComponents/Button'

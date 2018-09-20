@@ -77,9 +77,7 @@ export default class App extends Component<null, State> {
       return []
     }
     let block = Math.floor(events[0].blockNumber / 10000) * 10000
-    console.log('start block: ', block)
-    console.log('total: ', events.length)
-    const blockRange = 6000
+    const blockRange = 10000
     const data = events.reduce((res, e) => {
       const blockLimit = block + blockRange
       if (e.blockNumber < blockLimit) {
@@ -96,14 +94,6 @@ export default class App extends Component<null, State> {
       }
       return res
     }, {})
-    console.log('data: ', data)
-    let counts = ''
-
-    Object.keys(data).forEach(key => {
-      const value = data[key]
-      counts = counts + `${key},${value.length}\n`
-    })
-    console.log('counts: ', counts)
 
     const graphData: Array<Object> = Object.keys(data).map(key => {
       const value = data[key]

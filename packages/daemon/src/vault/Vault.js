@@ -119,6 +119,7 @@ export const readVaultFile = async (
 
 export type UserSettings = {
   bzzURL: string,
+  pssURL: string,
   web3HTTPProvider: string,
 }
 
@@ -165,6 +166,7 @@ export default class Vault {
       identities: new IdentitiesRepository(),
       settings: {
         bzzURL: 'http://swarm-gateways.net',
+        pssURL: 'ws://localhost:8546',
         web3HTTPProvider: 'https://mainnet.infura.io/KWLG1YOMaYgl4wiFlcJv',
       },
     }
@@ -391,8 +393,17 @@ export default class Vault {
 
   // Settings
 
+  setSettings(settings: $Shape<UserSettings>): UserSettings {
+    Object.assign(this._data.settings, settings)
+    return this._data.settings
+  }
+
   setBzzURL(url: string): void {
     this._data.settings.bzzURL = url
+  }
+
+  setPssURL(url: string): void {
+    this._data.settings.pssURL = url
   }
 
   setWeb3HTTPProvider(provider: string): void {

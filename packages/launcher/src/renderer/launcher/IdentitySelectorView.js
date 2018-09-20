@@ -10,10 +10,11 @@ import {
   ScrollView,
 } from 'react-native-web'
 
-import rpc from '../rpc'
 import Button from '../UIComponents/Button'
 import Text from '../UIComponents/Text'
 import colors from '../colors'
+
+import rpc from './rpc'
 
 type Identity = {
   id: ID,

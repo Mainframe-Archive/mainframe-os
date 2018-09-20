@@ -4,9 +4,9 @@ import type { AppOwnData, AppInstalledData, ID } from '@mainframe/client'
 import React, { Component } from 'react'
 import { View, TouchableOpacity, StyleSheet } from 'react-native-web'
 
-import rpc from '../rpc'
 import colors from '../colors'
 import Text from '../UIComponents/Text'
+import rpc from './rpc'
 
 type AppData = AppOwnData | AppInstalledData
 

@@ -5,17 +5,20 @@ import { stringify } from 'querystring'
 import url from 'url'
 // eslint-disable-next-line import/named
 import Client from '@mainframe/client'
-import { Environment, DaemonConfig } from '@mainframe/config'
+import { Environment, DaemonConfig, VaultConfig } from '@mainframe/config'
+import StreamRPC from '@mainframe/rpc-stream'
 import { startDaemon } from '@mainframe/toolbox'
 // eslint-disable-next-line import/named
 import { app, BrowserWindow, ipcMain } from 'electron'
 import { is } from 'electron-util'
 
-import type { ActiveApps, AppSession, AppSessions } from '../types'
+import { APP_TRUSTED_REQUEST_CHANNEL } from '../constants'
+import type { AppSession, AppSessions } from '../types'
+
+import { AppContext, LauncherContext } from './contexts'
 import { interceptWebRequests } from './permissions'
-import createRPCChannels from './createRPCChannels'
-import electronMainRPC from './electronMainRPC'
-import { TRUSTED_CHANNEL } from './rpc/trusted'
+import createElectronTransport from './createElectronTransport'
+import createRPCChannels from './rpc/createChannels'
 
 const PORT = process.env.ELECTRON_WEBPACK_WDS_PORT || ''
 
@@ -30,12 +33,13 @@ const env = Environment.get(envName, envType)
 console.log(`using environment "${env.name}" (${env.type})`)
 
 const daemonConfig = new DaemonConfig(env)
+const vaultConfig = new VaultConfig(env)
 
 let client
-let mainWindow
+let launcherWindow
 
-const activeApps: ActiveApps = new WeakMap()
 const appSessions: AppSessions = {}
+const appContexts: WeakMap<BrowserWindow, AppContext> = new WeakMap()
 
 const newWindow = (params: Object = {}) => {
   const window = new BrowserWindow({
@@ -69,25 +73,35 @@ const launchApp = async (appSession: AppSession) => {
     // Already open
     return
   }
-  // $FlowFixMe: ID incompatible with client package ID type
+
   const appWindow = newWindow()
   appWindow.on('closed', async () => {
     await client.app.close({ sessID: appSession.session.sessID })
+    const ctx = appContexts.get(appWindow)
+    if (ctx != null) {
+      await ctx.clear()
+      appContexts.delete(appWindow)
+    }
     delete appSessions[appID][userID]
-    activeApps.delete(appWindow)
   })
-  const activeApp = {
+
+  const appContext = new AppContext({
     appSession,
-    rpc: electronMainRPC(appWindow, TRUSTED_CHANNEL),
-  }
-  activeApps.set(appWindow, activeApp)
+    client,
+    trustedRPC: new StreamRPC(
+      createElectronTransport(appWindow, APP_TRUSTED_REQUEST_CHANNEL),
+    ),
+    window: appWindow,
+  })
+  appContexts.set(appWindow, appContext)
+  interceptWebRequests(appContext)
+
   if (appSessions[appID]) {
     appSessions[appID][userID] = appSession
   } else {
     // $FlowFixMe: can't assign ID type
     appSessions[appID] = { [userID]: appSession }
   }
-  interceptWebRequests(client, appWindow, activeApp)
 }
 
 // TODO: proper setup, this is just temporary logic to simplify development flow
@@ -103,7 +117,6 @@ const setupClient = async () => {
   await startDaemon(daemonConfig, true)
   daemonConfig.runStatus = 'running'
   client = new Client(daemonConfig.socketPath)
-  createRPCChannels({ client, env, launchApp, activeApps })
 
   // Simple check for API call, not proper versioning logic
   const version = await client.apiVersion()
@@ -115,16 +128,23 @@ const setupClient = async () => {
 const createLauncherWindow = async () => {
   await setupClient()
 
-  mainWindow = newWindow({ width: 950, height: 650 })
+  launcherWindow = newWindow({ width: 950, height: 650 })
+
+  const launcherContext = new LauncherContext({
+    client,
+    launchApp,
+    vaultConfig,
+  })
+  createRPCChannels(launcherContext, appContexts)
 
   // Emitted when the window is closed.
-  mainWindow.on('closed', () => {
+  launcherWindow.on('closed', () => {
     // TODO: fix below to not error on close
     // const keys = Object.keys(appWindows)
     // Object.keys(appWindows).forEach(w => {
     //   appWindows[w].close()
     // })
-    mainWindow = null
+    launcherWindow = null
   })
 }
 
@@ -140,7 +160,7 @@ app.on('window-all-closed', () => {
 app.on('activate', () => {
   // On macOS it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
-  if (mainWindow === null) {
+  if (launcherWindow === null) {
     createLauncherWindow()
   }
 })
@@ -149,14 +169,14 @@ app.on('activate', () => {
 
 ipcMain.on('init-window', event => {
   const window = BrowserWindow.fromWebContents(event.sender)
-  if (window === mainWindow) {
+  if (window === launcherWindow) {
     window.webContents.send('start', { type: 'launcher' })
   } else {
-    const app = activeApps.get(window)
-    if (app) {
+    const appContext = appContexts.get(window)
+    if (appContext != null) {
       window.webContents.send('start', {
         type: 'app',
-        appSession: app.appSession,
+        appSession: appContext.appSession,
       })
     }
   }

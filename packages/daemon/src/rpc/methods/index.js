@@ -2,6 +2,7 @@
 
 import * as app from './app'
 import * as identity from './identity'
+import * as pss from './pss'
 import * as sub from './subscription'
 import * as vault from './vault'
 import * as blockchain from './blockchain'
@@ -10,6 +11,7 @@ const noop = () => {}
 
 export default {
   api_version: () => 0.1,
+
   app_checkPermission: app.checkPermission,
   app_close: app.close,
   app_install: app.install,
@@ -30,14 +32,28 @@ export default {
   app_setPermissionsRequirements: app.setPermissionsRequirements,
   app_publishContents: app.publishContents,
   app_writeManifest: app.writeManifest,
+
+  blockchain_getContractEvents: blockchain.getContractEvents,
+  blockchain_getLatestBlock: blockchain.getLatestBlock,
+  blockchain_readContract: blockchain.readContract,
+
   identity_createUser: identity.createUser,
   identity_createDeveloper: identity.createDeveloper,
   identity_getOwnUsers: identity.getOwnUsers,
   identity_getOwnDevelopers: identity.getOwnDevelopers,
+
+  // Temporary PSS APIs - should be removed when communication APIs are settled
+  pss_baseAddr: pss.baseAddr,
+  pss_createTopicSubscription: pss.createTopicSubscription,
+  pss_getPublicKey: pss.getPublicKey,
+  pss_sendAsym: pss.sendAsym,
+  pss_setPeerPublicKey: pss.setPeerPublicKey,
+  pss_stringToTopic: pss.stringToTopic,
+
   sub_unsubscribe: sub.unsubscribe,
+
   vault_create: vault.create,
+  vault_getSettings: vault.getSettings,
   vault_open: vault.open,
-  blockchain_getContractEvents: blockchain.getContractEvents,
-  blockchain_getLatestBlock: blockchain.getLatestBlock,
-  blockchain_readContract: blockchain.readContract,
+  vault_setSettings: vault.setSettings,
 }
