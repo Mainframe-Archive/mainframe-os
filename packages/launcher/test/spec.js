@@ -90,6 +90,9 @@ describe('Application launch', function() {
     await this.app.client.waitForExist(appItemSelector, 5000)
     await this.app.client.element(appItemSelector).click()
 
+    await this.app.client.waitForExist(identitySelector, 2000)
+    await this.app.client.element(identitySelector).click()
+
     const count = await this.app.client.getWindowCount()
     assert.equal(count, 2)
   })
