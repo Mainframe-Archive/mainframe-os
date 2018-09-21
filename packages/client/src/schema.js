@@ -11,6 +11,10 @@ import {
 export { MANIFEST_SCHEMA_MESSAGES } from '@mainframe/app-manifest'
 
 export const OPTIONAL_SEMVER_SCHEMA = { ...SEMVER_SCHEMA, optional: true }
+export const OPTIONAL_PERMISSIONS_REQUIREMENTS_SCHEMA = {
+  ...PERMISSIONS_REQUIREMENTS_SCHEMA,
+  optional: true,
+}
 
 export const LOCAL_ID_SCHEMA = {
   type: 'string',
@@ -34,6 +38,7 @@ export const APP_CREATE_SCHEMA = {
   developerID: OPTIONAL_LOCAL_ID_SCHEMA,
   name: 'string',
   version: OPTIONAL_SEMVER_SCHEMA,
+  permissions: OPTIONAL_PERMISSIONS_REQUIREMENTS_SCHEMA,
 }
 
 export const APP_GET_MANIFEST_DATA_SCHEMA = {
@@ -63,8 +68,24 @@ export const APP_PUBLISH_CONTENTS_SCHEMA = {
   version: OPTIONAL_SEMVER_SCHEMA,
 }
 
+export const APP_REMOVE_OWN_SCHEMA = {
+  appID: LOCAL_ID_SCHEMA,
+}
+
 export const APP_REMOVE_SCHEMA = {
   appID: LOCAL_ID_SCHEMA,
+}
+
+export const APP_SET_USER_SETTINGS_SCHEMA = {
+  appID: LOCAL_ID_SCHEMA,
+  userID: LOCAL_ID_SCHEMA,
+  settings: {
+    type: 'object',
+    props: {
+      permissions: PERMISSIONS_GRANTS_SCHEMA,
+      permissionsChecked: 'boolean',
+    },
+  },
 }
 
 export const APP_SET_PERMISSION_SCHEMA = {

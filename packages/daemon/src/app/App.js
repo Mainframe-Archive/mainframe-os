@@ -5,7 +5,7 @@ import {
   createWebRequestGrant,
   mergeGrantsToDetails,
   PERMISSION_KEYS_BOOLEAN,
-  type PermissionsGrants,
+  type StrictPermissionsGrants,
 } from '@mainframe/app-permissions'
 // eslint-disable-next-line import/named
 import { uniqueID, type ID } from '@mainframe/utils-id'
@@ -82,7 +82,9 @@ export default class App extends AbstractApp {
       ...requiredPermissions,
       WEB_REQUEST: createWebRequestGrant(requiredPermissions.WEB_REQUEST),
     }
-    const userPermissions: PermissionsGrants = this.getPermissions(userID) || {
+    const userPermissions: StrictPermissionsGrants = this.getPermissions(
+      userID,
+    ) || {
       WEB_REQUEST: createWebRequestGrant(),
     }
 

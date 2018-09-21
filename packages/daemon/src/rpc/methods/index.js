@@ -15,13 +15,12 @@ export default {
   app_checkPermission: app.checkPermission,
   app_close: app.close,
   app_install: app.install,
-  // TODO: list apps with filter by optional status such as having a manifest, installing or getInstalled
-  // Without filter, return all apps
-  app_list: noop,
   app_remove: app.remove,
+  app_removeOwn: app.removeOwn,
   app_open: app.open,
-  app_getInstalled: app.getInstalled, // TODO: remove, replaced by list
+  app_getAll: app.getAll,
   app_setPermission: app.setPermission,
+  app_setUserSettings: app.setUserSettings,
   // TODO: remove app for given user only
   // Options:
   // - "clear": removes app contents, only possible if there is no user left for app

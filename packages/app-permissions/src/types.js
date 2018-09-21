@@ -20,8 +20,9 @@ export type PermissionsDefinitionsDifference = {
   unchanged: PermissionsDefinitions,
 }
 
-export type StrictPermissionsDefinitions = PermissionsDefinitions & {
+export type StrictPermissionsDefinitions = {
   WEB_REQUEST: WebRequestDefinition,
+  [PermissionKeyBasic]: boolean,
 }
 
 export type WebRequestGrant = {
@@ -30,6 +31,11 @@ export type WebRequestGrant = {
 }
 
 export type PermissionsGrants = {
+  WEB_REQUEST?: WebRequestGrant,
+  [PermissionKeyBasic]: boolean,
+}
+
+export type StrictPermissionsGrants = {
   WEB_REQUEST: WebRequestGrant,
   [PermissionKeyBasic]: boolean,
 }
@@ -56,7 +62,9 @@ export type StrictPermissionsRequirements = {
   optional: StrictPermissionsDefinitions,
 }
 
-export type PermissionsDetails = { [PermissionLifetime]: PermissionsGrants }
+export type PermissionsDetails = {
+  [PermissionLifetime]: StrictPermissionsGrants,
+}
 
 export type PermissionCheckResult =
   | 'unknown_key' // Not a valid permission key

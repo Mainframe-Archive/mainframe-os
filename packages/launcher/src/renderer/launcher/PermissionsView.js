@@ -5,6 +5,7 @@ import {
   type PermissionKey, // eslint-disable-line import/named
   type PermissionRequirement, // eslint-disable-line import/named
   type PermissionsGrants, // eslint-disable-line import/named
+  type StrictPermissionsGrants, // eslint-disable-line import/named
 } from '@mainframe/app-permissions'
 import React, { Component } from 'react'
 import {
@@ -60,7 +61,7 @@ const PERMISSION_NAMES = {
 
 const formatSettings = (
   settings: $Shape<PermissionsSettings>,
-): $Shape<PermissionsGrants> => {
+): StrictPermissionsGrants => {
   const { WEB_REQUEST, ...others } = settings
   const domains = Object.keys(WEB_REQUEST)
   const granted = domains.filter(k => WEB_REQUEST[k])

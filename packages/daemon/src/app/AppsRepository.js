@@ -193,6 +193,14 @@ export default class AppsRepository {
     app.removeUser(userID)
   }
 
+  removeOwn(id: ID): void {
+    const app = this.getOwnByID(id)
+    if (app != null) {
+      delete this._byMainframeID[app.mainframeID]
+      delete this._ownApps[id]
+    }
+  }
+
   remove(id: ID): void {
     // TODO: support removing own apps - might be other method/flag to avoid accidents?
     const app = this.getByID(id)

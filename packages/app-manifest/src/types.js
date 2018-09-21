@@ -1,6 +1,6 @@
 // @flow
 
-import type { PermissionsRequirements } from '@mainframe/app-permissions'
+import type { StrictPermissionsRequirements } from '@mainframe/app-permissions'
 import type { MainframeID } from '@mainframe/data-types'
 
 export type ManifestData = {
@@ -11,7 +11,7 @@ export type ManifestData = {
   name: string,
   version: string,
   contentsURI: string,
-  permissions: PermissionsRequirements,
+  permissions: StrictPermissionsRequirements,
 }
 
 export type PartialManifestData = {
@@ -22,7 +22,7 @@ export type PartialManifestData = {
   name: string,
   version: string,
   contentsURI: ?string,
-  permissions: PermissionsRequirements,
+  permissions: ?StrictPermissionsRequirements,
 }
 
 export type ManifestValidationResult = true | Array<Object>

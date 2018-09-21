@@ -1,10 +1,12 @@
 // @flow
 
-import type {
-  PermissionGrant,
-  PermissionKey,
-  PermissionsDetails,
-  PermissionsGrants,
+import {
+  createStrictPermissionGrants,
+  type PermissionGrant,
+  type PermissionKey,
+  type PermissionsDetails,
+  type PermissionsGrants,
+  type StrictPermissionsGrants,
 } from '@mainframe/app-permissions'
 // eslint-disable-next-line import/named
 import { idType, type ID } from '@mainframe/utils-id'
@@ -25,7 +27,7 @@ export type SessionData = {
 }
 
 export type AppUserSettings = {
-  permissions: PermissionsGrants,
+  permissions: StrictPermissionsGrants,
   permissionsChecked: boolean,
 }
 
@@ -71,19 +73,23 @@ export default class AbstractApp {
   }
 
   setSettings(userID: ID, settings: AppUserSettings): void {
+    settings.permissions = createStrictPermissionGrants(settings.permissions)
     this._settings[userID] = settings
   }
 
-  getPermissions(userID: ID): ?PermissionsGrants {
+  getPermissions(userID: ID): ?StrictPermissionsGrants {
     const settings = this._settings[userID]
     if (settings != null && settings.permissions != null) {
       return settings.permissions
     }
   }
 
-  setPermissions(userID: ID, permissions: PermissionsGrants): void {
+  setPermissions(
+    userID: ID,
+    permissions: PermissionsGrants | StrictPermissionsGrants,
+  ): void {
     const settings = this.getSettings(userID)
-    settings.permissions = permissions
+    settings.permissions = createStrictPermissionGrants(permissions)
     this._settings[userID] = settings
   }
 
