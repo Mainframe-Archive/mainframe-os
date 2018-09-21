@@ -58,9 +58,9 @@ Make a read only call to the blockchain.
 **Arguments**
 
 1. `contractAddress: string`
-2. `abi: Array<Object>`
-3. `method: string`
-4. `args: Array<any>`
+1. `abi: Array<Object>`
+1. `method: string`
+1. `args: Array<any>`
 
 **returns:** `Promise<Response>`
 
