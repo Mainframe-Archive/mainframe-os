@@ -3,7 +3,7 @@
 Javascript SDK for communicating with the Mainframe launcher and daemon.
 
 ```
-import sdk from '@mainframe/sdk'
+import MainframeSDK from '@mainframe/sdk'
 const sdk = new MainframeSDK()
 const res = await sdk.apiVersion()
 ```

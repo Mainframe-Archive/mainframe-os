@@ -27,7 +27,7 @@ export default class SetPermissionsCommand extends Command {
     }
 
     if (!this.flags.id) {
-      this.log('Please provide an app ID (--d <APP_ID>)')
+      this.log('Please provide an app ID (--id <APP_ID>)')
       return
     }
 
