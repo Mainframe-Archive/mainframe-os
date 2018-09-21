@@ -1,12 +1,12 @@
 // @flow
 
 import type { Socket } from 'net'
+import BzzAPI from '@erebos/api-bzz-node'
+import PssAPI from '@erebos/api-pss'
 import type { Environment } from '@mainframe/config'
 import type StreamRPC from '@mainframe/rpc-stream'
 import createWebSocketRPC from '@mainframe/rpc-ws-node'
 import { uniqueID, type ID } from '@mainframe/utils-id'
-import Bzz from 'erebos-api-bzz-node'
-import Pss from 'erebos-api-pss'
 import Web3 from 'web3'
 
 import type { Vault, VaultRegistry } from '../vault'
@@ -47,8 +47,8 @@ export class ContextSubscription<T = ?mixed> {
 
 export default class RequestContext {
   _rpc: ?StreamRPC
-  _bzz: ?Bzz
-  _pss: ?Pss
+  _bzz: ?BzzAPI
+  _pss: ?PssAPI
   _web3: ?Web3
   _env: Environment
   _notify: NotifyFunc
@@ -73,16 +73,16 @@ export default class RequestContext {
     return this._rpc
   }
 
-  get bzz(): Bzz {
+  get bzz(): BzzAPI {
     if (this._bzz == null) {
-      this._bzz = new Bzz(this.openVault.settings.bzzURL)
+      this._bzz = new BzzAPI(this.openVault.settings.bzzURL)
     }
     return this._bzz
   }
 
-  get pss(): Pss {
+  get pss(): PssAPI {
     if (this._pss == null) {
-      this._pss = new Pss(this.rpc)
+      this._pss = new PssAPI(this.rpc)
     }
     return this._pss
   }
