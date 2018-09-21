@@ -82,7 +82,7 @@ export default class PermissionsRequirementsView extends Component<
     }
     if (!isValidWebHost(hostInput)) {
       this.setState({
-        errorMsg: 'Invlaid web host',
+        errorMsg: 'Please provide a valid domain, e.g. mainframe.com',
       })
       return
     }
@@ -215,7 +215,7 @@ export default class PermissionsRequirementsView extends Component<
               <TextInput
                 value={this.state.hostInput}
                 onChangeText={this.onChangeHostInput}
-                placeholder="Add web host (e.g. google.com)"
+                placeholder="Add domain (e.g. mainframe.com)"
               />
               <TouchableOpacity
                 style={styles.addWebHostButton}
