@@ -44,7 +44,7 @@ const appContexts: WeakMap<BrowserWindow, AppContext> = new WeakMap()
 const newWindow = (params: Object = {}) => {
   const window = new BrowserWindow({
     width: params.width || 800,
-    height: 600,
+    height: params.height || 600,
     show: false,
   })
   const stringParams = stringify(params)
@@ -128,7 +128,7 @@ const setupClient = async () => {
 const createLauncherWindow = async () => {
   await setupClient()
 
-  launcherWindow = newWindow({ width: 480 })
+  launcherWindow = newWindow({ width: 950, height: 650 })
 
   const launcherContext = new LauncherContext({
     client,

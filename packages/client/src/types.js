@@ -4,10 +4,11 @@ import type { ManifestData, PartialManifestData } from '@mainframe/app-manifest'
 import type {
   PermissionCheckResult,
   PermissionGrant,
-  PermissionsGrants,
   PermissionKey,
   PermissionsDetails,
   PermissionsRequirements,
+  StrictPermissionsRequirements,
+  StrictPermissionsGrants,
 } from '@mainframe/app-permissions'
 import type { ID } from '@mainframe/utils-id'
 
@@ -32,6 +33,7 @@ export type AppCreateParams = {
   developerID?: ?ID,
   name?: ?string,
   version?: ?string,
+  permissionsRequirements?: ?StrictPermissionsRequirements,
 }
 
 export type AppCreateResult = { appID: ID }
@@ -42,8 +44,19 @@ export type AppInstalledData = {
   users: Array<IdentityOwnData>,
 }
 
+export type AppOwnData = {
+  appID: ID,
+  manifest: ManifestData,
+  users: Array<IdentityOwnData>,
+}
+
 export type AppGetInstalledResult = {
   apps: Array<AppInstalledData>,
+}
+
+export type AppGetAllResult = {
+  own: Array<AppOwnData>,
+  installed: Array<AppInstalledData>,
 }
 
 export type AppGetManifestDataParams = {
@@ -56,7 +69,7 @@ export type AppGetManifestDataResult = {
 }
 
 export type AppUserSettings = {
-  permissions: PermissionsGrants,
+  permissions: StrictPermissionsGrants,
   permissionsChecked: boolean,
 }
 
@@ -100,6 +113,14 @@ export type AppPublishContentsResult = {
 }
 
 export type AppRemoveParams = { appID: ID }
+
+export type AppRemoveOwnParams = { appID: ID }
+
+export type AppSetUserSettingsParams = {
+  appID: ID,
+  userID: ID,
+  settings: AppUserSettings,
+}
 
 export type AppSetPermissionParams = {
   sessID: ID,

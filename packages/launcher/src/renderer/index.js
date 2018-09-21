@@ -7,7 +7,7 @@ import { ipcRenderer } from 'electron'
 import './styles.css'
 
 import Launcher from './launcher/Launcher.js'
-import AppContainer from './apps/AppContainer.js'
+import AppContainer from './app/AppContainer.js'
 
 const callback = () => ipcRenderer.send('ready-window')
 const rootTag = document.getElementById('app')

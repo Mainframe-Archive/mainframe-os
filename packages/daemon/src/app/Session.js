@@ -4,7 +4,7 @@ import {
   checkPermission,
   type PermissionKey, // eslint-disable-line import/named
   type PermissionGrant, // eslint-disable-line import/named
-  type PermissionsGrants, // eslint-disable-line import/named
+  type StrictPermissionsGrants, // eslint-disable-line import/named
   type PermissionCheckResult, // eslint-disable-line import/named
 } from '@mainframe/app-permissions'
 // eslint-disable-next-line import/named
@@ -13,9 +13,9 @@ import { type ID } from '@mainframe/utils-id'
 export default class Session {
   _appID: ID
   _userID: ID
-  _permissions: PermissionsGrants
+  _permissions: StrictPermissionsGrants
 
-  constructor(appID: ID, userID: ID, permissions: PermissionsGrants) {
+  constructor(appID: ID, userID: ID, permissions: StrictPermissionsGrants) {
     this._appID = appID
     this._userID = userID
     this._permissions = permissions

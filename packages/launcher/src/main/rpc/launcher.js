@@ -3,7 +3,10 @@
 import { readManifestFile } from '@mainframe/app-manifest'
 import {
   /* eslint-disable import/named */
-  type AppGetInstalledResult,
+  type AppGetAllResult,
+  APP_CREATE_SCHEMA,
+  type AppCreateParams,
+  type AppCreateResult,
   APP_INSTALL_SCHEMA,
   type AppInstallParams,
   type AppInstallResult,
@@ -11,8 +14,13 @@ import {
   type AppOpenParams,
   APP_REMOVE_SCHEMA,
   type AppRemoveParams,
+  APP_REMOVE_OWN_SCHEMA,
+  type AppRemoveOwnParams,
+  type AppSetUserSettingsParams,
+  APP_SET_USER_SETTINGS_SCHEMA,
   type IdentityCreateResult,
   type IdentityGetOwnUsersResult,
+  type IdentityGetOwnDevelopersResult,
   VAULT_SCHEMA,
   type VaultParams,
   /* eslint-enable import/named */
@@ -22,8 +30,8 @@ import type { LauncherContext } from '../contexts'
 
 export default {
   // Apps
-  app_getInstalled: (ctx: LauncherContext): Promise<AppGetInstalledResult> => {
-    return ctx.client.app.getInstalled()
+  app_getAll: (ctx: LauncherContext): Promise<AppGetAllResult> => {
+    return ctx.client.app.getAll()
   },
   app_install: {
     params: APP_INSTALL_SCHEMA,
@@ -41,6 +49,27 @@ export default {
       ctx.launchApp(appSession)
     },
   },
+  app_create: {
+    params: APP_CREATE_SCHEMA,
+    handler: (
+      ctx: LauncherContext,
+      params: AppCreateParams,
+    ): Promise<AppCreateResult> => {
+      return ctx.client.app.create(params)
+    },
+  },
+  app_remove: {
+    params: APP_REMOVE_SCHEMA,
+    handler: (ctx: LauncherContext, params: AppRemoveParams) => {
+      return ctx.client.app.remove(params)
+    },
+  },
+  app_removeOwn: {
+    params: APP_REMOVE_OWN_SCHEMA,
+    handler: (ctx: LauncherContext, params: AppRemoveOwnParams) => {
+      return ctx.client.app.removeOwn(params)
+    },
+  },
   app_readManifest: {
     params: {
       path: 'string',
@@ -54,10 +83,10 @@ export default {
       }
     },
   },
-  app_remove: {
-    params: APP_REMOVE_SCHEMA,
-    handler: (ctx: LauncherContext, params: AppRemoveParams) => {
-      return ctx.client.app.remove(params)
+  app_setUserSettings: {
+    params: APP_SET_USER_SETTINGS_SCHEMA,
+    handler: (ctx: LauncherContext, params: AppSetUserSettingsParams) => {
+      return ctx.client.app.setUserSettings(params)
     },
   },
 
@@ -73,12 +102,27 @@ export default {
       return ctx.client.identity.createUser(params)
     },
   },
+  identity_createDeveloper: {
+    params: {
+      data: 'any',
+    },
+    handler: (
+      ctx: LauncherContext,
+      params: { data?: Object },
+    ): Promise<IdentityCreateResult> => {
+      return ctx.client.identity.createDeveloper(params)
+    },
+  },
   identity_getOwnUsers: (
     ctx: LauncherContext,
   ): Promise<IdentityGetOwnUsersResult> => {
     return ctx.client.identity.getOwnUsers()
   },
-
+  identity_getOwnDevelopers: (
+    ctx: LauncherContext,
+  ): Promise<IdentityGetOwnDevelopersResult> => {
+    return ctx.client.identity.getOwnDevelopers()
+  },
   // Vaults
   vault_create: {
     handler: async (

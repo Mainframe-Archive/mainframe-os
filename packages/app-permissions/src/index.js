@@ -10,14 +10,17 @@ import type {
   PermissionsDefinitionsDifference,
   PermissionsDetails,
   PermissionsGrants,
-  PermissionsRequirements,
+  StrictPermissionsGrants,
   PermissionsRequirementsDifference,
+  StrictPermissionsRequirements,
 } from './types'
 
 export * from './schema'
 export * from './types'
 
-export const EMPTY_DEFINITIONS: PermissionsDefinitions = { WEB_REQUEST: [] }
+export const EMPTY_DEFINITIONS: StrictPermissionsDefinitions = {
+  WEB_REQUEST: [],
+}
 
 export const createWebRequestGrant = (
   granted?: WebRequestDefinition = [],
@@ -36,14 +39,14 @@ export const createDefinitions = (
 export const createRequirements = (
   required?: PermissionsDefinitions,
   optional?: PermissionsDefinitions,
-): PermissionsRequirements => ({
+): StrictPermissionsRequirements => ({
   required: createDefinitions(required),
   optional: createDefinitions(optional),
 })
 
 export const mergeGrantsToDetails = (
-  app: PermissionsGrants,
-  user: PermissionsGrants,
+  app: StrictPermissionsGrants,
+  user: StrictPermissionsGrants,
 ): PermissionsDetails => ({
   app,
   user,
@@ -57,6 +60,15 @@ export const mergeGrantsToDetails = (
     },
   },
 })
+
+export const createStrictPermissionGrants = (
+  permissions: PermissionsGrants | StrictPermissionsGrants,
+): StrictPermissionsGrants => {
+  return {
+    ...permissions,
+    WEB_REQUEST: permissions.WEB_REQUEST || createWebRequestGrant(),
+  }
+}
 
 export const checkURL = (
   input: ?string,
@@ -76,7 +88,7 @@ export const checkURL = (
 }
 
 export const checkPermission = (
-  permissions: PermissionsGrants,
+  permissions: StrictPermissionsGrants,
   key: PermissionKey,
   input?: ?string,
 ): PermissionCheckResult => {
@@ -107,8 +119,8 @@ export const checkPermission = (
 }
 
 export const getDefinitionsDifference = (
-  current?: PermissionsDefinitions = EMPTY_DEFINITIONS,
-  next?: PermissionsDefinitions = EMPTY_DEFINITIONS,
+  current?: StrictPermissionsDefinitions = EMPTY_DEFINITIONS,
+  next?: StrictPermissionsDefinitions = EMPTY_DEFINITIONS,
 ): PermissionsDefinitionsDifference => {
   const added = {}
   const changed = {}
@@ -169,8 +181,8 @@ export const getDefinitionsDifference = (
 }
 
 export const getRequirementsDifference = (
-  current?: PermissionsRequirements = {},
-  next?: PermissionsRequirements = {},
+  current?: StrictPermissionsRequirements = createRequirements(),
+  next?: StrictPermissionsRequirements = createRequirements(),
 ): PermissionsRequirementsDifference => ({
   required: getDefinitionsDifference(current.required, next.required),
   optional: getDefinitionsDifference(current.optional, next.optional),

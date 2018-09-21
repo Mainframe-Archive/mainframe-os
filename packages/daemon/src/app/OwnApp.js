@@ -3,7 +3,9 @@
 import {
   createWebRequestGrant,
   mergeGrantsToDetails,
-  type PermissionsRequirements, // eslint-disable-line import/named
+  createRequirements,
+  type PermissionsRequirements,
+  type StrictPermissionsRequirements,
 } from '@mainframe/app-permissions'
 import type { MainframeID } from '@mainframe/data-types'
 import { uniqueID, type ID } from '@mainframe/utils-id'
@@ -29,7 +31,7 @@ export type OwnAppData = {
 
 export type AppVersion = {
   contentsURI?: ?string,
-  permissions: PermissionsRequirements,
+  permissions: StrictPermissionsRequirements,
   publicationState: AppVersionPublicationState,
 }
 
@@ -108,7 +110,11 @@ export default class OwnApp extends AbstractApp {
     if (versionData == null) {
       throw new Error('Invalid version')
     }
-    versionData.permissions = permissions
+    const requirements = createRequirements(
+      permissions.required,
+      permissions.optional,
+    )
+    versionData.permissions = requirements
     this._versions[v] = versionData
   }
 
@@ -119,6 +125,8 @@ export default class OwnApp extends AbstractApp {
     if (versionData == null) {
       throw new Error('Invalid version')
     }
+    // TODO: Make permissions experience similar to installed
+    //       apps to allow developers to fully test flows
     const appPermissions = {
       ...versionData.permissions.required,
       WEB_REQUEST: createWebRequestGrant(

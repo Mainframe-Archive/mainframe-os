@@ -10,6 +10,7 @@ import {
 import {
   createRequirements,
   type PermissionsRequirements, // eslint-disable-line import/named
+  type StrictPermissionsRequirements,
 } from '@mainframe/app-permissions'
 import { readEncryptedFile, writeEncryptedFile } from '@mainframe/secure-file'
 import {
@@ -218,6 +219,10 @@ export default class Vault {
     return app
   }
 
+  removeOwnApp(appID: ID) {
+    this.apps.removeOwn(appID)
+  }
+
   removeApp(appID: ID) {
     this.apps.remove(appID)
   }
@@ -233,6 +238,7 @@ export default class Vault {
     developerID?: ?ID,
     name?: ?string,
     version?: ?string,
+    permissionsRequirements?: ?StrictPermissionsRequirements,
   }): OwnApp {
     const appIdentity = this.identities.getOwnApp(
       this.identities.createOwnApp(),
@@ -267,7 +273,7 @@ export default class Vault {
       },
       versions: {
         [version]: {
-          permissions: createRequirements(),
+          permissions: params.permissionsRequirements || createRequirements(),
           publicationState: 'unpublished',
         },
       },
@@ -292,6 +298,10 @@ export default class Vault {
       throw new Error('App not found')
     }
     app.setPermissionsRequirements(permissions, version)
+  }
+
+  setAppUserSettings(appID: ID, userID: ID, settings: AppUserSettings): void {
+    this.apps.setUserSettings(appID, userID, settings)
   }
 
   getAppManifestData(appID: ID, version?: ?string): PartialManifestData {
