@@ -1,5 +1,7 @@
 node_modules
 coverage
+/applications/*/flow-typed
+/applications/*/.flowconfig
 /packages/*/flow-typed
 /packages/*/lib
 /packages/*/.flowconfig

@@ -76,8 +76,10 @@ export default (socket: Socket, env: Environment, vaults: VaultRegistry) => {
     }
   })
 
-  socket.on('end', () => {
+  socket.on('end', async () => {
     log('disconnected')
+    await context.clear()
+    log('context cleared')
   })
 
   log('connected')

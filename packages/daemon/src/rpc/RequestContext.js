@@ -1,9 +1,12 @@
 // @flow
 
 import type { Socket } from 'net'
+import BzzAPI from '@erebos/api-bzz-node'
+import PssAPI from '@erebos/api-pss'
 import type { Environment } from '@mainframe/config'
-import type { ID } from '@mainframe/utils-id'
-import Bzz from 'erebos-api-bzz-node'
+import type StreamRPC from '@mainframe/rpc-stream'
+import createWebSocketRPC from '@mainframe/rpc-ws-node'
+import { uniqueID, type ID } from '@mainframe/utils-id'
 import Web3 from 'web3'
 
 import type { Vault, VaultRegistry } from '../vault'
@@ -20,14 +23,39 @@ type Params = {
   vaults: VaultRegistry,
 }
 
+export class ContextSubscription<T = ?mixed> {
+  _id: ID
+  _method: string
+  data: ?T
+
+  constructor(method: string, data?: T) {
+    this._id = uniqueID()
+    this._method = method
+    this.data = data
+  }
+
+  get id(): ID {
+    return this._id
+  }
+
+  get method(): string {
+    return this._method
+  }
+
+  async dispose() {}
+}
+
 export default class RequestContext {
-  _bzz: ?Bzz
+  _rpc: ?StreamRPC
+  _bzz: ?BzzAPI
+  _pss: ?PssAPI
   _web3: ?Web3
   _env: Environment
   _notify: NotifyFunc
   _socket: Socket
   _vaults: VaultRegistry
-  _subscriptions: { [ID]: string } = {}
+  _subscriptions: { [ID]: ContextSubscription<any> } = {}
+
   log: LogFunc
 
   constructor(params: Params) {
@@ -38,11 +66,25 @@ export default class RequestContext {
     this.log = params.log
   }
 
-  get bzz(): Bzz {
+  get rpc(): StreamRPC {
+    if (this._rpc == null) {
+      this._rpc = createWebSocketRPC(this.openVault.settings.pssURL)
+    }
+    return this._rpc
+  }
+
+  get bzz(): BzzAPI {
     if (this._bzz == null) {
-      this._bzz = new Bzz(this.openVault.settings.bzzURL)
+      this._bzz = new BzzAPI(this.openVault.settings.bzzURL)
     }
     return this._bzz
+  }
+
+  get pss(): PssAPI {
+    if (this._pss == null) {
+      this._pss = new PssAPI(this.rpc)
+    }
+    return this._pss
   }
 
   get web3(): Web3 {
@@ -76,18 +118,46 @@ export default class RequestContext {
     return vault
   }
 
-  addSubscription(id: ID, method: string) {
-    this._subscriptions[id] = method
+  async clear() {
+    const disposeSubs = Object.values(this._subscriptions).map(sub => {
+      // $FlowFixMe: Object.values() losing type
+      return sub.dispose()
+    })
+    await Promise.all(disposeSubs)
+    this._subscriptions = {}
+    this._bzz = undefined
+    this._pss = undefined
+    this._web3 = undefined
+    if (this._rpc != null) {
+      this._rpc.disconnect()
+    }
+  }
+
+  setSubscription(sub: ContextSubscription<any>): void {
+    this._subscriptions[sub.id] = sub
+  }
+
+  createSubscription<T: ?mixed>(
+    method: string,
+    data?: T,
+  ): ContextSubscription<T> {
+    const sub = new ContextSubscription(method, data)
+    this.setSubscription(sub)
+    return sub
   }
 
   removeSubscription(id: ID) {
-    delete this._subscriptions[id]
+    const sub = this._subscriptions[id]
+    if (sub != null) {
+      sub.dispose()
+      delete this._subscriptions[id]
+    }
   }
 
   notify(id: ID, result: Object) {
-    const method = this._subscriptions[id]
-    if (method != null) {
-      this._notify(method, { subscription: id, result })
+    const sub = this._subscriptions[id]
+    if (sub != null) {
+      this._notify(sub.method, { subscription: id, result })
     }
   }
 }

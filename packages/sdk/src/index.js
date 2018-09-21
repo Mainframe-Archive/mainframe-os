@@ -4,51 +4,13 @@
 
 import type StreamRPC from '@mainframe/rpc-stream'
 
-class API {
-  _rpc: StreamRPC
-
-  constructor(rpc: StreamRPC) {
-    this._rpc = rpc
-  }
-}
-
-class BlockchainAPI extends API {
-  readContract(
-    contractAddress: string,
-    abi: Array<any>,
-    method: string,
-    args?: ?Array<any>,
-  ): Promise<Array<Object>> {
-    return this._rpc.request('blockchain_readContract', {
-      contractAddress,
-      abi,
-      method,
-      args,
-    })
-  }
-
-  getContractEvents(
-    contractAddress: string,
-    abi: Array<any>,
-    eventName: string,
-    options: Object,
-  ): Promise<Array<Object>> {
-    return this._rpc.request('blockchain_getContractEvents', {
-      contractAddress,
-      abi,
-      eventName,
-      options,
-    })
-  }
-
-  getLatestBlock = (): Promise<number> => {
-    return this._rpc.request('blockchain_getLatestBlock')
-  }
-}
+import BlockchainAPIs from './apis/Blockchain'
+import PssAPIs from './apis/Pss'
 
 export default class MainframeSDK {
   _rpc: StreamRPC
-  blockchain: BlockchainAPI
+  blockchain: BlockchainAPIs
+  pss: PssAPIs
 
   constructor() {
     if (window.mainframe) {
@@ -57,7 +19,8 @@ export default class MainframeSDK {
       throw new Error('Cannot find expected mainframe client instance')
     }
 
-    this.blockchain = new BlockchainAPI(this._rpc)
+    this.blockchain = new BlockchainAPIs(this._rpc)
+    this.pss = new PssAPIs(this._rpc)
   }
 
   apiVersion = () => {

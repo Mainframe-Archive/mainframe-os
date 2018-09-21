@@ -27,6 +27,8 @@
     "start": "node -r esm lib"
   },
   "dependencies": {
+    "@erebos/api-bzz-node": "^0.4.0",
+    "@erebos/api-pss": "^0.4.0",
     "@mainframe/app-manifest": "*",
     "@mainframe/app-permissions": "*",
     "@mainframe/client": "*",
@@ -34,23 +36,24 @@
     "@mainframe/data-types": "*",
     "@mainframe/rpc-error": "^0.2.1",
     "@mainframe/rpc-handler": "^0.2.1",
-    "@mainframe/rpc-node": "^0.2.0",
+    "@mainframe/rpc-stream": "^0.2.4",
+    "@mainframe/rpc-ws-node": "^0.2.3",
     "@mainframe/secure-file": "^0.1.0",
     "@mainframe/utils-base64": "^0.1.0",
     "@mainframe/utils-crypto": "^0.2.1",
+    "@mainframe/utils-hex": "^0.1.1",
     "@mainframe/utils-id": "^0.1.0",
-    "@oclif/command": "^1.5.0",
-    "@oclif/config": "^1.7.0",
-    "@oclif/plugin-help": "^2.1.0",
-    "debug": "^3.1.0",
-    "erebos-api-bzz-node": "^0.3.5",
-    "esm": "3.0.79",
+    "@oclif/command": "^1.5.1",
+    "@oclif/config": "^1.7.6",
+    "@oclif/plugin-help": "^2.1.2",
+    "debug": "^4.0.1",
+    "esm": "3.0.84",
     "fs-extra": "^7.0.0",
-    "multibase": "^0.4.0",
-    "rxjs": "^6.2.0",
-    "web3": "^1.0.0-beta.35"
+    "multibase": "^0.5.0",
+    "rxjs": "^6.3.2",
+    "web3": "^1.0.0-beta.36"
   },
   "devDependencies": {
-    "flow-bin": "^0.79.1"
+    "flow-bin": "^0.81.0"
   }
 }
