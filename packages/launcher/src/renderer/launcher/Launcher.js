@@ -10,6 +10,7 @@ import type {
 import React, { Component } from 'react'
 import {
   View,
+  ScrollView,
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
@@ -113,7 +114,7 @@ export default class App extends Component<{}, State> {
     this.getApps()
   }
 
-  onOpenApp = async (app: AppData) => {
+  onOpenApp = (app: AppData) => {
     this.setState({
       showModal: {
         type: 'select_id',
@@ -317,7 +318,9 @@ export default class App extends Component<{}, State> {
           onToggleDevMode={this.onToggleDevMode}
         />
         <View style={appsContainerStyles}>
-          <View style={styles.appsGrid}>{appsGrid}</View>
+          <ScrollView contentContainerStyle={styles.appsGrid}>
+            {appsGrid}
+          </ScrollView>
         </View>
         {modal}
       </View>

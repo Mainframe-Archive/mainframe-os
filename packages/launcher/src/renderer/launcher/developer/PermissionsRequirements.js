@@ -5,14 +5,21 @@ import {
   type PermissionRequirement,
   type PermissionKey,
   type PermissionKeyBasic,
+  isValidWebHost,
 } from '@mainframe/app-permissions'
 import React, { Component } from 'react'
-import { View, TouchableOpacity, StyleSheet } from 'react-native-web'
+import {
+  View,
+  ScrollView,
+  TouchableOpacity,
+  StyleSheet,
+} from 'react-native-web'
 
 import colors from '../../colors'
 import Text from '../../UIComponents/Text'
 import Button from '../../UIComponents/Button'
 import TextInput from '../../UIComponents/TextInput'
+import globalStyles from '../../styles'
 
 type Props = {
   onSetPermissions: (permissions: StrictPermissionsRequirements) => void,
@@ -22,6 +29,7 @@ type Props = {
 type State = {
   isHovering?: boolean,
   hostInput: string,
+  errorMsg?: ?string,
   permissionSettings: {
     WEB_REQUEST: {
       [string]: PermissionRequirement,
@@ -72,10 +80,17 @@ export default class PermissionsRequirementsView extends Component<
     if (!hostInput) {
       return
     }
+    if (!isValidWebHost(hostInput)) {
+      this.setState({
+        errorMsg: 'Invlaid web host',
+      })
+      return
+    }
     this.setState(({ permissionSettings }) => {
       permissionSettings.WEB_REQUEST[hostInput] = 'required'
       return {
         permissionSettings,
+        errorMsg: undefined,
         hostInput: '',
       }
     })
@@ -83,6 +98,7 @@ export default class PermissionsRequirementsView extends Component<
 
   onChangeHostInput = (value: string) => {
     this.setState({
+      errorMsg: undefined,
       hostInput: value,
     })
   }
@@ -112,12 +128,42 @@ export default class PermissionsRequirementsView extends Component<
     this.props.onSetPermissions(formattedPermissions)
   }
 
+  onToggle = (
+    key: PermissionKey,
+    newState: PermissionRequirement,
+    host?: string,
+  ) => {
+    this.setState(({ permissionSettings }) => {
+      if (key === 'WEB_REQUEST' && host) {
+        if (newState === permissionSettings.WEB_REQUEST[host]) {
+          delete permissionSettings.WEB_REQUEST[host]
+        } else {
+          permissionSettings.WEB_REQUEST[host] = newState
+        }
+        return { permissionSettings }
+      } else {
+        if (newState === permissionSettings[key]) {
+          delete permissionSettings[key]
+        } else {
+          // @$FlowFixMe non web request
+          permissionSettings[key] = newState
+        }
+        return { permissionSettings }
+      }
+    })
+  }
+
   // RENDER
 
   renderToggle = (
-    key: string,
-    state?: PermissionRequirement,
-    onToggle: (type: PermissionRequirement) => void,
+    key: PermissionKey,
+    state: PermissionRequirement,
+    onToggle: (
+      key: PermissionKey,
+      type: PermissionRequirement,
+      host?: string,
+    ) => void,
+    host?: string,
   ) => {
     const leftToggleStyle = [styles.toggleLabel, styles.labelLeft]
     const rightToggleStyle = [styles.toggleLabel, styles.labelRight]
@@ -131,10 +177,10 @@ export default class PermissionsRequirementsView extends Component<
       <View style={styles.toggleContainer}>
         <TouchableOpacity
           style={styles.leftToggle}
-          onPress={() => onToggle('optional')}>
+          onPress={() => onToggle(key, 'optional', host)}>
           <Text style={leftToggleStyle}>OPTIONAL</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => onToggle('required')}>
+        <TouchableOpacity onPress={() => onToggle(key, 'required', host)}>
           <Text style={rightToggleStyle}>REQUIRED</Text>
         </TouchableOpacity>
       </View>
@@ -148,24 +194,14 @@ export default class PermissionsRequirementsView extends Component<
         const hostRequirements = Object.keys(
           permissionSettings.WEB_REQUEST,
         ).map(host => {
-          const onToggleHost = (nextState: PermissionRequirement) => {
-            this.setState(({ permissionSettings }) => {
-              if (nextState === permissionSettings.WEB_REQUEST[host]) {
-                delete permissionSettings.WEB_REQUEST[host]
-              } else {
-                permissionSettings.WEB_REQUEST[host] = nextState
-              }
-              return { permissionSettings }
-            })
-          }
-
           return (
             <View key={host} style={styles.webHostRow}>
               <Text style={styles.webHostLabel}>{host}</Text>
               {this.renderToggle(
                 key,
                 permissionSettings.WEB_REQUEST[host],
-                onToggleHost,
+                this.onToggle,
+                host,
               )}
             </View>
           )
@@ -192,31 +228,29 @@ export default class PermissionsRequirementsView extends Component<
         )
       }
 
-      const onToggle = (newState: PermissionRequirement) => {
-        this.setState(({ permissionSettings }) => {
-          if (newState === permissionSettings[key]) {
-            delete permissionSettings[key]
-          } else {
-            permissionSettings[key] = newState
-          }
-          return { permissionSettings }
-        })
-      }
-
       return (
         <View style={styles.permissionRow} key={key}>
           <Text style={styles.permissonDescription}>
             {PERMISSIONS_DESCRIPTIONS[key]}
           </Text>
-          {this.renderToggle(key, permissionSettings[key], onToggle)}
+          {this.renderToggle(key, permissionSettings[key], this.onToggle)}
         </View>
       )
     })
 
+    const errorLabel = this.state.errorMsg ? (
+      <Text style={[styles.errorLabel, globalStyles.errorText]}>
+        {this.state.errorMsg}
+      </Text>
+    ) : null
+
     return (
-      <View style={styles.container}>
+      <View>
         <Text>Set permission requirements for your App</Text>
-        <View style={styles.listContainer}>{permissionOptions}</View>
+        <ScrollView style={styles.listContainer}>
+          {permissionOptions}
+        </ScrollView>
+        {errorLabel}
         <Button title="Save" onPress={this.onPressSave} />
       </View>
     )
@@ -226,14 +260,12 @@ export default class PermissionsRequirementsView extends Component<
 const PADDING = 10
 
 const styles = StyleSheet.create({
-  container: {
-    padding: PADDING,
-  },
   listContainer: {
     marginVertical: PADDING,
     borderRadius: 3,
     borderWidth: 1,
     borderColor: colors.LIGHT_GREY_E8,
+    maxHeight: 350,
   },
   permissionRow: {
     flexDirection: 'row',
@@ -300,5 +332,8 @@ const styles = StyleSheet.create({
   },
   webHostLabel: {
     flex: 1,
+  },
+  errorLabel: {
+    paddingBottom: PADDING,
   },
 })

@@ -19,4 +19,7 @@ export default StyleSheet.create({
   boldText: {
     fontWeight: 'bold',
   },
+  errorText: {
+    color: colors.PRIMARY_RED,
+  },
 })

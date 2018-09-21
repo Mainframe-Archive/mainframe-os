@@ -8,7 +8,12 @@ import type {
 import type { ID, AppCreateParams } from '@mainframe/client'
 import { isValidSemver } from '@mainframe/app-manifest'
 import React, { createRef, Component, type ElementRef } from 'react'
-import { View, StyleSheet, TouchableOpacity } from 'react-native-web'
+import {
+  View,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+} from 'react-native-web'
 
 import rpc from '../rpc'
 import colors from '../../colors'
@@ -244,7 +249,6 @@ export default class CreateAppModal extends Component<Props, State> {
           </Text>
         </TouchableOpacity>
         <input
-          multiple
           id="installer-file-selector"
           onChange={this.onFileInputChange}
           ref={this.fileInput}
@@ -281,6 +285,40 @@ export default class CreateAppModal extends Component<Props, State> {
     )
   }
 
+  renderPermissionsSummaryRows = (
+    requirements: StrictPermissionsRequirements,
+    type: PermissionRequirement,
+  ): Array<Object> => {
+    return Object.keys(requirements[type]).reduce((acc, key: PermissionKey) => {
+      // @$FlowFixMe Missing keys
+      const permission = requirements[type][key]
+      if (key === 'WEB_REQUEST') {
+        if (permission.length) {
+          // @$FlowFixMe WEB_REQUEST specific
+          permission.forEach(host => {
+            acc.push(
+              <View style={styles.permissionSummaryRow}>
+                <Text style={globalStyles.darkGreyText} key={key}>
+                  Make web requests to{' '}
+                  <Text style={globalStyles.boldText}>{host}</Text>
+                </Text>
+              </View>,
+            )
+          })
+        }
+      } else {
+        acc.push(
+          <View style={styles.permissionSummaryRow}>
+            <Text key={key} style={globalStyles.darkGreyText}>
+              {PERMISSIONS_DESCRIPTIONS[key]}
+            </Text>
+          </View>,
+        )
+      }
+      return acc
+    }, [])
+  }
+
   renderSummary() {
     const { appData, permissionsRequirements } = this.state
 
@@ -289,46 +327,14 @@ export default class CreateAppModal extends Component<Props, State> {
     const requirements = permissionsRequirements
 
     if (requirements) {
-      const renderPermissions = (
-        requirement: PermissionRequirement,
-      ): Array<Object> => {
-        return Object.keys(requirements[requirement]).reduce(
-          (acc, key: PermissionKey) => {
-            // @$FlowFixMe Missing keys
-            const permission = requirements[requirement][key]
-            if (key === 'WEB_REQUEST') {
-              if (permission.length) {
-                // @$FlowFixMe WEB_REQUEST specific
-                permission.forEach(host => {
-                  acc.push(
-                    <Text
-                      style={[
-                        styles.permissionSummaryRow,
-                        globalStyles.darkGreyText,
-                      ]}
-                      key={key}>
-                      Make web requests to {host}
-                    </Text>,
-                  )
-                })
-              }
-            } else {
-              acc.push(
-                <View style={styles.permissionSummaryRow}>
-                  <Text key={key} style={globalStyles.darkGreyText}>
-                    {PERMISSIONS_DESCRIPTIONS[key]}
-                  </Text>
-                </View>,
-              )
-            }
-            return acc
-          },
-          [],
-        )
-      }
-
-      const optionalPermissionRequirements = renderPermissions('optional')
-      const requiredPermissionRequirements = renderPermissions('required')
+      const optionalPermissionRequirements = this.renderPermissionsSummaryRows(
+        requirements,
+        'optional',
+      )
+      const requiredPermissionRequirements = this.renderPermissionsSummaryRows(
+        requirements,
+        'required',
+      )
 
       const optionalPermissions = optionalPermissionRequirements.length ? (
         <View>
@@ -361,21 +367,23 @@ export default class CreateAppModal extends Component<Props, State> {
     return (
       <View>
         <Text style={globalStyles.header}>App Summary</Text>
-        <View style={styles.appDataSummary}>
-          <Text style={summaryRowStyles}>
-            <Text style={globalStyles.boldText}>Name: </Text>
-            {appData.name}
-          </Text>
-          <Text style={summaryRowStyles}>
-            <Text style={globalStyles.boldText}>Version: </Text>
-            {appData.version}
-          </Text>
-          <Text style={summaryRowStyles}>
-            <Text style={globalStyles.boldText}>Contents path: </Text>
-            {appData.contentsPath}
-          </Text>
-        </View>
-        {permissionsContainer}
+        <ScrollView style={styles.scrollContainer}>
+          <View style={styles.appDataSummary}>
+            <Text style={summaryRowStyles}>
+              <Text style={globalStyles.boldText}>Name: </Text>
+              {appData.name}
+            </Text>
+            <Text style={summaryRowStyles}>
+              <Text style={globalStyles.boldText}>Version: </Text>
+              {appData.version}
+            </Text>
+            <Text style={summaryRowStyles}>
+              <Text style={globalStyles.boldText}>Contents path: </Text>
+              {appData.contentsPath}
+            </Text>
+          </View>
+          {permissionsContainer}
+        </ScrollView>
         <Button title="CREATE APP" onPress={this.onPressCreateApp} />
       </View>
     )
@@ -434,8 +442,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     borderRadius: 3,
   },
-  appDataSummary: {
+  scrollContainer: {
     marginVertical: PADDING,
+    maxHeight: 400,
+  },
+  appDataSummary: {
     borderRadius: 3,
     borderWidth: 1,
     padding: PADDING,

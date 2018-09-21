@@ -13,7 +13,7 @@ type AppData = AppOwnData | AppInstalledData
 type Props = {
   ownApp?: boolean,
   app: AppData,
-  onOpenApp: (app: AppData) => Promise<void>,
+  onOpenApp: (app: AppData) => void,
   onAppRemoved: (appID: ID) => void,
 }
 

@@ -119,8 +119,6 @@ export default class IdentitySelectorView extends Component<Props, State> {
       </View>
     ) : null
 
-    // TODO: scroll with max height
-
     return (
       <View>
         <Text style={styles.header}>{header}</Text>

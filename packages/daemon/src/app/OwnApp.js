@@ -111,8 +111,8 @@ export default class OwnApp extends AbstractApp {
       throw new Error('Invalid version')
     }
     const requirements = createRequirements(
-      permissions.optional,
       permissions.required,
+      permissions.optional,
     )
     versionData.permissions = requirements
     this._versions[v] = versionData
