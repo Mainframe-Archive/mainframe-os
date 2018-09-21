@@ -27,9 +27,9 @@ Read events from the blockchain.
 **Arguments**
 
 1. `contractAddress: string`
-2. `abi: Array<Object>`
-3. `eventName: string`
-4. `options: Object`
+1. `abi: Array<Object>`
+1. `eventName: string`
+1. `options: Object`
 
 **returns:** `Promise<Response>`
 

@@ -76,33 +76,34 @@ Your app will need to use the [Mainframe sdk](packages/sdk) to interact with the
 Example SDK usage:
 
 ```
-import sdk from '@mainframe/sdk'
+import MainframeSDK from '@mainframe/sdk'
 const sdk = new MainframeSDK()
 const res = await sdk.apiVersion()
 ```
 
-### Publishing your App
+### Testing your App from the Launcher
 
-**_Developer mode coming soon_!**
-We're working towards building a "developer mode" in the launcher that will simplify testing and management of pre released apps, however until then developers are required to go through the full app publishing steps below before you can test your app in the launcher.
+The Launcher has a developer mode where you are be able to create, run and manage your apps. To access this dev mode you can use the toggle in the bottom left corner of the Launcher.
 
-#### 1. Register your app in the Daemon
+In developer mode, click the `Create new App` button to begin the app creation flow. You will then be guided through some steps to provide meta data for your app, link to your apps contents folder, create or select your developer identity and set any required permissions.
 
-The first step is to create an instance of your app in the deamon, the CLI will ask you to provide some basic metadata and return an app ID.
+Once created, you should see your app displayed in the launcher, clicking it should open it in a new window and load your app contents.
 
-```
-./packages/cli/bin/run app:create
-```
+**_Editing your app details from the launcher is currently not supported, if you'd like to amend your app metadata or permissions once it's been created, you can use the CLI or simply delete and recreate your app._**
 
-#### 2. Set Required Permissions
+#### Debugging with Chrome dev tools
 
-Developers need to define the apps required permissions using the command below, these preferences will be written to the app's manifest file when it's created and be presented to the user during the install flow. For more information around what API's require permission, please check out the [Permissions docs](packages/app-permissions).
+Apps run inside a sandboxed webview, so any logs you make from your app won't show up in the chrome devtools console linked to your apps containing window, however you can open the developer tools for the webview by running the following command from the app container console:
 
 ```
-./packages/cli/bin/run app:setPermissions --id <APP_ID>
+$("#sandbox-webview").openDevTools();
 ```
 
-#### 3. Upload Content to Swarm
+### Publishing your app
+
+To allow users to install your app, you will need to upload the contents to swarm and then write and sign a manifest file which can be distributed and used for installation.
+
+#### 1. Upload Content to Swarm
 
 To upload your package contents you will need to run a local Swarm node. We recommend using the [Erebos library](https://github.com/MainframeHQ/erebos), once you've followed the setup documented in the Erebos repo you can run your docker image with the following command:
 
@@ -118,9 +119,9 @@ Once your Swarm node is running you can publish your app contents using:
 
 When the upload is complete, you should be presented with a swarm hash, used to identify the location of your contents in the network.
 
-#### 4. Write the App Manifest File
+#### 2. Write the App Manifest File
 
-The final step is to produce and sign your apps manifest.json file, used for distributing and installing your app. The following command will generate the JSON file and sign it using your app ID and developer ID, allowing users to verify the author and integrity of the file and app contents during the install process.
+The following command will generate your manifest JSON file and sign it using your app ID and developer ID, allowing users to verify the author and integrity of the file and app contents during the install process.
 
 ```
 ./packages/cli/bin/run app:writeManifest --id <APP_ID>
@@ -133,15 +134,6 @@ When decoded during install, the file will contain:
 - Version number
 - Swarm hash
 - Permission requirements
-
-### Testing Your App
-
-Once you have created an App manifest file, use the app install flow in the launcher to download and install the app.
-
-**Testing Changes**
-
-Until we add more developer functionality in the launcher, to test changes in your app, update the apps contents folder with the updated files, located in:
-`<User root>/Library/Application Support/mainframe-env-<env_name>-nodejs/apps`
 
 ---
 
