@@ -1,13 +1,13 @@
 # Mainframe Platform
 
-A platform for the new decentralized web. Makes building and running distributed, unstoppable apps easier.
+A platform for easily building and running distributed, unstoppable apps.
 
 ## Overview
 
-The main components (packages) of the Mainframe Browser are as follows:
+The main components (packages) of the Mainframe Platform are as follows:
 
 - `daemon`: a background daemon process that communicates with decentralized services
-- `launcher`: a front-end browser-like app launcher (powered by electron)
+- `launcher`: the Mainframe application installing, launching and running sandboxed apps
 
 In addition, there are several auxiliary packages:
 
@@ -20,6 +20,10 @@ In addition, there are several auxiliary packages:
 - `toolbox`: a set of functions that both the launcher and the cli use
 
 In order to make it easier to share code among packages, this project uses [lerna](https://lernajs.io/). Whenever code changes, it's expected that you run `yarn build` from the root of the project directory, and it will kick off the necessary `lerna` build processes in the package folders.
+
+## Project Status
+
+This project is in alpha, lots of breaking changes are to be expected between releases. It is using libraries and services that are themselves still in early stages of development. The cryptography and overall security have not been audited, no guarantees should be expected from this project at this stage.
 
 ## Getting Started
 
@@ -69,9 +73,11 @@ cd packages/launcher && yarn dev
 
 ### Building Mainframe Apps
 
-We recommend to build your apps using [React Native Web](https://github.com/necolas/react-native-web), you can see a sample setup in the reference app, [Onyx Stats](/applications/onyx-stats). We are currently working on a UI Kit to make it easier for developers to build Mainframe app interfaces and will also be releasing a bootstrapping script to streamline the initial setup process.
+You can build a Mainframe app using any Web technology supported by Electron v2 (Chromium v61).
 
-Your app will need to use the [Mainframe sdk](packages/sdk) to interact with the daemon, you can view the available api's in the [sdk package](packages/sdk/README.md).
+The Mainframe teams build apps using [React Native Web](https://github.com/necolas/react-native-web), you can see a sample setup in the reference app, [Onyx Stats](/applications/onyx-stats). We are currently working on a UI Kit to make it easier for developers to build Mainframe app interfaces and will also be releasing a bootstrapping script to streamline the initial setup process.
+
+Your app will need to use the [Mainframe SDK](packages/sdk) to interact with the daemon, you can view the available API's in the [SDK package](packages/sdk/README.md).
 
 Example SDK usage:
 
@@ -105,13 +111,20 @@ To allow users to install your app, you will need to upload the contents to swar
 
 #### 1. Upload Content to Swarm
 
-To upload your package contents you will need to run a local Swarm node. We recommend using the [Erebos library](https://github.com/MainframeHQ/erebos), once you've followed the setup documented in the Erebos repo you can run your docker image with the following command:
+By default, a vault is configured to connect to the [Swarm gateways](https://swarm-gateways.net/) to interact with Swarm. This works well for downloads and other requests, however uploads are limited to 1 MB, which might prevent from being able to upload some apps.
+In order to upload apps contents larger than 1 MB, a local Swarm node must be used. We recommend using the docker image provided in the [Erebos library repository](https://github.com/MainframeHQ/erebos), once you've followed the setup documented in the Erebos repo you can run your docker image with the following command:
 
 ```
 docker run --publish 8500:8500 --interactive --tty erebos
 ```
 
-Once your Swarm node is running you can publish your app contents using:
+Your vault settings will need to be updated to use the local node rather than the Swarm gateways, running the following command:
+
+```
+./packages/cli/bin/run vault:settings --bzz-url http://localhost:8500
+```
+
+Once your Swarm node is running and you vault settings updated you can publish your app contents using:
 
 ```
 ./packages/cli/bin/run app:publishContents --id <APP_ID>
@@ -149,4 +162,4 @@ There are several places to look when errors arise initially or during developme
 
 - if the Launcher won't start, look to the terminal logs where you ran `yarn dev`. Some javascript errors could prevent Electron from showing a window.
 - if there are problems inside the launcher or apps, you can use the regular Chrome debugger (cmd-option-I) to view logs and diagnose issues.
-- the daemon also shows errors in the terminal, and you can enable more verbose logging by setting the `DEBUG="*"` environment variable, e.g. `DEBUG="*" ./bin/run daemon:start`
+- the daemon also shows errors in the terminal, and you can enable more verbose logging by setting the `DEBUG="*"` environment variable, e.g. `DEBUG="*" ./packages/cli/bin/run daemon:start`
