@@ -5,17 +5,13 @@ import { prompt } from 'inquirer'
 import Command from '../../OpenVaultCommand'
 
 export default class IdentityListCommand extends Command {
-  static description = 'Manage Identities'
+  static description = 'List Identities'
   static flags = Command.flags
 
   async run() {
-    const client = this.createClient()
-    if (client == null) {
-      return
-    }
     const func = await promptSelectCommand()
     // $FlowFixMe: indexer property
-    const res = await client[func]()
+    const res = await this.client.identity[func]()
     Object.keys(res).forEach(type => {
       res[type].forEach(identity => {
         this.log('\nid: ', identity.id)
@@ -27,8 +23,8 @@ export default class IdentityListCommand extends Command {
 
 const promptSelectCommand = async () => {
   const identityListMethods = {
-    'Own Developers': 'getOwnDeveloperIdentities',
-    'Own Users': 'getOwnUserIdentities',
+    'Own Developers': 'getOwnDevelopers',
+    'Own Users': 'getOwnUsers',
   }
   const answers = await prompt([
     {

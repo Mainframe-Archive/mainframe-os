@@ -28,7 +28,7 @@ type Props = {
   identities: Array<Identity>,
   enableCreate?: boolean,
   onSelectId: (id: ID) => any,
-  onCreatedId?: (id: ID) => void,
+  onCreatedId?: (id: ID) => any,
 }
 
 type State = {
@@ -47,7 +47,7 @@ export default class IdentitySelectorView extends Component<Props, State> {
     this.createId()
   }
 
-  async createId() {
+  createId = async () => {
     try {
       let createIdentity
       switch (this.props.type) {

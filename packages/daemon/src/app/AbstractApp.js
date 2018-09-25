@@ -112,10 +112,6 @@ export default class AbstractApp {
     }
   }
 
-  getPermissionsChecked(userID: ID): boolean {
-    return this.getSettings(userID).permissionsChecked
-  }
-
   setPermissionsChecked(userID: ID, checked: boolean) {
     const settings = this.getSettings(userID)
     settings.permissionsChecked = checked

@@ -231,6 +231,7 @@ export default class CreateAppModal extends Component<Props, State> {
         <Text style={styles.description}>Set your app details.</Text>
         <TextInput
           placeholder="App name"
+          testID="create-app-name-input"
           style={styles.input}
           onChangeText={this.onChangeName}
           value={this.state.appData.name}
@@ -238,6 +239,7 @@ export default class CreateAppModal extends Component<Props, State> {
         <TextInput
           placeholder="Version"
           style={styles.input}
+          testID="create-app-version-input"
           onChangeText={this.onChangeVersion}
           value={this.state.appData.version}
         />
@@ -249,14 +251,18 @@ export default class CreateAppModal extends Component<Props, State> {
           </Text>
         </TouchableOpacity>
         <input
-          id="installer-file-selector"
+          id="app-contents-file-selector"
           onChange={this.onFileInputChange}
           ref={this.fileInput}
           type="file"
           hidden
           value={this.state.inputValue}
         />
-        <Button title="CONTINUE" onPress={this.onSetAppData} />
+        <Button
+          testID="create-app-set-info-button"
+          title="CONTINUE"
+          onPress={this.onSetAppData}
+        />
       </View>
     )
   }
@@ -384,7 +390,11 @@ export default class CreateAppModal extends Component<Props, State> {
           </View>
           {permissionsContainer}
         </ScrollView>
-        <Button title="CREATE APP" onPress={this.onPressCreateApp} />
+        <Button
+          testID="create-app-complete-button"
+          title="CREATE APP"
+          onPress={this.onPressCreateApp}
+        />
       </View>
     )
   }
