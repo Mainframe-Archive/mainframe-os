@@ -111,13 +111,20 @@ To allow users to install your app, you will need to upload the contents to swar
 
 #### 1. Upload Content to Swarm
 
-To upload your package contents you will need to run a local Swarm node. We recommend using the docker image provided in the [Erebos library repository](https://github.com/MainframeHQ/erebos), once you've followed the setup documented in the Erebos repo you can run your docker image with the following command:
+By default, a vault is configured to connect to the [Swarm gateways](https://swarm-gateways.net/) to interact with Swarm. This works well for downloads and other requests, however uploads are limited to 1 MB, which might prevent from being able to upload some apps.
+In order to upload apps contents larger than 1 MB, a local Swarm node must be used. We recommend using the docker image provided in the [Erebos library repository](https://github.com/MainframeHQ/erebos), once you've followed the setup documented in the Erebos repo you can run your docker image with the following command:
 
 ```
 docker run --publish 8500:8500 --interactive --tty erebos
 ```
 
-Once your Swarm node is running you can publish your app contents using:
+Your vault settings will need to be updated to use the local node rather than the Swarm gateways, running the following command:
+
+```
+./packages/cli/bin/run vault:settings --bzz-url http://localhost:8500
+```
+
+Once your Swarm node is running and you vault settings updated you can publish your app contents using:
 
 ```
 ./packages/cli/bin/run app:publishContents --id <APP_ID>

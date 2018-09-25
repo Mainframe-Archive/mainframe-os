@@ -21,6 +21,8 @@
 - `client:setup`: ensure the environment has a default vault setup
 - `vault:create`: create a vault
 - `vault:delete`: delete a vault
+- `vault:list`: list existing vaults
+- `vault:settings`: set and/or display a vault settings
 - `identity:create`: create an identity
 - `identity:list`: list identities
 - `app:create`: create an app
