@@ -3,6 +3,7 @@
 import type { ManifestData } from '@mainframe/app-manifest'
 import {
   createWebRequestGrant,
+  havePermissionsToGrant,
   mergeGrantsToDetails,
   PERMISSION_KEYS_BOOLEAN,
   type StrictPermissionsGrants,
@@ -63,6 +64,13 @@ export default class App extends AbstractApp {
 
   get manifest(): ManifestData {
     return this._manifest
+  }
+
+  getPermissionsChecked(userID: ID): boolean {
+    if (!havePermissionsToGrant(this._manifest.permissions)) {
+      return true
+    }
+    return this.getSettings(userID).permissionsChecked
   }
 
   // Session

@@ -146,6 +146,7 @@ export const getAll = (ctx: RequestContext): AppGetAllResult => {
           acc.push({
             id: toClientID(id),
             data: user.data,
+            settings: app.getSettings(id),
           })
         }
         return acc

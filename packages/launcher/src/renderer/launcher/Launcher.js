@@ -7,6 +7,10 @@ import type {
   AppOwnData,
   AppInstalledData,
 } from '@mainframe/client'
+import {
+  havePermissionsToGrant,
+  type StrictPermissionsGrants,
+} from '@mainframe/app-permissions'
 import React, { Component } from 'react'
 import {
   View,
@@ -19,6 +23,7 @@ import {
 import type { VaultsData } from '../../types'
 
 import colors from '../colors'
+import globalStyles from '../styles'
 import Text from '../UIComponents/Text'
 import ModalView from '../UIComponents/ModalView'
 import rpc from './rpc'
@@ -26,6 +31,7 @@ import AppInstallModal from './AppInstallModal'
 import AppGridItem from './AppGridItem'
 import CreateAppModal from './developer/CreateAppModal'
 import IdentitySelectorView from './IdentitySelectorView'
+import PermissionsView from './PermissionsView'
 import VaultManagerModal from './VaultManagerModal'
 import SideMenu from './SideMenu'
 
@@ -38,7 +44,7 @@ type State = {
   showAppInstallModal?: boolean,
   showAppCreateModal?: boolean,
   showModal: ?{
-    type: 'app_create' | 'app_install' | 'select_id',
+    type: 'app_create' | 'app_install' | 'select_id' | 'accept_permissions',
     data?: Object,
   },
   vaultsData?: VaultsData,
@@ -73,7 +79,7 @@ export default class App extends Component<{}, State> {
         vaultsData,
       })
       if (vaultsData.vaultOpen) {
-        this.getApps()
+        this.getAppsAndUsers()
       }
     } catch (err) {
       // eslint-disable-next-line no-console
@@ -81,12 +87,12 @@ export default class App extends Component<{}, State> {
     }
   }
 
-  async getApps() {
+  getAppsAndUsers = async () => {
     try {
-      const res = await rpc.getApps()
+      const apps = await rpc.getApps()
       const identities = await rpc.getOwnUserIdentities()
       this.setState({
-        apps: res,
+        apps,
         identities,
       })
     } catch (err) {
@@ -111,7 +117,7 @@ export default class App extends Component<{}, State> {
 
   onInstallComplete = () => {
     this.onCloseModal()
-    this.getApps()
+    this.getAppsAndUsers()
   }
 
   onOpenApp = (app: AppData) => {
@@ -133,7 +139,7 @@ export default class App extends Component<{}, State> {
   }
 
   onSelectAppUser = async (userID: ID) => {
-    const { showModal } = this.state
+    const { showModal, devMode } = this.state
     if (
       showModal &&
       showModal.data &&
@@ -141,23 +147,32 @@ export default class App extends Component<{}, State> {
       showModal.type === 'select_id'
     ) {
       const { app } = showModal.data
-      if (app.users.findIndex(u => u.id === userID) === -1) {
+      const user = app.users.find(u => u.id === userID)
+      if (
+        !devMode &&
+        havePermissionsToGrant(app.manifest.permissions) &&
+        (!user || !user.settings.permissionsChecked)
+      ) {
+        // If this user hasn't used the app before
+        // we need to ask to accept permissions
+        const data = { ...showModal.data }
+        data['userID'] = userID
+        this.setState({
+          showModal: {
+            type: 'accept_permissions',
+            data,
+          },
+        })
+      } else {
         try {
-          await rpc.setAppUserSettings(app.appID, userID, {
-            permissions: {
-              WEB_REQUEST: { granted: [], denied: [] },
-            },
-            permissionsChecked: false,
-          })
+          await rpc.launchApp(app.appID, userID)
         } catch (err) {
-          // eslint-disable-next-line no-console
-          console.warn(err)
+          // TODO: - Error feedback
         }
+        this.setState({
+          showModal: undefined,
+        })
       }
-      await rpc.launchApp(app.appID, userID)
-      this.setState({
-        showModal: undefined,
-      })
     }
   }
 
@@ -177,11 +192,36 @@ export default class App extends Component<{}, State> {
 
   onAppCreated = () => {
     this.onCloseModal()
-    this.getApps()
+    this.getAppsAndUsers()
   }
 
   onAppRemoved = () => {
-    this.getApps()
+    this.getAppsAndUsers()
+  }
+
+  onSubmitPermissions = async (permissionSettings: StrictPermissionsGrants) => {
+    if (
+      this.state.showModal &&
+      this.state.showModal.type === 'accept_permissions' &&
+      this.state.showModal.data
+    ) {
+      const { app, userID } = this.state.showModal.data
+      try {
+        await rpc.setAppUserSettings(app.appID, userID, {
+          permissions: permissionSettings,
+          permissionsChecked: true,
+        })
+        await this.getAppsAndUsers()
+        await rpc.launchApp(app.appID, userID)
+      } catch (err) {
+        // TODO: - Error feedback
+        // eslint-disable-next-line no-console
+        console.warn(err)
+      }
+      this.setState({
+        showModal: undefined,
+      })
+    }
   }
 
   // RENDER
@@ -271,6 +311,22 @@ export default class App extends Component<{}, State> {
     let modal
     if (this.state.showModal) {
       switch (this.state.showModal.type) {
+        case 'accept_permissions': {
+          // $FlowFixMe ignore undefined warning
+          const { app } = this.state.showModal.data
+          modal = (
+            <ModalView isOpen={true} onRequestClose={this.onCloseModal}>
+              <Text style={globalStyles.header}>
+                Permission Requested by {app.manifest.name}
+              </Text>
+              <PermissionsView
+                permissions={app.manifest.permissions}
+                onSubmit={this.onSubmitPermissions}
+              />
+            </ModalView>
+          )
+          break
+        }
         case 'app_install':
           modal = (
             <AppInstallModal
@@ -295,6 +351,7 @@ export default class App extends Component<{}, State> {
                 type="user"
                 identities={this.state.identities.users}
                 onSelectId={this.onSelectAppUser}
+                onCreatedId={this.getAppsAndUsers}
               />
             </ModalView>
           )

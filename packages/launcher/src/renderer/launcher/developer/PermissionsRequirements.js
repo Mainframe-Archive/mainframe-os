@@ -251,7 +251,11 @@ export default class PermissionsRequirementsView extends Component<
           {permissionOptions}
         </ScrollView>
         {errorLabel}
-        <Button title="Save" onPress={this.onPressSave} />
+        <Button
+          testID="set-permission-requirements"
+          title="Save"
+          onPress={this.onPressSave}
+        />
       </View>
     )
   }

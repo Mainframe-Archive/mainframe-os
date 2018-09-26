@@ -22,6 +22,27 @@ export const EMPTY_DEFINITIONS: StrictPermissionsDefinitions = {
   WEB_REQUEST: [],
 }
 
+export const definitionsExist = (
+  definitions: StrictPermissionsDefinitions,
+): boolean => {
+  if (!definitions) {
+    return false
+  }
+  return Object.keys(definitions).length > 1 || !!definitions.WEB_REQUEST.length
+}
+
+export const havePermissionsToGrant = (
+  requirements: ?StrictPermissionsRequirements,
+): boolean => {
+  if (!requirements) {
+    return false
+  }
+  return (
+    definitionsExist(requirements.optional) ||
+    definitionsExist(requirements.required)
+  )
+}
+
 export const createWebRequestGrant = (
   granted?: WebRequestDefinition = [],
   denied?: WebRequestDefinition = [],

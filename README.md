@@ -130,6 +130,12 @@ Once your Swarm node is running and you vault settings updated you can publish y
 ./packages/cli/bin/run app:publishContents --id <APP_ID>
 ```
 
+If you don't know your app's ID, you can view details of all your apps by running:
+
+```
+./packages/cli/bin/run app:list
+```
+
 When the upload is complete, you should be presented with a swarm hash, used to identify the location of your contents in the network.
 
 #### 2. Write the App Manifest File

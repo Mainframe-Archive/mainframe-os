@@ -1,7 +1,12 @@
 //@flow
 
-import type { PermissionsGrants } from '@mainframe/app-permissions'
+import {
+  havePermissionsToGrant,
+  type StrictPermissionsGrants,
+  createStrictPermissionGrants,
+} from '@mainframe/app-permissions'
 import type { ID } from '@mainframe/client'
+import type { ManifestData } from '@mainframe/app-manifest'
 import React, { createRef, Component, type ElementRef } from 'react'
 import { View, StyleSheet } from 'react-native-web'
 
@@ -10,7 +15,7 @@ import Text from '../UIComponents/Text'
 import ModalView from '../UIComponents/ModalView'
 
 import rpc from './rpc'
-import PermissionsView, { type PermissionOptions } from './PermissionsView'
+import PermissionsView from './PermissionsView'
 import IdentitySelectorView from './IdentitySelectorView'
 
 type Props = {
@@ -27,11 +32,8 @@ type User = {
 type State = {
   inputValue: string,
   installStep: 'manifest' | 'identity' | 'permissions' | 'download',
-  manifest: ?{
-    name: string,
-    permissions: PermissionOptions,
-  },
-  userPermissions?: PermissionsGrants,
+  manifest: ?ManifestData,
+  userPermissions?: StrictPermissionsGrants,
   userId?: ID,
   ownUsers: Array<User>,
 }
@@ -85,7 +87,7 @@ export default class AppInstallModal extends Component<Props, State> {
     }
   }
 
-  onSubmitPermissions = (userPermissions: PermissionsGrants) => {
+  onSubmitPermissions = (userPermissions: StrictPermissionsGrants) => {
     this.setState(
       {
         installStep: 'download',
@@ -107,7 +109,21 @@ export default class AppInstallModal extends Component<Props, State> {
   }
 
   onSelectId = (id: ID) => {
-    this.setState({ installStep: 'permissions', userId: id })
+    const { manifest } = this.state
+    if (
+      manifest &&
+      manifest.permissions &&
+      havePermissionsToGrant(manifest.permissions)
+    ) {
+      this.setState({
+        installStep: 'permissions',
+        userId: id,
+      })
+    } else {
+      this.setState({ userId: id })
+      const strictGrants = createStrictPermissionGrants({})
+      this.onSubmitPermissions(strictGrants)
+    }
   }
 
   onCreatedId = () => {

@@ -2,9 +2,9 @@
 
 import {
   createWebRequestGrant,
+  definitionsExist,
   type PermissionKey, // eslint-disable-line import/named
-  type PermissionRequirement, // eslint-disable-line import/named
-  type PermissionsGrants, // eslint-disable-line import/named
+  type StrictPermissionsRequirements,
   type StrictPermissionsGrants, // eslint-disable-line import/named
 } from '@mainframe/app-permissions'
 import React, { Component } from 'react'
@@ -23,18 +23,13 @@ type PermissionGranted = boolean
 
 type PermissionOption = {
   WEB_REQUEST?: Array<Domain>,
-  [PermissionKey]: true,
+  [PermissionKey]: boolean,
 }
 
 type PermissionOptionValue = $Values<PermissionOption>
 
-// Permissions requested by manifest
-export type PermissionOptions = {
-  [PermissionRequirement]: PermissionOption,
-}
-
 // Permissions set by user
-type PermissionsSettings = {
+export type PermissionsSettings = {
   WEB_REQUEST: { [Domain]: PermissionGranted },
   [PermissionKey]: PermissionGranted,
 }
@@ -75,8 +70,8 @@ const formatSettings = (
 }
 
 type Props = {
-  permissions: PermissionOptions,
-  onSubmit: (permissions: PermissionsGrants) => void,
+  permissions: StrictPermissionsRequirements,
+  onSubmit: (permissions: StrictPermissionsGrants) => any,
 }
 
 type State = {
@@ -201,6 +196,9 @@ export default class PermissionsView extends Component<Props, State> {
 
     if (key === 'WEB_REQUEST') {
       if (Array.isArray(value)) {
+        if (!value.length) {
+          return null
+        }
         options = (
           <View key={key} style={styles.domains}>
             {value.map(domain => (
@@ -254,12 +252,12 @@ export default class PermissionsView extends Component<Props, State> {
   renderPermissionsOptions = () => {
     const { permissions } = this.props
 
-    const required = permissions.required
+    const required = definitionsExist(permissions.required)
       ? Object.keys(permissions.required).map(key => {
           return this.renderPermission(key, permissions.required[key], true)
         })
       : null
-    const optional = permissions.optional
+    const optional = definitionsExist(permissions.optional)
       ? Object.keys(permissions.optional).map(key => {
           return this.renderPermission(key, permissions.optional[key], false)
         })
