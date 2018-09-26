@@ -1,5 +1,6 @@
 // @flow
 import util from 'util'
+import Table from 'cli-table'
 
 import Command from '../../OpenVaultCommand'
 
@@ -13,18 +14,30 @@ export default class AppListCommand extends Command {
     Object.keys(res).forEach(type => {
       this.log(`\n${type === 'own' ? 'Created' : 'Installed'} Apps\n`)
       res[type].forEach(app => {
-        this.log(`\n  ${app.manifest.name}, v${app.manifest.version}\n`)
-        this.log('      ID:', app.appID)
+        const table = new Table({
+          head: [app.manifest.name],
+        })
+        let contentsPath, mainframeID, developerId
         if (type === 'own') {
-          this.log('     MainframeID: ', app.manifest.mainframeID)
-          this.log('     Developer: ', app.manifest.developerID)
-          this.log('     Contents Path: ', app.manifest.contentsPath)
+          contentsPath = app.manifest.contentsPath
+          developerId = app.manifest.developerID
+          mainframeID = app.manifest.mainframeID
         } else {
-          this.log('     Author: ', app.manifest.author.id)
-          this.log('     Contents URI: ', app.manifest.contentsURI)
-          this.log('     Permissions: ', util.inspect(app.manifest.permissions))
+          contentsPath = app.manifest.contentsURI
+          developerId = app.manifest.author.id
+          mainframeID = ''
         }
-        this.log('     Users: ', app.users, '\n')
+
+        table.push(
+          ['ID', app.appID],
+          ['Mainframe ID', mainframeID],
+          ['Version', app.manifest.version],
+          ['Developer', developerId],
+          ['Contents', contentsPath],
+          ['Users', util.inspect(app.users)],
+          ['Permissions', util.inspect(app.manifest.permissions) || {}],
+        )
+        this.log(table.toString())
       })
     })
   }
