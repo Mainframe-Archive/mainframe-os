@@ -41,7 +41,7 @@ export default class CreateCommand extends Command {
         choices: ENV_TYPES,
         default: 'development',
         name: 'type',
-        message: 'Select a vault to use by default',
+        message: 'Select the environment type',
       })
     }
     if (flags.default == null) {
