@@ -44,10 +44,16 @@ yarn bootstrap
 yarn build
 ```
 
-Next, set up the daemon using the CLI:
+Next, a local environment must be created. An environment contains references to all the vaults created and stores the downloaded application contents. To create a new environment, run the following command:
 
 ```
 packages/cli/bin/run env:create
+```
+
+This first environment should be created with the `development` type and set as default environment.
+The newly created environment then needs to be configured using the CLI:
+
+```
 packages/cli/bin/run daemon:setup --bin-path=./packages/daemon/bin/run
 ```
 
@@ -87,11 +93,16 @@ const sdk = new MainframeSDK()
 const res = await sdk.apiVersion()
 ```
 
+### Packaging Mainframe Apps for the Launcher
+
+Mainframe Apps must be packaged as static Web apps with an `index.html` entry file. All assets reference paths must be relative rather than rely on a specific resolution behaviour.
+For example to add the [Onyx Stats](applications/onyx-stats) contents to the Launcher, the `dist` folder (created during the build) must be selected rather than the root application folder.
+
 ### Testing your App from the Launcher
 
 The Launcher has a developer mode where you are be able to create, run and manage your apps. To access this dev mode you can use the toggle in the bottom left corner of the Launcher.
 
-In developer mode, click the `Create new App` button to begin the app creation flow. You will then be guided through some steps to provide meta data for your app, link to your apps contents folder, create or select your developer identity and set any required permissions.
+In developer mode, click the `Create new App` button to begin the app creation flow. You will then be guided through some steps to provide meta data for your app, link to your apps contents folder (the folder containing the `index.html` entry file), create or select your developer identity and set any required permissions.
 
 Once created, you should see your app displayed in the launcher, clicking it should open it in a new window and load your app contents.
 
@@ -112,13 +123,9 @@ To allow users to install your app, you will need to upload the contents to swar
 #### 1. Upload Content to Swarm
 
 By default, a vault is configured to connect to the [Swarm gateways](https://swarm-gateways.net/) to interact with Swarm. This works well for downloads and other requests, however uploads are limited to 1 MB, which might prevent from being able to upload some apps.
-In order to upload apps contents larger than 1 MB, a local Swarm node must be used. We recommend using the docker image provided in the [Erebos library repository](https://github.com/MainframeHQ/erebos), once you've followed the setup documented in the Erebos repo you can run your docker image with the following command:
+In order to upload apps contents larger than 1 MB, a local Swarm node must be used. Installation instructions are available in the [Swarm guide](https://swarm-guide.readthedocs.io/en/latest/installation.html) and a [Docker image](https://github.com/ethersphere/swarm-docker) is also available.
 
-```
-docker run --publish 8500:8500 --interactive --tty erebos
-```
-
-Your vault settings will need to be updated to use the local node rather than the Swarm gateways, running the following command:
+Your vault settings will need to be updated to use the local node rather than the Swarm gateways, running the following command (replace `http://localhost:8500` by the Swarm URL if different):
 
 ```
 ./packages/cli/bin/run vault:settings --bzz-url http://localhost:8500
