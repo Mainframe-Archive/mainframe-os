@@ -1,7 +1,6 @@
 // @flow
-
-import { prompt } from 'inquirer'
 import fs from 'fs'
+import { prompt } from 'inquirer'
 
 import Command from '../../OpenVaultCommand'
 
@@ -42,12 +41,16 @@ export default class AppCreateCommand extends Command {
     }
 
     if (!fs.existsSync(contentsPath)) {
-      throw new Error(`Contents folder needs to exist (${contentsPath} is missing)`)
+      throw new Error(
+        `Contents folder needs to exist (${contentsPath} is missing)`,
+      )
     }
 
     const stats = fs.lstatSync(contentsPath)
     if (!stats.isDirectory()) {
-      throw new Error(`Contents folder needs to be a folder (${contentsPath} isn't a folder)`)
+      throw new Error(
+        `Contents folder needs to be a folder (${contentsPath} isn't a folder)`,
+      )
     }
 
     const res = await client.app.create({
