@@ -4,7 +4,6 @@ import { prompt } from 'inquirer'
 import fs from 'fs'
 
 import Command from '../../OpenVaultCommand'
-import { stat } from 'fs-extra-p';
 
 export default class AppCreateCommand extends Command {
   static description = 'Create app'
