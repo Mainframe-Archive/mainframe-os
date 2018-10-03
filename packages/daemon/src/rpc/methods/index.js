@@ -6,6 +6,7 @@ import * as pss from './pss'
 import * as sub from './subscription'
 import * as vault from './vault'
 import * as blockchain from './blockchain'
+import * as wallet from './wallet'
 
 const noop = () => {}
 
@@ -56,4 +57,9 @@ export default {
   vault_getSettings: vault.getSettings,
   vault_open: vault.open,
   vault_setSettings: vault.setSettings,
+
+  wallet_createHD: wallet.createHDWallet,
+  wallet_importPK: wallet.importAccountByPK,
+  wallet_getEthWallets: wallet.getEthWallets,
+  wallet_signEthTransaction: wallet.signEthTransaction,
 }

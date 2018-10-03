@@ -1,0 +1,76 @@
+// @flow
+
+import {
+  idType,
+  WALLET_CREATE_HD_SCHEMA,
+  WALLET_SIGN_ETH_TRANSACTION_SCHEMA,
+  WALLET_IMPORT_PK_SCHEMA,
+  type WalletCreateHDParams,
+  type WalletCreateHDResult,
+  type WalletImportPKParams,
+  type WalletImportPKResult,
+  type WalletResults,
+  type WalletGetEthWalletsResult,
+  type WalletEthSignTransactionParams,
+  type WalletEthSignTransactionResult,
+  type WalletTypes,
+} from '@mainframe/client'
+
+import type RequestContext from '../RequestContext'
+
+export const createHDWallet = {
+  params: WALLET_CREATE_HD_SCHEMA,
+  handler: async (
+    ctx: RequestContext,
+    params: WalletCreateHDParams,
+  ): Promise<WalletCreateHDResult> => {
+    // TODO define params
+    const res = ctx.openVault.wallets.createHDWallet(params)
+    await ctx.openVault.save()
+    return res
+  },
+}
+
+export const importAccountByPK = {
+  params: WALLET_IMPORT_PK_SCHEMA,
+  handler: async (
+    ctx: RequestContext,
+    params: WalletImportPKParams,
+  ): Promise<WalletImportPKResult> => {
+    const simpleWallet = ctx.openVault.wallets.importPKWallet(params)
+    await ctx.openVault.save()
+    return simpleWallet
+  },
+}
+
+export const getEthWallets = (
+  ctx: RequestContext,
+): WalletGetEthWalletsResult => {
+  const mapData = (type: WalletTypes): WalletResults =>
+    Object.keys(ctx.openVault.wallets.ethWallets[type]).map(id => {
+      const wallet = ctx.openVault.wallets.ethWallets[type][id]
+      const accounts = wallet.getAccounts()
+      return {
+        type: type,
+        walletID: idType(id),
+        accounts,
+      }
+    })
+  return {
+    hd: mapData('hd'),
+    simple: mapData('pk'),
+    ledger: mapData('ledger'),
+  }
+}
+
+export const signEthTransaction = {
+  params: WALLET_SIGN_ETH_TRANSACTION_SCHEMA,
+  handler: async (
+    ctx: RequestContext,
+    params: WalletEthSignTransactionParams,
+  ): Promise<WalletEthSignTransactionResult> => {
+    const res = ctx.openVault.wallets.signEthTransaction(params)
+    await ctx.openVault.save()
+    return res
+  },
+}

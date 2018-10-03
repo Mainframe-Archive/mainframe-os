@@ -119,3 +119,36 @@ export const VAULT_SETTINGS_SCHEMA = {
   pssURL: VAULT_SETTING_SCHEMA,
   web3HTTPProvider: VAULT_SETTING_SCHEMA,
 }
+
+export const WALLET_CREATE_HD_SCHEMA = {
+  chain: 'string',
+}
+
+export const WALLET_TYPE_SCHEMA = {
+  type: 'enum',
+  values: ['hd', 'simple', 'ledger'],
+}
+
+export const WALLET_IMPORT_PK_SCHEMA = {
+  privateKey: 'string',
+}
+
+export const ETH_TRANSACTION_SCHEMA = {
+  nonce: 'number',
+  from: 'string',
+  to: 'string',
+  value: 'number',
+  data: 'string',
+  gasLimit: 'number',
+  gasPrice: 'number',
+  chainId: 'string',
+}
+
+export const WALLET_SIGN_ETH_TRANSACTION_SCHEMA = {
+  walletType: WALLET_TYPE_SCHEMA,
+  walletID: 'string',
+  transactionData: {
+    type: 'object',
+    props: ETH_TRANSACTION_SCHEMA,
+  },
+}

@@ -14,6 +14,9 @@ import type { ID } from '@mainframe/utils-id'
 
 export type { ID } from '@mainframe/utils-id'
 
+export type WalletTypes = 'hd' | 'pk' | 'ledger'
+export type WalletSupportedChains = 'ethereum'
+
 export type IdentityOwnData = { id: ID, data: Object }
 
 export type AppCheckPermissionParams = {
@@ -165,6 +168,59 @@ export type BlockchainReadContractParams = {
 }
 
 export type BlockchainReadContractResult = any
+
+export type WalletCreateHDParams = {
+  chain: WalletSupportedChains,
+}
+
+export type WalletImportPKParams = {
+  chain: WalletSupportedChains,
+  privateKey: string,
+  walletID?: ID,
+}
+
+export type WalletResult = {
+  walletID: ID,
+  type: WalletTypes,
+  accounts: Array<string>,
+}
+
+export type WalletImportPKResult = WalletResult
+
+export type WalletCreateHDResult = WalletResult
+
+export type WalletResults = Array<WalletResult>
+
+export type WalletGetEthWalletsResult = {
+  hd: WalletResults,
+  simple: WalletResults,
+  ledger: WalletResults,
+}
+
+export type EthTransactionParams = {
+  nonce: number,
+  from: string,
+  to: string,
+  value: number,
+  data: string,
+  gasLimit: number,
+  gasPrice: number,
+  chainId: string,
+}
+
+export type WalletEthSignTransactionParams = {
+  walletID: ID,
+  walletType: WalletTypes,
+  transactionData: EthTransactionParams,
+}
+
+export type WalletEthSignDataParams = {
+  walletID: ID,
+  address: string,
+  data: string,
+}
+
+export type WalletEthSignTransactionResult = string
 
 export type IdentityCreateDeveloperParams = {
   data?: Object,

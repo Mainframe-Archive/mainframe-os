@@ -38,6 +38,9 @@ import type Session from '../app/Session'
 import IdentitiesRepository, {
   type IdentitiesRepositorySerialized,
 } from '../identity/IdentitiesRepository'
+import WalletsRepository, {
+  type WalletsRepositorySerialized,
+} from '../wallet/WalletsRepository'
 
 type VaultKDF = {
   algorithm: number,
@@ -127,12 +130,14 @@ export type VaultData = {
   apps: AppsRepository,
   identities: IdentitiesRepository,
   settings: UserSettings,
+  wallets: WalletsRepository,
 }
 
 export type VaultSerialized = {
   apps?: AppsRepositorySerialized,
   identities?: IdentitiesRepositorySerialized,
   settings?: UserSettings,
+  wallets?: WalletsRepositorySerialized,
 }
 
 export default class Vault {
@@ -148,6 +153,7 @@ export default class Vault {
     return new Vault(path, keyParams, {
       apps: AppsRepository.fromJSON(data.apps),
       identities: IdentitiesRepository.fromJSON(data.identities),
+      wallets: WalletsRepository.fromJSON(data.wallets),
       settings: data.settings,
     })
   }
@@ -169,6 +175,7 @@ export default class Vault {
         pssURL: 'ws://localhost:8546',
         web3HTTPProvider: 'https://mainnet.infura.io/KWLG1YOMaYgl4wiFlcJv',
       },
+      wallets: new WalletsRepository(),
     }
     this._data = data ? Object.assign(vaultData, data) : vaultData
   }
@@ -189,6 +196,10 @@ export default class Vault {
 
   get settings(): UserSettings {
     return this._data.settings
+  }
+
+  get wallets(): WalletsRepository {
+    return this._data.wallets
   }
 
   // App lifecycle
@@ -425,6 +436,7 @@ export default class Vault {
       ? {
           apps: AppsRepository.toJSON(this._data.apps),
           identities: IdentitiesRepository.toJSON(this._data.identities),
+          wallets: WalletsRepository.toJSON(this._data.wallets),
           settings: this._data.settings,
         }
       : {}

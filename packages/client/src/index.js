@@ -8,6 +8,7 @@ import BlockchainAPIs from './apis/Blockchain'
 import IdentityAPIs from './apis/Identity'
 import PssAPIs from './apis/Pss'
 import VaultAPIs from './apis/Vault'
+import WalletAPIs from './apis/Wallet'
 
 export { idType } from '@mainframe/utils-id'
 export * from './schema'
@@ -20,6 +21,7 @@ export default class MainframeClient {
   identity: IdentityAPIs
   pss: PssAPIs
   vault: VaultAPIs
+  wallet: WalletAPIs
 
   constructor(socketPath: string) {
     this._rpc = ipcRPC(socketPath)
@@ -28,6 +30,7 @@ export default class MainframeClient {
     this.identity = new IdentityAPIs(this._rpc)
     this.pss = new PssAPIs(this._rpc)
     this.vault = new VaultAPIs(this._rpc)
+    this.wallet = new WalletAPIs(this._rpc)
   }
 
   close() {
