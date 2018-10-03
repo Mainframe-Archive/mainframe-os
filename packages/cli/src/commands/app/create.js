@@ -1,8 +1,10 @@
 // @flow
 
 import { prompt } from 'inquirer'
+import fs from 'fs'
 
 import Command from '../../OpenVaultCommand'
+import { stat } from 'fs-extra-p';
 
 export default class AppCreateCommand extends Command {
   static description = 'Create app'
@@ -34,13 +36,23 @@ export default class AppCreateCommand extends Command {
         default: '1.0.0',
       },
     ])
+    const contentsPath = this.resolvePath(answers.path)
 
     if (answers.path.length === 0) {
       throw new Error('Contents folder must be provided')
     }
 
+    if (!fs.existsSync(contentsPath)) {
+      throw new Error(`Contents folder needs to exist (${contentsPath} is missing)`)
+    }
+
+    const stats = fs.lstatSync(contentsPath)
+    if (!stats.isDirectory()) {
+      throw new Error(`Contents folder needs to be a folder (${contentsPath} isn't a folder)`)
+    }
+
     const res = await client.app.create({
-      contentsPath: this.resolvePath(answers.path),
+      contentsPath: contentsPath,
       name: answers.name,
       version: answers.version,
     })
