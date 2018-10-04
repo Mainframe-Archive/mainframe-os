@@ -1,14 +1,12 @@
 // @flow
 
-// eslint-disable-next-line import/named
 import { validateManifest, type ManifestData } from '@mainframe/app-manifest'
 import {
   getRequirementsDifference,
-  type PermissionKey, // eslint-disable-line import/named
-  type PermissionGrant, // eslint-disable-line import/named
+  type PermissionKey,
+  type PermissionGrant,
 } from '@mainframe/app-permissions'
 import type { MainframeID } from '@mainframe/data-types'
-// eslint-disable-next-line import/named
 import { uniqueID, idType, type ID } from '@mainframe/utils-id'
 
 import { mapObject } from '../utils'

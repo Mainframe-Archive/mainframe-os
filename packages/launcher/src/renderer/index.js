@@ -21,7 +21,12 @@ ipcRenderer.on('start', (event, params) => {
     AppRegistry.registerComponent('Launcher', () => Launcher)
     AppRegistry.runApplication('Launcher', { rootTag, callback })
   } else {
-    const App = () => <AppContainer appSession={params.appSession} />
+    const App = () => (
+      <AppContainer
+        appSession={params.appSession}
+        partition={params.partition}
+      />
+    )
     AppRegistry.registerComponent('App', () => App)
     AppRegistry.runApplication('App', { rootTag, callback })
   }
