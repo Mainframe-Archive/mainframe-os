@@ -44,6 +44,7 @@
   },
   "devDependencies": {
     "@babel/plugin-syntax-dynamic-import": "^7.0.0",
+    "@erebos/api-bzz-node": "^0.4.1",
     "@mainframe/utils-id": "^0.1.0",
     "babel-loader": "^8.0.4",
     "babel-plugin-react-native-web": "^0.9.1",
