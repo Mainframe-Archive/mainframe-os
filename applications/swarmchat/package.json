@@ -26,6 +26,6 @@
   },
   "homepage": "./",
   "browserslist": [
-    "electron 3.0"
+    "electron 2.0"
   ]
 }
