@@ -27,7 +27,7 @@
     "start": "node -r esm lib"
   },
   "dependencies": {
-    "@erebos/api-bzz-node": "^0.4.0",
+    "@erebos/api-bzz-node": "^0.4.1",
     "@erebos/api-pss": "^0.4.0",
     "@mainframe/app-manifest": "*",
     "@mainframe/app-permissions": "*",
@@ -38,7 +38,7 @@
     "@mainframe/rpc-handler": "^0.2.1",
     "@mainframe/rpc-stream": "^0.2.4",
     "@mainframe/rpc-ws-node": "^0.2.3",
-    "@mainframe/secure-file": "^0.1.0",
+    "@mainframe/secure-file": "^0.1.3",
     "@mainframe/utils-base64": "^0.1.0",
     "@mainframe/utils-crypto": "^0.2.1",
     "@mainframe/utils-hex": "^0.1.1",
