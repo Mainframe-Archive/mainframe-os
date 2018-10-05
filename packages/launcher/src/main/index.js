@@ -1,7 +1,6 @@
 // @flow
 
 import path from 'path'
-import { stringify } from 'querystring'
 import url from 'url'
 // eslint-disable-next-line import/named
 import Client from '@mainframe/client'
@@ -47,11 +46,10 @@ const newWindow = (params: Object = {}) => {
     height: params.height || 600,
     show: false,
   })
-  const stringParams = stringify(params)
 
   if (is.development) {
     window.webContents.openDevTools()
-    window.loadURL(`http://localhost:${PORT}?${stringParams}`)
+    window.loadURL(`http://localhost:${PORT}`)
   } else {
     const formattedUrl = url.format({
       pathname: path.join(__dirname, `index.html`),
@@ -177,6 +175,9 @@ ipcMain.on('init-window', event => {
       window.webContents.send('start', {
         type: 'app',
         appSession: appContext.appSession,
+        partition: `persist:${appContext.appSession.app.appID}/${
+          appContext.appSession.user.id
+        }`,
       })
     }
   }
