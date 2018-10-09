@@ -1,36 +1,23 @@
 // @flow
 
 import type {
-  BlockchainGetContractEventsParams,
-  BlockchainGetContractEventsResult,
-  BlockchainGetLatestBlockResult,
-  BlockchainReadContractParams,
-  BlockchainReadContractResult,
+  BlockchainWeb3SendParams,
+  BlockchainWeb3SendResult,
 } from '@mainframe/client'
-import type RequestContext from '../RequestContext'
 
-export const getContractEvents = async (
-  ctx: RequestContext,
-  params: BlockchainGetContractEventsParams,
-): Promise<BlockchainGetContractEventsResult> => {
-  const contract = new ctx.web3.eth.Contract(params.abi, params.contractAddress)
-  return contract.getPastEvents(params.eventName, params.options)
-}
+import { type default as RequestContext } from '../RequestContext'
 
-export const getLatestBlock = async (
+export const web3Send = async (
   ctx: RequestContext,
-): Promise<BlockchainGetLatestBlockResult> => {
-  return ctx.web3.eth.getBlockNumber()
-}
-
-export const readContract = async (
-  ctx: RequestContext,
-  params: BlockchainReadContractParams,
-): Promise<BlockchainReadContractResult> => {
-  const contract = new ctx.web3.eth.Contract(params.abi, params.contractAddress)
-  if (!contract.methods[params.method]) {
-    throw new Error('Contract method not found in provided ABI')
-  }
-  const args = params.args || []
-  return contract.methods[params.method](...args).call()
+  params: BlockchainWeb3SendParams,
+): Promise<BlockchainWeb3SendResult> => {
+  return new Promise((resolve, reject) => {
+    ctx.web3Websocket.send(params, (err, res) => {
+      if (err || res.error) {
+        reject(err || res.error)
+      } else {
+        resolve(res.result)
+      }
+    })
+  })
 }

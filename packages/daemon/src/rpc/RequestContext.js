@@ -7,7 +7,7 @@ import type { Environment } from '@mainframe/config'
 import type StreamRPC from '@mainframe/rpc-stream'
 import createWebSocketRPC from '@mainframe/rpc-ws-node'
 import { uniqueID, type ID } from '@mainframe/utils-id'
-import Web3 from 'web3'
+import Web3WSProvider from 'web3-providers-ws'
 
 import type { Vault, VaultRegistry } from '../vault'
 
@@ -49,7 +49,7 @@ export default class RequestContext {
   _rpc: ?StreamRPC
   _bzz: ?BzzAPI
   _pss: ?PssAPI
-  _web3: ?Web3
+  _web3Websocket: ?Web3WSProvider
   _env: Environment
   _notify: NotifyFunc
   _socket: Socket
@@ -87,15 +87,14 @@ export default class RequestContext {
     return this._pss
   }
 
-  get web3(): Web3 {
-    if (this._web3 == null) {
-      this._web3 = new Web3(
-        new Web3.providers.HttpProvider(
-          this.openVault.settings.web3HTTPProvider,
-        ),
+  get web3Websocket(): Web3WSProvider {
+    if (this._web3Websocket == null) {
+      this._web3Websocket = new Web3WSProvider(
+        // this.openVault.settings.web3HTTPProvider, // TODO store in vault
+        'wss://ropsten.infura.io/ws/8ec0911ee74c4583b1346bbc1afdf22d',
       )
     }
-    return this._web3
+    return this._web3Websocket
   }
 
   get env(): Environment {
@@ -127,7 +126,7 @@ export default class RequestContext {
     this._subscriptions = {}
     this._bzz = undefined
     this._pss = undefined
-    this._web3 = undefined
+    this._web3Websocket = undefined
     if (this._rpc != null) {
       this._rpc.disconnect()
     }

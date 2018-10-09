@@ -34,9 +34,7 @@ export default {
   app_publishContents: app.publishContents,
   app_writeManifest: app.writeManifest,
 
-  blockchain_getContractEvents: blockchain.getContractEvents,
-  blockchain_getLatestBlock: blockchain.getLatestBlock,
-  blockchain_readContract: blockchain.readContract,
+  blockchain_web3Send: blockchain.web3Send,
 
   identity_createUser: identity.createUser,
   identity_createDeveloper: identity.createDeveloper,
@@ -61,5 +59,5 @@ export default {
   wallet_createHD: wallet.createHDWallet,
   wallet_importPK: wallet.importAccountByPK,
   wallet_getEthWallets: wallet.getEthWallets,
-  wallet_signEthTransaction: wallet.signEthTransaction,
+  wallet_signTx: wallet.signTransaction,
 }

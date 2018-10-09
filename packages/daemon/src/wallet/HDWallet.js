@@ -62,13 +62,6 @@ export default class HDWallet extends AbstractWallet {
 
   // Public
 
-  getAccounts(): Array<string> {
-    return Object.keys(this._wallets).map(i => {
-      const wallet = this._wallets[i]
-      return sigUtil.normalize(wallet.getAddress().toString('hex'))
-    })
-  }
-
   addAccounts(indexes: Array<number>): Array<string> {
     const newWallets = []
     indexes.forEach(i => {

@@ -5,6 +5,10 @@ import type { PermissionKey } from '@mainframe/app-permissions'
 
 import type { AppContext } from './contexts'
 
+export const userDeniedError = (key: PermissionKey) => {
+  return new Error(`User denied permission: ${key}`)
+}
+
 export const interceptWebRequests = (context: AppContext) => {
   context.window.webContents.session.webRequest.onBeforeRequest(
     [],
@@ -84,34 +88,51 @@ export const interceptWebRequests = (context: AppContext) => {
   )
 }
 
+export const isGranted = async (key: PermissionKey, ctx: AppContext) => {
+  const permissions = ctx.appSession.session.permissions.session
+  let granted = checkPermission(permissions, key)
+  if (granted === 'not_set') {
+    const res = await ctx.trustedRPC.request('permission_ask', { key })
+    if (key !== 'WEB_REQUEST') {
+      // To satisfy flow, will never be a WEB_REQUEST permission, they are handled separately
+      permissions[key] = res.granted
+    }
+    if (res.persist) {
+      await ctx.client.app.setPermission({
+        sessID: ctx.appSession.session.sessID,
+        key,
+        value: res.granted,
+      })
+    }
+    granted = res.granted ? 'granted' : 'denied'
+  }
+}
+
+export const requestTransactionPermission = async (
+  ctx: AppContext,
+  params: Object,
+): Promise<{
+  granted: boolean,
+  walletID: string,
+}> => {
+  return await ctx.trustedRPC.request('permission_ask', {
+    key: 'BLOCKCHAIN_SEND',
+    params,
+  })
+}
+
 export const withPermission = (
   key: PermissionKey,
   handler: (ctx: AppContext, params: Object) => Promise<any>,
 ) => {
   return async (ctx: AppContext, params: Object) => {
-    const permissions = ctx.appSession.session.permissions.session
-    let granted = checkPermission(permissions, key)
-    if (granted === 'not_set') {
-      const res = await ctx.trustedRPC.request('permission_ask', { key })
-      if (key !== 'WEB_REQUEST') {
-        // To satisfy flow, will never be a WEB_REQUEST permission, they are handled separately
-        permissions[key] = res.granted
-      }
-      if (res.persist) {
-        await ctx.client.app.setPermission({
-          sessID: ctx.appSession.session.sessID,
-          key,
-          value: res.granted,
-        })
-      }
-      granted = res.granted ? 'granted' : 'denied'
-    }
+    const granted = isGranted(key, ctx)
     switch (granted) {
       case 'granted':
         return await handler(ctx, params)
       case 'denied': {
         ctx.notifyPermissionDenied({ key })
-        throw new Error(`User denied permission: ${key}`)
+        throw userDeniedError(key)
       }
       case 'unknown':
       default:

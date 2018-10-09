@@ -2,6 +2,8 @@
 import {
   type WalletEthSignTransactionParams,
   type WalletEthSignTransactionResult,
+  type WalletSignTxParams,
+  type WalletSignTxResult,
   type WalletCreateHDParams,
   type WalletImportPKParams,
   type WalletResult,
@@ -13,6 +15,7 @@ import { mapObject } from '../utils'
 import HDWallet, { type HDWalletSerialized } from './HDWallet'
 import PKWallet, { type PKWalletSerialized } from './PKWallet'
 import LedgerWallet, { type LedgerWalletSerialized } from './LedgerWallet'
+import AbstractWallet from './AbstractWallet'
 
 const hdWalletsToJSON = mapObject(HDWallet.toJSON)
 const hdWalletsFromJSON = mapObject(HDWallet.fromJSON)
@@ -88,6 +91,14 @@ export default class WalletsRepository {
     return this._wallets.ethereum
   }
 
+  getEthWalletByID(id: string): ?AbstractWallet {
+    return (
+      this.ethWallets.hd[id] ||
+      this.ethWallets.pk[id] ||
+      this.ethWallets.ledger[id]
+    )
+  }
+
   createHDWallet(params: WalletCreateHDParams) {
     switch (params.chain) {
       case 'ethereum': {
@@ -142,10 +153,22 @@ export default class WalletsRepository {
     }
   }
 
+  async signTransaction(params: WalletSignTxParams): WalletSignTxResult {
+    switch (params.chain) {
+      case 'ethereum':
+        return this.signEthTransaction(params)
+      default:
+        throw new Error(`Unsupported blockchain type: ${params.chain}`)
+    }
+  }
+
   signEthTransaction(
     params: WalletEthSignTransactionParams,
   ): WalletEthSignTransactionResult {
-    const wallet = this.ethWallets[params.walletType][params.walletID]
+    const wallet = this.getEthWalletByID(params.walletID)
+    if (!wallet) {
+      throw new Error('Wallet not found')
+    }
     return wallet.signTransaction(params.transactionData)
   }
 }

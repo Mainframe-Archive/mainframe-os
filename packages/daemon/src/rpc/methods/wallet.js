@@ -3,7 +3,7 @@
 import {
   idType,
   WALLET_CREATE_HD_SCHEMA,
-  WALLET_SIGN_ETH_TRANSACTION_SCHEMA,
+  WALLET_SIGN_TRANSACTION_SCHEMA,
   WALLET_IMPORT_PK_SCHEMA,
   type WalletCreateHDParams,
   type WalletCreateHDResult,
@@ -63,14 +63,12 @@ export const getEthWallets = (
   }
 }
 
-export const signEthTransaction = {
-  params: WALLET_SIGN_ETH_TRANSACTION_SCHEMA,
+export const signTransaction = {
+  params: WALLET_SIGN_TRANSACTION_SCHEMA,
   handler: async (
     ctx: RequestContext,
     params: WalletEthSignTransactionParams,
   ): Promise<WalletEthSignTransactionResult> => {
-    const res = ctx.openVault.wallets.signEthTransaction(params)
-    await ctx.openVault.save()
-    return res
+    return ctx.openVault.wallets.signTransaction(params)
   },
 }

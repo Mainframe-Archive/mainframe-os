@@ -18,7 +18,11 @@ import rpc from './rpc'
 import type { AppSessionData } from './AppContainer'
 
 type PermissionGrantData = { key: string, input?: string }
-type PermissionGrantResult = { granted: boolean, persist: boolean }
+type PermissionGrantResult = {
+  granted: boolean,
+  persist: boolean,
+  data?: ?Object,
+}
 
 const methods = {
   permission_ask: (
@@ -66,6 +70,7 @@ type State = {
       resolve: (result: PermissionGrantResult) => void,
     },
   },
+  wallets: ?Object, // TODO define
   persistGrant: boolean,
 }
 
@@ -74,6 +79,7 @@ export default class PermissionsManagerView extends Component<Props, State> {
     permissionDeniedNotifs: [],
     permissionRequests: {},
     persistGrant: false,
+    wallets: undefined,
   }
 
   _onRPCMessage: (Object, Object) => Promise<void>
@@ -83,6 +89,7 @@ export default class PermissionsManagerView extends Component<Props, State> {
     super(props)
     this.handleNotifications()
     this.handlePermissionRequest()
+    this.getEthWallets()
   }
 
   componentWillUnmount() {
@@ -90,6 +97,11 @@ export default class PermissionsManagerView extends Component<Props, State> {
     if (this._permissionDeniedSubscription != null) {
       this._permissionDeniedSubscription.unsubscribe()
     }
+  }
+
+  async getEthWallets() {
+    const wallets = await rpc.getEthWallets()
+    this.setState({ wallets })
   }
 
   async handleNotifications() {
@@ -126,11 +138,13 @@ export default class PermissionsManagerView extends Component<Props, State> {
     ipcRenderer.on(APP_TRUSTED_REQUEST_CHANNEL, this._onRPCMessage)
   }
 
-  onSetPermissionGrant = (id: string, granted: boolean) => {
+  onSetPermissionGrant = (id: string, granted: boolean, data?: ?Object) => {
     const request = this.state.permissionRequests[id]
+
     if (request != null) {
       request.resolve({
         granted,
+        data,
         persist: this.state.persistGrant,
       })
       this.setState(({ permissionRequests }) => {
@@ -141,7 +155,16 @@ export default class PermissionsManagerView extends Component<Props, State> {
   }
 
   acceptPermission = (id: string) => {
-    this.onSetPermissionGrant(id, true)
+    let data
+    const { wallets } = this.state
+    const request = this.state.permissionRequests[id]
+    if (wallets && request.data.key === 'BLOCKCHAIN_SEND') {
+      data = {
+        walletID: wallets.hd[0].walletID,
+        walletAccount: wallets.hd[0].accounts[0],
+      }
+    }
+    this.onSetPermissionGrant(id, true, data)
   }
 
   declinePermission = (id: string) => {
@@ -164,6 +187,28 @@ export default class PermissionsManagerView extends Component<Props, State> {
     return alerts.length ? (
       <View style={styles.permissionDeniedAlerts}>{alerts}</View>
     ) : null
+  }
+
+  renderExtraPermissionInfo(permissionData: PermissionGrantData) {
+    switch (permissionData.key) {
+      case 'BLOCKCHAIN_SEND': {
+        const wallets = this.state.wallets
+          ? Object.keys(this.state.wallets).map(type => {
+              return this.state.wallets[type].map(w => {
+                return w.accounts.map(a => <Text key={a}>{a}</Text>)
+              })
+            })
+          : null
+        return (
+          <View style={styles.wallets}>
+            <Text>Wallets</Text>
+            {wallets}
+          </View>
+        )
+      }
+      default:
+        return null
+    }
   }
 
   renderPermissionRequest = () => {
@@ -203,6 +248,8 @@ export default class PermissionsManagerView extends Component<Props, State> {
       )
     }
 
+    const extraPermissionInfo = this.renderExtraPermissionInfo(permissionData)
+
     return (
       <View style={styles.container}>
         <View style={styles.requestContainer}>
@@ -215,6 +262,7 @@ export default class PermissionsManagerView extends Component<Props, State> {
             <Text style={styles.persistLabel}>{`Don't ask me again?`}</Text>
             <Switch value={persistGrant} onValueChange={this.onTogglePersist} />
           </View>
+          {extraPermissionInfo}
           <View style={styles.buttonsContainer}>
             <Button
               title="ACCEPT"

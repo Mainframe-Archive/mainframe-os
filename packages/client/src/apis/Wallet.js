@@ -4,18 +4,20 @@ import ClientAPIs from '../ClientAPIs'
 import type {
   WalletEthSignTransactionParams,
   WalletImportPKParams,
-  WalletSupportedChains,
+  WalletCreateHDParams,
   WalletImportPKResult,
   WalletGetEthWalletsResult,
   WalletCreateHDResult,
   WalletEthSignTransactionResult,
+  WalletSignTxParams,
+  WalletSignTxResult,
 } from '../types'
 
 export default class WalletAPIs extends ClientAPIs {
   async createHDWallet(
-    chain: WalletSupportedChains,
+    params: WalletCreateHDParams,
   ): Promise<WalletCreateHDResult> {
-    return this._rpc.request('wallet_createHD', { chain })
+    return this._rpc.request('wallet_createHD', params)
   }
 
   async importAccountByPK(
@@ -32,5 +34,10 @@ export default class WalletAPIs extends ClientAPIs {
     params: WalletEthSignTransactionParams,
   ): Promise<WalletEthSignTransactionResult> {
     return this._rpc.request('wallet_signEthTransaction', params)
+  }
+  async signTransaction(
+    params: WalletSignTxParams,
+  ): Promise<WalletSignTxResult> {
+    return this._rpc.request('wallet_signTx', params)
   }
 }

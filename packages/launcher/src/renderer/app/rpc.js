@@ -46,4 +46,8 @@ export default {
       return unsubscribe
     })
   },
+
+  getEthWallets: async () => {
+    return rpc.request('wallet_getEthWallets')
+  },
 }

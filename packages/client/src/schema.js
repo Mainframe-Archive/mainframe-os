@@ -129,6 +129,11 @@ export const WALLET_TYPE_SCHEMA = {
   values: ['hd', 'simple', 'ledger'],
 }
 
+export const WALLET_SUPPORTED_CHAIN_SCHEMA = {
+  type: 'enum',
+  values: ['ethereum'],
+}
+
 export const WALLET_IMPORT_PK_SCHEMA = {
   privateKey: 'string',
 }
@@ -137,11 +142,9 @@ export const ETH_TRANSACTION_SCHEMA = {
   nonce: 'number',
   from: 'string',
   to: 'string',
-  value: 'number',
   data: 'string',
   gasLimit: 'number',
   gasPrice: 'number',
-  chainId: 'string',
 }
 
 export const WALLET_SIGN_ETH_TRANSACTION_SCHEMA = {
@@ -151,4 +154,10 @@ export const WALLET_SIGN_ETH_TRANSACTION_SCHEMA = {
     type: 'object',
     props: ETH_TRANSACTION_SCHEMA,
   },
+}
+
+export const WALLET_SIGN_TRANSACTION_SCHEMA = {
+  chain: WALLET_SUPPORTED_CHAIN_SCHEMA,
+  walletID: 'string',
+  transactionData: 'object',
 }

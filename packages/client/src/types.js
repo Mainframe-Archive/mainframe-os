@@ -143,31 +143,16 @@ export type AppWriteManifestParams = {
   version?: ?string,
 }
 
-export type BlockchainContractABI = Array<Object>
+// Blockchain
 
-export type BlockchainGetContractEventsParams = {
-  contractAddress: string,
-  abi: BlockchainContractABI,
-  eventName: string,
-  options?: {
-    filter?: Object,
-    fromBlock?: number,
-    toBlock?: number,
-  },
+export type BlockchainWeb3SendParams = {
+  transactionParams: Object, // TODO: define
+  walletID: ID,
 }
 
-export type BlockchainGetContractEventsResult = Array<Object>
+export type BlockchainWeb3SendResult = any
 
-export type BlockchainGetLatestBlockResult = number
-
-export type BlockchainReadContractParams = {
-  contractAddress: string,
-  abi: BlockchainContractABI,
-  method: string,
-  args?: ?Array<any>,
-}
-
-export type BlockchainReadContractResult = any
+// Wallet
 
 export type WalletCreateHDParams = {
   chain: WalletSupportedChains,
@@ -221,6 +206,16 @@ export type WalletEthSignDataParams = {
 }
 
 export type WalletEthSignTransactionResult = string
+
+export type WalletSignTxParams = {
+  walletID: ID,
+  chain: WalletSupportedChains,
+  transactionParams: Object, // TODO: define
+}
+
+export type WalletSignTxResult = string
+
+// Identity
 
 export type IdentityCreateDeveloperParams = {
   data?: Object,

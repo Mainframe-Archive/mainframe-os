@@ -2,14 +2,14 @@
 
 import {
   LOCAL_ID_SCHEMA,
-  type BlockchainGetContractEventsParams,
-  type BlockchainGetContractEventsResult,
-  type BlockchainReadContractParams,
-  type BlockchainReadContractResult,
+  type BlockchainWeb3SendParams,
+  type WalletSignTxParams,
+  type WalletSignTxResult,
 } from '@mainframe/client'
 import type { Subscription as RxSubscription } from 'rxjs'
 
 import { type AppContext, ContextSubscription } from '../contexts'
+import { userDeniedError, requestTransactionPermission } from '../permissions'
 
 class TopicSubscription extends ContextSubscription<RxSubscription> {
   data: ?RxSubscription
@@ -29,20 +29,40 @@ export const sandboxed = {
   api_version: (ctx: AppContext) => ctx.client.apiVersion(),
 
   // Blockchain
-  blockchain_getContractEvents: (
+
+  blockchain_web3Send: async (
     ctx: AppContext,
-    params: BlockchainGetContractEventsParams,
-  ): Promise<BlockchainGetContractEventsResult> => {
-    return ctx.client.blockchain.getContractEvents(params)
+    params: BlockchainWeb3SendParams,
+  ): Promise<Object> => {
+    return ctx.client.blockchain.web3Send(params)
   },
-  blockchain_readContract: (
+
+  // Wallet
+
+  wallet_signTx: async (
     ctx: AppContext,
-    params: BlockchainReadContractParams,
-  ): Promise<BlockchainReadContractResult> => {
-    return ctx.client.blockchain.readContract(params)
+    params: WalletSignTxParams,
+  ): Promise<WalletSignTxResult> => {
+    const res = await requestTransactionPermission(ctx, params)
+    if (res.granted) {
+      const grantedParams = {
+        ...params,
+        walletID: res.data.walletID,
+      }
+      grantedParams.transactionData.from = res.data.walletAccount
+      return ctx.client.wallet.signTransaction(grantedParams)
+    }
+    throw userDeniedError('BLOCKCHAIN_SEND')
   },
-  blockchain_getLatestBlock: (ctx: AppContext) => {
-    return ctx.client.blockchain.getLatestBlock()
+
+  wallet_getEthAccounts: async (ctx: AppContext): Promise<Array<string>> => {
+    const ethWallets = await ctx.client.wallet.getEthWallets()
+    // TODO might need to refactor wallets type
+    // or add seaprate call for only accounts
+    return Object.keys(ethWallets).reduce((acc, key) => {
+      ethWallets[key].forEach(w => acc.push(...w.accounts))
+      return acc
+    }, [])
   },
 
   // Temporary PSS APIs - should be removed when communication APIs are settled
@@ -115,5 +135,13 @@ export const trusted = {
     handler: (ctx: AppContext, params: { id: string }): void => {
       ctx.removeSubscription(params.id)
     },
+  },
+
+  // WALLET
+
+  wallet_getEthWallets: async (
+    ctx: AppContext,
+  ): Promise<WalletGetAllResult> => {
+    return ctx.client.wallet.getEthWallets()
   },
 }

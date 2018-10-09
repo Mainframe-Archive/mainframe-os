@@ -12,7 +12,8 @@
     "test:types": "flow check"
   },
   "dependencies": {
-    "@babel/runtime": "^7.0.0"
+    "@babel/runtime": "^7.0.0",
+    "web3-provider-engine": "^14.1.0"
   },
   "devDependencies": {
     "@mainframe/rpc-stream": "^0.2.4",
