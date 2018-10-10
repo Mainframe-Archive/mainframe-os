@@ -13,7 +13,7 @@ const permissionOptions = {
 }
 
 export default class SetPermissionsCommand extends Command {
-  static description = 'Create app'
+  static description = 'Set app permissions'
   static flags = {
     ...Command.flags,
     id: flags.string({
