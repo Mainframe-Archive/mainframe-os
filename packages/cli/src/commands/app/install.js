@@ -4,8 +4,8 @@ import { prompt } from 'inquirer'
 
 import Command from '../../OpenVaultCommand'
 
-export default class AppCreateCommand extends Command {
-  static description = 'Create app'
+export default class AppInstallCommand extends Command {
+  static description = 'Install app'
   static flags = Command.flags
 
   async run() {
@@ -59,6 +59,6 @@ export default class AppCreateCommand extends Command {
       version: answers.version,
     })
 
-    this.log(`App created with ID ${res.appID}`)
+    this.log(`App installed with ID ${res.appID}`)
   }
 }
