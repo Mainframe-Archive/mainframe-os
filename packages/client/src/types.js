@@ -192,6 +192,7 @@ export type VaultParams = {
 export type VaultSettings = {
   bzzURL: string,
   pssURL: string,
+  bluzelleURL: string,
   web3HTTPProvider: string,
 }
 

@@ -3,6 +3,7 @@
 import type { Socket } from 'net'
 import BzzAPI from '@erebos/api-bzz-node'
 import PssAPI from '@erebos/api-pss'
+import bluzelle from 'bluzelle'
 import type { Environment } from '@mainframe/config'
 import type StreamRPC from '@mainframe/rpc-stream'
 import createWebSocketRPC from '@mainframe/rpc-ws-node'
@@ -49,6 +50,7 @@ export default class RequestContext {
   _rpc: ?StreamRPC
   _bzz: ?BzzAPI
   _pss: ?PssAPI
+  _bluzelle: ?any
   _web3: ?Web3
   _env: Environment
   _notify: NotifyFunc
@@ -85,6 +87,17 @@ export default class RequestContext {
       this._pss = new PssAPI(this.rpc)
     }
     return this._pss
+  }
+
+  get bluzelle() {
+    if (this._bluzelle == null) {
+      this._bluzelle = Object.assign({}, bluzelle, {
+        connect: (uuid) => {
+          bluzelle.connect(this.openVault.settings.bluzelleURL, uuid)
+        }
+      })
+    }
+    return this._bluzelle
   }
 
   get web3(): Web3 {

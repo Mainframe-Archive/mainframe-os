@@ -46,6 +46,7 @@
     "@oclif/command": "^1.5.2",
     "@oclif/config": "^1.8.4",
     "@oclif/plugin-help": "^2.1.2",
+    "bluzelle": "^0.2.105",
     "debug": "^4.0.1",
     "esm": "3.0.84",
     "fs-extra": "^7.0.0",

@@ -120,6 +120,7 @@ export const readVaultFile = async (
 export type UserSettings = {
   bzzURL: string,
   pssURL: string,
+  bluzelleURL: string,
   web3HTTPProvider: string,
 }
 
@@ -167,6 +168,7 @@ export default class Vault {
       settings: {
         bzzURL: 'http://swarm-gateways.net',
         pssURL: 'ws://localhost:8546',
+        bluzelleURL: 'ws://testnet.bluzelle.com:51010',
         web3HTTPProvider: 'https://mainnet.infura.io/KWLG1YOMaYgl4wiFlcJv',
       },
     }
@@ -404,6 +406,10 @@ export default class Vault {
 
   setPssURL(url: string): void {
     this._data.settings.pssURL = url
+  }
+
+  setBluzelleURL(url: string): void {
+    this._data.settings.bluzelleURL = url
   }
 
   setWeb3HTTPProvider(provider: string): void {
