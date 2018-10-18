@@ -3,6 +3,7 @@
 import * as app from './app'
 import * as identity from './identity'
 import * as pss from './pss'
+import * as bluzelle from './bluzelle'
 import * as sub from './subscription'
 import * as vault from './vault'
 import * as blockchain from './blockchain'
@@ -49,6 +50,9 @@ export default {
   pss_sendAsym: pss.sendAsym,
   pss_setPeerPublicKey: pss.setPeerPublicKey,
   pss_stringToTopic: pss.stringToTopic,
+
+  bluzelle_read: bluzelle.read,
+  bluzelle_write: bluzelle.write,
 
   sub_unsubscribe: sub.unsubscribe,
 

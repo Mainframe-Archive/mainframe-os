@@ -184,6 +184,17 @@ export type IdentityGetOwnUsersResult = {
   users: Array<IdentityOwnData>,
 }
 
+export type BluzelleReadParams = {
+  uuid: string,
+  key: string,
+}
+
+export type BluzelleWriteParams = {
+  uuid: string,
+  key: string,
+  value: string,
+}
+
 export type VaultParams = {
   path: string,
   password: string,

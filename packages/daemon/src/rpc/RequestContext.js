@@ -3,7 +3,7 @@
 import type { Socket } from 'net'
 import BzzAPI from '@erebos/api-bzz-node'
 import PssAPI from '@erebos/api-pss'
-import bluzelle from 'bluzelle'
+import BluzelleAPI from './service-wrappers/bluzelle'
 import type { Environment } from '@mainframe/config'
 import type StreamRPC from '@mainframe/rpc-stream'
 import createWebSocketRPC from '@mainframe/rpc-ws-node'
@@ -91,11 +91,7 @@ export default class RequestContext {
 
   get bluzelle() {
     if (this._bluzelle == null) {
-      this._bluzelle = Object.assign({}, bluzelle, {
-        connect: (uuid) => {
-          bluzelle.connect(this.openVault.settings.bluzelleURL, uuid)
-        }
-      })
+      this._bluzelle = new BluzelleAPI(this.openVault.settings.bluzelleURL)
     }
     return this._bluzelle
   }

@@ -172,7 +172,14 @@ export default class Vault {
         web3HTTPProvider: 'https://mainnet.infura.io/KWLG1YOMaYgl4wiFlcJv',
       },
     }
-    this._data = data ? Object.assign(vaultData, data) : vaultData
+    this._data = data ? this.vaultDataWithDefaults(data, vaultData) : vaultData
+  }
+
+  vaultDataWithDefaults(vaultData: VaultData, defaultVaultData: VaultData) {
+    const settings = Object.assign({}, defaultVaultData.settings || {}, vaultData.settings || {})
+    const newVaultData = Object.assign({}, defaultVaultData, vaultData)
+    newVaultData.settings = settings
+    return newVaultData
   }
 
   // Getters

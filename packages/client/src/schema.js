@@ -107,6 +107,17 @@ export const APP_WRITE_MANIFEST_SCHEMA = {
   version: OPTIONAL_SEMVER_SCHEMA,
 }
 
+export const BLUZELLE_READ_SCHEMA = {
+  uuid: 'string',
+  key: 'string',
+}
+
+export const BLUZELLE_WRITE_SCHEMA = {
+  uuid: 'string',
+  key: 'string',
+  value: 'string',
+}
+
 export const VAULT_SCHEMA = {
   path: 'string',
   password: 'string',
