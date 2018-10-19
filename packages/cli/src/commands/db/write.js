@@ -34,7 +34,6 @@ export default class WriteCommand extends Command {
       throw new Error('value is required. e.g. "hello world"')
     }
     
-    this.log(`uuid: ${this.flags['uuid']}, key: ${this.flags['key']}, value: ${this.flags['value']}`)
     this.client.bluzelle.write({
       uuid: this.flags['uuid'],
       key: this.flags['key'],

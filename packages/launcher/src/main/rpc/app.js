@@ -102,6 +102,24 @@ export const sandboxed = {
       return ctx.client.pss.stringToTopic(params)
     },
   },
+  db_read: {
+    params: {
+      uuid: 'string',
+      key: 'string',
+    },
+    handler: (ctx: AppContext, params: { uuid: string, key: string }): Promise<string> => {
+      return ctx.client.bluzelle.read(params)
+    },
+  },
+  db_write: {
+    params: {
+      uuid: 'string',
+      key: 'string',
+    },
+    handler: (ctx: AppContext, params: { uuid: string, key: string, value: string }): Promise<null> => {
+      return ctx.client.bluzelle.write(params)
+    },
+  }
 }
 
 export const trusted = {

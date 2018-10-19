@@ -6,11 +6,13 @@ import type StreamRPC from '@mainframe/rpc-stream'
 
 import BlockchainAPIs from './apis/Blockchain'
 import PssAPIs from './apis/Pss'
+import DbAPIs from './apis/Db'
 
 export default class MainframeSDK {
   _rpc: StreamRPC
   blockchain: BlockchainAPIs
   pss: PssAPIs
+  db: DbAPIs
 
   constructor() {
     if (window.mainframe) {
@@ -21,6 +23,7 @@ export default class MainframeSDK {
 
     this.blockchain = new BlockchainAPIs(this._rpc)
     this.pss = new PssAPIs(this._rpc)
+    this.db = new DbAPIs(this._rpc)
   }
 
   apiVersion = () => {

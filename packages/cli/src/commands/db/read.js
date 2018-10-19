@@ -18,9 +18,26 @@ export default class ReadCommand extends Command {
     }),
   }
   async run() {
-    this.client.bluzelle.read({
-      uuid: this.flags['uuid'],
-      key: this.flags['key']
-    })
+    if (!this.flags['uuid']) {
+      throw new Error('uuid is required. e.g. sometablename')
+    }
+
+    if (!this.flags['key']) {
+      throw new Error('key is required. e.g. somekey')
+    }
+    
+    try {
+      const value = await this.client.bluzelle.read({
+        uuid: this.flags['uuid'],
+        key: this.flags['key']
+      })
+      this.log(value)
+    } catch(err) {
+      if (err.message === 'RECORD_NOT_FOUND') {
+        this.error('Record not found')
+      } else {
+        throw err
+      }
+    }
   }
 }

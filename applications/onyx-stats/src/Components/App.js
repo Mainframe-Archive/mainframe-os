@@ -19,6 +19,7 @@ import colors from './ui-kit/Colors'
 type State = {
   stakingData?: Array<Object>,
   requestErr?: string,
+  readValue?: string,
 }
 
 export default class App extends Component<null, State> {
@@ -32,6 +33,12 @@ export default class App extends Component<null, State> {
 
   componentDidMount() {
     this.getEvents()
+    this.readFromDatabase()
+  }
+
+  async readFromDatabase() {
+    const value = await this.sdk.db.readByUUID('hellomainframe', 'name')
+    this.setState({readValue: value})
   }
 
   async getEvents() {
@@ -134,6 +141,7 @@ export default class App extends Component<null, State> {
           <ScrollView style={styles.scrollView}>
             <View style={styles.header}>
               <Logo />
+              <Text style={styles.title}>readValue: {this.state.readValue}</Text>
               <Text style={styles.title}>Onyx Staking</Text>
               <Text style={styles.descriptionLabel}>
                 Onyx staking transactions per 1000 blocks
