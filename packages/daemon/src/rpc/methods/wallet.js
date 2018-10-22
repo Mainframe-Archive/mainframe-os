@@ -11,8 +11,8 @@ import {
   type WalletImportPKResult,
   type WalletResults,
   type WalletGetEthWalletsResult,
-  type WalletEthSignTransactionParams,
-  type WalletEthSignTransactionResult,
+  type WalletSignTxParams,
+  type WalletSignTxResult,
   type WalletTypes,
 } from '@mainframe/client'
 
@@ -67,8 +67,8 @@ export const signTransaction = {
   params: WALLET_SIGN_TRANSACTION_SCHEMA,
   handler: async (
     ctx: RequestContext,
-    params: WalletEthSignTransactionParams,
-  ): Promise<WalletEthSignTransactionResult> => {
+    params: WalletSignTxParams,
+  ): Promise<WalletSignTxResult> => {
     return ctx.openVault.wallets.signTransaction(params)
   },
 }

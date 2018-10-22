@@ -5,6 +5,8 @@ export default {
   PRIMARY_RED: '#DA1157',
   PRIMARY_LIGHT_BLUE: '#00A7E7',
 
+  BRIGHT_BLUE: '#4896ec',
+
   DARK_BLUE: '#132041',
   DARK_BLUE_1: '#0F1628',
   DARK_BLUE_2: '#0D1321',
@@ -13,11 +15,11 @@ export default {
 
   DARK_RED: '#C1154E',
 
+  LIGHT_GREY_F7: '#f7f7f7',
+  LIGHT_GREY_EE: '#eeeeee',
   LIGHT_GREY_E8: '#e8e8e8',
   LIGHT_GREY_E5: '#e5e5e5',
   LIGHT_GREY_DE: '#dedede',
-  LIGHT_GREY_EE: '#eeeeee',
-  LIGHT_GREY_F7: '#f7f7f7',
   LIGHT_GREY_AE: '#AEAEAE',
   LIGHT_GREY_BLUE: '#9ba3b5',
   GREY_MED_81: '#818181',

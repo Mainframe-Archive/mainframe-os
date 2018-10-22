@@ -147,17 +147,9 @@ export const ETH_TRANSACTION_SCHEMA = {
   gasPrice: 'number',
 }
 
-export const WALLET_SIGN_ETH_TRANSACTION_SCHEMA = {
-  walletType: WALLET_TYPE_SCHEMA,
-  walletID: 'string',
-  transactionData: {
-    type: 'object',
-    props: ETH_TRANSACTION_SCHEMA,
-  },
-}
+export const WALLET_SIGN_ETH_TRANSACTION_SCHEMA = ETH_TRANSACTION_SCHEMA
 
 export const WALLET_SIGN_TRANSACTION_SCHEMA = {
   chain: WALLET_SUPPORTED_CHAIN_SCHEMA,
-  walletID: 'string',
   transactionData: 'object',
 }

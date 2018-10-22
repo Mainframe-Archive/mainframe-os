@@ -8,7 +8,6 @@ import type {
   WalletImportPKResult,
   WalletGetEthWalletsResult,
   WalletCreateHDResult,
-  WalletEthSignTransactionResult,
   WalletSignTxParams,
   WalletSignTxResult,
 } from '../types'
@@ -30,11 +29,6 @@ export default class WalletAPIs extends ClientAPIs {
     return this._rpc.request('wallet_getEthWallets')
   }
 
-  async signEthTransaction(
-    params: WalletEthSignTransactionParams,
-  ): Promise<WalletEthSignTransactionResult> {
-    return this._rpc.request('wallet_signEthTransaction', params)
-  }
   async signTransaction(
     params: WalletSignTxParams,
   ): Promise<WalletSignTxResult> {

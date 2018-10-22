@@ -11,16 +11,24 @@ export default class BlockchainAPIs extends ClientAPIs {
     const engine = new ProviderEngine()
     const hookedWallet = new HookedProvider({
       getAccounts: async cb => {
-        const accounts = await rpc.request('wallet_getEthAccounts')
-        cb(null, accounts) // TODO: Fetch accounts
+        try {
+          const accounts = await rpc.request('wallet_getEthAccounts')
+          cb(null, accounts)
+        } catch (err) {
+          cb(err)
+        }
       },
       signTransaction: async (params, cb) => {
         const txParams = {
           chain: 'ethereum',
           transactionData: params,
         }
-        const res = await rpc.request('wallet_signTx', txParams)
-        cb(null, res)
+        try {
+          const res = await rpc.request('wallet_signTx', txParams)
+          cb(null, res)
+        } catch (err) {
+          cb(err)
+        }
       },
     })
     engine.addProvider(hookedWallet)

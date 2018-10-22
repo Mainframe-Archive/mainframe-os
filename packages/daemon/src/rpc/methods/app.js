@@ -67,6 +67,8 @@ const createClientSession = (
   if (user == null) {
     throw clientError('Invalid userID')
   }
+  const defaultWallet =
+    app.getDefaultWallet(userID) || ctx.openVault.wallets.getFirstEthWallet()
 
   const appData =
     app instanceof OwnApp
@@ -90,6 +92,7 @@ const createClientSession = (
       sessID: toClientID(session.sessID),
       permissions: session.permissions,
     },
+    defaultWallet: defaultWallet,
     app: appData,
   }
 }

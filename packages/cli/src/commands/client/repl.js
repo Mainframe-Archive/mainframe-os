@@ -22,6 +22,11 @@ export default class REPLCommand extends Command {
     }
 
     initializeContext()
+    await r.context.client.vault.open({
+      path:
+        '/Users/adamclarke/Library/Preferences/mainframe-env-tests-nodejs/vaults/xDKvJS6lDaba4_ZiRIlSu',
+      password: 'password',
+    })
     // $FlowFixMe: VM context
     Object.defineProperty(r.context, 'env', {
       configurable: false,

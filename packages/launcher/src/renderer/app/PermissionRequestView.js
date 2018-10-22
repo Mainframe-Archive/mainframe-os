@@ -7,17 +7,23 @@ import { ipcRenderer } from 'electron'
 import React, { Component } from 'react'
 import { View, StyleSheet, Switch } from 'react-native-web'
 import type { Subscription } from 'rxjs'
+import type { EthTransactionParams } from '@mainframe/client'
 
 import { APP_TRUSTED_REQUEST_CHANNEL } from '../../constants'
 
 import colors from '../colors'
 import Text from '../UIComponents/Text'
 import Button from '../UIComponents/Button'
+import WalletTxRequestView from './WalletTxRequestView'
 
 import rpc from './rpc'
 import type { AppSessionData } from './AppContainer'
 
-type PermissionGrantData = { key: string, input?: string }
+type PermissionGrantData = {
+  key: string,
+  input?: string,
+  txParams?: EthTransactionParams,
+}
 type PermissionGrantResult = {
   granted: boolean,
   persist: boolean,
@@ -70,7 +76,6 @@ type State = {
       resolve: (result: PermissionGrantResult) => void,
     },
   },
-  wallets: ?Object, // TODO define
   persistGrant: boolean,
 }
 
@@ -79,7 +84,6 @@ export default class PermissionsManagerView extends Component<Props, State> {
     permissionDeniedNotifs: [],
     permissionRequests: {},
     persistGrant: false,
-    wallets: undefined,
   }
 
   _onRPCMessage: (Object, Object) => Promise<void>
@@ -89,7 +93,6 @@ export default class PermissionsManagerView extends Component<Props, State> {
     super(props)
     this.handleNotifications()
     this.handlePermissionRequest()
-    this.getEthWallets()
   }
 
   componentWillUnmount() {
@@ -97,11 +100,6 @@ export default class PermissionsManagerView extends Component<Props, State> {
     if (this._permissionDeniedSubscription != null) {
       this._permissionDeniedSubscription.unsubscribe()
     }
-  }
-
-  async getEthWallets() {
-    const wallets = await rpc.getEthWallets()
-    this.setState({ wallets })
   }
 
   async handleNotifications() {
@@ -155,16 +153,8 @@ export default class PermissionsManagerView extends Component<Props, State> {
   }
 
   acceptPermission = (id: string) => {
-    let data
-    const { wallets } = this.state
     const request = this.state.permissionRequests[id]
-    if (wallets && request.data.key === 'BLOCKCHAIN_SEND') {
-      data = {
-        walletID: wallets.hd[0].walletID,
-        walletAccount: wallets.hd[0].accounts[0],
-      }
-    }
-    this.onSetPermissionGrant(id, true, data)
+    this.onSetPermissionGrant(id, true)
   }
 
   declinePermission = (id: string) => {
@@ -189,26 +179,27 @@ export default class PermissionsManagerView extends Component<Props, State> {
     ) : null
   }
 
-  renderExtraPermissionInfo(permissionData: PermissionGrantData) {
-    switch (permissionData.key) {
-      case 'BLOCKCHAIN_SEND': {
-        const wallets = this.state.wallets
-          ? Object.keys(this.state.wallets).map(type => {
-              return this.state.wallets[type].map(w => {
-                return w.accounts.map(a => <Text key={a}>{a}</Text>)
-              })
-            })
-          : null
-        return (
-          <View style={styles.wallets}>
-            <Text>Wallets</Text>
-            {wallets}
-          </View>
-        )
-      }
-      default:
-        return null
+  renderTxSignRequest(permissionData: PermissionGrantData) {
+    if (permissionData.txParams == null) {
+      return null
     }
+    return <WalletTxRequestView transaction={permissionData.txParams} />
+  }
+
+  renderPermission(persistGrant, permissionLabel) {
+    return (
+      <View>
+        <Text style={styles.headerText}>Permission Required</Text>
+        <Text
+          style={
+            styles.descriptionText
+          }>{`This app is asking permission to make a ${permissionLabel}.`}</Text>
+        <View style={styles.persistOption}>
+          <Text style={styles.persistLabel}>{`Don't ask me again?`}</Text>
+          <Switch value={persistGrant} onValueChange={this.onTogglePersist} />
+        </View>
+      </View>
+    )
   }
 
   renderPermissionRequest = () => {
@@ -248,21 +239,18 @@ export default class PermissionsManagerView extends Component<Props, State> {
       )
     }
 
-    const extraPermissionInfo = this.renderExtraPermissionInfo(permissionData)
+    let content
+
+    if (permissionData.key === 'BLOCKCHAIN_SEND') {
+      content = this.renderTxSignRequest(permissionData)
+    } else {
+      content = this.renderPermission(persistGrant, permissionLabel)
+    }
 
     return (
       <View style={styles.container}>
         <View style={styles.requestContainer}>
-          <Text style={styles.headerText}>Permission Required</Text>
-          <Text
-            style={
-              styles.descriptionText
-            }>{`This app is asking permission to make a ${permissionLabel}.`}</Text>
-          <View style={styles.persistOption}>
-            <Text style={styles.persistLabel}>{`Don't ask me again?`}</Text>
-            <Switch value={persistGrant} onValueChange={this.onTogglePersist} />
-          </View>
-          {extraPermissionInfo}
+          {content}
           <View style={styles.buttonsContainer}>
             <Button
               title="ACCEPT"
@@ -327,9 +315,11 @@ const styles = StyleSheet.create({
   },
   acceptButton: {
     marginRight: 10,
+    flex: 1,
     backgroundColor: colors.PRIMARY_LIGHT_BLUE,
   },
   declineButton: {
+    flex: 1,
     backgroundColor: colors.GREY_MED_81,
   },
   permissionDeniedAlerts: {

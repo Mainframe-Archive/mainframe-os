@@ -18,6 +18,18 @@ const DEFAULT_SETTINGS = {
     WEB_REQUEST: [],
   },
   permissionsChecked: false,
+  walletSettings: {
+    defaultWallet: null,
+  },
+}
+
+export type Wallet = {
+  id: ID,
+  account: string,
+}
+
+export type WalletSettings = {
+  defaultWallet: ?Wallet,
 }
 
 export type SessionData = {
@@ -29,6 +41,7 @@ export type SessionData = {
 export type AppUserSettings = {
   permissions: StrictPermissionsGrants,
   permissionsChecked: boolean,
+  walletSettings: WalletSettings,
 }
 
 export type AbstractAppParams = {
@@ -116,6 +129,20 @@ export default class AbstractApp {
     const settings = this.getSettings(userID)
     settings.permissionsChecked = checked
     this._settings[userID] = settings
+  }
+
+  setDefaultWallet(userID: ID, walletID: ID, account: string) {
+    const settings = this.getSettings(userID)
+    settings.walletSettings.defaultWallet = {
+      id: walletID,
+      account,
+    }
+    this._settings[userID] = settings
+  }
+
+  getDefaultWallet(userID: ID): ?Wallet {
+    const settings = this.getSettings(userID)
+    return settings.walletSettings.defaultWallet
   }
 
   removeUser(userID: ID) {

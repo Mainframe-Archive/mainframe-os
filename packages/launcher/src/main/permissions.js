@@ -2,7 +2,7 @@
 import url from 'url'
 import { checkPermission } from '@mainframe/app-permissions'
 import type { PermissionKey } from '@mainframe/app-permissions'
-
+import type { EthTransactionParams } from '@mainframe/client'
 import type { AppContext } from './contexts'
 
 export const userDeniedError = (key: PermissionKey) => {
@@ -110,14 +110,13 @@ export const isGranted = async (key: PermissionKey, ctx: AppContext) => {
 
 export const requestTransactionPermission = async (
   ctx: AppContext,
-  params: Object,
+  params: EthTransactionParams,
 ): Promise<{
   granted: boolean,
-  walletID: string,
 }> => {
   return await ctx.trustedRPC.request('permission_ask', {
     key: 'BLOCKCHAIN_SEND',
-    params,
+    txParams: params.transactionData,
   })
 }
 

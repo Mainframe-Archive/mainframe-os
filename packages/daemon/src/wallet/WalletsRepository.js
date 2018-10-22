@@ -1,7 +1,5 @@
 // @flow
 import {
-  type WalletEthSignTransactionParams,
-  type WalletEthSignTransactionResult,
   type WalletSignTxParams,
   type WalletSignTxResult,
   type WalletCreateHDParams,
@@ -99,6 +97,16 @@ export default class WalletsRepository {
     )
   }
 
+  getFirstEthWallet(): ?AbstractWallet {
+    const priority = ['hd', 'ledger', 'pk']
+    let wallet
+    priority.forEach(type => {
+      if (Object.keys(this.ethWallets[type]).length) {
+        return this.ethWallets[type][Object.keys(this.ethWallets[type])[0]]
+      }
+    })
+  }
+
   createHDWallet(params: WalletCreateHDParams) {
     switch (params.chain) {
       case 'ethereum': {
@@ -162,10 +170,22 @@ export default class WalletsRepository {
     }
   }
 
-  signEthTransaction(
-    params: WalletEthSignTransactionParams,
-  ): WalletEthSignTransactionResult {
-    const wallet = this.getEthWalletByID(params.walletID)
+  getEthWalletByAccount(account: string): ?AbstractWallet {
+    let wallet
+    Object.keys(this.ethWallets).forEach(type => {
+      Object.keys(this.ethWallets[type]).forEach(w => {
+        const keyring = this.ethWallets[type][w]
+        const foundWallet = keyring._walletByAddress(account)
+        if (foundWallet) {
+          wallet = keyring
+        }
+      })
+    })
+    return wallet
+  }
+
+  async signEthTransaction(params: WalletSignTxParams): WalletSignTxResult {
+    const wallet = this.getEthWalletByAccount(params.transactionData.from)
     if (!wallet) {
       throw new Error('Wallet not found')
     }

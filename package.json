@@ -5,10 +5,7 @@
   "license": "MIT",
   "private": true,
   "workspaces": {
-    "packages": [
-      "packages/*",
-      "applications/*"
-    ],
+    "packages": ["packages/*", "applications/*"],
     "nohoist": [
       "**/@erebos/*",
       "**/@mainframe/rpc-*",
@@ -21,6 +18,7 @@
       "**/electron-better-ipc",
       "**/electron-builder",
       "**/electron-webpack",
+      "**/eslint**",
       "**/es6-error",
       "**/fastest-validator",
       "**/form-data",
@@ -39,6 +37,8 @@
       "**/tar-fs",
       "**/tar-stream",
       "**/uri-js",
+      "**/web3-utils",
+      "**/web3-eth-abi",
       "**/webpack",
       "**/webpack-dev-server",
       "**/ws"

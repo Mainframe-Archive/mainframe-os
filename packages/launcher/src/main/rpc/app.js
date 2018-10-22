@@ -43,14 +43,10 @@ export const sandboxed = {
     ctx: AppContext,
     params: WalletSignTxParams,
   ): Promise<WalletSignTxResult> => {
-    const res = await requestTransactionPermission(ctx, params)
-    if (res.granted) {
-      const grantedParams = {
-        ...params,
-        walletID: res.data.walletID,
-      }
-      grantedParams.transactionData.from = res.data.walletAccount
-      return ctx.client.wallet.signTransaction(grantedParams)
+    // TODO validate tx params
+    const granted = await requestTransactionPermission(ctx, params)
+    if (granted) {
+      return ctx.client.wallet.signTransaction(params)
     }
     throw userDeniedError('BLOCKCHAIN_SEND')
   },
@@ -59,10 +55,19 @@ export const sandboxed = {
     const ethWallets = await ctx.client.wallet.getEthWallets()
     // TODO might need to refactor wallets type
     // or add seaprate call for only accounts
-    return Object.keys(ethWallets).reduce((acc, key) => {
+    const accounts = Object.keys(ethWallets).reduce((acc, key) => {
       ethWallets[key].forEach(w => acc.push(...w.accounts))
       return acc
     }, [])
+    if (
+      ctx.appSession.defaultWallet &&
+      accounts.includes(ctx.appSession.defaultWallet.account)
+    ) {
+      const defualtAccount = ctx.appSession.defaultWallet.account
+      accounts.splice(accounts.indexOf(defualtAccount), 1)
+      accounts.unshift(defualtAccount)
+    }
+    return accounts
   },
 
   // Temporary PSS APIs - should be removed when communication APIs are settled

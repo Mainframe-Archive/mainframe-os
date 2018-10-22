@@ -127,6 +127,7 @@ export default class App extends Component<null, State> {
       const mfTokenAddr = '0xA46f1563984209fe47f8236f8B01a03f03F957E4'
       const contract = new this.web3.eth.Contract(abi, mfStakeAddr)
       const tokenContract = new this.web3.eth.Contract(tokenABI, mfTokenAddr)
+      const accounts = await this.web3.eth.getAccounts()
       const data = tokenContract.methods
         .transfer('0xaAf7a7155101236f4067963EFc80252F32DC00DF', 10000)
         .encodeABI()
@@ -134,7 +135,7 @@ export default class App extends Component<null, State> {
       tokenContract.methods
         .transfer('0xaAf7a7155101236f4067963EFc80252F32DC00DF', 10000)
         .send({
-          from: '0xb8055ea1affeb6683e0218d7c2e292a66ff63433',
+          from: accounts[0],
           gasLimit: 500000,
           gasPrice: 5000000000,
         })

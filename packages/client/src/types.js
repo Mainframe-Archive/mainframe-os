@@ -104,6 +104,10 @@ export type AppOpenResult = {
   app: AppData,
   session: AppSession,
   user: IdentityOwnData,
+  defaultWallet: {
+    id: ID,
+    account: string,
+  },
 }
 
 export type AppPublishContentsParams = {
@@ -205,12 +209,9 @@ export type WalletEthSignDataParams = {
   data: string,
 }
 
-export type WalletEthSignTransactionResult = string
-
 export type WalletSignTxParams = {
-  walletID: ID,
   chain: WalletSupportedChains,
-  transactionParams: Object, // TODO: define
+  transactionData: Object, // TODO: define
 }
 
 export type WalletSignTxResult = string
