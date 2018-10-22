@@ -33,7 +33,7 @@
     "@mainframe/rpc-handler": "^0.2.1",
     "@mainframe/toolbox": "*",
     "@mainframe/utils-id": "^0.1.0",
-    "electron-util": "^0.9.1",
+    "electron-util": "^0.10.0",
     "react": "^16.5.2",
     "react-art": "^16.5.2",
     "react-dom": "^16.5.2",
