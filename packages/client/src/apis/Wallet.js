@@ -2,9 +2,10 @@
 
 import ClientAPIs from '../ClientAPIs'
 import type {
-  WalletImportPKParams,
   WalletCreateHDParams,
-  WalletImportPKResult,
+  WalletImportPKParams,
+  WalletImportResult,
+  WalletImportMnemonicParams,
   WalletGetEthWalletsResult,
   WalletCreateHDResult,
   WalletSignTxParams,
@@ -20,8 +21,14 @@ export default class WalletAPIs extends ClientAPIs {
 
   async importAccountByPK(
     params: WalletImportPKParams,
-  ): Promise<WalletImportPKResult> {
+  ): Promise<WalletImportResult> {
     return this._rpc.request('wallet_importPK', params)
+  }
+
+  async importWalletByMnemonic(
+    params: WalletImportMnemonicParams,
+  ): Promise<WalletImportResult> {
+    return this._rpc.request('wallet_importMnemonic', params)
   }
 
   async getEthWallets(): Promise<WalletGetEthWalletsResult> {

@@ -173,6 +173,11 @@ export type WalletCreateHDParams = {
   chain: WalletSupportedChains,
 }
 
+export type WalletImportMnemonicParams = {
+  chain: WalletSupportedChains,
+  mnemonic: string,
+}
+
 export type WalletImportPKParams = {
   chain: WalletSupportedChains,
   privateKey: string,
@@ -185,7 +190,7 @@ export type WalletResult = {
   accounts: Array<string>,
 }
 
-export type WalletImportPKResult = WalletResult
+export type WalletImportResult = WalletResult
 
 export type WalletCreateHDResult = WalletResult
 

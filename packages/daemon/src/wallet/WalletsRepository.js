@@ -4,6 +4,7 @@ import {
   type WalletSignTxResult,
   type WalletCreateHDParams,
   type WalletImportPKParams,
+  type WalletImportMnemonicParams,
   type WalletResult,
   idType as idTypeToClient,
 } from '@mainframe/client'
@@ -151,6 +152,35 @@ export default class WalletsRepository {
         return {
           type: 'pk',
           walletID: idTypeToClient(wallet.id),
+          accounts,
+        }
+      }
+      default: {
+        throw new Error(`Unsupported chain type: ${params.chain}`)
+      }
+    }
+  }
+
+  importMnemonicWallet(params: WalletImportMnemonicParams): WalletResult {
+    switch (params.chain) {
+      case 'ethereum': {
+        const alreadyExists = Object.keys(this.ethWallets.hd).find(id => {
+          return this.ethWallets.hd[id]._mnemonic === params.mnemonic
+        })
+        if (alreadyExists) {
+          throw new Error('Wallet with this mnemonic phrase already exists')
+        }
+        const walletID = uniqueID()
+        const hdWallet = new HDWallet({
+          walletID,
+          mnemonic: params.mnemonic,
+        })
+
+        this.ethWallets.hd[walletID] = hdWallet
+        const accounts = hdWallet.getAccounts()
+        return {
+          type: 'hd',
+          walletID: idTypeToClient(hdWallet.id),
           accounts,
         }
       }

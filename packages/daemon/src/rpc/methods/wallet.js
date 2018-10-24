@@ -5,10 +5,12 @@ import {
   WALLET_CREATE_HD_SCHEMA,
   WALLET_SIGN_TRANSACTION_SCHEMA,
   WALLET_IMPORT_PK_SCHEMA,
+  WALLET_IMPORT_MNEMONIC_SCHEMA,
   type WalletCreateHDParams,
   type WalletCreateHDResult,
   type WalletImportPKParams,
-  type WalletImportPKResult,
+  type WalletImportResult,
+  type WalletImportMnemonicParams,
   type WalletResults,
   type WalletGetEthWalletsResult,
   type WalletSignTxParams,
@@ -36,10 +38,22 @@ export const importAccountByPK = {
   handler: async (
     ctx: RequestContext,
     params: WalletImportPKParams,
-  ): Promise<WalletImportPKResult> => {
+  ): Promise<WalletImportResult> => {
     const simpleWallet = ctx.openVault.wallets.importPKWallet(params)
     await ctx.openVault.save()
     return simpleWallet
+  },
+}
+
+export const importMnemonic = {
+  params: WALLET_IMPORT_MNEMONIC_SCHEMA,
+  handler: async (
+    ctx: RequestContext,
+    params: WalletImportMnemonicParams,
+  ): Promise<WalletImportResult> => {
+    const hdWallet = ctx.openVault.wallets.importMnemonicWallet(params)
+    await ctx.openVault.save()
+    return hdWallet
   },
 }
 

@@ -9,7 +9,7 @@ import AbstractWallet, { type AbstractWalletParams } from './AbstractWallet'
 type HDWalletParams = AbstractWalletParams & {
   mnemonic: string,
   hdPath?: string,
-  activeAccounts: { [number]: string },
+  activeAccounts?: { [number]: string },
 }
 
 export type HDWalletSerialized = HDWalletParams

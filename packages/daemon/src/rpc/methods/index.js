@@ -59,6 +59,7 @@ export default {
 
   wallet_createHD: wallet.createHDWallet,
   wallet_importPK: wallet.importAccountByPK,
+  wallet_importMnemonic: wallet.importMnemonic,
   wallet_getEthWallets: wallet.getEthWallets,
   wallet_signTx: wallet.signTransaction,
 }

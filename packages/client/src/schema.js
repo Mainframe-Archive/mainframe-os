@@ -151,6 +151,10 @@ export const WALLET_IMPORT_PK_SCHEMA = {
   privateKey: 'string',
 }
 
+export const WALLET_IMPORT_MNEMONIC_SCHEMA = {
+  mnemonic: 'string',
+}
+
 export const ETH_TRANSACTION_SCHEMA = {
   nonce: 'number',
   from: 'string',
