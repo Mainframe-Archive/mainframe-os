@@ -10,8 +10,8 @@ export default class App extends Component<{}> {
   sdk: MainframeSDK
   web3: Web3
 
-  constructor(props) {
-    super(props)
+  constructor() {
+    super()
     this.sdk = new MainframeSDK()
     this.web3 = new Web3(this.sdk.blockchain.getWeb3Provider())
   }

@@ -8,6 +8,7 @@ import {
   TextInput,
   Button,
   TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native-web'
 
 import applyContext, { type ContextProps } from './Context'
@@ -19,17 +20,17 @@ type State = {
   amount: string,
   data: string,
   errorMsg?: ?string,
+  txReceipt?: ?string,
+  processingTransaction?: ?boolean,
   sendType: 'tokens' | 'ether',
 }
 
 class SendFunds extends Component<ContextProps, State> {
   state = {
-    recipient: '0x20Aa9b43C0bfb9c10326BdB707ab4E7f765a4706',
+    recipient: '',
     amount: '',
-    data:
-      '0x264762040000000000000000000000002343e938363c59c82b6fbabda2a2c40f00c92fb7',
-    tokenAddress: '0xA46f1563984209fe47f8236f8B01a03f03F957E4', // TODO change to empty string
-    // tokenAddress: '0x6E6Bda8B1ec708Bd4Ce4f000B464557657988806', // Stake
+    data: '',
+    tokenAddress: '',
     sendType: 'ether',
   }
 
@@ -101,7 +102,6 @@ class SendFunds extends Component<ContextProps, State> {
     if (!this.validateSend()) {
       return
     }
-    // const mfTokenAddr = '0xA46f1563984209fe47f8236f8B01a03f03F957E4'
     const tokenContract = new web3.eth.Contract(
       tokenABI,
       this.state.tokenAddress,
@@ -110,19 +110,18 @@ class SendFunds extends Component<ContextProps, State> {
     // TODO: fetch decimal
     const amount = web3.utils.toWei(this.state.amount)
     try {
-      tokenContract.methods
-        .transfer(this.state.recipient, amount)
-        .send({
-          from: accounts[0],
-        })
-        .on('error', err => {
-          console.log(err)
-        })
-        .on('receipt', receipt => {
-          console.log(receipt)
-        })
+      this.sendTransaction(() => {
+        return tokenContract.methods
+          .transfer(this.state.recipient, amount)
+          .send({
+            from: accounts[0],
+          })
+      })
     } catch (err) {
-      console.log('err send: ', err)
+      this.setState({
+        processingTransaction: false,
+        errorMsg: err.message || 'Error processing transaction',
+      })
     }
   }
 
@@ -130,23 +129,45 @@ class SendFunds extends Component<ContextProps, State> {
     const { web3 } = this.props
     const accounts = await web3.eth.getAccounts()
     const amount = web3.utils.toWei(this.state.amount || '0')
+
     try {
-      this.props.web3.eth
-        .sendTransaction({
+      this.sendTransaction(() => {
+        return this.props.web3.eth.sendTransaction({
           data: this.state.data,
           to: this.state.recipient,
           from: accounts[0],
           value: amount,
         })
-        .on('error', err => {
-          console.log(err)
-        })
-        .on('receipt', receipt => {
-          console.log(receipt)
-        })
+      })
     } catch (err) {
-      console.log('err send eth: ', err)
+      this.setState({
+        processingTransaction: false,
+        errorMsg: err.message || 'Error processing transaction',
+      })
     }
+  }
+
+  sendTransaction = txFunc => {
+    this.setState({
+      processingTransaction: true,
+      txReceipt: undefined,
+      errorMsg: undefined,
+    })
+    txFunc()
+      .on('error', err => {
+        console.warn(err)
+        this.setState({
+          processingTransaction: false,
+          errorMsg: err.message || 'Error processing transaction',
+        })
+      })
+      .on('receipt', receipt => {
+        console.log(receipt)
+        this.setState({
+          processingTransaction: false,
+          txReceipt: receipt.transactionHash,
+        })
+      })
   }
 
   // RENDER
@@ -172,7 +193,6 @@ class SendFunds extends Component<ContextProps, State> {
           onChangeText={this.onChangeAmount}
           value={this.state.amount}
         />
-        <Button title="Send" onPress={this.onPressSendToken} />
       </View>
     )
   }
@@ -199,7 +219,6 @@ class SendFunds extends Component<ContextProps, State> {
           onChangeText={this.onChangeData}
           value={this.state.data}
         />
-        <Button title="Send" onPress={this.onPressSendEth} />
       </View>
     )
   }
@@ -227,16 +246,50 @@ class SendFunds extends Component<ContextProps, State> {
     )
   }
 
+  renderResult() {
+    if (this.state.txReceipt) {
+      return (
+        <View style={[styles.feedbackContainer, styles.receiptContainer]}>
+          <Text>{this.state.txReceipt}</Text>
+        </View>
+      )
+    }
+  }
+
+  renderError() {
+    if (this.state.errorMsg) {
+      return (
+        <View style={[styles.feedbackContainer, styles.errorContainer]}>
+          <Text>{this.state.errorMsg}</Text>
+        </View>
+      )
+    }
+  }
+
   render() {
     const content =
       this.state.sendType === 'ether'
         ? this.renderEthSend()
         : this.renderTokenSend()
+
+    const onPress =
+      this.state.sendType === 'ether'
+        ? this.onPressSendEth
+        : this.onPressSendToken
+
+    const button = this.state.processingTransaction ? (
+      <ActivityIndicator />
+    ) : (
+      <Button title="Send" onPress={onPress} />
+    )
     return (
       <View style={styles.container}>
         <View style={styles.innerContainer}>
           {this.renderTabs()}
+          {this.renderResult()}
+          {this.renderError()}
           {content}
+          {button}
         </View>
       </View>
     )
@@ -281,6 +334,25 @@ const styles = StyleSheet.create({
   },
   dataInput: {
     height: 75,
+  },
+  feedbackContainer: {
+    padding: 10,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderRadius: 3,
+  },
+  receiptLabel: {
+    fontSize: 12,
+  },
+  receiptContainer: {
+    color: '#535748',
+    backgroundColor: '#e6f2bf',
+    borderColor: '#d3e2a7',
+  },
+  errorContainer: {
+    color: '#473f3e',
+    backgroundColor: '#f7d7d7',
+    borderColor: '#e5bebe',
   },
 })
 

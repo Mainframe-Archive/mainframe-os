@@ -118,9 +118,12 @@ export default class PermissionsManagerView extends Component<Props, State> {
             setTimeout(() => {
               this.setState(({ permissionDeniedNotifs: notifs }) => {
                 const index = notifs.indexOf(data)
-                return index > -1
-                  ? { permissionDeniedNotifs: notifs.splice(index, 1) }
-                  : null
+                if (index > -1) {
+                  notifs.splice(index, 1)
+                  return {
+                    permissionDeniedNotifs: notifs,
+                  }
+                }
               })
             }, 3000)
           },
