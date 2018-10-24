@@ -13,7 +13,11 @@ import { uniqueID, idType, type ID } from '@mainframe/utils-id'
 
 import { mapObject } from '../utils'
 
-import type { AppUserSettings, SessionData } from './AbstractApp'
+import type {
+  AppUserSettings,
+  SessionData,
+  PermissionsSettings,
+} from './AbstractApp'
 import App, { type AppSerialized } from './App'
 import OwnApp, { type OwnAppParams, type OwnAppSerialized } from './OwnApp'
 
@@ -141,11 +145,14 @@ export default class AppsRepository {
 
   // App lifecycle
 
-  add(manifest: ManifestData, userID: ID, settings: AppUserSettings): App {
+  add(
+    manifest: ManifestData,
+    userID: ID,
+    permissionsSettings: PermissionsSettings,
+  ): App {
     if (validateManifest(manifest) === 'valid') {
       throw new Error('Invalid manifest')
     }
-
     const appID = uniqueID()
     const app = new App({
       appID,
@@ -153,8 +160,7 @@ export default class AppsRepository {
       installationState: 'pending',
       settings: {
         [(userID: string)]: {
-          permissions: settings.permissions,
-          permissionsChecked: settings.permissionsChecked,
+          permissionsSettings,
         },
       },
     })
@@ -170,6 +176,18 @@ export default class AppsRepository {
       throw new Error('Invalid app')
     }
     app.setSettings(userID, settings)
+  }
+
+  setUserPermissionsSettings(
+    appID: ID,
+    userID: ID,
+    settings: PermissionsSettings,
+  ): void {
+    const app = this.getAnyByID(appID)
+    if (app == null) {
+      throw new Error('Invalid app')
+    }
+    app.setPermissionsSettings(userID, settings)
   }
 
   setUserPermission(

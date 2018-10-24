@@ -2,7 +2,6 @@
 
 import ClientAPIs from '../ClientAPIs'
 import type {
-  WalletEthSignTransactionParams,
   WalletImportPKParams,
   WalletCreateHDParams,
   WalletImportPKResult,

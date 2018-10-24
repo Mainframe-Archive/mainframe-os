@@ -141,11 +141,11 @@ export default class AppInstallModal extends Component<Props, State> {
     }
 
     try {
-      const permissions = {
-        permissions: userPermissions,
+      const permissionsSettings = {
+        grants: userPermissions,
         permissionsChecked: true,
       }
-      const res = await rpc.installApp(manifest, userId, permissions)
+      const res = await rpc.installApp(manifest, userId, permissionsSettings)
       this.props.onInstallComplete(res.id)
     } catch (err) {
       // eslint-disable-next-line no-console

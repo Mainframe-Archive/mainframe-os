@@ -8,6 +8,7 @@
     "packages": ["packages/*", "applications/*"],
     "nohoist": [
       "**/@erebos/*",
+      "**/@mainframe/contract-utils",
       "**/@mainframe/rpc-*",
       "**/@mainframe/secure-file",
       "**/@mainframe/transport-*",
@@ -18,7 +19,6 @@
       "**/electron-better-ipc",
       "**/electron-builder",
       "**/electron-webpack",
-      "**/eslint**",
       "**/es6-error",
       "**/fastest-validator",
       "**/form-data",
@@ -39,6 +39,7 @@
       "**/uri-js",
       "**/web3-utils",
       "**/web3-eth-abi",
+      "**/web3-eth-contract",
       "**/webpack",
       "**/webpack-dev-server",
       "**/ws"

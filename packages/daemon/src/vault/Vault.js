@@ -28,7 +28,11 @@ import {
 // eslint-disable-next-line import/named
 import { uniqueID, type ID } from '@mainframe/utils-id'
 
-import type { AppUserSettings, SessionData } from '../app/AbstractApp'
+import type {
+  AppUserSettings,
+  PermissionsSettings,
+  SessionData,
+} from '../app/AbstractApp'
 import type App from '../app/App'
 import AppsRepository, {
   type AppsRepositorySerialized,
@@ -217,7 +221,7 @@ export default class Vault {
   installApp(
     manifest: ManifestData,
     userID: ID,
-    settings: AppUserSettings,
+    settings: PermissionsSettings,
   ): App {
     let app = this.apps.getByMainframeID(manifest.id)
     if (app == null) {
@@ -225,7 +229,7 @@ export default class Vault {
       app = this.apps.add(manifest, userID, settings)
     } else {
       // Set user settings for already existing app
-      this.apps.setUserSettings(app.id, userID, settings)
+      this.apps.setUserPermissionsSettings(app.id, userID, settings)
     }
     return app
   }
@@ -313,6 +317,14 @@ export default class Vault {
 
   setAppUserSettings(appID: ID, userID: ID, settings: AppUserSettings): void {
     this.apps.setUserSettings(appID, userID, settings)
+  }
+
+  setAppUserPermissionsSettings(
+    appID: ID,
+    userID: ID,
+    settings: PermissionsSettings,
+  ): void {
+    this.apps.setUserPermissionsSettings(appID, userID, settings)
   }
 
   getAppManifestData(appID: ID, version?: ?string): PartialManifestData {

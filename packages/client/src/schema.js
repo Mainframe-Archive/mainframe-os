@@ -46,16 +46,18 @@ export const APP_GET_MANIFEST_DATA_SCHEMA = {
   version: OPTIONAL_SEMVER_SCHEMA,
 }
 
+export const APP_PERMISSIONS_SETTINGS_SCHEMA = {
+  type: 'object',
+  props: {
+    grants: PERMISSIONS_GRANTS_SCHEMA,
+    permissionsChecked: 'boolean',
+  },
+}
+
 export const APP_INSTALL_SCHEMA = {
   manifest: MANIFEST_SCHEMA,
   userID: LOCAL_ID_SCHEMA,
-  settings: {
-    type: 'object',
-    props: {
-      permissions: PERMISSIONS_GRANTS_SCHEMA,
-      permissionsChecked: 'boolean',
-    },
-  },
+  permissionsSettings: APP_PERMISSIONS_SETTINGS_SCHEMA,
 }
 
 export const APP_OPEN_SCHEMA = {
@@ -82,8 +84,13 @@ export const APP_SET_USER_SETTINGS_SCHEMA = {
   settings: {
     type: 'object',
     props: {
-      permissions: PERMISSIONS_GRANTS_SCHEMA,
-      permissionsChecked: 'boolean',
+      permissionsSetings: APP_PERMISSIONS_SETTINGS_SCHEMA,
+      walletSettings: {
+        type: 'object',
+        props: {
+          defaultEthAccount: 'string',
+        },
+      },
     },
   },
 }
@@ -93,6 +100,12 @@ export const APP_SET_PERMISSION_SCHEMA = {
   key: PERMISSION_KEY_SCHEMA,
   value: PERMISSION_GRANT_SCHEMA,
   persist: { type: 'boolean', optional: true },
+}
+
+export const APP_SET_USER_PERMISSIONS_SETTINGS_SCHEMA = {
+  appID: LOCAL_ID_SCHEMA,
+  userID: LOCAL_ID_SCHEMA,
+  settings: APP_PERMISSIONS_SETTINGS_SCHEMA,
 }
 
 export const APP_SET_PERMISSIONS_REQUIREMENTS_SCHEMA = {
@@ -143,8 +156,8 @@ export const ETH_TRANSACTION_SCHEMA = {
   from: 'string',
   to: 'string',
   data: 'string',
-  gasLimit: 'number',
-  gasPrice: 'number',
+  gas: 'string',
+  gasPrice: 'string',
 }
 
 export const WALLET_SIGN_ETH_TRANSACTION_SCHEMA = ETH_TRANSACTION_SCHEMA

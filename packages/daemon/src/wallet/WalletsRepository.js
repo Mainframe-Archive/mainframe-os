@@ -99,7 +99,6 @@ export default class WalletsRepository {
 
   getFirstEthWallet(): ?AbstractWallet {
     const priority = ['hd', 'ledger', 'pk']
-    let wallet
     priority.forEach(type => {
       if (Object.keys(this.ethWallets[type]).length) {
         return this.ethWallets[type][Object.keys(this.ethWallets[type])[0]]
@@ -161,7 +160,9 @@ export default class WalletsRepository {
     }
   }
 
-  async signTransaction(params: WalletSignTxParams): WalletSignTxResult {
+  async signTransaction(
+    params: WalletSignTxParams,
+  ): Promise<WalletSignTxResult> {
     switch (params.chain) {
       case 'ethereum':
         return this.signEthTransaction(params)
@@ -184,7 +185,9 @@ export default class WalletsRepository {
     return wallet
   }
 
-  async signEthTransaction(params: WalletSignTxParams): WalletSignTxResult {
+  async signEthTransaction(
+    params: WalletSignTxParams,
+  ): Promise<WalletSignTxResult> {
     const wallet = this.getEthWalletByAccount(params.transactionData.from)
     if (!wallet) {
       throw new Error('Wallet not found')

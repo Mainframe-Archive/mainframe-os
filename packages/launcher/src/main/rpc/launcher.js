@@ -18,6 +18,8 @@ import {
   type AppRemoveOwnParams,
   type AppSetUserSettingsParams,
   APP_SET_USER_SETTINGS_SCHEMA,
+  type AppSetUserPermissionsSettingsParams,
+  APP_SET_USER_PERMISSIONS_SETTINGS_SCHEMA,
   type IdentityCreateResult,
   type IdentityGetOwnUsersResult,
   type IdentityGetOwnDevelopersResult,
@@ -87,6 +89,16 @@ export default {
     params: APP_SET_USER_SETTINGS_SCHEMA,
     handler: (ctx: LauncherContext, params: AppSetUserSettingsParams) => {
       return ctx.client.app.setUserSettings(params)
+    },
+  },
+
+  app_setUserPermissionsSettings: {
+    params: APP_SET_USER_PERMISSIONS_SETTINGS_SCHEMA,
+    handler: (
+      ctx: LauncherContext,
+      params: AppSetUserPermissionsSettingsParams,
+    ) => {
+      return ctx.client.app.setUserPermissionsSettings(params)
     },
   },
 

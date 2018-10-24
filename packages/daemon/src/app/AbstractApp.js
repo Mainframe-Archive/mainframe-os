@@ -14,22 +14,19 @@ import { idType, type ID } from '@mainframe/utils-id'
 import type Session from './Session'
 
 const DEFAULT_SETTINGS = {
-  permissions: {
-    WEB_REQUEST: [],
+  permissionsSettings: {
+    grants: {
+      WEB_REQUEST: [],
+    },
+    permissionsChecked: false,
   },
-  permissionsChecked: false,
   walletSettings: {
-    defaultWallet: null,
+    defaultEthAccount: null,
   },
-}
-
-export type Wallet = {
-  id: ID,
-  account: string,
 }
 
 export type WalletSettings = {
-  defaultWallet: ?Wallet,
+  defaultEthAccount: ?string,
 }
 
 export type SessionData = {
@@ -38,9 +35,13 @@ export type SessionData = {
   permissions: PermissionsDetails,
 }
 
-export type AppUserSettings = {
-  permissions: StrictPermissionsGrants,
+export type PermissionsSettings = {
+  grants: StrictPermissionsGrants,
   permissionsChecked: boolean,
+}
+
+export type AppUserSettings = {
+  permissionsSettings: PermissionsSettings,
   walletSettings: WalletSettings,
 }
 
@@ -86,14 +87,16 @@ export default class AbstractApp {
   }
 
   setSettings(userID: ID, settings: AppUserSettings): void {
-    settings.permissions = createStrictPermissionGrants(settings.permissions)
+    settings.permissionsSettings.grants = createStrictPermissionGrants(
+      settings.permissionsSettings.grants,
+    )
     this._settings[userID] = settings
   }
 
   getPermissions(userID: ID): ?StrictPermissionsGrants {
     const settings = this._settings[userID]
-    if (settings != null && settings.permissions != null) {
-      return settings.permissions
+    if (settings != null && settings.permissionsSettings != null) {
+      return settings.permissionsSettings.grants
     }
   }
 
@@ -102,8 +105,20 @@ export default class AbstractApp {
     permissions: PermissionsGrants | StrictPermissionsGrants,
   ): void {
     const settings = this.getSettings(userID)
-    settings.permissions = createStrictPermissionGrants(permissions)
+    settings.permissionsSettings.grants = createStrictPermissionGrants(
+      permissions,
+    )
     this._settings[userID] = settings
+  }
+
+  setPermissionsSettings(userID: ID, settings: PermissionsSettings): void {
+    const appSettings = this.getSettings(userID)
+    appSettings.permissionsSettings.grants = createStrictPermissionGrants(
+      settings.grants,
+    )
+    appSettings.permissionsSettings.permissionsChecked =
+      settings.permissionsChecked
+    this._settings[userID] = appSettings
   }
 
   getPermission(userID: ID, key: PermissionKey): ?PermissionGrant {
@@ -114,35 +129,34 @@ export default class AbstractApp {
   }
 
   setPermission(userID: ID, key: PermissionKey, value: PermissionGrant): void {
-    const { permissions } = this.getSettings(userID)
+    const { permissionsSettings } = this.getSettings(userID)
     if (
       (key === 'WEB_REQUEST' && typeof value === 'object') ||
       (key !== 'WEB_REQUEST' && typeof value === 'boolean')
     ) {
       // $FlowFixMe: value polymorphism
-      permissions[key] = value
-      this.setPermissions(userID, permissions)
+      permissionsSettings.grants[key] = value
+      this.setPermissions(userID, permissionsSettings.grants)
     }
   }
 
   setPermissionsChecked(userID: ID, checked: boolean) {
     const settings = this.getSettings(userID)
-    settings.permissionsChecked = checked
+    settings.permissionsSettings.permissionsChecked = checked
     this._settings[userID] = settings
   }
 
-  setDefaultWallet(userID: ID, walletID: ID, account: string) {
+  setDefaultEthAccount(userID: ID, walletID: ID, account: string) {
     const settings = this.getSettings(userID)
-    settings.walletSettings.defaultWallet = {
-      id: walletID,
-      account,
+    settings.walletSettings.defaultEthAccount = account
+    this._settings[userID] = settings
+  }
+
+  getDefaultEthAccount(userID: ID): ?string {
+    const settings = this.getSettings(userID)
+    if (settings.walletSettings) {
+      return settings.walletSettings.defaultEthAccount
     }
-    this._settings[userID] = settings
-  }
-
-  getDefaultWallet(userID: ID): ?Wallet {
-    const settings = this.getSettings(userID)
-    return settings.walletSettings.defaultWallet
   }
 
   removeUser(userID: ID) {

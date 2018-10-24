@@ -7,7 +7,7 @@ import { ipcRenderer } from 'electron'
 import React, { Component } from 'react'
 import { View, StyleSheet, Switch } from 'react-native-web'
 import type { Subscription } from 'rxjs'
-import type { EthTransactionParams } from '@mainframe/client'
+import type { WalletSignTxParams } from '@mainframe/client'
 
 import { APP_TRUSTED_REQUEST_CHANNEL } from '../../constants'
 
@@ -21,13 +21,17 @@ import type { AppSessionData } from './AppContainer'
 
 type PermissionGrantData = {
   key: string,
-  input?: string,
-  txParams?: EthTransactionParams,
+  domain?: string,
+  params?: WalletSignTxParams,
 }
 type PermissionGrantResult = {
   granted: boolean,
   persist: boolean,
   data?: ?Object,
+}
+type PermissionDeniedNotif = {
+  key: string,
+  domain?: string,
 }
 
 const methods = {
@@ -54,7 +58,7 @@ const handleMessage = createHandler({ methods, validatorOptions })
 const permissionDescriptions = {
   BLOCKCHAIN_SEND: 'Ethereum blockchain transaction',
 }
-const getPermissionDescription = (key: string, input: ?string): ?string => {
+const getPermissionDescription = (key: string, input?: ?string): ?string => {
   if (key === 'WEB_REQUEST' && input) {
     return `web request to ${input}`
   }
@@ -69,7 +73,7 @@ type Props = {
 }
 
 type State = {
-  permissionDeniedNotifs: Array<PermissionGrantData>,
+  permissionDeniedNotifs: Array<PermissionDeniedNotif>,
   permissionRequests: {
     [id: string]: {
       data: PermissionGrantData,
@@ -105,7 +109,7 @@ export default class PermissionsManagerView extends Component<Props, State> {
   async handleNotifications() {
     const notifications = await rpc.createPermissionDeniedSubscription()
     this._permissionDeniedSubscription = notifications.subscribe(
-      (data: PermissionGrantData) => {
+      (data: PermissionDeniedNotif) => {
         this.setState(
           ({ permissionDeniedNotifs }) => ({
             permissionDeniedNotifs: [...permissionDeniedNotifs, data],
@@ -153,7 +157,6 @@ export default class PermissionsManagerView extends Component<Props, State> {
   }
 
   acceptPermission = (id: string) => {
-    const request = this.state.permissionRequests[id]
     this.onSetPermissionGrant(id, true)
   }
 
@@ -171,7 +174,7 @@ export default class PermissionsManagerView extends Component<Props, State> {
     const alerts = this.state.permissionDeniedNotifs.map((data, i) => (
       <Text key={`alert${i}`} style={styles.permissionDeniedLabel}>
         <Text style={styles.boldText}>Blocked:</Text>{' '}
-        {getPermissionDescription(data.key, data.input)}
+        {getPermissionDescription(data.key, data.domain)}
       </Text>
     ))
     return alerts.length ? (
@@ -180,13 +183,18 @@ export default class PermissionsManagerView extends Component<Props, State> {
   }
 
   renderTxSignRequest(permissionData: PermissionGrantData) {
-    if (permissionData.txParams == null) {
+    if (permissionData.params == null) {
+      // TODO display error
       return null
     }
-    return <WalletTxRequestView transaction={permissionData.txParams} />
+    return (
+      <WalletTxRequestView
+        transaction={permissionData.params.transactionData}
+      />
+    )
   }
 
-  renderPermission(persistGrant, permissionLabel) {
+  renderPermission(persistGrant: boolean, permissionLabel: string) {
     return (
       <View>
         <Text style={styles.headerText}>Permission Required</Text>
@@ -214,7 +222,7 @@ export default class PermissionsManagerView extends Component<Props, State> {
     const permissionData = permissionRequests[id].data
     const permissionLabel = getPermissionDescription(
       permissionData.key,
-      permissionData.input,
+      permissionData.domain,
     )
 
     const declineButton = (

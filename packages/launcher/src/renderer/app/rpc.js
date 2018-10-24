@@ -50,4 +50,8 @@ export default {
   getEthWallets: async () => {
     return rpc.request('wallet_getEthWallets')
   },
+
+  web3Send: async (params: Object) => {
+    return rpc.request('blockchain_web3Send', params)
+  },
 }

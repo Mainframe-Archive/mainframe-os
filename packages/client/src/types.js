@@ -29,6 +29,11 @@ export type AppCheckPermissionResult = {
   result: PermissionCheckResult,
 }
 
+export type AppUserPermissionsSettings = {
+  grants: StrictPermissionsGrants,
+  permissionsChecked: boolean,
+}
+
 export type AppCloseParams = { sessID: ID }
 
 export type AppCreateParams = {
@@ -71,15 +76,18 @@ export type AppGetManifestDataResult = {
   data: PartialManifestData,
 }
 
+export type WalletSettings = {
+  defaultEthAccount: ?string,
+}
 export type AppUserSettings = {
-  permissions: StrictPermissionsGrants,
-  permissionsChecked: boolean,
+  permissionsSettings: AppUserPermissionsSettings,
+  walletSettings: WalletSettings,
 }
 
 export type AppInstallParams = {
   manifest: ManifestData,
   userID: ID,
-  settings: AppUserSettings,
+  permissionsSettings: AppUserPermissionsSettings,
 }
 
 export type AppInstallResult = { appID: ID }
@@ -104,10 +112,7 @@ export type AppOpenResult = {
   app: AppData,
   session: AppSession,
   user: IdentityOwnData,
-  defaultWallet: {
-    id: ID,
-    account: string,
-  },
+  defaultEthAccount: ?string,
 }
 
 export type AppPublishContentsParams = {
@@ -127,6 +132,12 @@ export type AppSetUserSettingsParams = {
   appID: ID,
   userID: ID,
   settings: AppUserSettings,
+}
+
+export type AppSetUserPermissionsSettingsParams = {
+  appID: ID,
+  userID: ID,
+  settings: AppUserPermissionsSettings,
 }
 
 export type AppSetPermissionParams = {
@@ -192,15 +203,9 @@ export type EthTransactionParams = {
   to: string,
   value: number,
   data: string,
-  gasLimit: number,
-  gasPrice: number,
+  gas: string,
+  gasPrice: string,
   chainId: string,
-}
-
-export type WalletEthSignTransactionParams = {
-  walletID: ID,
-  walletType: WalletTypes,
-  transactionData: EthTransactionParams,
 }
 
 export type WalletEthSignDataParams = {
@@ -211,7 +216,7 @@ export type WalletEthSignDataParams = {
 
 export type WalletSignTxParams = {
   chain: WalletSupportedChains,
-  transactionData: Object, // TODO: define
+  transactionData: EthTransactionParams,
 }
 
 export type WalletSignTxResult = string

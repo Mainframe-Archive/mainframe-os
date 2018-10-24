@@ -28,8 +28,8 @@ class SendFunds extends Component<ContextProps, State> {
     amount: '',
     data:
       '0x264762040000000000000000000000002343e938363c59c82b6fbabda2a2c40f00c92fb7',
-    // tokenAddress: '0xA46f1563984209fe47f8236f8B01a03f03F957E4', // TODO change to empty string
-    tokenAddress: '0x6E6Bda8B1ec708Bd4Ce4f000B464557657988806', // Stake
+    tokenAddress: '0xA46f1563984209fe47f8236f8B01a03f03F957E4', // TODO change to empty string
+    // tokenAddress: '0x6E6Bda8B1ec708Bd4Ce4f000B464557657988806', // Stake
     sendType: 'ether',
   }
 

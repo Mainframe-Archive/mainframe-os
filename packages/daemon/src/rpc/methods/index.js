@@ -21,6 +21,7 @@ export default {
   app_open: app.open,
   app_getAll: app.getAll,
   app_setPermission: app.setPermission,
+  app_setUserPermissionsSettings: app.setUserPermissionsSettings,
   app_setUserSettings: app.setUserSettings,
   // TODO: remove app for given user only
   // Options:

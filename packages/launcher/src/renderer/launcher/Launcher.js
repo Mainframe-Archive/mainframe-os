@@ -151,7 +151,7 @@ export default class App extends Component<{}, State> {
       if (
         !devMode &&
         havePermissionsToGrant(app.manifest.permissions) &&
-        (!user || !user.settings.permissionsChecked)
+        (!user || !user.settings.permissionsSettings.permissionsChecked)
       ) {
         // If this user hasn't used the app before
         // we need to ask to accept permissions
@@ -207,8 +207,8 @@ export default class App extends Component<{}, State> {
     ) {
       const { app, userID } = this.state.showModal.data
       try {
-        await rpc.setAppUserSettings(app.appID, userID, {
-          permissions: permissionSettings,
+        await rpc.setAppUserPermissionsSettings(app.appID, userID, {
+          grants: permissionSettings,
           permissionsChecked: true,
         })
         await this.getAppsAndUsers()

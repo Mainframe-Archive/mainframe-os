@@ -3,13 +3,12 @@
 import {
   LOCAL_ID_SCHEMA,
   type BlockchainWeb3SendParams,
-  type WalletSignTxParams,
-  type WalletSignTxResult,
+  type WalletGetEthWalletsResult,
 } from '@mainframe/client'
 import type { Subscription as RxSubscription } from 'rxjs'
 
 import { type AppContext, ContextSubscription } from '../contexts'
-import { userDeniedError, requestTransactionPermission } from '../permissions'
+import { withPermission } from '../permissions'
 
 class TopicSubscription extends ContextSubscription<RxSubscription> {
   data: ?RxSubscription
@@ -39,17 +38,10 @@ export const sandboxed = {
 
   // Wallet
 
-  wallet_signTx: async (
-    ctx: AppContext,
-    params: WalletSignTxParams,
-  ): Promise<WalletSignTxResult> => {
-    // TODO validate tx params
-    const granted = await requestTransactionPermission(ctx, params)
-    if (granted) {
-      return ctx.client.wallet.signTransaction(params)
-    }
-    throw userDeniedError('BLOCKCHAIN_SEND')
-  },
+  wallet_signTx: withPermission(
+    'BLOCKCHAIN_SEND',
+    (ctx: AppContext, params: any) => ctx.client.wallet.signTransaction(params),
+  ),
 
   wallet_getEthAccounts: async (ctx: AppContext): Promise<Array<string>> => {
     const ethWallets = await ctx.client.wallet.getEthWallets()
@@ -60,10 +52,10 @@ export const sandboxed = {
       return acc
     }, [])
     if (
-      ctx.appSession.defaultWallet &&
-      accounts.includes(ctx.appSession.defaultWallet.account)
+      ctx.appSession.defaultEthAccount &&
+      accounts.includes(ctx.appSession.defaultEthAccount)
     ) {
-      const defualtAccount = ctx.appSession.defaultWallet.account
+      const defualtAccount = ctx.appSession.defaultEthAccount
       accounts.splice(accounts.indexOf(defualtAccount), 1)
       accounts.unshift(defualtAccount)
     }
@@ -146,7 +138,14 @@ export const trusted = {
 
   wallet_getEthWallets: async (
     ctx: AppContext,
-  ): Promise<WalletGetAllResult> => {
+  ): Promise<WalletGetEthWalletsResult> => {
     return ctx.client.wallet.getEthWallets()
+  },
+
+  blockchain_web3Send: async (
+    ctx: AppContext,
+    params: BlockchainWeb3SendParams,
+  ): Promise<Object> => {
+    return ctx.client.blockchain.web3Send(params)
   },
 }

@@ -47,7 +47,9 @@ class WalletInfo extends Component<ContextProps, State> {
       content = (
         <View style={styles.container}>
           <Text style={styles.address}>{account}</Text>
-          <Text style={styles.balance}>{ethBalance} ETH</Text>
+          <Text style={styles.balance}>
+            {parseFloat(ethBalance).toFixed(8)} ETH
+          </Text>
         </View>
       )
     }

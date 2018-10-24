@@ -20,6 +20,7 @@
       "@mainframe/app-manifest",
       "@mainframe/app-permissions",
       "@mainframe/client",
+      "@mainframe/contract-utils",
       "@mainframe/config",
       "@mainframe/toolbox"
     ]
@@ -29,6 +30,7 @@
     "@mainframe/app-permissions": "*",
     "@mainframe/client": "*",
     "@mainframe/config": "*",
+    "@mainframe/contract-utils": "0.1.0",
     "@mainframe/rpc-electron": "^0.1.0",
     "@mainframe/rpc-handler": "^0.2.1",
     "@mainframe/toolbox": "*",

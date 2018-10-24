@@ -1,15 +1,24 @@
 // @flow
 
 import React, { Component } from 'react'
-import { View, StyleSheet, Switch, ScrollView } from 'react-native-web'
+import { View, StyleSheet, ScrollView } from 'react-native-web'
 import web3Utils from 'web3-utils'
-import Web3EthAbi from 'web3-eth-abi'
+import Web3Contract from 'web3-eth-contract'
+import {
+  ABI,
+  getERC20Data,
+  decodeTransactionData,
+  type ERC20DataResult,
+  type DecodedTxResult,
+} from '@mainframe/contract-utils'
 
-import rpc from './rpc'
-import colors from '../colors'
-import Text from '../UIComponents/Text'
-import Button from '../UIComponents/Button'
 import globalStyles from '../styles'
+import Text from '../UIComponents/Text'
+import colors from '../colors'
+import rpc from './rpc'
+import renderRPCProvider from './RPCProvider'
+
+Web3Contract.setProvider(renderRPCProvider)
 
 type Props = {
   transaction: {
@@ -26,39 +35,8 @@ type Props = {
 type State = {
   error?: ?string,
   wallets?: ?Object, // TODO define
-  txInfo?: {
-    params: Object,
-    signature: string,
-  },
-}
-
-const TRANSFER_SIG = 'a9059cbb'
-const APPROVE_SIG = '095ea7b3'
-const TRANSFER_FROM_SIG = '23b872dd'
-
-const METHOD_LABELS = {
-  [TRANSFER_SIG]: 'Transfer',
-  [APPROVE_SIG]: 'Approve',
-  [TRANSFER_FROM_SIG]: 'Transfer From',
-}
-
-const decodableERC20Methods = {
-  [TRANSFER_SIG]: [
-    // Transfer
-    { type: 'address', name: 'to' },
-    { type: 'uint256', name: 'amount' },
-  ],
-  [APPROVE_SIG]: [
-    // Approve
-    { type: 'address', name: 'spender' },
-    { type: 'uint256', name: 'amount' },
-  ],
-  [TRANSFER_FROM_SIG]: [
-    // transferFrom
-    { type: 'address', name: 'from' },
-    { type: 'address', name: 'to' },
-    { type: 'uint256', name: 'amount' },
-  ],
+  tokenInfo?: ERC20DataResult,
+  txInfo?: DecodedTxResult,
 }
 
 const truncateAddress = (address: string): string => {
@@ -71,10 +49,9 @@ const truncateAddress = (address: string): string => {
   return address
 }
 
-const sendSig = '0xa9059cbb'
-
 export default class WalletTxRequestView extends Component<Props, State> {
   state = {}
+  tokenContract: Web3Contract
 
   componentDidMount() {
     this.getEthWallets()
@@ -96,30 +73,16 @@ export default class WalletTxRequestView extends Component<Props, State> {
     const txData = transaction.data
     if (txData) {
       try {
-        const methodSig = txData.slice(2, 10)
-        const expectedParams = decodableERC20Methods[methodSig]
-        if (expectedParams) {
-          const paramsData = txData.slice(10, txData.length)
-          const params = Web3EthAbi.decodeParameters(expectedParams, paramsData)
-          const paramKeys = Object.keys(expectedParams).map(
-            k => expectedParams[k].name,
-          )
-          const cleanedParams = {}
-          Object.keys(params).forEach(k => {
-            if (paramKeys.includes(k)) {
-              cleanedParams[k] = params[k]
-            }
-          })
-          if (params.amount) {
-            params.amount = web3Utils.fromWei(params.amount) // TODO: Get token decimal
-          }
-          this.setState({
-            txInfo: {
-              signature: methodSig,
-              params: cleanedParams,
-            },
-          })
+        const txInfo = await decodeTransactionData(txData)
+        let tokenInfo
+        if (txInfo.contractType === 'ERC20') {
+          const contract = new Web3Contract(ABI.ERC20, transaction.to)
+          tokenInfo = await getERC20Data(contract, transaction.from)
         }
+        this.setState({
+          tokenInfo,
+          txInfo,
+        })
       } catch (err) {
         this.setState({ error: 'error decoding transaction data' })
       }
@@ -163,18 +126,18 @@ export default class WalletTxRequestView extends Component<Props, State> {
   }
 
   renderDetailed() {
-    const { txInfo } = this.state
+    const { txInfo, tokenInfo } = this.state
     const { transaction } = this.props
     // TODO Add alert if also sending eth
-    // TODO Get ticker
     if (txInfo) {
       const value = txInfo.params.amount
         ? web3Utils.fromWei(txInfo.params.amount)
         : 0
+      const ticker = tokenInfo ? tokenInfo.symbol : 'Tokens'
       return (
         <View style={styles.container}>
           <Text style={styles.header}>Sign Transaction</Text>
-          {this.renderAmount(value, 'MFT', METHOD_LABELS[txInfo.signature])}
+          {this.renderAmount(value, ticker, txInfo.signatureName)}
           {this.renderTransactionInfo(transaction.from, txInfo.params.to)}
         </View>
       )
@@ -219,6 +182,7 @@ export default class WalletTxRequestView extends Component<Props, State> {
   }
 
   render() {
+    // TODO Display activity when attempting to decode
     if (this.state.txInfo) {
       return this.renderDetailed()
     } else {
@@ -251,9 +215,6 @@ const styles = StyleSheet.create({
   methodTypeLabel: {
     color: colors.BRIGHT_BLUE,
     fontSize: 15,
-  },
-  addressLabel: {
-    maxWidth: 100,
   },
   transactionInfo: {
     borderColor: colors.LIGHT_GREY_DE,
