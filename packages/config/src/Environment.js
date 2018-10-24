@@ -73,7 +73,7 @@ export default class Environment {
   static async destroy(name: string) {
     const env = Environment.load(name)
     // Delete all environment folders
-    // $FlowFixMe Object.values losing type
+    // $FlowFixMe: Object.values() losing type
     await Promise.all(Object.values(env.paths).map(path => remove(path)))
 
     envsConf.delete(envKey(name))

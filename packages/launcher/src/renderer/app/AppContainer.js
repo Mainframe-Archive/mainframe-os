@@ -36,6 +36,7 @@ export type AppSessionData = {
 
 type Props = {
   appSession: AppSessionData,
+  partition: string,
 }
 
 export default class AppContainer extends Component<Props> {
@@ -80,6 +81,7 @@ export default class AppContainer extends Component<Props> {
           preload={preloadPath}
           style={{ flex: 1 }} // eslint-disable-line react-native/no-inline-styles
           sandboxed="true"
+          partition={this.props.partition}
         />
       </View>
     )

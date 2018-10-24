@@ -2,7 +2,7 @@ const assert = require('assert')
 const path = require('path')
 const os = require('os')
 const Application = require('spectron').Application
-const BzzAPI = require('erebos-api-bzz-node').default
+const BzzAPI = require('@erebos/api-bzz-node').default
 
 const getFixture = fixture => path.join(__dirname, '../../../fixtures', fixture)
 

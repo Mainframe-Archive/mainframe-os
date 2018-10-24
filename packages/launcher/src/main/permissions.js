@@ -9,6 +9,7 @@ export const userDeniedError = (key: PermissionKey) => {
 }
 
 export const interceptWebRequests = (context: AppContext) => {
+  const appPath = encodeURI(context.appSession.app.contentsPath)
   context.window.webContents.session.webRequest.onBeforeRequest(
     [],
     async (request, callback) => {
@@ -27,7 +28,6 @@ export const interceptWebRequests = (context: AppContext) => {
       // Allowing files loaded from apps contents
 
       if (urlParts.protocol === 'file:') {
-        const appPath = encodeURI(context.appSession.app.contentsPath)
         if (urlParts.path && urlParts.path.startsWith(appPath)) {
           // Loading app contents
           callback({ cancel: false })
