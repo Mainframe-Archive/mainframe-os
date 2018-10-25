@@ -118,6 +118,7 @@ export default class WalletsRepository {
         return {
           type: 'hd',
           walletID: pubKey,
+          mnemonic: hdWallet._mnemonic,
           accounts,
         }
       }

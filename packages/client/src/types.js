@@ -192,7 +192,12 @@ export type WalletResult = {
 
 export type WalletImportResult = WalletResult
 
-export type WalletCreateHDResult = WalletResult
+export type WalletCreateHDResult = {
+  walletID: ID,
+  type: WalletTypes,
+  accounts: Array<string>,
+  mnemonic: string,
+}
 
 export type WalletResults = Array<WalletResult>
 

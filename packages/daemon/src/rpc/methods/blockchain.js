@@ -13,7 +13,6 @@ export const web3Send = async (
 ): Promise<BlockchainWeb3SendResult> => {
   return new Promise((resolve, reject) => {
     ctx.web3Provider.send(params, (err, res) => {
-      console.log(err, res)
       if (err || res.error) {
         reject(err || res.error)
       } else {

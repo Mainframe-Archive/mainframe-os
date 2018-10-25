@@ -26,7 +26,6 @@ export const createHDWallet = {
     ctx: RequestContext,
     params: WalletCreateHDParams,
   ): Promise<WalletCreateHDResult> => {
-    // TODO define params
     const res = ctx.openVault.wallets.createHDWallet(params)
     await ctx.openVault.save()
     return res

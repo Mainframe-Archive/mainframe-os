@@ -5,7 +5,7 @@ export default {
   PRIMARY_RED: '#DA1157',
   PRIMARY_LIGHT_BLUE: '#00A7E7',
 
-  BRIGHT_BLUE: '#4896ec',
+  BRIGHT_BLUE: '#49A6E1',
 
   DARK_BLUE: '#132041',
   DARK_BLUE_1: '#0F1628',
@@ -13,6 +13,9 @@ export default {
   DARK_BLUE_GREY: '#1B1F2F',
   DARK_BLUE_SHADE_1: '#1E2D54',
 
+  LIGHT_GREEN_BG: '#e6f2bf',
+  LIGHT_GREEN_BORDER: '#d3e2a7',
+  DARK_GREEN_TEXT: '#535748',
   DARK_RED: '#C1154E',
 
   LIGHT_GREY_F7: '#f7f7f7',
