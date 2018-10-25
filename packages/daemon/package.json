@@ -54,6 +54,6 @@
     "web3": "^1.0.0-beta.36"
   },
   "devDependencies": {
-    "flow-bin": "^0.81.0"
+    "flow-bin": "^0.84.0"
   }
 }
