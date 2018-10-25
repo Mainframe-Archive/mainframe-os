@@ -8,7 +8,7 @@ import Command from '../../OpenVaultCommand'
 const KEY_FLAGS = {
   bzzURL: '--bzz-url',
   pssURL: '--pss-url',
-  web3HTTPProvider: '--web3-url',
+  ethURL: '--eth-url',
 }
 
 export default class VaultSettingsCommand extends Command {
@@ -21,7 +21,7 @@ export default class VaultSettingsCommand extends Command {
     'pss-url': flags.string({
       description: 'Swarm WebSocket URL (pss)',
     }),
-    'web3-url': flags.string({
+    'eth-url': flags.string({
       description: 'Ethereum HTTP URL',
     }),
   }
@@ -42,9 +42,9 @@ export default class VaultSettingsCommand extends Command {
       hasSettings = true
       settings.pssURL = this.flags['pss-url']
     }
-    if (this.flags['web3-url'] != null) {
+    if (this.flags['eth-url'] != null) {
       hasSettings = true
-      settings.web3HTTPProvider = this.flags['web3-url']
+      settings.ethURL = this.flags['eth-url']
     }
 
     const res = hasSettings

@@ -127,7 +127,7 @@ export const readVaultFile = async (
 export type UserSettings = {
   bzzURL: string,
   pssURL: string,
-  web3HTTPProvider: string,
+  ethURL: string,
 }
 
 export type VaultData = {
@@ -177,7 +177,7 @@ export default class Vault {
       settings: {
         bzzURL: 'http://swarm-gateways.net',
         pssURL: 'ws://localhost:8546',
-        web3HTTPProvider: 'https://mainnet.infura.io/KWLG1YOMaYgl4wiFlcJv',
+        ethURL: 'https://ropsten.infura.io/KWLG1YOMaYgl4wiFlcJv',
       },
       wallets: new WalletsRepository(),
     }
@@ -429,8 +429,8 @@ export default class Vault {
     this._data.settings.pssURL = url
   }
 
-  setWeb3HTTPProvider(provider: string): void {
-    this._data.settings.web3HTTPProvider = provider
+  setEthUrl(url: string): void {
+    this._data.settings.ethURL = url
   }
 
   // Vault lifecycle
