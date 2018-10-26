@@ -77,100 +77,18 @@ export default class App extends Component<null, State> {
       },
     ]
 
-    const tokenABI = [
-      {
-        constant: false,
-        inputs: [
-          {
-            name: 'to',
-            type: 'address',
-          },
-          {
-            name: 'value',
-            type: 'uint256',
-          },
-        ],
-        name: 'transfer',
-        outputs: [
-          {
-            name: '',
-            type: 'bool',
-          },
-        ],
-        payable: false,
-        stateMutability: 'nonpayable',
-        type: 'function',
-      },
-      {
-        constant: true,
-        inputs: [
-          {
-            name: '_address',
-            type: 'address',
-          },
-        ],
-        name: 'balanceOf',
-        outputs: [
-          {
-            name: 'balance',
-            type: 'uint256',
-          },
-        ],
-        payable: false,
-        stateMutability: 'view',
-        type: 'function',
-      },
-    ]
-
     try {
       const mfStakeAddr = '0xe3C2130530D77418b3e367Fe162808887526e74D'
-      const mfTokenAddr = '0xA46f1563984209fe47f8236f8B01a03f03F957E4'
       const contract = new this.web3.eth.Contract(abi, mfStakeAddr)
-      const tokenContract = new this.web3.eth.Contract(tokenABI, mfTokenAddr)
-      const accounts = await this.web3.eth.getAccounts()
-      const data = tokenContract.methods
-        .transfer('0xaAf7a7155101236f4067963EFc80252F32DC00DF', 10000)
-        .encodeABI()
-      console.log('data: ', data)
-      tokenContract.methods
-        .transfer('0xaAf7a7155101236f4067963EFc80252F32DC00DF', 10000)
-        .send({
-          from: accounts[0],
-          gasLimit: 500000,
-          gasPrice: 5000000000,
-        })
-        .on('transactionHash', console.log)
-        .on('receipt', receipt => {
-          console.log('Receipt: ', receipt)
-        })
-        .on('confirmation', (confirmationNumber, receipt) => {
-          console.log('confirmation:', confirmationNumber)
-        })
-        .on('error', console.error)
-      // const res1 = contract.methods
-      //   .balanceOf('0xaAf7a7155101236f4067963EFc80252F32DC00DF')
-      //   .call()
-      // const res = contract.methods
-      //   .balanceOf('0xaAf7a7155101236f4067963EFc80252F32DC00DF')
-      //   .send({
-      //     from: '0x9ab031781d234342f7765636ac2f557ef402fc38',
-      //     gasPrice: 100000,
-      //     gasLimit: 2000000,
-      //   })
-      console.log('waiting for result...')
-      // const latestBlock = await this.sdk.blockchain.getLatestBlock()
-      // const res = await this.sdk.blockchain.getContractEvents(
-      //   mfTokenAddr,
-      //   abi,
-      //   'Staked',
-      //   { fromBlock: 5916157, toBlock: latestBlock },
-      // )
-      // const data = this.formatData(res)
-      // this.setState({
-      //   stakingData: data,
-      // })
+      const res = await contract.getPastEvents('Staked', {
+        fromBlock: 5916157,
+        toBlock: 'latest',
+      })
+      const data = this.formatData(res)
+      this.setState({
+        stakingData: data,
+      })
     } catch (err) {
-      console.log('WEB3 ERROR:', err)
       this.setState({ requestErr: err })
     }
   }
@@ -191,7 +109,7 @@ export default class App extends Component<null, State> {
           res[rangeKey] = [e]
         }
       } else {
-        block = blockLimit
+        block = Math.floor(e.blockNumber / 10000) * 10000
         const rangeKey = `${block}`
         res[rangeKey] = [e]
       }

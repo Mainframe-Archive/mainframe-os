@@ -12,7 +12,7 @@ import {
 } from 'react-native-web'
 
 import applyContext, { type ContextProps } from './Context'
-import tokenABI from '../abi/ERC20'
+import { ABI } from '@mainframe/contract-utils'
 
 type State = {
   recipient: string,
@@ -103,7 +103,7 @@ class SendFunds extends Component<ContextProps, State> {
       return
     }
     const tokenContract = new web3.eth.Contract(
-      tokenABI,
+      ABI.ERC20,
       this.state.tokenAddress,
     )
     const accounts = await web3.eth.getAccounts()

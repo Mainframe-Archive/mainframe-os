@@ -160,8 +160,19 @@ export type AppWriteManifestParams = {
 
 // Blockchain
 
+export type EthTransactionParams = {
+  nonce: number,
+  from: string,
+  to: string,
+  value: number,
+  data: string,
+  gas: string,
+  gasPrice: string,
+  chainId: string,
+}
+
 export type BlockchainWeb3SendParams = {
-  transactionParams: Object, // TODO: define
+  transactionParams: EthTransactionParams,
   walletID: ID,
 }
 
@@ -205,17 +216,6 @@ export type WalletGetEthWalletsResult = {
   hd: WalletResults,
   simple: WalletResults,
   ledger: WalletResults,
-}
-
-export type EthTransactionParams = {
-  nonce: number,
-  from: string,
-  to: string,
-  value: number,
-  data: string,
-  gas: string,
-  gasPrice: string,
-  chainId: string,
 }
 
 export type WalletEthSignDataParams = {

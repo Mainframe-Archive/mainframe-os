@@ -45,16 +45,17 @@ export const sandboxed = {
 
   wallet_getEthAccounts: async (ctx: AppContext): Promise<Array<string>> => {
     const ethWallets = await ctx.client.wallet.getEthWallets()
-    // TODO might need to refactor wallets type
-    // or add seaprate call for only accounts
     const accounts = Object.keys(ethWallets).reduce((acc, key) => {
       ethWallets[key].forEach(w => acc.push(...w.accounts))
       return acc
     }, [])
     if (
+      // TODO: We'll also eventually want default
+      // accounts attached to identities
       ctx.appSession.defaultEthAccount &&
       accounts.includes(ctx.appSession.defaultEthAccount)
     ) {
+      // Move default account to top
       const defualtAccount = ctx.appSession.defaultEthAccount
       accounts.splice(accounts.indexOf(defualtAccount), 1)
       accounts.unshift(defualtAccount)

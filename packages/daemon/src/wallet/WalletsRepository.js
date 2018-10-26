@@ -143,7 +143,7 @@ export default class WalletsRepository {
           wallet = this.ethWallets.pk[firstSimpleWalletID]
           walletID = firstSimpleWalletID
         } else {
-          // Create a new Simple wallet
+          // Create a new PK wallet
           walletID = uniqueID()
           wallet = new PKWallet({ walletID, privateKeys: [] })
           this.ethWallets.pk[walletID] = wallet
@@ -206,10 +206,10 @@ export default class WalletsRepository {
     let wallet
     Object.keys(this.ethWallets).forEach(type => {
       Object.keys(this.ethWallets[type]).forEach(w => {
-        const keyring = this.ethWallets[type][w]
-        const foundWallet = keyring._walletByAddress(account)
-        if (foundWallet) {
-          wallet = keyring
+        const containingWallet = this.ethWallets[type][w]
+        const accountWallet = containingWallet._walletByAddress(account)
+        if (accountWallet) {
+          wallet = containingWallet
         }
       })
     })

@@ -5,8 +5,8 @@ module.exports = {
   entry: './src/index.js',
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'mainframe.production.js',
-    library: 'MainframeWeb3',
+    filename: 'ContractUtils.js',
+    library: 'ContractUtils',
     libraryTarget: 'umd',
   },
   module: {
