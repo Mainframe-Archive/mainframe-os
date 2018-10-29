@@ -53,13 +53,6 @@ describe('app-manifest', () => {
       {
         actual: undefined,
         expected: undefined,
-        field: 'author',
-        message: "The 'author' field is required!",
-        type: 'required',
-      },
-      {
-        actual: undefined,
-        expected: undefined,
         field: 'name',
         message: "The 'name' field is required!",
         type: 'required',
@@ -76,13 +69,6 @@ describe('app-manifest', () => {
         expected: undefined,
         field: 'contentsURI',
         message: "The 'contentsURI' field is required!",
-        type: 'required',
-      },
-      {
-        actual: undefined,
-        expected: undefined,
-        field: 'permissions',
-        message: "The 'permissions' field is required!",
         type: 'required',
       },
       {
@@ -223,13 +209,6 @@ describe('app-manifest', () => {
           expected: undefined,
           field: 'contentsURI',
           message: "The 'contentsURI' field is required!",
-          type: 'required',
-        },
-        {
-          actual: undefined,
-          expected: undefined,
-          field: 'permissions',
-          message: "The 'permissions' field is required!",
           type: 'required',
         },
         {

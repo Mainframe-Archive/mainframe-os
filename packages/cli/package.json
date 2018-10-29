@@ -34,7 +34,8 @@
     "@oclif/config": "^1.8.4",
     "@oclif/plugin-help": "^2.1.2",
     "cli-table": "^0.3.1",
-    "inquirer": "^6.2.0"
+    "inquirer": "^6.2.0",
+    "rxjs": "^6.3.3"
   },
   "devDependencies": {
     "flow-bin": "^0.81.0"
