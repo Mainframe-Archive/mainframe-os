@@ -34,7 +34,7 @@
     "@mainframe/client": "*",
     "@mainframe/config": "*",
     "@mainframe/data-types": "*",
-    "@mainframe/rpc-error": "^0.2.1",
+    "@mainframe/rpc-error": "^0.3.0",
     "@mainframe/rpc-handler": "^0.2.1",
     "@mainframe/rpc-stream": "^0.2.4",
     "@mainframe/rpc-ws-node": "^0.2.3",
