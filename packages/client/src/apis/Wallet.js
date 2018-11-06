@@ -8,6 +8,7 @@ import type {
   WalletImportMnemonicParams,
   WalletGetEthWalletsResult,
   WalletCreateHDResult,
+  WalletDeleteParams,
   WalletSignTxParams,
   WalletSignTxResult,
 } from '../types'
@@ -31,6 +32,10 @@ export default class WalletAPIs extends ClientAPIs {
     return this._rpc.request('wallet_importMnemonic', params)
   }
 
+  async deleteWallet(params: WalletDeleteParams): Promise<void> {
+    return this._rpc.request('wallet_delete', params)
+  }
+
   async getEthWallets(): Promise<WalletGetEthWalletsResult> {
     return this._rpc.request('wallet_getEthWallets')
   }
@@ -39,5 +44,13 @@ export default class WalletAPIs extends ClientAPIs {
     params: WalletSignTxParams,
   ): Promise<WalletSignTxResult> {
     return this._rpc.request('wallet_signTx', params)
+  }
+
+  async getLedgerEthAccounts(params: { pageNum: number }) {
+    return this._rpc.request('wallet_ledgerGetEthAccounts', params)
+  }
+
+  async addLedgerEthAccount(params: { index: number }) {
+    return this._rpc.request('wallet_ledgerAddEthAccount', params)
   }
 }

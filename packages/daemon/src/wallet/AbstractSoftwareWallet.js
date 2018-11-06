@@ -16,9 +16,9 @@ export type AbstractWalletParams = {
 
 export type AbstractWalletSerialized = AbstractWalletParams
 
-export default class PKWallet {
+export default class AbstractSoftwareWallet {
   _walletID: ID
-  _wallets: { [string]: EthWallet }
+  _wallets: { [index: number]: EthWallet }
 
   // Getters
 
@@ -26,53 +26,56 @@ export default class PKWallet {
     return this._walletID
   }
 
-  // Internal
+  getAccounts(): Array<string> {
+    throw new Error('Must be implemented')
+  }
 
-  _walletByAddress(address: string): ?EthWallet {
+  _accountWalletByAddress(address: string): ?EthWallet {
     const targetAddress = sigUtil.normalize(address)
-    let wallet
-    Object.keys(this._wallets).forEach(key => {
+    let accountWallet
+    const indexes: Array<number> = Object.keys(this._wallets).map(k =>
+      Number(k),
+    )
+    indexes.forEach(i => {
       const normalizedAddr = sigUtil.normalize(
-        this._wallets[key].getAddress().toString('hex'),
+        this._wallets[i].getAddress().toString('hex'),
       )
       if (normalizedAddr === targetAddress) {
-        wallet = this._wallets[key]
+        accountWallet = this._wallets[i]
       }
     })
-    return wallet
+    return accountWallet
   }
 
   // Public
 
-  getAccounts() {
-    // $FlowFixMe mapping type
-    return Object.keys(this._wallets).map((i: string) => {
-      const wallet = this._wallets[i]
-      return sigUtil.normalize(wallet.getAddress().toString('hex'))
-    })
+  containsAccount(account: string): boolean {
+    return !!this._accountWalletByAddress(account)
   }
 
   signTransaction(params: EthTransactionParams): string {
-    const wallet = this._walletByAddress(params.from)
+    const accountWallet = this._accountWalletByAddress(params.from)
 
-    if (!wallet) {
+    if (!accountWallet) {
       throw new Error('Invalid from address')
     }
 
     const tx = new EthereumTx(params)
-    tx.sign(wallet.getPrivateKey())
+    tx.sign(accountWallet.getPrivateKey())
     return addHexPrefix(tx.serialize().toString('hex'))
   }
 
   sign(params: WalletEthSignDataParams) {
-    const wallet = this._walletByAddress(params.address)
+    const accountWallet = this._accountWalletByAddress(params.address)
 
-    if (!wallet) {
+    if (!accountWallet) {
       throw new Error('Invalid address')
     }
 
     return addHexPrefix(
-      sigUtil.personalSign(wallet.getPrivateKey(), { data: params.data }),
+      sigUtil.personalSign(accountWallet.getPrivateKey(), {
+        data: params.data,
+      }),
     )
   }
 }

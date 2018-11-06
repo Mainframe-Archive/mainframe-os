@@ -168,7 +168,7 @@ export type EthTransactionParams = {
   data: string,
   gas: string,
   gasPrice: string,
-  chainId: string,
+  chainId: number,
 }
 
 export type BlockchainWeb3SendParams = {
@@ -212,6 +212,12 @@ export type WalletCreateHDResult = {
 
 export type WalletResults = Array<WalletResult>
 
+export type WalletDeleteParams = {
+  chain: string,
+  type: WalletTypes,
+  walletID: ID,
+}
+
 export type WalletGetEthWalletsResult = {
   hd: WalletResults,
   simple: WalletResults,
@@ -230,6 +236,16 @@ export type WalletSignTxParams = {
 }
 
 export type WalletSignTxResult = string
+
+export type WalletGetLedgerEthAccountsParams = {
+  pageNum: number,
+}
+
+export type WalletGetLedgerEthAccountsResult = Array<string>
+
+export type WalletAddLedgerEthAccountParams = {
+  index: number,
+}
 
 // Identity
 
@@ -260,6 +276,7 @@ export type VaultSettings = {
   bzzURL: string,
   pssURL: string,
   ethURL: string,
+  ethChainID: number,
 }
 
 export type VaultSettingsParams = $Shape<VaultSettings>

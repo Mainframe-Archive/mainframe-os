@@ -128,6 +128,7 @@ export type UserSettings = {
   bzzURL: string,
   pssURL: string,
   ethURL: string,
+  ethChainID: number,
 }
 
 export type VaultData = {
@@ -178,6 +179,7 @@ export default class Vault {
         bzzURL: 'http://swarm-gateways.net',
         pssURL: 'ws://localhost:8546',
         ethURL: 'https://ropsten.infura.io/KWLG1YOMaYgl4wiFlcJv',
+        ethChainID: 3, // Mainnet 1, Ropsten 3, Rinkeby 4, Kovan 42, Local (ganache) 1977
       },
       wallets: new WalletsRepository(),
     }
@@ -431,6 +433,10 @@ export default class Vault {
 
   setEthUrl(url: string): void {
     this._data.settings.ethURL = url
+  }
+
+  setEthChainID(chainID: number): void {
+    this._data.settings.ethChainID = chainID
   }
 
   // Vault lifecycle

@@ -155,6 +155,20 @@ export const WALLET_IMPORT_MNEMONIC_SCHEMA = {
   mnemonic: 'string',
 }
 
+export const WALLET_DELETE_SCHEMA = {
+  chain: WALLET_SUPPORTED_CHAIN_SCHEMA,
+  type: WALLET_TYPE_SCHEMA,
+  walletID: LOCAL_ID_SCHEMA,
+}
+
+export const WALLET_GET_LEDGER_ETH_ACCOUNTS_SCHEMA = {
+  pageNum: 'number',
+}
+
+export const WALLET_ADD_LEDGER_ETH_ACCOUNT_SCHEMA = {
+  index: 'number',
+}
+
 export const ETH_TRANSACTION_SCHEMA = {
   nonce: 'number',
   from: 'string',
