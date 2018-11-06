@@ -41,6 +41,7 @@ export const sandboxed = {
   wallet_signTx: withPermission(
     'BLOCKCHAIN_SEND',
     (ctx: AppContext, params: any) => ctx.client.wallet.signTransaction(params),
+    // TODO notify app if using ledger to feedback awaiting sign
   ),
 
   wallet_getEthAccounts: async (ctx: AppContext): Promise<Array<string>> => {

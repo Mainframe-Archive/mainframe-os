@@ -6,11 +6,16 @@
   "bin": {
     "mainframe-daemon": "./bin/run"
   },
-  "files": ["/bin", "/lib"],
+  "files": [
+    "/bin",
+    "/lib"
+  ],
   "oclif": {
     "commands": "./lib/cli/commands",
     "bin": "mainframe-daemon",
-    "plugins": ["@oclif/plugin-help"]
+    "plugins": [
+      "@oclif/plugin-help"
+    ]
   },
   "scripts": {
     "clean": "del lib",
@@ -24,6 +29,8 @@
   "dependencies": {
     "@erebos/api-bzz-node": "^0.4.1",
     "@erebos/api-pss": "^0.4.0",
+    "@ledgerhq/hw-app-eth": "^4.24.0",
+    "@ledgerhq/hw-transport-node-hid": "^4.24.0",
     "@mainframe/app-manifest": "*",
     "@mainframe/app-permissions": "*",
     "@mainframe/client": "*",
@@ -52,7 +59,8 @@
     "multibase": "^0.5.0",
     "rxjs": "^6.3.3",
     "web3-provider-engine": "^14.0.6",
-    "web3-providers-http": "^1.0.0-beta.36"
+    "web3-providers-http": "^1.0.0-beta.36",
+    "web3-utils": "^1.0.0-beta.36"
   },
   "devDependencies": {
     "flow-bin": "^0.81.0"
