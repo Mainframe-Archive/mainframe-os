@@ -177,4 +177,8 @@ export default {
   wallet_createEth: (ctx: LauncherContext): Promise<WalletCreateHDResult> => {
     return ctx.client.wallet.createHDWallet({ chain: 'ethereum' })
   },
+
+  wallet_getEthWallets: (ctx: LauncherContext) => {
+    return ctx.client.wallet.getEthWallets()
+  },
 }

@@ -2,6 +2,8 @@
 
 import ClientAPIs from '../ClientAPIs'
 import type {
+  WalletAddHDAccountParams,
+  WalletAddHDAccountResult,
   WalletCreateHDParams,
   WalletImportPKParams,
   WalletImportResult,
@@ -30,6 +32,12 @@ export default class WalletAPIs extends ClientAPIs {
     params: WalletImportMnemonicParams,
   ): Promise<WalletImportResult> {
     return this._rpc.request('wallet_importMnemonic', params)
+  }
+
+  async addHDWalletAccount(
+    params: WalletAddHDAccountParams,
+  ): Promise<WalletAddHDAccountResult> {
+    return this._rpc.request('wallet_addHDAccount', params)
   }
 
   async deleteWallet(params: WalletDeleteParams): Promise<void> {

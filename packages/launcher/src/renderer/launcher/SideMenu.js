@@ -1,9 +1,13 @@
 //@flow
 
-import type { IdentityGetOwnUsersResult as OwnIdentities } from '@mainframe/client'
+import type {
+  IdentityGetOwnUsersResult as OwnIdentities,
+  WalletGetEthWalletsResult as Wallets,
+} from '@mainframe/client'
 import React, { Component } from 'react'
 import { View, TouchableOpacity, StyleSheet } from 'react-native-web'
 
+import { truncateAddress } from '../../utils'
 import Text from '../UIComponents/Text'
 import Icon from '../UIComponents/Icon'
 import colors from '../colors'
@@ -12,6 +16,7 @@ type Props = {
   onToggleDevMode: () => void,
   devMode?: boolean,
   identities: OwnIdentities,
+  wallets?: Wallets,
 }
 
 export default class SideMenu extends Component<Props> {
@@ -35,6 +40,39 @@ export default class SideMenu extends Component<Props> {
     )
   }
 
+  renderWallets() {
+    if (!this.props.wallets) {
+      return null
+    }
+    const walletList = Object.keys(this.props.wallets).map(type => {
+      let accounts = []
+      this.props.wallets[type].forEach(w => {
+        const addresses = w.accounts.map(a => {
+          return (
+            <View key={a}>
+              <Text style={styles.sideBarLabel}>{truncateAddress(a)}</Text>
+            </View>
+          )
+        })
+        accounts = accounts.concat(addresses)
+      })
+      return (
+        <View key={type}>
+          <View style={styles.walletType}>
+            <Text style={styles.walletTypeLabel}>{type} wallets</Text>
+          </View>
+          {accounts}
+        </View>
+      )
+    })
+    return (
+      <View>
+        <Text style={styles.sideBarHeader}>WALLETS</Text>
+        {walletList}
+      </View>
+    )
+  }
+
   render() {
     const sideBarStyles = [styles.sideBarView]
     const devToggleStyles = [styles.devToggleButton]
@@ -46,6 +84,7 @@ export default class SideMenu extends Component<Props> {
     return (
       <View style={sideBarStyles}>
         {this.renderUsers()}
+        {this.renderWallets()}
         <TouchableOpacity
           style={devToggleStyles}
           testID="launcher-toggle-dev-button"
@@ -80,6 +119,13 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     fontSize: 13,
     color: colors.WHITE,
+  },
+  walletType: {
+    marginTop: 8,
+  },
+  walletTypeLabel: {
+    fontSize: 12,
+    color: colors.LIGHT_GREY_BLUE,
   },
   devToggleButton: {
     position: 'absolute',

@@ -66,4 +66,5 @@ export default {
       chain: 'ethereum',
     }),
   createEthWallet: () => rpc.request('wallet_createEth'),
+  getEthWallets: () => rpc.request('wallet_getEthWallets'),
 }

@@ -1,11 +1,12 @@
 // @flow
 import {
+  type WalletAddHDAccountParams,
+  type WalletCreateHDParams,
+  type WalletImportMnemonicParams,
+  type WalletImportPKParams,
+  type WalletResult,
   type WalletSignTxParams,
   type WalletSignTxResult,
-  type WalletCreateHDParams,
-  type WalletImportPKParams,
-  type WalletImportMnemonicParams,
-  type WalletResult,
   type WalletTypes,
   idType as idTypeToClient,
   type ID,
@@ -202,6 +203,16 @@ export default class WalletsRepository {
     }
   }
 
+  addHDWalletAccount(params: WalletAddHDAccountParams): string {
+    if (!this.ethWallets.hd[params.walletID]) {
+      throw new Error('Wallet not found')
+    }
+    const address = this.ethWallets.hd[params.walletID].addAccounts([
+      params.index,
+    ])
+    return address[0]
+  }
+
   deleteWallet(params: { chain: string, type: WalletTypes, walletID: ID }) {
     if (!this._wallets[params.chain]) {
       throw new Error(`Unsupported chain ${params.chain}`)
@@ -210,19 +221,6 @@ export default class WalletsRepository {
       throw new Error(`Invalid wallet type ${params.type}`)
     }
     delete this._wallets[params.chain][params.type][params.walletID]
-  }
-
-  // Signing
-
-  async signTransaction(
-    params: WalletSignTxParams,
-  ): Promise<WalletSignTxResult> {
-    switch (params.chain) {
-      case 'ethereum':
-        return this.signEthTransaction(params)
-      default:
-        throw new Error(`Unsupported blockchain type: ${params.chain}`)
-    }
   }
 
   getEthWalletByAccount(account: string): ?AbstractWallet {
@@ -237,6 +235,19 @@ export default class WalletsRepository {
       })
     })
     return wallet
+  }
+
+  // Signing
+
+  async signTransaction(
+    params: WalletSignTxParams,
+  ): Promise<WalletSignTxResult> {
+    switch (params.chain) {
+      case 'ethereum':
+        return this.signEthTransaction(params)
+      default:
+        throw new Error(`Unsupported blockchain type: ${params.chain}`)
+    }
   }
 
   async signEthTransaction(

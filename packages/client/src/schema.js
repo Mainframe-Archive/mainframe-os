@@ -169,6 +169,11 @@ export const WALLET_ADD_LEDGER_ETH_ACCOUNT_SCHEMA = {
   index: 'number',
 }
 
+export const WALLET_ADD_HD_ACCOUNT_SCHEMA = {
+  walletID: 'string',
+  index: 'number',
+}
+
 export const ETH_TRANSACTION_SCHEMA = {
   nonce: 'number',
   from: 'string',

@@ -247,6 +247,13 @@ export type WalletAddLedgerEthAccountParams = {
   index: number,
 }
 
+export type WalletAddHDAccountParams = {
+  index: number,
+  walletID: ID,
+}
+
+export type WalletAddHDAccountResult = string
+
 // Identity
 
 export type IdentityCreateDeveloperParams = {

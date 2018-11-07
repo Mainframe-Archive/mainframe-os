@@ -71,7 +71,7 @@ export default class HDWallet extends AbstractSoftwareWallet {
   getAccounts(): Array<string> {
     // $FlowFixMe mapping type
     return Object.keys(this._wallets).map(i => {
-      const wallet = this._wallets[i]
+      const wallet = this._wallets[Number(i)]
       return sigUtil.normalize(wallet.getAddress().toString('hex'))
     })
   }
@@ -81,10 +81,12 @@ export default class HDWallet extends AbstractSoftwareWallet {
   addAccounts(indexes: Array<number>): Array<string> {
     const newWallets = []
     indexes.forEach(i => {
-      const child = this._root.deriveChild(i)
-      const wallet = child.getWallet()
-      newWallets.push(wallet)
-      this._wallets[i] = wallet
+      if (!this._wallets[i]) {
+        const child = this._root.deriveChild(i)
+        const wallet = child.getWallet()
+        newWallets.push(wallet)
+        this._wallets[Number(i)] = wallet
+      }
     })
     const hexWallets = newWallets.map(w => {
       return sigUtil.normalize(w.getAddress().toString('hex'))

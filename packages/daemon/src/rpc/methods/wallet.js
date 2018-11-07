@@ -9,6 +9,9 @@ import {
   WALLET_DELETE_SCHEMA,
   WALLET_GET_LEDGER_ETH_ACCOUNTS_SCHEMA,
   WALLET_ADD_LEDGER_ETH_ACCOUNT_SCHEMA,
+  WALLET_ADD_HD_ACCOUNT_SCHEMA,
+  type WalletAddHDAccountParams,
+  type WalletAddHDAccountResult,
   type WalletCreateHDParams,
   type WalletCreateHDResult,
   type WalletImportPKParams,
@@ -64,6 +67,18 @@ export const importMnemonic = {
   },
 }
 
+export const addHDAccount = {
+  params: WALLET_ADD_HD_ACCOUNT_SCHEMA,
+  handler: async (
+    ctx: RequestContext,
+    params: WalletAddHDAccountParams,
+  ): Promise<WalletAddHDAccountResult> => {
+    const newAddress = ctx.openVault.wallets.addHDWalletAccount(params)
+    await ctx.openVault.save()
+    return newAddress
+  },
+}
+
 export const deleteWallet = {
   params: WALLET_DELETE_SCHEMA,
   handler: async (
@@ -107,8 +122,6 @@ export const signTransaction = {
     return ctx.openVault.wallets.signTransaction(params)
   },
 }
-
-// TODO addHDWalletAccount
 
 export const getLedgerEthAccounts = {
   params: WALLET_GET_LEDGER_ETH_ACCOUNTS_SCHEMA,

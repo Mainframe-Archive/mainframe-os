@@ -15,6 +15,7 @@ import {
 import globalStyles from '../styles'
 import Text from '../UIComponents/Text'
 import colors from '../colors'
+import { truncateAddress } from '../../utils'
 import rpc from './rpc'
 import renderRPCProvider from './RPCProvider'
 
@@ -37,16 +38,6 @@ type State = {
   wallets?: ?Object, // TODO define
   tokenInfo?: ERC20DataResult,
   txInfo?: DecodedTxResult,
-}
-
-const truncateAddress = (address: string): string => {
-  if (web3Utils.isAddress(address)) {
-    const length = address.length
-    const start = address.slice(0, 8)
-    const end = address.slice(length - 5, length)
-    return start + '...' + end
-  }
-  return address
 }
 
 export default class WalletTxRequestView extends Component<Props, State> {
