@@ -31,6 +31,7 @@ This project is in alpha, lots of breaking changes are to be expected between re
 
 - [Node](https://nodejs.org/en/) v10+ (includes npm)
 - [Yarn](https://yarnpkg.com/lang/en/) (optional - faster alternative to npm)
+- [Homebrew](https://brew.sh/) for mac setup
 
 ### Setup
 
@@ -39,6 +40,8 @@ Each package contains (or will contain) a readme with further information pertai
 In the root of the project, install node dependencies:
 
 ```
+brew update && brew upgrade
+brew install libtool autoconf automake
 yarn install
 yarn bootstrap
 yarn build
