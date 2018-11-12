@@ -59,6 +59,7 @@ type AppData = AppOwnData | AppInstalledData
 export default class App extends Component<{}, State> {
   state = {
     showModal: undefined,
+    wallets: undefined,
     devMode: false,
     showAppInstallModal: false,
     identities: {

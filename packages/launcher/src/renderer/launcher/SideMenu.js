@@ -44,9 +44,10 @@ export default class SideMenu extends Component<Props> {
     if (!this.props.wallets) {
       return null
     }
-    const walletList = Object.keys(this.props.wallets).map(type => {
+    const userWallets = this.props.wallets // for flow
+    const walletList = Object.keys(userWallets).map(type => {
       let accounts = []
-      this.props.wallets[type].forEach(w => {
+      userWallets[type].forEach(w => {
         const addresses = w.accounts.map(a => {
           return (
             <View key={a}>

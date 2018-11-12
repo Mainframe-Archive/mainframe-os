@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/node:10-browsers
+      - image: circleci/node:10-stretch-browsers
 
     working_directory: ~/repo
 
@@ -14,18 +14,23 @@ jobs:
             # fallback to using the latest cache if no exact match is found
             - v1-dependencies
       - run:
+          name: Install libudev-dev
+          command: |
+            sudo apt-get update
+            sudo apt-get install build-essential libudev-dev -y
+      - run:
           name: Setup
-          command: yarn install && yarn bootstrap
+          command: npm install && npm run bootstrap
       - save_cache:
           paths:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
       - run:
           name: Build and check
-          command: yarn build && yarn lint && yarn test:types
+          command: npm run build && npm run lint && npm run test:types
       - run:
           name: Project tests
-          command: yarn test:ci
+          command: npm run test:ci
           environment:
             JEST_JUNIT_OUTPUT: '/tmp/test-reports/jest/results.xml'
       - run:
@@ -37,6 +42,6 @@ jobs:
           background: true
       - run:
           name: Integration tests
-          command: cd ./packages/launcher && yarn dist:ci && yarn test
+          command: cd ./packages/launcher && npm run dist:ci && npm run test
       - store_test_results:
           path: /tmp/test-reports

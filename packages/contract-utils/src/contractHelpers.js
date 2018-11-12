@@ -54,9 +54,11 @@ export const getERC20Data = async (
   contract: Web3Contract,
   userAddr: string,
 ): Promise<ERC20DataResult> => {
-  const symbol = await contract.methods.symbol().call()
-  const decimals = await contract.methods.decimals().call()
-  const balanceWei = await contract.methods.balanceOf(userAddr).call()
+  const [symbol, decimals, balanceWei] = await Promise.all([
+    contract.methods.symbol().call(),
+    contract.methods.decimals().call(),
+    contract.methods.balanceOf(userAddr).call(),
+  ])
   const decimalsString = Math.pow(10, decimals).toString()
   const unit = Object.keys(web3Utils.unitMap).find(unitName => {
     const unit = web3Utils.unitMap[unitName]

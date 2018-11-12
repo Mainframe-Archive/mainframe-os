@@ -20,9 +20,6 @@ export type WalletAccount = string
 export type IdentityOwnData = {
   id: ID,
   data: Object,
-}
-
-export type IdentityOwnUserData = IdentityOwnData & {
   ethWallets: { [walletID: ID]: Array<WalletAccount> },
 }
 
@@ -118,7 +115,7 @@ export type AppSession = {
 export type AppOpenResult = {
   app: AppData,
   session: AppSession,
-  user: IdentityOwnUserData,
+  user: IdentityOwnData,
   defaultEthAccount: ?string,
 }
 
@@ -278,7 +275,7 @@ export type IdentityGetOwnDevelopersResult = {
 }
 
 export type IdentityGetOwnUsersResult = {
-  users: Array<IdentityOwnUserData>,
+  users: Array<IdentityOwnData>,
 }
 
 export type IdentityLinkEthWalletAccountParams = {

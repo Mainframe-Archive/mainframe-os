@@ -8,15 +8,17 @@ import AbstractSoftwareWallet, {
   type AbstractWalletParams,
 } from './AbstractSoftwareWallet'
 
+type AccountIndex = string
+
 type HDWalletParams = AbstractWalletParams & {
   mnemonic: string,
   hdPath?: string,
-  activeAccounts?: Array<number>,
+  activeAccounts?: Array<AccountIndex>,
 }
 
 export type HDWalletSerialized = HDWalletParams
 
-const hdPathString = `m/44'/60'/0'/0`
+const HD_PATH_STRING = `m/44'/60'/0'/0`
 
 export default class HDWallet extends AbstractSoftwareWallet {
   static fromJSON = (params: HDWalletSerialized): HDWallet =>
@@ -31,19 +33,19 @@ export default class HDWallet extends AbstractSoftwareWallet {
   })
 
   _hdKey: HDkey
-  _root: Object
+  _root: HDkey
   _mnemonic: string
   _hdPath: string
 
   constructor(params?: HDWalletParams) {
     super()
     this._wallets = {}
-    this._hdPath = params && params.hdPath ? params.hdPath : hdPathString
+    this._hdPath = params && params.hdPath ? params.hdPath : HD_PATH_STRING
     if (params) {
       this._walletID = params.walletID
       this._initFromMnemonic(params.mnemonic)
       if (params.activeAccounts && params.activeAccounts.length) {
-        this.addAccounts(params.activeAccounts)
+        this.addAccounts(params.activeAccounts.map(a => Number(a)))
       }
     } else {
       this._initFromMnemonic(bip39.generateMnemonic())
@@ -71,7 +73,7 @@ export default class HDWallet extends AbstractSoftwareWallet {
   getAccounts(): Array<string> {
     // $FlowFixMe mapping type
     return Object.keys(this._wallets).map(i => {
-      const wallet = this._wallets[Number(i)]
+      const wallet = this._wallets[i]
       return sigUtil.normalize(wallet.getAddress().toString('hex'))
     })
   }
@@ -81,11 +83,11 @@ export default class HDWallet extends AbstractSoftwareWallet {
   addAccounts(indexes: Array<number>): Array<string> {
     const newWallets = []
     indexes.forEach(i => {
-      if (!this._wallets[i]) {
+      if (!this._wallets[String(i)]) {
         const child = this._root.deriveChild(i)
         const wallet = child.getWallet()
         newWallets.push(wallet)
-        this._wallets[Number(i)] = wallet
+        this._wallets[String(i)] = wallet
       }
     })
     const hexWallets = newWallets.map(w => {

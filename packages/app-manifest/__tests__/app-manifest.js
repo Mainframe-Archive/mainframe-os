@@ -118,7 +118,7 @@ describe('app-manifest', () => {
         expected: 3,
         field: 'name',
         message:
-          "The 'name' field length must be larger than or equal to 3 characters long!",
+          "The 'name' field length must be greater than or equal to 3 characters long!",
         type: 'stringMin',
       },
       {

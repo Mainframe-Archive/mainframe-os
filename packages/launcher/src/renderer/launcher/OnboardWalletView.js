@@ -24,7 +24,7 @@ type State = {
   successMsg?: ?string,
 }
 
-export default class VaultManagerModal extends Component<Props, State> {
+export default class OnboardWalletView extends Component<Props, State> {
   constructor(props: Props) {
     super(props)
     this.state = {

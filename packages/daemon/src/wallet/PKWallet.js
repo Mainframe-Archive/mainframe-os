@@ -21,7 +21,7 @@ export default class PKWallet extends AbstractSoftwareWallet {
   static toJSON = (pkWallet: PKWallet): PKWalletSerialized => ({
     walletID: pkWallet._walletID,
     privateKeys: Object.keys(pkWallet._wallets).map(k => {
-      return pkWallet._wallets[Number(k)].getPrivateKey().toString('hex')
+      return pkWallet._wallets[k].getPrivateKey().toString('hex')
     }),
   })
 
@@ -46,7 +46,7 @@ export default class PKWallet extends AbstractSoftwareWallet {
 
   _getWalletFromPrivateKey(privateKey: string): EthWallet {
     const strippedKey = stripHexPrefix(privateKey)
-    const buffer = new Buffer(strippedKey, 'hex')
+    const buffer = Buffer.from(strippedKey, 'hex')
     return EthWallet.fromPrivateKey(buffer)
   }
 

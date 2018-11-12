@@ -27,7 +27,7 @@ import {
   type WalletSignTxResult,
   type WalletTypes,
 } from '@mainframe/client'
-import ledgerClient from '../../wallet/LedgerClient'
+import ledgerClient from '../../wallet/ledgerClient'
 
 import type RequestContext from '../RequestContext'
 

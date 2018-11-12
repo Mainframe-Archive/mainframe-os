@@ -51,7 +51,13 @@ export const getOwnDevelopers = (
 ): IdentityGetOwnDevelopersResult => {
   const { ownDevelopers } = ctx.openVault.identities
   const developers = Object.keys(ownDevelopers).map(id => {
-    return { id: toClientID(id), data: ownDevelopers[id].data }
+    const wallets =
+      ctx.openVault.identityWallets.walletsByIdentity[toClientID(id)] || {}
+    return {
+      id: toClientID(id),
+      data: ownDevelopers[id].data,
+      ethWallets: wallets,
+    }
   })
   return { developers }
 }

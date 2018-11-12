@@ -84,7 +84,7 @@ export const APP_SET_USER_SETTINGS_SCHEMA = {
   settings: {
     type: 'object',
     props: {
-      permissionsSetings: APP_PERMISSIONS_SETTINGS_SCHEMA,
+      permissionsSettings: APP_PERMISSIONS_SETTINGS_SCHEMA,
       walletSettings: {
         type: 'object',
         props: {

@@ -18,7 +18,7 @@ export type AbstractWalletSerialized = AbstractWalletParams
 
 export default class AbstractSoftwareWallet {
   _walletID: ID
-  _wallets: { [index: number]: EthWallet }
+  _wallets: { [index: string]: EthWallet }
 
   // Getters
 
@@ -33,9 +33,7 @@ export default class AbstractSoftwareWallet {
   _accountWalletByAddress(address: string): ?EthWallet {
     const targetAddress = sigUtil.normalize(address)
     let accountWallet
-    const indexes: Array<number> = Object.keys(this._wallets).map(k =>
-      Number(k),
-    )
+    const indexes: Array<string> = Object.keys(this._wallets)
     indexes.forEach(i => {
       const normalizedAddr = sigUtil.normalize(
         this._wallets[i].getAddress().toString('hex'),

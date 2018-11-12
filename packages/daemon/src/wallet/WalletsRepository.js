@@ -20,7 +20,7 @@ import HDWallet, { type HDWalletSerialized } from './HDWallet'
 import PKWallet, { type PKWalletSerialized } from './PKWallet'
 import LedgerWallet, { type LedgerWalletSerialized } from './LedgerWallet'
 import AbstractWallet from './AbstractSoftwareWallet'
-import ledgerClient from './LedgerClient'
+import ledgerClient from './ledgerClient'
 
 const hdWalletsToJSON = mapObject(HDWallet.toJSON)
 const hdWalletsFromJSON = mapObject(HDWallet.fromJSON)

@@ -8,7 +8,7 @@ import type {
 } from '@mainframe/client'
 import { uniqueID, type ID } from '@mainframe/utils-id'
 
-import ledgerClient from './LedgerClient'
+import ledgerClient from './ledgerClient'
 import { type AbstractWalletParams } from './AbstractSoftwareWallet'
 
 type AccountAddress = string

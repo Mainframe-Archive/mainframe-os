@@ -1,7 +1,7 @@
 //@flow
 import type StreamRPC from '@mainframe/rpc-stream'
 
-import Subprovider from 'web3-provider-engine/subproviders/subprovider.js'
+import Subprovider from 'web3-provider-engine/subproviders/subprovider'
 
 type Callback = (?Error, ?any) => any
 

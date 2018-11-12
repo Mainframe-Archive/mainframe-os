@@ -57,9 +57,9 @@ export const sandboxed = {
       accounts.includes(ctx.appSession.defaultEthAccount)
     ) {
       // Move default account to top
-      const defualtAccount = ctx.appSession.defaultEthAccount
-      accounts.splice(accounts.indexOf(defualtAccount), 1)
-      accounts.unshift(defualtAccount)
+      const defaultAccount = ctx.appSession.defaultEthAccount
+      accounts.splice(accounts.indexOf(defaultAccount), 1)
+      accounts.unshift(defaultAccount)
     }
     return accounts
   },
