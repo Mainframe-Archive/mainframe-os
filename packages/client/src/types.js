@@ -16,8 +16,15 @@ export type { ID } from '@mainframe/utils-id'
 
 export type WalletTypes = 'hd' | 'pk' | 'ledger'
 export type WalletSupportedChains = 'ethereum'
+export type WalletAccount = string
+export type IdentityOwnData = {
+  id: ID,
+  data: Object,
+}
 
-export type IdentityOwnData = { id: ID, data: Object }
+export type IdentityOwnUserData = IdentityOwnData & {
+  ethWallets: { [walletID: ID]: Array<WalletAccount> },
+}
 
 export type AppCheckPermissionParams = {
   sessID: ID,
@@ -111,7 +118,7 @@ export type AppSession = {
 export type AppOpenResult = {
   app: AppData,
   session: AppSession,
-  user: IdentityOwnData,
+  user: IdentityOwnUserData,
   defaultEthAccount: ?string,
 }
 
@@ -180,10 +187,6 @@ export type BlockchainWeb3SendResult = any
 
 // Wallet
 
-export type WalletCreateHDParams = {
-  chain: WalletSupportedChains,
-}
-
 export type WalletImportMnemonicParams = {
   chain: WalletSupportedChains,
   mnemonic: string,
@@ -202,6 +205,10 @@ export type WalletResult = {
 }
 
 export type WalletImportResult = WalletResult
+
+export type WalletCreateHDParams = {
+  chain: WalletSupportedChains,
+}
 
 export type WalletCreateHDResult = {
   walletID: ID,
@@ -271,8 +278,22 @@ export type IdentityGetOwnDevelopersResult = {
 }
 
 export type IdentityGetOwnUsersResult = {
-  users: Array<IdentityOwnData>,
+  users: Array<IdentityOwnUserData>,
 }
+
+export type IdentityLinkEthWalletAccountParams = {
+  id: ID,
+  walletID: ID,
+  address: string,
+}
+
+export type IdentityUnlinkEthWalletAccountParams = {
+  id: ID,
+  walletID: ID,
+  address: string,
+}
+
+// Vaults
 
 export type VaultParams = {
   path: string,

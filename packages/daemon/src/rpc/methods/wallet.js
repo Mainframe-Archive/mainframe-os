@@ -86,6 +86,7 @@ export const deleteWallet = {
     params: WalletDeleteParams,
   ): Promise<void> => {
     await ctx.openVault.wallets.deleteWallet(params)
+    ctx.openVault.identityWallets.deleteWallet(params.walletID)
     await ctx.openVault.save()
   },
 }

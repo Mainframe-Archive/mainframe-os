@@ -189,3 +189,15 @@ export const WALLET_SIGN_TRANSACTION_SCHEMA = {
   chain: WALLET_SUPPORTED_CHAIN_SCHEMA,
   transactionData: 'object',
 }
+
+export const IDENTITY_LINK_ETH_WALLET_SCHEMA = {
+  id: LOCAL_ID_SCHEMA,
+  walletID: LOCAL_ID_SCHEMA,
+  address: 'string',
+}
+
+export const IDENTITY_UNLINK_ETH_WALLET_SCHEMA = {
+  id: LOCAL_ID_SCHEMA,
+  walletID: LOCAL_ID_SCHEMA,
+  address: 'string',
+}

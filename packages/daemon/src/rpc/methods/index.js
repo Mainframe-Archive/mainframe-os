@@ -41,6 +41,8 @@ export default {
   identity_createDeveloper: identity.createDeveloper,
   identity_getOwnUsers: identity.getOwnUsers,
   identity_getOwnDevelopers: identity.getOwnDevelopers,
+  identity_linkEthWallet: identity.linkEthWallet,
+  identity_unlinkEthWallet: identity.unlinkEthWallet,
 
   // Temporary PSS APIs - should be removed when communication APIs are settled
   pss_baseAddr: pss.baseAddr,

@@ -2,13 +2,14 @@
 import {
   type WalletAddHDAccountParams,
   type WalletCreateHDParams,
+  type WalletCreateHDResult,
   type WalletImportMnemonicParams,
   type WalletImportPKParams,
   type WalletResult,
   type WalletSignTxParams,
   type WalletSignTxResult,
   type WalletTypes,
-  idType as idTypeToClient,
+  idType as toClientId,
   type ID,
 } from '@mainframe/client'
 
@@ -119,17 +120,16 @@ export default class WalletsRepository {
     return wallet
   }
 
-  createHDWallet(params: WalletCreateHDParams) {
+  createHDWallet(params: WalletCreateHDParams): WalletCreateHDResult {
     switch (params.chain) {
       case 'ethereum': {
         const hdWallet = new HDWallet()
-        const pubKey = hdWallet.publicExtendedKey
         const accounts = hdWallet.getAccounts()
         hdWallet._walletID = uniqueID()
         this.ethWallets.hd[hdWallet.id] = hdWallet
         return {
           type: 'hd',
-          walletID: pubKey,
+          walletID: toClientId(hdWallet._walletID),
           mnemonic: hdWallet._mnemonic,
           accounts,
         }
@@ -164,7 +164,7 @@ export default class WalletsRepository {
         const accounts = wallet.getAccounts()
         return {
           type: 'pk',
-          walletID: idTypeToClient(wallet.id),
+          walletID: toClientId(wallet.id),
           accounts,
         }
       }
@@ -193,7 +193,7 @@ export default class WalletsRepository {
         const accounts = hdWallet.getAccounts()
         return {
           type: 'hd',
-          walletID: idTypeToClient(hdWallet.id),
+          walletID: toClientId(hdWallet.id),
           accounts,
         }
       }
