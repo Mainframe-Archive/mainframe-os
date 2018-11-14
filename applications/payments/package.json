@@ -17,7 +17,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build:app": "react-scripts build",
+    "build:app-skip": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "test:types": "flow check"

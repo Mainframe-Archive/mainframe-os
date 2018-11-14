@@ -20,7 +20,7 @@ jobs:
             sudo apt-get install build-essential libudev-dev -y
       - run:
           name: Setup
-          command: npm install && npm run bootstrap
+          command: npm install && npm run bootstrap:ci
       - save_cache:
           paths:
             - node_modules
