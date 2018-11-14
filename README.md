@@ -32,7 +32,7 @@ This project is in alpha, lots of breaking changes are to be expected between re
 ### Prerequisites
 
 - [Node](https://nodejs.org/en/) v10+ (includes npm)
-- [Yarn](https://yarnpkg.com/lang/en/) (optional - faster alternative to npm)
+- [Yarn](https://yarnpkg.com/lang/en/) (faster alternative to npm)
 
 ### Setup
 
