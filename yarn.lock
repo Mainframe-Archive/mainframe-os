@@ -7113,10 +7113,10 @@ flow-copy-source@^2.0.1:
     kefir "^3.7.3"
     yargs "^12.0.1"
 
-flow-mono-cli@^1.4.2:
-  version "1.4.2"
-  resolved "https://registry.yarnpkg.com/flow-mono-cli/-/flow-mono-cli-1.4.2.tgz#6046938f8125e8eb35fd3ed2a19ab069c601c89e"
-  integrity sha512-oMR9iNFy4vQA1E57R5RvHvSjdPXCxPgUhr6uBVSoXLwNe+6eF2yi5eCWtnmPBTks8PUedaHg5XXYa4hinsr7sw==
+flow-mono-cli@^1.4.3:
+  version "1.4.3"
+  resolved "https://registry.yarnpkg.com/flow-mono-cli/-/flow-mono-cli-1.4.3.tgz#72947ccf83bb652ee2252dae23859a08f8117b1b"
+  integrity sha512-L9fDIbfOB0Szutu8qM6qcHKf6eIxH+N669fWnZ4K4BMskrAgylN0cUYlqduXa0A9UkyUJKSDmB4uIi9rMMYBqQ==
   dependencies:
     cosmiconfig "5.0.6"
     debug-logger "0.4.1"
