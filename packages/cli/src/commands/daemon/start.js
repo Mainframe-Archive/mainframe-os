@@ -25,7 +25,7 @@ export default class StartCommand extends Command {
     if (status === 'starting') {
       this.warn('Daemon is already starting from another process')
     } else if (status === 'running') {
-      this.log('Daemon is already running from another process')
+      this.log('Daemon is already running from another process. Run "./packages/cli/bin/run daemon:stop" to stop the daemon.')
     } else {
       try {
         const proc = await startDaemon(cfg, this.flags.detached)
