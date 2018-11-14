@@ -27,6 +27,8 @@ This project is in alpha, lots of breaking changes are to be expected between re
 
 ## Getting Started
 
+### Contributing
+ > see [contributing.md](contributing.md)
 ### Prerequisites
 
 - [Node](https://nodejs.org/en/) v10+ (includes npm)
