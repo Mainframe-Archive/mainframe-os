@@ -5,10 +5,11 @@
   "license": "MIT",
   "scripts": {
     "clean": "del cjs && del dist",
-    "build:dist": "BABEL_ENV='browser-esm' yarn webpack",
+    "webpack": "webpack",
+    "build:dist": "BABEL_ENV='browser-esm' npm run webpack",
     "build:cjs": "BABEL_ENV='browser-cjs' babel src --out-dir cjs",
     "build:flow": "flow-copy-source src cjs",
-    "build:sdk": "yarn clean && yarn build:dist && yarn build:cjs && yarn build:flow",
+    "build:sdk": "npm run clean && npm run build:dist && npm run build:cjs && npm run build:flow",
     "test:types": "flow check"
   },
   "dependencies": {

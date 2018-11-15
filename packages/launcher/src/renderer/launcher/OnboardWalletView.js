@@ -84,7 +84,11 @@ export default class OnboardWalletView extends Component<Props, State> {
           <View style={styles.resultContainer}>
             <Text>{this.state.mnemonic}</Text>
           </View>
-          <Button title="Continue" onPress={this.props.onComplete} />
+          <Button
+            title="Continue"
+            onPress={this.props.onComplete}
+            testID="create-wallet-continue-button"
+          />
         </View>
       )
     }
@@ -102,6 +106,7 @@ export default class OnboardWalletView extends Component<Props, State> {
         <Button
           title="Create Wallet"
           style={styles.createButton}
+          testID="create-wallet-button"
           onPress={this.onPressCreateWallet}
         />
         <View style={styles.divider} />

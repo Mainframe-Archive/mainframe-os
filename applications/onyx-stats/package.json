@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "webpack --mode development --watch",
-    "build:app": "webpack --mode production"
+    "build:app-skip": "webpack --mode production"
   },
   "dependencies": {
     "@babel/runtime": "^7.1.2",

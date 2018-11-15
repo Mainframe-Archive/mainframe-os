@@ -7,7 +7,7 @@
     "clean": "del lib",
     "build:js": "flow-remove-types src --out-dir lib",
     "build:flow": "flow-copy-source src lib",
-    "build": "yarn clean && yarn build:js && yarn build:flow",
+    "build": "npm run clean && npm run build:js && npm run build:flow",
     "test:types": "flow check"
   },
   "devDependencies": {

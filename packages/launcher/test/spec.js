@@ -64,7 +64,16 @@ describe('Application launch', function() {
     await this.app.client
       .element('[data-testid="create-vault-button-submit"]')
       .click()
-    await this.app.client.waitForExist('[data-testid="launcher-view"]', 8000)
+  })
+
+  it('Creates a new wallet', async function() {
+    const createWalletButton = '[data-testid="create-wallet-button"]'
+    await this.app.client.waitForExist(createWalletButton, 10000)
+    await this.app.client.element(createWalletButton).click()
+
+    const continueButton = '[data-testid="create-wallet-continue-button"]'
+    await this.app.client.waitForExist(continueButton, 2000)
+    await this.app.client.element(continueButton).click()
   })
 
   it('creates an app', async function() {
