@@ -66,7 +66,7 @@ describe('Application launch', function() {
       .click()
   })
 
-  it('Creates a new wallet', async function() {
+  it('creates a new wallet', async function() {
     const createWalletButton = '[data-testid="create-wallet-button"]'
     await this.app.client.waitForExist(createWalletButton, 10000)
     await this.app.client.element(createWalletButton).click()
