@@ -1,6 +1,6 @@
 //@flow
 
-import type { ID } from '@mainframe/client'
+import type { ID, IdentityOwnData } from '@mainframe/client'
 import React, { Component } from 'react'
 import {
   View,
@@ -16,16 +16,9 @@ import colors from '../colors'
 
 import rpc from './rpc'
 
-type Identity = {
-  id: ID,
-  data: {
-    name: string,
-  },
-}
-
 type Props = {
   type: 'user' | 'developer',
-  identities: Array<Identity>,
+  identities: Array<IdentityOwnData>,
   enableCreate?: boolean,
   onSelectId: (id: ID) => any,
   onCreatedId?: (id: ID) => any,
@@ -33,7 +26,7 @@ type Props = {
 
 type State = {
   newName: string,
-  identities: Array<Identity>,
+  identities: Array<IdentityOwnData>,
   showCreateIdForm?: boolean,
 }
 

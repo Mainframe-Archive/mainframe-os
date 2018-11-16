@@ -16,6 +16,7 @@ import MFTextInput from '../UIComponents/TextInput'
 import Icon from '../UIComponents/Icon'
 import Text from '../UIComponents/Text'
 import colors from '../colors'
+import OnboardWalletView from './OnboardWalletView'
 
 import rpc from './rpc'
 
@@ -33,6 +34,7 @@ type State = {
   awaitingResponse?: boolean,
   showVaultList?: boolean,
   showCreateVault?: boolean,
+  showWalletOnboarding?: boolean,
   error?: ?string,
 }
 
@@ -103,7 +105,9 @@ export default class VaultManagerModal extends Component<Props, State> {
   async createVault(password: string, label: string) {
     try {
       await rpc.createVault(password, label)
-      this.props.onOpenedVault()
+      this.setState({
+        showWalletOnboarding: true,
+      })
     } catch (err) {
       // eslint-disable-next-line no-console
       console.warn(err)
@@ -112,6 +116,10 @@ export default class VaultManagerModal extends Component<Props, State> {
         awaitingResponse: false,
       })
     }
+  }
+
+  onSetWallet = () => {
+    this.props.onOpenedVault()
   }
 
   onUnlockVault = () => {
@@ -293,6 +301,9 @@ export default class VaultManagerModal extends Component<Props, State> {
   }
 
   render() {
+    if (this.state.showWalletOnboarding) {
+      return <OnboardWalletView onComplete={this.onSetWallet} />
+    }
     const content =
       this.state.showCreateVault || !this.props.vaultsData.defaultVault
         ? this.renderCreateVault()

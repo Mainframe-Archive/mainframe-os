@@ -5,14 +5,17 @@
   "license": "MIT",
   "scripts": {
     "clean": "del cjs && del dist",
-    "build:dist": "BABEL_ENV='browser-esm' yarn webpack",
+    "webpack": "webpack",
+    "build:dist": "BABEL_ENV='browser-esm' npm run webpack",
     "build:cjs": "BABEL_ENV='browser-cjs' babel src --out-dir cjs",
     "build:flow": "flow-copy-source src cjs",
-    "build:sdk": "yarn clean && yarn build:dist && yarn build:cjs && yarn build:flow",
+    "build:sdk": "npm run clean && npm run build:dist && npm run build:cjs && npm run build:flow",
     "test:types": "flow check"
   },
   "dependencies": {
-    "@babel/runtime": "^7.1.2"
+    "@babel/runtime": "^7.1.2",
+    "ethereumjs-abi": "^0.6.5",
+    "web3-provider-engine": "^14.1.0"
   },
   "devDependencies": {
     "@mainframe/rpc-stream": "^0.2.4",

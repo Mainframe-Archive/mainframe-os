@@ -5,7 +5,7 @@ import {
   type StrictPermissionsGrants,
   createStrictPermissionGrants,
 } from '@mainframe/app-permissions'
-import type { ID } from '@mainframe/client'
+import type { ID, IdentityOwnData } from '@mainframe/client'
 import type { ManifestData } from '@mainframe/app-manifest'
 import React, { createRef, Component, type ElementRef } from 'react'
 import { View, StyleSheet } from 'react-native-web'
@@ -23,19 +23,13 @@ type Props = {
   onInstallComplete: (appID: ID) => void,
 }
 
-type User = {
-  id: ID,
-  data: {
-    name: string,
-  },
-}
 type State = {
   inputValue: string,
   installStep: 'manifest' | 'identity' | 'permissions' | 'download',
   manifest: ?ManifestData,
   userPermissions?: StrictPermissionsGrants,
   userId?: ID,
-  ownUsers: Array<User>,
+  ownUsers: Array<IdentityOwnData>,
 }
 
 export default class AppInstallModal extends Component<Props, State> {
@@ -141,11 +135,11 @@ export default class AppInstallModal extends Component<Props, State> {
     }
 
     try {
-      const permissions = {
-        permissions: userPermissions,
+      const permissionsSettings = {
+        grants: userPermissions,
         permissionsChecked: true,
       }
-      const res = await rpc.installApp(manifest, userId, permissions)
+      const res = await rpc.installApp(manifest, userId, permissionsSettings)
       this.props.onInstallComplete(res.id)
     } catch (err) {
       // eslint-disable-next-line no-console

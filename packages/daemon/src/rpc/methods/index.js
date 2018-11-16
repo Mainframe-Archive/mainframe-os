@@ -6,6 +6,7 @@ import * as pss from './pss'
 import * as sub from './subscription'
 import * as vault from './vault'
 import * as blockchain from './blockchain'
+import * as wallet from './wallet'
 
 const noop = () => {}
 
@@ -20,6 +21,7 @@ export default {
   app_open: app.open,
   app_getAll: app.getAll,
   app_setPermission: app.setPermission,
+  app_setUserPermissionsSettings: app.setUserPermissionsSettings,
   app_setUserSettings: app.setUserSettings,
   // TODO: remove app for given user only
   // Options:
@@ -33,14 +35,14 @@ export default {
   app_publishContents: app.publishContents,
   app_writeManifest: app.writeManifest,
 
-  blockchain_getContractEvents: blockchain.getContractEvents,
-  blockchain_getLatestBlock: blockchain.getLatestBlock,
-  blockchain_readContract: blockchain.readContract,
+  blockchain_web3Send: blockchain.web3Send,
 
   identity_createUser: identity.createUser,
   identity_createDeveloper: identity.createDeveloper,
   identity_getOwnUsers: identity.getOwnUsers,
   identity_getOwnDevelopers: identity.getOwnDevelopers,
+  identity_linkEthWallet: identity.linkEthWallet,
+  identity_unlinkEthWallet: identity.unlinkEthWallet,
 
   // Temporary PSS APIs - should be removed when communication APIs are settled
   pss_baseAddr: pss.baseAddr,
@@ -56,4 +58,14 @@ export default {
   vault_getSettings: vault.getSettings,
   vault_open: vault.open,
   vault_setSettings: vault.setSettings,
+
+  wallet_createHD: wallet.createHDWallet,
+  wallet_importPK: wallet.importAccountByPK,
+  wallet_importMnemonic: wallet.importMnemonic,
+  wallet_addHDAccount: wallet.addHDAccount,
+  wallet_delete: wallet.deleteWallet,
+  wallet_getEthWallets: wallet.getEthWallets,
+  wallet_ledgerGetEthAccounts: wallet.getLedgerEthAccounts,
+  wallet_ledgerAddEthAccount: wallet.addLedgerEthAccount,
+  wallet_signTx: wallet.signTransaction,
 }

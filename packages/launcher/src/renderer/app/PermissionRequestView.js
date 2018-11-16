@@ -7,18 +7,32 @@ import { ipcRenderer } from 'electron'
 import React, { Component } from 'react'
 import { View, StyleSheet, Switch } from 'react-native-web'
 import type { Subscription } from 'rxjs'
+import type { WalletSignTxParams } from '@mainframe/client'
 
 import { APP_TRUSTED_REQUEST_CHANNEL } from '../../constants'
 
 import colors from '../colors'
 import Text from '../UIComponents/Text'
 import Button from '../UIComponents/Button'
+import WalletTxRequestView from './WalletTxRequestView'
 
 import rpc from './rpc'
 import type { AppSessionData } from './AppContainer'
 
-type PermissionGrantData = { key: string, input?: string }
-type PermissionGrantResult = { granted: boolean, persist: boolean }
+type PermissionGrantData = {
+  key: string,
+  domain?: string,
+  params?: WalletSignTxParams,
+}
+type PermissionGrantResult = {
+  granted: boolean,
+  persist: boolean,
+  data?: ?Object,
+}
+type PermissionDeniedNotif = {
+  key: string,
+  domain?: string,
+}
 
 const methods = {
   permission_ask: (
@@ -44,7 +58,7 @@ const handleMessage = createHandler({ methods, validatorOptions })
 const permissionDescriptions = {
   BLOCKCHAIN_SEND: 'Ethereum blockchain transaction',
 }
-const getPermissionDescription = (key: string, input: ?string): ?string => {
+const getPermissionDescription = (key: string, input?: ?string): ?string => {
   if (key === 'WEB_REQUEST' && input) {
     return `web request to ${input}`
   }
@@ -59,7 +73,7 @@ type Props = {
 }
 
 type State = {
-  permissionDeniedNotifs: Array<PermissionGrantData>,
+  permissionDeniedNotifs: Array<PermissionDeniedNotif>,
   permissionRequests: {
     [id: string]: {
       data: PermissionGrantData,
@@ -95,7 +109,7 @@ export default class PermissionsManagerView extends Component<Props, State> {
   async handleNotifications() {
     const notifications = await rpc.createPermissionDeniedSubscription()
     this._permissionDeniedSubscription = notifications.subscribe(
-      (data: PermissionGrantData) => {
+      (data: PermissionDeniedNotif) => {
         this.setState(
           ({ permissionDeniedNotifs }) => ({
             permissionDeniedNotifs: [...permissionDeniedNotifs, data],
@@ -104,9 +118,12 @@ export default class PermissionsManagerView extends Component<Props, State> {
             setTimeout(() => {
               this.setState(({ permissionDeniedNotifs: notifs }) => {
                 const index = notifs.indexOf(data)
-                return index > -1
-                  ? { permissionDeniedNotifs: notifs.splice(index, 1) }
-                  : null
+                if (index > -1) {
+                  notifs.splice(index, 1)
+                  return {
+                    permissionDeniedNotifs: notifs,
+                  }
+                }
               })
             }, 3000)
           },
@@ -126,11 +143,13 @@ export default class PermissionsManagerView extends Component<Props, State> {
     ipcRenderer.on(APP_TRUSTED_REQUEST_CHANNEL, this._onRPCMessage)
   }
 
-  onSetPermissionGrant = (id: string, granted: boolean) => {
+  onSetPermissionGrant = (id: string, granted: boolean, data?: ?Object) => {
     const request = this.state.permissionRequests[id]
+
     if (request != null) {
       request.resolve({
         granted,
+        data,
         persist: this.state.persistGrant,
       })
       this.setState(({ permissionRequests }) => {
@@ -158,12 +177,40 @@ export default class PermissionsManagerView extends Component<Props, State> {
     const alerts = this.state.permissionDeniedNotifs.map((data, i) => (
       <Text key={`alert${i}`} style={styles.permissionDeniedLabel}>
         <Text style={styles.boldText}>Blocked:</Text>{' '}
-        {getPermissionDescription(data.key, data.input)}
+        {getPermissionDescription(data.key, data.domain)}
       </Text>
     ))
     return alerts.length ? (
       <View style={styles.permissionDeniedAlerts}>{alerts}</View>
     ) : null
+  }
+
+  renderTxSignRequest(permissionData: PermissionGrantData) {
+    if (permissionData.params == null) {
+      // TODO display error
+      return null
+    }
+    return (
+      <WalletTxRequestView
+        transaction={permissionData.params.transactionData}
+      />
+    )
+  }
+
+  renderPermission(persistGrant: boolean, permissionLabel: string) {
+    return (
+      <View>
+        <Text style={styles.headerText}>Permission Required</Text>
+        <Text
+          style={
+            styles.descriptionText
+          }>{`This app is asking permission to make a ${permissionLabel}.`}</Text>
+        <View style={styles.persistOption}>
+          <Text style={styles.persistLabel}>{`Don't ask me again?`}</Text>
+          <Switch value={persistGrant} onValueChange={this.onTogglePersist} />
+        </View>
+      </View>
+    )
   }
 
   renderPermissionRequest = () => {
@@ -178,7 +225,7 @@ export default class PermissionsManagerView extends Component<Props, State> {
     const permissionData = permissionRequests[id].data
     const permissionLabel = getPermissionDescription(
       permissionData.key,
-      permissionData.input,
+      permissionData.domain,
     )
 
     const declineButton = (
@@ -203,18 +250,18 @@ export default class PermissionsManagerView extends Component<Props, State> {
       )
     }
 
+    let content
+
+    if (permissionData.key === 'BLOCKCHAIN_SEND') {
+      content = this.renderTxSignRequest(permissionData)
+    } else {
+      content = this.renderPermission(persistGrant, permissionLabel)
+    }
+
     return (
       <View style={styles.container}>
         <View style={styles.requestContainer}>
-          <Text style={styles.headerText}>Permission Required</Text>
-          <Text
-            style={
-              styles.descriptionText
-            }>{`This app is asking permission to make a ${permissionLabel}.`}</Text>
-          <View style={styles.persistOption}>
-            <Text style={styles.persistLabel}>{`Don't ask me again?`}</Text>
-            <Switch value={persistGrant} onValueChange={this.onTogglePersist} />
-          </View>
+          {content}
           <View style={styles.buttonsContainer}>
             <Button
               title="ACCEPT"
@@ -279,9 +326,11 @@ const styles = StyleSheet.create({
   },
   acceptButton: {
     marginRight: 10,
+    flex: 1,
     backgroundColor: colors.PRIMARY_LIGHT_BLUE,
   },
   declineButton: {
+    flex: 1,
     backgroundColor: colors.GREY_MED_81,
   },
   permissionDeniedAlerts: {

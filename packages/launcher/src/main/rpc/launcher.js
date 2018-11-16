@@ -18,11 +18,16 @@ import {
   type AppRemoveOwnParams,
   type AppSetUserSettingsParams,
   APP_SET_USER_SETTINGS_SCHEMA,
+  type AppSetUserPermissionsSettingsParams,
+  APP_SET_USER_PERMISSIONS_SETTINGS_SCHEMA,
   type IdentityCreateResult,
   type IdentityGetOwnUsersResult,
   type IdentityGetOwnDevelopersResult,
   VAULT_SCHEMA,
   type VaultParams,
+  type WalletCreateHDResult,
+  WALLET_IMPORT_MNEMONIC_SCHEMA,
+  type WalletImportMnemonicParams,
   /* eslint-enable import/named */
 } from '@mainframe/client'
 
@@ -90,6 +95,16 @@ export default {
     },
   },
 
+  app_setUserPermissionsSettings: {
+    params: APP_SET_USER_PERMISSIONS_SETTINGS_SCHEMA,
+    handler: (
+      ctx: LauncherContext,
+      params: AppSetUserPermissionsSettingsParams,
+    ) => {
+      return ctx.client.app.setUserPermissionsSettings(params)
+    },
+  },
+
   // Identities
   identity_createUser: {
     params: {
@@ -149,5 +164,21 @@ export default {
       ctx.vaultOpen = params.path
       return { open: true }
     },
+  },
+
+  // Wallets
+
+  wallet_importMnemonic: {
+    params: WALLET_IMPORT_MNEMONIC_SCHEMA,
+    handler: async (ctx: LauncherContext, params: WalletImportMnemonicParams) =>
+      ctx.client.wallet.importWalletByMnemonic(params),
+  },
+
+  wallet_createEth: (ctx: LauncherContext): Promise<WalletCreateHDResult> => {
+    return ctx.client.wallet.createHDWallet({ chain: 'ethereum' })
+  },
+
+  wallet_getEthWallets: (ctx: LauncherContext) => {
+    return ctx.client.wallet.getEthWallets()
   },
 }

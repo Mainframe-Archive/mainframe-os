@@ -70,7 +70,7 @@ export default class App extends AbstractApp {
     if (!havePermissionsToGrant(this._manifest.permissions)) {
       return true
     }
-    return this.getSettings(userID).permissionsChecked
+    return this.getSettings(userID).permissionsSettings.permissionsChecked
   }
 
   // Session

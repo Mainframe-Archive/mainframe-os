@@ -2,14 +2,13 @@
 
 import {
   LOCAL_ID_SCHEMA,
-  type BlockchainGetContractEventsParams,
-  type BlockchainGetContractEventsResult,
-  type BlockchainReadContractParams,
-  type BlockchainReadContractResult,
+  type BlockchainWeb3SendParams,
+  type WalletGetEthWalletsResult,
 } from '@mainframe/client'
 import type { Subscription as RxSubscription } from 'rxjs'
 
 import { type AppContext, ContextSubscription } from '../contexts'
+import { withPermission } from '../permissions'
 
 class TopicSubscription extends ContextSubscription<RxSubscription> {
   data: ?RxSubscription
@@ -29,20 +28,40 @@ export const sandboxed = {
   api_version: (ctx: AppContext) => ctx.client.apiVersion(),
 
   // Blockchain
-  blockchain_getContractEvents: (
+
+  blockchain_web3Send: async (
     ctx: AppContext,
-    params: BlockchainGetContractEventsParams,
-  ): Promise<BlockchainGetContractEventsResult> => {
-    return ctx.client.blockchain.getContractEvents(params)
+    params: BlockchainWeb3SendParams,
+  ): Promise<Object> => {
+    return ctx.client.blockchain.web3Send(params)
   },
-  blockchain_readContract: (
-    ctx: AppContext,
-    params: BlockchainReadContractParams,
-  ): Promise<BlockchainReadContractResult> => {
-    return ctx.client.blockchain.readContract(params)
-  },
-  blockchain_getLatestBlock: (ctx: AppContext) => {
-    return ctx.client.blockchain.getLatestBlock()
+
+  // Wallet
+
+  wallet_signTx: withPermission(
+    'BLOCKCHAIN_SEND',
+    (ctx: AppContext, params: any) => ctx.client.wallet.signTransaction(params),
+    // TODO notify app if using ledger to feedback awaiting sign
+  ),
+
+  wallet_getEthAccounts: async (ctx: AppContext): Promise<Array<string>> => {
+    const ethWallets = await ctx.client.wallet.getEthWallets()
+    const accounts = Object.keys(ethWallets).reduce((acc, key) => {
+      ethWallets[key].forEach(w => acc.push(...w.accounts))
+      return acc
+    }, [])
+    if (
+      // TODO: We'll also eventually want default
+      // accounts attached to identities
+      ctx.appSession.defaultEthAccount &&
+      accounts.includes(ctx.appSession.defaultEthAccount)
+    ) {
+      // Move default account to top
+      const defaultAccount = ctx.appSession.defaultEthAccount
+      accounts.splice(accounts.indexOf(defaultAccount), 1)
+      accounts.unshift(defaultAccount)
+    }
+    return accounts
   },
 
   // Temporary PSS APIs - should be removed when communication APIs are settled
@@ -115,5 +134,20 @@ export const trusted = {
     handler: (ctx: AppContext, params: { id: string }): void => {
       ctx.removeSubscription(params.id)
     },
+  },
+
+  // WALLET
+
+  wallet_getEthWallets: async (
+    ctx: AppContext,
+  ): Promise<WalletGetEthWalletsResult> => {
+    return ctx.client.wallet.getEthWallets()
+  },
+
+  blockchain_web3Send: async (
+    ctx: AppContext,
+    params: BlockchainWeb3SendParams,
+  ): Promise<Object> => {
+    return ctx.client.blockchain.web3Send(params)
   },
 }

@@ -35,6 +35,8 @@ import {
   type AppSetPermissionsRequirementsParams,
   APP_SET_USER_SETTINGS_SCHEMA,
   type AppSetUserSettingsParams,
+  APP_SET_USER_PERMISSIONS_SETTINGS_SCHEMA,
+  type AppSetUserPermissionsSettingsParams,
   APP_WRITE_MANIFEST_SCHEMA,
   type AppWriteManifestParams,
 } from '@mainframe/client'
@@ -67,6 +69,14 @@ const createClientSession = (
   if (user == null) {
     throw clientError('Invalid userID')
   }
+  let defaultEthAccount = app.getDefaultEthAccount(userID)
+  if (!defaultEthAccount) {
+    // TODO: add a setting for default eth account on identity
+    const ethWallet = ctx.openVault.wallets.getFirstEthWallet()
+    if (ethWallet) {
+      defaultEthAccount = ethWallet.getAccounts()[0]
+    }
+  }
 
   const appData =
     app instanceof OwnApp
@@ -80,16 +90,20 @@ const createClientSession = (
           manifest: app.manifest,
           contentsPath: getContentsPath(ctx.env, app.manifest),
         }
+  const wallets =
+    ctx.openVault.identityWallets.walletsByIdentity[toClientID(userID)] || {}
 
   return {
     user: {
       id: toClientID(userID),
       data: user.data,
+      ethWallets: wallets,
     },
     session: {
       sessID: toClientID(session.sessID),
       permissions: session.permissions,
     },
+    defaultEthAccount,
     app: appData,
   }
 }
@@ -186,7 +200,7 @@ export const install = {
     const app = ctx.openVault.installApp(
       params.manifest,
       fromClientID(params.userID),
-      params.settings,
+      params.permissionsSettings,
     )
 
     // TODO: rather than waiting for contents to be downloaded, return early and let client subscribe to installation state changes
@@ -275,6 +289,19 @@ export const setUserSettings = {
     const appID = fromClientID(params.appID)
     const userID = fromClientID(params.userID)
     ctx.openVault.setAppUserSettings(appID, userID, params.settings)
+    await ctx.openVault.save()
+  },
+}
+
+export const setUserPermissionsSettings = {
+  params: APP_SET_USER_PERMISSIONS_SETTINGS_SCHEMA,
+  handler: async (
+    ctx: RequestContext,
+    params: AppSetUserPermissionsSettingsParams,
+  ): Promise<void> => {
+    const appID = fromClientID(params.appID)
+    const userID = fromClientID(params.userID)
+    ctx.openVault.setAppUserPermissionsSettings(appID, userID, params.settings)
     await ctx.openVault.save()
   },
 }

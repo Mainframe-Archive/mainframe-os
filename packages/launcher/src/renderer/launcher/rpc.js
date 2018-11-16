@@ -1,6 +1,11 @@
 // @flow
 
-import type { ID, AppCreateParams, AppUserSettings } from '@mainframe/client'
+import type {
+  ID,
+  AppCreateParams,
+  AppUserSettings,
+  AppUserPermissionsSettings,
+} from '@mainframe/client'
 import electronRPC from '@mainframe/rpc-electron'
 
 import { LAUNCHER_CHANNEL } from '../../constants'
@@ -10,8 +15,12 @@ const rpc = electronRPC(LAUNCHER_CHANNEL)
 export default {
   // Apps
   getApps: () => rpc.request('app_getAll'),
-  installApp: (manifest: Object, userID: ID, settings: Object) => {
-    return rpc.request('app_install', { manifest, userID, settings })
+  installApp: (
+    manifest: Object,
+    userID: ID,
+    permissionsSettings: AppUserPermissionsSettings,
+  ) => {
+    return rpc.request('app_install', { manifest, userID, permissionsSettings })
   },
   createApp: (appInfo: AppCreateParams) => rpc.request('app_create', appInfo),
   removeApp: (appID: ID) => rpc.request('app_remove', { appID }),
@@ -22,6 +31,13 @@ export default {
   readManifest: (path: string) => rpc.request('app_readManifest', { path }),
   setAppUserSettings: (appID: ID, userID: ID, settings: AppUserSettings) => {
     rpc.request('app_setUserSettings', { appID, userID, settings })
+  },
+  setAppUserPermissionsSettings: (
+    appID: ID,
+    userID: ID,
+    settings: AppUserPermissionsSettings,
+  ) => {
+    rpc.request('app_setUserPermissionsSettings', { appID, userID, settings })
   },
 
   // Identity
@@ -42,4 +58,13 @@ export default {
   openVault: (path: string, password: string) => {
     return rpc.request('vault_open', { path, password })
   },
+
+  // Wallets
+  importWalletFromMnemonic: (mnemonic: string) =>
+    rpc.request('wallet_importMnemonic', {
+      mnemonic,
+      chain: 'ethereum',
+    }),
+  createEthWallet: () => rpc.request('wallet_createEth'),
+  getEthWallets: () => rpc.request('wallet_getEthWallets'),
 }

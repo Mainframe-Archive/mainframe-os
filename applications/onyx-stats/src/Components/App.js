@@ -8,6 +8,7 @@ import {
   Image,
   ActivityIndicator,
 } from 'react-native-web'
+import Web3 from 'web3'
 import MainframeSDK from '@mainframe/sdk'
 
 import Logo from '../../assets/images/mainframe-logo.svg'
@@ -23,10 +24,12 @@ type State = {
 
 export default class App extends Component<null, State> {
   sdk: MainframeSDK
+  web3: Web3
 
   constructor() {
     super()
     this.sdk = new MainframeSDK()
+    this.web3 = new Web3(this.sdk.blockchain.getWeb3Provider())
     this.state = {}
   }
 
@@ -53,16 +56,34 @@ export default class App extends Component<null, State> {
         name: 'Staked',
         type: 'event',
       },
+      {
+        constant: true,
+        inputs: [
+          {
+            name: '_address',
+            type: 'address',
+          },
+        ],
+        name: 'balanceOf',
+        outputs: [
+          {
+            name: 'balance',
+            type: 'uint256',
+          },
+        ],
+        payable: false,
+        stateMutability: 'view',
+        type: 'function',
+      },
     ]
-    const mfTokenAddr = '0xe3C2130530D77418b3e367Fe162808887526e74D'
+
     try {
-      const latestBlock = await this.sdk.blockchain.getLatestBlock()
-      const res = await this.sdk.blockchain.getContractEvents(
-        mfTokenAddr,
-        abi,
-        'Staked',
-        { fromBlock: 5916157, toBlock: latestBlock },
-      )
+      const mfStakeAddr = '0xe3C2130530D77418b3e367Fe162808887526e74D'
+      const contract = new this.web3.eth.Contract(abi, mfStakeAddr)
+      const res = await contract.getPastEvents('Staked', {
+        fromBlock: 5916157,
+        toBlock: 'latest',
+      })
       const data = this.formatData(res)
       this.setState({
         stakingData: data,
@@ -88,7 +109,7 @@ export default class App extends Component<null, State> {
           res[rangeKey] = [e]
         }
       } else {
-        block = blockLimit
+        block = Math.floor(e.blockNumber / 10000) * 10000
         const rangeKey = `${block}`
         res[rangeKey] = [e]
       }

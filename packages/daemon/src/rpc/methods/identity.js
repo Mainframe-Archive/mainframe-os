@@ -8,8 +8,13 @@ import {
   type IdentityCreateResult,
   type IdentityGetOwnDevelopersResult,
   type IdentityGetOwnUsersResult,
+  type IdentityLinkEthWalletAccountParams,
+  type IdentityUnlinkEthWalletAccountParams,
+  IDENTITY_LINK_ETH_WALLET_SCHEMA,
+  IDENTITY_UNLINK_ETH_WALLET_SCHEMA,
   /* eslint-enable import/named */
 } from '@mainframe/client'
+import { idType as fromClientID } from '@mainframe/utils-id'
 
 import type RequestContext from '../RequestContext'
 
@@ -46,7 +51,13 @@ export const getOwnDevelopers = (
 ): IdentityGetOwnDevelopersResult => {
   const { ownDevelopers } = ctx.openVault.identities
   const developers = Object.keys(ownDevelopers).map(id => {
-    return { id: toClientID(id), data: ownDevelopers[id].data }
+    const wallets =
+      ctx.openVault.identityWallets.walletsByIdentity[toClientID(id)] || {}
+    return {
+      id: toClientID(id),
+      data: ownDevelopers[id].data,
+      ethWallets: wallets,
+    }
   })
   return { developers }
 }
@@ -54,7 +65,49 @@ export const getOwnDevelopers = (
 export const getOwnUsers = (ctx: RequestContext): IdentityGetOwnUsersResult => {
   const { ownUsers } = ctx.openVault.identities
   const users = Object.keys(ownUsers).map(id => {
-    return { id: toClientID(id), data: ownUsers[id].data }
+    const wallets =
+      ctx.openVault.identityWallets.walletsByIdentity[toClientID(id)] || {}
+    return {
+      id: toClientID(id),
+      data: ownUsers[id].data,
+      ethWallets: wallets,
+    }
   })
   return { users }
+}
+
+export const linkEthWallet = {
+  params: IDENTITY_LINK_ETH_WALLET_SCHEMA,
+  handler: async (
+    ctx: RequestContext,
+    params: IdentityLinkEthWalletAccountParams,
+  ): Promise<void> => {
+    if (!ctx.openVault.wallets.getEthWalletByID(params.walletID)) {
+      throw new Error('Wallet not found')
+    }
+    if (!ctx.openVault.identities.getOwn(fromClientID(params.id))) {
+      throw new Error('Identity not found')
+    }
+    ctx.openVault.identityWallets.linkWalletToIdentity(
+      params.id,
+      params.walletID,
+      params.address,
+    )
+    await ctx.openVault.save()
+  },
+}
+
+export const unlinkEthWallet = {
+  params: IDENTITY_UNLINK_ETH_WALLET_SCHEMA,
+  handler: async (
+    ctx: RequestContext,
+    params: IdentityUnlinkEthWalletAccountParams,
+  ): Promise<void> => {
+    ctx.openVault.identityWallets.unlinkWalletToIdentity(
+      params.id,
+      params.walletID,
+      params.address,
+    )
+    await ctx.openVault.save()
+  },
 }

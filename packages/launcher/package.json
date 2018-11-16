@@ -6,9 +6,10 @@
   "scripts": {
     "dev": "electron-webpack dev",
     "compile": "electron-webpack",
-    "dist": "yarn compile && electron-builder",
-    "dist:ci": "yarn compile && yarn electron-builder -l --dir",
-    "dist:dir": "yarn dist --dir -c.compression=store -c.mac.identity=null",
+    "dist": "npm run compile && electron-builder",
+    "electron-builder": "electron-builder",
+    "dist:ci": "npm run compile && npm run electron-builder -l --dir",
+    "dist:dir": "npm run dist --dir -c.compression=store -c.mac.identity=null",
     "dist:electron": "electron-builder",
     "build:flow": "flow-copy-source src lib",
     "test:types": "flow check",
@@ -20,6 +21,7 @@
       "@mainframe/app-manifest",
       "@mainframe/app-permissions",
       "@mainframe/client",
+      "@mainframe/contract-utils",
       "@mainframe/config",
       "@mainframe/toolbox"
     ]
@@ -29,6 +31,7 @@
     "@mainframe/app-permissions": "*",
     "@mainframe/client": "*",
     "@mainframe/config": "*",
+    "@mainframe/contract-utils": "0.1.0",
     "@mainframe/rpc-electron": "^0.1.0",
     "@mainframe/rpc-handler": "^0.2.1",
     "@mainframe/toolbox": "*",
@@ -40,7 +43,10 @@
     "react-modal": "^3.6.1",
     "react-native-web": "^0.9.1",
     "rxjs": "^6.3.3",
-    "source-map-support": "^0.5.9"
+    "source-map-support": "^0.5.9",
+    "web3-eth-abi": "^1.0.0-beta.36",
+    "web3-eth-contract": "^1.0.0-beta.36",
+    "web3-utils": "^1.0.0-beta.36"
   },
   "devDependencies": {
     "@babel/plugin-syntax-dynamic-import": "^7.0.0",
@@ -51,9 +57,11 @@
     "electron": "^2.0.10",
     "electron-builder": "^20.28.4",
     "electron-webpack": "^2.3.1",
+    "file-loader": "^2.0.0",
     "flow-bin": "^0.81.0",
     "mocha": "^5.2.0",
     "spectron": "^4.0.0",
+    "url-loader": "^1.1.2",
     "webpack": "^4.20.2"
   }
 }

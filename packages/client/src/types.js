@@ -14,7 +14,14 @@ import type { ID } from '@mainframe/utils-id'
 
 export type { ID } from '@mainframe/utils-id'
 
-export type IdentityOwnData = { id: ID, data: Object }
+export type WalletTypes = 'hd' | 'pk' | 'ledger'
+export type WalletSupportedChains = 'ethereum'
+export type WalletAccount = string
+export type IdentityOwnData = {
+  id: ID,
+  data: Object,
+  ethWallets: { [walletID: ID]: Array<WalletAccount> },
+}
 
 export type AppCheckPermissionParams = {
   sessID: ID,
@@ -24,6 +31,11 @@ export type AppCheckPermissionParams = {
 
 export type AppCheckPermissionResult = {
   result: PermissionCheckResult,
+}
+
+export type AppUserPermissionsSettings = {
+  grants: StrictPermissionsGrants,
+  permissionsChecked: boolean,
 }
 
 export type AppCloseParams = { sessID: ID }
@@ -68,15 +80,18 @@ export type AppGetManifestDataResult = {
   data: PartialManifestData,
 }
 
+export type WalletSettings = {
+  defaultEthAccount: ?string,
+}
 export type AppUserSettings = {
-  permissions: StrictPermissionsGrants,
-  permissionsChecked: boolean,
+  permissionsSettings: AppUserPermissionsSettings,
+  walletSettings: WalletSettings,
 }
 
 export type AppInstallParams = {
   manifest: ManifestData,
   userID: ID,
-  settings: AppUserSettings,
+  permissionsSettings: AppUserPermissionsSettings,
 }
 
 export type AppInstallResult = { appID: ID }
@@ -101,6 +116,7 @@ export type AppOpenResult = {
   app: AppData,
   session: AppSession,
   user: IdentityOwnData,
+  defaultEthAccount: ?string,
 }
 
 export type AppPublishContentsParams = {
@@ -122,6 +138,12 @@ export type AppSetUserSettingsParams = {
   settings: AppUserSettings,
 }
 
+export type AppSetUserPermissionsSettingsParams = {
+  appID: ID,
+  userID: ID,
+  settings: AppUserPermissionsSettings,
+}
+
 export type AppSetPermissionParams = {
   sessID: ID,
   key: PermissionKey,
@@ -140,31 +162,103 @@ export type AppWriteManifestParams = {
   version?: ?string,
 }
 
-export type BlockchainContractABI = Array<Object>
+// Blockchain
 
-export type BlockchainGetContractEventsParams = {
-  contractAddress: string,
-  abi: BlockchainContractABI,
-  eventName: string,
-  options?: {
-    filter?: Object,
-    fromBlock?: number,
-    toBlock?: number,
-  },
+export type EthTransactionParams = {
+  nonce: number,
+  from: string,
+  to: string,
+  value: number,
+  data: string,
+  gas: string,
+  gasPrice: string,
+  chainId: number,
 }
 
-export type BlockchainGetContractEventsResult = Array<Object>
-
-export type BlockchainGetLatestBlockResult = number
-
-export type BlockchainReadContractParams = {
-  contractAddress: string,
-  abi: BlockchainContractABI,
-  method: string,
-  args?: ?Array<any>,
+export type BlockchainWeb3SendParams = {
+  transactionParams: EthTransactionParams,
+  walletID: ID,
 }
 
-export type BlockchainReadContractResult = any
+export type BlockchainWeb3SendResult = any
+
+// Wallet
+
+export type WalletImportMnemonicParams = {
+  chain: WalletSupportedChains,
+  mnemonic: string,
+}
+
+export type WalletImportPKParams = {
+  chain: WalletSupportedChains,
+  privateKey: string,
+  walletID?: ID,
+}
+
+export type WalletResult = {
+  walletID: ID,
+  type: WalletTypes,
+  accounts: Array<string>,
+}
+
+export type WalletImportResult = WalletResult
+
+export type WalletCreateHDParams = {
+  chain: WalletSupportedChains,
+}
+
+export type WalletCreateHDResult = {
+  walletID: ID,
+  type: WalletTypes,
+  accounts: Array<string>,
+  mnemonic: string,
+}
+
+export type WalletResults = Array<WalletResult>
+
+export type WalletDeleteParams = {
+  chain: string,
+  type: WalletTypes,
+  walletID: ID,
+}
+
+export type WalletGetEthWalletsResult = {
+  hd: WalletResults,
+  simple: WalletResults,
+  ledger: WalletResults,
+}
+
+export type WalletEthSignDataParams = {
+  walletID: ID,
+  address: string,
+  data: string,
+}
+
+export type WalletSignTxParams = {
+  chain: WalletSupportedChains,
+  transactionData: EthTransactionParams,
+}
+
+export type WalletSignTxResult = string
+
+export type WalletGetLedgerEthAccountsParams = {
+  pageNum: number,
+}
+
+export type WalletGetLedgerEthAccountsResult = Array<string>
+
+export type WalletAddLedgerEthAccountParams = {
+  index: number,
+}
+
+export type WalletAddHDAccountParams = {
+  index: number,
+  walletID: ID,
+}
+
+export type WalletAddHDAccountResult = string
+
+// Identity
 
 export type IdentityCreateDeveloperParams = {
   data?: Object,
@@ -184,6 +278,20 @@ export type IdentityGetOwnUsersResult = {
   users: Array<IdentityOwnData>,
 }
 
+export type IdentityLinkEthWalletAccountParams = {
+  id: ID,
+  walletID: ID,
+  address: string,
+}
+
+export type IdentityUnlinkEthWalletAccountParams = {
+  id: ID,
+  walletID: ID,
+  address: string,
+}
+
+// Vaults
+
 export type VaultParams = {
   path: string,
   password: string,
@@ -192,7 +300,8 @@ export type VaultParams = {
 export type VaultSettings = {
   bzzURL: string,
   pssURL: string,
-  web3HTTPProvider: string,
+  ethURL: string,
+  ethChainID: number,
 }
 
 export type VaultSettingsParams = $Shape<VaultSettings>

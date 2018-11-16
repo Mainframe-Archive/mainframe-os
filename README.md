@@ -19,7 +19,7 @@ In addition, there are several auxiliary packages:
 - `data-types`: shared data primitives
 - `toolbox`: a set of functions that both the launcher and the cli use
 
-In order to make it easier to share code among packages, this project uses [lerna](https://lernajs.io/). Whenever code changes, it's expected that you run `yarn build` from the root of the project directory, and it will kick off the necessary `lerna` build processes in the package folders.
+In order to make it easier to share code among packages, this project uses [lerna](https://lernajs.io/). Whenever code changes, it's expected that you run `npm run build` from the root of the project directory, and it will kick off the necessary `lerna` build processes in the package folders.
 
 ## Project Status
 
@@ -32,7 +32,6 @@ This project is in alpha, lots of breaking changes are to be expected between re
 ### Prerequisites
 
 - [Node](https://nodejs.org/en/) v10+ (includes npm)
-- [Yarn](https://yarnpkg.com/lang/en/) (faster alternative to npm)
 
 ### Setup
 
@@ -41,9 +40,9 @@ Each package contains (or will contain) a readme with further information pertai
 In the root of the project, install node dependencies:
 
 ```
-yarn install
-yarn bootstrap
-yarn build
+npm install
+npm run bootstrap
+npm run build
 ```
 
 Next, a local environment must be created. An environment contains references to all the vaults created and stores the downloaded application contents. To create a new environment, run the following command:
@@ -64,7 +63,7 @@ packages/cli/bin/run daemon:setup --bin-path=./packages/daemon/bin/run
 Whenever code changes in more than one package, you should build everything (via `lerna`) with:
 
 ```
-yarn build
+npm run build
 ```
 
 Now, in one terminal tab, run the daemon:
@@ -76,7 +75,7 @@ Now, in one terminal tab, run the daemon:
 Then, in another tab, run the launcher:
 
 ```
-cd packages/launcher && yarn dev
+cd packages/launcher && npm run dev
 ```
 
 ### Building Mainframe Apps
@@ -169,6 +168,6 @@ When decoded during install, the file will contain:
 
 There are several places to look when errors arise initially or during development. Here is an overview:
 
-- if the Launcher won't start, look to the terminal logs where you ran `yarn dev`. Some javascript errors could prevent Electron from showing a window.
+- if the Launcher won't start, look to the terminal logs where you ran `npm run dev`. Some javascript errors could prevent Electron from showing a window.
 - if there are problems inside the launcher or apps, you can use the regular Chrome debugger (cmd-option-I) to view logs and diagnose issues.
 - the daemon also shows errors in the terminal, and you can enable more verbose logging by setting the `DEBUG="*"` environment variable, e.g. `DEBUG="*" ./packages/cli/bin/run daemon:start`

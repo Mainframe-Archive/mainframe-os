@@ -35,10 +35,11 @@ export default class AppInstallModal extends Component<Props> {
 const styles = StyleSheet.create({
   button: {
     paddingVertical: 10,
-    backgroundColor: COLORS.PRIMARY_RED,
+    backgroundColor: COLORS.BRIGHT_BLUE,
     paddingHorizontal: 30,
     borderRadius: 30,
     maxWidth: 250,
+    alignSelf: 'left',
   },
   label: {
     textAlign: 'center',

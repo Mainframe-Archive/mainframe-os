@@ -1,0 +1,30 @@
+{
+  "name": "@mainframe/contract-utils",
+  "description": "Mainframe Contract Utils",
+  "version": "0.1.0",
+  "author": "Mainframe",
+  "license": "MIT",
+  "main": "cjs/index.js",
+  "scripts": {
+    "clean": "del cjs && del dist",
+    "webpack": "webpack",
+    "build:dist": "BABEL_ENV='browser-esm' npm run webpack",
+    "build:cjs": "BABEL_ENV='browser-cjs' babel src --out-dir cjs",
+    "build:flow": "flow-copy-source src cjs",
+    "build": "npm run clean && npm run build:dist && npm run build:cjs && npm run build:flow",
+    "test:types": "flow check"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.0.0",
+    "@mainframe/rpc-stream": "^0.2.4",
+    "web3-eth-abi": "^1.0.0-beta.36",
+    "web3-provider-engine": "^14.1.0",
+    "web3-utils": "^1.0.0-beta.36"
+  },
+  "devDependencies": {
+    "babel-loader": "^8.0.0",
+    "flow-bin": "^0.81.0",
+    "webpack": "^4.19.1",
+    "webpack-cli": "^3.1.0"
+  }
+}

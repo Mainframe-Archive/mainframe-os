@@ -46,16 +46,18 @@ export const APP_GET_MANIFEST_DATA_SCHEMA = {
   version: OPTIONAL_SEMVER_SCHEMA,
 }
 
+export const APP_PERMISSIONS_SETTINGS_SCHEMA = {
+  type: 'object',
+  props: {
+    grants: PERMISSIONS_GRANTS_SCHEMA,
+    permissionsChecked: 'boolean',
+  },
+}
+
 export const APP_INSTALL_SCHEMA = {
   manifest: MANIFEST_SCHEMA,
   userID: LOCAL_ID_SCHEMA,
-  settings: {
-    type: 'object',
-    props: {
-      permissions: PERMISSIONS_GRANTS_SCHEMA,
-      permissionsChecked: 'boolean',
-    },
-  },
+  permissionsSettings: APP_PERMISSIONS_SETTINGS_SCHEMA,
 }
 
 export const APP_OPEN_SCHEMA = {
@@ -82,8 +84,13 @@ export const APP_SET_USER_SETTINGS_SCHEMA = {
   settings: {
     type: 'object',
     props: {
-      permissions: PERMISSIONS_GRANTS_SCHEMA,
-      permissionsChecked: 'boolean',
+      permissionsSettings: APP_PERMISSIONS_SETTINGS_SCHEMA,
+      walletSettings: {
+        type: 'object',
+        props: {
+          defaultEthAccount: 'string',
+        },
+      },
     },
   },
 }
@@ -93,6 +100,12 @@ export const APP_SET_PERMISSION_SCHEMA = {
   key: PERMISSION_KEY_SCHEMA,
   value: PERMISSION_GRANT_SCHEMA,
   persist: { type: 'boolean', optional: true },
+}
+
+export const APP_SET_USER_PERMISSIONS_SETTINGS_SCHEMA = {
+  appID: LOCAL_ID_SCHEMA,
+  userID: LOCAL_ID_SCHEMA,
+  settings: APP_PERMISSIONS_SETTINGS_SCHEMA,
 }
 
 export const APP_SET_PERMISSIONS_REQUIREMENTS_SCHEMA = {
@@ -117,5 +130,74 @@ const VAULT_SETTING_SCHEMA = { type: 'string', empty: false, optional: true }
 export const VAULT_SETTINGS_SCHEMA = {
   bzzURL: VAULT_SETTING_SCHEMA,
   pssURL: VAULT_SETTING_SCHEMA,
-  web3HTTPProvider: VAULT_SETTING_SCHEMA,
+  ethURL: VAULT_SETTING_SCHEMA,
+}
+
+export const WALLET_CREATE_HD_SCHEMA = {
+  chain: 'string',
+}
+
+export const WALLET_TYPE_SCHEMA = {
+  type: 'enum',
+  values: ['hd', 'simple', 'ledger'],
+}
+
+export const WALLET_SUPPORTED_CHAIN_SCHEMA = {
+  type: 'enum',
+  values: ['ethereum'],
+}
+
+export const WALLET_IMPORT_PK_SCHEMA = {
+  privateKey: 'string',
+}
+
+export const WALLET_IMPORT_MNEMONIC_SCHEMA = {
+  mnemonic: 'string',
+}
+
+export const WALLET_DELETE_SCHEMA = {
+  chain: WALLET_SUPPORTED_CHAIN_SCHEMA,
+  type: WALLET_TYPE_SCHEMA,
+  walletID: LOCAL_ID_SCHEMA,
+}
+
+export const WALLET_GET_LEDGER_ETH_ACCOUNTS_SCHEMA = {
+  pageNum: 'number',
+}
+
+export const WALLET_ADD_LEDGER_ETH_ACCOUNT_SCHEMA = {
+  index: 'number',
+}
+
+export const WALLET_ADD_HD_ACCOUNT_SCHEMA = {
+  walletID: 'string',
+  index: 'number',
+}
+
+export const ETH_TRANSACTION_SCHEMA = {
+  nonce: 'number',
+  from: 'string',
+  to: 'string',
+  data: 'string',
+  gas: 'string',
+  gasPrice: 'string',
+}
+
+export const WALLET_SIGN_ETH_TRANSACTION_SCHEMA = ETH_TRANSACTION_SCHEMA
+
+export const WALLET_SIGN_TRANSACTION_SCHEMA = {
+  chain: WALLET_SUPPORTED_CHAIN_SCHEMA,
+  transactionData: 'object',
+}
+
+export const IDENTITY_LINK_ETH_WALLET_SCHEMA = {
+  id: LOCAL_ID_SCHEMA,
+  walletID: LOCAL_ID_SCHEMA,
+  address: 'string',
+}
+
+export const IDENTITY_UNLINK_ETH_WALLET_SCHEMA = {
+  id: LOCAL_ID_SCHEMA,
+  walletID: LOCAL_ID_SCHEMA,
+  address: 'string',
 }

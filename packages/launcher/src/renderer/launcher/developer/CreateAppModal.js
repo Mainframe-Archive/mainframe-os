@@ -5,7 +5,7 @@ import type {
   PermissionRequirement,
   StrictPermissionsRequirements,
 } from '@mainframe/app-permissions'
-import type { ID, AppCreateParams } from '@mainframe/client'
+import type { ID, AppCreateParams, IdentityOwnData } from '@mainframe/client'
 import { isValidSemver } from '@mainframe/app-manifest'
 import React, { createRef, Component, type ElementRef } from 'react'
 import {
@@ -32,13 +32,6 @@ type Props = {
   onAppCreated: (appID: ID) => void,
 }
 
-type User = {
-  id: ID,
-  data: {
-    name: string,
-  },
-}
-
 type AppData = {
   name?: string,
   version?: string,
@@ -51,7 +44,7 @@ type State = {
   screen: 'info' | 'identity' | 'permissions' | 'summary',
   permissionsRequirements: StrictPermissionsRequirements,
   userId?: ID,
-  devIdentities: Array<User>,
+  devIdentities: Array<IdentityOwnData>,
   appData: AppData,
   errorMsg?: string,
 }

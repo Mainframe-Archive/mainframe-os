@@ -28,7 +28,11 @@ import {
 // eslint-disable-next-line import/named
 import { uniqueID, type ID } from '@mainframe/utils-id'
 
-import type { AppUserSettings, SessionData } from '../app/AbstractApp'
+import type {
+  AppUserSettings,
+  PermissionsSettings,
+  SessionData,
+} from '../app/AbstractApp'
 import type App from '../app/App'
 import AppsRepository, {
   type AppsRepositorySerialized,
@@ -38,6 +42,12 @@ import type Session from '../app/Session'
 import IdentitiesRepository, {
   type IdentitiesRepositorySerialized,
 } from '../identity/IdentitiesRepository'
+import WalletsRepository, {
+  type WalletsRepositorySerialized,
+} from '../wallet/WalletsRepository'
+import IdentityWallets, {
+  type IdentityWalletsSerialized,
+} from '../identity/IdentityWallets'
 
 type VaultKDF = {
   algorithm: number,
@@ -120,19 +130,24 @@ export const readVaultFile = async (
 export type UserSettings = {
   bzzURL: string,
   pssURL: string,
-  web3HTTPProvider: string,
+  ethURL: string,
+  ethChainID: number,
 }
 
 export type VaultData = {
   apps: AppsRepository,
   identities: IdentitiesRepository,
   settings: UserSettings,
+  wallets: WalletsRepository,
+  identityWallets: IdentityWallets,
 }
 
 export type VaultSerialized = {
   apps?: AppsRepositorySerialized,
   identities?: IdentitiesRepositorySerialized,
   settings?: UserSettings,
+  wallets?: WalletsRepositorySerialized,
+  identityWallets?: IdentityWalletsSerialized,
 }
 
 export default class Vault {
@@ -148,6 +163,8 @@ export default class Vault {
     return new Vault(path, keyParams, {
       apps: AppsRepository.fromJSON(data.apps),
       identities: IdentitiesRepository.fromJSON(data.identities),
+      wallets: WalletsRepository.fromJSON(data.wallets),
+      identityWallets: IdentityWallets.fromJSON(data.identityWallets),
       settings: data.settings,
     })
   }
@@ -160,15 +177,17 @@ export default class Vault {
   constructor(path: string, keyParams: VaultKeyParams, data?: ?VaultData) {
     this._path = path
     this._keyParams = keyParams
-
     const vaultData = {
       apps: new AppsRepository(),
       identities: new IdentitiesRepository(),
       settings: {
         bzzURL: 'http://swarm-gateways.net',
         pssURL: 'ws://localhost:8546',
-        web3HTTPProvider: 'https://mainnet.infura.io/KWLG1YOMaYgl4wiFlcJv',
+        ethURL: 'https://ropsten.infura.io/KWLG1YOMaYgl4wiFlcJv',
+        ethChainID: 3, // Mainnet 1, Ropsten 3, Rinkeby 4, Kovan 42, Local (ganache) 1977
       },
+      identityWallets: new IdentityWallets(),
+      wallets: new WalletsRepository(),
     }
     this._data = data ? Object.assign(vaultData, data) : vaultData
   }
@@ -191,6 +210,14 @@ export default class Vault {
     return this._data.settings
   }
 
+  get wallets(): WalletsRepository {
+    return this._data.wallets
+  }
+
+  get identityWallets(): IdentityWallets {
+    return this._data.identityWallets
+  }
+
   // App lifecycle
 
   closeApp(sessID: ID): void {
@@ -206,7 +233,7 @@ export default class Vault {
   installApp(
     manifest: ManifestData,
     userID: ID,
-    settings: AppUserSettings,
+    settings: PermissionsSettings,
   ): App {
     let app = this.apps.getByMainframeID(manifest.id)
     if (app == null) {
@@ -214,7 +241,7 @@ export default class Vault {
       app = this.apps.add(manifest, userID, settings)
     } else {
       // Set user settings for already existing app
-      this.apps.setUserSettings(app.id, userID, settings)
+      this.apps.setUserPermissionsSettings(app.id, userID, settings)
     }
     return app
   }
@@ -302,6 +329,14 @@ export default class Vault {
 
   setAppUserSettings(appID: ID, userID: ID, settings: AppUserSettings): void {
     this.apps.setUserSettings(appID, userID, settings)
+  }
+
+  setAppUserPermissionsSettings(
+    appID: ID,
+    userID: ID,
+    settings: PermissionsSettings,
+  ): void {
+    this.apps.setUserPermissionsSettings(appID, userID, settings)
   }
 
   getAppManifestData(appID: ID, version?: ?string): PartialManifestData {
@@ -406,8 +441,12 @@ export default class Vault {
     this._data.settings.pssURL = url
   }
 
-  setWeb3HTTPProvider(provider: string): void {
-    this._data.settings.web3HTTPProvider = provider
+  setEthUrl(url: string): void {
+    this._data.settings.ethURL = url
+  }
+
+  setEthChainID(chainID: number): void {
+    this._data.settings.ethChainID = chainID
   }
 
   // Vault lifecycle
@@ -425,6 +464,8 @@ export default class Vault {
       ? {
           apps: AppsRepository.toJSON(this._data.apps),
           identities: IdentitiesRepository.toJSON(this._data.identities),
+          wallets: WalletsRepository.toJSON(this._data.wallets),
+          identityWallets: IdentityWallets.toJSON(this._data.identityWallets),
           settings: this._data.settings,
         }
       : {}

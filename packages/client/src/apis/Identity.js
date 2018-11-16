@@ -7,6 +7,8 @@ import type {
   IdentityCreateResult,
   IdentityGetOwnDevelopersResult,
   IdentityGetOwnUsersResult,
+  IdentityLinkEthWalletAccountParams,
+  IdentityUnlinkEthWalletAccountParams,
 } from '../types'
 
 export default class IdentityAPIs extends ClientAPIs {
@@ -26,5 +28,17 @@ export default class IdentityAPIs extends ClientAPIs {
 
   getOwnUsers(): Promise<IdentityGetOwnUsersResult> {
     return this._rpc.request('identity_getOwnUsers')
+  }
+
+  linkEthWalletAccount(
+    params: IdentityLinkEthWalletAccountParams,
+  ): Promise<void> {
+    return this._rpc.request('identity_linkEthWallet', params)
+  }
+
+  unlinkEthWalletAccount(
+    params: IdentityUnlinkEthWalletAccountParams,
+  ): Promise<void> {
+    return this._rpc.request('identity_unlinkEthWallet', params)
   }
 }

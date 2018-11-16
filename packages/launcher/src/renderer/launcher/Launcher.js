@@ -4,6 +4,7 @@ import type {
   ID,
   AppGetAllResult as Apps,
   IdentityGetOwnUsersResult as OwnIdentities,
+  WalletGetEthWalletsResult as Wallets,
   AppOwnData,
   AppInstalledData,
 } from '@mainframe/client'
@@ -40,6 +41,7 @@ const GRID_ITEMS_PER_ROW = 3
 type State = {
   apps: Apps,
   identities: OwnIdentities,
+  wallets?: Wallets,
   devMode: boolean,
   showAppInstallModal?: boolean,
   showAppCreateModal?: boolean,
@@ -57,6 +59,7 @@ type AppData = AppOwnData | AppInstalledData
 export default class App extends Component<{}, State> {
   state = {
     showModal: undefined,
+    wallets: undefined,
     devMode: false,
     showAppInstallModal: false,
     identities: {
@@ -91,9 +94,11 @@ export default class App extends Component<{}, State> {
     try {
       const apps = await rpc.getApps()
       const identities = await rpc.getOwnUserIdentities()
+      const wallets = await rpc.getEthWallets()
       this.setState({
         apps,
         identities,
+        wallets,
       })
     } catch (err) {
       // eslint-disable-next-line no-console
@@ -151,7 +156,7 @@ export default class App extends Component<{}, State> {
       if (
         !devMode &&
         havePermissionsToGrant(app.manifest.permissions) &&
-        (!user || !user.settings.permissionsChecked)
+        (!user || !user.settings.permissionsSettings.permissionsChecked)
       ) {
         // If this user hasn't used the app before
         // we need to ask to accept permissions
@@ -207,8 +212,8 @@ export default class App extends Component<{}, State> {
     ) {
       const { app, userID } = this.state.showModal.data
       try {
-        await rpc.setAppUserSettings(app.appID, userID, {
-          permissions: permissionSettings,
+        await rpc.setAppUserPermissionsSettings(app.appID, userID, {
+          grants: permissionSettings,
           permissionsChecked: true,
         })
         await this.getAppsAndUsers()
@@ -372,6 +377,7 @@ export default class App extends Component<{}, State> {
         <SideMenu
           devMode={this.state.devMode}
           identities={this.state.identities}
+          wallets={this.state.wallets}
           onToggleDevMode={this.onToggleDevMode}
         />
         <View style={appsContainerStyles}>
