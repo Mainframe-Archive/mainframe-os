@@ -41,8 +41,8 @@ export const createTopicSubscription = {
     const sub = new TopicSubscription()
     // Subscribe to messages from Swarm and store the created Rx Subscription
     // object in the TopicSubscription so it can be disposed of
-    sub.data = ctx.pss.createSubscription(subKey).subscribe(msg => {
-      ctx.notify(sub.id, msg)
+    sub.data = ctx.pss.createSubscription(subKey).subscribe(event => {
+      ctx.notify(sub.id, { key: event.key, msg: event.msg.value })
     })
     // Add local subscription to context and return its ID to client so it can unsubscribe
     ctx.setSubscription(sub)
