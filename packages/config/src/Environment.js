@@ -147,8 +147,8 @@ export default class Environment {
       : join(this._paths.config, path)
   }
 
-  createWhenValue<T>(key: string, timeout?: number) {
-    return (expectedValue: T): Promise<any> => {
+  createWhenValue(key: string, timeout?: number) {
+    return <T>(expectedValue: T): Promise<any> => {
       return new Promise((resolve, reject) => {
         if (this._conf.get(key) === expectedValue) {
           resolve()
