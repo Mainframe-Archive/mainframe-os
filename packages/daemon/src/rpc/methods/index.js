@@ -37,10 +37,12 @@ export default {
 
   blockchain_web3Send: blockchain.web3Send,
 
+  identity_addPeerByKey: identity.addPeerByKey,
   identity_createUser: identity.createUser,
   identity_createDeveloper: identity.createDeveloper,
   identity_getOwnUsers: identity.getOwnUsers,
   identity_getOwnDevelopers: identity.getOwnDevelopers,
+  identity_getPeers: identity.getPeers,
   identity_linkEthWallet: identity.linkEthWallet,
   identity_unlinkEthWallet: identity.unlinkEthWallet,
 

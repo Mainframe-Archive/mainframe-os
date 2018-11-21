@@ -4,6 +4,7 @@ import type { MainframeID } from '@mainframe/data-types'
 import type { KeyPair } from '@mainframe/utils-crypto'
 // eslint-disable-next-line import/named
 import { uniqueID, idType, type ID } from '@mainframe/utils-id'
+import multibase from 'multibase'
 
 import { mapObject } from '../utils'
 
@@ -12,7 +13,6 @@ import AppIdentity, { type AppIdentitySerialized } from './AppIdentity'
 import DeveloperIdentity, {
   type DeveloperIdentitySerialized,
 } from './DeveloperIdentity'
-import UserIdentity, { type UserIdentitySerialized } from './UserIdentity'
 import OwnAppIdentity, { type OwnAppIdentitySerialized } from './OwnAppIdentity'
 import OwnDeveloperIdentity, {
   type OwnDeveloperIdentitySerialized,
@@ -20,11 +20,16 @@ import OwnDeveloperIdentity, {
 import OwnUserIdentity, {
   type OwnUserIdentitySerialized,
 } from './OwnUserIdentity'
+import PeerUserIdentity, {
+  type PeerUserIdentitySerialized,
+  type PeerData,
+  type Feeds,
+} from './PeerUserIdentity'
 
-type IdentitiesRepositoryGroupSerialized = {
+type PeerIdentitiesRepositoryGroupSerialized = {
   apps?: { [id: string]: AppIdentitySerialized },
   developers?: { [id: string]: DeveloperIdentitySerialized },
-  users?: { [id: string]: UserIdentitySerialized },
+  users?: { [id: string]: PeerUserIdentitySerialized },
 }
 
 type OwnIdentitiesRepositoryGroupSerialized = {
@@ -35,13 +40,13 @@ type OwnIdentitiesRepositoryGroupSerialized = {
 
 export type IdentitiesRepositorySerialized = {
   own?: OwnIdentitiesRepositoryGroupSerialized,
-  other?: IdentitiesRepositoryGroupSerialized,
+  peers?: PeerIdentitiesRepositoryGroupSerialized,
 }
 
-type IdentitiesRepositoryGroupParams = {
+type PeerIdentitiesRepositoryGroupParams = {
   apps?: { [id: string]: AppIdentity },
   developers?: { [id: string]: DeveloperIdentity },
-  users?: { [id: string]: UserIdentity },
+  users?: { [id: string]: PeerUserIdentity },
 }
 
 type OwnIdentitiesRepositoryGroupParams = {
@@ -52,13 +57,13 @@ type OwnIdentitiesRepositoryGroupParams = {
 
 export type IdentitiesRepositoryParams = {
   own?: OwnIdentitiesRepositoryGroupParams,
-  other?: IdentitiesRepositoryGroupParams,
+  peers?: PeerIdentitiesRepositoryGroupParams,
 }
 
-type IdentitiesRepositoryGroup = {
+type PeerIdentitiesRepositoryGroup = {
   apps: { [id: string]: AppIdentity },
   developers: { [id: string]: DeveloperIdentity },
-  users: { [id: string]: UserIdentity },
+  users: { [id: string]: PeerUserIdentity },
 }
 
 type OwnIdentitiesRepositoryGroup = {
@@ -69,22 +74,22 @@ type OwnIdentitiesRepositoryGroup = {
 
 type IdentitiesData = {
   own: OwnIdentitiesRepositoryGroup,
-  other: IdentitiesRepositoryGroup,
+  peers: PeerIdentitiesRepositoryGroup,
 }
 
-type Domain = $Keys<IdentitiesRepositoryGroup>
+type Domain = $Keys<PeerIdentitiesRepositoryGroup>
 type Ownership = $Keys<IdentitiesData>
 type Reference = { domain: Domain, ownership: Ownership }
 
 const getReference = (identity: Identity): ?Reference => {
   if (identity instanceof AppIdentity) {
-    return { domain: 'apps', ownership: 'other' }
+    return { domain: 'apps', ownership: 'peers' }
   }
   if (identity instanceof DeveloperIdentity) {
-    return { domain: 'developers', ownership: 'other' }
+    return { domain: 'developers', ownership: 'peers' }
   }
-  if (identity instanceof UserIdentity) {
-    return { domain: 'users', ownership: 'other' }
+  if (identity instanceof PeerUserIdentity) {
+    return { domain: 'users', ownership: 'peers' }
   }
   if (identity instanceof OwnAppIdentity) {
     return { domain: 'apps', ownership: 'own' }
@@ -99,14 +104,14 @@ const getReference = (identity: Identity): ?Reference => {
 
 const fromAppIdentity = mapObject(AppIdentity.toJSON)
 const fromDeveloperIdentity = mapObject(DeveloperIdentity.toJSON)
-const fromUserIdentity = mapObject(UserIdentity.toJSON)
-const fromGroup = group => ({
+const fromPeerUserIdentity = mapObject(PeerUserIdentity.toJSON)
+const fromPeersGroup = group => ({
   // $FlowFixMe: mapping type
   apps: fromAppIdentity(group.apps),
   // $FlowFixMe: mapping type
   developers: fromDeveloperIdentity(group.developers),
   // $FlowFixMe: mapping type
-  users: fromUserIdentity(group.users),
+  users: fromPeerUserIdentity(group.users),
 })
 
 const fromOwnAppIdentity = mapObject(OwnAppIdentity.toJSON)
@@ -123,14 +128,14 @@ const fromOwnGroup = group => ({
 
 const toAppIdentity = mapObject(AppIdentity.fromJSON)
 const toDeveloperIdentity = mapObject(DeveloperIdentity.fromJSON)
-const toUserIdentity = mapObject(UserIdentity.fromJSON)
-const toGroup = group => ({
+const toPeerUserIdentity = mapObject(PeerUserIdentity.fromJSON)
+const toPeersGroup = group => ({
   // $FlowFixMe: mapping type
   apps: toAppIdentity(group.apps),
   // $FlowFixMe: mapping type
   developers: toDeveloperIdentity(group.developers),
   // $FlowFixMe: mapping type
-  users: toUserIdentity(group.users),
+  users: toPeerUserIdentity(group.users),
 })
 
 const toOwnAppIdentity = mapObject(OwnAppIdentity.fromJSON)
@@ -145,7 +150,9 @@ const toOwnGroup = group => ({
   users: toOwnUserIdentity(group.users),
 })
 
-const createGroup = (params: IdentitiesRepositoryGroupParams = {}) => ({
+const createPeersGroup = (
+  params: PeerIdentitiesRepositoryGroupParams = {},
+) => ({
   apps: params.apps == null ? {} : params.apps,
   developers: params.developers == null ? {} : params.developers,
   users: params.users == null ? {} : params.users,
@@ -165,7 +172,7 @@ export default class IdentitiesRepository {
       // $FlowFixMe: mapper type
       own: serialized.own ? toOwnGroup(serialized.own) : {},
       // $FlowFixMe: mapper type
-      other: serialized.other ? toGroup(serialized.other) : {},
+      peers: serialized.peers ? toPeersGroup(serialized.peers) : {},
     })
   }
 
@@ -175,17 +182,18 @@ export default class IdentitiesRepository {
     // $FlowFixMe: mapper type
     own: fromOwnGroup(repository.ownIdentities),
     // $FlowFixMe: mapper type
-    other: fromGroup(repository.otherIdentities),
+    peers: fromPeersGroup(repository.peerIdentities),
   })
 
   _byMainframeID: { [mainframeID: string]: ID } = {}
   _identities: IdentitiesData
   _refs: { [id: string]: Reference } = {}
+  _mainframeIdByFeed: { [feedHash: string]: string } = {}
 
   constructor(identities: IdentitiesRepositoryParams = {}) {
     this._identities = {
       own: createOwnGroup(identities.own),
-      other: createGroup(identities.other),
+      peers: createPeersGroup(identities.peers),
     }
     // Add references so an identity can be retrieved by local ID or Mainframe ID lookup
     Object.keys(this._identities).forEach(ownership => {
@@ -194,6 +202,12 @@ export default class IdentitiesRepository {
           const identity = this._identities[ownership][domain][id]
           this._byMainframeID[identity.id] = idType(id)
           this._refs[id] = { ownership, domain }
+          if (identity.feeds) {
+            Object.values(identity.feeds).forEach(hash => {
+              // $FlowFixMe: value is string
+              this._mainframeIdByFeed[hash] = identity.id
+            })
+          }
         })
       })
     })
@@ -205,8 +219,8 @@ export default class IdentitiesRepository {
     return this._identities.own
   }
 
-  get otherIdentities(): IdentitiesRepositoryGroup {
-    return this._identities.other
+  get peerIdentities(): PeerIdentitiesRepositoryGroup {
+    return this._identities.peers
   }
 
   get ownApps(): { [id: string]: OwnAppIdentity } {
@@ -221,16 +235,16 @@ export default class IdentitiesRepository {
     return this._identities.own.users
   }
 
-  get otherApps(): { [id: string]: AppIdentity } {
-    return this._identities.other.apps
+  get peerApps(): { [id: string]: AppIdentity } {
+    return this._identities.peers.apps
   }
 
-  get otherDevelopers(): { [id: string]: DeveloperIdentity } {
-    return this._identities.other.developers
+  get peerDevelopers(): { [id: string]: DeveloperIdentity } {
+    return this._identities.peers.developers
   }
 
-  get otherUsers(): { [id: string]: UserIdentity } {
-    return this._identities.other.users
+  get peerUsers(): { [id: string]: PeerUserIdentity } {
+    return this._identities.peers.users
   }
 
   getOwnApp(id: ID): ?OwnAppIdentity {
@@ -245,39 +259,37 @@ export default class IdentitiesRepository {
     return this._identities.own.users[id]
   }
 
-  getOtherApp(id: ID): ?AppIdentity {
-    return this._identities.other.apps[id]
+  getPeerApp(id: ID): ?AppIdentity {
+    return this._identities.peers.apps[id]
   }
 
-  getOtherDeveloper(id: ID): ?DeveloperIdentity {
-    return this._identities.other.developers[id]
+  getPeerDeveloper(id: ID): ?DeveloperIdentity {
+    return this._identities.peers.developers[id]
   }
 
-  getOtherUser(id: ID): ?UserIdentity {
-    return this._identities.other.users[id]
+  getPeerUser(id: ID): ?PeerUserIdentity {
+    return this._identities.peers.users[id]
   }
 
   getApp(id: ID): ?(AppIdentity | OwnAppIdentity) {
-    return this.getOwnApp(id) || this.getOtherApp(id)
+    return this.getOwnApp(id) || this.getPeerApp(id)
   }
 
   getDeveloper(id: ID): ?(DeveloperIdentity | OwnDeveloperIdentity) {
-    return this.getOwnDeveloper(id) || this.getOtherDeveloper(id)
+    return this.getOwnDeveloper(id) || this.getPeerDeveloper(id)
   }
 
-  getUser(id: ID): ?(UserIdentity | OwnUserIdentity) {
-    return this.getOwnUser(id) || this.getOtherUser(id)
+  getUser(id: ID): ?(PeerUserIdentity | OwnUserIdentity) {
+    return this.getOwnUser(id) || this.getPeerUser(id)
   }
 
   getOwn(id: ID): ?(OwnAppIdentity | OwnDeveloperIdentity | OwnUserIdentity) {
     return this.getOwnApp(id) || this.getOwnDeveloper(id) || this.getOwnUser(id)
   }
 
-  getOther(id: ID): ?(AppIdentity | DeveloperIdentity | UserIdentity) {
+  getPeer(id: ID): ?(AppIdentity | DeveloperIdentity | PeerUserIdentity) {
     return (
-      this.getOtherApp(id) ||
-      this.getOtherDeveloper(id) ||
-      this.getOtherUser(id)
+      this.getPeerApp(id) || this.getPeerDeveloper(id) || this.getPeerUser(id)
     )
   }
 
@@ -332,15 +344,24 @@ export default class IdentitiesRepository {
     return this.addIdentity(OwnUserIdentity.create(keyPair, data))
   }
 
-  createOtherApp(key: MainframeID | Buffer) {
+  createPeerApp(key: MainframeID | Buffer) {
     return this.addIdentity(new AppIdentity(key))
   }
 
-  createOtherDeveloper(key: MainframeID | Buffer) {
+  createPeerDeveloper(key: MainframeID | Buffer) {
     return this.addIdentity(new DeveloperIdentity(key))
   }
 
-  createOtherUser(key: MainframeID | Buffer) {
-    return this.addIdentity(new UserIdentity(key))
+  createPeerUserFromKey(publicKey: string, data: PeerData, feeds?: Feeds): ID {
+    const keyBuffer = multibase.decode(publicKey)
+    const id = this.addIdentity(new PeerUserIdentity(keyBuffer, data, feeds))
+    const peer = this.getPeerUser(id)
+    if (feeds) {
+      Object.values(feeds).forEach(hash => {
+        // $FlowFixMe: value is string
+        this._mainframeIdByFeed[hash] = peer.id
+      })
+    }
+    return id
   }
 }

@@ -10,9 +10,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - v1-dependencies-{{ checksum "package.json" }}
-            # fallback to using the latest cache if no exact match is found
-            - v1-dependencies
+            - v1-dependencies-{{ .Branch }}
       - run:
           name: Install libudev-dev
           command: |
@@ -24,7 +22,7 @@ jobs:
       - save_cache:
           paths:
             - node_modules
-          key: v1-dependencies-{{ checksum "package.json" }}
+          key: v1-dependencies-{{ .Branch }}
       - run:
           name: Build and check
           command: npm run build && npm run lint && npm run test:types
