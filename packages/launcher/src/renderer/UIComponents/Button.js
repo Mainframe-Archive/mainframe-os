@@ -39,7 +39,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
     borderRadius: 30,
     maxWidth: 250,
-    alignSelf: 'left',
+    alignSelf: 'flex-start',
   },
   label: {
     textAlign: 'center',
