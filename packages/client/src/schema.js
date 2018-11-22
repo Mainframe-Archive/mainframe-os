@@ -190,6 +190,26 @@ export const WALLET_SIGN_TRANSACTION_SCHEMA = {
   transactionData: 'object',
 }
 
+export const IDENTITY_PUBLIC_FEEDS_SCHEMA = {
+  type: 'object',
+  optional: true,
+  props: {
+    public: { type: 'string', optional: true },
+  },
+}
+
+export const IDENTITY_ADD_PEER_BY_KEY_SCHEMA = {
+  key: 'string',
+  data: {
+    type: 'object',
+    props: {
+      name: 'string',
+      avatar: { type: 'string', optional: true },
+    },
+  },
+  feeds: IDENTITY_PUBLIC_FEEDS_SCHEMA,
+}
+
 export const IDENTITY_LINK_ETH_WALLET_SCHEMA = {
   id: LOCAL_ID_SCHEMA,
   walletID: LOCAL_ID_SCHEMA,

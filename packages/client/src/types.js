@@ -260,6 +260,31 @@ export type WalletAddHDAccountResult = string
 
 // Identity
 
+export type PublicFeedTypes = 'public'
+
+export type FeedHash = string
+
+export type PublicFeeds = {
+  [type: PublicFeedTypes]: FeedHash,
+}
+
+export type IdentityAddPeerByKeyParams = {
+  key: string,
+  data: {
+    name: string,
+    avatar?: ?string,
+  },
+  feeds: PublicFeeds,
+}
+
+export type IdentityPeerResult = {
+  id: ID,
+  name: string,
+  avatar: ?string,
+}
+
+export type IdentityAddPeerByKeyResult = { id: ID }
+
 export type IdentityCreateDeveloperParams = {
   data?: Object,
 }
@@ -276,6 +301,10 @@ export type IdentityGetOwnDevelopersResult = {
 
 export type IdentityGetOwnUsersResult = {
   users: Array<IdentityOwnData>,
+}
+
+export type IdentityGetPeersResult = {
+  peers: Array<IdentityPeerResult>,
 }
 
 export type IdentityLinkEthWalletAccountParams = {

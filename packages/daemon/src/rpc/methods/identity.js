@@ -3,13 +3,17 @@
 import {
   idType as toClientID,
   /* eslint-disable import/named */
+  type IdentityAddPeerByKeyParams,
+  type IdentityAddPeerByKeyResult,
   type IdentityCreateDeveloperParams,
   type IdentityCreateUserParams,
   type IdentityCreateResult,
   type IdentityGetOwnDevelopersResult,
   type IdentityGetOwnUsersResult,
+  type IdentityGetPeersResult,
   type IdentityLinkEthWalletAccountParams,
   type IdentityUnlinkEthWalletAccountParams,
+  IDENTITY_ADD_PEER_BY_KEY_SCHEMA,
   IDENTITY_LINK_ETH_WALLET_SCHEMA,
   IDENTITY_UNLINK_ETH_WALLET_SCHEMA,
   /* eslint-enable import/named */
@@ -110,4 +114,33 @@ export const unlinkEthWallet = {
     )
     await ctx.openVault.save()
   },
+}
+
+export const addPeerByKey = {
+  params: IDENTITY_ADD_PEER_BY_KEY_SCHEMA,
+  handler: async (
+    ctx: RequestContext,
+    params: IdentityAddPeerByKeyParams,
+  ): Promise<IdentityAddPeerByKeyResult> => {
+    const peerID = ctx.openVault.identities.createPeerUserFromKey(
+      params.key,
+      params.data,
+      params.feeds,
+    )
+    await ctx.openVault.save()
+    return { id: toClientID(peerID) }
+  },
+}
+
+export const getPeers = (ctx: RequestContext): IdentityGetPeersResult => {
+  const peerUsers = ctx.openVault.identities.peerUsers
+  const peers = Object.keys(peerUsers).map(id => {
+    const peer = peerUsers[id]
+    return {
+      id: toClientID(id),
+      name: peer.name,
+      avatar: peer.avatar,
+    }
+  })
+  return { peers }
 }
