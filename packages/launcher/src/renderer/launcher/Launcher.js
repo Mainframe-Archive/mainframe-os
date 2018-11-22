@@ -410,7 +410,7 @@ const styles = StyleSheet.create({
   },
   appsGrid: {
     flexDirection: 'column',
-    alignItems: 'left',
+    alignItems: 'flex-start',
     width: 700,
   },
   gridRow: {
