@@ -120,19 +120,22 @@ export default class WalletTxRequestView extends Component<Props, State> {
     const { txInfo, tokenInfo } = this.state
     const { transaction } = this.props
     // TODO Add alert if also sending eth
-    if (txInfo) {
-      const value = txInfo.params.amount
-        ? web3Utils.fromWei(txInfo.params.amount)
-        : 0
-      const ticker = tokenInfo ? tokenInfo.symbol : 'Tokens'
-      return (
-        <View style={styles.container}>
-          <Text style={styles.header}>Sign Transaction</Text>
-          {this.renderAmount(value, ticker, txInfo.signatureName)}
-          {this.renderTransactionInfo(transaction.from, txInfo.params.to)}
-        </View>
-      )
+
+    if (txInfo == null) {
+      return null
     }
+
+    const value = txInfo.params.amount
+      ? web3Utils.fromWei(txInfo.params.amount)
+      : 0
+    const ticker = tokenInfo ? tokenInfo.symbol : 'Tokens'
+    return (
+      <View style={styles.container}>
+        <Text style={styles.header}>Sign Transaction</Text>
+        {this.renderAmount(value, ticker, txInfo.signatureName)}
+        {this.renderTransactionInfo(transaction.from, txInfo.params.to)}
+      </View>
+    )
   }
 
   renderBasic() {

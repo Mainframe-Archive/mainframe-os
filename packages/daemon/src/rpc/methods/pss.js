@@ -1,8 +1,7 @@
 // @flow
 
+import type { hexValue } from '@erebos/hex'
 import type { Subscription as RxSubscription } from 'rxjs'
-
-import type { hex } from '@mainframe/utils-hex'
 
 import {
   type default as RequestContext,
@@ -24,7 +23,7 @@ class TopicSubscription extends ContextSubscription<RxSubscription> {
   }
 }
 
-export const baseAddr = (ctx: RequestContext): Promise<hex> => {
+export const baseAddr = (ctx: RequestContext): Promise<hexValue> => {
   return ctx.pss.baseAddr()
 }
 
@@ -34,7 +33,7 @@ export const createTopicSubscription = {
   },
   handler: async (
     ctx: RequestContext,
-    params: { topic: hex },
+    params: { topic: hexValue },
   ): Promise<string> => {
     // Create topic subscription in Swarm node
     const subKey = await ctx.pss.subscribeTopic(params.topic)
@@ -42,8 +41,8 @@ export const createTopicSubscription = {
     const sub = new TopicSubscription()
     // Subscribe to messages from Swarm and store the created Rx Subscription
     // object in the TopicSubscription so it can be disposed of
-    sub.data = ctx.pss.createSubscription(subKey).subscribe(msg => {
-      ctx.notify(sub.id, msg)
+    sub.data = ctx.pss.createSubscription(subKey).subscribe(event => {
+      ctx.notify(sub.id, { key: event.key, msg: event.msg.value })
     })
     // Add local subscription to context and return its ID to client so it can unsubscribe
     ctx.setSubscription(sub)
@@ -51,7 +50,7 @@ export const createTopicSubscription = {
   },
 }
 
-export const getPublicKey = (ctx: RequestContext): Promise<hex> => {
+export const getPublicKey = (ctx: RequestContext): Promise<hexValue> => {
   return ctx.pss.getPublicKey()
 }
 
@@ -63,7 +62,7 @@ export const sendAsym = {
   },
   handler: (
     ctx: RequestContext,
-    params: { key: hex, topic: hex, message: hex },
+    params: { key: hexValue, topic: hexValue, message: hexValue },
   ): Promise<null> => {
     return ctx.pss.sendAsym(params.key, params.topic, params.message)
   },
@@ -76,7 +75,7 @@ export const setPeerPublicKey = {
   },
   handler: (
     ctx: RequestContext,
-    params: { key: hex, topic: hex },
+    params: { key: hexValue, topic: hexValue },
   ): Promise<null> => {
     return ctx.pss.setPeerPublicKey(params.key, params.topic)
   },
@@ -89,7 +88,7 @@ export const stringToTopic = {
   handler: (
     ctx: RequestContext,
     params: { string: string },
-  ): Promise<string> => {
+  ): Promise<hexValue> => {
     return ctx.pss.stringToTopic(params.string)
   },
 }

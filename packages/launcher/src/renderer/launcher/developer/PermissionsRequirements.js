@@ -58,7 +58,10 @@ export default class PermissionsRequirementsView extends Component<
     if (requirements) {
       Object.keys(requirements).forEach(requirement => {
         Object.keys(requirements[requirement]).forEach(key => {
-          if (key === 'WEB_REQUEST') {
+          if (
+            key === 'WEB_REQUEST' &&
+            Array.isArray(requirements.optional[key])
+          ) {
             requirements.optional[key].forEach(host => {
               permissionSettings[host] = requirement
             })

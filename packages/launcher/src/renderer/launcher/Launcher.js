@@ -12,7 +12,7 @@ import {
   havePermissionsToGrant,
   type StrictPermissionsGrants,
 } from '@mainframe/app-permissions'
-import React, { Component } from 'react'
+import React, { Component, Fragment } from 'react'
 import {
   View,
   ScrollView,
@@ -297,11 +297,12 @@ export default class App extends Component<{}, State> {
       appRows.push([installButton])
     }
 
-    return appRows.map((row, i) => (
-      <View key={i} style={styles.gridRow}>
+    const gridRows = appRows.map((row, i) => (
+      <View key={`row${i}`} style={styles.gridRow}>
         {row}
       </View>
     ))
+    return <Fragment>{gridRows}</Fragment>
   }
 
   render() {
