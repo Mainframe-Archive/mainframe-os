@@ -31,6 +31,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.LIGHT_GREY_E8,
     fontFamily: 'Poppins',
-    fontWeight: 300,
+    fontWeight: '300',
   },
 })

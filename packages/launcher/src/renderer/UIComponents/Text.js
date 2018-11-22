@@ -24,6 +24,6 @@ export default class Text extends Component<Props> {
 const styles = StyleSheet.create({
   font: {
     fontFamily: 'Poppins',
-    fontWeight: 300,
+    fontWeight: '300',
   },
 })
