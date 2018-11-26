@@ -238,7 +238,7 @@ export default class VaultManagerModal extends Component<Props, State> {
               key={path}
               style={styles.vaultListRow}
               onPress={onPress}>
-              <Text>{label}</Text>
+              <Text style={styles.vaultListRowLabel}>{label}</Text>
             </TouchableOpacity>
           )
         })
@@ -249,7 +249,7 @@ export default class VaultManagerModal extends Component<Props, State> {
           key={'create'}
           style={styles.vaultListRow}
           onPress={this.onToggleShowCreateVault}>
-          <Text style={styles.vaultlistCreate}>Create a new vault</Text>
+          <Text style={styles.vaultListCreate}>Create a new vault</Text>
         </TouchableOpacity>,
       )
     }
@@ -351,9 +351,11 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.LIGHT_GREY_EE,
     borderBottomWidth: 1,
     padding: 8,
+  },
+  vaultListRowLabel: {
     color: colors.GREY_MED_75,
   },
-  vaultlistCreate: {
+  vaultListCreate: {
     color: colors.PRIMARY_BLUE,
   },
   downArrow: {

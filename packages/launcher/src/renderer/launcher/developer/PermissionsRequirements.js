@@ -223,7 +223,7 @@ export default class PermissionsRequirementsView extends Component<
               <TouchableOpacity
                 style={styles.addWebHostButton}
                 onPress={this.onPressAddHost}>
-                <Text>Add</Text>
+                <Text style={styles.addWebHostButtonLabel}>Add</Text>
               </TouchableOpacity>
             </View>
             {hostRequirements}
@@ -328,8 +328,10 @@ const styles = StyleSheet.create({
     padding: PADDING,
     marginLeft: PADDING,
     backgroundColor: colors.PRIMARY_BLUE,
-    color: colors.WHITE,
     borderRadius: 3,
+  },
+  addWebHostButton: {
+    color: colors.WHITE,
   },
   webHostRow: {
     padding: PADDING,
