@@ -109,13 +109,19 @@ Once created, you should see your app displayed in the launcher, clicking it sho
 
 **_Editing your app details from the launcher is currently not supported, if you'd like to amend your app metadata or permissions once it's been created, you can use the CLI or simply delete and recreate your app._**
 
-#### Debugging with Chrome dev tools
+#### Debugging with Chrome Developer Tools
 
-Apps run inside a sandboxed webview, so any logs you make from your app won't show up in the chrome devtools console linked to your apps containing window, however you can open the developer tools for the webview by running the following command from the app container console:
+Similar to the Chrome web browser, the Launcher provides developer tools ("devtools") to inspect the DOM, and view javascript console output (among other capabilities). However, unlike the web browser, there is not one set of devtools per app, but several sets of devtools. Most likely, you will want the app-specific devtools (see #1 below), but if you are developing the MainframeOS stack itself, you may benefit from the others as well.
+
+1. The HTML, CSS, and javascript code specific to your app is associated with its own devtools window. When running MainframeOS in developer mode, this window will open automatically when you open an app. You can also force it to open by running the following command from the app container ("Trusted UI") console:
 
 ```
 $("#sandbox-webview").openDevTools();
 ```
+
+2. Each app window has a "Trusted UI" container with associated devtools. Errors, warnings, and logs related to the "Trusted UI" portion of the app container will be visible there. Most people will not need this when developing an app. You can enable this view via the menu, when the app window has the focus: `View` -> `Toggle Developer Tools`.
+
+3. The main Launcher window also has its own developer tools pane. Errors, warnings, and logs associated with the main Launcher thread will be visible there. Most people will not need this when developing an app. You can enable this view via the menu, when the main launcher window has the focus: `View` -> `Toggle Developer Tools`.
 
 ### Publishing your app
 
@@ -169,5 +175,6 @@ When decoded during install, the file will contain:
 There are several places to look when errors arise initially or during development. Here is an overview:
 
 - if the Launcher won't start, look to the terminal logs where you ran `npm run dev`. Some javascript errors could prevent Electron from showing a window.
+- you can send all logs (including in-app `console.log` calls) to the terminal by starting electron with the `ELECTRON_ENABLE_LOGGING` environment variable, e.g. `ELECTRON_ENABLE_LOGGING=1 npm run dev`
 - if there are problems inside the launcher or apps, you can use the regular Chrome debugger (cmd-option-I) to view logs and diagnose issues.
 - the daemon also shows errors in the terminal, and you can enable more verbose logging by setting the `DEBUG="*"` environment variable, e.g. `DEBUG="*" ./packages/cli/bin/run daemon:start`
