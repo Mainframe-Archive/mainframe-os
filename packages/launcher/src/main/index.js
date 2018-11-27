@@ -48,7 +48,6 @@ const newWindow = (params: Object = {}) => {
   })
 
   if (is.development) {
-    window.webContents.openDevTools()
     window.loadURL(`http://localhost:${PORT}`)
   } else {
     const formattedUrl = url.format({
@@ -73,6 +72,12 @@ const launchApp = async (appSession: AppSession) => {
   }
 
   const appWindow = newWindow()
+  if (is.development) {
+    appWindow.webContents.on('did-attach-webview', (attachEvent) => {
+      // Open a separate developer tools window for the app
+      appWindow.webContents.executeJavaScript(`document.getElementById('sandbox-webview').openDevTools()`)
+    })
+  }
   appWindow.on('closed', async () => {
     await client.app.close({ sessID: appSession.session.sessID })
     const ctx = appContexts.get(appWindow)
