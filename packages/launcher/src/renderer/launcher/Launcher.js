@@ -258,6 +258,7 @@ export default class App extends Component<{}, State> {
       }
       rows[rowIndex].push(
         <AppGridItem
+          key={`item${i}`}
           app={app}
           ownApp={this.state.devMode}
           onAppRemoved={this.onAppRemoved}
