@@ -330,7 +330,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.PRIMARY_BLUE,
     borderRadius: 3,
   },
-  addWebHostButton: {
+  addWebHostButtonLabel: {
     color: colors.WHITE,
   },
   webHostRow: {
