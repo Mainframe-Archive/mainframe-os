@@ -73,9 +73,11 @@ const launchApp = async (appSession: AppSession) => {
 
   const appWindow = newWindow()
   if (is.development) {
-    appWindow.webContents.on('did-attach-webview', (attachEvent) => {
+    appWindow.webContents.on('did-attach-webview', () => {
       // Open a separate developer tools window for the app
-      appWindow.webContents.executeJavaScript(`document.getElementById('sandbox-webview').openDevTools()`)
+      appWindow.webContents.executeJavaScript(
+        `document.getElementById('sandbox-webview').openDevTools()`,
+      )
     })
   }
   appWindow.on('closed', async () => {
