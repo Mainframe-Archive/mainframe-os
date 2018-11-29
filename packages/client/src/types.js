@@ -302,7 +302,7 @@ export type IdentityCreateUserParams = {
 export type IdentityCreateResult = { id: ID }
 
 export type IdentityCreateContactParams = {
-  userId: string,
+  userID: string,
   contactParams: {
     peerID: string,
     contactData: {

@@ -126,8 +126,8 @@ export const unlinkEthWallet = {
 export const addPeerByFeed = {
   params: IDENTITY_ADD_PEER_BY_FEED_SCHEMA,
   handler: async (
-    ctx: RequestContext, // eslint-disable-line
-    params: IdentityAddPeerByFeedParams, // eslint-disable-line
+    _ctx: RequestContext,
+    _params: IdentityAddPeerByFeedParams,
   ): Promise<IdentityAddPeerResult> => {
     // TODO - Fetch key and profile from feed and create peer
     throw new Error('not yet implemented')

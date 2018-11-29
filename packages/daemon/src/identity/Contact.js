@@ -65,4 +65,8 @@ export default class Contact {
   get profile(): ContactProfile {
     return this._profile
   }
+
+  get name(): ?string {
+    return this._profile.aliasName || this._profile.name
+  }
 }

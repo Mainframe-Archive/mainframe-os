@@ -190,21 +190,19 @@ const contactsFromJSON = mapObject(Contact.fromJSON)
 const contactsToJSON = mapObject(Contact.toJSON)
 
 const toContacts = (params: ContactsRepositorySerialized = {}) => {
-  const contacts = {}
-  Object.keys(params).forEach(ownID => {
+  return Object.keys(params).reduce((acc, ownID) => {
     // $FlowFixMe: mapper type
-    contacts[ownID] = contactsFromJSON(params[ownID])
-  })
-  return contacts
+    acc[ownID] = contactsFromJSON(params[ownID])
+    return acc
+  }, {})
 }
 
 const fromContacts = (contacts: ContactsRepository) => {
-  const serialized = {}
-  Object.keys(contacts).forEach(ownID => {
+  return Object.keys(contacts).reduce((acc, ownID) => {
     // $FlowFixMe: mapper type
-    serialized[ownID] = contactsToJSON(contacts[ownID])
-  })
-  return serialized
+    acc[ownID] = contactsToJSON(contacts[ownID])
+    return acc
+  }, {})
 }
 
 export default class IdentitiesRepository {
