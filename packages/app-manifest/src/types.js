@@ -1,12 +1,11 @@
 // @flow
 
 import type { StrictPermissionsRequirements } from '@mainframe/app-permissions'
-import type { MainframeID } from '@mainframe/data-types'
 
 export type ManifestData = {
-  id: MainframeID,
+  id: string,
   author: {
-    id: MainframeID,
+    id: string,
   },
   name: string,
   version: string,
@@ -15,9 +14,9 @@ export type ManifestData = {
 }
 
 export type PartialManifestData = {
-  id: MainframeID,
+  id: string,
   author: {
-    id: MainframeID,
+    id: string,
   },
   name: string,
   version: string,

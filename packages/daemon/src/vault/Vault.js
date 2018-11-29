@@ -235,7 +235,7 @@ export default class Vault {
     userID: ID,
     settings: PermissionsSettings,
   ): App {
-    let app = this.apps.getByMainframeID(manifest.id)
+    let app = this.apps.getByMFID(manifest.id)
     if (app == null) {
       // Add app with user settings
       app = this.apps.add(manifest, userID, settings)
@@ -294,7 +294,7 @@ export default class Vault {
       data: {
         contentsPath: params.contentsPath,
         developerID,
-        mainframeID: appIdentity.id,
+        mfid: appIdentity.id,
         name: params.name || 'Untitled',
         version,
       },
@@ -354,7 +354,7 @@ export default class Vault {
     }
 
     return {
-      id: app.mainframeID,
+      id: app.mfid,
       author: {
         id: devIdentity.id,
       },
@@ -375,7 +375,7 @@ export default class Vault {
       throw new Error('App not found')
     }
 
-    const appIdentityID = this.identities.getID(app.mainframeID)
+    const appIdentityID = this.identities.getID(app.mfid)
     if (appIdentityID == null) {
       throw new Error('App identity not found')
     }
@@ -410,7 +410,7 @@ export default class Vault {
     }
 
     const manifestData = {
-      id: app.mainframeID,
+      id: app.mfid,
       author: {
         id: devIdentity.id,
       },

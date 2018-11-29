@@ -1,6 +1,6 @@
 /* global getFixture, getTempFile */
 
-import { encodeMainframeID } from '@mainframe/data-types'
+import { MFID } from '@mainframe/data-types'
 import { signContents } from '@mainframe/secure-file'
 import { createSignKeyPair } from '@mainframe/utils-crypto'
 
@@ -13,11 +13,15 @@ import {
   writeManifestFile,
 } from '..'
 
+const createID = id => {
+  return MFID.create('user:pub-key:ed25519', Buffer.from(id)).toString()
+}
+
 describe('app-manifest', () => {
   const validManifest = {
-    id: encodeMainframeID(Buffer.from('id')),
+    id: createID('id'),
     author: {
-      id: encodeMainframeID(Buffer.from('author')),
+      id: createID('author'),
     },
     name: 'app',
     version: '0.2.0',

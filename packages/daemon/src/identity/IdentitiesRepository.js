@@ -1,6 +1,6 @@
 // @flow
 
-import type { MainframeID } from '@mainframe/data-types'
+import { MFID } from '@mainframe/data-types'
 import type { KeyPair } from '@mainframe/utils-crypto'
 // eslint-disable-next-line import/named
 import { uniqueID, idType, type ID } from '@mainframe/utils-id'
@@ -185,10 +185,10 @@ export default class IdentitiesRepository {
     peers: fromPeersGroup(repository.peerIdentities),
   })
 
-  _byMainframeID: { [mainframeID: string]: ID } = {}
+  _byMFID: { [mfid: string]: ID } = {}
   _identities: IdentitiesData
   _refs: { [id: string]: Reference } = {}
-  _mainframeIdByFeed: { [feedHash: string]: string } = {}
+  _mfidByFeed: { [feedHash: string]: string } = {}
 
   constructor(identities: IdentitiesRepositoryParams = {}) {
     this._identities = {
@@ -200,12 +200,11 @@ export default class IdentitiesRepository {
       Object.keys(this._identities[ownership]).forEach(domain => {
         Object.keys(this._identities[ownership][domain]).forEach(id => {
           const identity = this._identities[ownership][domain][id]
-          this._byMainframeID[identity.id] = idType(id)
+          this._byMFID[MFID.canonical(identity.id)] = idType(id)
           this._refs[id] = { ownership, domain }
           if (identity.feeds) {
             Object.values(identity.feeds).forEach(hash => {
-              // $FlowFixMe: value is string
-              this._mainframeIdByFeed[hash] = identity.id
+              this._mfidByFeed[String(hash)] = identity.id
             })
           }
         })
@@ -300,12 +299,12 @@ export default class IdentitiesRepository {
     }
   }
 
-  getID(mainframeID: MainframeID): ?ID {
-    return this._byMainframeID[mainframeID]
+  getID(mfid: string | MFID): ?ID {
+    return this._byMFID[MFID.canonical(mfid)]
   }
 
-  getByMainframeID(mainframeID: MainframeID): ?Identity {
-    const id = this._byMainframeID[mainframeID]
+  getByMFID(mfid: string): ?Identity {
+    const id = this.getID(mfid)
     if (id != null) {
       return this.getIdentity(id)
     }
@@ -314,7 +313,7 @@ export default class IdentitiesRepository {
   // Setters
 
   addIdentity(identity: Identity): ID {
-    const foundID = this._byMainframeID[identity.id]
+    const foundID = this._byMFID[identity.id]
     if (foundID != null) {
       return foundID
     }
@@ -325,7 +324,7 @@ export default class IdentitiesRepository {
     }
 
     const id = uniqueID()
-    this._byMainframeID[identity.id] = id
+    this._byMFID[identity.id] = id
     this._refs[id] = ref
     // $FlowFixMe: polymorphic type
     this._identities[ref.ownership][ref.domain][id] = identity
@@ -344,11 +343,11 @@ export default class IdentitiesRepository {
     return this.addIdentity(OwnUserIdentity.create(keyPair, data))
   }
 
-  createPeerApp(key: MainframeID | Buffer) {
+  createPeerApp(key: string | Buffer) {
     return this.addIdentity(new AppIdentity(key))
   }
 
-  createPeerDeveloper(key: MainframeID | Buffer) {
+  createPeerDeveloper(key: string | Buffer) {
     return this.addIdentity(new DeveloperIdentity(key))
   }
 
@@ -356,10 +355,9 @@ export default class IdentitiesRepository {
     const keyBuffer = multibase.decode(publicKey)
     const id = this.addIdentity(new PeerUserIdentity(keyBuffer, data, feeds))
     const peer = this.getPeerUser(id)
-    if (feeds) {
+    if (feeds && peer) {
       Object.values(feeds).forEach(hash => {
-        // $FlowFixMe: value is string
-        this._mainframeIdByFeed[hash] = peer.id
+        this._mfidByFeed[String(hash)] = peer.id
       })
     }
     return id

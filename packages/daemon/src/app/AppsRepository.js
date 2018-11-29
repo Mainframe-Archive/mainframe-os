@@ -6,7 +6,7 @@ import {
   type PermissionKey,
   type PermissionGrant,
 } from '@mainframe/app-permissions'
-import type { MainframeID } from '@mainframe/data-types'
+import { MFID } from '@mainframe/data-types'
 import { uniqueID, idType, type ID } from '@mainframe/utils-id'
 
 import { mapObject } from '../utils'
@@ -84,13 +84,14 @@ export default class AppsRepository {
   _apps: Apps
   _updates: AppUpdates
   _ownApps: OwnApps
-  _byMainframeID: { [mainframeID: string]: ID }
+  _byMFID: { [mfid: string]: ID }
 
   constructor(params: AppsRepositoryParams = {}) {
     this._apps = params.apps || {}
-    this._byMainframeID = Object.keys(this._apps).reduce((acc, appID) => {
+    this._byMFID = Object.keys(this._apps).reduce((acc, appID) => {
       const id = idType(appID)
-      acc[(this._apps[id].manifest.id: string)] = id
+      const mfid = MFID.canonical(this._apps[id].manifest.id)
+      acc[mfid] = id
       return acc
     }, {})
     this._updates = params.updates || {}
@@ -115,23 +116,23 @@ export default class AppsRepository {
     return this._apps[id] || this._ownApps[id]
   }
 
-  getByMainframeID(mainframeID: MainframeID): ?App {
-    const id = this._byMainframeID[mainframeID]
+  getByMFID(mfid: string | MFID): ?App {
+    const id = this.getID(mfid)
     if (id != null) {
       return this._apps[id]
     }
   }
 
-  getID(mainframeID: MainframeID): ?ID {
-    return this._byMainframeID[mainframeID]
+  getID(mfid: string | MFID): ?ID {
+    return this._byMFID[MFID.canonical(mfid)]
   }
 
   getOwnByID(id: ID): ?OwnApp {
     return this._ownApps[id]
   }
 
-  getOwnByMainframeID(mainframeID: MainframeID): ?OwnApp {
-    const id = this._byMainframeID[mainframeID]
+  getOwnByMFID(mfid: string | MFID): ?OwnApp {
+    const id = this.getID(mfid)
     if (id != null) {
       return this._ownApps[id]
     }
@@ -163,7 +164,7 @@ export default class AppsRepository {
       },
     })
     this._apps[appID] = app
-    this._byMainframeID[manifest.id] = appID
+    this._byMFID[MFID.canonical(manifest.id)] = appID
 
     return app
   }
@@ -212,7 +213,7 @@ export default class AppsRepository {
   removeOwn(id: ID): void {
     const app = this.getOwnByID(id)
     if (app != null) {
-      delete this._byMainframeID[app.mainframeID]
+      delete this._byMFID[app.mfid]
       delete this._ownApps[id]
     }
   }
@@ -222,7 +223,7 @@ export default class AppsRepository {
     const app = this.getByID(id)
     if (app != null) {
       // TODO: handle "clean" option to remove the app contents
-      delete this._byMainframeID[app.manifest.id]
+      delete this._byMFID[app.manifest.id]
       delete this._apps[id]
     }
   }
@@ -289,7 +290,7 @@ export default class AppsRepository {
 
   create(params: OwnAppParams): OwnApp {
     const app = new OwnApp(params)
-    this._byMainframeID[params.data.mainframeID] = params.appID
+    this._byMFID[MFID.canonical(params.data.mfid)] = params.appID
     this._ownApps[params.appID] = app
     return app
   }

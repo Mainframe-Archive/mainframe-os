@@ -5,16 +5,15 @@
   "license": "MIT",
   "scripts": {
     "clean": "del lib",
-    "build:js": "flow-remove-types src --out-dir lib",
+    "build:js": "babel src --out-dir lib",
     "build:flow": "flow-copy-source src lib",
     "build": "npm run clean && npm run build:js && npm run build:flow",
     "test:types": "flow check"
   },
   "dependencies": {
-    "multibase": "^0.5.0",
-    "uri-js": "^4.2.2"
+    "multibase": "^0.6.0"
   },
   "devDependencies": {
-    "flow-bin": "^0.86.0"
+    "flow-bin": "^0.87.0"
   }
 }

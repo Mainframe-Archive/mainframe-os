@@ -20,7 +20,7 @@
   "devDependencies": {
     "@mainframe/rpc-stream": "^0.2.4",
     "babel-loader": "^8.0.4",
-    "flow-bin": "^0.86.0",
+    "flow-bin": "^0.87.0",
     "webpack": "^4.20.2",
     "webpack-cli": "^3.1.2"
   }

@@ -1,7 +1,7 @@
 // @flow
 
 import { PERMISSIONS_REQUIREMENTS_SCHEMA } from '@mainframe/app-permissions'
-import { isValidMainframeID } from '@mainframe/data-types'
+import { isValidMFID } from '@mainframe/data-types'
 import semver from 'semver'
 import { parse as parseURI } from 'uri-js'
 
@@ -29,7 +29,7 @@ export const isValidURN = (value: ?string): boolean => {
 }
 
 export const idCheck = function(value: string) {
-  return isValidMainframeID(value) || this.makeError('id', null, value)
+  return isValidMFID(value) || this.makeError('id', null, value)
 }
 
 export const semverCheck = function(value: string) {
