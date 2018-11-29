@@ -260,30 +260,36 @@ export type WalletAddHDAccountResult = string
 
 // Identity
 
-export type PublicFeedTypes = 'public'
-
 export type FeedHash = string
 
-export type PublicFeeds = {
-  [type: PublicFeedTypes]: FeedHash,
+export type Feeds = {
+  [type: string]: FeedHash,
 }
 
-export type IdentityAddPeerByKeyParams = {
+export type IdentityAddPeerParams = {
   key: string,
-  data: {
-    name: string,
+  profile: {
+    name?: ?string,
     avatar?: ?string,
   },
-  feeds: PublicFeeds,
+  publicFeed: string,
+  otherFeeds: Feeds,
+}
+
+export type IdentityAddPeerByFeedParams = {
+  feedHash: string,
 }
 
 export type IdentityPeerResult = {
   id: ID,
-  name: string,
-  avatar: ?string,
+  publicFeed: string,
+  profile: {
+    name?: ?string,
+    avatar?: ?string,
+  },
 }
 
-export type IdentityAddPeerByKeyResult = { id: ID }
+export type IdentityAddPeerResult = { id: ID }
 
 export type IdentityCreateDeveloperParams = {
   data?: Object,
@@ -295,6 +301,22 @@ export type IdentityCreateUserParams = {
 
 export type IdentityCreateResult = { id: ID }
 
+export type IdentityCreateContactParams = {
+  userID: string,
+  contactParams: {
+    peerID: string,
+    contactData: {
+      name?: ?string,
+      avatar?: ?string,
+      ethAddress?: ?string,
+    },
+    ownFeed?: ?string,
+    contactFeed?: ?string,
+  },
+}
+
+export type IdentityCreateContactResult = { id: ID }
+
 export type IdentityGetOwnDevelopersResult = {
   developers: Array<IdentityOwnData>,
 }
@@ -305,6 +327,26 @@ export type IdentityGetOwnUsersResult = {
 
 export type IdentityGetPeersResult = {
   peers: Array<IdentityPeerResult>,
+}
+
+export type IdentityDeleteContactParams = {
+  userID: ID,
+  contactID: ID,
+}
+
+export type IdentityGetUserContactsParams = {
+  userID: ID,
+}
+
+export type ContactResult = {
+  id: string,
+  name?: ?string,
+  avatar?: ?string,
+  connection: 'sent' | 'connected',
+}
+
+export type IdentityGetUserContactsResult = {
+  contacts: Array<ContactResult>,
 }
 
 export type IdentityLinkEthWalletAccountParams = {

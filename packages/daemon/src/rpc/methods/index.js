@@ -37,14 +37,17 @@ export default {
 
   blockchain_web3Send: blockchain.web3Send,
 
-  identity_addPeerByKey: identity.addPeerByKey,
+  identity_addPeer: identity.addPeer,
+  identity_addPeerByFeed: identity.addPeerByFeed,
   identity_createUser: identity.createUser,
   identity_createDeveloper: identity.createDeveloper,
+  identity_deleteContact: identity.deleteContact,
   identity_getOwnUsers: identity.getOwnUsers,
   identity_getOwnDevelopers: identity.getOwnDevelopers,
   identity_getPeers: identity.getPeers,
   identity_linkEthWallet: identity.linkEthWallet,
   identity_unlinkEthWallet: identity.unlinkEthWallet,
+  identity_getUserContacts: identity.getUserContacts,
 
   // Temporary PSS APIs - should be removed when communication APIs are settled
   pss_baseAddr: pss.baseAddr,
