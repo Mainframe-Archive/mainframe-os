@@ -58,7 +58,10 @@ export default class PermissionsRequirementsView extends Component<
     if (requirements) {
       Object.keys(requirements).forEach(requirement => {
         Object.keys(requirements[requirement]).forEach(key => {
-          if (key === 'WEB_REQUEST') {
+          if (
+            key === 'WEB_REQUEST' &&
+            Array.isArray(requirements.optional[key])
+          ) {
             requirements.optional[key].forEach(host => {
               permissionSettings[host] = requirement
             })
@@ -220,7 +223,7 @@ export default class PermissionsRequirementsView extends Component<
               <TouchableOpacity
                 style={styles.addWebHostButton}
                 onPress={this.onPressAddHost}>
-                <Text>Add</Text>
+                <Text style={styles.addWebHostButtonLabel}>Add</Text>
               </TouchableOpacity>
             </View>
             {hostRequirements}
@@ -325,8 +328,10 @@ const styles = StyleSheet.create({
     padding: PADDING,
     marginLeft: PADDING,
     backgroundColor: colors.PRIMARY_BLUE,
-    color: colors.WHITE,
     borderRadius: 3,
+  },
+  addWebHostButtonLabel: {
+    color: colors.WHITE,
   },
   webHostRow: {
     padding: PADDING,

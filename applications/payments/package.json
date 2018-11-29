@@ -9,11 +9,11 @@
     "react-art": "^16.5.2",
     "react-dom": "^16.5.2",
     "react-native-web": "^0.9.3",
-    "react-scripts": "2.0.5",
+    "react-scripts": "2.1.1",
     "web3": "^1.0.0-beta.36"
   },
   "devDependencies": {
-    "flow-bin": "^0.81.0"
+    "flow-bin": "^0.86.0"
   },
   "scripts": {
     "start": "react-scripts start",

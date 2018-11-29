@@ -77,9 +77,11 @@ export default class SideMenu extends Component<Props> {
   render() {
     const sideBarStyles = [styles.sideBarView]
     const devToggleStyles = [styles.devToggleButton]
+    const devToggleLabelStyles = [styles.devToggleLabel]
     if (this.props.devMode) {
       sideBarStyles.push(styles.sideBarDev)
       devToggleStyles.push(styles.devToggleDark)
+      devToggleLabelStyles.push(styles.devToggleLabelDark)
     }
 
     return (
@@ -90,7 +92,7 @@ export default class SideMenu extends Component<Props> {
           style={devToggleStyles}
           testID="launcher-toggle-dev-button"
           onPress={this.props.onToggleDevMode}>
-          <Text style={styles.devToggleLabel}>
+          <Text style={devToggleLabelStyles}>
             {this.props.devMode ? 'User Mode' : 'Developer Mode'}
           </Text>
           <Icon name="right-arrow-grey" size={14} style={styles.arrowIcon} />
@@ -135,16 +137,18 @@ const styles = StyleSheet.create({
     right: 0,
     padding: 15,
     backgroundColor: colors.DARK_BLUE_SHADE_1,
-    color: colors.WHITE,
     flexDirection: 'row',
   },
   devToggleDark: {
     backgroundColor: colors.TRANSPARENT_BLACK_30,
-    color: colors.LIGHT_GREY_DE,
   },
   devToggleLabel: {
     flex: 1,
     fontSize: 12,
+    color: colors.WHITE,
+  },
+  devToggleLabelDark: {
+    color: colors.LIGHT_GREY_DE,
   },
   arrowIcon: {
     paddingTop: 3,

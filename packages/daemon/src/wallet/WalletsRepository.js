@@ -116,6 +116,7 @@ export default class WalletsRepository {
         wallet = this.ethWallets[type][Object.keys(this.ethWallets[type])[0]]
         return true
       }
+      return false
     })
     return wallet
   }

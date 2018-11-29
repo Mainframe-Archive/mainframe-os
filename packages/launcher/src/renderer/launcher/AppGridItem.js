@@ -102,10 +102,8 @@ const styles = StyleSheet.create({
     right: -10,
     top: -10,
     backgroundColor: colors.PRIMARY_RED,
-    color: colors.WHITE,
     borderRadius: 11,
     height: 22,
-    textAlign: 'center',
     justifyContent: 'center',
     paddingRight: 8,
     paddingLeft: 10,
@@ -113,6 +111,8 @@ const styles = StyleSheet.create({
   deleteLabel: {
     fontSize: 18,
     fontWeight: 'bold',
+    textAlign: 'center',
+    color: colors.WHITE,
   },
   appInfo: {
     flexDirection: 'row',
