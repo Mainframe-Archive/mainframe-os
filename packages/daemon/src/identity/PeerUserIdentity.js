@@ -4,55 +4,74 @@ import { mainframeIDType, type MainframeID } from '@mainframe/data-types'
 
 import Identity from './Identity'
 
-type FeedTypes = 'public' // TODO: define more types
 type FeedHash = string
 
-export type PeerData = {
-  name: string,
+export type ProfileData = {
+  name?: ?string,
   avatar?: ?string,
 }
 
-export type Feeds = { [type: FeedTypes]: FeedHash }
+export type Feeds = { [type: string]: FeedHash }
 
 export type PeerUserIdentitySerialized = {
   id: string,
-  feeds: Feeds,
-  data: PeerData,
+  publicFeed: FeedHash,
+  otherFeeds: Feeds,
+  profile: ProfileData,
 }
 
 export default class PeerUserIdentity extends Identity {
   static fromJSON = (params: PeerUserIdentitySerialized): PeerUserIdentity =>
-    new PeerUserIdentity(mainframeIDType(params.id), params.data, params.feeds)
+    new PeerUserIdentity(
+      mainframeIDType(params.id),
+      params.profile,
+      params.publicFeed,
+      params.otherFeeds,
+    )
 
   static toJSON = (peer: PeerUserIdentity): PeerUserIdentitySerialized => ({
     id: peer._id,
-    feeds: peer._feeds,
-    data: {
-      name: peer._name,
-      avatar: peer._avatar,
-    },
+    publicFeed: peer._publicFeed,
+    otherFeeds: peer._otherFeeds,
+    profile: peer._profile,
   })
 
-  _feeds: Feeds
-  _name: string
-  _avatar: ?string
+  _publicFeed: FeedHash
+  _otherFeeds: Feeds
+  _profile: {
+    name?: ?string,
+    avatar?: ?string,
+  }
 
-  constructor(keyOrId: MainframeID | Buffer, data: PeerData, feeds?: Feeds) {
+  constructor(
+    keyOrId: MainframeID | Buffer,
+    profile: ProfileData,
+    publicFeed: FeedHash,
+    otherFeeds?: Feeds,
+  ) {
     super(keyOrId)
-    this._feeds = feeds || {}
-    this._name = data.name
-    this._avatar = data.avatar
+    this._publicFeed = publicFeed
+    this._otherFeeds = otherFeeds || {}
+    this._profile = profile
   }
 
-  get feeds(): Feeds {
-    return this._feeds
+  get publicFeed(): FeedHash {
+    return this._publicFeed
   }
 
-  get name(): string {
-    return this._name
+  get profile(): ProfileData {
+    return this._profile
+  }
+
+  get otherFeeds(): Feeds {
+    return this._otherFeeds
+  }
+
+  get name(): ?string {
+    return this._profile.name
   }
 
   get avatar(): ?string {
-    return this._avatar
+    return this._profile.avatar
   }
 }

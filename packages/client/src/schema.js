@@ -198,16 +198,30 @@ export const IDENTITY_PUBLIC_FEEDS_SCHEMA = {
   },
 }
 
-export const IDENTITY_ADD_PEER_BY_KEY_SCHEMA = {
+export const IDENTITY_ADD_PEER_SCHEMA = {
   key: 'string',
-  data: {
+  publicFeed: 'string',
+  profile: {
     type: 'object',
     props: {
-      name: 'string',
+      name: { type: 'string', optional: true },
       avatar: { type: 'string', optional: true },
     },
   },
-  feeds: IDENTITY_PUBLIC_FEEDS_SCHEMA,
+  otherFeeds: IDENTITY_PUBLIC_FEEDS_SCHEMA,
+}
+
+export const IDENTITY_ADD_PEER_BY_FEED_SCHEMA = {
+  feedHash: 'string',
+}
+
+export const IDENTITY_DELETE_CONTACT_SCHEMA = {
+  userID: LOCAL_ID_SCHEMA,
+  contactID: LOCAL_ID_SCHEMA,
+}
+
+export const IDENTITY_GET_USER_CONTACTS_SCHEMA = {
+  userID: LOCAL_ID_SCHEMA,
 }
 
 export const IDENTITY_LINK_ETH_WALLET_SCHEMA = {

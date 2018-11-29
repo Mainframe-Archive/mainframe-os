@@ -3,17 +3,24 @@
 import {
   idType as toClientID,
   /* eslint-disable import/named */
-  type IdentityAddPeerByKeyParams,
-  type IdentityAddPeerByKeyResult,
+  type IdentityAddPeerParams,
+  type IdentityAddPeerResult,
+  type IdentityAddPeerByFeedParams,
   type IdentityCreateDeveloperParams,
   type IdentityCreateUserParams,
   type IdentityCreateResult,
+  type IdentityDeleteContactParams,
   type IdentityGetOwnDevelopersResult,
   type IdentityGetOwnUsersResult,
   type IdentityGetPeersResult,
+  type IdentityGetUserContactsParams,
+  type IdentityGetUserContactsResult,
   type IdentityLinkEthWalletAccountParams,
   type IdentityUnlinkEthWalletAccountParams,
-  IDENTITY_ADD_PEER_BY_KEY_SCHEMA,
+  IDENTITY_ADD_PEER_SCHEMA,
+  IDENTITY_ADD_PEER_BY_FEED_SCHEMA,
+  IDENTITY_DELETE_CONTACT_SCHEMA,
+  IDENTITY_GET_USER_CONTACTS_SCHEMA,
   IDENTITY_LINK_ETH_WALLET_SCHEMA,
   IDENTITY_UNLINK_ETH_WALLET_SCHEMA,
   /* eslint-enable import/named */
@@ -116,18 +123,29 @@ export const unlinkEthWallet = {
   },
 }
 
-export const addPeerByKey = {
-  params: IDENTITY_ADD_PEER_BY_KEY_SCHEMA,
+export const addPeerByFeed = {
+  params: IDENTITY_ADD_PEER_BY_FEED_SCHEMA,
+  handler: async (
+    ctx: RequestContext, // eslint-disable-line
+    params: IdentityAddPeerByFeedParams, // eslint-disable-line
+  ): Promise<IdentityAddPeerResult> => {
+    // TODO - Fetch key and profile from feed and create peer
+    throw new Error('not yet implemented')
+  },
+}
+
+export const addPeer = {
+  params: IDENTITY_ADD_PEER_SCHEMA,
   handler: async (
     ctx: RequestContext,
-    params: IdentityAddPeerByKeyParams,
-  ): Promise<IdentityAddPeerByKeyResult> => {
-    const peerID = ctx.openVault.identities.createPeerUserFromKey(
+    params: IdentityAddPeerParams,
+  ): Promise<IdentityAddPeerResult> => {
+    const peerID = ctx.openVault.identities.createPeerUser(
       params.key,
-      params.data,
-      params.feeds,
+      params.profile,
+      params.publicFeed,
+      params.otherFeeds,
     )
-    await ctx.openVault.save()
     return { id: toClientID(peerID) }
   },
 }
@@ -138,9 +156,59 @@ export const getPeers = (ctx: RequestContext): IdentityGetPeersResult => {
     const peer = peerUsers[id]
     return {
       id: toClientID(id),
-      name: peer.name,
-      avatar: peer.avatar,
+      publicFeed: peer.publicFeed,
+      profile: {
+        name: peer.name,
+        avatar: peer.avatar,
+      },
     }
   })
   return { peers }
+}
+
+export const deleteContact = {
+  params: IDENTITY_DELETE_CONTACT_SCHEMA,
+  handler: async (
+    ctx: RequestContext,
+    params: IdentityDeleteContactParams,
+  ): Promise<void> => {
+    ctx.openVault.identities.deleteContact(
+      fromClientID(params.userID),
+      fromClientID(params.contactID),
+    )
+    await ctx.openVault.save()
+  },
+}
+
+export const getUserContacts = {
+  params: IDENTITY_GET_USER_CONTACTS_SCHEMA,
+  handler: async (
+    ctx: RequestContext,
+    params: IdentityGetUserContactsParams,
+  ): Promise<IdentityGetUserContactsResult> => {
+    const result = []
+    const contacts = ctx.openVault.identities.getContactsForUser(
+      fromClientID(params.userID),
+    )
+    if (contacts) {
+      Object.keys(contacts).forEach(id => {
+        const contact = contacts[id]
+        const peer = ctx.openVault.identities.getPeerUser(
+          fromClientID(contact.peerID),
+        )
+        if (peer) {
+          const profile = { ...peer.profile, ...contact.profile }
+          const contactRes = {
+            id,
+            profile,
+            connection: contact.contactFeed ? 'connected' : 'sent',
+            // For v1 first contact, we assign a full contact state
+            // depending on if we've seen a private feed for our user
+          }
+          result.push(contactRes)
+        }
+      })
+    }
+    return { contacts: result }
+  },
 }
