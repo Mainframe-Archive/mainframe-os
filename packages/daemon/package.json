@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "@erebos/api-bzz-node": "^0.5.1",
-    "@erebos/api-pss": "^0.5.0",
+    "@erebos/api-pss": "^0.5.2",
     "@erebos/hex": "^0.5.0",
     "@ledgerhq/hw-app-eth": "^4.24.0",
     "@ledgerhq/hw-transport-node-hid": "^4.24.0",
