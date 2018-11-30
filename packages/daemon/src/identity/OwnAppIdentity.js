@@ -25,4 +25,8 @@ export default class OwnAppIdentity extends OwnIdentity {
   static toJSON = (identity: OwnAppIdentity): OwnAppIdentitySerialized => ({
     keyPair: serializeKeyPair(identity.keyPair),
   })
+
+  constructor(keyPair: KeyPair) {
+    super('app', keyPair)
+  }
 }

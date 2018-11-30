@@ -11,6 +11,7 @@
     "test:types": "flow check"
   },
   "dependencies": {
+    "@mainframe/data-types": "*",
     "@mainframe/utils-id": "^0.1.0",
     "conf": "^2.0.0",
     "env-paths": "^2.0.0",

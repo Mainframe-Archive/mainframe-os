@@ -22,7 +22,7 @@ export default class UserIdentity extends Identity {
   data: Object
 
   constructor(key: string | Buffer, data: Object = {}) {
-    super(key)
+    super('user', key)
     this.data = data
   }
 }

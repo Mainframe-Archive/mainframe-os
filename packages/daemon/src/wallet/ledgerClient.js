@@ -56,10 +56,3 @@ export const signTransaction = async (
   const path = HD_PATH + accountIndex
   return app.signTransaction(path, txHex)
 }
-
-export default {
-  getAddressAtIndex,
-  getAccounts,
-  getAccountsByPage,
-  signTransaction,
-}

@@ -26,7 +26,7 @@ export default class DeveloperIdentity extends Identity {
   data: Object
 
   constructor(key: string | Buffer, data: Object = {}) {
-    super(key)
+    super('dev', key)
     this.data = data
   }
 }

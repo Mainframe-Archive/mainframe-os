@@ -38,7 +38,7 @@ export default class OwnUserIdentity extends OwnIdentity {
   data: Object
 
   constructor(keyPair: KeyPair, data: Object = {}) {
-    super(keyPair)
+    super('user', keyPair)
     this.data = data
   }
 }

@@ -21,7 +21,7 @@ export default class AppListCommand extends Command {
         if (type === 'own') {
           contentsPath = app.manifest.contentsPath
           developerId = app.manifest.developerID
-          mainframeID = app.manifest.mainframeID
+          mainframeID = app.manifest.mfid
         } else {
           contentsPath = app.manifest.contentsURI
           developerId = app.manifest.author.id

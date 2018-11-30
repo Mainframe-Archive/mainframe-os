@@ -22,7 +22,7 @@ export default class AppIdentity extends Identity {
   data: Object
 
   constructor(key: string | Buffer, data: Object = {}) {
-    super(key)
+    super('app', key)
     this.data = data
   }
 }

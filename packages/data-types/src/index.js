@@ -116,9 +116,12 @@ export class MFID {
     return new MFID(`mf:${MFID.VERSION}/${type}/${data}`)
   }
 
+  static from = (mfid: string | MFID): MFID => {
+    return mfid instanceof MFID ? mfid : new MFID(mfid)
+  }
+
   static canonical = (mfid: string | MFID): string => {
-    const id = mfid instanceof MFID ? mfid : new MFID(mfid)
-    return id.toString()
+    return MFID.from(mfid).toString()
   }
 
   _value: string

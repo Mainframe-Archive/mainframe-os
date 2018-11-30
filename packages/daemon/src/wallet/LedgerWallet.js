@@ -8,7 +8,7 @@ import type {
 } from '@mainframe/client'
 import { uniqueID, type ID } from '@mainframe/utils-id'
 
-import ledgerClient from './ledgerClient'
+import { getAddressAtIndex, signTransaction } from './ledgerClient'
 import { type AbstractWalletParams } from './AbstractSoftwareWallet'
 
 type AccountAddress = string
@@ -71,7 +71,7 @@ export default class LedgerWallet {
     const newAddresses = []
     indexes.forEach(async i => {
       if (!this._activeAccounts[i]) {
-        const address = await ledgerClient.getAddressAtIndex({ index: i })
+        const address = await getAddressAtIndex({ index: i })
         this._activeAccounts[i] = address
         newAddresses.push(address)
       }
@@ -93,7 +93,7 @@ export default class LedgerWallet {
     tx.s = '0x00'
     const txHex = tx.serialize().toString('hex')
 
-    const res = await ledgerClient.signTransaction(Number(index), txHex)
+    const res = await signTransaction(Number(index), txHex)
 
     tx.v = Buffer.from(res.v, 'hex')
     tx.r = Buffer.from(res.r, 'hex')

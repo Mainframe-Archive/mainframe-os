@@ -48,7 +48,7 @@ export default class PeerUserIdentity extends Identity {
     publicFeed: FeedHash,
     otherFeeds?: Feeds,
   ) {
-    super(keyOrId)
+    super('user', keyOrId)
     this._publicFeed = publicFeed
     this._otherFeeds = otherFeeds || {}
     this._profile = profile
