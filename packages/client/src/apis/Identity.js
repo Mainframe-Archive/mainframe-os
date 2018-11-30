@@ -2,14 +2,18 @@
 
 import ClientAPIs from '../ClientAPIs'
 import type {
-  IdentityAddPeerByKeyParams,
-  IdentityAddPeerByKeyResult,
+  IdentityAddPeerByFeedParams,
+  IdentityAddPeerParams,
+  IdentityAddPeerResult,
   IdentityCreateDeveloperParams,
   IdentityCreateUserParams,
   IdentityCreateResult,
+  IdentityDeleteContactParams,
   IdentityGetOwnDevelopersResult,
   IdentityGetOwnUsersResult,
   IdentityGetPeersResult,
+  IdentityGetUserContactsParams,
+  IdentityGetUserContactsResult,
   IdentityLinkEthWalletAccountParams,
   IdentityUnlinkEthWalletAccountParams,
 } from '../types'
@@ -25,12 +29,6 @@ export default class IdentityAPIs extends ClientAPIs {
     return this._rpc.request('identity_createUser', params)
   }
 
-  addPeerByKey(
-    params: IdentityAddPeerByKeyParams,
-  ): Promise<IdentityAddPeerByKeyResult> {
-    return this._rpc.request('identity_addPeerByKey', params)
-  }
-
   getOwnDevelopers(): Promise<IdentityGetOwnDevelopersResult> {
     return this._rpc.request('identity_getOwnDevelopers')
   }
@@ -39,9 +37,33 @@ export default class IdentityAPIs extends ClientAPIs {
     return this._rpc.request('identity_getOwnUsers')
   }
 
+  // Contacts
+
+  addPeer(params: IdentityAddPeerParams): Promise<IdentityAddPeerResult> {
+    return this._rpc.request('identity_addPeer', params)
+  }
+
+  addPeerByFeed(
+    params: IdentityAddPeerByFeedParams,
+  ): Promise<IdentityAddPeerResult> {
+    return this._rpc.request('identity_addPeerByFeed', params)
+  }
+
   getPeers(): Promise<IdentityGetPeersResult> {
     return this._rpc.request('identity_getPeers')
   }
+
+  deleteContact(params: IdentityDeleteContactParams): Promise<void> {
+    return this._rpc.request('identity_deleteContact', params)
+  }
+
+  getUserContacts(
+    params: IdentityGetUserContactsParams,
+  ): Promise<IdentityGetUserContactsResult> {
+    return this._rpc.request('identity_getUserContacts', params)
+  }
+
+  // Wallets
 
   linkEthWalletAccount(
     params: IdentityLinkEthWalletAccountParams,
