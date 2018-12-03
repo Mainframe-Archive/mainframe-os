@@ -14,5 +14,7 @@ export const query = {
   handler: async (
     ctx: RequestContext,
     params: GraphQLQueryParams,
-  ): Promise<GraphQLQueryResult> => graphql(ctx.schema, params.query),
+  ): Promise<GraphQLQueryResult> => {
+    return graphql(ctx.schema, params.query, {}, {}, params.variables)
+  },
 }

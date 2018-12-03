@@ -20,6 +20,7 @@ import {
   StyleSheet,
   ActivityIndicator,
 } from 'react-native-web'
+import { graphql, QueryRenderer } from 'react-relay'
 
 import type { VaultsData } from '../../types'
 
@@ -27,7 +28,9 @@ import colors from '../colors'
 import globalStyles from '../styles'
 import Text from '../UIComponents/Text'
 import ModalView from '../UIComponents/ModalView'
+
 import rpc from './rpc'
+import { EnvironmentContext } from './RelayEnvironment'
 import AppInstallModal from './AppInstallModal'
 import AppGridItem from './AppGridItem'
 import CreateAppModal from './developer/CreateAppModal'
@@ -57,6 +60,8 @@ type State = {
 type AppData = AppOwnData | AppInstalledData
 
 export default class App extends Component<{}, State> {
+  static contextType = EnvironmentContext
+
   state = {
     showModal: undefined,
     wallets: undefined,
@@ -383,6 +388,31 @@ export default class App extends Component<{}, State> {
           onToggleDevMode={this.onToggleDevMode}
         />
         <View style={appsContainerStyles}>
+          <QueryRenderer
+            environment={this.context}
+            query={graphql`
+              query LauncherQuery {
+                apps {
+                  installed {
+                    id
+                  }
+                }
+              }
+            `}
+            variables={{}}
+            render={({ error, props }) => {
+              /* eslint-disable no-console */
+              if (error) {
+                console.log('GraphQL query error:', error)
+              } else if (props) {
+                console.log('GraphQL got data:', props)
+              } else {
+                console.log('GraphQL loading')
+              }
+              /* eslint-enable no-console */
+              return null
+            }}
+          />
           <ScrollView contentContainerStyle={styles.appsGrid}>
             {appsGrid}
           </ScrollView>

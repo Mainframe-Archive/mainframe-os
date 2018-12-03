@@ -1,0 +1,59 @@
+type App implements Node {
+  """The ID of an object"""
+  id: ID!
+  localId: ID!
+  users: [AppUser]
+}
+
+type AppPermissions {
+  BLOCKCHAIN_SEND: Boolean
+  WEB_REQUEST: [String]
+}
+
+type AppPermissionsSettings {
+  checked: Boolean!
+  grants: AppPermissions!
+}
+
+type AppsQuery {
+  installed: [App]
+  own: [OwnApp]
+}
+
+type AppUser {
+  id: ID!
+  identity: OwnUserIdentity!
+  settings: AppUserSettings!
+}
+
+type AppUserSettings {
+  permissions: AppPermissionsSettings!
+}
+
+"""An object with an ID"""
+interface Node {
+  """The id of the object."""
+  id: ID!
+}
+
+type OwnApp implements Node {
+  """The ID of an object"""
+  id: ID!
+  localId: ID!
+}
+
+type OwnUserIdentity implements Node {
+  """The ID of an object"""
+  id: ID!
+  localId: ID!
+  pubKey: String!
+}
+
+type Query {
+  """Fetches an object given its ID"""
+  node(
+    """The ID of an object"""
+    id: ID!
+  ): Node
+  apps: AppsQuery!
+}

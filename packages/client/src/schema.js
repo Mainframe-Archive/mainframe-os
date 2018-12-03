@@ -122,6 +122,10 @@ export const APP_WRITE_MANIFEST_SCHEMA = {
 
 export const GRAPHQL_QUERY_SCHEMA = {
   query: 'string',
+  variables: {
+    type: 'object',
+    optional: true,
+  },
 }
 
 export const IDENTITY_PUBLIC_FEEDS_SCHEMA = {

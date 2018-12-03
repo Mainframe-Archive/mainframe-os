@@ -187,6 +187,7 @@ export type BlockchainWeb3SendResult = any
 
 export type GraphQLQueryParams = {
   query: string,
+  variables?: Object,
 }
 
 export type GraphQLQueryResult = ExecutionResult

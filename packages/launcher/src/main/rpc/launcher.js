@@ -23,6 +23,9 @@ import {
   type IdentityCreateResult,
   type IdentityGetOwnUsersResult,
   type IdentityGetOwnDevelopersResult,
+  GRAPHQL_QUERY_SCHEMA,
+  type GraphQLQueryParams,
+  type GraphQLQueryResult,
   VAULT_SCHEMA,
   type VaultParams,
   type WalletCreateHDResult,
@@ -138,7 +141,21 @@ export default {
   ): Promise<IdentityGetOwnDevelopersResult> => {
     return ctx.client.identity.getOwnDevelopers()
   },
+
+  // GrahpQL
+
+  graphql_query: {
+    params: GRAPHQL_QUERY_SCHEMA,
+    handler: (
+      ctx: LauncherContext,
+      params: GraphQLQueryParams,
+    ): Promise<GraphQLQueryResult> => {
+      return ctx.client.graphql(params)
+    },
+  },
+
   // Vaults
+
   vault_create: {
     handler: async (
       ctx: LauncherContext,

@@ -1,4 +1,8 @@
 {
-  "plugins": ["react-native-web", "@babel/plugin-proposal-class-properties"],
+  "plugins": [
+    "@babel/plugin-proposal-class-properties",
+    "react-native-web",
+    "relay"
+  ],
   "presets": ["@babel/preset-flow", "@babel/preset-react"]
 }
