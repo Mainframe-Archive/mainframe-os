@@ -1,11 +1,12 @@
 // @flow
 
 import * as app from './app'
+import * as blockchain from './blockchain'
+import * as graphql from './graphql'
 import * as identity from './identity'
 import * as pss from './pss'
 import * as sub from './subscription'
 import * as vault from './vault'
-import * as blockchain from './blockchain'
 import * as wallet from './wallet'
 
 const noop = () => {}
@@ -36,6 +37,8 @@ export default {
   app_writeManifest: app.writeManifest,
 
   blockchain_web3Send: blockchain.web3Send,
+
+  graphql_query: graphql.query,
 
   identity_addPeer: identity.addPeer,
   identity_addPeerByFeed: identity.addPeerByFeed,

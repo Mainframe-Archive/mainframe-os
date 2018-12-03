@@ -7,8 +7,10 @@ import type { Environment } from '@mainframe/config'
 import type StreamRPC from '@mainframe/rpc-stream'
 import createWebSocketRPC from '@mainframe/rpc-ws-node'
 import { uniqueID, type ID } from '@mainframe/utils-id'
+import type { GraphQLSchema } from 'graphql'
 import Web3HTTPProvider from 'web3-providers-http'
 
+import { createSchema } from '../graphql/schema'
 import type { Vault, VaultRegistry } from '../vault'
 
 import type { NotifyFunc } from './handleClient'
@@ -52,6 +54,7 @@ export default class RequestContext {
   _web3HttpProvider: ?Web3HTTPProvider
   _env: Environment
   _notify: NotifyFunc
+  _schema: ?GraphQLSchema
   _socket: Socket
   _vaults: VaultRegistry
   _subscriptions: { [ID]: ContextSubscription<any> } = {}
@@ -98,6 +101,13 @@ export default class RequestContext {
 
   get env(): Environment {
     return this._env
+  }
+
+  get schema(): GraphQLSchema {
+    if (this._schema == null) {
+      this._schema = createSchema(() => this.openVault)
+    }
+    return this._schema
   }
 
   get socket(): Socket {

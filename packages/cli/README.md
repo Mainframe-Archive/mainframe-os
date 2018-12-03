@@ -23,6 +23,8 @@
 - `vault:delete`: delete a vault
 - `vault:list`: list existing vaults
 - `vault:settings`: set and/or display a vault settings
+- `graphql:query`: executes a GraphQL query
+- `graphql:schema`: writes the GraphQL schema
 - `identity:create`: create an identity
 - `identity:list`: list identities
 - `app:create`: create an app

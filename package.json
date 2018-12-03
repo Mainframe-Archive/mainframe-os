@@ -4,57 +4,6 @@
   "main": "index.js",
   "license": "MIT",
   "private": true,
-  "workspaces": {
-    "packages": [
-      "packages/*",
-      "applications/*"
-    ],
-    "nohoist": [
-      "**/@erebos/*",
-      "**/@ledgerhq/*",
-      "**/@mainframe/contract-utils",
-      "**/@mainframe/rpc-*",
-      "**/@mainframe/secure-file",
-      "**/@mainframe/transport-*",
-      "**/@mainframe/utils-*",
-      "**/app-builder-lib",
-      "**/create-react-class",
-      "**/electron",
-      "**/electron-better-ipc",
-      "**/electron-builder",
-      "**/electron-webpack",
-      "**/es6-error",
-      "**/fastest-validator",
-      "**/file-loader",
-      "**/form-data",
-      "**/fs-extra",
-      "**/lodash",
-      "**/multibase",
-      "**/nanoid",
-      "**/node-fetch",
-      "**/node-hid",
-      "**/oboe",
-      "**/react",
-      "**/react-art",
-      "**/react-dom",
-      "**/read-config-file",
-      "**/react-native-web",
-      "**/rx-socket",
-      "**/rxjs",
-      "**/sodium-universal",
-      "**/tar-fs",
-      "**/tar-stream",
-      "**/uri-js",
-      "**/url-loader",
-      "**/usb",
-      "**/web3-utils",
-      "**/web3-eth-abi",
-      "**/web3-eth-contract",
-      "**/webpack",
-      "**/webpack-dev-server",
-      "**/ws"
-    ]
-  },
   "scripts": {
     "flow:install": "lerna exec --concurrency 1 -- flow-typed install --ignoreDeps=dev",
     "bootstrap": "lerna bootstrap && npm run flow:install",
@@ -67,9 +16,6 @@
     "test": "npm run lint && npm run test:types && npm run test:unit",
     "build": "lerna run build && lerna run build:sdk && lerna run build:app",
     "start": "npm run build && npm run test"
-  },
-  "resolutions": {
-    "esm": "3.0.84"
   },
   "devDependencies": {
     "@babel/cli": "^7.1.2",
