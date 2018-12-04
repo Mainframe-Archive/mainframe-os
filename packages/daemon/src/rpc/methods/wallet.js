@@ -27,7 +27,8 @@ import {
   type WalletSignTxResult,
   type WalletTypes,
 } from '@mainframe/client'
-import ledgerClient from '../../wallet/ledgerClient'
+
+import { getAccountsByPage } from '../../wallet/ledgerClient'
 
 import type RequestContext from '../RequestContext'
 
@@ -130,7 +131,7 @@ export const getLedgerEthAccounts = {
     ctx: RequestContext,
     params: WalletGetLedgerEthAccountsParams,
   ): Promise<WalletGetLedgerEthAccountsResult> => {
-    return ledgerClient.getAccountsByPage(params)
+    return getAccountsByPage(params)
   },
 }
 

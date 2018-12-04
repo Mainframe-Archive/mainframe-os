@@ -1,6 +1,7 @@
 // @flow
 
 import { join } from 'path'
+import { MFID } from '@mainframe/data-types'
 
 import type Environment from './Environment'
 
@@ -9,5 +10,6 @@ export const getAppContentsPath = (
   appID: string,
   version: string,
 ): string => {
-  return join(env.paths.data, 'apps', appID, version)
+  const safeID = MFID.from(appID).toEncodedString('base64url')
+  return join(env.paths.data, 'apps', safeID, version)
 }

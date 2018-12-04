@@ -85,14 +85,14 @@
     "babel-jest": "^23.6.0",
     "del-cli": "^1.1.0",
     "eslint": "^5.6.1",
-    "eslint-config-mainframe": "^2.1.0",
-    "flow-bin": "^0.86.0",
+    "eslint-config-mainframe": "^2.3.0",
+    "flow-bin": "^0.87.0",
     "flow-copy-source": "^2.0.1",
     "flow-remove-types": "^1.2.3",
     "flow-typed": "^2.4.0",
     "jest": "^23.6.0",
     "jest-junit": "^5.2.0",
-    "lerna": "^3.4.1",
+    "lerna": "^3.5.1",
     "prettier": "^1.14.3"
   }
 }

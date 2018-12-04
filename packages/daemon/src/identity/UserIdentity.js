@@ -1,8 +1,5 @@
 // @flow
 
-// eslint-disable-next-line import/named
-import { mainframeIDType, type MainframeID } from '@mainframe/data-types'
-
 import Identity from './Identity'
 
 export type UserIdentitySerialized = {
@@ -12,7 +9,7 @@ export type UserIdentitySerialized = {
 
 export default class UserIdentity extends Identity {
   static fromJSON = (serialized: UserIdentitySerialized): UserIdentity => {
-    return new UserIdentity(mainframeIDType(serialized.id), serialized.data)
+    return new UserIdentity(serialized.id, serialized.data)
   }
 
   static toJSON = (identity: UserIdentity): UserIdentitySerialized => {
@@ -24,8 +21,8 @@ export default class UserIdentity extends Identity {
 
   data: Object
 
-  constructor(key: MainframeID | Buffer, data: Object = {}) {
-    super(key)
+  constructor(key: string | Buffer, data: Object = {}) {
+    super('user', key)
     this.data = data
   }
 }

@@ -27,8 +27,8 @@ export const serializeKeyPair = (keyPair: KeyPair): KeyPairSerialized => ({
 export default class OwnIdentity extends Identity {
   _keyPair: KeyPair
 
-  constructor(keyPair: KeyPair) {
-    super(keyPair.publicKey)
+  constructor(type: string, keyPair: KeyPair) {
+    super(type, keyPair.publicKey)
     this._keyPair = keyPair
   }
 

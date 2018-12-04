@@ -43,7 +43,7 @@ export default class OwnDeveloperIdentity extends OwnIdentity {
   data: Object
 
   constructor(keyPair: KeyPair, data: Object = {}) {
-    super(keyPair)
+    super('dev', keyPair)
     this.data = data
   }
 }

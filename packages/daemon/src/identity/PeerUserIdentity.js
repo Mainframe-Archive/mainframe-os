@@ -1,7 +1,5 @@
 // @flow
 
-import { mainframeIDType, type MainframeID } from '@mainframe/data-types'
-
 import Identity from './Identity'
 
 type FeedHash = string
@@ -21,13 +19,14 @@ export type PeerUserIdentitySerialized = {
 }
 
 export default class PeerUserIdentity extends Identity {
-  static fromJSON = (params: PeerUserIdentitySerialized): PeerUserIdentity =>
-    new PeerUserIdentity(
-      mainframeIDType(params.id),
+  static fromJSON = (params: PeerUserIdentitySerialized): PeerUserIdentity => {
+    return new PeerUserIdentity(
+      params.id,
       params.profile,
       params.publicFeed,
       params.otherFeeds,
     )
+  }
 
   static toJSON = (peer: PeerUserIdentity): PeerUserIdentitySerialized => ({
     id: peer._id,
@@ -44,12 +43,12 @@ export default class PeerUserIdentity extends Identity {
   }
 
   constructor(
-    keyOrId: MainframeID | Buffer,
+    keyOrId: string | Buffer,
     profile: ProfileData,
     publicFeed: FeedHash,
     otherFeeds?: Feeds,
   ) {
-    super(keyOrId)
+    super('user', keyOrId)
     this._publicFeed = publicFeed
     this._otherFeeds = otherFeeds || {}
     this._profile = profile

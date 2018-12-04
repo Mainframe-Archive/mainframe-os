@@ -27,8 +27,8 @@
     "start": "node -r esm lib"
   },
   "dependencies": {
-    "@erebos/api-bzz-node": "^0.5.0",
-    "@erebos/api-pss": "^0.5.0",
+    "@erebos/api-bzz-node": "^0.5.1",
+    "@erebos/api-pss": "^0.5.2",
     "@erebos/hex": "^0.5.0",
     "@ledgerhq/hw-app-eth": "^4.24.0",
     "@ledgerhq/hw-transport-node-hid": "^4.24.0",
@@ -57,13 +57,13 @@
     "ethereumjs-util": "^6.0.0",
     "ethereumjs-wallet": "^0.6.2",
     "fs-extra": "^7.0.0",
-    "multibase": "^0.5.0",
+    "multibase": "^0.6.0",
     "rxjs": "^6.3.3",
     "web3-provider-engine": "^14.0.6",
     "web3-providers-http": "^1.0.0-beta.36",
     "web3-utils": "^1.0.0-beta.36"
   },
   "devDependencies": {
-    "flow-bin": "^0.86.0"
+    "flow-bin": "^0.87.0"
   }
 }

@@ -7,7 +7,6 @@ import {
   type PermissionsRequirements,
   type StrictPermissionsRequirements,
 } from '@mainframe/app-permissions'
-import type { MainframeID } from '@mainframe/data-types'
 import { uniqueID, type ID } from '@mainframe/utils-id'
 
 import AbstractApp, {
@@ -24,7 +23,7 @@ export type AppVersionPublicationState =
 export type OwnAppData = {
   contentsPath: string,
   developerID: ID,
-  mainframeID: MainframeID,
+  mfid: string,
   name: string,
   version: string,
 }
@@ -73,8 +72,8 @@ export default class OwnApp extends AbstractApp {
     return this._data.contentsPath
   }
 
-  get mainframeID(): MainframeID {
-    return this._data.mainframeID
+  get mfid(): string {
+    return this._data.mfid
   }
 
   get versions(): { [version: string]: AppVersion } {

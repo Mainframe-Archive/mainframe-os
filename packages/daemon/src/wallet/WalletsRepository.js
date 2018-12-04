@@ -20,7 +20,7 @@ import HDWallet, { type HDWalletSerialized } from './HDWallet'
 import PKWallet, { type PKWalletSerialized } from './PKWallet'
 import LedgerWallet, { type LedgerWalletSerialized } from './LedgerWallet'
 import AbstractWallet from './AbstractSoftwareWallet'
-import ledgerClient from './ledgerClient'
+import { getAddressAtIndex } from './ledgerClient'
 
 const hdWalletsToJSON = mapObject(HDWallet.toJSON)
 const hdWalletsFromJSON = mapObject(HDWallet.fromJSON)
@@ -276,9 +276,7 @@ export default class WalletsRepository {
 
   async addLedgerEthAccount(params: { index: number }): Promise<void> {
     // Identify ledger wallets with first address
-    const firstLedgerAddr = await ledgerClient.getAddressAtIndex({
-      index: 0,
-    })
+    const firstLedgerAddr = await getAddressAtIndex({ index: 0 })
     const wallet = this.getLedgerEthWalletByFirstAddr(firstLedgerAddr)
     if (wallet) {
       wallet.addAccounts([params.index])
