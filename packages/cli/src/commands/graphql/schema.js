@@ -4,7 +4,7 @@ import fs from 'fs'
 import { promisify } from 'util'
 import { buildClientSchema, getIntrospectionQuery, printSchema } from 'graphql'
 
-import Command from '../../OpenVaultCommand'
+import Command from '../../Command'
 
 const writeFile = promisify(fs.writeFile)
 

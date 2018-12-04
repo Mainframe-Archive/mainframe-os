@@ -7,6 +7,8 @@ import {
 } from '@mainframe/client'
 import { graphql } from 'graphql'
 
+import schema from '../../graphql/schema'
+
 import type RequestContext from '../RequestContext'
 
 export const query = {
@@ -15,6 +17,6 @@ export const query = {
     ctx: RequestContext,
     params: GraphQLQueryParams,
   ): Promise<GraphQLQueryResult> => {
-    return graphql(ctx.schema, params.query, {}, {}, params.variables)
+    return graphql(schema, params.query, {}, ctx, params.variables)
   },
 }
