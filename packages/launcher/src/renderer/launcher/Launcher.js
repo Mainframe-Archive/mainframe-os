@@ -33,7 +33,8 @@ import AppGridItem from './AppGridItem'
 import CreateAppModal from './developer/CreateAppModal'
 import IdentitySelectorView from './IdentitySelectorView'
 import PermissionsView from './PermissionsView'
-import VaultManagerModal from './VaultManagerModal'
+import OnboardView from './OnboardView'
+import UnlockVaultView from './UnlockVaultView'
 import SideMenu from './SideMenu'
 
 const GRID_ITEMS_PER_ROW = 3
@@ -60,6 +61,7 @@ export default class App extends Component<{}, State> {
   state = {
     showModal: undefined,
     wallets: undefined,
+    vaultsData: undefined,
     devMode: false,
     showAppInstallModal: false,
     identities: {
@@ -75,7 +77,7 @@ export default class App extends Component<{}, State> {
     this.getVaultsData()
   }
 
-  async getVaultsData() {
+  getVaultsData = async () => {
     try {
       const vaultsData = await rpc.getVaultsData()
       this.setState({
@@ -106,11 +108,11 @@ export default class App extends Component<{}, State> {
     }
   }
 
+  // HANDLERS
+
   onOpenedVault = () => {
     this.getVaultsData()
   }
-
-  // HANDLERS
 
   onPressInstall = () => {
     this.setState({
@@ -231,20 +233,8 @@ export default class App extends Component<{}, State> {
 
   // RENDER
 
-  renderVaultManager() {
-    if (this.state.vaultsData) {
-      return (
-        <VaultManagerModal
-          vaultsData={this.state.vaultsData}
-          onOpenedVault={this.onOpenedVault}
-        />
-      )
-    }
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator />
-      </View>
-    )
+  renderOnboarding() {
+    return <OnboardView onboardComplete={this.getVaultsData} />
   }
 
   renderAppsGrid = (apps: Array<AppData>) => {
@@ -307,8 +297,24 @@ export default class App extends Component<{}, State> {
   }
 
   render() {
-    if (!this.state.vaultsData || !this.state.vaultsData.vaultOpen) {
-      return this.renderVaultManager()
+    if (!this.state.vaultsData) {
+      return (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator />
+        </View>
+      )
+    }
+    if (!this.state.vaultsData.defaultVault) {
+      return this.renderOnboarding()
+    }
+
+    if (!this.state.vaultsData.vaultOpen) {
+      return (
+        <UnlockVaultView
+          vaultsData={this.state.vaultsData || {}}
+          onUnlockVault={this.onOpenedVault}
+        />
+      )
     }
 
     const { apps, devMode } = this.state

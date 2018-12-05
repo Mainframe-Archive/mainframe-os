@@ -3,8 +3,8 @@
 import React, { Component } from 'react'
 import { View, StyleSheet } from 'react-native-web'
 
+import OnboardContainer from '../UIComponents/OnboardContainer'
 import Button from '../UIComponents/Button'
-import ModalView from '../UIComponents/ModalView'
 import MFTextInput from '../UIComponents/TextInput'
 import Text from '../UIComponents/Text'
 import colors from '../colors'
@@ -74,7 +74,7 @@ export default class OnboardWalletView extends Component<Props, State> {
         <View>
           <Text style={sectionLabelStyles}>ETH Address</Text>
           <View style={styles.resultContainer}>
-            <Text style={styles.walletAddress}>{this.state.walletAddress}</Text>
+            <Text>{this.state.walletAddress}</Text>
           </View>
           <Text style={sectionLabelStyles}>Mnemonic</Text>
           <Text style={[globalStyles.darkGreyText, styles.bottomPad]}>
@@ -97,33 +97,36 @@ export default class OnboardWalletView extends Component<Props, State> {
   renderImportOrCreate() {
     return (
       <View>
-        <Text style={[globalStyles.boldText, styles.bottomPad]}>
-          Create wallet
-        </Text>
-        <Text style={[globalStyles.darkGreyText, styles.bottomPad]}>
-          Create a new Ethereum wallet.
-        </Text>
-        <Button
-          title="Create Wallet"
-          style={styles.createButton}
-          testID="create-wallet-button"
-          onPress={this.onPressCreateWallet}
-        />
-        <View style={styles.divider} />
-        <Text style={[globalStyles.boldText, styles.bottomPad]}>
-          Import wallet
-        </Text>
-        <Text style={[globalStyles.darkGreyText, styles.bottomPad]}>
-          Import existing accounts from a mnemonic passphrase
-        </Text>
-        <MFTextInput
-          multiline
-          style={styles.input}
-          value={this.state.mnemonic}
-          placeholder="12 word mneomnic phrase"
-          onChangeText={this.onChangeMnemonic}
-        />
-        <Button title="Import Wallet" onPress={this.onPressImportMnemonic} />
+        <View style={styles.sectionContainer}>
+          <Text style={[globalStyles.boldText, styles.bottomPad]}>
+            Create wallet
+          </Text>
+          <Text style={[globalStyles.darkGreyText, styles.bottomPad]}>
+            Create a new Ethereum wallet.
+          </Text>
+          <Button
+            title="Create Wallet"
+            style={styles.createButton}
+            testID="create-wallet-button"
+            onPress={this.onPressCreateWallet}
+          />
+        </View>
+        <View style={styles.sectionContainer}>
+          <Text style={[globalStyles.boldText, styles.bottomPad]}>
+            Import wallet
+          </Text>
+          <Text style={[globalStyles.darkGreyText, styles.bottomPad]}>
+            Import existing accounts from a mnemonic passphrase
+          </Text>
+          <MFTextInput
+            multiline
+            style={styles.input}
+            value={this.state.mnemonic}
+            placeholder="12 word mneomnic phrase"
+            onChangeText={this.onChangeMnemonic}
+          />
+          <Button title="Import Wallet" onPress={this.onPressImportMnemonic} />
+        </View>
       </View>
     )
   }
@@ -134,41 +137,35 @@ export default class OnboardWalletView extends Component<Props, State> {
       ? this.renderAddress()
       : this.renderImportOrCreate()
     return (
-      <ModalView>
-        <Text style={[globalStyles.header, styles.bottomPad]}>
-          {this.state.successMsg || 'Setup Your Ethereum Wallet'}
-        </Text>
+      <OnboardContainer title={this.state.successMsg || 'Setup a Wallet'}>
         {content}
-      </ModalView>
+      </OnboardContainer>
     )
   }
 }
 
 const styles = StyleSheet.create({
   bottomPad: {
-    paddingBottom: 10,
+    paddingBottom: 12,
+  },
+  sectionContainer: {
+    borderColor: colors.LIGHT_GREY_DE,
+    borderRadius: 4,
+    borderWidth: 1,
+    padding: 20,
+    marginBottom: 20,
   },
   input: {
     height: 70,
-    marginBottom: 10,
-  },
-  divider: {
-    flex: 1,
-    height: 2,
-    marginVertical: 20,
-    backgroundColor: colors.LIGHT_GREY_DE,
+    marginBottom: 15,
   },
   createButton: {
     backgroundColor: colors.PRIMARY_RED,
   },
   resultContainer: {
     padding: 10,
-    backgroundColor: colors.LIGHT_GREY_EE,
-    borderColor: colors.LIGHT_GREY_DE,
+    backgroundColor: colors.LIGHT_GREY_F7,
     borderRadius: 4,
-    marginBottom: 10,
-  },
-  walletAddress: {
-    color: colors.BRIGHT_BLUE,
+    marginBottom: 15,
   },
 })
