@@ -133,7 +133,7 @@ const setupClient = async () => {
 const createLauncherWindow = async () => {
   await setupClient()
 
-  launcherWindow = newWindow({ width: 950, height: 650 })
+  launcherWindow = newWindow({ width: 900, height: 600 })
 
   const launcherContext = new LauncherContext({
     client,
