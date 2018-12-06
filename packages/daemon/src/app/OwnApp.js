@@ -138,9 +138,10 @@ export default class OwnApp extends AbstractApp {
     const permissions = mergeGrantsToDetails(appPermissions, userPermissions)
     const session = new Session(this._appID, userID, permissions.session)
     return {
-      permissions,
       sessID: uniqueID(),
+      isDev: true,
       session,
+      permissions,
     }
   }
 }

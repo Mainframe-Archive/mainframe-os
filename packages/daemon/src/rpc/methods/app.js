@@ -105,6 +105,7 @@ const createClientSession = (
     },
     defaultEthAccount,
     app: appData,
+    isDev: session.isDev,
   }
 }
 
