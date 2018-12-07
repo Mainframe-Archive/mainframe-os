@@ -87,6 +87,12 @@ export default class AppContainer extends Component<Props, State> {
     })
   }
 
+  onKeyPress = (event: SyntheticKeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      this.relaodContents()
+    }
+  }
+
   resetUrl = () => {
     this.setState({
       urlInputValue: this.state.bundleUrl,
@@ -148,6 +154,7 @@ export default class AppContainer extends Component<Props, State> {
           value={this.state.urlInputValue}
           placeholder="custom url e.g. http://localhost:3000"
           onChangeText={this.onChangeUrl}
+          onKeyPress={this.onKeyPress}
         />
         {buttons}
       </View>
