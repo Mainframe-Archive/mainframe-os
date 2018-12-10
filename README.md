@@ -32,6 +32,11 @@ This project is in alpha, lots of breaking changes are to be expected between re
 ### Prerequisites
 
 - [Node](https://nodejs.org/en/) v10+ (includes npm)
+- `libudev` library, if you're running Linux.
+On Debian/Ubuntu distros it can be installed using:
+```
+sudo apt install libudev-dev -y
+```
 
 ### Setup
 
