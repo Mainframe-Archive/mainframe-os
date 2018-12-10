@@ -63,7 +63,6 @@ const styles = StyleSheet.create({
   },
   bgImage: {
     flex: 1,
-    textAlign: 'right',
   },
   title: {
     fontWeight: 'bold',
