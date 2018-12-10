@@ -35,7 +35,7 @@ export const APP_CLOSE_SCHEMA = {
 
 export const APP_CREATE_SCHEMA = {
   contentsPath: 'string',
-  developerID: OPTIONAL_LOCAL_ID_SCHEMA,
+  developerID: LOCAL_ID_SCHEMA,
   name: 'string',
   version: OPTIONAL_SEMVER_SCHEMA,
   permissions: OPTIONAL_PERMISSIONS_REQUIREMENTS_SCHEMA,
@@ -125,6 +125,16 @@ export const GRAPHQL_QUERY_SCHEMA = {
   variables: {
     type: 'object',
     optional: true,
+  },
+}
+
+export const IDENTITY_CREATE_OWN_USER_SCHEMA = {
+  profile: {
+    type: 'object',
+    props: {
+      name: 'string',
+      avatar: { type: 'string', optional: true },
+    },
   },
 }
 

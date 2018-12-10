@@ -21,6 +21,8 @@ import {
   type AppSetUserPermissionsSettingsParams,
   APP_SET_USER_PERMISSIONS_SETTINGS_SCHEMA,
   type IdentityCreateResult,
+  type IdentityCreateUserParams,
+  type IdentityCreateDeveloperParams,
   type IdentityGetOwnUsersResult,
   type IdentityGetOwnDevelopersResult,
   GRAPHQL_QUERY_SCHEMA,
@@ -115,7 +117,7 @@ export default {
     },
     handler: (
       ctx: LauncherContext,
-      params: { data?: Object },
+      params: IdentityCreateUserParams,
     ): Promise<IdentityCreateResult> => {
       return ctx.client.identity.createUser(params)
     },
@@ -126,7 +128,7 @@ export default {
     },
     handler: (
       ctx: LauncherContext,
-      params: { data?: Object },
+      params: IdentityCreateDeveloperParams,
     ): Promise<IdentityCreateResult> => {
       return ctx.client.identity.createDeveloper(params)
     },

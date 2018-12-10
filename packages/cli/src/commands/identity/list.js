@@ -15,7 +15,8 @@ export default class IdentityListCommand extends Command {
     Object.keys(res).forEach(type => {
       res[type].forEach(identity => {
         this.log('\nid: ', identity.id)
-        this.log('data: ', identity.data)
+        this.log('localID: ', identity.localID)
+        this.log('data: ', identity.profile)
       })
     })
   }

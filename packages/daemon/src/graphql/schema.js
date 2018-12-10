@@ -115,6 +115,10 @@ const appUser = new GraphQLObjectType({
     id: {
       type: new GraphQLNonNull(GraphQLID),
     },
+    localId: {
+      type: new GraphQLNonNull(GraphQLID),
+      resolve: self => self.localID,
+    },
     identity: {
       type: new GraphQLNonNull(ownUserIdentityType),
       resolve: (self, args, ctx: RequestContext) => {
@@ -132,9 +136,13 @@ const appType = new GraphQLObjectType({
   interfaces: () => [nodeInterface],
   fields: () => ({
     id: globalIdField(),
-    localId: {
+    appID: {
       type: new GraphQLNonNull(GraphQLID),
       resolve: self => self.id,
+    },
+    name: {
+      type: new GraphQLNonNull(GraphQLString),
+      resolve: self => self.manifest.name,
     },
     users: {
       type: new GraphQLList(appUser),
@@ -153,9 +161,22 @@ const ownAppType = new GraphQLObjectType({
   interfaces: () => [nodeInterface],
   fields: () => ({
     id: globalIdField(),
-    localId: {
+    appID: {
       type: new GraphQLNonNull(GraphQLID),
       resolve: self => self.id,
+    },
+    name: {
+      type: new GraphQLNonNull(GraphQLString),
+      resolve: self => self.data.name,
+    },
+    users: {
+      type: new GraphQLList(appUser),
+      resolve: ({ settings }) => {
+        return Object.keys(settings).map(id => ({
+          localId: id,
+          settings: settings[id],
+        }))
+      },
     },
   }),
 })
@@ -166,6 +187,10 @@ const ownAppIdentityType = new GraphQLObjectType({
   fields: () => ({
     id: globalIdField(),
     localId: {
+      type: new GraphQLNonNull(GraphQLID),
+      resolve: self => self.localID,
+    },
+    mfid: {
       type: new GraphQLNonNull(GraphQLID),
       resolve: self => self.id,
     },
@@ -182,10 +207,26 @@ const ownDeveloperIdentityType = new GraphQLObjectType({
     id: globalIdField(),
     localId: {
       type: new GraphQLNonNull(GraphQLID),
+      resolve: self => self.localID,
+    },
+    mfid: {
+      type: new GraphQLNonNull(GraphQLID),
       resolve: self => self.id,
     },
     pubKey: {
       type: new GraphQLNonNull(GraphQLString),
+    },
+    profile: {
+      type: new GraphQLObjectType({
+        name: 'OwnDeveloperProfile',
+        fields: () => ({
+          name: {
+            type: GraphQLNonNull(GraphQLString),
+            resolve: self => self.name,
+          },
+        }),
+      }),
+      resolve: self => self.profile,
     },
   }),
 })
@@ -197,7 +238,23 @@ const ownUserIdentityType = new GraphQLObjectType({
     id: globalIdField(),
     localId: {
       type: new GraphQLNonNull(GraphQLID),
+      resolve: self => self.localID,
+    },
+    mfid: {
+      type: new GraphQLNonNull(GraphQLID),
       resolve: self => self.id,
+    },
+    profile: {
+      type: new GraphQLObjectType({
+        name: 'OwnUserProfile',
+        fields: () => ({
+          name: {
+            type: GraphQLNonNull(GraphQLString),
+            resolve: self => self.name,
+          },
+        }),
+      }),
+      resolve: self => self.profile,
     },
     pubKey: {
       type: new GraphQLNonNull(GraphQLString),
@@ -212,7 +269,7 @@ const peerAppIdentityType = new GraphQLObjectType({
     id: globalIdField(),
     localId: {
       type: new GraphQLNonNull(GraphQLID),
-      resolve: self => self.id,
+      resolve: self => self.localID,
     },
     pubKey: {
       type: new GraphQLNonNull(GraphQLString),
@@ -227,7 +284,7 @@ const peerDeveloperIdentityType = new GraphQLObjectType({
     id: globalIdField(),
     localId: {
       type: new GraphQLNonNull(GraphQLID),
-      resolve: self => self.id,
+      resolve: self => self.localID,
     },
     pubKey: {
       type: new GraphQLNonNull(GraphQLString),
@@ -268,12 +325,34 @@ const appsQueryType = new GraphQLObjectType({
   }),
 })
 
+const identitiesQueryType = new GraphQLObjectType({
+  name: 'IdentitiesQuery',
+  fields: () => ({
+    ownUsers: {
+      type: new GraphQLList(ownUserIdentityType),
+      resolve: (self, args, ctx: RequestContext) => {
+        return Object.values(ctx.openVault.identities.ownUsers)
+      },
+    },
+    ownDevelopers: {
+      type: new GraphQLList(ownDeveloperIdentityType),
+      resolve: (self, args, ctx: RequestContext) => {
+        return Object.values(ctx.openVault.identities.ownDevelopers)
+      },
+    },
+  }),
+})
+
 const queryType = new GraphQLObjectType({
   name: 'Query',
   fields: () => ({
     node: nodeField,
     apps: {
       type: new GraphQLNonNull(appsQueryType),
+      resolve: () => ({}),
+    },
+    identities: {
+      type: new GraphQLNonNull(identitiesQueryType),
       resolve: () => ({}),
     },
   }),

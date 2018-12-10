@@ -19,6 +19,7 @@ import {
   type IdentityUnlinkEthWalletAccountParams,
   IDENTITY_ADD_PEER_SCHEMA,
   IDENTITY_ADD_PEER_BY_FEED_SCHEMA,
+  IDENTITY_CREATE_OWN_USER_SCHEMA,
   IDENTITY_DELETE_CONTACT_SCHEMA,
   IDENTITY_GET_USER_CONTACTS_SCHEMA,
   IDENTITY_LINK_ETH_WALLET_SCHEMA,
@@ -37,21 +38,19 @@ export const createDeveloper = {
     ctx: RequestContext,
     params: IdentityCreateDeveloperParams,
   ): Promise<IdentityCreateResult> => {
-    const id = ctx.openVault.identities.createOwnDeveloper(params.data)
+    const id = ctx.openVault.identities.createOwnDeveloper(params.profile)
     await ctx.openVault.save()
     return { id: toClientID(id) }
   },
 }
 
 export const createUser = {
-  params: {
-    data: 'any', // TODO: data schema
-  },
+  params: IDENTITY_CREATE_OWN_USER_SCHEMA,
   handler: async (
     ctx: RequestContext,
     params: IdentityCreateUserParams,
   ): Promise<IdentityCreateResult> => {
-    const id = ctx.openVault.identities.createOwnUser(params.data)
+    const id = ctx.openVault.identities.createOwnUser(params.profile)
     await ctx.openVault.save()
     return { id: toClientID(id) }
   },
@@ -65,8 +64,9 @@ export const getOwnDevelopers = (
     const wallets =
       ctx.openVault.identityWallets.walletsByIdentity[toClientID(id)] || {}
     return {
-      id: toClientID(id),
-      data: ownDevelopers[id].data,
+      id: ownDevelopers[id].id,
+      localID: ownDevelopers[id].localID,
+      profile: ownDevelopers[id].profile,
       ethWallets: wallets,
     }
   })
@@ -79,8 +79,9 @@ export const getOwnUsers = (ctx: RequestContext): IdentityGetOwnUsersResult => {
     const wallets =
       ctx.openVault.identityWallets.walletsByIdentity[toClientID(id)] || {}
     return {
-      id: toClientID(id),
-      data: ownUsers[id].data,
+      id: ownUsers[id].id,
+      localID: ownUsers[id].localID,
+      profile: ownUsers[id].profile,
       ethWallets: wallets,
     }
   })

@@ -68,6 +68,7 @@ const launchApp = async (appSession: AppSession) => {
   const appOpen = appSessions[appID] && appSessions[appID][userID]
   if (appOpen) {
     // Already open
+    // TODO: bring window to front
     return
   }
 

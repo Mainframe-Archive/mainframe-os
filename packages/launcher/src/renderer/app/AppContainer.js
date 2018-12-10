@@ -17,7 +17,7 @@ declare var __static: string
 
 type User = {
   id: ID,
-  data: Object,
+  profile: Object,
 }
 
 type App = {
@@ -175,7 +175,10 @@ export default class AppContainer extends Component<Props, State> {
           <View style={styles.identity}>
             <Text style={styles.headerLabel}>
               User:{' '}
-              <Text style={styles.boldLabel}> {appSession.user.data.name}</Text>
+              <Text style={styles.boldLabel}>
+                {' '}
+                {appSession.user.profile.name}
+              </Text>
             </Text>
           </View>
         </View>

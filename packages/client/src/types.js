@@ -19,8 +19,9 @@ export type WalletTypes = 'hd' | 'pk' | 'ledger'
 export type WalletSupportedChains = 'ethereum'
 export type WalletAccount = string
 export type IdentityOwnData = {
-  id: ID,
-  data: Object,
+  id: string,
+  localID: string,
+  profile: Object,
   ethWallets: { [walletID: ID]: Array<WalletAccount> },
 }
 
@@ -43,7 +44,7 @@ export type AppCloseParams = { sessID: ID }
 
 export type AppCreateParams = {
   contentsPath: string,
-  developerID?: ?ID,
+  developerID: ID,
   name?: ?string,
   version?: ?string,
   permissionsRequirements?: ?StrictPermissionsRequirements,
@@ -51,16 +52,27 @@ export type AppCreateParams = {
 
 export type AppCreateResult = { appID: ID }
 
+export type AppUserSettings = {
+  permissionsSettings: AppUserPermissionsSettings,
+  walletSettings: WalletSettings,
+}
+
+export type AppUser = IdentityOwnData & {
+  settings: AppUserSettings,
+}
+
 export type AppInstalledData = {
   appID: ID,
   manifest: ManifestData,
-  users: Array<IdentityOwnData>,
+  users: Array<AppUser>,
+  name: string,
 }
 
 export type AppOwnData = {
   appID: ID,
   manifest: ManifestData,
-  users: Array<IdentityOwnData>,
+  users: Array<AppUser>,
+  name: string,
 }
 
 export type AppGetInstalledResult = {
@@ -83,10 +95,6 @@ export type AppGetManifestDataResult = {
 
 export type WalletSettings = {
   defaultEthAccount: ?string,
-}
-export type AppUserSettings = {
-  permissionsSettings: AppUserPermissionsSettings,
-  walletSettings: WalletSettings,
 }
 
 export type AppInstallParams = {
@@ -226,11 +234,17 @@ export type IdentityPeerResult = {
 export type IdentityAddPeerResult = { id: ID }
 
 export type IdentityCreateDeveloperParams = {
-  data?: Object,
+  profile: {
+    name: string,
+    avatar?: ?string,
+  },
 }
 
 export type IdentityCreateUserParams = {
-  data?: Object,
+  profile: {
+    name: string,
+    avatar?: ?string,
+  },
 }
 
 export type IdentityCreateResult = { id: ID }

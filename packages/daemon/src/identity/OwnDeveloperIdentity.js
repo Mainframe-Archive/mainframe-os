@@ -2,6 +2,7 @@
 
 // eslint-disable-next-line import/named
 import { createSignKeyPair, type KeyPair } from '@mainframe/utils-crypto'
+import { uniqueID } from '@mainframe/utils-id'
 
 import OwnIdentity, {
   parseKeyPair,
@@ -9,25 +10,37 @@ import OwnIdentity, {
   type KeyPairSerialized,
 } from './OwnIdentity'
 
+export type OwnDeveloperProfile = {
+  name: string,
+  avatar?: ?string,
+}
+
 export type OwnDeveloperIdentitySerialized = {
+  localID: string,
   keyPair: KeyPairSerialized,
-  data: Object,
+  profile: OwnDeveloperProfile,
 }
 
 export default class OwnDeveloperIdentity extends OwnIdentity {
   static create = (
+    profile: OwnDeveloperProfile,
     keyPair?: KeyPair,
-    data?: Object = {},
+    localID?: string,
   ): OwnDeveloperIdentity => {
-    return new OwnDeveloperIdentity(keyPair || createSignKeyPair(), data)
+    return new OwnDeveloperIdentity(
+      localID || uniqueID(),
+      keyPair || createSignKeyPair(),
+      profile,
+    )
   }
 
   static fromJSON = (
     serialized: OwnDeveloperIdentitySerialized,
   ): OwnDeveloperIdentity => {
     return new OwnDeveloperIdentity(
+      serialized.localID,
       parseKeyPair(serialized.keyPair),
-      serialized.data,
+      serialized.profile,
     )
   }
 
@@ -35,15 +48,20 @@ export default class OwnDeveloperIdentity extends OwnIdentity {
     identity: OwnDeveloperIdentity,
   ): OwnDeveloperIdentitySerialized => {
     return {
+      localID: identity.localID,
       keyPair: serializeKeyPair(identity.keyPair),
-      data: identity.data,
+      profile: identity.profile,
     }
   }
 
-  data: Object
+  _profile: OwnDeveloperProfile
 
-  constructor(keyPair: KeyPair, data: Object = {}) {
-    super('dev', keyPair)
-    this.data = data
+  constructor(localID: string, keyPair: KeyPair, profile: OwnDeveloperProfile) {
+    super(localID, 'dev', keyPair)
+    this._profile = profile
+  }
+
+  get profile(): OwnDeveloperProfile {
+    return this._profile
   }
 }
