@@ -33,6 +33,7 @@ export type SessionData = {
   sessID: ID,
   session: Session,
   permissions: PermissionsDetails,
+  isDev?: ?boolean,
 }
 
 export type PermissionsSettings = {

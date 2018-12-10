@@ -53,9 +53,6 @@ describe('Application launch', function() {
 
   it('creates a new vault', async function() {
     await this.app.client
-      .element('[data-testid="create-vault-input-name"]')
-      .setValue('test')
-    await this.app.client
       .element('[data-testid="create-vault-input-password"]')
       .setValue('password')
     await this.app.client
@@ -66,14 +63,13 @@ describe('Application launch', function() {
       .click()
   })
 
-  it('creates a new wallet', async function() {
-    const createWalletButton = '[data-testid="create-wallet-button"]'
-    await this.app.client.waitForExist(createWalletButton, 10000)
-    await this.app.client.element(createWalletButton).click()
-
-    const continueButton = '[data-testid="create-wallet-continue-button"]'
-    await this.app.client.waitForExist(continueButton, 2000)
-    await this.app.client.element(continueButton).click()
+  it('creates an identity', async function() {
+    const createIdButton = '[data-testid="onboard-create-identity-button"]'
+    await this.app.client.waitForExist(createIdButton, 10000)
+    await this.app.client
+      .element('[data-testid="onboard-create-identity-input-name"]')
+      .setValue('tester')
+    await this.app.client.element(createIdButton).click()
   })
 
   it('creates an app', async function() {
