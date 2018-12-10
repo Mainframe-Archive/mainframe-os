@@ -32,6 +32,9 @@ This project is in alpha, lots of breaking changes are to be expected between re
 ### Prerequisites
 
 - [Node](https://nodejs.org/en/) v10+ (includes npm)
+- Installed git and added to PATH environment variable
+- #### Windows
+  ``npm install --global --production windows-build-tools``
 
 ### Setup
 
