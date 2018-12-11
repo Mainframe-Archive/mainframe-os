@@ -210,11 +210,11 @@ const styles = StyleSheet.create({
   identity: {
     paddingHorizontal: 10,
     justifyContent: 'center',
-    alignItems: 'right',
-    textAlign: 'right',
+    alignItems: 'flex-end',
     flex: 1,
   },
   headerLabel: {
+    textAlign: 'left',
     color: colors.GREY_DARK_54,
     fontSize: 12,
   },
