@@ -194,14 +194,11 @@ export default class App extends Component<{}, State> {
         `}
         variables={{}}
         render={({ error, props }) => {
-          /* eslint-disable no-console */
           if (error) {
-            console.log('GraphQL query error:', error)
             this.setState({
               relayError: error,
             })
           } else if (props) {
-            console.log('GraphQL got apps data:', props)
             return (
               <View>
                 <AppsView apps={props.apps} />
@@ -214,7 +211,6 @@ export default class App extends Component<{}, State> {
               </View>
             )
           }
-          /* eslint-enable no-console */
           return null
         }}
       />
