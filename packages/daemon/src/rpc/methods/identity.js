@@ -20,6 +20,7 @@ import {
   IDENTITY_ADD_PEER_SCHEMA,
   IDENTITY_ADD_PEER_BY_FEED_SCHEMA,
   IDENTITY_CREATE_OWN_USER_SCHEMA,
+  IDENTITY_CREATE_OWN_DEVELOPER_SCHEMA,
   IDENTITY_DELETE_CONTACT_SCHEMA,
   IDENTITY_GET_USER_CONTACTS_SCHEMA,
   IDENTITY_LINK_ETH_WALLET_SCHEMA,
@@ -31,9 +32,7 @@ import { idType as fromClientID } from '@mainframe/utils-id'
 import type RequestContext from '../RequestContext'
 
 export const createDeveloper = {
-  params: {
-    data: 'any', // TODO: data schema
-  },
+  params: IDENTITY_CREATE_OWN_DEVELOPER_SCHEMA,
   handler: async (
     ctx: RequestContext,
     params: IdentityCreateDeveloperParams,
@@ -80,7 +79,7 @@ export const getOwnUsers = (ctx: RequestContext): IdentityGetOwnUsersResult => {
       ctx.openVault.identityWallets.walletsByIdentity[toClientID(id)] || {}
     return {
       id: ownUsers[id].id,
-      localID: ownUsers[id].localID,
+      localID: id,
       profile: ownUsers[id].profile,
       ethWallets: wallets,
     }

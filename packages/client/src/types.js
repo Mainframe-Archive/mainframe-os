@@ -52,6 +52,10 @@ export type AppCreateParams = {
 
 export type AppCreateResult = { appID: ID }
 
+export type WalletSettings = {
+  defaultEthAccount: ?string,
+}
+
 export type AppUserSettings = {
   permissionsSettings: AppUserPermissionsSettings,
   walletSettings: WalletSettings,
@@ -91,10 +95,6 @@ export type AppGetManifestDataParams = {
 
 export type AppGetManifestDataResult = {
   data: PartialManifestData,
-}
-
-export type WalletSettings = {
-  defaultEthAccount: ?string,
 }
 
 export type AppInstallParams = {

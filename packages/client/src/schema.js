@@ -138,6 +138,16 @@ export const IDENTITY_CREATE_OWN_USER_SCHEMA = {
   },
 }
 
+export const IDENTITY_CREATE_OWN_DEVELOPER_SCHEMA = {
+  profile: {
+    type: 'object',
+    props: {
+      name: 'string',
+      avatar: { type: 'string', optional: true },
+    },
+  },
+}
+
 export const IDENTITY_PUBLIC_FEEDS_SCHEMA = {
   type: 'object',
   optional: true,

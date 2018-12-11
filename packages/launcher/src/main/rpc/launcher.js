@@ -25,6 +25,8 @@ import {
   type IdentityCreateDeveloperParams,
   type IdentityGetOwnUsersResult,
   type IdentityGetOwnDevelopersResult,
+  IDENTITY_CREATE_OWN_USER_SCHEMA,
+  IDENTITY_CREATE_OWN_DEVELOPER_SCHEMA,
   GRAPHQL_QUERY_SCHEMA,
   type GraphQLQueryParams,
   type GraphQLQueryResult,
@@ -112,9 +114,7 @@ export default {
 
   // Identities
   identity_createUser: {
-    params: {
-      data: 'any',
-    },
+    params: IDENTITY_CREATE_OWN_USER_SCHEMA,
     handler: (
       ctx: LauncherContext,
       params: IdentityCreateUserParams,
@@ -123,9 +123,7 @@ export default {
     },
   },
   identity_createDeveloper: {
-    params: {
-      data: 'any',
-    },
+    params: IDENTITY_CREATE_OWN_DEVELOPER_SCHEMA,
     handler: (
       ctx: LauncherContext,
       params: IdentityCreateDeveloperParams,

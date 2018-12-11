@@ -169,7 +169,6 @@ export default class IdentitySelectorQueryContainer extends Component<ContainerP
         `}
         variables={{}}
         render={({ error, props }) => {
-          /* eslint-disable no-console */
           if (error) {
             // TODO: handle error
           } else if (props) {
@@ -187,7 +186,6 @@ export default class IdentitySelectorQueryContainer extends Component<ContainerP
               </View>
             )
           }
-          /* eslint-enable no-console */
           return null
         }}
       />
