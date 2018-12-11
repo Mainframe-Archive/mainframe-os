@@ -36,6 +36,9 @@ This project is in alpha, lots of breaking changes are to be expected between re
 - #### Linux
   `sudo apt install -y libudev-dev libtool libusb-1.0-0-dev build-essential`
 
+- #### Windows
+  ``npm install --global --production windows-build-tools``
+
 ### Setup
 
 Each package contains (or will contain) a readme with further information pertaining to setup. A shortcut guide is as follows:
@@ -53,12 +56,20 @@ Next, a local environment must be created. An environment contains references to
 ```
 packages/cli/bin/run env:create
 ```
+Or on Windows
+```
+"packages/cli/bin/run.cmd" env:create
+```
 
 This first environment should be created with the `development` type and set as default environment.
 The newly created environment then needs to be configured using the CLI:
 
 ```
 packages/cli/bin/run daemon:setup --bin-path=./packages/daemon/bin/run
+```
+Or on Windows
+```
+"packages/cli/bin/run.cmd" daemon:setup --bin-path="packages/daemon/bin/run.cmd"
 ```
 
 ## Development
@@ -73,6 +84,10 @@ Now, in one terminal tab, run the daemon:
 
 ```
 ./packages/cli/bin/run daemon:start
+```
+Or on Windows
+```
+"packages/cli/bin/run.cmd" daemon:start
 ```
 
 Then, in another tab, run the launcher:
