@@ -28,7 +28,7 @@ export default class SideMenu extends Component<Props> {
     const userList = this.props.identities.users.map(u => {
       return (
         <View key={u.id}>
-          <Text style={styles.sideBarLabel}>{u.data.name}</Text>
+          <Text style={styles.sideBarLabel}>{u.profile.name}</Text>
         </View>
       )
     })

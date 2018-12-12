@@ -68,7 +68,7 @@ export const createDeveloperIdentity = async (
     }
   }
 
-  const res = await client.identity.createDeveloper({ data })
+  const res = await client.identity.createDeveloper({ profile: data })
   client.close()
   return `Created developer identity: ${res.id}`
 }
@@ -86,7 +86,7 @@ export const createUserIdentity = async (
     }
   }
 
-  const res = await client.identity.createUser({ data })
+  const res = await client.identity.createUser({ profile: data })
   client.close()
   return `Created user identity: ${res.id}`
 }

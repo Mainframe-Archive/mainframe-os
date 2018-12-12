@@ -1,6 +1,6 @@
 //@flow
 
-import type { ID, IdentityOwnData } from '@mainframe/client'
+import type { ID } from '@mainframe/client'
 import React, { Component } from 'react'
 import {
   View,
@@ -8,31 +8,47 @@ import {
   StyleSheet,
   TextInput,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native-web'
+import { QueryRenderer, graphql } from 'react-relay'
 
 import Button from '../UIComponents/Button'
 import Text from '../UIComponents/Text'
 import colors from '../colors'
+import { EnvironmentContext } from './RelayEnvironment'
 
 import rpc from './rpc'
 
-type Props = {
+type ContainerProps = {
   type: 'user' | 'developer',
-  identities: Array<IdentityOwnData>,
   enableCreate?: boolean,
   onSelectId: (id: ID) => any,
   onCreatedId?: (id: ID) => any,
 }
 
+type Identity = {
+  id: string,
+  localID: string,
+  profile: {
+    name: string,
+    avatar: string,
+  },
+}
+
+type Props = ContainerProps & {
+  identities: {
+    ownUsers: Array<Identity>,
+    ownDevelopers: Array<Identity>,
+  },
+}
+
 type State = {
   newName: string,
-  identities: Array<IdentityOwnData>,
   showCreateIdForm?: boolean,
 }
 
-export default class IdentitySelectorView extends Component<Props, State> {
+class IdentitySelectorView extends Component<Props, State> {
   state = {
-    identities: [],
     newName: '',
   }
 
@@ -86,9 +102,11 @@ export default class IdentitySelectorView extends Component<Props, State> {
       )
     }
 
-    const idRows = this.props.identities.map(user => {
-      const handler = () => this.props.onSelectId(user.id)
-      return rowRender(user.id, user.data.name, handler)
+    const idRows = Object.values(this.props.identities.ownUsers).map(user => {
+      // $FlowFixMe mixed map type
+      const handler = () => this.props.onSelectId(user.localId)
+      // $FlowFixMe mixed map type
+      return rowRender(user.localId, user.profile.name, handler)
     })
 
     const createIdentity = this.props.enableCreate ? (
@@ -124,6 +142,57 @@ export default class IdentitySelectorView extends Component<Props, State> {
   }
 }
 
+export default class IdentitySelectorQueryContainer extends Component<ContainerProps> {
+  static contextType = EnvironmentContext
+
+  render() {
+    return (
+      <QueryRenderer
+        environment={this.context}
+        query={graphql`
+          query IdentitySelectorViewQuery {
+            identities {
+              ownUsers {
+                localId
+                profile {
+                  name
+                }
+              }
+              ownDevelopers {
+                localId
+                profile {
+                  name
+                }
+              }
+            }
+          }
+        `}
+        variables={{}}
+        render={({ error, props }) => {
+          if (error) {
+            // TODO: handle error
+          } else if (props) {
+            return (
+              <IdentitySelectorView
+                identities={props.identities}
+                type={props.type}
+                {...this.props}
+              />
+            )
+          } else {
+            return (
+              <View>
+                <ActivityIndicator />
+              </View>
+            )
+          }
+          return null
+        }}
+      />
+    )
+  }
+}
+
 const styles = StyleSheet.create({
   scrollInner: {
     maxHeight: 260,
@@ -133,7 +202,7 @@ const styles = StyleSheet.create({
     borderRadius: 3,
     backgroundColor: colors.LIGHT_GREY_EE,
     marginTop: 10,
-    flexDirection: 'row',
+    flexDirection: 'column',
   },
   nameLabel: {
     flex: 1,

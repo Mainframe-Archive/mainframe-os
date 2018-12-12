@@ -12,10 +12,12 @@ import type Identity from './Identity'
 import AppIdentity, { type AppIdentitySerialized } from './AppIdentity'
 import DeveloperIdentity, {
   type DeveloperIdentitySerialized,
+  type DeveloperProfile,
 } from './DeveloperIdentity'
 import OwnAppIdentity, { type OwnAppIdentitySerialized } from './OwnAppIdentity'
 import OwnDeveloperIdentity, {
   type OwnDeveloperIdentitySerialized,
+  type OwnDeveloperProfile,
 } from './OwnDeveloperIdentity'
 import OwnUserIdentity, {
   type OwnUserIdentitySerialized,
@@ -385,32 +387,31 @@ export default class IdentitiesRepository {
       throw new Error('Unsupported identity')
     }
 
-    const id = uniqueID()
-    this._byMFID[identity.id] = id
-    this._refs[id] = ref
+    this._byMFID[identity.id] = idType(identity.localID)
+    this._refs[identity.localID] = ref
     // $FlowFixMe: polymorphic type
-    this._identities[ref.ownership][ref.domain][id] = identity
-    return id
+    this._identities[ref.ownership][ref.domain][identity.localID] = identity
+    return idType(identity.localID)
   }
 
   createOwnApp(keyPair?: KeyPair) {
     return this.addIdentity(OwnAppIdentity.create(keyPair))
   }
 
-  createOwnDeveloper(data: Object = {}, keyPair?: KeyPair) {
-    return this.addIdentity(OwnDeveloperIdentity.create(keyPair, data))
+  createOwnDeveloper(profile: OwnDeveloperProfile, keyPair?: KeyPair) {
+    return this.addIdentity(OwnDeveloperIdentity.create(profile, keyPair))
   }
 
-  createOwnUser(data: Object = {}, keyPair?: KeyPair) {
-    return this.addIdentity(OwnUserIdentity.create(keyPair, data))
+  createOwnUser(profile: Object = {}, keyPair?: KeyPair) {
+    return this.addIdentity(OwnUserIdentity.create(profile, keyPair))
   }
 
   createPeerApp(key: string | Buffer) {
-    return this.addIdentity(new AppIdentity(key))
+    return this.addIdentity(new AppIdentity(uniqueID(), key))
   }
 
-  createPeerDeveloper(key: string | Buffer) {
-    return this.addIdentity(new DeveloperIdentity(key))
+  createPeerDeveloper(key: string | Buffer, profile: DeveloperProfile) {
+    return this.addIdentity(new DeveloperIdentity(uniqueID(), key, profile))
   }
 
   createPeerUser(
@@ -424,7 +425,7 @@ export default class IdentitiesRepository {
     }
     const keyBuffer = multibase.decode(publicKey)
     const id = this.addIdentity(
-      new PeerUserIdentity(keyBuffer, profile, publicFeed, feeds),
+      new PeerUserIdentity(uniqueID(), keyBuffer, profile, publicFeed, feeds),
     )
     const peer = this.getPeerUser(id)
     if (peer != null) {

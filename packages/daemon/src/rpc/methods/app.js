@@ -96,7 +96,8 @@ const createClientSession = (
   return {
     user: {
       id: toClientID(userID),
-      data: user.data,
+      localID: user.localID,
+      profile: user.profile,
       ethWallets: wallets,
     },
     session: {
@@ -160,7 +161,7 @@ export const getAll = (ctx: RequestContext): AppGetAllResult => {
         if (user) {
           acc.push({
             id: toClientID(id),
-            data: user.data,
+            profile: user.profile,
             settings: app.getSettings(id),
           })
         }
@@ -168,6 +169,7 @@ export const getAll = (ctx: RequestContext): AppGetAllResult => {
       }, [])
       return {
         appID: toClientID(appID),
+        name: app instanceof OwnApp ? app.data.name : app.manifest.name,
         manifest: app.manifest || app._data,
         users: users,
       }

@@ -1,7 +1,8 @@
 type App implements Node {
   """The ID of an object"""
   id: ID!
-  localId: ID!
+  appID: ID!
+  name: String!
   users: [AppUser]
 }
 
@@ -22,12 +23,18 @@ type AppsQuery {
 
 type AppUser {
   id: ID!
+  localId: ID!
   identity: OwnUserIdentity!
   settings: AppUserSettings!
 }
 
 type AppUserSettings {
   permissions: AppPermissionsSettings!
+}
+
+type IdentitiesQuery {
+  ownUsers: [OwnUserIdentity]
+  ownDevelopers: [OwnDeveloperIdentity]
 }
 
 """An object with an ID"""
@@ -39,14 +46,35 @@ interface Node {
 type OwnApp implements Node {
   """The ID of an object"""
   id: ID!
+  appID: ID!
+  name: String!
+  users: [AppUser]
+}
+
+type OwnDeveloperIdentity implements Node {
+  """The ID of an object"""
+  id: ID!
   localId: ID!
+  mfid: ID!
+  pubKey: String!
+  profile: OwnDeveloperProfile
+}
+
+type OwnDeveloperProfile {
+  name: String!
 }
 
 type OwnUserIdentity implements Node {
   """The ID of an object"""
   id: ID!
   localId: ID!
+  mfid: ID!
+  profile: OwnUserProfile
   pubKey: String!
+}
+
+type OwnUserProfile {
+  name: String!
 }
 
 type Query {
@@ -56,4 +84,5 @@ type Query {
     id: ID!
   ): Node
   apps: AppsQuery!
+  identities: IdentitiesQuery!
 }

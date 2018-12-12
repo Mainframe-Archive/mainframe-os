@@ -1,22 +1,15 @@
 //@flow
 
 import type {
-  ID,
   AppGetAllResult as Apps,
   IdentityGetOwnUsersResult as OwnIdentities,
   WalletGetEthWalletsResult as Wallets,
-  AppOwnData,
-  AppInstalledData,
 } from '@mainframe/client'
-import {
-  havePermissionsToGrant,
-  type StrictPermissionsGrants,
-} from '@mainframe/app-permissions'
-import React, { Component, Fragment } from 'react'
+import { type StrictPermissionsGrants } from '@mainframe/app-permissions'
+import React, { Component } from 'react'
 import {
   View,
   ScrollView,
-  TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
 } from 'react-native-web'
@@ -32,15 +25,12 @@ import ModalView from '../UIComponents/ModalView'
 import rpc from './rpc'
 import { EnvironmentContext } from './RelayEnvironment'
 import AppInstallModal from './AppInstallModal'
-import AppGridItem from './AppGridItem'
 import CreateAppModal from './developer/CreateAppModal'
-import IdentitySelectorView from './IdentitySelectorView'
 import PermissionsView from './PermissionsView'
 import OnboardView from './OnboardView'
 import UnlockVaultView from './UnlockVaultView'
 import SideMenu from './SideMenu'
-
-const GRID_ITEMS_PER_ROW = 3
+import AppsView from './apps/AppsView'
 
 type State = {
   apps: Apps,
@@ -50,15 +40,14 @@ type State = {
   showAppInstallModal?: boolean,
   showAppCreateModal?: boolean,
   showModal: ?{
-    type: 'app_create' | 'app_install' | 'select_id' | 'accept_permissions',
+    type: 'app_create' | 'app_install',
     data?: Object,
   },
+  relayError?: ?Error,
   vaultsData?: VaultsData,
   selectIdForApp?: Object,
   appHoverByID?: string,
 }
-
-type AppData = AppOwnData | AppInstalledData
 
 export default class App extends Component<{}, State> {
   static contextType = EnvironmentContext
@@ -132,60 +121,10 @@ export default class App extends Component<{}, State> {
     this.getAppsAndUsers()
   }
 
-  onOpenApp = (app: AppData) => {
-    this.setState({
-      showModal: {
-        type: 'select_id',
-        data: {
-          type: this.state.devMode ? 'own' : 'installed',
-          app,
-        },
-      },
-    })
-  }
-
   onCloseModal = () => {
     this.setState({
       showModal: undefined,
     })
-  }
-
-  onSelectAppUser = async (userID: ID) => {
-    const { showModal, devMode } = this.state
-    if (
-      showModal &&
-      showModal.data &&
-      showModal.data.app &&
-      showModal.type === 'select_id'
-    ) {
-      const { app } = showModal.data
-      const user = app.users.find(u => u.id === userID)
-      if (
-        !devMode &&
-        havePermissionsToGrant(app.manifest.permissions) &&
-        (!user || !user.settings.permissionsSettings.permissionsChecked)
-      ) {
-        // If this user hasn't used the app before
-        // we need to ask to accept permissions
-        const data = { ...showModal.data }
-        data['userID'] = userID
-        this.setState({
-          showModal: {
-            type: 'accept_permissions',
-            data,
-          },
-        })
-      } else {
-        try {
-          await rpc.launchApp(app.appID, userID)
-        } catch (err) {
-          // TODO: - Error feedback
-        }
-        this.setState({
-          showModal: undefined,
-        })
-      }
-    }
   }
 
   onToggleDevMode = () => {
@@ -219,12 +158,12 @@ export default class App extends Component<{}, State> {
     ) {
       const { app, userID } = this.state.showModal.data
       try {
-        await rpc.setAppUserPermissionsSettings(app.appID, userID, {
+        await rpc.setAppUserPermissionsSettings(app.appId, userID, {
           grants: permissionSettings,
           permissionsChecked: true,
         })
         await this.getAppsAndUsers()
-        await rpc.launchApp(app.appID, userID)
+        await rpc.launchApp(app.appId, userID)
       } catch (err) {
         // TODO: - Error feedback
         // eslint-disable-next-line no-console
@@ -242,63 +181,40 @@ export default class App extends Component<{}, State> {
     return <OnboardView onboardComplete={this.getVaultsData} />
   }
 
-  renderAppsGrid = (apps: Array<AppData>) => {
-    if (!apps) {
-      return null
-    }
-    const appRows = apps.reduce((rows, app, i) => {
-      const rowIndex = Math.floor(i / GRID_ITEMS_PER_ROW)
-      if (!rows[rowIndex]) {
-        rows[rowIndex] = []
-      }
-      rows[rowIndex].push(
-        <AppGridItem
-          key={`item${i}`}
-          app={app}
-          ownApp={this.state.devMode}
-          onAppRemoved={this.onAppRemoved}
-          onOpenApp={this.onOpenApp}
-        />,
-      )
-      return rows
-    }, [])
-
-    const btnTitle = this.state.devMode ? 'Create new App' : 'Install App'
-    const btnStyles = [styles.installButtonText]
-    const onPress = this.state.devMode
-      ? this.onPressCreate
-      : this.onPressInstall
-    if (this.state.devMode) {
-      btnStyles.push(styles.createButtonText)
-    }
-    const testID = this.state.devMode
-      ? 'launcher-create-app-button'
-      : 'launcher-install-app-button'
-    const installButton = (
-      <TouchableOpacity
-        key="install"
-        testID={testID}
-        style={styles.newAppButton}
-        onPress={onPress}>
-        <View style={styles.installAppButton}>
-          <Text style={btnStyles}>{btnTitle}</Text>
-        </View>
-      </TouchableOpacity>
+  renderApps() {
+    return (
+      <QueryRenderer
+        environment={this.context}
+        query={graphql`
+          query LauncherQuery {
+            apps {
+              ...AppsView_apps
+            }
+          }
+        `}
+        variables={{}}
+        render={({ error, props }) => {
+          if (error) {
+            this.setState({
+              relayError: error,
+            })
+          } else if (props) {
+            return (
+              <View>
+                <AppsView apps={props.apps} />
+              </View>
+            )
+          } else {
+            return (
+              <View>
+                <ActivityIndicator />
+              </View>
+            )
+          }
+          return null
+        }}
+      />
     )
-
-    const lastRow = appRows[appRows.length - 1]
-    if (lastRow && lastRow.length < GRID_ITEMS_PER_ROW) {
-      lastRow.push(installButton)
-    } else {
-      appRows.push([installButton])
-    }
-
-    const gridRows = appRows.map((row, i) => (
-      <View key={`row${i}`} style={styles.gridRow}>
-        {row}
-      </View>
-    ))
-    return <Fragment>{gridRows}</Fragment>
   }
 
   render() {
@@ -321,10 +237,6 @@ export default class App extends Component<{}, State> {
         />
       )
     }
-
-    const { apps, devMode } = this.state
-
-    const appsGrid = this.renderAppsGrid(devMode ? apps.own : apps.installed)
 
     let modal
     if (this.state.showModal) {
@@ -361,19 +273,6 @@ export default class App extends Component<{}, State> {
             />
           )
           break
-        case 'select_id':
-          modal = (
-            <ModalView isOpen={true} onRequestClose={this.onCloseModal}>
-              <IdentitySelectorView
-                enableCreate
-                type="user"
-                identities={this.state.identities.users}
-                onSelectId={this.onSelectAppUser}
-                onCreatedId={this.getAppsAndUsers}
-              />
-            </ModalView>
-          )
-          break
         default:
       }
     }
@@ -394,33 +293,8 @@ export default class App extends Component<{}, State> {
           onToggleDevMode={this.onToggleDevMode}
         />
         <View style={appsContainerStyles}>
-          <QueryRenderer
-            environment={this.context}
-            query={graphql`
-              query LauncherQuery {
-                apps {
-                  installed {
-                    id
-                  }
-                }
-              }
-            `}
-            variables={{}}
-            render={({ error, props }) => {
-              /* eslint-disable no-console */
-              if (error) {
-                console.log('GraphQL query error:', error)
-              } else if (props) {
-                console.log('GraphQL got data:', props)
-              } else {
-                console.log('GraphQL loading')
-              }
-              /* eslint-enable no-console */
-              return null
-            }}
-          />
           <ScrollView contentContainerStyle={styles.appsGrid}>
-            {appsGrid}
+            {this.renderApps()}
           </ScrollView>
         </View>
         {modal}
@@ -445,37 +319,5 @@ const styles = StyleSheet.create({
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
-  },
-  appsGrid: {
-    flexDirection: 'column',
-    alignItems: 'flex-start',
-    width: 700,
-  },
-  gridRow: {
-    marginTop: 20,
-    alignItems: 'flex-start',
-    flexDirection: 'row',
-  },
-  newAppButton: {
-    marginHorizontal: 20,
-    alignItems: 'center',
-  },
-  installAppButton: {
-    width: 190,
-    height: 160,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 4,
-    borderWidth: 1,
-    borderStyle: 'dashed',
-    borderColor: colors.GREY_MED_81,
-  },
-  installButtonText: {
-    fontSize: 15,
-    fontWeight: 'bold',
-    color: colors.GREY_DARK_54,
-  },
-  createButtonText: {
-    color: colors.LIGHT_GREY_BLUE,
   },
 })

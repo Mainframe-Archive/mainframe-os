@@ -42,7 +42,7 @@ export default {
 
   // Identity
   createUserIdentity: (data: Object) => {
-    return rpc.request('identity_createUser', { data })
+    return rpc.request('identity_createUser', { profile: data })
   },
   createDeveloperIdentity: (data: Object) => {
     return rpc.request('identity_createDeveloper', { data })
