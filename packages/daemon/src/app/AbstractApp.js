@@ -1,5 +1,6 @@
 // @flow
 
+import { createKeyPair } from '@erebos/api-bzz-base'
 import {
   createStrictPermissionGrants,
   type PermissionGrant,
@@ -8,7 +9,8 @@ import {
   type PermissionsGrants,
   type StrictPermissionsGrants,
 } from '@mainframe/app-permissions'
-// eslint-disable-next-line import/named
+import { encodeBase64, type base64 } from '@mainframe/utils-base64'
+import { secureRandomBytes } from '@mainframe/utils-crypto'
 import { idType, type ID } from '@mainframe/utils-id'
 
 import type Session from './Session'
@@ -25,6 +27,12 @@ const DEFAULT_SETTINGS = {
   },
 }
 
+export type AppStorage = {
+  feedHash: ?string,
+  feedKey: string, // hex
+  encryptionKey: base64,
+}
+
 export type WalletSettings = {
   defaultEthAccount: ?string,
 }
@@ -34,6 +42,7 @@ export type SessionData = {
   session: Session,
   permissions: PermissionsDetails,
   isDev?: ?boolean,
+  storage: AppStorage,
 }
 
 export type PermissionsSettings = {
@@ -49,22 +58,39 @@ export type AppUserSettings = {
 export type AbstractAppParams = {
   appID: ID,
   settings?: { [ID]: AppUserSettings },
+  storage?: AppStorage,
 }
 
 export type AbstractAppSerialized = AbstractAppParams
+
+export const createAppStorage = (): AppStorage => {
+  const kp = createKeyPair()
+  return {
+    feedHash: undefined,
+    feedKey: kp.getPrivate('hex'),
+    encryptionKey: encodeBase64(secureRandomBytes(16)),
+  }
+}
 
 export default class AbstractApp {
   static toJSON = (app: AbstractApp): AbstractAppSerialized => ({
     appID: app._appID,
     settings: app._settings,
+    storage: app._storage,
   })
 
   _appID: ID
   _settings: { [ID]: AppUserSettings }
+  _storage: AppStorage
 
   constructor(params: AbstractAppParams) {
     this._appID = params.appID
     this._settings = params.settings == null ? {} : params.settings
+    if (params.storage == null) {
+      this._storage = createAppStorage()
+    } else {
+      this._storage = params.storage
+    }
   }
 
   // Accessors
@@ -75,6 +101,10 @@ export default class AbstractApp {
 
   get settings(): { [ID]: AppUserSettings } {
     return this._settings
+  }
+
+  get storage(): AppStorage {
+    return this._storage
   }
 
   get userIDs(): Array<ID> {

@@ -50,8 +50,11 @@ export default {
   app_launch: {
     params: APP_OPEN_SCHEMA,
     handler: async (ctx: LauncherContext, params: AppOpenParams) => {
-      const appSession = await ctx.client.app.open(params)
-      ctx.launchApp(appSession)
+      const [appSession, vaultSettings] = await Promise.all([
+        ctx.client.app.open(params),
+        ctx.client.vault.getSettings(),
+      ])
+      ctx.launchApp(appSession, vaultSettings)
     },
   },
   app_create: {

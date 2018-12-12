@@ -5,6 +5,7 @@ import {
   type BlockchainWeb3SendParams,
   type WalletGetEthWalletsResult,
 } from '@mainframe/client'
+import { dialog } from 'electron'
 import type { Subscription as RxSubscription } from 'rxjs'
 
 import { type AppContext, ContextSubscription } from '../contexts'
@@ -119,6 +120,38 @@ export const sandboxed = {
     },
     handler: (ctx: AppContext, params: { string: string }): Promise<string> => {
       return ctx.client.pss.stringToTopic(params)
+    },
+  },
+
+  storage_requestUpload: {
+    params: {
+      name: 'string',
+    },
+    handler: (ctx: AppContext, params: { name: string }): Promise<?string> => {
+      return new Promise((resolve, reject) => {
+        dialog.showOpenDialog(
+          ctx.window,
+          { title: 'Select file to upload', buttonLabel: 'Upload' },
+          async filePaths => {
+            if (filePaths.length !== 0) {
+              // TODO: use these to create the cipher and update the feed after the file is written
+              const { encryptionKey, feedHash, feedKeyPair } = ctx.storage
+              try {
+                await ctx.bzz.uploadFileFrom(filePaths[0], {
+                  path: params.name,
+                })
+                resolve(params.name)
+              } catch (err) {
+                // TODO: use RPCError to provide a custom error code
+                reject(new Error('Upload failed'))
+              }
+            } else {
+              // No file selected
+              resolve()
+            }
+          },
+        )
+      })
     },
   },
 }

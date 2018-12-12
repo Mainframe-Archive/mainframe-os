@@ -1,8 +1,11 @@
 // @flow
 
-import type Client, { AppOpenResult } from '@mainframe/client'
+import { createKeyPair, type KeyPair } from '@erebos/api-bzz-base'
+import BzzAPI from '@erebos/api-bzz-node'
+import type Client, { AppOpenResult, VaultSettings } from '@mainframe/client'
 import type { VaultConfig } from '@mainframe/config'
 import type StreamRPC from '@mainframe/rpc-stream'
+import { decodeBase64 } from '@mainframe/utils-base64'
 import { uniqueID } from '@mainframe/utils-id'
 import type { BrowserWindow, WebContents } from 'electron'
 
@@ -10,7 +13,10 @@ import type { AppSession } from '../types'
 
 import { APP_SANDBOXED_CHANNEL, APP_TRUSTED_CHANNEL } from '../constants'
 
-export type LaunchAppFunc = (data: AppOpenResult) => Promise<void>
+export type LaunchAppFunc = (
+  data: AppOpenResult,
+  vaultSettings: VaultSettings,
+) => Promise<void>
 
 export class ContextSubscription<T = ?mixed> {
   _id: string
@@ -70,24 +76,53 @@ export class Context {
 export type AppContextParams = {
   appSession: AppSession,
   client: Client,
+  settings: VaultSettings,
   trustedRPC: StreamRPC,
   window: BrowserWindow,
+}
+
+type AppStorageSettings = {
+  encryptionKey: Buffer,
+  feedHash: ?string,
+  feedKeyPair: KeyPair,
 }
 
 export class AppContext extends Context {
   appSession: AppSession
   client: Client
   sandbox: ?WebContents
+  settings: VaultSettings
   trustedRPC: StreamRPC
   window: BrowserWindow
+  _bzz: ?BzzAPI
   _permissionDeniedID: ?string
+  _storage: ?AppStorageSettings
 
   constructor(params: AppContextParams) {
     super()
     this.appSession = params.appSession
     this.client = params.client
+    this.settings = params.settings
     this.trustedRPC = params.trustedRPC
     this.window = params.window
+  }
+
+  get bzz(): BzzAPI {
+    if (this._bzz == null) {
+      this._bzz = new BzzAPI(this.settings.bzzURL)
+    }
+    return this._bzz
+  }
+
+  get storage(): AppStorageSettings {
+    if (this._storage == null) {
+      this._storage = {
+        encryptionKey: decodeBase64(this.appSession.storage.encryptionKey),
+        feedHash: this.appSession.storage.feedHash,
+        feedKeyPair: createKeyPair(this.appSession.storage.feedKey, 'hex'),
+      }
+    }
+    return this._storage
   }
 
   notifyTrusted(id: string, result?: Object = {}) {

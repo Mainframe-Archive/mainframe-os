@@ -142,6 +142,7 @@ export default class OwnApp extends AbstractApp {
       isDev: true,
       session,
       permissions,
+      storage: this.storage,
     }
   }
 }

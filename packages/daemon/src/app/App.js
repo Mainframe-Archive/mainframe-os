@@ -108,6 +108,7 @@ export default class App extends AbstractApp {
       permissions,
       sessID: uniqueID(),
       session,
+      storage: this.storage,
     }
   }
 }

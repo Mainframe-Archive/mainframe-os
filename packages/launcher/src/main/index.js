@@ -3,7 +3,7 @@
 import path from 'path'
 import url from 'url'
 // eslint-disable-next-line import/named
-import Client from '@mainframe/client'
+import Client, { type VaultSettings } from '@mainframe/client'
 import { Environment, DaemonConfig, VaultConfig } from '@mainframe/config'
 import StreamRPC from '@mainframe/rpc-stream'
 import { startDaemon } from '@mainframe/toolbox'
@@ -62,7 +62,10 @@ const newWindow = (params: Object = {}) => {
 
 // App Lifecycle
 
-const launchApp = async (appSession: AppSession) => {
+const launchApp = async (
+  appSession: AppSession,
+  vaultSettings: VaultSettings,
+) => {
   const appID = appSession.app.appID
   const userID = appSession.user.id
   const appOpen = appSessions[appID] && appSessions[appID][userID]
@@ -97,6 +100,7 @@ const launchApp = async (appSession: AppSession) => {
       createElectronTransport(appWindow, APP_TRUSTED_REQUEST_CHANNEL),
     ),
     window: appWindow,
+    settings: vaultSettings,
   })
   appContexts.set(appWindow, appContext)
   interceptWebRequests(appContext)

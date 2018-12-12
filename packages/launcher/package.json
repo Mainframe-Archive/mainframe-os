@@ -27,6 +27,8 @@
     ]
   },
   "dependencies": {
+    "@erebos/api-bzz-base": "^0.5.1",
+    "@erebos/api-bzz-node": "^0.5.1",
     "@mainframe/app-manifest": "*",
     "@mainframe/app-permissions": "*",
     "@mainframe/client": "*",
@@ -35,6 +37,7 @@
     "@mainframe/rpc-electron": "^0.1.0",
     "@mainframe/rpc-handler": "^0.2.1",
     "@mainframe/toolbox": "*",
+    "@mainframe/utils-base64": "^0.1.1",
     "@mainframe/utils-id": "^0.1.0",
     "electron-store": "^2.0.0",
     "electron-util": "^0.10.2",
@@ -51,7 +54,6 @@
   },
   "devDependencies": {
     "@babel/plugin-syntax-dynamic-import": "^7.0.0",
-    "@erebos/api-bzz-node": "^0.5.0",
     "@mainframe/utils-id": "^0.1.0",
     "babel-loader": "^8.0.4",
     "babel-plugin-react-native-web": "^0.9.1",

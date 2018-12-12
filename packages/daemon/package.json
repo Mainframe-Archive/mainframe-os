@@ -27,6 +27,7 @@
     "start": "node -r esm lib"
   },
   "dependencies": {
+    "@erebos/api-bzz-base": "^0.5.1",
     "@erebos/api-bzz-node": "^0.5.1",
     "@erebos/api-pss": "^0.5.2",
     "@erebos/hex": "^0.5.0",

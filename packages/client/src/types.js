@@ -10,6 +10,7 @@ import type {
   StrictPermissionsRequirements,
   StrictPermissionsGrants,
 } from '@mainframe/app-permissions'
+import type { base64 } from '@mainframe/utils-base64'
 import type { ID } from '@mainframe/utils-id'
 
 export type { ID } from '@mainframe/utils-id'
@@ -107,9 +108,16 @@ export type AppData = {
   contentsPath: string,
 }
 
+export type AppStorage = {
+  feedHash: ?string,
+  feedKey: string, // hex
+  encryptionKey: base64,
+}
+
 export type AppSession = {
   sessID: ID,
   permissions: PermissionsDetails,
+  storage: AppStorage,
 }
 
 export type AppOpenResult = {
