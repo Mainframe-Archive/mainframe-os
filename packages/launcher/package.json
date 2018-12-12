@@ -23,8 +23,15 @@
       "@mainframe/client",
       "@mainframe/contract-utils",
       "@mainframe/config",
-      "@mainframe/toolbox"
-    ]
+      "@mainframe/toolbox",
+      "@morpheus-ui/core",
+      "@morpheus-ui/forms",
+      "@morpheus-ui/fonts",
+      "@morpheus-ui/icons"
+    ],
+    "renderer": {
+      "webpackConfig": "webpack.renderer.additions.js"
+    }
   },
   "dependencies": {
     "@mainframe/app-manifest": "*",
@@ -36,15 +43,19 @@
     "@mainframe/rpc-handler": "^0.2.1",
     "@mainframe/toolbox": "*",
     "@mainframe/utils-id": "^0.1.0",
+    "@morpheus-ui/core": "0.0.4",
+    "@morpheus-ui/fonts": "0.0.1",
+    "@morpheus-ui/icons": "0.0.1",
     "electron-store": "^2.0.0",
     "electron-util": "^0.10.2",
     "react": "^16.5.2",
     "react-art": "^16.5.2",
     "react-dom": "^16.5.2",
-    "react-modal": "^3.6.1",
-    "react-native-web": "^0.9.1",
+    "react-modal": "^3.6.1",   
+    "react-native-web": "^0.9.9",
     "rxjs": "^6.3.3",
     "source-map-support": "^0.5.9",
+    "styled-components": "^4.1.2",
     "web3-eth-abi": "^1.0.0-beta.36",
     "web3-eth-contract": "^1.0.0-beta.36",
     "web3-utils": "^1.0.0-beta.36"
@@ -54,7 +65,7 @@
     "@erebos/api-bzz-node": "^0.5.0",
     "@mainframe/utils-id": "^0.1.0",
     "babel-loader": "^8.0.4",
-    "babel-plugin-react-native-web": "^0.9.1",
+    "babel-plugin-react-native-web": "^0.9.9",
     "electron": "^3.0.9",
     "electron-builder": "^20.38.2",
     "electron-webpack": "^2.6.1",
