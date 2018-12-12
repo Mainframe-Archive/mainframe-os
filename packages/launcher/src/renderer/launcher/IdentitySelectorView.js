@@ -102,11 +102,12 @@ class IdentitySelectorView extends Component<Props, State> {
       )
     }
 
-    const idRows = Object.values(this.props.identities.ownUsers).map(user => {
+    const type = this.props.type === 'user' ? 'ownUsers' : 'ownDevelopers'
+    const idRows = Object.values(this.props.identities[type]).map(user => {
       // $FlowFixMe mixed map type
-      const handler = () => this.props.onSelectId(user.localId)
+      const handler = () => this.props.onSelectId(user.localID)
       // $FlowFixMe mixed map type
-      return rowRender(user.localId, user.profile.name, handler)
+      return rowRender(user.localID, user.profile.name, handler)
     })
 
     const createIdentity = this.props.enableCreate ? (
@@ -153,13 +154,13 @@ export default class IdentitySelectorQueryContainer extends Component<ContainerP
           query IdentitySelectorViewQuery {
             identities {
               ownUsers {
-                localId
+                localID
                 profile {
                   name
                 }
               }
               ownDevelopers {
-                localId
+                localID
                 profile {
                   name
                 }

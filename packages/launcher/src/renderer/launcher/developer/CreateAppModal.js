@@ -133,7 +133,7 @@ export default class CreateAppModal extends Component<Props, State> {
       this.props.onAppCreated(res.id)
     } catch (err) {
       // eslint-disable-next-line no-console
-      console.log('err:', err.data)
+      console.log('err:', err)
       const msg =
         err.data && err.data.length
           ? err.data[0].message
@@ -268,7 +268,6 @@ export default class CreateAppModal extends Component<Props, State> {
           enableCreate
           type="developer"
           onSelectId={this.onSelectId}
-          identities={this.state.devIdentities}
           onCreatedId={this.onCreatedId}
         />
       </View>

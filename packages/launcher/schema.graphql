@@ -3,7 +3,23 @@ type App implements Node {
   id: ID!
   appID: ID!
   name: String!
+  manifest: AppManifestData!
   users: [AppUser]
+}
+
+type AppManifestData implements Node {
+  """The ID of an object"""
+  id: ID!
+  name: String!
+  version: String!
+  permissions: AppRequestedPermissions!
+}
+
+type AppPermissionDefinitions implements Node {
+  """The ID of an object"""
+  id: ID!
+  WEB_REQUEST: [String]
+  BLOCKCHAIN_SEND: Boolean
 }
 
 type AppPermissions {
@@ -12,8 +28,15 @@ type AppPermissions {
 }
 
 type AppPermissionsSettings {
-  checked: Boolean!
+  permissionsChecked: Boolean!
   grants: AppPermissions!
+}
+
+type AppRequestedPermissions implements Node {
+  """The ID of an object"""
+  id: ID!
+  optional: AppPermissionDefinitions!
+  required: AppPermissionDefinitions!
 }
 
 type AppsQuery {
@@ -22,14 +45,23 @@ type AppsQuery {
 }
 
 type AppUser {
+  """The ID of an object"""
   id: ID!
-  localId: ID!
+  localID: ID!
   identity: OwnUserIdentity!
   settings: AppUserSettings!
 }
 
 type AppUserSettings {
-  permissions: AppPermissionsSettings!
+  permissionsSettings: AppPermissionsSettings!
+}
+
+type AppVersionData implements Node {
+  """The ID of an object"""
+  id: ID!
+  version: String!
+  permissions: AppRequestedPermissions!
+  publicationState: String!
 }
 
 type IdentitiesQuery {
@@ -48,13 +80,14 @@ type OwnApp implements Node {
   id: ID!
   appID: ID!
   name: String!
+  versions: [AppVersionData]
   users: [AppUser]
 }
 
 type OwnDeveloperIdentity implements Node {
   """The ID of an object"""
   id: ID!
-  localId: ID!
+  localID: ID!
   mfid: ID!
   pubKey: String!
   profile: OwnDeveloperProfile
@@ -67,7 +100,7 @@ type OwnDeveloperProfile {
 type OwnUserIdentity implements Node {
   """The ID of an object"""
   id: ID!
-  localId: ID!
+  localID: ID!
   mfid: ID!
   profile: OwnUserProfile
   pubKey: String!

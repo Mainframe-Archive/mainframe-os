@@ -178,7 +178,6 @@ export default class AppInstallModal extends Component<Props, State> {
         type="user"
         enableCreate
         onSelectId={this.onSelectId}
-        identities={this.state.ownUsers}
         onCreatedId={this.onCreatedId}
       />
     )

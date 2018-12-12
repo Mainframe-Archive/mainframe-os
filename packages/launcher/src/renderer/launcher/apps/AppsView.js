@@ -1,39 +1,102 @@
 // @flow
 
 import React, { Component } from 'react'
-import { View, StyleSheet, TouchableOpacity } from 'react-native-web'
+import {
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+} from 'react-native-web'
 import { createFragmentContainer, graphql } from 'react-relay'
-import { havePermissionsToGrant } from '@mainframe/app-permissions'
+import {
+  havePermissionsToGrant,
+  type StrictPermissionsGrants,
+} from '@mainframe/app-permissions'
 import type { AppOwnData, AppInstalledData, ID } from '@mainframe/client'
 
+import colors from '../../colors'
+import rpc from '../rpc'
+import globalStyles from '../../styles'
 import Text from '../../UIComponents/Text'
 import ModalView from '../../UIComponents/ModalView'
 import IdentitySelectorView from '../IdentitySelectorView'
-import colors from '../../colors'
-import rpc from '../rpc'
+import CreateAppModal from '../developer/CreateAppModal'
+import AppInstallModal from '../AppInstallModal'
+import PermissionsView from '../PermissionsView'
 
 type AppData = AppOwnData | AppInstalledData
 
+export type Apps = {
+  installed: Array<AppData>,
+  own: Array<AppData>,
+}
+
 type Props = {
-  apps: {
-    installed: Array<AppData>,
-    own: Array<AppData>,
-  },
+  apps: Apps,
 }
 
 type State = {
   showModal?: ?{
-    type: 'select_id' | 'accept_permissions',
-    data: ?{
+    type: 'select_id' | 'accept_permissions' | 'app_install' | 'app_create',
+    data?: ?{
       app: AppData,
       own: boolean,
-      userID?: ?string,
+      userID?: ID,
     },
   },
 }
 
 class AppsView extends Component<Props, State> {
   state = {}
+
+  // App Install
+
+  onPressInstall = () => {
+    this.setState({
+      showModal: {
+        type: 'app_install',
+      },
+    })
+  }
+
+  onInstallComplete = () => {
+    this.onCloseModal()
+  }
+
+  onSubmitPermissions = async (permissionSettings: StrictPermissionsGrants) => {
+    if (
+      this.state.showModal &&
+      this.state.showModal.type === 'accept_permissions' &&
+      this.state.showModal.data &&
+      this.state.showModal.data.userID
+    ) {
+      const { app, userID } = this.state.showModal.data
+      try {
+        await rpc.setAppUserPermissionsSettings(app.appID, userID, {
+          grants: permissionSettings,
+          permissionsChecked: true,
+        })
+        await rpc.launchApp(app.appID, userID)
+      } catch (err) {
+        // TODO: - Error feedback
+        // eslint-disable-next-line no-console
+        console.warn(err)
+      }
+      this.setState({
+        showModal: undefined,
+      })
+    }
+  }
+
+  // App Creation
+
+  onPressCreateApp = () => {
+    this.setState({
+      showModal: {
+        type: 'app_create',
+      },
+    })
+  }
 
   onOpenApp = (app: AppData, own: boolean) => {
     this.setState({
@@ -56,7 +119,7 @@ class AppsView extends Component<Props, State> {
       showModal.type === 'select_id'
     ) {
       const { app, own } = showModal.data
-      const user = app.users.find(u => u.id === userID)
+      const user = app.users.find(u => u.localID === userID)
       if (
         !own &&
         havePermissionsToGrant(app.manifest.permissions) &&
@@ -91,12 +154,18 @@ class AppsView extends Component<Props, State> {
     })
   }
 
+  onAppCreated = () => {
+    this.onCloseModal()
+  }
+
+  // RENDER
+
   renderApp(app: AppData, own: boolean) {
     const open = () => this.onOpenApp(app, own)
     return (
       <TouchableOpacity onPress={open} key={app.appID} style={styles.app}>
-        <Text>{app.name}</Text>
-        <Text>{app.appID}</Text>
+        <Text style={styles.nameLabel}>{app.name}</Text>
+        <Text style={styles.idLabel}>{app.appID}</Text>
       </TouchableOpacity>
     )
   }
@@ -131,15 +200,63 @@ class AppsView extends Component<Props, State> {
     )
   }
 
+  renderButton(title: string, onPress: () => void) {
+    return (
+      <TouchableOpacity onPress={onPress} style={styles.createApp}>
+        <Text style={styles.createAppLabel}>{title}</Text>
+      </TouchableOpacity>
+    )
+  }
+
   render() {
+    let modal
     if (this.state.showModal) {
-      return this.renderIdentitySelector()
+      switch (this.state.showModal.type) {
+        case 'select_id':
+          modal = this.renderIdentitySelector()
+          break
+        case 'app_install':
+          modal = (
+            <AppInstallModal
+              onRequestClose={this.onCloseModal}
+              onInstallComplete={this.onInstallComplete}
+            />
+          )
+          break
+        case 'accept_permissions': {
+          // $FlowFixMe ignore undefined warning
+          const { app } = this.state.showModal.data
+          modal = (
+            <ModalView isOpen={true} onRequestClose={this.onCloseModal}>
+              <Text style={globalStyles.header}>
+                Permission Requested by {app.manifest.name}
+              </Text>
+              <PermissionsView
+                permissions={app.manifest.permissions}
+                onSubmit={this.onSubmitPermissions}
+              />
+            </ModalView>
+          )
+          break
+        }
+        case 'app_create':
+          modal = (
+            <CreateAppModal
+              onRequestClose={this.onCloseModal}
+              onAppCreated={this.onAppCreated}
+            />
+          )
+          break
+      }
     }
     return (
-      <View>
+      <ScrollView style={styles.container}>
         {this.renderInstalled()}
+        {this.renderButton('Install App', this.onPressInstall)}
         {this.renderOwn()}
-      </View>
+        {this.renderButton('Create new App', this.onPressCreateApp)}
+        {modal}
+      </ScrollView>
     )
   }
 }
@@ -148,24 +265,56 @@ export default createFragmentContainer(AppsView, {
   apps: graphql`
     fragment AppsView_apps on AppsQuery {
       installed {
-        id
         appID
         name
+        manifest {
+          permissions {
+            optional {
+              WEB_REQUEST
+              BLOCKCHAIN_SEND
+            }
+            required {
+              WEB_REQUEST
+              BLOCKCHAIN_SEND
+            }
+          }
+        }
         users {
-          localId
+          localID
           identity {
             profile {
               name
             }
           }
+          settings {
+            permissionsSettings {
+              permissionsChecked
+              grants {
+                BLOCKCHAIN_SEND
+                WEB_REQUEST
+              }
+            }
+          }
         }
       }
       own {
-        id
         appID
         name
+        versions {
+          version
+          permissions {
+            optional {
+              WEB_REQUEST
+              BLOCKCHAIN_SEND
+            }
+            required {
+              WEB_REQUEST
+              BLOCKCHAIN_SEND
+            }
+          }
+        }
         users {
-          localId
+          localID
           identity {
             profile {
               name
@@ -178,9 +327,28 @@ export default createFragmentContainer(AppsView, {
 })
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   app: {
     padding: 10,
     marginTop: 10,
     backgroundColor: colors.LIGHT_GREY_EE,
+    flexDirection: 'row',
+  },
+  nameLabel: {
+    flex: 1,
+  },
+  idLabel: {
+    fontSize: 12,
+    color: colors.GREY_MED_75,
+  },
+  createApp: {
+    marginVertical: 20,
+    padding: 10,
+    backgroundColor: colors.BRIGHT_BLUE,
+  },
+  createAppLabel: {
+    color: colors.WHITE,
   },
 })

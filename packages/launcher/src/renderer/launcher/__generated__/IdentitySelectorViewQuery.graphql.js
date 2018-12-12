@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash edaa5909bbd2c6af100dfaae23ee609b
+ * @relayHash d8b91dbee99a893cca981b93ca71c32b
  */
 
 /* eslint-disable */
@@ -13,13 +13,13 @@ export type IdentitySelectorViewQueryVariables = {||};
 export type IdentitySelectorViewQueryResponse = {|
   +identities: {|
     +ownUsers: ?$ReadOnlyArray<?{|
-      +localId: string,
+      +localID: string,
       +profile: ?{|
         +name: string
       |},
     |}>,
     +ownDevelopers: ?$ReadOnlyArray<?{|
-      +localId: string,
+      +localID: string,
       +profile: ?{|
         +name: string
       |},
@@ -37,14 +37,14 @@ export type IdentitySelectorViewQuery = {|
 query IdentitySelectorViewQuery {
   identities {
     ownUsers {
-      localId
+      localID
       profile {
         name
       }
       id
     }
     ownDevelopers {
-      localId
+      localID
       profile {
         name
       }
@@ -58,7 +58,7 @@ const node/*: ConcreteRequest*/ = (function(){
 var v0 = {
   "kind": "ScalarField",
   "alias": null,
-  "name": "localId",
+  "name": "localID",
   "args": null,
   "storageKey": null
 },
@@ -103,7 +103,7 @@ return {
   "operationKind": "query",
   "name": "IdentitySelectorViewQuery",
   "id": null,
-  "text": "query IdentitySelectorViewQuery {\n  identities {\n    ownUsers {\n      localId\n      profile {\n        name\n      }\n      id\n    }\n    ownDevelopers {\n      localId\n      profile {\n        name\n      }\n      id\n    }\n  }\n}\n",
+  "text": "query IdentitySelectorViewQuery {\n  identities {\n    ownUsers {\n      localID\n      profile {\n        name\n      }\n      id\n    }\n    ownDevelopers {\n      localID\n      profile {\n        name\n      }\n      id\n    }\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -200,5 +200,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '2dd96a82f27ef5b9d62b4a2bccccd929';
+(node/*: any*/).hash = '6abb1f501e6d186adb7236af76c0163f';
 module.exports = node;
