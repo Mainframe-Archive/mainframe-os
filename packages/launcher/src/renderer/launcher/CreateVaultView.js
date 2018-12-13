@@ -4,16 +4,17 @@ import React, { Component } from 'react'
 import { ActivityIndicator } from 'react-native-web'
 import { uniqueID } from '@mainframe/utils-id'
 
-import { Button, TextField } from '@morpheus-ui/core'
+import { Button, TextField, Row, Column } from '@morpheus-ui/core'
+import { CircleArrowRight } from '@morpheus-ui/icons'
 import {
   Form,
   type FormSubmitPayload,
   type FieldValidateFunctionParams,
 } from '@morpheus-ui/forms'
+
 import styled from 'styled-components/native'
 
 import OnboardContainer from '../UIComponents/OnboardContainer'
-import colors from '../colors'
 
 import rpc from './rpc'
 
@@ -23,27 +24,21 @@ type Props = {
 
 type State = {
   error?: ?string,
-  password: string,
-  confirmPassword: string,
   awaitingResponse?: boolean,
 }
 
-const PADDING = 10
-
-const ErrorText = styled.View`
+const ErrorText = styled.Text`
   font-size: 14px;
-  padding-bottom: ${PADDING}px;
-  color: ${colors.PRIMARY_RED};
+  padding-bottom: ${props => props.theme.padding}px;
+  color: ${props => props.theme.colors.PRIMARY_RED};
+`
+
+const FormContainer = styled.View`
+  max-width: 260px;
 `
 
 export default class CreateVaultView extends Component<Props, State> {
-  constructor(props: Props) {
-    super(props)
-    this.state = {
-      password: '',
-      confirmPassword: '',
-    }
-  }
+  state = {}
 
   onSubmit = (payload: FormSubmitPayload) => {
     if (payload.valid) {
@@ -52,8 +47,8 @@ export default class CreateVaultView extends Component<Props, State> {
         error: null,
         awaitingResponse: true,
       })
-      // const label = uniqueID()
-      // this.createVault(password, label)
+      const label = uniqueID()
+      this.createVault(password, label)
     }
   }
 
@@ -89,36 +84,58 @@ export default class CreateVaultView extends Component<Props, State> {
 
   render() {
     const errorMsg = this.state.error ? (
-      <ErrorText>{this.state.error}</ErrorText>
+      <Row size={1}>
+        <Column>
+          <ErrorText>{this.state.error}</ErrorText>
+        </Column>
+      </Row>
     ) : null
     const action = this.state.awaitingResponse ? (
       <ActivityIndicator />
     ) : (
-      <Button title="Create Vault" testID="create-vault-button-submit" submit />
+      <Button
+        title="CONTINUE"
+        variant="onboarding"
+        Icon={CircleArrowRight}
+        testID="create-vault-button-submit"
+        submit
+      />
     )
     return (
       <OnboardContainer
         title="Welcome"
-        description="This is where we securely store your files, wallets and identities.">
-        <Form onSubmit={this.onSubmit}>
-          <TextField
-            label="Password"
-            name="password"
-            type="password"
-            testID="create-vault-input-password"
-            validation={this.passwordValidation}
-            required
-          />
-          <TextField
-            label="Confirm Password"
-            name="confirmPassword"
-            type="password"
-            testID="create-vault-input-password"
-            validation={this.confirmPasswordValidation}
-          />
-          {errorMsg}
-          {action}
-        </Form>
+        description="Let’s quickly secure your MainframeOS vault.">
+        <FormContainer>
+          <Form onSubmit={this.onSubmit}>
+            <Row size={1} top>
+              <Column>
+                <TextField
+                  label="Password"
+                  name="password"
+                  type="password"
+                  testID="create-vault-input-password"
+                  validation={this.passwordValidation}
+                  required
+                />
+              </Column>
+              <Column>
+                <TextField
+                  label="Confirm Password"
+                  name="confirmPassword"
+                  type="password"
+                  testID="create-vault-input-password"
+                  validation={this.confirmPasswordValidation}
+                />
+              </Column>
+            </Row>
+            {errorMsg}
+            <Row size={2} top>
+              <Column styles="align-items:flex-end;" smOffset={1}>
+                {action}
+              </Column>
+            </Row>
+          </Form>
+        </FormContainer>
       </OnboardContainer>
     )
   }
