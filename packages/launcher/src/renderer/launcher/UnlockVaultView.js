@@ -61,7 +61,12 @@ export default class UnlockVaultView extends Component<Props, State> {
 
   render() {
     const errorMsg = this.state.error ? (
-      <Text style={styles.errorLabel}>{this.state.error}</Text>
+      <Text
+          style={styles.errorLabel}
+          testID="vault-manager-unlock-errorlabel"
+      >
+        {this.state.error}
+      </Text>
     ) : null
     const action = this.state.awaitingResponse ? (
       <ActivityIndicator />

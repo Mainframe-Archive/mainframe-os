@@ -6,6 +6,12 @@ const BzzAPI = require('@erebos/api-bzz-node').default
 
 const getFixture = fixture => path.join(__dirname, '../../../fixtures', fixture)
 
+const timeouts = {
+  unlockVault : 10000,
+  input : 2000,
+  launch : 5000
+}
+
 describe('Application launch', function() {
   // mocha requires non arrow style function to bind context
   this.timeout(10000)
@@ -48,7 +54,7 @@ describe('Application launch', function() {
   //   await this.app.client
   //     .element('[data-testid="vault-manager-unlock-button"]')
   //     .click()
-  //   await this.app.client.waitForExist('[data-testid="launcher-view"]', 8000)
+  //   await this.app.client.waitForExist('[data-testid="launcher-view"]', timeouts.unlockVault)
   // })
 
   it('creates a new vault', async function() {
@@ -74,62 +80,62 @@ describe('Application launch', function() {
 
   it('creates an app', async function() {
     const devButtonSelector = '[data-testid="launcher-toggle-dev-button"]'
-    await this.app.client.waitForExist(devButtonSelector, 2000)
+    await this.app.client.waitForExist(devButtonSelector, timeouts.input)
     await this.app.client.element(devButtonSelector).click()
 
     const createAppSelector = '[data-testid="launcher-create-app-button"]'
-    await this.app.client.waitForExist(createAppSelector, 2000)
+    await this.app.client.waitForExist(createAppSelector, timeouts.input)
     await this.app.client.element(createAppSelector).click()
 
     const appNameInput = '[data-testid="create-app-name-input"]'
-    await this.app.client.waitForExist(appNameInput, 2000)
+    await this.app.client.waitForExist(appNameInput, timeouts.input)
     await this.app.client.element(appNameInput).setValue('test app')
 
     const versionInput = '[data-testid="create-app-version-input"]'
-    await this.app.client.waitForExist(versionInput, 2000)
+    await this.app.client.waitForExist(versionInput, timeouts.input)
     await this.app.client.element(versionInput).setValue('1.0.0')
 
     //TODO: Issue choosing dir instead of file
     const appContents = getFixture('test-app/index.html')
     const contentsPathSelector = '#app-contents-file-selector'
-    await this.app.client.waitForExist(contentsPathSelector, 2000)
+    await this.app.client.waitForExist(contentsPathSelector, timeouts.input)
     await this.app.client.chooseFile(contentsPathSelector, appContents)
 
     const step1Button = '[data-testid="create-app-set-info-button"]'
-    await this.app.client.waitForExist(step1Button, 2000)
+    await this.app.client.waitForExist(step1Button, timeouts.input)
     await this.app.client.element(step1Button).click()
 
     const identityInputSelector = '[data-testid="create-identity-input-name"]'
-    await this.app.client.waitForExist(identityInputSelector, 2000)
+    await this.app.client.waitForExist(identityInputSelector, timeouts.input)
     await this.app.client.element(identityInputSelector).setValue('dev')
 
     const identityButtonSelector =
       '[data-testid="create-identity-button-submit"]'
-    await this.app.client.waitForExist(identityButtonSelector, 2000)
+    await this.app.client.waitForExist(identityButtonSelector, timeouts.input)
     await this.app.client.element(identityButtonSelector).click()
 
     const identitySelector = '[data-testid="identity-selector-select-dev"]'
-    await this.app.client.waitForExist(identitySelector, 2000)
+    await this.app.client.waitForExist(identitySelector, timeouts.input)
     await this.app.client.element(identitySelector).click()
 
     const setPermissionsButton = '[data-testid="set-permission-requirements"]'
-    await this.app.client.waitForExist(setPermissionsButton, 2000)
+    await this.app.client.waitForExist(setPermissionsButton, timeouts.input)
     await this.app.client.element(setPermissionsButton).click()
 
     const completeCreateAppBtn = '[data-testid="create-app-complete-button"]'
-    await this.app.client.waitForExist(completeCreateAppBtn, 5000)
+    await this.app.client.waitForExist(completeCreateAppBtn, timeouts.launch)
     await this.app.client.element(completeCreateAppBtn).click()
 
     const appItemSelector = '[data-testid="launcher-open-app"]'
-    await this.app.client.waitForExist(appItemSelector, 5000)
+    await this.app.client.waitForExist(appItemSelector, timeouts.launch)
     await this.app.client.element(appItemSelector).click()
 
-    await this.app.client.waitForExist(identityInputSelector, 2000)
+    await this.app.client.waitForExist(identityInputSelector, timeouts.input)
     await this.app.client.element(identityInputSelector).setValue('user')
     await this.app.client.element(identityButtonSelector).click()
 
     const userIdentity = '[data-testid="identity-selector-select-user"]'
-    await this.app.client.waitForExist(userIdentity, 2000)
+    await this.app.client.waitForExist(userIdentity, timeouts.input)
     await this.app.client.element(userIdentity).click()
 
     const count = await this.app.client.getWindowCount()
@@ -138,7 +144,7 @@ describe('Application launch', function() {
 
   it('completes app install flow and opens app', async function() {
     const devButtonSelector = '[data-testid="launcher-toggle-dev-button"]'
-    await this.app.client.waitForExist(devButtonSelector, 2000)
+    await this.app.client.waitForExist(devButtonSelector, timeouts.input)
     await this.app.client.element(devButtonSelector).click()
 
     await this.app.client
@@ -151,30 +157,42 @@ describe('Application launch', function() {
     const manifestPath = getFixture('test-app-manifest.json')
 
     const fileInputSelector = '#installer-file-selector'
-    await this.app.client.waitForExist(fileInputSelector, 2000)
+    await this.app.client.waitForExist(fileInputSelector, timeouts.input)
     await this.app.client.chooseFile(fileInputSelector, manifestPath)
 
     const identityInputSelector = '[data-testid="create-identity-input-name"]'
-    await this.app.client.waitForExist(identityInputSelector, 2000)
+    await this.app.client.waitForExist(identityInputSelector, timeouts.input)
     await this.app.client.element(identityInputSelector).setValue('tester')
 
     const identityButtonSelector =
       '[data-testid="create-identity-button-submit"]'
-    await this.app.client.waitForExist(identityButtonSelector, 2000)
+    await this.app.client.waitForExist(identityButtonSelector, timeouts.input)
     await this.app.client.element(identityButtonSelector).click()
 
     const identitySelector = '[data-testid="identity-selector-select-tester"]'
-    await this.app.client.waitForExist(identitySelector, 2000)
+    await this.app.client.waitForExist(identitySelector, timeouts.input)
     await this.app.client.element(identitySelector).click()
 
     const appItemSelector = '[data-testid="launcher-open-app"]'
-    await this.app.client.waitForExist(appItemSelector, 5000)
+    await this.app.client.waitForExist(appItemSelector, timeouts.launch)
     await this.app.client.element(appItemSelector).click()
 
-    await this.app.client.waitForExist(identitySelector, 2000)
+    await this.app.client.waitForExist(identitySelector, timeouts.input)
     await this.app.client.element(identitySelector).click()
 
     const count = await this.app.client.getWindowCount()
     assert.equal(count, 3)
+  })
+
+  it('bad password warning',async function(){
+    await this.app.restart()
+    await this.app.client
+        .element('[data-testid="vault-manager-unlock-input"]')
+        .setValue('badpassword')
+      await this.app.client
+        .element('[data-testid="vault-manager-unlock-button"]')
+        .click()
+      await this.app.client.waitForExist('[data-testid="vault-manager-unlock-errorlabel"]', timeouts.unlockVault)
+    assert.equal(await this.app.client.getValue('[data-testid="vault-manager-unlock-errorlabel"]'),'Failed to unlock vault, please check you entered the correct password.')
   })
 })
