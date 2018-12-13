@@ -3,7 +3,7 @@
 import React, { Component } from 'react'
 import { ActivityIndicator } from 'react-native'
 
-import { Button, TextField, Row, Column } from '@morpheus-ui/core'
+import { Button, TextField, Row, Column, Text } from '@morpheus-ui/core'
 import { CircleArrowRight } from '@morpheus-ui/icons'
 import { Form, type FormSubmitPayload } from '@morpheus-ui/forms'
 
@@ -21,12 +21,6 @@ type State = {
   error?: ?string,
   awaitingResponse?: boolean,
 }
-
-const ErrorText = styled.Text`
-  font-size: 14px;
-  padding-bottom: ${props => props.theme.padding}px;
-  color: ${props => props.theme.colors.PRIMARY_RED};
-`
 
 const FormContainer = styled.View`
   max-width: 260px;
@@ -65,7 +59,7 @@ export default class OnboardIdentityView extends Component<Props, State> {
     const errorMsg = this.state.error ? (
       <Row size={1}>
         <Column>
-          <ErrorText>{this.state.error}</ErrorText>
+          <Text variant="error">{this.state.error}</Text>
         </Column>
       </Row>
     ) : null

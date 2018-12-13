@@ -12,9 +12,21 @@ export default {
         borderWidth: 0,
       },
     },
+    Text: {
+      default: {
+        fontWeight: '300',
+      },
+      regular: {
+        fontWeight: '400',
+      },
+      error: {
+        paddingBottom: 10,
+        color: COLORS.PRIMARY_RED,
+      },
+    },
   },
   styled: {
     colors: COLORS,
-    padding: 10,
+    spacing: 10,
   },
 }
