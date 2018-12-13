@@ -1,7 +1,7 @@
 //@flow
 
 import React, { Component } from 'react'
-import { ActivityIndicator } from 'react-native-web'
+import { ActivityIndicator } from 'react-native'
 import { uniqueID } from '@mainframe/utils-id'
 
 import { Button, TextField, Row, Column } from '@morpheus-ui/core'
@@ -123,7 +123,7 @@ export default class CreateVaultView extends Component<Props, State> {
                   label="Confirm Password"
                   name="confirmPassword"
                   type="password"
-                  testID="create-vault-input-password"
+                  testID="create-vault-input-confirm-password"
                   validation={this.confirmPasswordValidation}
                 />
               </Column>
