@@ -7,3 +7,6 @@ const web3Provider = getWeb3Provider(rpc)
 window.mainframe = { rpc }
 window['web3'] = { currentProvider: web3Provider } // Existing standard
 window.ethereum = web3Provider // TODO: Provider needs updating to support this new standard https://eips.ethereum.org/EIPS/eip-1102
+
+// set a high max listener count to avoid unnecessary warnings
+web3Provider.setMaxListeners(100)
