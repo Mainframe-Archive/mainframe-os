@@ -126,7 +126,6 @@ export default class AppContainer extends Component<Props, State> {
     })
 
     const appUrl = this.state.contentsPath || this.state.bundleUrl
-
     const buttons = this.state.showUrlButtons ? (
       <View style={styles.rowContainer}>
         <Button
