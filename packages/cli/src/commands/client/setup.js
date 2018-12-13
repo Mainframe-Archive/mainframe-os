@@ -36,7 +36,7 @@ export default class SetupCommand extends Command {
         },
       ])
       if (create) {
-        this.createDefaultVault(cfg)
+        await this.createDefaultVault(cfg)
       }
       return
     }
