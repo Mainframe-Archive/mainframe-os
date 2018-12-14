@@ -13,7 +13,8 @@
     "dist:electron": "electron-builder",
     "build:flow": "flow-copy-source src lib",
     "test:types": "flow check",
-    "test": "mocha"
+    "test": "mocha",
+    "rebuild": "electron-rebuild"
   },
   "electronWebpack": {
     "title": "Mainframe",
@@ -45,7 +46,9 @@
     "react-modal": "^3.6.1",
     "react-native-web": "^0.9.1",
     "rxjs": "^6.3.3",
+    "bignumber.js": "^4.0.1",
     "source-map-support": "^0.5.9",
+    "web3": "^1.0.0-beta.36",
     "web3-eth-abi": "^1.0.0-beta.36",
     "web3-eth-contract": "^1.0.0-beta.36",
     "web3-utils": "^1.0.0-beta.36"
@@ -58,6 +61,7 @@
     "babel-plugin-react-native-web": "^0.9.1",
     "electron": "^3.0.9",
     "electron-builder": "^20.38.2",
+    "electron-rebuild": "^1.8.2",
     "electron-webpack": "^2.6.1",
     "file-loader": "^2.0.0",
     "flow-bin": "^0.87.0",
