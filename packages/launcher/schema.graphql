@@ -1,30 +1,81 @@
 type App implements Node {
   """The ID of an object"""
   id: ID!
-  appID: ID!
+  localID: ID!
   name: String!
   manifest: AppManifestData!
   users: [AppUser]
 }
 
-type AppManifestData implements Node {
-  """The ID of an object"""
-  id: ID!
+input AppCreateMutationInput {
   name: String!
+  contentsPath: String!
   version: String!
-  permissions: AppRequestedPermissions!
+  developerID: String!
+  permissionsRequirements: AppPermissionsRequirementsInput!
+  clientMutationId: String
 }
 
-type AppPermissionDefinitions implements Node {
-  """The ID of an object"""
-  id: ID!
+type AppCreateMutationPayload {
+  app: OwnApp
+  viewer: Viewer!
+  clientMutationId: String
+}
+
+input AppInstallMutationInput {
+  userID: String!
+  manifest: AppManifestInput!
+  permissionsSettings: AppPermissionsSettingsInput!
+  clientMutationId: String
+}
+
+type AppInstallMutationPayload {
+  app: OwnApp
+  viewer: Viewer!
+  clientMutationId: String
+}
+
+type AppManifestData {
+  name: String!
+  version: String!
+  permissions: AppPermissionsRequirements!
+}
+
+input AppManifestInput {
+  id: String!
+  name: String!
+  version: String!
+  permissions: AppPermissionsRequirementsInput!
+  author: ManifestAuthorInput!
+}
+
+type AppPermissionDefinitions {
   WEB_REQUEST: [String]
   BLOCKCHAIN_SEND: Boolean
+}
+
+input AppPermissionDefinitionsInput {
+  WEB_REQUEST: [String]
+  BLOCKCHAIN_SEND: Boolean
+  SWARM_UPLOAD: Boolean
+  SWARM_DOWNLOAD: Boolean
 }
 
 type AppPermissions {
   BLOCKCHAIN_SEND: Boolean
+  SWARM_UPLOAD: Boolean
+  SWARM_DOWNLOAD: Boolean
   WEB_REQUEST: [String]
+}
+
+type AppPermissionsRequirements {
+  optional: AppPermissionDefinitions!
+  required: AppPermissionDefinitions!
+}
+
+input AppPermissionsRequirementsInput {
+  optional: AppPermissionDefinitionsInput!
+  required: AppPermissionDefinitionsInput!
 }
 
 type AppPermissionsSettings {
@@ -32,11 +83,9 @@ type AppPermissionsSettings {
   grants: AppPermissions!
 }
 
-type AppRequestedPermissions implements Node {
-  """The ID of an object"""
-  id: ID!
-  optional: AppPermissionDefinitions!
-  required: AppPermissionDefinitions!
+input AppPermissionsSettingsInput {
+  permissionsChecked: Boolean!
+  grants: PermissionGrantsInput!
 }
 
 type AppsQuery {
@@ -56,17 +105,24 @@ type AppUserSettings {
   permissionsSettings: AppPermissionsSettings!
 }
 
-type AppVersionData implements Node {
-  """The ID of an object"""
-  id: ID!
+type AppVersionData {
   version: String!
-  permissions: AppRequestedPermissions!
+  permissions: AppPermissionsRequirements!
   publicationState: String!
 }
 
 type IdentitiesQuery {
   ownUsers: [OwnUserIdentity]
   ownDevelopers: [OwnDeveloperIdentity]
+}
+
+input ManifestAuthorInput {
+  id: String!
+}
+
+type Mutation {
+  createApp(input: AppCreateMutationInput!): AppCreateMutationPayload
+  installApp(input: AppInstallMutationInput!): AppInstallMutationPayload
 }
 
 """An object with an ID"""
@@ -78,7 +134,7 @@ interface Node {
 type OwnApp implements Node {
   """The ID of an object"""
   id: ID!
-  appID: ID!
+  localID: ID!
   name: String!
   versions: [AppVersionData]
   users: [AppUser]
@@ -110,12 +166,24 @@ type OwnUserProfile {
   name: String!
 }
 
+input PermissionGrantsInput {
+  BLOCKCHAIN_SEND: Boolean
+  SWARM_UPLOAD: Boolean
+  SWARM_DOWNLOAD: Boolean
+  WEB_REQUEST: [String]
+}
+
 type Query {
   """Fetches an object given its ID"""
   node(
     """The ID of an object"""
     id: ID!
   ): Node
+  viewer: Viewer!
+}
+
+type Viewer {
+  id: ID!
   apps: AppsQuery!
   identities: IdentitiesQuery!
 }

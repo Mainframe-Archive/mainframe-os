@@ -9,18 +9,20 @@ import type { ID, IdentityOwnData } from '@mainframe/client'
 import type { ManifestData } from '@mainframe/app-manifest'
 import React, { createRef, Component, type ElementRef } from 'react'
 import { View, StyleSheet } from 'react-native-web'
+import { commitMutation } from 'react-relay'
+import { EnvironmentContext } from '../RelayEnvironment'
 
-import Button from '../UIComponents/Button'
-import Text from '../UIComponents/Text'
-import ModalView from '../UIComponents/ModalView'
-
-import rpc from './rpc'
-import PermissionsView from './PermissionsView'
-import IdentitySelectorView from './IdentitySelectorView'
+import Button from '../../UIComponents/Button'
+import Text from '../../UIComponents/Text'
+import ModalView from '../../UIComponents/ModalView'
+import rpc from '../rpc'
+import PermissionsView from '../PermissionsView'
+import IdentitySelectorView from '../IdentitySelectorView'
+import { appInstallMutation } from './appMutations'
 
 type Props = {
   onRequestClose: () => void,
-  onInstallComplete: (appID: ID) => void,
+  onInstallComplete: () => void,
 }
 
 type State = {
@@ -30,9 +32,12 @@ type State = {
   userPermissions?: StrictPermissionsGrants,
   userId?: ID,
   ownUsers: Array<IdentityOwnData>,
+  errorMsg?: string,
 }
 
 export default class AppInstallModal extends Component<Props, State> {
+  static contextType = EnvironmentContext
+
   state = {
     inputValue: '',
     installStep: 'manifest',
@@ -134,18 +139,35 @@ export default class AppInstallModal extends Component<Props, State> {
       return
     }
 
-    try {
-      const permissionsSettings = {
-        grants: userPermissions,
-        permissionsChecked: true,
-      }
-      const res = await rpc.installApp(manifest, userId, permissionsSettings)
-      this.props.onInstallComplete(res.id)
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.log('err:', err)
-      // TODO: handle error
+    const permissionsSettings = {
+      grants: userPermissions,
+      permissionsChecked: true,
     }
+
+    const params = {
+      userID: userId,
+      manifest,
+      permissionsSettings,
+    }
+
+    commitMutation(this.context, {
+      mutation: appInstallMutation,
+      variables: { input: params },
+      onCompleted: () => {
+        this.props.onInstallComplete()
+      },
+      onError: err => {
+        // eslint-disable-next-line no-console
+        console.log('err:', err)
+        const msg =
+          err.data && err.data.length
+            ? err.data[0].message
+            : 'Sorry, there was a problem creating your app.'
+        this.setState({
+          errorMsg: msg,
+        })
+      },
+    })
   }
 
   // RENDER

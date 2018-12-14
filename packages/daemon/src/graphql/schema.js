@@ -9,8 +9,14 @@ import {
   GraphQLNonNull,
   GraphQLSchema,
   GraphQLString,
+  GraphQLInputObjectType,
 } from 'graphql'
-import { fromGlobalId, globalIdField, nodeDefinitions } from 'graphql-relay'
+import {
+  fromGlobalId,
+  globalIdField,
+  nodeDefinitions,
+  mutationWithClientMutationId,
+} from 'graphql-relay'
 
 import { App, OwnApp } from '../app'
 import {
@@ -25,6 +31,9 @@ import type RequestContext from '../rpc/RequestContext'
 
 const { nodeInterface, nodeField } = nodeDefinitions(
   (globalId: string, ctx: RequestContext) => {
+    if (globalId === 'viewer') {
+      return {}
+    }
     const { type, id } = fromGlobalId(globalId)
     const typedID = idType(id)
 
@@ -78,10 +87,14 @@ const { nodeInterface, nodeField } = nodeDefinitions(
   },
 )
 
+const idResolver = globalIdField(null, obj => obj.localID)
+
 const appPermissionGrants = new GraphQLObjectType({
   name: 'AppPermissions',
   fields: () => ({
     BLOCKCHAIN_SEND: { type: GraphQLBoolean },
+    SWARM_UPLOAD: { type: GraphQLBoolean },
+    SWARM_DOWNLOAD: { type: GraphQLBoolean },
     WEB_REQUEST: { type: new GraphQLList(GraphQLString) },
   }),
 })
@@ -112,7 +125,7 @@ const appUserSettings = new GraphQLObjectType({
 const appUser = new GraphQLObjectType({
   name: 'AppUser',
   fields: () => ({
-    id: globalIdField(),
+    id: idResolver,
     localID: {
       type: new GraphQLNonNull(GraphQLID),
     },
@@ -130,9 +143,7 @@ const appUser = new GraphQLObjectType({
 
 const appPermissionDefinitions = new GraphQLObjectType({
   name: 'AppPermissionDefinitions',
-  interfaces: () => [nodeInterface],
   fields: () => ({
-    id: globalIdField(),
     WEB_REQUEST: {
       type: new GraphQLList(GraphQLString),
     },
@@ -142,11 +153,9 @@ const appPermissionDefinitions = new GraphQLObjectType({
   }),
 })
 
-const appRequestedPermissions = new GraphQLObjectType({
-  name: 'AppRequestedPermissions',
-  interfaces: () => [nodeInterface],
+const appPermissionsRequirements = new GraphQLObjectType({
+  name: 'AppPermissionsRequirements',
   fields: () => ({
-    id: globalIdField(),
     optional: {
       type: new GraphQLNonNull(appPermissionDefinitions),
       resolve: self => self.optional,
@@ -160,9 +169,7 @@ const appRequestedPermissions = new GraphQLObjectType({
 
 const appManifestData = new GraphQLObjectType({
   name: 'AppManifestData',
-  interfaces: () => [nodeInterface],
   fields: () => ({
-    id: globalIdField(),
     name: {
       type: new GraphQLNonNull(GraphQLString),
       resolve: self => self.name,
@@ -172,7 +179,7 @@ const appManifestData = new GraphQLObjectType({
       resolve: self => self.version,
     },
     permissions: {
-      type: new GraphQLNonNull(appRequestedPermissions),
+      type: new GraphQLNonNull(appPermissionsRequirements),
       resolve: self => self.permissions,
     },
   }),
@@ -180,14 +187,12 @@ const appManifestData = new GraphQLObjectType({
 
 const appVersionData = new GraphQLObjectType({
   name: 'AppVersionData',
-  interfaces: () => [nodeInterface],
   fields: () => ({
-    id: globalIdField(),
     version: {
       type: new GraphQLNonNull(GraphQLString),
     },
     permissions: {
-      type: new GraphQLNonNull(appRequestedPermissions),
+      type: new GraphQLNonNull(appPermissionsRequirements),
       resolve: self => self.permissions,
     },
     publicationState: {
@@ -201,7 +206,7 @@ const appType = new GraphQLObjectType({
   interfaces: () => [nodeInterface],
   fields: () => ({
     id: globalIdField(),
-    appID: {
+    localID: {
       type: new GraphQLNonNull(GraphQLID),
       resolve: self => self.id,
     },
@@ -230,7 +235,7 @@ const ownAppType = new GraphQLObjectType({
   interfaces: () => [nodeInterface],
   fields: () => ({
     id: globalIdField(),
-    appID: {
+    localID: {
       type: new GraphQLNonNull(GraphQLID),
       resolve: self => self.id,
     },
@@ -263,7 +268,8 @@ const ownAppIdentityType = new GraphQLObjectType({
   name: 'OwnAppIdentity',
   interfaces: () => [nodeInterface],
   fields: () => ({
-    id: globalIdField(),
+    id: idResolver,
+    // TODO: consistent id naming
     localID: {
       type: new GraphQLNonNull(GraphQLID),
       resolve: self => self.localID,
@@ -282,7 +288,7 @@ const ownDeveloperIdentityType = new GraphQLObjectType({
   name: 'OwnDeveloperIdentity',
   interfaces: () => [nodeInterface],
   fields: () => ({
-    id: globalIdField(),
+    id: idResolver,
     localID: {
       type: new GraphQLNonNull(GraphQLID),
       resolve: self => self.localID,
@@ -313,7 +319,7 @@ const ownUserIdentityType = new GraphQLObjectType({
   name: 'OwnUserIdentity',
   interfaces: () => [nodeInterface],
   fields: () => ({
-    id: globalIdField(),
+    id: idResolver,
     localID: {
       type: new GraphQLNonNull(GraphQLID),
       resolve: self => self.localID,
@@ -344,7 +350,7 @@ const peerAppIdentityType = new GraphQLObjectType({
   name: 'PeerAppIdentity',
   interfaces: () => [nodeInterface],
   fields: () => ({
-    id: globalIdField(),
+    id: idResolver,
     localID: {
       type: new GraphQLNonNull(GraphQLID),
       resolve: self => self.localID,
@@ -359,7 +365,7 @@ const peerDeveloperIdentityType = new GraphQLObjectType({
   name: 'PeerDeveloperIdentity',
   interfaces: () => [nodeInterface],
   fields: () => ({
-    id: globalIdField(),
+    id: idResolver,
     localID: {
       type: new GraphQLNonNull(GraphQLID),
       resolve: self => self.localID,
@@ -374,10 +380,10 @@ const peerUserIdentityType = new GraphQLObjectType({
   name: 'PeerUserIdentity',
   interfaces: () => [nodeInterface],
   fields: () => ({
-    id: globalIdField(),
+    id: idResolver,
     localID: {
       type: new GraphQLNonNull(GraphQLID),
-      resolve: self => self.id,
+      resolve: self => self.localID,
     },
     pubKey: {
       type: new GraphQLNonNull(GraphQLString),
@@ -421,10 +427,13 @@ const identitiesQueryType = new GraphQLObjectType({
   }),
 })
 
-const queryType = new GraphQLObjectType({
-  name: 'Query',
+const viewerType = new GraphQLObjectType({
+  name: 'Viewer',
   fields: () => ({
-    node: nodeField,
+    id: {
+      type: new GraphQLNonNull(GraphQLID),
+      resolve: () => 'viewer',
+    },
     apps: {
       type: new GraphQLNonNull(appsQueryType),
       resolve: () => ({}),
@@ -436,6 +445,188 @@ const queryType = new GraphQLObjectType({
   }),
 })
 
+// MUTATIONS
+
+const appPermissionDefinitionsInput = new GraphQLInputObjectType({
+  name: 'AppPermissionDefinitionsInput',
+  fields: () => ({
+    WEB_REQUEST: {
+      type: new GraphQLList(GraphQLString),
+    },
+    BLOCKCHAIN_SEND: {
+      type: GraphQLBoolean,
+    },
+    SWARM_UPLOAD: {
+      type: GraphQLBoolean,
+    },
+    SWARM_DOWNLOAD: {
+      type: GraphQLBoolean,
+    },
+  }),
+})
+
+const appPermissionsRequirementsInput = new GraphQLInputObjectType({
+  name: 'AppPermissionsRequirementsInput',
+  fields: () => ({
+    optional: {
+      type: new GraphQLNonNull(appPermissionDefinitionsInput),
+    },
+    required: {
+      type: new GraphQLNonNull(appPermissionDefinitionsInput),
+    },
+  }),
+})
+
+const appCreateMutation = mutationWithClientMutationId({
+  name: 'AppCreateMutation',
+  inputFields: {
+    name: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    contentsPath: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    version: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    developerID: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    permissionsRequirements: {
+      type: new GraphQLNonNull(appPermissionsRequirementsInput),
+    },
+  },
+  outputFields: {
+    app: {
+      type: ownAppType,
+      resolve: payload => payload.app,
+    },
+    viewer: {
+      type: new GraphQLNonNull(viewerType),
+      resolve: () => ({}),
+    },
+  },
+  mutateAndGetPayload: async (args, ctx) => {
+    const app = ctx.openVault.createApp({
+      contentsPath: args.contentsPath,
+      developerID: args.developerID,
+      name: args.name,
+      version: args.version,
+      permissionsRequirements: args.permissionsRequirements,
+    })
+    await ctx.openVault.save()
+    return { app }
+  },
+})
+
+const manifestAuthorInput = new GraphQLInputObjectType({
+  name: 'ManifestAuthorInput',
+  fields: () => ({
+    id: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+  }),
+})
+
+const appManifestInput = new GraphQLInputObjectType({
+  name: 'AppManifestInput',
+  fields: () => ({
+    id: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    name: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    version: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    contentsURI: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    permissions: {
+      type: new GraphQLNonNull(appPermissionsRequirementsInput),
+    },
+    author: {
+      type: new GraphQLNonNull(manifestAuthorInput),
+    },
+  }),
+})
+
+const permissionGrantsInput = new GraphQLInputObjectType({
+  name: 'PermissionGrantsInput',
+  fields: () => ({
+    BLOCKCHAIN_SEND: { type: GraphQLBoolean },
+    SWARM_UPLOAD: { type: GraphQLBoolean },
+    SWARM_DOWNLOAD: { type: GraphQLBoolean },
+    WEB_REQUEST: { type: new GraphQLList(GraphQLString) },
+  }),
+})
+
+const appPermissionSettingsInput = new GraphQLInputObjectType({
+  name: 'AppPermissionsSettingsInput',
+  fields: () => ({
+    permissionsChecked: {
+      type: new GraphQLNonNull(GraphQLBoolean),
+    },
+    grants: {
+      type: new GraphQLNonNull(permissionGrantsInput),
+    },
+  }),
+})
+
+const appInstallMutation = mutationWithClientMutationId({
+  name: 'AppInstallMutation',
+  inputFields: {
+    userID: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    manifest: {
+      type: new GraphQLNonNull(appManifestInput),
+    },
+    permissionsSettings: {
+      type: new GraphQLNonNull(appPermissionSettingsInput),
+    },
+  },
+  outputFields: {
+    app: {
+      type: appType,
+      resolve: payload => payload.app,
+    },
+    viewer: {
+      type: new GraphQLNonNull(viewerType),
+      resolve: () => ({}),
+    },
+  },
+  mutateAndGetPayload: async (
+    { userID, manifest, permissionsSettings },
+    ctx,
+  ) => {
+    const app = ctx.openVault.installApp(manifest, userID, permissionsSettings)
+    await ctx.openVault.save()
+    return { app }
+  },
+})
+
+const mutationType = new GraphQLObjectType({
+  name: 'Mutation',
+  fields: () => ({
+    createApp: appCreateMutation,
+    installApp: appInstallMutation,
+  }),
+})
+
+const queryType = new GraphQLObjectType({
+  name: 'Query',
+  fields: () => ({
+    node: nodeField,
+    viewer: {
+      type: new GraphQLNonNull(viewerType),
+      resolve: () => ({}),
+    },
+  }),
+})
+
 export default new GraphQLSchema({
   query: queryType,
+  mutation: mutationType,
 })

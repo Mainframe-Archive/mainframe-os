@@ -152,17 +152,19 @@ export default class IdentitySelectorQueryContainer extends Component<ContainerP
         environment={this.context}
         query={graphql`
           query IdentitySelectorViewQuery {
-            identities {
-              ownUsers {
-                localID
-                profile {
-                  name
+            viewer {
+              identities {
+                ownUsers {
+                  localID
+                  profile {
+                    name
+                  }
                 }
-              }
-              ownDevelopers {
-                localID
-                profile {
-                  name
+                ownDevelopers {
+                  localID
+                  profile {
+                    name
+                  }
                 }
               }
             }
@@ -175,8 +177,7 @@ export default class IdentitySelectorQueryContainer extends Component<ContainerP
           } else if (props) {
             return (
               <IdentitySelectorView
-                identities={props.identities}
-                type={props.type}
+                identities={props.viewer.identities}
                 {...this.props}
               />
             )

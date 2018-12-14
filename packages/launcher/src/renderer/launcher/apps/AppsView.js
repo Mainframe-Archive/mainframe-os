@@ -21,8 +21,9 @@ import Text from '../../UIComponents/Text'
 import ModalView from '../../UIComponents/ModalView'
 import IdentitySelectorView from '../IdentitySelectorView'
 import CreateAppModal from '../developer/CreateAppModal'
-import AppInstallModal from '../AppInstallModal'
 import PermissionsView from '../PermissionsView'
+import AppInstallModal from './AppInstallModal'
+import { OwnAppItem, InstalledAppItem } from './AppItem'
 
 type AppData = AppOwnData | AppInstalledData
 
@@ -72,11 +73,11 @@ class AppsView extends Component<Props, State> {
     ) {
       const { app, userID } = this.state.showModal.data
       try {
-        await rpc.setAppUserPermissionsSettings(app.appID, userID, {
+        await rpc.setAppUserPermissionsSettings(app.localID, userID, {
           grants: permissionSettings,
           permissionsChecked: true,
         })
-        await rpc.launchApp(app.appID, userID)
+        await rpc.launchApp(app.localID, userID)
       } catch (err) {
         // TODO: - Error feedback
         // eslint-disable-next-line no-console
@@ -137,7 +138,7 @@ class AppsView extends Component<Props, State> {
         })
       } else {
         try {
-          await rpc.launchApp(app.appID, userID)
+          await rpc.launchApp(app.localID, userID)
         } catch (err) {
           // TODO: - Error feedback
         }
@@ -161,12 +162,10 @@ class AppsView extends Component<Props, State> {
   // RENDER
 
   renderApp(app: AppData, own: boolean) {
-    const open = () => this.onOpenApp(app, own)
-    return (
-      <TouchableOpacity onPress={open} key={app.appID} style={styles.app}>
-        <Text style={styles.nameLabel}>{app.name}</Text>
-        <Text style={styles.idLabel}>{app.appID}</Text>
-      </TouchableOpacity>
+    return own ? (
+      <OwnAppItem ownApp={app} onOpenApp={this.onOpenApp} />
+    ) : (
+      <InstalledAppItem installedApp={app} onOpenApp={this.onOpenApp} />
     )
   }
 
@@ -247,6 +246,7 @@ class AppsView extends Component<Props, State> {
             />
           )
           break
+        default:
       }
     }
     return (
@@ -265,62 +265,10 @@ export default createFragmentContainer(AppsView, {
   apps: graphql`
     fragment AppsView_apps on AppsQuery {
       installed {
-        appID
-        name
-        manifest {
-          permissions {
-            optional {
-              WEB_REQUEST
-              BLOCKCHAIN_SEND
-            }
-            required {
-              WEB_REQUEST
-              BLOCKCHAIN_SEND
-            }
-          }
-        }
-        users {
-          localID
-          identity {
-            profile {
-              name
-            }
-          }
-          settings {
-            permissionsSettings {
-              permissionsChecked
-              grants {
-                BLOCKCHAIN_SEND
-                WEB_REQUEST
-              }
-            }
-          }
-        }
+        ...AppItem_installedApp
       }
       own {
-        appID
-        name
-        versions {
-          version
-          permissions {
-            optional {
-              WEB_REQUEST
-              BLOCKCHAIN_SEND
-            }
-            required {
-              WEB_REQUEST
-              BLOCKCHAIN_SEND
-            }
-          }
-        }
-        users {
-          localID
-          identity {
-            profile {
-              name
-            }
-          }
-        }
+        ...AppItem_ownApp
       }
     }
   `,
@@ -329,19 +277,6 @@ export default createFragmentContainer(AppsView, {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  app: {
-    padding: 10,
-    marginTop: 10,
-    backgroundColor: colors.LIGHT_GREY_EE,
-    flexDirection: 'row',
-  },
-  nameLabel: {
-    flex: 1,
-  },
-  idLabel: {
-    fontSize: 12,
-    color: colors.GREY_MED_75,
   },
   createApp: {
     marginVertical: 20,

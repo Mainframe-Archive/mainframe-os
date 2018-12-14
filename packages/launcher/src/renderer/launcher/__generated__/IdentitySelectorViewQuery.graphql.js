@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash d8b91dbee99a893cca981b93ca71c32b
+ * @relayHash 510cee9ecaba6a5a7a24afc4fcbb54ff
  */
 
 /* eslint-disable */
@@ -11,19 +11,21 @@
 import type { ConcreteRequest } from 'relay-runtime';
 export type IdentitySelectorViewQueryVariables = {||};
 export type IdentitySelectorViewQueryResponse = {|
-  +identities: {|
-    +ownUsers: ?$ReadOnlyArray<?{|
-      +localID: string,
-      +profile: ?{|
-        +name: string
-      |},
-    |}>,
-    +ownDevelopers: ?$ReadOnlyArray<?{|
-      +localID: string,
-      +profile: ?{|
-        +name: string
-      |},
-    |}>,
+  +viewer: {|
+    +identities: {|
+      +ownUsers: ?$ReadOnlyArray<?{|
+        +localID: string,
+        +profile: ?{|
+          +name: string
+        |},
+      |}>,
+      +ownDevelopers: ?$ReadOnlyArray<?{|
+        +localID: string,
+        +profile: ?{|
+          +name: string
+        |},
+      |}>,
+    |}
   |}
 |};
 export type IdentitySelectorViewQuery = {|
@@ -35,21 +37,24 @@ export type IdentitySelectorViewQuery = {|
 
 /*
 query IdentitySelectorViewQuery {
-  identities {
-    ownUsers {
-      localID
-      profile {
-        name
+  viewer {
+    identities {
+      ownUsers {
+        localID
+        profile {
+          name
+        }
+        id
       }
-      id
-    }
-    ownDevelopers {
-      localID
-      profile {
-        name
+      ownDevelopers {
+        localID
+        profile {
+          name
+        }
+        id
       }
-      id
     }
+    id
   }
 }
 */
@@ -103,7 +108,7 @@ return {
   "operationKind": "query",
   "name": "IdentitySelectorViewQuery",
   "id": null,
-  "text": "query IdentitySelectorViewQuery {\n  identities {\n    ownUsers {\n      localID\n      profile {\n        name\n      }\n      id\n    }\n    ownDevelopers {\n      localID\n      profile {\n        name\n      }\n      id\n    }\n  }\n}\n",
+  "text": "query IdentitySelectorViewQuery {\n  viewer {\n    identities {\n      ownUsers {\n        localID\n        profile {\n          name\n        }\n        id\n      }\n      ownDevelopers {\n        localID\n        profile {\n          name\n        }\n        id\n      }\n    }\n    id\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -115,36 +120,47 @@ return {
       {
         "kind": "LinkedField",
         "alias": null,
-        "name": "identities",
+        "name": "viewer",
         "storageKey": null,
         "args": null,
-        "concreteType": "IdentitiesQuery",
+        "concreteType": "Viewer",
         "plural": false,
         "selections": [
           {
             "kind": "LinkedField",
             "alias": null,
-            "name": "ownUsers",
+            "name": "identities",
             "storageKey": null,
             "args": null,
-            "concreteType": "OwnUserIdentity",
-            "plural": true,
+            "concreteType": "IdentitiesQuery",
+            "plural": false,
             "selections": [
-              v0,
-              v2
-            ]
-          },
-          {
-            "kind": "LinkedField",
-            "alias": null,
-            "name": "ownDevelopers",
-            "storageKey": null,
-            "args": null,
-            "concreteType": "OwnDeveloperIdentity",
-            "plural": true,
-            "selections": [
-              v0,
-              v3
+              {
+                "kind": "LinkedField",
+                "alias": null,
+                "name": "ownUsers",
+                "storageKey": null,
+                "args": null,
+                "concreteType": "OwnUserIdentity",
+                "plural": true,
+                "selections": [
+                  v0,
+                  v2
+                ]
+              },
+              {
+                "kind": "LinkedField",
+                "alias": null,
+                "name": "ownDevelopers",
+                "storageKey": null,
+                "args": null,
+                "concreteType": "OwnDeveloperIdentity",
+                "plural": true,
+                "selections": [
+                  v0,
+                  v3
+                ]
+              }
             ]
           }
         ]
@@ -159,40 +175,52 @@ return {
       {
         "kind": "LinkedField",
         "alias": null,
-        "name": "identities",
+        "name": "viewer",
         "storageKey": null,
         "args": null,
-        "concreteType": "IdentitiesQuery",
+        "concreteType": "Viewer",
         "plural": false,
         "selections": [
           {
             "kind": "LinkedField",
             "alias": null,
-            "name": "ownUsers",
+            "name": "identities",
             "storageKey": null,
             "args": null,
-            "concreteType": "OwnUserIdentity",
-            "plural": true,
+            "concreteType": "IdentitiesQuery",
+            "plural": false,
             "selections": [
-              v0,
-              v2,
-              v4
+              {
+                "kind": "LinkedField",
+                "alias": null,
+                "name": "ownUsers",
+                "storageKey": null,
+                "args": null,
+                "concreteType": "OwnUserIdentity",
+                "plural": true,
+                "selections": [
+                  v0,
+                  v2,
+                  v4
+                ]
+              },
+              {
+                "kind": "LinkedField",
+                "alias": null,
+                "name": "ownDevelopers",
+                "storageKey": null,
+                "args": null,
+                "concreteType": "OwnDeveloperIdentity",
+                "plural": true,
+                "selections": [
+                  v0,
+                  v3,
+                  v4
+                ]
+              }
             ]
           },
-          {
-            "kind": "LinkedField",
-            "alias": null,
-            "name": "ownDevelopers",
-            "storageKey": null,
-            "args": null,
-            "concreteType": "OwnDeveloperIdentity",
-            "plural": true,
-            "selections": [
-              v0,
-              v3,
-              v4
-            ]
-          }
+          v4
         ]
       }
     ]
@@ -200,5 +228,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '6abb1f501e6d186adb7236af76c0163f';
+(node/*: any*/).hash = '1a1097cd27de9e8ee25fef8c8813e060';
 module.exports = node;
