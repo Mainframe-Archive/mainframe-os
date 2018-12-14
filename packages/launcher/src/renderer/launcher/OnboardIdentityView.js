@@ -4,7 +4,7 @@ import React, { Component } from 'react'
 import { ActivityIndicator } from 'react-native'
 
 import { Button, TextField, Row, Column, Text } from '@morpheus-ui/core'
-import { CircleArrowRight } from '@morpheus-ui/icons'
+import CircleArrowRight from '@morpheus-ui/icons/CircleArrowRight'
 import { Form, type FormSubmitPayload } from '@morpheus-ui/forms'
 
 import styled from 'styled-components/native'

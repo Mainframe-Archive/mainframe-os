@@ -25,9 +25,7 @@
       "@mainframe/config",
       "@mainframe/toolbox",
       "@morpheus-ui/core",
-      "@morpheus-ui/forms",
-      "@morpheus-ui/fonts",
-      "@morpheus-ui/icons"
+      "@morpheus-ui/fonts"
     ],
     "renderer": {
       "webpackConfig": "webpack.renderer.additions.js"
@@ -43,10 +41,9 @@
     "@mainframe/rpc-handler": "^0.2.1",
     "@mainframe/toolbox": "*",
     "@mainframe/utils-id": "^0.1.0",
-    "@morpheus-ui/core": "0.0.8",
-    "@morpheus-ui/forms": "0.0.2",
+    "@morpheus-ui/core": "0.0.9",
     "@morpheus-ui/fonts": "0.0.1",
-    "@morpheus-ui/icons": "0.0.1",
+    "@morpheus-ui/icons": "0.0.2",
     "electron-store": "^2.0.0",
     "electron-util": "^0.10.2",
     "react": "^16.5.2",
@@ -56,7 +53,6 @@
     "react-native-web": "^0.9.9",
     "rxjs": "^6.3.3",
     "source-map-support": "^0.5.9",
-    "styled-components": "^4.1.2",
     "web3-eth-abi": "^1.0.0-beta.36",
     "web3-eth-contract": "^1.0.0-beta.36",
     "web3-utils": "^1.0.0-beta.36"

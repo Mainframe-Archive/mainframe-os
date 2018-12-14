@@ -22,7 +22,6 @@ import {
 } from 'react-native'
 
 import { ThemeProvider as MFThemeProvider } from '@morpheus-ui/core'
-import { ThemeProvider as SCThemeProvider } from 'styled-components/native'
 
 import THEME from '../theme'
 
@@ -406,11 +405,7 @@ export default class App extends Component<{}, State> {
 
   render() {
     return (
-      <MFThemeProvider theme={THEME.morpheus}>
-        <SCThemeProvider theme={THEME.styled}>
-          {this.renderInside()}
-        </SCThemeProvider>
-      </MFThemeProvider>
+      <MFThemeProvider theme={THEME}>{this.renderInside()}</MFThemeProvider>
     )
   }
 }
