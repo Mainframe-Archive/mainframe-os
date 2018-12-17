@@ -83,6 +83,7 @@ export default class OnboardIdentityView extends Component<Props, State> {
             <Row size={1} top>
               <Column>
                 <TextField
+                  autoFocus
                   label="Name"
                   name="name"
                   required
