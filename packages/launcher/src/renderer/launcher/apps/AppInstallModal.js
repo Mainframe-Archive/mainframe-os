@@ -150,6 +150,7 @@ export default class AppInstallModal extends Component<Props, State> {
       permissionsSettings,
     }
 
+    // $FlowFixMe: Permission types
     commitMutation(this.context, {
       mutation: appInstallMutation,
       variables: { input: params },
@@ -157,12 +158,8 @@ export default class AppInstallModal extends Component<Props, State> {
         this.props.onInstallComplete()
       },
       onError: err => {
-        // eslint-disable-next-line no-console
-        console.log('err:', err)
         const msg =
-          err.data && err.data.length
-            ? err.data[0].message
-            : 'Sorry, there was a problem creating your app.'
+          err.message || 'Sorry, there was a problem creating your app.'
         this.setState({
           errorMsg: msg,
         })

@@ -30,7 +30,7 @@ input AppInstallMutationInput {
 }
 
 type AppInstallMutationPayload {
-  app: OwnApp
+  app: App
   viewer: Viewer!
   clientMutationId: String
 }
@@ -45,6 +45,7 @@ input AppManifestInput {
   id: String!
   name: String!
   version: String!
+  contentsURI: String!
   permissions: AppPermissionsRequirementsInput!
   author: ManifestAuthorInput!
 }
@@ -65,7 +66,7 @@ type AppPermissions {
   BLOCKCHAIN_SEND: Boolean
   SWARM_UPLOAD: Boolean
   SWARM_DOWNLOAD: Boolean
-  WEB_REQUEST: [String]
+  WEB_REQUEST: WebRequestGrants!
 }
 
 type AppPermissionsRequirements {
@@ -111,6 +112,28 @@ type AppVersionData {
   publicationState: String!
 }
 
+input CreateDeveloperIdentityInput {
+  profile: UserProfileInput!
+  clientMutationId: String
+}
+
+type CreateDeveloperIdentityPayload {
+  user: OwnDeveloperIdentity
+  viewer: Viewer!
+  clientMutationId: String
+}
+
+input CreateUserIdentityInput {
+  profile: UserProfileInput!
+  clientMutationId: String
+}
+
+type CreateUserIdentityPayload {
+  user: OwnUserIdentity
+  viewer: Viewer!
+  clientMutationId: String
+}
+
 type IdentitiesQuery {
   ownUsers: [OwnUserIdentity]
   ownDevelopers: [OwnDeveloperIdentity]
@@ -123,6 +146,8 @@ input ManifestAuthorInput {
 type Mutation {
   createApp(input: AppCreateMutationInput!): AppCreateMutationPayload
   installApp(input: AppInstallMutationInput!): AppInstallMutationPayload
+  createUserIdentity(input: CreateUserIdentityInput!): CreateUserIdentityPayload
+  createDeveloperIdentity(input: CreateDeveloperIdentityInput!): CreateDeveloperIdentityPayload
 }
 
 """An object with an ID"""
@@ -170,7 +195,7 @@ input PermissionGrantsInput {
   BLOCKCHAIN_SEND: Boolean
   SWARM_UPLOAD: Boolean
   SWARM_DOWNLOAD: Boolean
-  WEB_REQUEST: [String]
+  WEB_REQUEST: WebRequestGrantInput!
 }
 
 type Query {
@@ -182,8 +207,23 @@ type Query {
   viewer: Viewer!
 }
 
+input UserProfileInput {
+  name: String!
+  avatar: String
+}
+
 type Viewer {
   id: ID!
   apps: AppsQuery!
   identities: IdentitiesQuery!
+}
+
+input WebRequestGrantInput {
+  granted: [String]
+  denied: [String]
+}
+
+type WebRequestGrants {
+  granted: [String]
+  denied: [String]
 }

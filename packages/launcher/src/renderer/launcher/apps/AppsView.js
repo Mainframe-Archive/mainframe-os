@@ -199,9 +199,12 @@ class AppsView extends Component<Props, State> {
     )
   }
 
-  renderButton(title: string, onPress: () => void) {
+  renderButton(title: string, onPress: () => void, testID: string) {
     return (
-      <TouchableOpacity onPress={onPress} style={styles.createApp}>
+      <TouchableOpacity
+        onPress={onPress}
+        style={styles.createApp}
+        testID={testID}>
         <Text style={styles.createAppLabel}>{title}</Text>
       </TouchableOpacity>
     )
@@ -252,9 +255,17 @@ class AppsView extends Component<Props, State> {
     return (
       <ScrollView style={styles.container}>
         {this.renderInstalled()}
-        {this.renderButton('Install App', this.onPressInstall)}
+        {this.renderButton(
+          'Install App',
+          this.onPressInstall,
+          'launcher-install-app-button',
+        )}
         {this.renderOwn()}
-        {this.renderButton('Create new App', this.onPressCreateApp)}
+        {this.renderButton(
+          'Create new App',
+          this.onPressCreateApp,
+          'launcher-create-app-button',
+        )}
         {modal}
       </ScrollView>
     )

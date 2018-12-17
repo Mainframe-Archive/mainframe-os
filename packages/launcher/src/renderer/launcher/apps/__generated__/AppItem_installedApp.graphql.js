@@ -37,7 +37,10 @@ export type AppItem_installedApp = {|
         +permissionsChecked: boolean,
         +grants: {|
           +BLOCKCHAIN_SEND: ?boolean,
-          +WEB_REQUEST: ?$ReadOnlyArray<?string>,
+          +WEB_REQUEST: {|
+            +granted: ?$ReadOnlyArray<?string>,
+            +denied: ?$ReadOnlyArray<?string>,
+          |},
         |},
       |}
     |},
@@ -65,20 +68,19 @@ v1 = {
 v2 = {
   "kind": "ScalarField",
   "alias": null,
-  "name": "WEB_REQUEST",
-  "args": null,
-  "storageKey": null
-},
-v3 = {
-  "kind": "ScalarField",
-  "alias": null,
   "name": "BLOCKCHAIN_SEND",
   "args": null,
   "storageKey": null
 },
-v4 = [
-  v2,
-  v3
+v3 = [
+  {
+    "kind": "ScalarField",
+    "alias": null,
+    "name": "WEB_REQUEST",
+    "args": null,
+    "storageKey": null
+  },
+  v2
 ];
 return {
   "kind": "Fragment",
@@ -115,7 +117,7 @@ return {
               "args": null,
               "concreteType": "AppPermissionDefinitions",
               "plural": false,
-              "selections": v4
+              "selections": v3
             },
             {
               "kind": "LinkedField",
@@ -125,7 +127,7 @@ return {
               "args": null,
               "concreteType": "AppPermissionDefinitions",
               "plural": false,
-              "selections": v4
+              "selections": v3
             }
           ]
         }
@@ -198,8 +200,32 @@ return {
                   "concreteType": "AppPermissions",
                   "plural": false,
                   "selections": [
-                    v3,
-                    v2
+                    v2,
+                    {
+                      "kind": "LinkedField",
+                      "alias": null,
+                      "name": "WEB_REQUEST",
+                      "storageKey": null,
+                      "args": null,
+                      "concreteType": "WebRequestGrants",
+                      "plural": false,
+                      "selections": [
+                        {
+                          "kind": "ScalarField",
+                          "alias": null,
+                          "name": "granted",
+                          "args": null,
+                          "storageKey": null
+                        },
+                        {
+                          "kind": "ScalarField",
+                          "alias": null,
+                          "name": "denied",
+                          "args": null,
+                          "storageKey": null
+                        }
+                      ]
+                    }
                   ]
                 }
               ]
@@ -212,5 +238,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '68a6332c14b01a7c95f02e54acbb8ded';
+(node/*: any*/).hash = '8e1cd862e62e8a15ab2cb141502f25f4';
 module.exports = node;

@@ -1,12 +1,7 @@
 //@flow
 
 import React, { Component } from 'react'
-import {
-  View,
-  ScrollView,
-  StyleSheet,
-  ActivityIndicator,
-} from 'react-native-web'
+import { View, ScrollView, StyleSheet, ActivityIndicator } from 'react-native'
 
 import type { VaultsData } from '../../types'
 import rpc from './rpc'

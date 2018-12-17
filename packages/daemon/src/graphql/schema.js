@@ -89,13 +89,21 @@ const { nodeInterface, nodeField } = nodeDefinitions(
 
 const idResolver = globalIdField(null, obj => obj.localID)
 
+const webRequestGrants = new GraphQLObjectType({
+  name: 'WebRequestGrants',
+  fields: () => ({
+    granted: { type: new GraphQLList(GraphQLString) },
+    denied: { type: new GraphQLList(GraphQLString) },
+  }),
+})
+
 const appPermissionGrants = new GraphQLObjectType({
   name: 'AppPermissions',
   fields: () => ({
     BLOCKCHAIN_SEND: { type: GraphQLBoolean },
     SWARM_UPLOAD: { type: GraphQLBoolean },
     SWARM_DOWNLOAD: { type: GraphQLBoolean },
-    WEB_REQUEST: { type: new GraphQLList(GraphQLString) },
+    WEB_REQUEST: { type: new GraphQLNonNull(webRequestGrants) },
   }),
 })
 
@@ -447,6 +455,66 @@ const viewerType = new GraphQLObjectType({
 
 // MUTATIONS
 
+const userProfileInput = new GraphQLInputObjectType({
+  name: 'UserProfileInput',
+  fields: () => ({
+    name: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    avatar: {
+      type: GraphQLString,
+    },
+  }),
+})
+
+const createUserIdentityMutation = mutationWithClientMutationId({
+  name: 'CreateUserIdentity',
+  inputFields: {
+    profile: {
+      type: new GraphQLNonNull(userProfileInput),
+    },
+  },
+  outputFields: {
+    user: {
+      type: ownUserIdentityType,
+      resolve: payload => payload.user,
+    },
+    viewer: {
+      type: new GraphQLNonNull(viewerType),
+      resolve: () => ({}),
+    },
+  },
+  mutateAndGetPayload: async (args, ctx) => {
+    const user = ctx.openVault.identities.createOwnUser(args.profile)
+    await ctx.openVault.save()
+    return { user }
+  },
+})
+
+const createDeveloperIdentityMutation = mutationWithClientMutationId({
+  name: 'CreateDeveloperIdentity',
+  inputFields: {
+    profile: {
+      type: new GraphQLNonNull(userProfileInput),
+    },
+  },
+  outputFields: {
+    user: {
+      type: ownDeveloperIdentityType,
+      resolve: payload => payload.user,
+    },
+    viewer: {
+      type: new GraphQLNonNull(viewerType),
+      resolve: () => ({}),
+    },
+  },
+  mutateAndGetPayload: async (args, ctx) => {
+    const user = ctx.openVault.identities.createOwnDeveloper(args.profile)
+    await ctx.openVault.save()
+    return { user }
+  },
+})
+
 const appPermissionDefinitionsInput = new GraphQLInputObjectType({
   name: 'AppPermissionDefinitionsInput',
   fields: () => ({
@@ -552,13 +620,21 @@ const appManifestInput = new GraphQLInputObjectType({
   }),
 })
 
+const webRequestGrantInput = new GraphQLInputObjectType({
+  name: 'WebRequestGrantInput',
+  fields: () => ({
+    granted: { type: new GraphQLList(GraphQLString) },
+    denied: { type: new GraphQLList(GraphQLString) },
+  }),
+})
+
 const permissionGrantsInput = new GraphQLInputObjectType({
   name: 'PermissionGrantsInput',
   fields: () => ({
     BLOCKCHAIN_SEND: { type: GraphQLBoolean },
     SWARM_UPLOAD: { type: GraphQLBoolean },
     SWARM_DOWNLOAD: { type: GraphQLBoolean },
-    WEB_REQUEST: { type: new GraphQLList(GraphQLString) },
+    WEB_REQUEST: { type: new GraphQLNonNull(webRequestGrantInput) },
   }),
 })
 
@@ -612,6 +688,8 @@ const mutationType = new GraphQLObjectType({
   fields: () => ({
     createApp: appCreateMutation,
     installApp: appInstallMutation,
+    createUserIdentity: createUserIdentityMutation,
+    createDeveloperIdentity: createDeveloperIdentityMutation,
   }),
 })
 
