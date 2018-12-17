@@ -135,6 +135,7 @@ export default class CreateAppModal extends Component<Props, State> {
 
     commitMutation(this.context, {
       mutation: appCreateMutation,
+      // $FlowFixMe: Relay type
       variables: { input: params },
       onCompleted: () => {
         this.props.onAppCreated()
@@ -143,9 +144,7 @@ export default class CreateAppModal extends Component<Props, State> {
         // eslint-disable-next-line no-console
         console.log('err:', err)
         const msg =
-          err.data && err.data.length
-            ? err.data[0].message
-            : 'Sorry, there was a problem creating your app.'
+          err.message || 'Sorry, there was a problem creating your app.'
         this.setState({
           errorMsg: msg,
         })
