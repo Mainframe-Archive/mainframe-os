@@ -19,7 +19,11 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
-} from 'react-native-web'
+} from 'react-native'
+
+import { ThemeProvider as MFThemeProvider } from '@morpheus-ui/core'
+
+import THEME from '../theme'
 
 import type { VaultsData } from '../../types'
 
@@ -296,7 +300,7 @@ export default class App extends Component<{}, State> {
     return <Fragment>{gridRows}</Fragment>
   }
 
-  render() {
+  renderInside() {
     if (!this.state.vaultsData) {
       return (
         <View style={styles.loadingContainer}>
@@ -304,6 +308,7 @@ export default class App extends Component<{}, State> {
         </View>
       )
     }
+
     if (!this.state.vaultsData.defaultVault) {
       return this.renderOnboarding()
     }
@@ -395,6 +400,12 @@ export default class App extends Component<{}, State> {
         </View>
         {modal}
       </View>
+    )
+  }
+
+  render() {
+    return (
+      <MFThemeProvider theme={THEME}>{this.renderInside()}</MFThemeProvider>
     )
   }
 }

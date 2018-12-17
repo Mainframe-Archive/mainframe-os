@@ -10,7 +10,7 @@ import {
   ScrollView,
 } from 'react-native-web'
 
-import Button from '../UIComponents/Button'
+import { Button } from '@morpheus-ui/core'
 import Text from '../UIComponents/Text'
 import colors from '../colors'
 
