@@ -1,14 +1,20 @@
 //@flow
 
 import React, { Component } from 'react'
-import { StyleSheet, ActivityIndicator } from 'react-native-web'
+import { ActivityIndicator } from 'react-native'
 import { uniqueID } from '@mainframe/utils-id'
 
-import Button from '../UIComponents/Button'
-import MFTextInput from '../UIComponents/TextInput'
-import Text from '../UIComponents/Text'
+import { Button, TextField, Row, Column, Text } from '@morpheus-ui/core'
+import CircleArrowRight from '@morpheus-ui/icons/CircleArrowRight'
+import {
+  Form,
+  type FormSubmitPayload,
+  type FieldValidateFunctionParams,
+} from '@morpheus-ui/forms'
+
+import styled from 'styled-components/native'
+
 import OnboardContainer from '../UIComponents/OnboardContainer'
-import colors from '../colors'
 
 import rpc from './rpc'
 
@@ -18,39 +24,26 @@ type Props = {
 
 type State = {
   error?: ?string,
-  password: string,
-  confirmPassword: string,
   awaitingResponse?: boolean,
 }
 
-export default class CreateVaultView extends Component<Props, State> {
-  constructor(props: Props) {
-    super(props)
-    this.state = {
-      password: '',
-      confirmPassword: '',
-    }
-  }
+const FormContainer = styled.View`
+  max-width: 260px;
+`
 
-  onPressCreateVault = () => {
-    const { password, confirmPassword } = this.state
-    if (password.length < 8) {
+export default class CreateVaultView extends Component<Props, State> {
+  state = {}
+
+  onSubmit = (payload: FormSubmitPayload) => {
+    if (payload.valid) {
+      const { password } = payload.fields
       this.setState({
-        error: 'Password must be at least 8 characters',
+        error: null,
+        awaitingResponse: true,
       })
-      return
-    } else if (password !== confirmPassword) {
-      this.setState({
-        error: 'Passwords do not match',
-      })
-      return
+      const label = uniqueID()
+      this.createVault(password, label)
     }
-    this.setState({
-      error: null,
-      awaitingResponse: true,
-    })
-    const label = uniqueID()
-    this.createVault(password, label)
   }
 
   async createVault(password: string, label: string) {
@@ -67,68 +60,77 @@ export default class CreateVaultView extends Component<Props, State> {
     }
   }
 
-  onChangePassword = (value: string) => {
-    this.setState({
-      password: value,
-    })
+  passwordValidation = ({ value }: FieldValidateFunctionParams) => {
+    if (value && typeof value === 'string' && value.length < 8) {
+      return 'Password must be at least 8 characters'
+    }
   }
 
-  onChangeConfirmPassword = (value: string) => {
-    this.setState({
-      confirmPassword: value,
-    })
+  confirmPasswordValidation = ({
+    value,
+    values,
+  }: FieldValidateFunctionParams) => {
+    if (values && value !== values.password) {
+      return 'Passwords do not match'
+    }
+    return ''
   }
 
   render() {
     const errorMsg = this.state.error ? (
-      <Text style={styles.errorLabel}>{this.state.error}</Text>
+      <Row size={1}>
+        <Column>
+          <Text variant="error">{this.state.error}</Text>
+        </Column>
+      </Row>
     ) : null
     const action = this.state.awaitingResponse ? (
       <ActivityIndicator />
     ) : (
       <Button
-        title="Create Vault"
+        title="CONTINUE"
+        variant="onboarding"
+        Icon={CircleArrowRight}
         testID="create-vault-button-submit"
-        onPress={this.onPressCreateVault}
+        submit
       />
     )
     return (
       <OnboardContainer
         title="Welcome"
-        description="This is where we securely store your files, wallets and identities.">
-        <MFTextInput
-          secureTextEntry
-          style={styles.input}
-          onChangeText={this.onChangePassword}
-          value={this.state.password}
-          placeholder="Password"
-          testID="create-vault-input-password"
-        />
-        <MFTextInput
-          secureTextEntry
-          style={styles.input}
-          onChangeText={this.onChangeConfirmPassword}
-          value={this.state.confirmPassword}
-          placeholder="Confirm Password"
-          testID="create-vault-input-confirm-password"
-        />
-        {errorMsg}
-        {action}
+        description="Let’s quickly secure your MainframeOS vault.">
+        <FormContainer>
+          <Form onSubmit={this.onSubmit}>
+            <Row size={1} top>
+              <Column>
+                <TextField
+                  label="Password"
+                  name="password"
+                  type="password"
+                  testID="create-vault-input-password"
+                  validation={this.passwordValidation}
+                  required
+                />
+              </Column>
+              <Column>
+                <TextField
+                  label="Confirm Password"
+                  name="confirmPassword"
+                  type="password"
+                  testID="create-vault-input-confirm-password"
+                  validation={this.confirmPasswordValidation}
+                />
+              </Column>
+            </Row>
+            {errorMsg}
+            <Row size={2} top>
+              <Column styles="align-items:flex-end;" smOffset={1}>
+                {action}
+              </Column>
+            </Row>
+          </Form>
+        </FormContainer>
       </OnboardContainer>
     )
   }
 }
-
-const PADDING = 10
-
-const styles = StyleSheet.create({
-  input: {
-    marginBottom: PADDING * 2,
-    maxWidth: 300,
-  },
-  errorLabel: {
-    fontSize: 14,
-    paddingBottom: PADDING,
-    color: colors.PRIMARY_RED,
-  },
-})
