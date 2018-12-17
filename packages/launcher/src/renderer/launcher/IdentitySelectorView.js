@@ -12,7 +12,7 @@ import {
 } from 'react-native-web'
 import { QueryRenderer, graphql, commitMutation } from 'react-relay'
 
-import Button from '../UIComponents/Button'
+import { Button } from '@morpheus-ui/core'
 import Text from '../UIComponents/Text'
 import colors from '../colors'
 import { EnvironmentContext } from './RelayEnvironment'

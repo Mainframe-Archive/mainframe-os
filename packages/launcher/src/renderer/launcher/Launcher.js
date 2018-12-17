@@ -3,6 +3,10 @@
 import React, { Component } from 'react'
 import { View, ScrollView, StyleSheet, ActivityIndicator } from 'react-native'
 
+import { ThemeProvider as MFThemeProvider } from '@morpheus-ui/core'
+
+import THEME from '../theme'
+
 import type { VaultsData } from '../../types'
 import rpc from './rpc'
 import { EnvironmentContext } from './RelayEnvironment'
@@ -62,7 +66,7 @@ export default class App extends Component<{}, State> {
     return <AppsScreen />
   }
 
-  render() {
+  renderInside() {
     if (!this.state.vaultsData) {
       return (
         <View style={styles.loadingContainer}>
@@ -70,6 +74,7 @@ export default class App extends Component<{}, State> {
         </View>
       )
     }
+
     if (!this.state.vaultsData.defaultVault) {
       return this.renderOnboarding()
     }
@@ -90,6 +95,12 @@ export default class App extends Component<{}, State> {
           <ScrollView>{this.renderScreen()}</ScrollView>
         </View>
       </View>
+    )
+  }
+
+  render() {
+    return (
+      <MFThemeProvider theme={THEME}>{this.renderInside()}</MFThemeProvider>
     )
   }
 }

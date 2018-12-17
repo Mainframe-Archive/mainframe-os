@@ -11,5 +11,6 @@
 [lints]
 
 [options]
+module.name_mapper='^react-native$' -> 'react-native-web'
 
 [strict]
