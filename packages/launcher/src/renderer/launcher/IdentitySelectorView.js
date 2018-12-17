@@ -10,14 +10,12 @@ import {
   ScrollView,
   ActivityIndicator,
 } from 'react-native-web'
-import { QueryRenderer, graphql } from 'react-relay'
+import { QueryRenderer, graphql, commitMutation } from 'react-relay'
 
 import { Button } from '@morpheus-ui/core'
 import Text from '../UIComponents/Text'
 import colors from '../colors'
 import { EnvironmentContext } from './RelayEnvironment'
-
-import rpc from './rpc'
 
 type ContainerProps = {
   type: 'user' | 'developer',
@@ -45,9 +43,70 @@ type Props = ContainerProps & {
 type State = {
   newName: string,
   showCreateIdForm?: boolean,
+  errorMsg?: ?string,
 }
 
+export const createUserMutation = graphql`
+  mutation IdentitySelectorViewCreateUserIdentityMutation(
+    $input: CreateUserIdentityInput!
+  ) {
+    createUserIdentity(input: $input) {
+      user {
+        localID
+        profile {
+          name
+        }
+      }
+      viewer {
+        identities {
+          ownUsers {
+            profile {
+              name
+            }
+          }
+          ownDevelopers {
+            profile {
+              name
+            }
+          }
+        }
+      }
+    }
+  }
+`
+
+export const createDeveloperMutation = graphql`
+  mutation IdentitySelectorViewCreateDeveloperIdentityMutation(
+    $input: CreateDeveloperIdentityInput!
+  ) {
+    createDeveloperIdentity(input: $input) {
+      user {
+        localID
+        profile {
+          name
+        }
+      }
+      viewer {
+        identities {
+          ownUsers {
+            profile {
+              name
+            }
+          }
+          ownDevelopers {
+            profile {
+              name
+            }
+          }
+        }
+      }
+    }
+  }
+`
+
 class IdentitySelectorView extends Component<Props, State> {
+  static contextType = EnvironmentContext
+
   state = {
     newName: '',
   }
@@ -57,28 +116,34 @@ class IdentitySelectorView extends Component<Props, State> {
   }
 
   createId = async () => {
-    try {
-      let createIdentity
-      switch (this.props.type) {
-        case 'developer':
-          createIdentity = rpc.createDeveloperIdentity
-          break
-        case 'user':
-        default:
-          createIdentity = rpc.createUserIdentity
-      }
-      const res = await createIdentity({
+    const mutation =
+      this.props.type === 'user' ? createUserMutation : createDeveloperMutation
+
+    const input = {
+      profile: {
         name: this.state.newName,
-      })
-      this.setState({ newName: '' })
-      if (this.props.onCreatedId) {
-        this.props.onCreatedId(res.id)
-      }
-    } catch (err) {
-      // TODO: Handle error
-      // eslint-disable-next-line no-console
-      console.warn(err)
+      },
     }
+
+    commitMutation(this.context, {
+      mutation: mutation,
+      variables: { input },
+      onCompleted: user => {
+        this.setState({ newName: '' })
+        if (this.props.onCreatedId) {
+          this.props.onCreatedId(user.localID)
+        }
+      },
+      onError: err => {
+        // eslint-disable-next-line no-console
+        console.log('err:', err)
+        const msg =
+          err.message || 'Sorry, there was a problem creating your app.'
+        this.setState({
+          errorMsg: msg,
+        })
+      },
+    })
   }
 
   onChangeName = (value: string) => {

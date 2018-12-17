@@ -398,12 +398,21 @@ export default class IdentitiesRepository {
     return this.addIdentity(OwnAppIdentity.create(keyPair))
   }
 
-  createOwnDeveloper(profile: OwnDeveloperProfile, keyPair?: KeyPair) {
-    return this.addIdentity(OwnDeveloperIdentity.create(profile, keyPair))
+  createOwnDeveloper(
+    profile: OwnDeveloperProfile,
+    keyPair?: KeyPair,
+  ): OwnDeveloperIdentity {
+    const id = this.addIdentity(OwnDeveloperIdentity.create(profile, keyPair))
+    const dev = this.getOwnDeveloper(id)
+    if (dev) return dev
+    else throw new Error('Error creating developer')
   }
 
-  createOwnUser(profile: Object = {}, keyPair?: KeyPair) {
-    return this.addIdentity(OwnUserIdentity.create(profile, keyPair))
+  createOwnUser(profile: Object = {}, keyPair?: KeyPair): OwnUserIdentity {
+    const id = this.addIdentity(OwnUserIdentity.create(profile, keyPair))
+    const user = this.getOwnUser(id)
+    if (user) return user
+    else throw new Error('Error creating user')
   }
 
   createPeerApp(key: string | Buffer) {
