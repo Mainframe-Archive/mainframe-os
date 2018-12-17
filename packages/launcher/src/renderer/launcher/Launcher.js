@@ -1,12 +1,7 @@
 //@flow
 
 import React, { Component } from 'react'
-import {
-  View,
-  ScrollView,
-  StyleSheet,
-  ActivityIndicator,
-} from 'react-native'
+import { View, ScrollView, StyleSheet, ActivityIndicator } from 'react-native'
 
 import { ThemeProvider as MFThemeProvider } from '@morpheus-ui/core'
 

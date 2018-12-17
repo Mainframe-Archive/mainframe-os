@@ -168,7 +168,7 @@ export const getAll = (ctx: RequestContext): AppGetAllResult => {
         return acc
       }, [])
       return {
-        appID: toClientID(appID),
+        localID: toClientID(appID),
         name: app instanceof OwnApp ? app.data.name : app.manifest.name,
         manifest: app.manifest || app._data,
         users: users,

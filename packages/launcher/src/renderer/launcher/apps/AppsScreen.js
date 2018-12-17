@@ -35,8 +35,10 @@ export default class AppsScreenRenderer extends Component<{}> {
         environment={this.context}
         query={graphql`
           query AppsScreenQuery {
-            apps {
-              ...AppsScreen_apps
+            viewer {
+              apps {
+                ...AppsScreen_apps
+              }
             }
           }
         `}
@@ -45,7 +47,9 @@ export default class AppsScreenRenderer extends Component<{}> {
           if (error || !props) {
             return <RelayLoaderView error={error ? error.message : undefined} />
           } else {
-            return <AppsScreenRelayContainer {...props} {...this.props} />
+            return (
+              <AppsScreenRelayContainer {...props.viewer} {...this.props} />
+            )
           }
         }}
       />

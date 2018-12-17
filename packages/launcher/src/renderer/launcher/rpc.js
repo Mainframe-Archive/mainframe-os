@@ -45,7 +45,7 @@ export default {
     return rpc.request('identity_createUser', { profile: data })
   },
   createDeveloperIdentity: (data: Object) => {
-    return rpc.request('identity_createDeveloper', { data })
+    return rpc.request('identity_createDeveloper', { profile: data })
   },
   getOwnUserIdentities: () => rpc.request('identity_getOwnUsers'),
   getOwnDevIdentities: () => rpc.request('identity_getOwnDevelopers'),
