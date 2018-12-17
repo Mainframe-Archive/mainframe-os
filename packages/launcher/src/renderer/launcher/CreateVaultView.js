@@ -104,6 +104,7 @@ export default class CreateVaultView extends Component<Props, State> {
             <Row size={1} top>
               <Column>
                 <TextField
+                  autoFocus
                   label="Password"
                   name="password"
                   type="password"
