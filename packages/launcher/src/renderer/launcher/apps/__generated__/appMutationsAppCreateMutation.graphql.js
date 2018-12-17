@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 59ede5b234057ab96e8955f089cd67a6
+ * @relayHash b19e04fee1c51186218a882c44f7b522
  */
 
 /* eslint-disable */
@@ -110,7 +110,10 @@ fragment AppItem_installedApp on App {
         permissionsChecked
         grants {
           BLOCKCHAIN_SEND
-          WEB_REQUEST
+          WEB_REQUEST {
+            granted
+            denied
+          }
         }
       }
     }
@@ -202,22 +205,21 @@ v5 = {
 v6 = {
   "kind": "ScalarField",
   "alias": null,
-  "name": "WEB_REQUEST",
-  "args": null,
-  "storageKey": null
-},
-v7 = {
-  "kind": "ScalarField",
-  "alias": null,
   "name": "BLOCKCHAIN_SEND",
   "args": null,
   "storageKey": null
 },
-v8 = [
-  v6,
-  v7
+v7 = [
+  {
+    "kind": "ScalarField",
+    "alias": null,
+    "name": "WEB_REQUEST",
+    "args": null,
+    "storageKey": null
+  },
+  v6
 ],
-v9 = {
+v8 = {
   "kind": "LinkedField",
   "alias": null,
   "name": "permissions",
@@ -234,7 +236,7 @@ v9 = {
       "args": null,
       "concreteType": "AppPermissionDefinitions",
       "plural": false,
-      "selections": v8
+      "selections": v7
     },
     {
       "kind": "LinkedField",
@@ -244,11 +246,11 @@ v9 = {
       "args": null,
       "concreteType": "AppPermissionDefinitions",
       "plural": false,
-      "selections": v8
+      "selections": v7
     }
   ]
 },
-v10 = {
+v9 = {
   "kind": "LinkedField",
   "alias": null,
   "name": "identity",
@@ -277,7 +279,7 @@ return {
   "operationKind": "mutation",
   "name": "appMutationsAppCreateMutation",
   "id": null,
-  "text": "mutation appMutationsAppCreateMutation(\n  $input: AppCreateMutationInput!\n) {\n  createApp(input: $input) {\n    app {\n      id\n      localID\n      name\n    }\n    viewer {\n      apps {\n        ...AppsView_apps\n      }\n      id\n    }\n  }\n}\n\nfragment AppsView_apps on AppsQuery {\n  installed {\n    ...AppItem_installedApp\n    id\n  }\n  own {\n    ...AppItem_ownApp\n    id\n  }\n}\n\nfragment AppItem_installedApp on App {\n  localID\n  name\n  manifest {\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n    }\n  }\n  users {\n    localID\n    identity {\n      profile {\n        name\n      }\n      id\n    }\n    settings {\n      permissionsSettings {\n        permissionsChecked\n        grants {\n          BLOCKCHAIN_SEND\n          WEB_REQUEST\n        }\n      }\n    }\n    id\n  }\n}\n\nfragment AppItem_ownApp on OwnApp {\n  localID\n  name\n  versions {\n    version\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n    }\n  }\n  users {\n    localID\n    identity {\n      profile {\n        name\n      }\n      id\n    }\n    id\n  }\n}\n",
+  "text": "mutation appMutationsAppCreateMutation(\n  $input: AppCreateMutationInput!\n) {\n  createApp(input: $input) {\n    app {\n      id\n      localID\n      name\n    }\n    viewer {\n      apps {\n        ...AppsView_apps\n      }\n      id\n    }\n  }\n}\n\nfragment AppsView_apps on AppsQuery {\n  installed {\n    ...AppItem_installedApp\n    id\n  }\n  own {\n    ...AppItem_ownApp\n    id\n  }\n}\n\nfragment AppItem_installedApp on App {\n  localID\n  name\n  manifest {\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n    }\n  }\n  users {\n    localID\n    identity {\n      profile {\n        name\n      }\n      id\n    }\n    settings {\n      permissionsSettings {\n        permissionsChecked\n        grants {\n          BLOCKCHAIN_SEND\n          WEB_REQUEST {\n            granted\n            denied\n          }\n        }\n      }\n    }\n    id\n  }\n}\n\nfragment AppItem_ownApp on OwnApp {\n  localID\n  name\n  versions {\n    version\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n    }\n  }\n  users {\n    localID\n    identity {\n      profile {\n        name\n      }\n      id\n    }\n    id\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -380,7 +382,7 @@ return {
                         "concreteType": "AppManifestData",
                         "plural": false,
                         "selections": [
-                          v9
+                          v8
                         ]
                       },
                       {
@@ -393,7 +395,7 @@ return {
                         "plural": true,
                         "selections": [
                           v3,
-                          v10,
+                          v9,
                           {
                             "kind": "LinkedField",
                             "alias": null,
@@ -428,8 +430,32 @@ return {
                                     "concreteType": "AppPermissions",
                                     "plural": false,
                                     "selections": [
-                                      v7,
-                                      v6
+                                      v6,
+                                      {
+                                        "kind": "LinkedField",
+                                        "alias": null,
+                                        "name": "WEB_REQUEST",
+                                        "storageKey": null,
+                                        "args": null,
+                                        "concreteType": "WebRequestGrants",
+                                        "plural": false,
+                                        "selections": [
+                                          {
+                                            "kind": "ScalarField",
+                                            "alias": null,
+                                            "name": "granted",
+                                            "args": null,
+                                            "storageKey": null
+                                          },
+                                          {
+                                            "kind": "ScalarField",
+                                            "alias": null,
+                                            "name": "denied",
+                                            "args": null,
+                                            "storageKey": null
+                                          }
+                                        ]
+                                      }
                                     ]
                                   }
                                 ]
@@ -469,7 +495,7 @@ return {
                             "args": null,
                             "storageKey": null
                           },
-                          v9
+                          v8
                         ]
                       },
                       {
@@ -482,7 +508,7 @@ return {
                         "plural": true,
                         "selections": [
                           v3,
-                          v10,
+                          v9,
                           v2
                         ]
                       },

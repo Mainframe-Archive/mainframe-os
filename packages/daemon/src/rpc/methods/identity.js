@@ -37,9 +37,9 @@ export const createDeveloper = {
     ctx: RequestContext,
     params: IdentityCreateDeveloperParams,
   ): Promise<IdentityCreateResult> => {
-    const id = ctx.openVault.identities.createOwnDeveloper(params.profile)
+    const dev = ctx.openVault.identities.createOwnDeveloper(params.profile)
     await ctx.openVault.save()
-    return { id: toClientID(id) }
+    return { id: toClientID(dev.localID) }
   },
 }
 
@@ -49,9 +49,9 @@ export const createUser = {
     ctx: RequestContext,
     params: IdentityCreateUserParams,
   ): Promise<IdentityCreateResult> => {
-    const id = ctx.openVault.identities.createOwnUser(params.profile)
+    const user = ctx.openVault.identities.createOwnUser(params.profile)
     await ctx.openVault.save()
-    return { id: toClientID(id) }
+    return { id: toClientID(user.localID) }
   },
 }
 

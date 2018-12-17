@@ -31,8 +31,13 @@ export default class AppItem extends Component<Props> {
   render() {
     const { app, isOwn, onOpenApp } = this.props
     const open = () => onOpenApp(app, !!isOwn)
+    const testID = isOwn ? 'own-app-item' : 'installed-app-item'
     return (
-      <TouchableOpacity onPress={open} key={app.localID} style={styles.app}>
+      <TouchableOpacity
+        onPress={open}
+        key={app.localID}
+        style={styles.app}
+        testID={testID}>
         <Text style={styles.nameLabel}>{app.name}</Text>
         <Text style={styles.idLabel}>{app.localID}</Text>
       </TouchableOpacity>
@@ -76,7 +81,10 @@ export const InstalledAppItem = createFragmentContainer(InstalledView, {
             permissionsChecked
             grants {
               BLOCKCHAIN_SEND
-              WEB_REQUEST
+              WEB_REQUEST {
+                granted
+                denied
+              }
             }
           }
         }
