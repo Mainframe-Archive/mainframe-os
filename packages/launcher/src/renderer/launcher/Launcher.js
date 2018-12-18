@@ -14,6 +14,7 @@ import OnboardView from './OnboardView'
 import UnlockVaultView from './UnlockVaultView'
 import SideMenu, { type ScreenNames } from './SideMenu'
 import AppsScreen from './apps/AppsScreen'
+import IdentitiesScreen from './identities/IdentitiesScreen'
 
 type State = {
   vaultsData?: VaultsData,
@@ -63,7 +64,12 @@ export default class App extends Component<{}, State> {
   }
 
   renderScreen() {
-    return <AppsScreen />
+    switch (this.state.openScreen) {
+      case 'apps':
+        return <AppsScreen />
+      case 'identities':
+        return <IdentitiesScreen />
+    }
   }
 
   renderInside() {
