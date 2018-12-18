@@ -90,7 +90,10 @@ export default class App extends Component<{}, State> {
 
     return (
       <View style={styles.container} testID="launcher-view">
-        <SideMenu onSelectMenuItem={this.setOpenScreen} />
+        <SideMenu
+          selected={this.state.openScreen}
+          onSelectMenuItem={this.setOpenScreen}
+        />
         <View style={styles.contentContainer}>
           <ScrollView>{this.renderScreen()}</ScrollView>
         </View>
