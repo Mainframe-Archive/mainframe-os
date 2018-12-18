@@ -135,10 +135,8 @@ class IdentitySelectorView extends Component<Props, State> {
         }
       },
       onError: err => {
-        // eslint-disable-next-line no-console
-        console.log('err:', err)
         const msg =
-          err.message || 'Sorry, there was a problem creating your app.'
+          err.message || 'Sorry, there was a problem creating your identity.'
         this.setState({
           errorMsg: msg,
         })

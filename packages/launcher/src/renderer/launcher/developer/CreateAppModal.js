@@ -141,8 +141,6 @@ export default class CreateAppModal extends Component<Props, State> {
         this.props.onAppCreated()
       },
       onError: err => {
-        // eslint-disable-next-line no-console
-        console.log('err:', err)
         const msg =
           err.message || 'Sorry, there was a problem creating your app.'
         this.setState({
