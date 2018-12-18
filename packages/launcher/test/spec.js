@@ -73,10 +73,6 @@ describe('Application launch', function() {
   })
 
   it('creates an app', async function() {
-    const devButtonSelector = '[data-testid="launcher-toggle-dev-button"]'
-    await this.app.client.waitForExist(devButtonSelector, 2000)
-    await this.app.client.element(devButtonSelector).click()
-
     const createAppSelector = '[data-testid="launcher-create-app-button"]'
     await this.app.client.waitForExist(createAppSelector, 2000)
     await this.app.client.element(createAppSelector).click()
@@ -120,16 +116,12 @@ describe('Application launch', function() {
     await this.app.client.waitForExist(completeCreateAppBtn, 5000)
     await this.app.client.element(completeCreateAppBtn).click()
 
-    const appItemSelector = '[data-testid="launcher-open-app"]'
+    const appItemSelector = '[data-testid="own-app-item"]'
     await this.app.client.waitForExist(appItemSelector, 5000)
     await this.app.client.element(appItemSelector).click()
 
-    await this.app.client.waitForExist(identityInputSelector, 2000)
-    await this.app.client.element(identityInputSelector).setValue('user')
-    await this.app.client.element(identityButtonSelector).click()
-
-    const userIdentity = '[data-testid="identity-selector-select-user"]'
-    await this.app.client.waitForExist(userIdentity, 2000)
+    const userIdentity = '[data-testid="identity-selector-select-tester"]'
+    await this.app.client.waitForExist(userIdentity, 5000)
     await this.app.client.element(userIdentity).click()
 
     const count = await this.app.client.getWindowCount()
@@ -137,10 +129,6 @@ describe('Application launch', function() {
   })
 
   it('completes app install flow and opens app', async function() {
-    const devButtonSelector = '[data-testid="launcher-toggle-dev-button"]'
-    await this.app.client.waitForExist(devButtonSelector, 2000)
-    await this.app.client.element(devButtonSelector).click()
-
     await this.app.client
       .element('[data-testid="launcher-install-app-button"]')
       .click()
@@ -167,7 +155,7 @@ describe('Application launch', function() {
     await this.app.client.waitForExist(identitySelector, 2000)
     await this.app.client.element(identitySelector).click()
 
-    const appItemSelector = '[data-testid="launcher-open-app"]'
+    const appItemSelector = '[data-testid="installed-app-item"]'
     await this.app.client.waitForExist(appItemSelector, 5000)
     await this.app.client.element(appItemSelector).click()
 

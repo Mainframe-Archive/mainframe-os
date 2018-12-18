@@ -9,6 +9,7 @@ import IdentityAPIs from './apis/Identity'
 import PssAPIs from './apis/Pss'
 import VaultAPIs from './apis/Vault'
 import WalletAPIs from './apis/Wallet'
+import type { GraphQLQueryParams, GraphQLQueryResult } from './types'
 
 export { idType } from '@mainframe/utils-id'
 export * from './schema'
@@ -41,5 +42,11 @@ export default class MainframeClient {
 
   apiVersion(): Promise<number> {
     return this._rpc.request('api_version')
+  }
+
+  // GraphQL
+
+  graphql(params: GraphQLQueryParams): Promise<GraphQLQueryResult> {
+    return this._rpc.request('graphql_query', params)
   }
 }

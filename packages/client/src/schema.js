@@ -35,7 +35,7 @@ export const APP_CLOSE_SCHEMA = {
 
 export const APP_CREATE_SCHEMA = {
   contentsPath: 'string',
-  developerID: OPTIONAL_LOCAL_ID_SCHEMA,
+  developerID: LOCAL_ID_SCHEMA,
   name: 'string',
   version: OPTIONAL_SEMVER_SCHEMA,
   permissions: OPTIONAL_PERMISSIONS_REQUIREMENTS_SCHEMA,
@@ -120,6 +120,80 @@ export const APP_WRITE_MANIFEST_SCHEMA = {
   version: OPTIONAL_SEMVER_SCHEMA,
 }
 
+export const GRAPHQL_QUERY_SCHEMA = {
+  query: 'string',
+  variables: {
+    type: 'object',
+    optional: true,
+  },
+}
+
+export const IDENTITY_CREATE_OWN_USER_SCHEMA = {
+  profile: {
+    type: 'object',
+    props: {
+      name: 'string',
+      avatar: { type: 'string', optional: true },
+    },
+  },
+}
+
+export const IDENTITY_CREATE_OWN_DEVELOPER_SCHEMA = {
+  profile: {
+    type: 'object',
+    props: {
+      name: 'string',
+      avatar: { type: 'string', optional: true },
+    },
+  },
+}
+
+export const IDENTITY_PUBLIC_FEEDS_SCHEMA = {
+  type: 'object',
+  optional: true,
+  props: {
+    public: { type: 'string', optional: true },
+  },
+}
+
+export const IDENTITY_ADD_PEER_SCHEMA = {
+  key: 'string',
+  publicFeed: 'string',
+  profile: {
+    type: 'object',
+    props: {
+      name: { type: 'string', optional: true },
+      avatar: { type: 'string', optional: true },
+    },
+  },
+  otherFeeds: IDENTITY_PUBLIC_FEEDS_SCHEMA,
+}
+
+export const IDENTITY_ADD_PEER_BY_FEED_SCHEMA = {
+  feedHash: 'string',
+}
+
+export const IDENTITY_DELETE_CONTACT_SCHEMA = {
+  userID: LOCAL_ID_SCHEMA,
+  contactID: LOCAL_ID_SCHEMA,
+}
+
+export const IDENTITY_GET_USER_CONTACTS_SCHEMA = {
+  userID: LOCAL_ID_SCHEMA,
+}
+
+export const IDENTITY_LINK_ETH_WALLET_SCHEMA = {
+  id: LOCAL_ID_SCHEMA,
+  walletID: LOCAL_ID_SCHEMA,
+  address: 'string',
+}
+
+export const IDENTITY_UNLINK_ETH_WALLET_SCHEMA = {
+  id: LOCAL_ID_SCHEMA,
+  walletID: LOCAL_ID_SCHEMA,
+  address: 'string',
+}
+
 export const VAULT_SCHEMA = {
   path: 'string',
   password: 'string',
@@ -188,50 +262,4 @@ export const WALLET_SIGN_ETH_TRANSACTION_SCHEMA = ETH_TRANSACTION_SCHEMA
 export const WALLET_SIGN_TRANSACTION_SCHEMA = {
   chain: WALLET_SUPPORTED_CHAIN_SCHEMA,
   transactionData: 'object',
-}
-
-export const IDENTITY_PUBLIC_FEEDS_SCHEMA = {
-  type: 'object',
-  optional: true,
-  props: {
-    public: { type: 'string', optional: true },
-  },
-}
-
-export const IDENTITY_ADD_PEER_SCHEMA = {
-  key: 'string',
-  publicFeed: 'string',
-  profile: {
-    type: 'object',
-    props: {
-      name: { type: 'string', optional: true },
-      avatar: { type: 'string', optional: true },
-    },
-  },
-  otherFeeds: IDENTITY_PUBLIC_FEEDS_SCHEMA,
-}
-
-export const IDENTITY_ADD_PEER_BY_FEED_SCHEMA = {
-  feedHash: 'string',
-}
-
-export const IDENTITY_DELETE_CONTACT_SCHEMA = {
-  userID: LOCAL_ID_SCHEMA,
-  contactID: LOCAL_ID_SCHEMA,
-}
-
-export const IDENTITY_GET_USER_CONTACTS_SCHEMA = {
-  userID: LOCAL_ID_SCHEMA,
-}
-
-export const IDENTITY_LINK_ETH_WALLET_SCHEMA = {
-  id: LOCAL_ID_SCHEMA,
-  walletID: LOCAL_ID_SCHEMA,
-  address: 'string',
-}
-
-export const IDENTITY_UNLINK_ETH_WALLET_SCHEMA = {
-  id: LOCAL_ID_SCHEMA,
-  walletID: LOCAL_ID_SCHEMA,
-  address: 'string',
 }

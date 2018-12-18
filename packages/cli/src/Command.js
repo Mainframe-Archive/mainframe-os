@@ -79,12 +79,13 @@ export default class Command extends Cmd {
   }
 
   async init() {
-    const { flags } = this.parse(this.constructor)
+    const { args, flags } = this.parse(this.constructor)
     const name = flags.env || Environment.getDefault()
     if (name == null) {
       throw new Error('Missing environment')
     }
     this.env = Environment.load(name)
+    this.args = args
     this.flags = flags
   }
 

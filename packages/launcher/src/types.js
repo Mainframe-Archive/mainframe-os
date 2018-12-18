@@ -24,7 +24,7 @@ export type AppSession = AppOpenResult
 
 export type AppSessions = {
   [appID: ID]: {
-    [userID: ID]: AppSession,
+    [userID: string]: AppSession,
   },
 }
 
