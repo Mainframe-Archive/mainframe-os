@@ -1,19 +1,42 @@
 //@flow
 
 import React, { Component } from 'react'
-import { View, ScrollView, StyleSheet, ActivityIndicator } from 'react-native'
-
+import { ScrollView, ActivityIndicator } from 'react-native'
+import styled from 'styled-components/native'
 import { ThemeProvider as MFThemeProvider } from '@morpheus-ui/core'
 
 import THEME from '../theme'
 
 import type { VaultsData } from '../../types'
+import OSLogo from '../UIComponents/MainframeOSLogo'
 import rpc from './rpc'
 import { EnvironmentContext } from './RelayEnvironment'
+
 import OnboardView from './OnboardView'
 import UnlockVaultView from './UnlockVaultView'
+import CompleteOnboardSession from './CompleteOnboardSession'
 import SideMenu, { type ScreenNames } from './SideMenu'
 import AppsScreen from './apps/AppsScreen'
+
+const Container = styled.View`
+  flex-direction: 'row';
+  height: '100vh';
+  flex: 1;
+`
+
+const ContentContainer = styled.View`
+  padding: 20px 50px;
+  flex: 1;
+`
+
+const LoadingContainer = styled.View`
+  flex: 1;
+  justify-content: 'center';
+`
+
+const Header = styled.View`
+  height: 50px;
+`
 
 type State = {
   vaultsData?: VaultsData,
@@ -69,9 +92,9 @@ export default class App extends Component<{}, State> {
   renderInside() {
     if (!this.state.vaultsData) {
       return (
-        <View style={styles.loadingContainer}>
+        <LoadingContainer>
           <ActivityIndicator />
-        </View>
+        </LoadingContainer>
       )
     }
 
@@ -89,15 +112,19 @@ export default class App extends Component<{}, State> {
     }
 
     return (
-      <View style={styles.container} testID="launcher-view">
+      <Container testID="launcher-view">
         <SideMenu
           selected={this.state.openScreen}
           onSelectMenuItem={this.setOpenScreen}
         />
-        <View style={styles.contentContainer}>
+        <ContentContainer>
+          <Header>
+            <OSLogo />
+          </Header>
+          <CompleteOnboardSession onSelectItem={() => {}} onSkip={() => {}} />
           <ScrollView>{this.renderScreen()}</ScrollView>
-        </View>
-      </View>
+        </ContentContainer>
+      </Container>
     )
   }
 
@@ -107,19 +134,3 @@ export default class App extends Component<{}, State> {
     )
   }
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    height: '100vh',
-    flex: 1,
-  },
-  contentContainer: {
-    padding: 20,
-    flex: 1,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-})
