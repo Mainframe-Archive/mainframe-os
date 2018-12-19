@@ -7,9 +7,9 @@ const BzzAPI = require('@erebos/api-bzz-node').default
 const getFixture = fixture => path.join(__dirname, '../../../fixtures', fixture)
 
 const timeouts = {
-  unlockVault : 10000,
-  input : 2000,
-  launch : 5000
+  unlockVault: 10000,
+  input: 2000,
+  launch: 5000,
 }
 
 describe('Application launch', function() {
@@ -42,7 +42,7 @@ describe('Application launch', function() {
 
   it('shows an initial window', async function() {
     const count = await this.app.client.getWindowCount()
-    assert.equal(count, 1)
+    assert.strictEqual(count, 1)
   })
 
   // Can be used when testing to save clearing state
@@ -131,7 +131,7 @@ describe('Application launch', function() {
     await this.app.client.element(userIdentity).click()
 
     const count = await this.app.client.getWindowCount()
-    assert.equal(count, 2)
+    assert.strictEqual(count, 2)
   })
 
   it('completes app install flow and opens app', async function() {
@@ -169,18 +169,26 @@ describe('Application launch', function() {
     await this.app.client.element(identitySelector).click()
 
     const count = await this.app.client.getWindowCount()
-    assert.equal(count, 3)
+    assert.strictEqual(count, 3)
   })
 
-  it('bad password warning',async function(){
+  it('bad password warning', async function() {
     await this.app.restart()
     await this.app.client
-        .element('[data-testid="vault-manager-unlock-input"]')
-        .setValue('badpassword')
-      await this.app.client
-        .element('[data-testid="vault-manager-unlock-button"]')
-        .click()
-      await this.app.client.waitForExist('[data-testid="vault-manager-unlock-errorlabel"]', timeouts.unlockVault)
-    assert.equal(await this.app.client.getValue('[data-testid="vault-manager-unlock-errorlabel"]'),'Failed to unlock vault, please check you entered the correct password.')
+      .element('[data-testid="vault-manager-unlock-input"]')
+      .setValue('badpassword')
+    await this.app.client
+      .element('[data-testid="vault-manager-unlock-button"]')
+      .click()
+    await this.app.client.waitForExist(
+      '[data-testid="vault-manager-unlock-errorlabel"]',
+      timeouts.unlockVault,
+    )
+    assert.strictEqual(
+      await this.app.client.getValue(
+        '[data-testid="vault-manager-unlock-errorlabel"]',
+      ),
+      'Failed to unlock vault, please check you entered the correct password.',
+    )
   })
 })
