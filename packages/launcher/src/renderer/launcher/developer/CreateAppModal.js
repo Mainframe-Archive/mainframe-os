@@ -8,6 +8,7 @@ import type {
 import type { ID, AppCreateParams, IdentityOwnData } from '@mainframe/client'
 import { isValidSemver } from '@mainframe/app-manifest'
 import React, { createRef, Component, type ElementRef } from 'react'
+import { commitMutation } from 'react-relay'
 import {
   View,
   ScrollView,
@@ -23,13 +24,15 @@ import Text from '../../UIComponents/Text'
 import TextInput from '../../UIComponents/TextInput'
 import ModalView from '../../UIComponents/ModalView'
 import IdentitySelectorView from '../IdentitySelectorView'
+import { EnvironmentContext } from '../RelayEnvironment'
+import { appCreateMutation } from '../apps/appMutations'
 import PermissionsRequirementsView, {
   PERMISSIONS_DESCRIPTIONS,
 } from './PermissionsRequirements'
 
 type Props = {
   onRequestClose: () => void,
-  onAppCreated: (appID: ID) => void,
+  onAppCreated: () => void,
 }
 
 type AppData = {
@@ -50,6 +53,8 @@ type State = {
 }
 
 export default class CreateAppModal extends Component<Props, State> {
+  static contextType = EnvironmentContext
+
   state = {
     inputValue: '',
     screen: 'info',
@@ -128,20 +133,21 @@ export default class CreateAppModal extends Component<Props, State> {
       return
     }
 
-    try {
-      const res = await rpc.createApp(params)
-      this.props.onAppCreated(res.id)
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.log('err:', err.data)
-      const msg =
-        err.data && err.data.length
-          ? err.data[0].message
-          : 'Sorry, there was a problem creating your app.'
-      this.setState({
-        errorMsg: msg,
-      })
-    }
+    commitMutation(this.context, {
+      mutation: appCreateMutation,
+      // $FlowFixMe: Relay type
+      variables: { input: params },
+      onCompleted: () => {
+        this.props.onAppCreated()
+      },
+      onError: err => {
+        const msg =
+          err.message || 'Sorry, there was a problem creating your app.'
+        this.setState({
+          errorMsg: msg,
+        })
+      },
+    })
   }
 
   onPressSelectContentsFolder = () => {
@@ -268,7 +274,6 @@ export default class CreateAppModal extends Component<Props, State> {
           enableCreate
           type="developer"
           onSelectId={this.onSelectId}
-          identities={this.state.devIdentities}
           onCreatedId={this.onCreatedId}
         />
       </View>

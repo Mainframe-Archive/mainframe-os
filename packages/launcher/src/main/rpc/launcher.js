@@ -21,8 +21,15 @@ import {
   type AppSetUserPermissionsSettingsParams,
   APP_SET_USER_PERMISSIONS_SETTINGS_SCHEMA,
   type IdentityCreateResult,
+  type IdentityCreateUserParams,
+  type IdentityCreateDeveloperParams,
   type IdentityGetOwnUsersResult,
   type IdentityGetOwnDevelopersResult,
+  IDENTITY_CREATE_OWN_USER_SCHEMA,
+  IDENTITY_CREATE_OWN_DEVELOPER_SCHEMA,
+  GRAPHQL_QUERY_SCHEMA,
+  type GraphQLQueryParams,
+  type GraphQLQueryResult,
   VAULT_SCHEMA,
   type VaultParams,
   type WalletCreateHDResult,
@@ -107,23 +114,19 @@ export default {
 
   // Identities
   identity_createUser: {
-    params: {
-      data: 'any',
-    },
+    params: IDENTITY_CREATE_OWN_USER_SCHEMA,
     handler: (
       ctx: LauncherContext,
-      params: { data?: Object },
+      params: IdentityCreateUserParams,
     ): Promise<IdentityCreateResult> => {
       return ctx.client.identity.createUser(params)
     },
   },
   identity_createDeveloper: {
-    params: {
-      data: 'any',
-    },
+    params: IDENTITY_CREATE_OWN_DEVELOPER_SCHEMA,
     handler: (
       ctx: LauncherContext,
-      params: { data?: Object },
+      params: IdentityCreateDeveloperParams,
     ): Promise<IdentityCreateResult> => {
       return ctx.client.identity.createDeveloper(params)
     },
@@ -138,7 +141,21 @@ export default {
   ): Promise<IdentityGetOwnDevelopersResult> => {
     return ctx.client.identity.getOwnDevelopers()
   },
+
+  // GrahpQL
+
+  graphql_query: {
+    params: GRAPHQL_QUERY_SCHEMA,
+    handler: (
+      ctx: LauncherContext,
+      params: GraphQLQueryParams,
+    ): Promise<GraphQLQueryResult> => {
+      return ctx.client.graphql(params)
+    },
+  },
+
   // Vaults
+
   vault_create: {
     handler: async (
       ctx: LauncherContext,

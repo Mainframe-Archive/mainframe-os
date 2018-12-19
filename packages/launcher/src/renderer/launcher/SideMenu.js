@@ -1,156 +1,161 @@
 //@flow
 
-import type {
-  IdentityGetOwnUsersResult as OwnIdentities,
-  WalletGetEthWalletsResult as Wallets,
-} from '@mainframe/client'
 import React, { Component } from 'react'
-import { View, TouchableOpacity, StyleSheet } from 'react-native-web'
 
-import { truncateAddress } from '../../utils'
-import Text from '../UIComponents/Text'
-import Icon from '../UIComponents/Icon'
-import colors from '../colors'
+import { Button } from '@morpheus-ui/core'
+
+import styled from 'styled-components/native'
+
+//import Icons
+import AppsIcon from '@morpheus-ui/icons/AppsMd'
+import AppsFilledIcon from '@morpheus-ui/icons/AppsFilledMd'
+import IdentityIcon from '@morpheus-ui/icons/IdentityMd'
+import IdentityFilledIcon from '@morpheus-ui/icons/IdentityFilledMd'
+import ContactsIcon from '@morpheus-ui/icons/ContactsMd'
+import ContactsFilledIcon from '@morpheus-ui/icons/ContactsFilledMd'
+import WalletsIcon from '@morpheus-ui/icons/WalletsMd'
+import WalletsFilledIcon from '@morpheus-ui/icons/WalletsFilledMd'
+import SettingsIcon from '@morpheus-ui/icons/SettingsMd'
+import SettingsFilledIcon from '@morpheus-ui/icons/SettingsFilledMd'
+
+export type ScreenNames =
+  | 'apps'
+  | 'identities'
+  | 'contacts'
+  | 'wallets'
+  | 'settings'
 
 type Props = {
-  onToggleDevMode: () => void,
-  devMode?: boolean,
-  identities: OwnIdentities,
-  wallets?: Wallets,
+  onSelectMenuItem: (name: ScreenNames) => void,
+  selected: ScreenNames,
+  notifications: Array<ScreenNames>,
 }
 
-export default class SideMenu extends Component<Props> {
-  renderUsers() {
-    if (!this.props.identities) {
-      return null
-    }
+type State = {
+  selectedItem: ScreenNames,
+}
 
-    const userList = this.props.identities.users.map(u => {
-      return (
-        <View key={u.id}>
-          <Text style={styles.sideBarLabel}>{u.data.name}</Text>
-        </View>
-      )
-    })
-    return (
-      <View>
-        <Text style={styles.sideBarHeader}>IDENTITIES</Text>
-        {userList}
-      </View>
-    )
+const MENU_ITEMS: Array<ScreenNames> = [
+  'apps',
+  'identities',
+  'contacts',
+  'wallets',
+  'settings',
+]
+
+const BUTTONS: Object = {
+  apps: {
+    title: 'Applications',
+    icon: AppsIcon,
+    activeIcon: AppsFilledIcon,
+  },
+  identities: {
+    title: 'Identities',
+    icon: IdentityIcon,
+    activeIcon: IdentityFilledIcon,
+  },
+  contacts: {
+    title: 'Contacts',
+    icon: ContactsIcon,
+    activeIcon: ContactsFilledIcon,
+  },
+  wallets: {
+    title: 'Wallets',
+    icon: WalletsIcon,
+    activeIcon: WalletsFilledIcon,
+  },
+  settings: {
+    title: 'Settings',
+    icon: SettingsIcon,
+    activeIcon: SettingsFilledIcon,
+  },
+}
+
+const Container = styled.View`
+  width: 126px;
+  background-color: ${props => props.theme.colors.LIGHT_GREY_F5};
+`
+
+const ScrollView = styled.ScrollView`
+  padding: ${props => props.theme.spacing * 2}px;
+`
+
+const MenuItem = styled.View`
+  padding: ${props => props.theme.spacing * 2}px 0
+    ${props => props.theme.spacing}px 0;
+  text-align: center;
+  align-items: center;
+`
+
+const NotificationDot = styled.View`
+  width: 5px;
+  height: 5px;
+  border-radius: 100%;
+  background-color: ${props =>
+    props.notifications ? props.theme.colors.PRIMARY_RED : 'transparent'};
+  margin-top: 7px;
+`
+
+const SelectedPointer = styled.View`
+  width: 21px;
+  height: 42px;
+  position: absolute;
+  right: -21px;
+  margin-top: -8px;
+`
+
+const SvgSelected = props => (
+  <svg width="21px" height="42px" viewBox="0 0 29 60" {...props}>
+    <path
+      d="M28.05 60.016L2.243 34.208a6 6 0 0 1 0-8.485L27.965 0l.085 60.016z"
+      fill="#FFF"
+      fillRule="evenodd"
+    />
+  </svg>
+)
+
+export default class SideMenu extends Component<Props, State> {
+  static defaultProps = {
+    notifications: [],
   }
 
-  renderWallets() {
-    if (!this.props.wallets) {
-      return null
-    }
-    const userWallets = this.props.wallets // for flow
-    const walletList = Object.keys(userWallets).map(type => {
-      let accounts = []
-      userWallets[type].forEach(w => {
-        const addresses = w.accounts.map(a => {
-          return (
-            <View key={a}>
-              <Text style={styles.sideBarLabel}>{truncateAddress(a)}</Text>
-            </View>
-          )
-        })
-        accounts = accounts.concat(addresses)
-      })
-      return (
-        <View key={type}>
-          <View style={styles.walletType}>
-            <Text style={styles.walletTypeLabel}>{type} wallets</Text>
-          </View>
-          {accounts}
-        </View>
-      )
+  onPressMenuItem = (name: ScreenNames) => {
+    this.setState({
+      selectedItem: name,
     })
+    this.props.onSelectMenuItem(name)
+  }
+
+  renderMenuItem(item: ScreenNames) {
+    const selected = this.props.selected === item
+    const data = BUTTONS[item]
+    const icon = selected ? data.activeIcon : data.icon
+    const variant = selected ? ['leftNav', 'leftNavActive'] : 'leftNav'
+    const notifications = this.props.notifications.indexOf(item) >= 0
+
     return (
-      <View>
-        <Text style={styles.sideBarHeader}>WALLETS</Text>
-        {walletList}
-      </View>
+      <MenuItem key={item}>
+        <Button
+          Icon={icon}
+          variant={variant}
+          title={data.title}
+          onPress={() => this.onPressMenuItem(item)}
+        />
+        {selected && (
+          <SelectedPointer>
+            <SvgSelected />
+          </SelectedPointer>
+        )}
+        {<NotificationDot notifications={notifications} />}
+      </MenuItem>
     )
   }
 
   render() {
-    const sideBarStyles = [styles.sideBarView]
-    const devToggleStyles = [styles.devToggleButton]
-    const devToggleLabelStyles = [styles.devToggleLabel]
-    if (this.props.devMode) {
-      sideBarStyles.push(styles.sideBarDev)
-      devToggleStyles.push(styles.devToggleDark)
-      devToggleLabelStyles.push(styles.devToggleLabelDark)
-    }
-
     return (
-      <View style={sideBarStyles}>
-        {this.renderUsers()}
-        {this.renderWallets()}
-        <TouchableOpacity
-          style={devToggleStyles}
-          testID="launcher-toggle-dev-button"
-          onPress={this.props.onToggleDevMode}>
-          <Text style={devToggleLabelStyles}>
-            {this.props.devMode ? 'User Mode' : 'Developer Mode'}
-          </Text>
-          <Icon name="right-arrow-grey" size={14} style={styles.arrowIcon} />
-        </TouchableOpacity>
-      </View>
+      <Container>
+        <ScrollView>{MENU_ITEMS.map(i => this.renderMenuItem(i))}</ScrollView>
+      </Container>
     )
   }
 }
-
-const styles = StyleSheet.create({
-  sideBarView: {
-    width: 220,
-    padding: 20,
-    backgroundColor: colors.DARK_BLUE,
-  },
-  sideBarDev: {
-    backgroundColor: colors.DARK_BLUE_2,
-  },
-  sideBarHeader: {
-    paddingTop: 20,
-    color: colors.LIGHT_GREY_BLUE,
-    fontWeight: 'bold',
-    fontSize: 11,
-    letterSpacing: 2,
-  },
-  sideBarLabel: {
-    paddingTop: 10,
-    fontSize: 13,
-    color: colors.WHITE,
-  },
-  walletType: {
-    marginTop: 8,
-  },
-  walletTypeLabel: {
-    fontSize: 12,
-    color: colors.LIGHT_GREY_BLUE,
-  },
-  devToggleButton: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    padding: 15,
-    backgroundColor: colors.DARK_BLUE_SHADE_1,
-    flexDirection: 'row',
-  },
-  devToggleDark: {
-    backgroundColor: colors.TRANSPARENT_BLACK_30,
-  },
-  devToggleLabel: {
-    flex: 1,
-    fontSize: 12,
-    color: colors.WHITE,
-  },
-  devToggleLabelDark: {
-    color: colors.LIGHT_GREY_DE,
-  },
-  arrowIcon: {
-    paddingTop: 3,
-  },
-})

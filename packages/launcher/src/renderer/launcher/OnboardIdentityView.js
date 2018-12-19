@@ -1,13 +1,15 @@
 //@flow
 
 import React, { Component } from 'react'
-import { View, StyleSheet, ActivityIndicator } from 'react-native-web'
+import { ActivityIndicator } from 'react-native'
 
-import Button from '../UIComponents/Button'
-import MFTextInput from '../UIComponents/TextInput'
-import Text from '../UIComponents/Text'
+import { Button, TextField, Row, Column, Text } from '@morpheus-ui/core'
+import CircleArrowRight from '@morpheus-ui/icons/CircleArrowRight'
+import { Form, type FormSubmitPayload } from '@morpheus-ui/forms'
+
+import styled from 'styled-components/native'
+
 import OnboardContainer from '../UIComponents/OnboardContainer'
-import colors from '../colors'
 
 import rpc from './rpc'
 
@@ -17,31 +19,26 @@ type Props = {
 
 type State = {
   error?: ?string,
-  name: string,
   awaitingResponse?: boolean,
 }
 
-export default class OnboardIdentityView extends Component<Props, State> {
-  constructor(props: Props) {
-    super(props)
-    this.state = {
-      name: '',
-    }
-  }
+const FormContainer = styled.View`
+  max-width: 260px;
+`
 
-  onPressCreateIdentity = () => {
-    const { name } = this.state
-    if (!name.length) {
+export default class OnboardIdentityView extends Component<Props, State> {
+  state = {}
+
+  onSubmit = (payload: FormSubmitPayload) => {
+    const { valid, fields } = payload
+
+    if (valid) {
       this.setState({
-        error: 'Please provide a name',
+        error: null,
+        awaitingResponse: true,
       })
-      return
+      this.createIdentity(fields.name)
     }
-    this.setState({
-      error: null,
-      awaitingResponse: true,
-    })
-    this.createIdentity(name)
   }
 
   async createIdentity(name: string) {
@@ -58,54 +55,51 @@ export default class OnboardIdentityView extends Component<Props, State> {
     }
   }
 
-  onChangeName = (value: string) => {
-    this.setState({
-      name: value,
-    })
-  }
-
   render() {
     const errorMsg = this.state.error ? (
-      <Text style={styles.errorLabel}>{this.state.error}</Text>
+      <Row size={1}>
+        <Column>
+          <Text variant="error">{this.state.error}</Text>
+        </Column>
+      </Row>
     ) : null
     const action = this.state.awaitingResponse ? (
       <ActivityIndicator />
     ) : (
       <Button
-        title="Create Identity"
+        variant="onboarding"
+        Icon={CircleArrowRight}
+        title="CONTINUE"
         testID="onboard-create-identity-button"
-        onPress={this.onPressCreateIdentity}
+        submit
       />
     )
     return (
       <OnboardContainer
-        title="Create an Identity"
-        description="This is personal information that can be selectively shared with your contacts.">
-        <View style={styles.container}>
-          <MFTextInput
-            style={styles.input}
-            onChangeText={this.onChangeName}
-            value={this.state.name}
-            placeholder="Name"
-            testID="onboard-create-identity-input-name"
-          />
-          {errorMsg}
-          {action}
-        </View>
+        title="Welcome!"
+        description="Let’s quickly secure your MainframeOS vault.">
+        <FormContainer>
+          <Form onSubmit={this.onSubmit}>
+            <Row size={1} top>
+              <Column>
+                <TextField
+                  autoFocus
+                  label="Name"
+                  name="name"
+                  required
+                  testID="onboard-create-identity-input-name"
+                />
+              </Column>
+            </Row>
+            {errorMsg}
+            <Row size={2} top>
+              <Column styles="align-items:flex-end;" smOffset={1}>
+                {action}
+              </Column>
+            </Row>
+          </Form>
+        </FormContainer>
       </OnboardContainer>
     )
   }
 }
-
-const PADDING = 10
-
-const styles = StyleSheet.create({
-  input: {
-    marginBottom: PADDING * 2,
-  },
-  errorLabel: {
-    fontSize: 14,
-    paddingBottom: PADDING,
-    color: colors.PRIMARY_RED,
-  },
-})

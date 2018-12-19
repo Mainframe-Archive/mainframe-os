@@ -1,6 +1,6 @@
 //@flow
 
-import type { ID, IdentityOwnData } from '@mainframe/client'
+import type { ID } from '@mainframe/client'
 import React, { Component } from 'react'
 import {
   View,
@@ -8,31 +8,106 @@ import {
   StyleSheet,
   TextInput,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native-web'
+import { QueryRenderer, graphql, commitMutation } from 'react-relay'
 
-import Button from '../UIComponents/Button'
+import { Button } from '@morpheus-ui/core'
 import Text from '../UIComponents/Text'
 import colors from '../colors'
+import { EnvironmentContext } from './RelayEnvironment'
 
-import rpc from './rpc'
-
-type Props = {
+type ContainerProps = {
   type: 'user' | 'developer',
-  identities: Array<IdentityOwnData>,
   enableCreate?: boolean,
   onSelectId: (id: ID) => any,
   onCreatedId?: (id: ID) => any,
 }
 
-type State = {
-  newName: string,
-  identities: Array<IdentityOwnData>,
-  showCreateIdForm?: boolean,
+type Identity = {
+  id: string,
+  localID: string,
+  profile: {
+    name: string,
+    avatar: string,
+  },
 }
 
-export default class IdentitySelectorView extends Component<Props, State> {
+type Props = ContainerProps & {
+  identities: {
+    ownUsers: Array<Identity>,
+    ownDevelopers: Array<Identity>,
+  },
+}
+
+type State = {
+  newName: string,
+  showCreateIdForm?: boolean,
+  errorMsg?: ?string,
+}
+
+export const createUserMutation = graphql`
+  mutation IdentitySelectorViewCreateUserIdentityMutation(
+    $input: CreateUserIdentityInput!
+  ) {
+    createUserIdentity(input: $input) {
+      user {
+        localID
+        profile {
+          name
+        }
+      }
+      viewer {
+        identities {
+          ownUsers {
+            profile {
+              name
+            }
+          }
+          ownDevelopers {
+            profile {
+              name
+            }
+          }
+        }
+      }
+    }
+  }
+`
+
+export const createDeveloperMutation = graphql`
+  mutation IdentitySelectorViewCreateDeveloperIdentityMutation(
+    $input: CreateDeveloperIdentityInput!
+  ) {
+    createDeveloperIdentity(input: $input) {
+      user {
+        localID
+        profile {
+          name
+        }
+      }
+      viewer {
+        identities {
+          ownUsers {
+            profile {
+              name
+            }
+          }
+          ownDevelopers {
+            profile {
+              name
+            }
+          }
+        }
+      }
+    }
+  }
+`
+
+class IdentitySelectorView extends Component<Props, State> {
+  static contextType = EnvironmentContext
+
   state = {
-    identities: [],
     newName: '',
   }
 
@@ -41,28 +116,32 @@ export default class IdentitySelectorView extends Component<Props, State> {
   }
 
   createId = async () => {
-    try {
-      let createIdentity
-      switch (this.props.type) {
-        case 'developer':
-          createIdentity = rpc.createDeveloperIdentity
-          break
-        case 'user':
-        default:
-          createIdentity = rpc.createUserIdentity
-      }
-      const res = await createIdentity({
+    const mutation =
+      this.props.type === 'user' ? createUserMutation : createDeveloperMutation
+
+    const input = {
+      profile: {
         name: this.state.newName,
-      })
-      this.setState({ newName: '' })
-      if (this.props.onCreatedId) {
-        this.props.onCreatedId(res.id)
-      }
-    } catch (err) {
-      // TODO: Handle error
-      // eslint-disable-next-line no-console
-      console.warn(err)
+      },
     }
+
+    commitMutation(this.context, {
+      mutation: mutation,
+      variables: { input },
+      onCompleted: user => {
+        this.setState({ newName: '' })
+        if (this.props.onCreatedId) {
+          this.props.onCreatedId(user.localID)
+        }
+      },
+      onError: err => {
+        const msg =
+          err.message || 'Sorry, there was a problem creating your identity.'
+        this.setState({
+          errorMsg: msg,
+        })
+      },
+    })
   }
 
   onChangeName = (value: string) => {
@@ -86,9 +165,12 @@ export default class IdentitySelectorView extends Component<Props, State> {
       )
     }
 
-    const idRows = this.props.identities.map(user => {
-      const handler = () => this.props.onSelectId(user.id)
-      return rowRender(user.id, user.data.name, handler)
+    const type = this.props.type === 'user' ? 'ownUsers' : 'ownDevelopers'
+    const idRows = Object.values(this.props.identities[type]).map(user => {
+      // $FlowFixMe mixed map type
+      const handler = () => this.props.onSelectId(user.localID)
+      // $FlowFixMe mixed map type
+      return rowRender(user.localID, user.profile.name, handler)
     })
 
     const createIdentity = this.props.enableCreate ? (
@@ -124,6 +206,58 @@ export default class IdentitySelectorView extends Component<Props, State> {
   }
 }
 
+export default class IdentitySelectorQueryContainer extends Component<ContainerProps> {
+  static contextType = EnvironmentContext
+
+  render() {
+    return (
+      <QueryRenderer
+        environment={this.context}
+        query={graphql`
+          query IdentitySelectorViewQuery {
+            viewer {
+              identities {
+                ownUsers {
+                  localID
+                  profile {
+                    name
+                  }
+                }
+                ownDevelopers {
+                  localID
+                  profile {
+                    name
+                  }
+                }
+              }
+            }
+          }
+        `}
+        variables={{}}
+        render={({ error, props }) => {
+          if (error) {
+            // TODO: handle error
+          } else if (props) {
+            return (
+              <IdentitySelectorView
+                identities={props.viewer.identities}
+                {...this.props}
+              />
+            )
+          } else {
+            return (
+              <View>
+                <ActivityIndicator />
+              </View>
+            )
+          }
+          return null
+        }}
+      />
+    )
+  }
+}
+
 const styles = StyleSheet.create({
   scrollInner: {
     maxHeight: 260,
@@ -133,7 +267,7 @@ const styles = StyleSheet.create({
     borderRadius: 3,
     backgroundColor: colors.LIGHT_GREY_EE,
     marginTop: 10,
-    flexDirection: 'row',
+    flexDirection: 'column',
   },
   nameLabel: {
     flex: 1,

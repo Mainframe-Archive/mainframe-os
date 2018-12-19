@@ -57,6 +57,8 @@
     "ethereumjs-util": "^6.0.0",
     "ethereumjs-wallet": "^0.6.2",
     "fs-extra": "^7.0.0",
+    "graphql": "^0.13.2",
+    "graphql-relay": "^0.5.5",
     "multibase": "^0.6.0",
     "rxjs": "^6.3.3",
     "web3-provider-engine": "^14.0.6",

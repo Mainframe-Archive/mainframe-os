@@ -42,15 +42,20 @@ export default {
 
   // Identity
   createUserIdentity: (data: Object) => {
-    return rpc.request('identity_createUser', { data })
+    return rpc.request('identity_createUser', { profile: data })
   },
   createDeveloperIdentity: (data: Object) => {
-    return rpc.request('identity_createDeveloper', { data })
+    return rpc.request('identity_createDeveloper', { profile: data })
   },
   getOwnUserIdentities: () => rpc.request('identity_getOwnUsers'),
   getOwnDevIdentities: () => rpc.request('identity_getOwnDevelopers'),
 
-  // Main process
+  // GraphQL
+  graphql: (query: string, variables?: ?Object) => {
+    return rpc.request('graphql_query', { query, variables })
+  },
+
+  // Vault
   getVaultsData: () => rpc.request('vault_getVaultsData'),
   createVault: (password: string, label: string) => {
     return rpc.request('vault_create', { password, label })

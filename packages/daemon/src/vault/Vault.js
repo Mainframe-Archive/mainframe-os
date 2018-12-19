@@ -262,7 +262,7 @@ export default class Vault {
 
   createApp(params: {
     contentsPath: string,
-    developerID?: ?ID,
+    developerID: ID,
     name?: ?string,
     version?: ?string,
     permissionsRequirements?: ?StrictPermissionsRequirements,
@@ -274,14 +274,9 @@ export default class Vault {
       throw new Error('Failed to create app identity')
     }
 
-    let developerID = params.developerID
-    if (developerID == null) {
-      developerID = this.identities.createOwnDeveloper()
-    } else {
-      const devIdentity = this.identities.getOwnDeveloper(developerID)
-      if (devIdentity == null) {
-        throw new Error('Developer identity not found')
-      }
+    const devIdentity = this.identities.getOwnDeveloper(params.developerID)
+    if (devIdentity == null) {
+      throw new Error('Developer identity not found')
     }
 
     const version =
@@ -293,7 +288,7 @@ export default class Vault {
       appID: uniqueID(),
       data: {
         contentsPath: params.contentsPath,
-        developerID,
+        developerID: params.developerID,
         mfid: appIdentity.id,
         name: params.name || 'Untitled',
         version,

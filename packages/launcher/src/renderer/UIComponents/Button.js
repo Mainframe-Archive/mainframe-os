@@ -1,7 +1,7 @@
 //@flow
 
 import React, { Component } from 'react'
-import { TouchableOpacity, StyleSheet } from 'react-native-web'
+import { TouchableOpacity, StyleSheet } from 'react-native'
 
 import COLORS from '../colors'
 import type { Style } from '../../types'

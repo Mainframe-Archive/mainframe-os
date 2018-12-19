@@ -29,7 +29,7 @@ export default class AppListCommand extends Command {
         }
 
         table.push(
-          ['ID', app.appID],
+          ['ID', app.localID],
           ['Mainframe ID', mainframeID],
           ['Version', app.manifest.version],
           ['Developer', developerId],
