@@ -1,29 +1,47 @@
 // @flow
 
 import React, { Component } from 'react'
-import {
-  View,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-} from 'react-native-web'
 import { createFragmentContainer, graphql } from 'react-relay'
 import {
   havePermissionsToGrant,
   type StrictPermissionsGrants,
 } from '@mainframe/app-permissions'
 import type { AppOwnData, AppInstalledData, ID } from '@mainframe/client'
+import styled from 'styled-components/native'
+import { Text } from '@morpheus-ui/core'
+import PlusIcon from '@morpheus-ui/icons/PlusSymbolCircled'
 
-import colors from '../../colors'
 import rpc from '../rpc'
 import globalStyles from '../../styles'
-import Text from '../../UIComponents/Text'
 import ModalView from '../../UIComponents/ModalView'
 import IdentitySelectorView from '../IdentitySelectorView'
 import CreateAppModal from '../developer/CreateAppModal'
 import PermissionsView from '../PermissionsView'
 import AppInstallModal from './AppInstallModal'
 import { OwnAppItem, InstalledAppItem } from './AppItem'
+const AppsGrid = styled.View`
+  flex-direction: row;
+  flex-wrap: wrap;
+`
+
+const AppInstallContainer = styled.TouchableOpacity`
+  padding: 15px 10px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  width: 110px;
+  height: 150px;
+`
+
+const InstallIcon = styled.View`
+  width: 72px;
+  height: 72px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #a9a9a9;
+`
 
 type AppData = AppOwnData | AppInstalledData
 
@@ -171,10 +189,25 @@ class AppsView extends Component<Props, State> {
 
   renderApps(apps: Array<AppData>, own: boolean) {
     return (
-      <View>
-        <Text>{own ? 'Own Apps' : 'Installed App'}</Text>
-        {apps.map(app => this.renderApp(app, own))}
-      </View>
+      <>
+        <Text variant="smallTitle">
+          {own ? 'Own Applications' : 'Installed Applications'}
+        </Text>
+        <AppsGrid>
+          {apps.map(app => this.renderApp(app, own))}
+          {own
+            ? this.renderButton(
+                'Create new',
+                this.onPressCreateApp,
+                'launcher-create-app-button',
+              )
+            : this.renderButton(
+                'Install',
+                this.onPressInstall,
+                'launcher-install-app-button',
+              )}
+        </AppsGrid>
+      </>
     )
   }
 
@@ -201,12 +234,23 @@ class AppsView extends Component<Props, State> {
 
   renderButton(title: string, onPress: () => void, testID: string) {
     return (
-      <TouchableOpacity
-        onPress={onPress}
-        style={styles.createApp}
-        testID={testID}>
-        <Text style={styles.createAppLabel}>{title}</Text>
-      </TouchableOpacity>
+      <AppInstallContainer onPress={onPress} testID={testID}>
+        <InstallIcon>
+          <PlusIcon color="#808080" />
+        </InstallIcon>
+        <Text
+          theme={{
+            width: '72px',
+            fontSize: '11px',
+            padding: '5px 0',
+            color: '#808080',
+            border: '1px solid #a9a9a9',
+            borderRadius: '3px',
+            textAlign: 'center',
+          }}>
+          {title}
+        </Text>
+      </AppInstallContainer>
     )
   }
 
@@ -253,21 +297,11 @@ class AppsView extends Component<Props, State> {
       }
     }
     return (
-      <ScrollView style={styles.container}>
+      <>
         {this.renderInstalled()}
-        {this.renderButton(
-          'Install App',
-          this.onPressInstall,
-          'launcher-install-app-button',
-        )}
         {this.renderOwn()}
-        {this.renderButton(
-          'Create new App',
-          this.onPressCreateApp,
-          'launcher-create-app-button',
-        )}
         {modal}
-      </ScrollView>
+      </>
     )
   }
 }
@@ -283,18 +317,4 @@ export default createFragmentContainer(AppsView, {
       }
     }
   `,
-})
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  createApp: {
-    marginVertical: 20,
-    padding: 10,
-    backgroundColor: colors.BRIGHT_BLUE,
-  },
-  createAppLabel: {
-    color: colors.WHITE,
-  },
 })

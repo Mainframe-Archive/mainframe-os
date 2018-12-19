@@ -34,6 +34,7 @@ export default {
   GREY_DARK_38: '#383838',
   GREY_DARK_2A: '#2A2A2A',
   GREY_DARK_80: '#808080',
+  GREY_A9: '#A9A9A9',
   WHITE: '#FFFFFF',
   TRANSPARENT_BLUE_BG: 'rgba(14, 18, 28, 0.85)',
   TRANSPARENT_BLACK_30: 'rgba(0, 0, 0, 0.30)',
