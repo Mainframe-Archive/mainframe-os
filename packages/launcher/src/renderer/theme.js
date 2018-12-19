@@ -29,6 +29,11 @@ export default {
       titleHoverColor: COLORS.PRIMARY_BLUE,
       iconHoverColor: COLORS.PRIMARY_BLUE,
     },
+    completeOnboarding: {
+      fontWeight: 'normal',
+      borderHoverColor: 'transparent',
+      hoverShadow: true,
+    },
   },
   Text: {
     default: {
