@@ -7,6 +7,7 @@ import {
 } from '@mainframe/client'
 import { dialog } from 'electron'
 import type { Subscription as RxSubscription } from 'rxjs'
+import { pubKeyToAddress } from '@erebos/api-bzz-base'
 
 import { type AppContext, ContextSubscription } from '../contexts'
 import { withPermission } from '../permissions'
@@ -128,18 +129,40 @@ export const sandboxed = {
       name: 'string',
     },
     handler: (ctx: AppContext, params: { name: string }): Promise<?string> => {
+      console.log(params, 'params')
       return new Promise((resolve, reject) => {
         dialog.showOpenDialog(
           ctx.window,
           { title: 'Select file to upload', buttonLabel: 'Upload' },
           async filePaths => {
+            console.log(filePaths, 'filePaths')
             if (filePaths.length !== 0) {
               // TODO: use these to create the cipher and update the feed after the file is written
-              const { encryptionKey, feedHash, feedKeyPair } = ctx.storage
+              console.log(ctx.storage, 'ctx.storage')
+              console.log(ctx.bzz, 'ctx.bzz')
               try {
-                await ctx.bzz.uploadFileFrom(filePaths[0], {
+                const { encryptionKey, feedHash, feedKeyPair } = ctx.storage
+                const feedHashExists = !!feedHash
+                console.log(feedHashExists, 'feedHashExists')
+                const pubKey = feedKeyPair.getPublic(feedKeyPair)
+                const address = pubKeyToAddress(pubKey)
+                const dataHash = await ctx.bzz.uploadFileFrom(filePaths[0], {
                   path: params.name,
+                  contentType: 'image/png' // TODO: remove hardcoded values
                 })
+                console.log(dataHash, 'dataHash')
+
+                if (feedHashExists) {
+                  let feedManifest = feedHash
+                } else {
+                  console.log(address, 'address')
+                  let feedManifest = await ctx.bzz.createFeedManifest(address)
+                }
+                console.log(feedManifest, 'feedManifest')
+                const feedMetaData = ctx.bzz.getFeedMetadata(feedManifest)
+                await ctx.bzz.postFeedValue(feedKeyPair, `0x${dataHash}`)
+                const url = ctx.bzz.getDownloadURL(feedManifest, { mode: 'default' })
+                console.log(url, 'url')
                 resolve(params.name)
               } catch (err) {
                 // TODO: use RPCError to provide a custom error code

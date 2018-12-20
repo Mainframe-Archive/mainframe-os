@@ -104,6 +104,8 @@ const launchApp = async (
   })
   appContexts.set(appWindow, appContext)
   interceptWebRequests(appContext)
+  // TODO: intercept streams
+  // registerStorageProtocol(appContext)
 
   if (appSessions[appID]) {
     appSessions[appID][userID] = appSession
