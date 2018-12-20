@@ -302,6 +302,20 @@ const ownAppType = new GraphQLObjectType({
   }),
 })
 
+const userWalletType = new GraphQLObjectType({
+  name: 'UserWalletType',
+  fields: () => ({
+    localID: {
+      type: new GraphQLNonNull(GraphQLID),
+      resolve: self => self.localID,
+    },
+    accounts: {
+      type: new GraphQLList(GraphQLString),
+      resolve: self => self.accounts,
+    },
+  }),
+})
+
 const ownAppIdentityType = new GraphQLObjectType({
   name: 'OwnAppIdentity',
   interfaces: () => [nodeInterface],
@@ -365,6 +379,24 @@ const ownUserIdentityType = new GraphQLObjectType({
     mfid: {
       type: new GraphQLNonNull(GraphQLID),
       resolve: self => self.id,
+    },
+    apps: {
+      type: new GraphQLList(appType),
+      resolve: (self, args, ctx: RequestContext) => {
+        return ctx.openVault.apps.getAppsForUser(self.localID)
+      },
+    },
+    wallets: {
+      type: new GraphQLList(userWalletType),
+      resolve: (self, args, ctx) => {
+        const wallets = ctx.openVault.getWalletsForIdentity(self.localID)
+        return Object.keys(wallets).map(id => {
+          return {
+            localID: id,
+            accounts: wallets[id],
+          }
+        })
+      },
     },
     profile: {
       type: new GraphQLObjectType({

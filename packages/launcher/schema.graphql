@@ -191,6 +191,8 @@ type OwnUserIdentity implements Node {
   id: ID!
   localID: ID!
   mfid: ID!
+  apps: [App]
+  wallets: [UserWalletType]
   profile: OwnUserProfile
   pubKey: String!
 }
@@ -218,6 +220,11 @@ type Query {
 input UserProfileInput {
   name: String!
   avatar: String
+}
+
+type UserWalletType {
+  localID: ID!
+  accounts: [String]
 }
 
 type Viewer {
