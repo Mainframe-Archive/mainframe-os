@@ -61,11 +61,8 @@ export default class UnlockVaultView extends Component<Props, State> {
     const errorMsg = this.state.error ? (
       <Row size={1}>
         <Column>
-          <Text
-              variant="error"
-            textId="vault-manager-unlock-errorlabel"
-          >
-              {this.state.error}
+          <Text variant="error" testID="vault-manager-unlock-input-warning">
+            {this.state.error}
           </Text>
         </Column>
       </Row>

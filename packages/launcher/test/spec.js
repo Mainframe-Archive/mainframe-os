@@ -45,17 +45,56 @@ describe('Application launch', function() {
     assert.strictEqual(count, 1)
   })
 
-  // Can be used when testing to save clearing state
+  it('no password', async function() {
+    await this.app.client
+      .element('[data-testid="create-vault-button-submit"]')
+      .click()
+    assert.strictEqual(
+      await this.app.client.getValue(
+        '[data-testid="vault-manager-unlock-input-password-warning"]',
+      ),
+      'Password must be at least 8 characters',
+    )
+    assert.strictEqual(
+      await this.app.client.getValue(
+        '[data-testid="vault-manager-unlock-confirm-password-warning"]',
+      ),
+      'Passwords do not match',
+    )
+  })
 
-  // it('opens the default vault', async function() {
-  //   await this.app.client
-  //     .element('[data-testid="vault-manager-unlock-input"]')
-  //     .setValue('password')
-  //   await this.app.client
-  //     .element('[data-testid="vault-manager-unlock-button"]')
-  //     .click()
-  //   await this.app.client.waitForExist('[data-testid="launcher-view"]', timeouts.unlockVault)
-  // })
+  it('passwords do not match', async function() {
+    await this.app.client
+      .element('[data-testid="create-vault-input-password"]')
+      .setValue('password')
+    await this.app.client
+      .element('[data-testid="create-vault-confirm-password"]')
+      .setValue('different')
+    await this.app.client
+      .element('[data-testid="create-vault-button-submit"]')
+      .click()
+    assert.strictEqual(
+      await this.app.client.getValue(
+        '[data-testid="vault-manager-unlock-confirm-password-warning"]',
+      ),
+      'Passwords do not match',
+    )
+  })
+
+  it('password too short', async function() {
+    await this.app.client
+      .element('[data-testid="create-vault-input-password"]')
+      .setValue('short')
+    await this.app.client
+      .element('[data-testid="create-vault-button-submit"]')
+      .click()
+    assert.strictEqual(
+      await this.app.client.getValue(
+        '[data-testid="vault-manager-unlock-input-password-warning"]',
+      ),
+      'Password must be at least 8 characters',
+    )
+  })
 
   it('creates a new vault', async function() {
     await this.app.client
@@ -67,6 +106,59 @@ describe('Application launch', function() {
     await this.app.client
       .element('[data-testid="create-vault-button-submit"]')
       .click()
+  })
+
+  it('no password warning after clicking unlock button', async function() {
+    this.app.restart()
+    await this.app.client.waitForExist(
+      '[data-testid="vault-manager-unlock-button"]',
+      timeouts.unlockVault,
+    )
+    await this.app.client
+      .element('[data-testid="vault-manager-unlock-button"]')
+      .click()
+    await this.app.client.waitForExist(
+      '[data-testid="vault-manager-unlock-input-warning"]',
+      timeouts.unlockVault,
+    )
+    assert.stricEqual(
+      await this.app.client.getValue(
+        '[data-testid="vault-manager-unlock-input-warning"]',
+      ),
+      'Password is required.',
+    )
+  })
+
+  it('bad password warning', async function() {
+    await this.app.client
+      .element('[data-testid="vault-manager-unlock-input"]')
+      .setValue('badpassword')
+    await this.app.client
+      .element('[data-testid="vault-manager-unlock-button"]')
+      .click()
+    await this.app.client.waitForExist(
+      '[data-testid="vault-manager-unlock-errorlabel"]',
+      timeouts.unlockVault,
+    )
+    assert.strictEqual(
+      await this.app.client.getValue(
+        '[data-testid="vault-manager-unlock-errorlabel"]',
+      ),
+      'Failed to unlock vault, please check you entered the correct password.',
+    )
+  })
+
+  it('opens the default vault', async function() {
+    await this.app.client
+      .element('[data-testid="vault-manager-unlock-input"]')
+      .setValue('password')
+    await this.app.client
+      .element('[data-testid="vault-manager-unlock-button"]')
+      .click()
+    await this.app.client.waitForExist(
+      '[data-testid="launcher-view"]',
+      timeouts.unlockVault,
+    )
   })
 
   it('creates an identity', async function() {
@@ -170,25 +262,5 @@ describe('Application launch', function() {
 
     const count = await this.app.client.getWindowCount()
     assert.strictEqual(count, 3)
-  })
-
-  it('bad password warning', async function() {
-    await this.app.restart()
-    await this.app.client
-      .element('[data-testid="vault-manager-unlock-input"]')
-      .setValue('badpassword')
-    await this.app.client
-      .element('[data-testid="vault-manager-unlock-button"]')
-      .click()
-    await this.app.client.waitForExist(
-      '[data-testid="vault-manager-unlock-errorlabel"]',
-      timeouts.unlockVault,
-    )
-    assert.strictEqual(
-      await this.app.client.getValue(
-        '[data-testid="vault-manager-unlock-errorlabel"]',
-      ),
-      'Failed to unlock vault, please check you entered the correct password.',
-    )
   })
 })
