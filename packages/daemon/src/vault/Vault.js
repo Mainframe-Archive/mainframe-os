@@ -352,6 +352,7 @@ export default class Vault {
       id: app.mfid,
       author: {
         id: devIdentity.id,
+        name: devIdentity.profile.name,
       },
       name: app.data.name,
       version: app.data.version,
@@ -408,6 +409,7 @@ export default class Vault {
       id: app.mfid,
       author: {
         id: devIdentity.id,
+        name: devIdentity.profile.name,
       },
       name: app.data.name,
       version: app.data.version,

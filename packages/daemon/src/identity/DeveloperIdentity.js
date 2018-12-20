@@ -3,7 +3,7 @@
 import Identity from './Identity'
 
 export type DeveloperProfile = {
-  name?: ?string,
+  name: string,
   avatar?: ?string,
 }
 
@@ -39,7 +39,7 @@ export default class DeveloperIdentity extends Identity {
   constructor(
     localID: string,
     key: string | Buffer,
-    profile: DeveloperProfile = {},
+    profile: DeveloperProfile,
   ) {
     super(localID, 'dev', key)
     this._profile = profile

@@ -6,6 +6,7 @@ export type ManifestData = {
   id: string,
   author: {
     id: string,
+    name: string,
   },
   name: string,
   version: string,
@@ -17,6 +18,7 @@ export type PartialManifestData = {
   id: string,
   author: {
     id: string,
+    name: string,
   },
   name: string,
   version: string,
