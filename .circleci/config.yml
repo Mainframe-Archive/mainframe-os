@@ -25,7 +25,7 @@ jobs:
           key: v1-dependencies-{{ .Branch }}
       - run:
           name: Build and check
-          command: npm run build && npm run lint && npm run test:types
+          command: npm run build && npm run lint && npm run test:types-ci
       - run:
           name: Project tests
           command: npm run test:ci

@@ -85,15 +85,27 @@ export default class AppsRepository {
   _updates: AppUpdates
   _ownApps: OwnApps
   _byMFID: { [mfid: string]: ID }
+  _appsByUser: { [uid: ID]: Array<ID> }
 
   constructor(params: AppsRepositoryParams = {}) {
     this._apps = params.apps || {}
-    this._byMFID = Object.keys(this._apps).reduce((acc, appID) => {
+    this._byMFID = {}
+    this._appsByUser = {}
+    Object.keys(this._apps).forEach(appID => {
       const id = idType(appID)
-      const mfid = MFID.canonical(this._apps[id].manifest.id)
-      acc[mfid] = id
-      return acc
-    }, {})
+      const app = this._apps[id]
+      const mfid = MFID.canonical(app.manifest.id)
+      this._byMFID[mfid] = id
+
+      Object.keys(app.settings).forEach(uid => {
+        const userID = idType(uid)
+        if (this._appsByUser[userID]) {
+          this._appsByUser[userID].push(idType(appID))
+        } else {
+          this._appsByUser[userID] = [idType(appID)]
+        }
+      })
+    })
     this._updates = params.updates || {}
     this._ownApps = params.ownApps || {}
   }
@@ -140,6 +152,19 @@ export default class AppsRepository {
 
   getAnyByID(id: ID): ?(App | OwnApp) {
     return this.getByID(id) || this.getOwnByID(id)
+  }
+
+  getAppsForUser(id: ID): ?Array<App> {
+    const apps = []
+    if (this._appsByUser[id]) {
+      this._appsByUser[id].forEach(id => {
+        const app = this.getByID(id)
+        if (app) {
+          apps.push(app)
+        }
+      })
+    }
+    return apps
   }
 
   // App lifecycle

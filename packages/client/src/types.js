@@ -22,7 +22,7 @@ export type IdentityOwnData = {
   id: string,
   localID: string,
   profile: Object,
-  ethWallets: { [walletID: ID]: Array<WalletAccount> },
+  ethWallets: { [walletID: string]: Array<WalletAccount> },
 }
 
 export type AppCheckPermissionParams = {
