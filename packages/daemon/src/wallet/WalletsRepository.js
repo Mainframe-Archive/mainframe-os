@@ -39,16 +39,25 @@ export type Wallets = {
   ethereum: WalletCollection,
 }
 
+export type WalletAccountNames = { [address: string]: string }
+export type NamedWalletAccount = { name: string, address: string }
+
 export type WalletsRepositoryParams = {
-  ethereum: WalletCollection,
+  wallets: {
+    ethereum: WalletCollection,
+  },
+  walletAccountNames: WalletAccountNames,
 }
 
 export type WalletsRepositorySerialized = {
-  ethereum: {
-    hd: { [id: string]: HDWalletSerialized },
-    ledger: { [id: string]: LedgerWalletSerialized },
-    pk: { [id: string]: PKWalletSerialized },
+  wallets: {
+    ethereum: {
+      hd: { [id: string]: HDWalletSerialized },
+      ledger: { [id: string]: LedgerWalletSerialized },
+      pk: { [id: string]: PKWalletSerialized },
+    },
   },
+  walletAccountNames: WalletAccountNames,
 }
 
 export default class WalletsRepository {
@@ -56,14 +65,17 @@ export default class WalletsRepository {
     serialized: WalletsRepositorySerialized,
   ): WalletsRepository => {
     return new WalletsRepository({
-      ethereum: {
-        // $FlowFixMe: mapping type
-        hd: hdWalletsFromJSON(serialized.ethereum.hd),
-        // $FlowFixMe: mapping type
-        pk: pkWalletsFromJSON(serialized.ethereum.pk),
-        // $FlowFixMe: mapping type
-        ledger: ledgerWalletsFromJSON(serialized.ethereum.ledger),
+      wallets: {
+        ethereum: {
+          // $FlowFixMe: mapping type
+          hd: hdWalletsFromJSON(serialized.wallets.ethereum.hd),
+          // $FlowFixMe: mapping type
+          pk: pkWalletsFromJSON(serialized.wallets.ethereum.pk),
+          // $FlowFixMe: mapping type
+          ledger: ledgerWalletsFromJSON(serialized.wallets.ethereum.ledger),
+        },
       },
+      walletAccountNames: serialized.walletAccountNames,
     })
   }
 
@@ -71,33 +83,44 @@ export default class WalletsRepository {
     registry: WalletsRepository,
   ): WalletsRepositorySerialized => {
     return {
-      ethereum: {
-        // $FlowFixMe: mapping type
-        hd: hdWalletsToJSON(registry.ethWallets.hd),
-        // $FlowFixMe: mapping type
-        pk: pkWalletsToJSON(registry.ethWallets.pk),
-        // $FlowFixMe: mapping type
-        ledger: ledgerWalletsToJSON(registry.ethWallets.ledger),
+      wallets: {
+        ethereum: {
+          // $FlowFixMe: mapping type
+          hd: hdWalletsToJSON(registry.ethWallets.hd),
+          // $FlowFixMe: mapping type
+          pk: pkWalletsToJSON(registry.ethWallets.pk),
+          // $FlowFixMe: mapping type
+          ledger: ledgerWalletsToJSON(registry.ethWallets.ledger),
+        },
       },
+      walletAccountNames: registry.walletAccountNames,
     }
   }
 
   _wallets: Wallets
+  _walletAccountNames: WalletAccountNames
 
   constructor(params?: WalletsRepositoryParams) {
-    this._wallets = params
-      ? params
-      : {
-          ethereum: {
-            hd: {},
-            pk: {},
-            ledger: {},
-          },
-        }
+    if (params) {
+      this._wallets = params.wallets
+      this._walletAccountNames = params.walletAccountNames
+    } else {
+      this._wallets = {
+        ethereum: {
+          hd: {},
+          pk: {},
+          ledger: {},
+        },
+      }
+      this._walletAccountNames = {}
+    }
   }
 
   get ethWallets(): WalletCollection {
     return this._wallets.ethereum
+  }
+  get walletAccountNames(): WalletAccountNames {
+    return this._walletAccountNames
   }
 
   getEthWalletByID(id: string): ?AbstractWallet {
@@ -106,6 +129,14 @@ export default class WalletsRepository {
       this.ethWallets.pk[id] ||
       this.ethWallets.ledger[id]
     )
+  }
+
+  getEthHDWallet(id: string): ?HDWallet {
+    return this.ethWallets.hd[id]
+  }
+
+  getEthLedgerWallet(id: string): ?LedgerWallet {
+    return this.ethWallets.ledger[id]
   }
 
   getFirstEthWallet(): ?AbstractWallet | ?LedgerWallet {
@@ -121,16 +152,49 @@ export default class WalletsRepository {
     return wallet
   }
 
+  getEthWalletByAccount(account: string): ?AbstractWallet {
+    let wallet
+    Object.keys(this.ethWallets).forEach(type => {
+      Object.keys(this.ethWallets[type]).forEach(w => {
+        const containingWallet = this.ethWallets[type][w]
+        const accountWallet = containingWallet.containsAccount(account)
+        if (accountWallet) {
+          wallet = containingWallet
+        }
+      })
+    })
+    return wallet
+  }
+
+  getEthHDWalletsAndNames(): Array<{
+    localID: string,
+    accounts: Array<NamedWalletAccount>,
+  }> {
+    return Object.keys(this.ethWallets.hd).map(key => {
+      const wallet = this.ethWallets.hd[key]
+      const accounts: Array<NamedWalletAccount> = wallet
+        .getAccounts()
+        .map(a => ({
+          address: a,
+          name: this.walletAccountNames[a],
+        }))
+      return {
+        accounts,
+        localID: wallet.id,
+      }
+    })
+  }
+
   createHDWallet(params: WalletCreateHDParams): WalletCreateHDResult {
     switch (params.chain) {
       case 'ethereum': {
-        const hdWallet = new HDWallet()
+        const hdWallet = HDWallet.create()
         const accounts = hdWallet.getAccounts()
-        hdWallet._walletID = uniqueID()
         this.ethWallets.hd[hdWallet.id] = hdWallet
+        this.walletAccountNames[accounts[0]] = params.name
         return {
           type: 'hd',
-          walletID: toClientId(hdWallet._walletID),
+          walletID: toClientId(hdWallet._localID),
           mnemonic: hdWallet._mnemonic,
           accounts,
         }
@@ -158,7 +222,7 @@ export default class WalletsRepository {
         } else {
           // Create a new PK wallet
           walletID = uniqueID()
-          wallet = new PKWallet({ walletID, privateKeys: [] })
+          wallet = new PKWallet({ localID: walletID, privateKeys: [] })
           this.ethWallets.pk[walletID] = wallet
         }
         wallet.importAccountByPK(params.privateKey)
@@ -186,12 +250,13 @@ export default class WalletsRepository {
         }
         const walletID = uniqueID()
         const hdWallet = new HDWallet({
-          walletID,
+          localID: walletID,
           mnemonic: params.mnemonic,
         })
+        const accounts = hdWallet.getAccounts()
 
         this.ethWallets.hd[walletID] = hdWallet
-        const accounts = hdWallet.getAccounts()
+        this.walletAccountNames[accounts[0]] = params.name
         return {
           type: 'hd',
           walletID: toClientId(hdWallet.id),
@@ -208,10 +273,11 @@ export default class WalletsRepository {
     if (!this.ethWallets.hd[params.walletID]) {
       throw new Error('Wallet not found')
     }
-    const address = this.ethWallets.hd[params.walletID].addAccounts([
+    const newAddresses = this.ethWallets.hd[params.walletID].addAccounts([
       params.index,
     ])
-    return address[0]
+    this.walletAccountNames[newAddresses[0]] = params.name
+    return newAddresses[0]
   }
 
   deleteWallet(params: { chain: string, type: WalletTypes, walletID: ID }) {
@@ -221,21 +287,12 @@ export default class WalletsRepository {
     if (!this._wallets[params.chain][params.type]) {
       throw new Error(`Invalid wallet type ${params.type}`)
     }
-    delete this._wallets[params.chain][params.type][params.walletID]
-  }
 
-  getEthWalletByAccount(account: string): ?AbstractWallet {
-    let wallet
-    Object.keys(this.ethWallets).forEach(type => {
-      Object.keys(this.ethWallets[type]).forEach(w => {
-        const containingWallet = this.ethWallets[type][w]
-        const accountWallet = containingWallet.containsAccount(account)
-        if (accountWallet) {
-          wallet = containingWallet
-        }
-      })
+    const wallet = this._wallets[params.chain][params.type][params.walletID]
+    wallet.getAccounts().forEach(a => {
+      delete this.walletAccountNames[a]
     })
-    return wallet
+    delete this._wallets[params.chain][params.type][params.walletID]
   }
 
   // Signing
@@ -285,7 +342,7 @@ export default class WalletsRepository {
     const ledgerWallet = new LedgerWallet()
     const walletID = uniqueID()
     ledgerWallet._firstAddress = firstLedgerAddr
-    ledgerWallet._walletID = walletID
+    ledgerWallet._localID = walletID
     this._wallets.ethereum.ledger[walletID] = ledgerWallet
     ledgerWallet.addAccounts([params.index])
   }

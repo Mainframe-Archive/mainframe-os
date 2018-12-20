@@ -6,7 +6,7 @@ import type {
   EthTransactionParams,
   WalletEthSignDataParams,
 } from '@mainframe/client'
-import { uniqueID, type ID } from '@mainframe/utils-id'
+import { uniqueID } from '@mainframe/utils-id'
 
 import { getAddressAtIndex, signTransaction } from './ledgerClient'
 import { type AbstractWalletParams } from './AbstractSoftwareWallet'
@@ -16,7 +16,7 @@ type AccountAddress = string
 type LedgerWalletParams = AbstractWalletParams & {
   activeAccounts: { [index: number]: AccountAddress },
   firstAddress: string,
-  walletID: ID,
+  localID: string,
 }
 
 export type LedgerWalletSerialized = LedgerWalletParams
@@ -28,23 +28,23 @@ export default class LedgerWallet {
   // $FlowFixMe: Wallet type
   static toJSON = (hdWallet: HDWallet): HDWalletSerialized => ({
     activeAccounts: hdWallet._activeAccounts,
-    walletID: hdWallet._walletID,
+    localID: hdWallet._localID,
     firstAddress: hdWallet._firstAddress,
   })
 
   // Store address at 0 to identify ledger
-  _walletID: ID
+  _localID: string
   _firstAddress: string
   _activeAccounts: { [index: number]: AccountAddress }
 
   constructor(params?: LedgerWalletParams) {
     if (params) {
       this._activeAccounts = params.activeAccounts
-      this._walletID = params.walletID
+      this._localID = params.localID
       this._firstAddress = params.firstAddress
     } else {
       this._activeAccounts = {}
-      this._walletID = uniqueID()
+      this._localID = uniqueID()
     }
   }
 

@@ -16,7 +16,10 @@ export default class IdentityCreateCommand extends Command {
     if (this.client == null) {
       return
     }
-    const res = await this.client.wallet.createHDWallet({ chain: 'ethereum' })
+    const res = await this.client.wallet.createHDWallet({
+      chain: 'ethereum',
+      name: 'Account 1',
+    })
 
     if (this.flags.userID && this.client) {
       await this.client.identity.linkEthWalletAccount({

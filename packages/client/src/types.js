@@ -330,6 +330,7 @@ export type VaultSettingsParams = $Shape<VaultSettings>
 export type WalletImportMnemonicParams = {
   chain: WalletSupportedChains,
   mnemonic: string,
+  name: string,
 }
 
 export type WalletImportPKParams = {
@@ -348,6 +349,7 @@ export type WalletImportResult = WalletResult
 
 export type WalletCreateHDParams = {
   chain: WalletSupportedChains,
+  name: string,
 }
 
 export type WalletCreateHDResult = {
@@ -395,6 +397,7 @@ export type WalletAddLedgerEthAccountParams = {
 }
 
 export type WalletAddHDAccountParams = {
+  name: string,
   index: number,
   walletID: ID,
 }

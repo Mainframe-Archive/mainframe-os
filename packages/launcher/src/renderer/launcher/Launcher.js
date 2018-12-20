@@ -15,6 +15,7 @@ import UnlockVaultView from './UnlockVaultView'
 import SideMenu, { type ScreenNames } from './SideMenu'
 import AppsScreen from './apps/AppsScreen'
 import IdentitiesScreen from './identities/IdentitiesScreen'
+import WalletsScreen from './wallets/WalletsScreen'
 
 type State = {
   vaultsData?: VaultsData,
@@ -69,6 +70,8 @@ export default class App extends Component<{}, State> {
         return <AppsScreen />
       case 'identities':
         return <IdentitiesScreen />
+      case 'wallets':
+        return <WalletsScreen />
     }
   }
 

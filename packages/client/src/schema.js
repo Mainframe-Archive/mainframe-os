@@ -184,13 +184,13 @@ export const IDENTITY_GET_USER_CONTACTS_SCHEMA = {
 
 export const IDENTITY_LINK_ETH_WALLET_SCHEMA = {
   id: LOCAL_ID_SCHEMA,
-  walletID: LOCAL_ID_SCHEMA,
+  localID: LOCAL_ID_SCHEMA,
   address: 'string',
 }
 
 export const IDENTITY_UNLINK_ETH_WALLET_SCHEMA = {
   id: LOCAL_ID_SCHEMA,
-  walletID: LOCAL_ID_SCHEMA,
+  localID: LOCAL_ID_SCHEMA,
   address: 'string',
 }
 
