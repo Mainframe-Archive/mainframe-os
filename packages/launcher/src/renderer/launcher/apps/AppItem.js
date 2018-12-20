@@ -4,7 +4,6 @@ import React, { Component } from 'react'
 import { createFragmentContainer, graphql } from 'react-relay'
 import type { AppOwnData, AppInstalledData } from '@mainframe/client'
 import styled from 'styled-components/native'
-import styledWeb from 'styled-components'
 
 import { Text } from '@morpheus-ui/core'
 
@@ -16,13 +15,12 @@ const AppButtonContainer = styled.TouchableOpacity`
   width: 110px;
 `
 
-const AppIcon = styledWeb.div`
+const AppIcon = styled.View`
   width: 72px;
   height: 72px;
   background-color: #232323;
   border-radius: 5px;
   margin-bottom: 10px;
-  transform: perspective(400px) rotateY(${props => props.direction * 30}deg);
   transition: all 0.3s;
 `
 
@@ -46,21 +44,22 @@ type Props = SharedProps & {
 }
 
 type State = {
-  direction: number,
+  direction: string,
 }
 
 type MouseEvent = { clientX: number }
 
 export default class AppItem extends Component<Props, State> {
   state = {
-    direction: 0,
+    direction: 'no-skew',
   }
 
   mousePosition: number = 0
 
   setDirection = ({ clientX }: MouseEvent): void => {
     if (clientX !== this.mousePosition) {
-      const direction = clientX > this.mousePosition ? 1 : -1
+      const direction =
+        clientX > this.mousePosition ? 'skew-right' : 'skew-left'
       this.mousePosition = clientX
       this.setState({
         direction,
@@ -71,14 +70,14 @@ export default class AppItem extends Component<Props, State> {
   startMoving = ({ clientX }: MouseEvent): void => {
     this.mousePosition = clientX
     this.setState({
-      direction: 0,
+      direction: 'no-skew',
     })
   }
 
   stopMoving = (): void => {
     this.mousePosition = 0
     this.setState({
-      direction: 0,
+      direction: 'no-skew',
     })
   }
 
@@ -91,7 +90,7 @@ export default class AppItem extends Component<Props, State> {
     return (
       <AppButtonContainer onPress={open} key={app.localID} testID={testID}>
         <AppIcon
-          direction={this.state.direction}
+          className={this.state.direction}
           onMouseMove={this.setDirection}
           onMouseOver={this.startMoving}
           onMouseOut={this.stopMoving}
