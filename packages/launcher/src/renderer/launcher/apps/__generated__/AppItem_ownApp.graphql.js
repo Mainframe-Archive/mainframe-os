@@ -13,6 +13,10 @@ declare export opaque type AppItem_ownApp$ref: FragmentReference;
 export type AppItem_ownApp = {|
   +localID: string,
   +name: string,
+  +developer: {|
+    +id: ?string,
+    +name: ?string,
+  |},
   +versions: ?$ReadOnlyArray<?{|
     +version: string,
     +permissions: {|
@@ -79,6 +83,25 @@ return {
   "selections": [
     v0,
     v1,
+    {
+      "kind": "LinkedField",
+      "alias": null,
+      "name": "developer",
+      "storageKey": null,
+      "args": null,
+      "concreteType": "AppAuthor",
+      "plural": false,
+      "selections": [
+        {
+          "kind": "ScalarField",
+          "alias": null,
+          "name": "id",
+          "args": null,
+          "storageKey": null
+        },
+        v1
+      ]
+    },
     {
       "kind": "LinkedField",
       "alias": null,
@@ -167,5 +190,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = 'af199763403c0c30acfa6d4d8ed9c5b0';
+(node/*: any*/).hash = '3e87a9a898d1db36f5d70ac9c1c51605';
 module.exports = node;

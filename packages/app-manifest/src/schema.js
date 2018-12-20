@@ -67,6 +67,7 @@ export const MANIFEST_SCHEMA_PROPS = {
     type: 'object',
     props: {
       id: ID_SCHEMA,
+      name: 'string',
     },
   },
   name: NAME_SCHEMA,

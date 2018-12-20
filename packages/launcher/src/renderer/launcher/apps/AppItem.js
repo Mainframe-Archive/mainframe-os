@@ -86,6 +86,8 @@ export default class AppItem extends Component<Props, State> {
     const { app, isOwn, onOpenApp } = this.props
     const open = () => onOpenApp(app, !!isOwn)
     const testID = isOwn ? 'own-app-item' : 'installed-app-item'
+    // $FlowFixMe: app type
+    const devName = isOwn ? app.developer.name : app.manifest.author.name
     return (
       <AppButtonContainer onPress={open} key={app.localID} testID={testID}>
         <AppIcon
@@ -95,7 +97,7 @@ export default class AppItem extends Component<Props, State> {
           onMouseOut={this.stopMoving}
         />
         <Text variant="appButtonName">{app.name}</Text>
-        <Text variant="appButtonId">{app.localID}</Text>
+        <Text variant="appButtonId">{devName}</Text>
       </AppButtonContainer>
     )
   }
@@ -123,6 +125,10 @@ export const InstalledAppItem = createFragmentContainer(InstalledView, {
             WEB_REQUEST
             BLOCKCHAIN_SEND
           }
+        }
+        author {
+          id
+          name
         }
       }
       users {
@@ -154,6 +160,10 @@ export const OwnAppItem = createFragmentContainer(OwnView, {
     fragment AppItem_ownApp on OwnApp {
       localID
       name
+      developer {
+        id
+        name
+      }
       versions {
         version
         permissions {

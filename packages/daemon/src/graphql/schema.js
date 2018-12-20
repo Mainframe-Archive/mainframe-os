@@ -175,6 +175,20 @@ const appPermissionsRequirements = new GraphQLObjectType({
   }),
 })
 
+const appAuthorType = new GraphQLObjectType({
+  name: 'AppAuthor',
+  fields: () => ({
+    id: {
+      type: GraphQLString,
+      resolve: self => self.id,
+    },
+    name: {
+      type: GraphQLString,
+      resolve: self => self.name,
+    },
+  }),
+})
+
 const appManifestData = new GraphQLObjectType({
   name: 'AppManifestData',
   fields: () => ({
@@ -189,6 +203,10 @@ const appManifestData = new GraphQLObjectType({
     permissions: {
       type: new GraphQLNonNull(appPermissionsRequirements),
       resolve: self => self.permissions,
+    },
+    author: {
+      type: new GraphQLNonNull(appAuthorType),
+      resolve: self => self.author,
     },
   }),
 })
@@ -258,6 +276,18 @@ const ownAppType = new GraphQLObjectType({
           version: version,
           ...versions[version],
         }))
+      },
+    },
+    developer: {
+      type: new GraphQLNonNull(appAuthorType),
+      resolve: (self, args, ctx) => {
+        const dev = ctx.openVault.identities.getOwnDeveloper(
+          self.data.developerID,
+        )
+        return {
+          id: dev.id,
+          name: dev.profile.name,
+        }
       },
     },
     users: {
@@ -591,6 +621,9 @@ const manifestAuthorInput = new GraphQLInputObjectType({
   name: 'ManifestAuthorInput',
   fields: () => ({
     id: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    name: {
       type: new GraphQLNonNull(GraphQLString),
     },
   }),
