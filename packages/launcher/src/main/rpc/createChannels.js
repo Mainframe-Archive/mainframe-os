@@ -45,17 +45,7 @@ export default (
     return context
   }
 
-  createChannel(
-    APP_SANDBOXED_CHANNEL,
-    sandboxedMethods,
-    (sender: WebContents): AppContext => {
-      const context = getAppContext(sender)
-      if (context.sandbox == null) {
-        context.sandbox = sender
-      }
-      return context
-    },
-  )
+  createChannel(APP_SANDBOXED_CHANNEL, sandboxedMethods, getAppContext)
 
   createChannel(APP_TRUSTED_CHANNEL, trustedMethods, getAppContext)
 

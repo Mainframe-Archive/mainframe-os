@@ -16,6 +16,7 @@ import type { AppSession, AppSessions } from '../types'
 
 import { AppContext, LauncherContext } from './contexts'
 import { interceptWebRequests } from './permissions'
+import { registerStreamProtocol } from './storage'
 import createElectronTransport from './createElectronTransport'
 import createRPCChannels from './rpc/createChannels'
 
@@ -75,23 +76,6 @@ const launchApp = async (
   }
 
   const appWindow = newWindow()
-  if (is.development) {
-    appWindow.webContents.on('did-attach-webview', () => {
-      // Open a separate developer tools window for the app
-      appWindow.webContents.executeJavaScript(
-        `document.getElementById('sandbox-webview').openDevTools()`,
-      )
-    })
-  }
-  appWindow.on('closed', async () => {
-    await client.app.close({ sessID: appSession.session.sessID })
-    const ctx = appContexts.get(appWindow)
-    if (ctx != null) {
-      await ctx.clear()
-      appContexts.delete(appWindow)
-    }
-    delete appSessions[appID][userID]
-  })
 
   const appContext = new AppContext({
     appSession,
@@ -104,8 +88,6 @@ const launchApp = async (
   })
   appContexts.set(appWindow, appContext)
   interceptWebRequests(appContext)
-  // TODO: intercept streams
-  // registerStorageProtocol(appContext)
 
   if (appSessions[appID]) {
     appSessions[appID][userID] = appSession
@@ -113,6 +95,27 @@ const launchApp = async (
     // $FlowFixMe: can't assign ID type
     appSessions[appID] = { [userID]: appSession }
   }
+
+  appWindow.webContents.on('did-attach-webview', (event, webContents) => {
+    // Open a separate developer tools window for the app
+    appContext.sandbox = webContents
+    registerStreamProtocol(appContext)
+    if (is.development) {
+      appWindow.webContents.executeJavaScript(
+        `document.getElementById('sandbox-webview').openDevTools()`,
+      )
+    }
+  })
+
+  appWindow.on('closed', async () => {
+    await client.app.close({ sessID: appSession.session.sessID })
+    const ctx = appContexts.get(appWindow)
+    if (ctx != null) {
+      await ctx.clear()
+      appContexts.delete(appWindow)
+    }
+    delete appSessions[appID][userID]
+  })
 }
 
 // TODO: proper setup, this is just temporary logic to simplify development flow

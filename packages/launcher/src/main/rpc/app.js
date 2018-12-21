@@ -11,6 +11,10 @@ import { pubKeyToAddress } from '@erebos/api-bzz-base'
 
 import { type AppContext, ContextSubscription } from '../contexts'
 import { withPermission } from '../permissions'
+import { PrependInitializationVector } from '../storage'
+import { createReadStream } from 'fs'
+import * as mime from 'mime'
+import crypto from 'crypto'
 
 class TopicSubscription extends ContextSubscription<RxSubscription> {
   data: ?RxSubscription
@@ -129,42 +133,33 @@ export const sandboxed = {
       name: 'string',
     },
     handler: (ctx: AppContext, params: { name: string }): Promise<?string> => {
-      console.log(params, 'params')
       return new Promise((resolve, reject) => {
         dialog.showOpenDialog(
           ctx.window,
           { title: 'Select file to upload', buttonLabel: 'Upload' },
           async filePaths => {
-            console.log(filePaths, 'filePaths')
             if (filePaths.length !== 0) {
-              // TODO: use these to create the cipher and update the feed after the file is written
-              console.log(ctx.storage, 'ctx.storage')
-              console.log(ctx.bzz, 'ctx.bzz')
               try {
+                const filePath = filePaths[0]
                 const { encryptionKey, feedHash, feedKeyPair } = ctx.storage
-                const feedHashExists = !!feedHash
-                console.log(feedHashExists, 'feedHashExists')
                 const pubKey = feedKeyPair.getPublic(feedKeyPair)
                 const address = pubKeyToAddress(pubKey)
-                const dataHash = await ctx.bzz.uploadFileFrom(filePaths[0], {
-                  path: params.name,
-                  contentType: 'image/png' // TODO: remove hardcoded values
-                })
-                console.log(dataHash, 'dataHash')
 
-                if (feedHashExists) {
-                  let feedManifest = feedHash
-                } else {
-                  console.log(address, 'address')
-                  let feedManifest = await ctx.bzz.createFeedManifest(address)
-                }
-                console.log(feedManifest, 'feedManifest')
-                const feedMetaData = ctx.bzz.getFeedMetadata(feedManifest)
-                await ctx.bzz.postFeedValue(feedKeyPair, `0x${dataHash}`)
-                const url = ctx.bzz.getDownloadURL(feedManifest, { mode: 'default' })
-                console.log(url, 'url')
+                // TODO: move out encryption code to a separate file
+                const iv = crypto.randomBytes(16) // TODO: use a constant for the length of the IV
+                const cipher = crypto.createCipheriv('aes256', encryptionKey, iv)
+                const body = createReadStream(filePath).pipe(cipher).pipe(new PrependInitializationVector(iv))
+                const dataHash = await ctx.bzz._upload(body, {}, { 'content-type': mime.getType(filePath) })
+                const feedManifest = feedHash || await ctx.bzz.createFeedManifest(address)
+                const feedMetaData = await ctx.bzz.getFeedMetadata(feedManifest)
+                const postFeedReq = await ctx.bzz.postFeedValue(feedKeyPair, `0x${dataHash}`)
+                const url = await ctx.bzz.getDownloadURL(feedManifest, { mode: 'default' })
+
+                // TODO: persist to the vault, atm feedHash is lost with the current session
+                ctx.storage.feedHash = feedManifest
                 resolve(params.name)
-              } catch (err) {
+              } catch (error) {
+                console.log(error, 'storage_requestUpload error')
                 // TODO: use RPCError to provide a custom error code
                 reject(new Error('Upload failed'))
               }

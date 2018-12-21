@@ -68,7 +68,7 @@ export const createAppStorage = (): AppStorage => {
   return {
     feedHash: undefined,
     feedKey: kp.getPrivate('hex'),
-    encryptionKey: encodeBase64(secureRandomBytes(16)),
+    encryptionKey: encodeBase64(secureRandomBytes(32)),
   }
 }
 

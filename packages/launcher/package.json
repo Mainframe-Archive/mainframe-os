@@ -41,6 +41,7 @@
     "@mainframe/utils-id": "^0.1.0",
     "electron-store": "^2.0.0",
     "electron-util": "^0.10.2",
+    "mime": "^2.4.0",
     "react": "^16.5.2",
     "react-art": "^16.5.2",
     "react-dom": "^16.5.2",
