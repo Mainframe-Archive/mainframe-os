@@ -20,6 +20,7 @@ export default {
   DARK_RED: '#C1154E',
 
   LIGHT_GREY_F7: '#f7f7f7',
+  LIGHT_GREY_F9: '#f9f9f9',
   LIGHT_GREY_EE: '#eeeeee',
   LIGHT_GREY_E8: '#e8e8e8',
   LIGHT_GREY_E5: '#e5e5e5',

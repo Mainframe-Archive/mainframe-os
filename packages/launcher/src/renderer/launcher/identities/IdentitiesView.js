@@ -1,13 +1,15 @@
 // @flow
 
 import React, { Component } from 'react'
-import { View, type ElementRef } from 'react-native-web'
+import { type ElementRef } from 'react-native'
 import { createFragmentContainer, graphql } from 'react-relay'
 import styled from 'styled-components/native'
 import type { AppInstalledData } from '@mainframe/client'
 
-import { Text } from '@morpheus-ui/core'
-import globalStyles from '../../styles'
+import { Text, Button } from '@morpheus-ui/core'
+
+import IdentityFilledIcon from '@morpheus-ui/icons/IdentityFilledMd'
+import PlusIcon from '@morpheus-ui/icons/PlusSymbolCircled'
 
 type Wallet = {
   localID: string,
@@ -33,95 +35,64 @@ type Props = {
 }
 
 const UserItem = styled.View`
-  margin: 10px;
-  padding: 10px;
-  background-color: ${props => props.theme.colors.LIGHT_GREY_F7};
+  margin: 10px 0;
+  padding: 30px 25px;
+  background-color: ${props => props.theme.colors.LIGHT_GREY_F9};
+  border-left: 5px solid ${props => props.theme.colors.PRIMARY_BLUE};
+  border-radius: 3px;
+  flex-direction: row;
+  align-items: center;
 `
 
-const SectionContainer = styled.View`
-  padding: 10px;
-  background-color: ${props => props.theme.colors.WHITE};
+const Profile = styled.View`
+  flex: 1;
+  margin-left: 15px;
 `
 
-const SectionHeader = styled.Text`
-  padding-vertical: 5px;
+const ButtonContainer = styled.View`
+  margin-top: 15px;
+  align-items: flex-end;
 `
 
 class IdentitiesView extends Component<Props> {
-  renderDevelopers(): Array<ElementRef> {
-    return this.props.identities.ownDevelopers.map(u => {
-      return <UserItem key={u.localID}>{this.renderProfile(u)}</UserItem>
-    })
-  }
-
-  renderUserApps(user: User) {
-    const apps: Array<ElementRef> = user.apps.map(a => {
-      return (
-        <View key={a.localID}>
-          <Text>{a.manifest.name}</Text>
-          <Text>{a.localID}</Text>
-        </View>
-      )
-    })
-    return (
-      <View>
-        <SectionHeader>Apps</SectionHeader>
-        <SectionContainer>{apps}</SectionContainer>
-      </View>
-    )
-  }
-
-  renderProfile(user: User) {
-    return (
-      <View>
-        <SectionHeader>Profile</SectionHeader>
-        <SectionContainer>
-          <Text>Name: {user.profile.name}</Text>
-          <Text>ID: {user.localID}</Text>
-        </SectionContainer>
-      </View>
-    )
-  }
-
-  renderWallets(user: User) {
-    return (
-      <View>
-        <SectionHeader>Wallets:</SectionHeader>
-        <SectionContainer>
-          {user.wallets.map(w => {
-            return (
-              <View key={w.localID}>
-                <Text>id: {w.localID}</Text>
-                {w.accounts.map(a => {
-                  return <Text key={a}>{a}</Text>
-                })}
-              </View>
-            )
-          })}
-        </SectionContainer>
-      </View>
-    )
-  }
-
   renderUsers(): Array<ElementRef> {
-    return this.props.identities.ownUsers.map(u => {
+    const identities = [
+      ...this.props.identities.ownUsers.map((user: User) => ({
+        ...user,
+        type: 'user',
+      })),
+      ...this.props.identities.ownDevelopers.map((user: User) => ({
+        ...user,
+        type: 'developer',
+      })),
+    ]
+
+    return identities.map((user: Object) => {
       return (
-        <UserItem key={u.localID}>
-          {this.renderProfile(u)}
-          {this.renderWallets(u)}
-          {this.renderUserApps(u)}
+        <UserItem key={user.localID}>
+          <IdentityFilledIcon width="24px" height="24px" />
+          <Profile>
+            <Text variant="bold">{user.profile.name}</Text>
+            <Text theme={{ color: '#585858', fontSize: '11px' }}>
+              {user.localID}
+            </Text>
+          </Profile>
+          <Text theme={{ color: '#585858', fontSize: '11px' }}>
+            {user.type}
+          </Text>
         </UserItem>
       )
     })
   }
   render() {
     return (
-      <View>
-        <Text style={globalStyles.boldText}>Users</Text>
+      <>
+        <Text variant="smallTitle">Indentities</Text>
         {this.renderUsers()}
-        <Text style={globalStyles.boldText}>Developers</Text>
-        {this.renderDevelopers()}
-      </View>
+        <ButtonContainer>
+          <Button variant="completeOnboarding" Icon={PlusIcon} title="New" />
+        </ButtonContainer>
+      </>
     )
   }
 }

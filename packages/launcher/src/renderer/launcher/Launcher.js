@@ -8,13 +8,12 @@ import { ThemeProvider as MFThemeProvider } from '@morpheus-ui/core'
 import THEME from '../theme'
 
 import type { VaultsData } from '../../types'
-import OSLogo from '../UIComponents/MainframeOSLogo'
+
 import rpc from './rpc'
 import { EnvironmentContext } from './RelayEnvironment'
 
 import OnboardView from './OnboardView'
 import UnlockVaultView from './UnlockVaultView'
-import CompleteOnboardSession from './CompleteOnboardSession'
 import SideMenu, { type ScreenNames } from './SideMenu'
 import AppsScreen from './apps/AppsScreen'
 import IdentitiesScreen from './identities/IdentitiesScreen'
@@ -35,10 +34,6 @@ const LoadingContainer = styled.View`
   justify-content: 'center';
 `
 
-const Header = styled.View`
-  height: 50px;
-`
-
 type State = {
   vaultsData?: VaultsData,
   openScreen: ScreenNames,
@@ -49,7 +44,7 @@ export default class App extends Component<{}, State> {
 
   state = {
     vaultsData: undefined,
-    openScreen: 'apps',
+    openScreen: 'identities',
   }
 
   componentDidMount() {
@@ -92,6 +87,8 @@ export default class App extends Component<{}, State> {
         return <AppsScreen />
       case 'identities':
         return <IdentitiesScreen />
+      default:
+        return null
     }
   }
 
@@ -124,10 +121,6 @@ export default class App extends Component<{}, State> {
           onSelectMenuItem={this.setOpenScreen}
         />
         <ContentContainer>
-          <Header>
-            <OSLogo />
-          </Header>
-          <CompleteOnboardSession onSelectItem={() => {}} onSkip={() => {}} />
           <ScrollView>{this.renderScreen()}</ScrollView>
         </ContentContainer>
       </Container>
