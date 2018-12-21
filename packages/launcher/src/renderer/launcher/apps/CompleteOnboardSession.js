@@ -83,6 +83,7 @@ export default class CompleteOnboardSession extends Component<Props> {
               variant="completeOnboarding"
               title="SKIP"
               Icon={SkipIcon}
+              onPress={this.props.onSkip}
             />
           </ButtonWrapper>
         </ButtonsContainer>

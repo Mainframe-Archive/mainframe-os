@@ -17,8 +17,16 @@ import ModalView from '../../UIComponents/ModalView'
 import IdentitySelectorView from '../IdentitySelectorView'
 import CreateAppModal from '../developer/CreateAppModal'
 import PermissionsView from '../PermissionsView'
+import OSLogo from '../../UIComponents/MainframeOSLogo'
+import CompleteOnboardSession from './CompleteOnboardSession'
+
 import AppInstallModal from './AppInstallModal'
 import { OwnAppItem, InstalledAppItem } from './AppItem'
+
+const Header = styled.View`
+  height: 50px;
+`
+
 const AppsGrid = styled.View`
   flex-direction: row;
   flex-wrap: wrap;
@@ -55,7 +63,7 @@ type Props = {
 }
 
 type State = {
-  showModal?: ?{
+  showModal: ?{
     type: 'select_id' | 'accept_permissions' | 'app_install' | 'app_create',
     data?: ?{
       app: AppData,
@@ -63,10 +71,20 @@ type State = {
       userID?: ID,
     },
   },
+  showOnboarding: boolean,
 }
 
 class AppsView extends Component<Props, State> {
-  state = {}
+  state = {
+    showModal: null,
+    showOnboarding: true,
+  }
+
+  onSkipOnboarding = () => {
+    this.setState({
+      showOnboarding: false,
+    })
+  }
 
   // App Install
 
@@ -298,6 +316,15 @@ class AppsView extends Component<Props, State> {
     }
     return (
       <>
+        <Header>
+          <OSLogo />
+        </Header>
+        {this.state.showOnboarding && (
+          <CompleteOnboardSession
+            onSelectItem={() => {}}
+            onSkip={this.onSkipOnboarding}
+          />
+        )}
         {this.renderInstalled()}
         {this.renderOwn()}
         {modal}
