@@ -44,7 +44,7 @@ export default class App extends Component<{}, State> {
 
   state = {
     vaultsData: undefined,
-    openScreen: 'identities',
+    openScreen: 'apps',
   }
 
   componentDidMount() {
