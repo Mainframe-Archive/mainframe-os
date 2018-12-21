@@ -1,7 +1,6 @@
 // @flow
 
-import React, { Component } from 'react'
-import { type ElementRef } from 'react-native'
+import React, { Component, type ElementRef } from 'react'
 import { createFragmentContainer, graphql } from 'react-relay'
 import styled from 'styled-components/native'
 import type { AppInstalledData } from '@mainframe/client'
@@ -55,7 +54,7 @@ const ButtonContainer = styled.View`
 `
 
 class IdentitiesView extends Component<Props> {
-  renderUsers(): Array<ElementRef> {
+  renderUsers(): Array<ElementRef<any>> {
     const identities = [
       ...this.props.identities.ownUsers.map((user: User) => ({
         ...user,
