@@ -17,6 +17,8 @@ import WalletsIcon from '@morpheus-ui/icons/WalletsMd'
 import WalletsFilledIcon from '@morpheus-ui/icons/WalletsFilledMd'
 import SettingsIcon from '@morpheus-ui/icons/SettingsMd'
 import SettingsFilledIcon from '@morpheus-ui/icons/SettingsFilledMd'
+import NotificationsIcon from '@morpheus-ui/icons/NotificationsMd'
+import NotificationsFilledIcon from '@morpheus-ui/icons/NotificationsFilledMd'
 
 export type ScreenNames =
   | 'apps'
@@ -24,6 +26,7 @@ export type ScreenNames =
   | 'contacts'
   | 'wallets'
   | 'settings'
+  | 'notifications'
 
 type Props = {
   onSelectMenuItem: (name: ScreenNames) => void,
@@ -40,6 +43,7 @@ const MENU_ITEMS: Array<ScreenNames> = [
   'identities',
   'contacts',
   'wallets',
+  'notifications',
   'settings',
 ]
 
@@ -68,6 +72,11 @@ const BUTTONS: Object = {
     title: 'Settings',
     icon: SettingsIcon,
     activeIcon: SettingsFilledIcon,
+  },
+  notifications: {
+    title: 'Notifications',
+    icon: NotificationsIcon,
+    activeIcon: NotificationsFilledIcon,
   },
 }
 

@@ -7,6 +7,11 @@ type App implements Node {
   users: [AppUser]
 }
 
+type AppAuthor {
+  id: String
+  name: String
+}
+
 input AppCreateMutationInput {
   name: String!
   contentsPath: String!
@@ -39,6 +44,7 @@ type AppManifestData {
   name: String!
   version: String!
   permissions: AppPermissionsRequirements!
+  author: AppAuthor!
 }
 
 input AppManifestInput {
@@ -141,6 +147,7 @@ type IdentitiesQuery {
 
 input ManifestAuthorInput {
   id: String!
+  name: String!
 }
 
 type Mutation {
@@ -162,6 +169,7 @@ type OwnApp implements Node {
   localID: ID!
   name: String!
   versions: [AppVersionData]
+  developer: AppAuthor!
   users: [AppUser]
 }
 
