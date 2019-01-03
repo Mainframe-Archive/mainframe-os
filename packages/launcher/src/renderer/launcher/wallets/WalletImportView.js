@@ -1,7 +1,7 @@
 // @flow
 
 import React, { Component } from 'react'
-import { graphql, commitMutation } from 'react-relay'
+import { graphql, commitMutation, type PayloadError } from 'react-relay'
 import styled from 'styled-components/native'
 import { Button, TextField, Row, Column, Text } from '@morpheus-ui/core'
 import { Form, type FormSubmitPayload } from '@morpheus-ui/forms'
@@ -77,7 +77,7 @@ export default class WalletImportView extends Component<Props, State> {
       commitMutation(this.context, {
         mutation: deleteWalletMutation,
         variables: { input: deleteInput },
-        onCompleted: (response: ?Object, errors: ?Array<Error>) => {
+        onCompleted: (response, errors) => {
           if (errors || !response) {
             const error =
               errors && errors.length ? errors[0] : new Error(IMPORT_ERR_MSG)
@@ -105,7 +105,7 @@ export default class WalletImportView extends Component<Props, State> {
     commitMutation(this.context, {
       mutation: walletImportMutation,
       variables: { input: importInput },
-      onCompleted: (response: ?Object, errors: ?Array<Error>) => {
+      onCompleted: (response, errors) => {
         if (errors || !response) {
           const error =
             errors && errors.length ? errors[0] : new Error(IMPORT_ERR_MSG)
@@ -120,7 +120,7 @@ export default class WalletImportView extends Component<Props, State> {
     })
   }
 
-  displayError(error: Error) {
+  displayError(error: Error | PayloadError) {
     const msg = error.message || IMPORT_ERR_MSG
     this.setState({
       errorMsg: msg,

@@ -166,7 +166,7 @@ export default class WalletsRepository {
     return wallet
   }
 
-  getEthHDWalletsAndNames(): Array<{
+  getNamedEthHDWallets(): Array<{
     localID: string,
     accounts: Array<NamedWalletAccount>,
   }> {

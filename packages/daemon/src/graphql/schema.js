@@ -535,7 +535,7 @@ const ethWalletsType = new GraphQLObjectType({
     hd: {
       type: new GraphQLList(ethHdWalletType),
       resolve: (self, args, ctx) => {
-        const wallets = ctx.openVault.wallets.getEthHDWalletsAndNames()
+        const wallets = ctx.openVault.wallets.getNamedEthHDWallets()
         return wallets
       },
     },

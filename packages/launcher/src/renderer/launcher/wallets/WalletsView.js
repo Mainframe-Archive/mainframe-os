@@ -1,7 +1,6 @@
 // @flow
 
-import React, { Component } from 'react'
-import { type ElementRef } from 'react-native-web'
+import React, { Component, type ElementRef } from 'react'
 import { createFragmentContainer, graphql, commitMutation } from 'react-relay'
 import styled from 'styled-components/native'
 import { Text, Button } from '@morpheus-ui/core'
@@ -9,9 +8,11 @@ import { Text, Button } from '@morpheus-ui/core'
 import { EnvironmentContext } from '../RelayEnvironment'
 import WalletImportView from './WalletImportView'
 
+export type WalletAccounts = Array<{ name: string, address: string }>
+
 export type Wallet = {
   localID: string,
-  accounts: Array<{ name: string, address: string }>,
+  accounts: WalletAccounts,
 }
 
 export type Wallets = {
@@ -142,7 +143,7 @@ class WalletsView extends Component<Props, State> {
     ) : null
   }
 
-  renderWalletAccounts(accounts) {
+  renderWalletAccounts(accounts: WalletAccounts): Array<ElementRef<any>> {
     return accounts.map(a => {
       return (
         <WalletView key={a.address}>
@@ -153,7 +154,7 @@ class WalletsView extends Component<Props, State> {
     })
   }
 
-  renderWallets(): Array<ElementRef> {
+  renderWallets(): Array<ElementRef<any>> {
     const { ethWallets } = this.props.wallets
     return Object.keys(ethWallets).map(type => {
       let wallets
