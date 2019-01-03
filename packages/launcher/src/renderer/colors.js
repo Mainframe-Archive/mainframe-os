@@ -20,6 +20,7 @@ export default {
   DARK_RED: '#C1154E',
 
   LIGHT_GREY_F7: '#f7f7f7',
+  LIGHT_GREY_F9: '#f9f9f9',
   LIGHT_GREY_EE: '#eeeeee',
   LIGHT_GREY_E8: '#e8e8e8',
   LIGHT_GREY_E5: '#e5e5e5',
@@ -34,6 +35,7 @@ export default {
   GREY_DARK_38: '#383838',
   GREY_DARK_2A: '#2A2A2A',
   GREY_DARK_80: '#808080',
+  GREY_A9: '#A9A9A9',
   WHITE: '#FFFFFF',
   TRANSPARENT_BLUE_BG: 'rgba(14, 18, 28, 0.85)',
   TRANSPARENT_BLACK_30: 'rgba(0, 0, 0, 0.30)',

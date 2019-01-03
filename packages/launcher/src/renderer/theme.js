@@ -29,6 +29,11 @@ export default {
       titleHoverColor: COLORS.PRIMARY_BLUE,
       iconHoverColor: COLORS.PRIMARY_BLUE,
     },
+    completeOnboarding: {
+      fontWeight: 'normal',
+      borderHoverColor: 'transparent',
+      hoverShadow: true,
+    },
   },
   Text: {
     default: {
@@ -40,6 +45,28 @@ export default {
     error: {
       paddingBottom: 10,
       color: COLORS.PRIMARY_RED,
+    },
+    smallTitle: {
+      textTransform: 'uppercase',
+      color: COLORS.GREY_A9,
+      fontSize: 10,
+      letterSpacing: '1.5px',
+      padding: '20px 0',
+    },
+    appButtonName: {
+      fontSize: '12px',
+      color: '#303030',
+      fontWeight: 'bold',
+      textAlign: 'center',
+    },
+    appButtonId: {
+      fontSize: '10px',
+      color: '#808080',
+      textAlign: 'center',
+      width: '72px',
+      overflow: 'hidden',
+      whiteSpace: 'nowrap',
+      textOverflow: 'elipsis',
     },
   },
   styled: {
