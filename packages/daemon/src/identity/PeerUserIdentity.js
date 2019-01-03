@@ -4,7 +4,7 @@ import Identity from './Identity'
 
 type FeedHash = string
 
-export type ProfileData = {
+export type PeerUserProfile = {
   name?: ?string,
   avatar?: ?string,
 }
@@ -16,7 +16,7 @@ export type PeerUserIdentitySerialized = {
   localID: string,
   publicFeed: FeedHash,
   otherFeeds: Feeds,
-  profile: ProfileData,
+  profile: PeerUserProfile,
 }
 
 export default class PeerUserIdentity extends Identity {
@@ -48,7 +48,7 @@ export default class PeerUserIdentity extends Identity {
   constructor(
     localID: string,
     keyOrId: string | Buffer,
-    profile: ProfileData,
+    profile: PeerUserProfile,
     publicFeed: FeedHash,
     otherFeeds?: Feeds,
   ) {
@@ -62,7 +62,7 @@ export default class PeerUserIdentity extends Identity {
     return this._publicFeed
   }
 
-  get profile(): ProfileData {
+  get profile(): PeerUserProfile {
     return this._profile
   }
 

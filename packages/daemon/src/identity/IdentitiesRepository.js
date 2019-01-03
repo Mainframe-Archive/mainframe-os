@@ -24,7 +24,7 @@ import OwnUserIdentity, {
 } from './OwnUserIdentity'
 import PeerUserIdentity, {
   type PeerUserIdentitySerialized,
-  type ProfileData,
+  type PeerUserProfile,
   type Feeds,
 } from './PeerUserIdentity'
 import Contact, { type ContactParams, type ContactSerialized } from './Contact'
@@ -425,7 +425,7 @@ export default class IdentitiesRepository {
 
   createPeerUser(
     publicKey: string,
-    profile: ProfileData,
+    profile: PeerUserProfile,
     publicFeed: string,
     feeds?: Feeds,
   ): ID {
