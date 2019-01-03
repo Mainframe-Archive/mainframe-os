@@ -11,7 +11,7 @@ export default class WalletDeleteCommand extends Command {
       description: 'wallet local ID',
     }),
     type: flags.string({
-      description: 'wallet local type (hd, ledger or pk)',
+      description: 'wallet local type (hd or ledger)',
     }),
   }
 

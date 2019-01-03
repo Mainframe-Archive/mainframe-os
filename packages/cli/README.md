@@ -32,6 +32,8 @@
 - `app:publishContents`: publish the app contents to Swarm
 - `app:writeManifest`: writes the app manifest
 - `wallet:createEth`: create a new Ethereum wallet
+- `wallet:connectLedgerAccount`: connect an account from ledger hardware wallet
+- `wallet:delete`: delete a wallet
 - `wallet:importEth`: import an Ethereum wallet
 
 ## Environment setup

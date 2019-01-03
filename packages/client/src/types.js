@@ -15,7 +15,7 @@ import type { ExecutionResult } from 'graphql'
 
 export type { ID } from '@mainframe/utils-id'
 
-export type WalletTypes = 'hd' | 'pk' | 'ledger'
+export type WalletTypes = 'hd' | 'ledger'
 export type WalletSupportedChains = 'ethereum'
 export type WalletAccount = string
 export type IdentityOwnData = {
@@ -333,13 +333,6 @@ export type WalletImportMnemonicParams = {
   name: string,
 }
 
-export type WalletImportPKParams = {
-  chain: WalletSupportedChains,
-  privateKey: string,
-  walletID?: ID,
-  name: string,
-}
-
 export type WalletNamedAccount = {
   name: string,
   address: string,
@@ -379,7 +372,6 @@ export type WalletDeleteParams = {
 
 export type WalletGetEthWalletsResult = {
   hd: WalletResults,
-  simple: WalletResults,
   ledger: WalletResults,
 }
 

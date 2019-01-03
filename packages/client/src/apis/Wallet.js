@@ -5,7 +5,6 @@ import type {
   WalletAddHDAccountParams,
   WalletAddHDAccountResult,
   WalletCreateHDParams,
-  WalletImportPKParams,
   WalletImportResult,
   WalletImportMnemonicParams,
   WalletGetEthWalletsResult,
@@ -20,12 +19,6 @@ export default class WalletAPIs extends ClientAPIs {
     params: WalletCreateHDParams,
   ): Promise<WalletCreateHDResult> {
     return this._rpc.request('wallet_createHD', params)
-  }
-
-  async importAccountByPK(
-    params: WalletImportPKParams,
-  ): Promise<WalletImportResult> {
-    return this._rpc.request('wallet_importPK', params)
   }
 
   async importWalletByMnemonic(

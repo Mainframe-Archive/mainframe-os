@@ -221,10 +221,6 @@ export const WALLET_SUPPORTED_CHAIN_SCHEMA = {
   values: ['ethereum'],
 }
 
-export const WALLET_IMPORT_PK_SCHEMA = {
-  privateKey: 'string',
-}
-
 export const WALLET_IMPORT_MNEMONIC_SCHEMA = {
   mnemonic: 'string',
 }
