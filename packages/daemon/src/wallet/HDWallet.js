@@ -11,41 +11,22 @@ import AbstractSoftwareWallet, {
 
 type AccountIndex = string
 
-type HDWalletParams = AbstractWalletParams & {
+export type HDWalletParams = AbstractWalletParams & {
   mnemonic: string,
   hdPath?: string,
   activeAccounts?: Array<AccountIndex>,
 }
 
-export type HDWalletSerialized = HDWalletParams
-
 const HD_PATH_STRING = `m/44'/60'/0'/0`
 
+export const generateWalletParams = () => ({
+  localID: uniqueID(),
+  mnemonic: bip39.generateMnemonic(),
+  hdPath: HD_PATH_STRING,
+  activeAccounts: ['0'],
+})
+
 export default class HDWallet extends AbstractSoftwareWallet {
-  static create = (): HDWallet => {
-    const localID = uniqueID()
-    const mnemonic = bip39.generateMnemonic()
-    const hdPath = HD_PATH_STRING
-    const accounts = ['0']
-    return new HDWallet({
-      localID,
-      hdPath,
-      mnemonic,
-      activeAccounts: accounts,
-    })
-  }
-
-  static fromJSON = (params: HDWalletSerialized): HDWallet =>
-    new HDWallet(params)
-
-  // $FlowFixMe: Wallet type
-  static toJSON = (hdWallet: HDWallet): HDWalletSerialized => ({
-    mnemonic: hdWallet._mnemonic,
-    localID: hdWallet._localID,
-    // $FlowFixMe: Keys are numbers
-    activeAccounts: Object.keys(hdWallet._wallets),
-  })
-
   _hdKey: HDkey
   _root: HDkey
   _mnemonic: string
@@ -78,6 +59,10 @@ export default class HDWallet extends AbstractSoftwareWallet {
 
   get publicExtendedKey() {
     return this._hdKey.publicExtendedKey()
+  }
+
+  get mnemonic(): string {
+    return this._mnemonic
   }
 
   getAccounts(): Array<string> {

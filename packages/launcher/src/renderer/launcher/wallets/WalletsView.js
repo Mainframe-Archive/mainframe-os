@@ -213,7 +213,10 @@ export default createFragmentContainer(WalletsView, {
         }
         ledger {
           localID
-          accounts
+          accounts {
+            name
+            address
+          }
         }
       }
     }

@@ -181,24 +181,19 @@ type EthHDWallet implements Node {
   """The ID of an object"""
   id: ID!
   localID: ID!
-  accounts: [HDWalletAccountType]
+  accounts: [NamedWalletAccountType]
 }
 
 type EthLedgerWallet implements Node {
   """The ID of an object"""
   id: ID!
   localID: ID!
-  accounts: [String]
+  accounts: [NamedWalletAccountType]
 }
 
 type EthWallets {
   hd: [EthHDWallet]
   ledger: [EthLedgerWallet]
-}
-
-type HDWalletAccountType {
-  name: String!
-  address: String!
 }
 
 type IdentitiesQuery {
@@ -234,6 +229,11 @@ type Mutation {
   importHDWallet(input: ImportHDWalletInput!): ImportHDWalletPayload
   addHDWalletAccount(input: AddHDWalletAccountInput!): AddHDWalletAccountPayload
   deleteWallet(input: DeleteWalletInput!): DeleteWalletPayload
+}
+
+type NamedWalletAccountType {
+  name: String!
+  address: String!
 }
 
 """An object with an ID"""

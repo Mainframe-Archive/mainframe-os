@@ -13,29 +13,19 @@ import { type AbstractWalletParams } from './AbstractSoftwareWallet'
 
 type AccountAddress = string
 
-type LedgerWalletParams = AbstractWalletParams & {
-  activeAccounts: { [index: number]: AccountAddress },
+type ActiveAccounts = { [index: string]: AccountAddress }
+
+export type LedgerWalletParams = AbstractWalletParams & {
+  activeAccounts: { [index: string]: AccountAddress },
   firstAddress: string,
   localID: string,
 }
 
-export type LedgerWalletSerialized = LedgerWalletParams
-
 export default class LedgerWallet {
-  static fromJSON = (params: LedgerWalletSerialized): LedgerWallet =>
-    new LedgerWallet(params)
-
-  // $FlowFixMe: Wallet type
-  static toJSON = (hdWallet: HDWallet): HDWalletSerialized => ({
-    activeAccounts: hdWallet._activeAccounts,
-    localID: hdWallet._localID,
-    firstAddress: hdWallet._firstAddress,
-  })
-
   // Store address at 0 to identify ledger
   _localID: string
   _firstAddress: string
-  _activeAccounts: { [index: number]: AccountAddress }
+  _activeAccounts: ActiveAccounts
 
   constructor(params?: LedgerWalletParams) {
     if (params) {
@@ -46,6 +36,18 @@ export default class LedgerWallet {
       this._activeAccounts = {}
       this._localID = uniqueID()
     }
+  }
+
+  get id(): string {
+    return this._localID
+  }
+
+  get firstAddress(): string {
+    return this._firstAddress
+  }
+
+  get activeAccounts(): ActiveAccounts {
+    return this._activeAccounts
   }
 
   // Public
@@ -63,19 +65,20 @@ export default class LedgerWallet {
 
   getIndexForAccount(account: string): ?string {
     return Object.keys(this._activeAccounts).find(i => {
-      return this._activeAccounts[Number(i)] === toChecksumAddress(account)
+      return this._activeAccounts[i] === toChecksumAddress(account)
     })
   }
 
-  addAccounts(indexes: Array<number>): Array<AccountAddress> {
+  async addAccounts(indexes: Array<number>): Promise<Array<AccountAddress>> {
     const newAddresses = []
-    indexes.forEach(async i => {
-      if (!this._activeAccounts[i]) {
+    for (let i = 0; i < indexes.length; i++) {
+      const stringIndex = String(i)
+      if (!this._activeAccounts[stringIndex]) {
         const address = await getAddressAtIndex({ index: i })
-        this._activeAccounts[i] = address
+        this._activeAccounts[stringIndex] = address
         newAddresses.push(address)
       }
-    })
+    }
     return newAddresses
   }
 

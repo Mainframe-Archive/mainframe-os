@@ -241,6 +241,7 @@ export const WALLET_GET_LEDGER_ETH_ACCOUNTS_SCHEMA = {
 
 export const WALLET_ADD_LEDGER_ETH_ACCOUNT_SCHEMA = {
   index: 'number',
+  name: 'string',
 }
 
 export const WALLET_ADD_HD_ACCOUNT_SCHEMA = {

@@ -337,6 +337,12 @@ export type WalletImportPKParams = {
   chain: WalletSupportedChains,
   privateKey: string,
   walletID?: ID,
+  name: string,
+}
+
+export type WalletNamedAccount = {
+  name: string,
+  address: string,
 }
 
 export type WalletResult = {
@@ -345,7 +351,11 @@ export type WalletResult = {
   accounts: Array<string>,
 }
 
-export type WalletImportResult = WalletResult
+export type WalletImportResult = {
+  walletID: ID,
+  type: WalletTypes,
+  accounts: Array<WalletNamedAccount>,
+}
 
 export type WalletCreateHDParams = {
   chain: WalletSupportedChains,
@@ -355,7 +365,7 @@ export type WalletCreateHDParams = {
 export type WalletCreateHDResult = {
   walletID: ID,
   type: WalletTypes,
-  accounts: Array<string>,
+  accounts: Array<WalletNamedAccount>,
   mnemonic: string,
 }
 
@@ -394,6 +404,7 @@ export type WalletGetLedgerEthAccountsResult = Array<string>
 
 export type WalletAddLedgerEthAccountParams = {
   index: number,
+  name: string,
 }
 
 export type WalletAddHDAccountParams = {
@@ -403,3 +414,8 @@ export type WalletAddHDAccountParams = {
 }
 
 export type WalletAddHDAccountResult = string
+
+export type WalletAddLedgerResult = {
+  walletID: string,
+  address: string,
+}

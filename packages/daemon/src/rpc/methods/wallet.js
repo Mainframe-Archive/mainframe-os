@@ -141,7 +141,8 @@ export const addLedgerEthAccount = {
     ctx: RequestContext,
     params: WalletAddLedgerEthAccountParams,
   ): Promise<void> => {
-    await ctx.openVault.wallets.addLedgerEthAccount(params)
+    const res = await ctx.openVault.wallets.addLedgerEthAccount(params)
     await ctx.openVault.save()
+    return res
   },
 }

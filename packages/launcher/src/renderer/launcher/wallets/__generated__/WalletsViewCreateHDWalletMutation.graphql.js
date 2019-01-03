@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 1092064982948c5b5965252696d97c0f
+ * @relayHash 9b01a4fa6499c0856f4a5e7c0b0c2451
  */
 
 /* eslint-disable */
@@ -77,7 +77,10 @@ fragment WalletsView_wallets on WalletsQuery {
     }
     ledger {
       localID
-      accounts
+      accounts {
+        name
+        address
+      }
       id
     }
   }
@@ -107,7 +110,7 @@ v2 = {
   "name": "accounts",
   "storageKey": null,
   "args": null,
-  "concreteType": "HDWalletAccountType",
+  "concreteType": "NamedWalletAccountType",
   "plural": true,
   "selections": [
     {
@@ -139,13 +142,18 @@ v4 = {
   "name": "id",
   "args": null,
   "storageKey": null
-};
+},
+v5 = [
+  v3,
+  v2,
+  v4
+];
 return {
   "kind": "Request",
   "operationKind": "mutation",
   "name": "WalletsViewCreateHDWalletMutation",
   "id": null,
-  "text": "mutation WalletsViewCreateHDWalletMutation(\n  $input: CreateHDWalletInput!\n) {\n  createHDWallet(input: $input) {\n    hdWallet {\n      accounts {\n        name\n        address\n      }\n      localID\n      id\n    }\n    viewer {\n      wallets {\n        ...WalletsView_wallets\n      }\n      id\n    }\n  }\n}\n\nfragment WalletsView_wallets on WalletsQuery {\n  ethWallets {\n    hd {\n      localID\n      accounts {\n        name\n        address\n      }\n      id\n    }\n    ledger {\n      localID\n      accounts\n      id\n    }\n  }\n}\n",
+  "text": "mutation WalletsViewCreateHDWalletMutation(\n  $input: CreateHDWalletInput!\n) {\n  createHDWallet(input: $input) {\n    hdWallet {\n      accounts {\n        name\n        address\n      }\n      localID\n      id\n    }\n    viewer {\n      wallets {\n        ...WalletsView_wallets\n      }\n      id\n    }\n  }\n}\n\nfragment WalletsView_wallets on WalletsQuery {\n  ethWallets {\n    hd {\n      localID\n      accounts {\n        name\n        address\n      }\n      id\n    }\n    ledger {\n      localID\n      accounts {\n        name\n        address\n      }\n      id\n    }\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -270,11 +278,7 @@ return {
                         "args": null,
                         "concreteType": "EthHDWallet",
                         "plural": true,
-                        "selections": [
-                          v3,
-                          v2,
-                          v4
-                        ]
+                        "selections": v5
                       },
                       {
                         "kind": "LinkedField",
@@ -284,17 +288,7 @@ return {
                         "args": null,
                         "concreteType": "EthLedgerWallet",
                         "plural": true,
-                        "selections": [
-                          v3,
-                          {
-                            "kind": "ScalarField",
-                            "alias": null,
-                            "name": "accounts",
-                            "args": null,
-                            "storageKey": null
-                          },
-                          v4
-                        ]
+                        "selections": v5
                       }
                     ]
                   }

@@ -21,7 +21,10 @@ export type WalletsView_wallets = {|
     |}>,
     +ledger: ?$ReadOnlyArray<?{|
       +localID: string,
-      +accounts: ?$ReadOnlyArray<?string>,
+      +accounts: ?$ReadOnlyArray<?{|
+        +name: string,
+        +address: string,
+      |}>,
     |}>,
   |},
   +$refType: WalletsView_wallets$ref,
@@ -30,13 +33,40 @@ export type WalletsView_wallets = {|
 
 
 const node/*: ConcreteFragment*/ = (function(){
-var v0 = {
-  "kind": "ScalarField",
-  "alias": null,
-  "name": "localID",
-  "args": null,
-  "storageKey": null
-};
+var v0 = [
+  {
+    "kind": "ScalarField",
+    "alias": null,
+    "name": "localID",
+    "args": null,
+    "storageKey": null
+  },
+  {
+    "kind": "LinkedField",
+    "alias": null,
+    "name": "accounts",
+    "storageKey": null,
+    "args": null,
+    "concreteType": "NamedWalletAccountType",
+    "plural": true,
+    "selections": [
+      {
+        "kind": "ScalarField",
+        "alias": null,
+        "name": "name",
+        "args": null,
+        "storageKey": null
+      },
+      {
+        "kind": "ScalarField",
+        "alias": null,
+        "name": "address",
+        "args": null,
+        "storageKey": null
+      }
+    ]
+  }
+];
 return {
   "kind": "Fragment",
   "name": "WalletsView_wallets",
@@ -61,34 +91,7 @@ return {
           "args": null,
           "concreteType": "EthHDWallet",
           "plural": true,
-          "selections": [
-            v0,
-            {
-              "kind": "LinkedField",
-              "alias": null,
-              "name": "accounts",
-              "storageKey": null,
-              "args": null,
-              "concreteType": "HDWalletAccountType",
-              "plural": true,
-              "selections": [
-                {
-                  "kind": "ScalarField",
-                  "alias": null,
-                  "name": "name",
-                  "args": null,
-                  "storageKey": null
-                },
-                {
-                  "kind": "ScalarField",
-                  "alias": null,
-                  "name": "address",
-                  "args": null,
-                  "storageKey": null
-                }
-              ]
-            }
-          ]
+          "selections": v0
         },
         {
           "kind": "LinkedField",
@@ -98,16 +101,7 @@ return {
           "args": null,
           "concreteType": "EthLedgerWallet",
           "plural": true,
-          "selections": [
-            v0,
-            {
-              "kind": "ScalarField",
-              "alias": null,
-              "name": "accounts",
-              "args": null,
-              "storageKey": null
-            }
-          ]
+          "selections": v0
         }
       ]
     }
@@ -115,5 +109,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '282fd6dcc06f9f8e1d6bac84498ad343';
+(node/*: any*/).hash = '1137417336431082f3b1cfdfea25c787';
 module.exports = node;

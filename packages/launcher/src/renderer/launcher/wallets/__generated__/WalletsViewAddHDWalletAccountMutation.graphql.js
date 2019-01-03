@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 23e7d952d3b345ad404da59b9cdb6252
+ * @relayHash ebaff95b2b959cf2fd651f82ce43c285
  */
 
 /* eslint-disable */
@@ -63,7 +63,10 @@ fragment WalletsView_wallets on WalletsQuery {
     }
     ledger {
       localID
-      accounts
+      accounts {
+        name
+        address
+      }
       id
     }
   }
@@ -97,23 +100,45 @@ v2 = {
 v3 = {
   "kind": "ScalarField",
   "alias": null,
-  "name": "localID",
-  "args": null,
-  "storageKey": null
-},
-v4 = {
-  "kind": "ScalarField",
-  "alias": null,
   "name": "id",
   "args": null,
   "storageKey": null
-};
+},
+v4 = [
+  {
+    "kind": "ScalarField",
+    "alias": null,
+    "name": "localID",
+    "args": null,
+    "storageKey": null
+  },
+  {
+    "kind": "LinkedField",
+    "alias": null,
+    "name": "accounts",
+    "storageKey": null,
+    "args": null,
+    "concreteType": "NamedWalletAccountType",
+    "plural": true,
+    "selections": [
+      {
+        "kind": "ScalarField",
+        "alias": null,
+        "name": "name",
+        "args": null,
+        "storageKey": null
+      },
+      v2
+    ]
+  },
+  v3
+];
 return {
   "kind": "Request",
   "operationKind": "mutation",
   "name": "WalletsViewAddHDWalletAccountMutation",
   "id": null,
-  "text": "mutation WalletsViewAddHDWalletAccountMutation(\n  $input: AddHDWalletAccountInput!\n) {\n  addHDWalletAccount(input: $input) {\n    address\n    viewer {\n      wallets {\n        ...WalletsView_wallets\n      }\n      id\n    }\n  }\n}\n\nfragment WalletsView_wallets on WalletsQuery {\n  ethWallets {\n    hd {\n      localID\n      accounts {\n        name\n        address\n      }\n      id\n    }\n    ledger {\n      localID\n      accounts\n      id\n    }\n  }\n}\n",
+  "text": "mutation WalletsViewAddHDWalletAccountMutation(\n  $input: AddHDWalletAccountInput!\n) {\n  addHDWalletAccount(input: $input) {\n    address\n    viewer {\n      wallets {\n        ...WalletsView_wallets\n      }\n      id\n    }\n  }\n}\n\nfragment WalletsView_wallets on WalletsQuery {\n  ethWallets {\n    hd {\n      localID\n      accounts {\n        name\n        address\n      }\n      id\n    }\n    ledger {\n      localID\n      accounts {\n        name\n        address\n      }\n      id\n    }\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -213,29 +238,7 @@ return {
                         "args": null,
                         "concreteType": "EthHDWallet",
                         "plural": true,
-                        "selections": [
-                          v3,
-                          {
-                            "kind": "LinkedField",
-                            "alias": null,
-                            "name": "accounts",
-                            "storageKey": null,
-                            "args": null,
-                            "concreteType": "HDWalletAccountType",
-                            "plural": true,
-                            "selections": [
-                              {
-                                "kind": "ScalarField",
-                                "alias": null,
-                                "name": "name",
-                                "args": null,
-                                "storageKey": null
-                              },
-                              v2
-                            ]
-                          },
-                          v4
-                        ]
+                        "selections": v4
                       },
                       {
                         "kind": "LinkedField",
@@ -245,23 +248,13 @@ return {
                         "args": null,
                         "concreteType": "EthLedgerWallet",
                         "plural": true,
-                        "selections": [
-                          v3,
-                          {
-                            "kind": "ScalarField",
-                            "alias": null,
-                            "name": "accounts",
-                            "args": null,
-                            "storageKey": null
-                          },
-                          v4
-                        ]
+                        "selections": v4
                       }
                     ]
                   }
                 ]
               },
-              v4
+              v3
             ]
           }
         ]

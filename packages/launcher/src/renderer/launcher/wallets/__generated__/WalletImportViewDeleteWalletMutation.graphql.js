@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash f3696f2ec1d37d63b1af40ab91ea40b6
+ * @relayHash b2428f07e4038bfd23e4b4dbf585d28b
  */
 
 /* eslint-disable */
@@ -60,7 +60,10 @@ fragment WalletsView_wallets on WalletsQuery {
     }
     ledger {
       localID
-      accounts
+      accounts {
+        name
+        address
+      }
       id
     }
   }
@@ -87,23 +90,51 @@ v1 = [
 v2 = {
   "kind": "ScalarField",
   "alias": null,
-  "name": "localID",
-  "args": null,
-  "storageKey": null
-},
-v3 = {
-  "kind": "ScalarField",
-  "alias": null,
   "name": "id",
   "args": null,
   "storageKey": null
-};
+},
+v3 = [
+  {
+    "kind": "ScalarField",
+    "alias": null,
+    "name": "localID",
+    "args": null,
+    "storageKey": null
+  },
+  {
+    "kind": "LinkedField",
+    "alias": null,
+    "name": "accounts",
+    "storageKey": null,
+    "args": null,
+    "concreteType": "NamedWalletAccountType",
+    "plural": true,
+    "selections": [
+      {
+        "kind": "ScalarField",
+        "alias": null,
+        "name": "name",
+        "args": null,
+        "storageKey": null
+      },
+      {
+        "kind": "ScalarField",
+        "alias": null,
+        "name": "address",
+        "args": null,
+        "storageKey": null
+      }
+    ]
+  },
+  v2
+];
 return {
   "kind": "Request",
   "operationKind": "mutation",
   "name": "WalletImportViewDeleteWalletMutation",
   "id": null,
-  "text": "mutation WalletImportViewDeleteWalletMutation(\n  $input: DeleteWalletInput!\n) {\n  deleteWallet(input: $input) {\n    viewer {\n      wallets {\n        ...WalletsView_wallets\n      }\n      id\n    }\n  }\n}\n\nfragment WalletsView_wallets on WalletsQuery {\n  ethWallets {\n    hd {\n      localID\n      accounts {\n        name\n        address\n      }\n      id\n    }\n    ledger {\n      localID\n      accounts\n      id\n    }\n  }\n}\n",
+  "text": "mutation WalletImportViewDeleteWalletMutation(\n  $input: DeleteWalletInput!\n) {\n  deleteWallet(input: $input) {\n    viewer {\n      wallets {\n        ...WalletsView_wallets\n      }\n      id\n    }\n  }\n}\n\nfragment WalletsView_wallets on WalletsQuery {\n  ethWallets {\n    hd {\n      localID\n      accounts {\n        name\n        address\n      }\n      id\n    }\n    ledger {\n      localID\n      accounts {\n        name\n        address\n      }\n      id\n    }\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -201,35 +232,7 @@ return {
                         "args": null,
                         "concreteType": "EthHDWallet",
                         "plural": true,
-                        "selections": [
-                          v2,
-                          {
-                            "kind": "LinkedField",
-                            "alias": null,
-                            "name": "accounts",
-                            "storageKey": null,
-                            "args": null,
-                            "concreteType": "HDWalletAccountType",
-                            "plural": true,
-                            "selections": [
-                              {
-                                "kind": "ScalarField",
-                                "alias": null,
-                                "name": "name",
-                                "args": null,
-                                "storageKey": null
-                              },
-                              {
-                                "kind": "ScalarField",
-                                "alias": null,
-                                "name": "address",
-                                "args": null,
-                                "storageKey": null
-                              }
-                            ]
-                          },
-                          v3
-                        ]
+                        "selections": v3
                       },
                       {
                         "kind": "LinkedField",
@@ -239,23 +242,13 @@ return {
                         "args": null,
                         "concreteType": "EthLedgerWallet",
                         "plural": true,
-                        "selections": [
-                          v2,
-                          {
-                            "kind": "ScalarField",
-                            "alias": null,
-                            "name": "accounts",
-                            "args": null,
-                            "storageKey": null
-                          },
-                          v3
-                        ]
+                        "selections": v3
                       }
                     ]
                   }
                 ]
               },
-              v3
+              v2
             ]
           }
         ]

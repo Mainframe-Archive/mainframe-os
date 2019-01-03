@@ -523,14 +523,14 @@ const ethLedgerWalletType = new GraphQLObjectType({
       resolve: self => self.localID,
     },
     accounts: {
-      type: new GraphQLList(GraphQLString),
+      type: new GraphQLList(namedWalletAccountType),
       resolve: self => self.accounts,
     },
   }),
 })
 
-const hdWalletAccountType = new GraphQLObjectType({
-  name: 'HDWalletAccountType',
+const namedWalletAccountType = new GraphQLObjectType({
+  name: 'NamedWalletAccountType',
   fields: () => ({
     name: {
       type: new GraphQLNonNull(GraphQLString),
@@ -553,7 +553,7 @@ const ethHdWalletType = new GraphQLObjectType({
       resolve: self => self.localID,
     },
     accounts: {
-      type: new GraphQLList(hdWalletAccountType),
+      type: new GraphQLList(namedWalletAccountType),
       resolve: self => self.accounts,
     },
   }),
@@ -564,9 +564,13 @@ const ethWalletsType = new GraphQLObjectType({
   fields: () => ({
     hd: {
       type: new GraphQLList(ethHdWalletType),
-      resolve: (self, args, ctx) => {
-        const wallets = ctx.openVault.wallets.getNamedEthHDWallets()
-        return wallets
+      resolve: self => {
+        return Object.keys(self.hd).map(id => {
+          return {
+            localID: id,
+            accounts: self.hd[id].getNamedAccounts(),
+          }
+        })
       },
     },
     ledger: {
@@ -575,7 +579,7 @@ const ethWalletsType = new GraphQLObjectType({
         return Object.keys(self.ledger).map(id => {
           return {
             localID: id,
-            accounts: self.ledger[id].getAccounts(),
+            accounts: self.ledger[id].getNamedAccounts(),
           }
         })
       },
@@ -769,10 +773,7 @@ const createHDWalletMutation = mutationWithClientMutationId({
     await ctx.openVault.save()
     return {
       localID: res.walletID,
-      accounts: res.accounts.map(a => ({
-        address: a,
-        name: ctx.openVault.wallets.walletAccountNames[a],
-      })),
+      accounts: res.accounts,
     }
   },
 })
