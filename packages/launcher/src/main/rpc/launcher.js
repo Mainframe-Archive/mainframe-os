@@ -32,6 +32,9 @@ import {
   type GraphQLQueryResult,
   VAULT_SCHEMA,
   type VaultParams,
+  type WalletGetLedgerEthAccountsParams,
+  type WalletGetLedgerEthAccountsResult,
+  WALLET_GET_LEDGER_ETH_ACCOUNTS_SCHEMA,
   /* eslint-enable import/named */
 } from '@mainframe/client'
 
@@ -177,6 +180,18 @@ export default {
       await ctx.client.vault.open(params)
       ctx.vaultOpen = params.path
       return { open: true }
+    },
+  },
+
+  // Wallets
+
+  wallet_getLedgerAccounts: {
+    params: WALLET_GET_LEDGER_ETH_ACCOUNTS_SCHEMA,
+    handler: (
+      ctx: LauncherContext,
+      params: WalletGetLedgerEthAccountsParams,
+    ): Promise<WalletGetLedgerEthAccountsResult> => {
+      return ctx.client.wallet.getLedgerEthAccounts(params)
     },
   },
 }

@@ -7,6 +7,7 @@ import { Text, Button } from '@morpheus-ui/core'
 
 import { EnvironmentContext } from '../RelayEnvironment'
 import WalletImportView from './WalletImportView'
+import WalletAddLedgerModal from './WalletAddLedgerModal'
 
 export type WalletAccounts = Array<{ name: string, address: string }>
 
@@ -27,7 +28,7 @@ type Props = {
 }
 
 type State = {
-  showImport?: ?boolean,
+  showModal?: ?string,
   errorMsg?: ?string,
 }
 
@@ -120,13 +121,19 @@ class WalletsView extends Component<Props, State> {
 
   onPressImport = () => {
     this.setState({
-      showImport: true,
+      showModal: 'import_wallet',
+    })
+  }
+
+  onPressConnectLedger = () => {
+    this.setState({
+      showModal: 'connect_ledger',
     })
   }
 
   onCloseModal = () => {
     this.setState({
-      showImport: false,
+      showModal: undefined,
     })
   }
 
@@ -135,11 +142,17 @@ class WalletsView extends Component<Props, State> {
   renderImportView() {
     const { ethWallets } = this.props.wallets
     const currentWallet = ethWallets.hd.length ? ethWallets.hd[0].localID : null
-    return this.state.showImport ? (
+    return this.state.showModal === 'import_wallet' ? (
       <WalletImportView
         onClose={this.onCloseModal}
         currentWalletID={currentWallet}
       />
+    ) : null
+  }
+
+  renderConnectLedgerView() {
+    return this.state.showModal === 'connect_ledger' ? (
+      <WalletAddLedgerModal onClose={this.onCloseModal} />
     ) : null
   }
 
@@ -154,47 +167,50 @@ class WalletsView extends Component<Props, State> {
     })
   }
 
-  renderWallets(): Array<ElementRef<any>> {
+  renderSoftwareWallets() {
     const { ethWallets } = this.props.wallets
-    return Object.keys(ethWallets).map(type => {
-      let wallets
-      if (type === 'hd' && ethWallets.hd.length) {
-        wallets = this.renderWalletAccounts(ethWallets.hd[0].accounts)
-      } else if (type === 'ledger') {
-        wallets = ethWallets[type].map(w => {
-          return this.renderWalletAccounts(w.accounts)
-        })
-      }
-      const createButton =
-        type === 'hd' ? (
+    const wallets = ethWallets.hd.length
+      ? this.renderWalletAccounts(ethWallets.hd[0].accounts)
+      : null
+    return (
+      <>
+        <WalletTypeLabel>{'Software Wallets'}</WalletTypeLabel>
+        {wallets}
+        <ButtonsContainer>
           <Button
             title="Create Software Wallet"
             onPress={this.onPressCreateHDWallet}
           />
-        ) : null
-      const importButton =
-        type === 'hd' ? (
           <Button title="Import From Seed" onPress={this.onPressImport} />
-        ) : null
-      const header = type === 'hd' ? 'Software Wallets' : 'Ledger Wallets'
-      return (
-        <>
-          <WalletTypeLabel>{header}</WalletTypeLabel>
-          {wallets}
-          <ButtonsContainer>
-            {createButton}
-            {importButton}
-          </ButtonsContainer>
-        </>
-      )
+        </ButtonsContainer>
+      </>
+    )
+  }
+
+  renderLedgerWallets() {
+    const { ethWallets } = this.props.wallets
+    const wallets = ethWallets.ledger.map(w => {
+      return this.renderWalletAccounts(w.accounts)
     })
+    return (
+      <>
+        <WalletTypeLabel>{'Ledger Wallets'}</WalletTypeLabel>
+        {wallets}
+        <Button
+          title="Connect Ledger Wallet"
+          onPress={this.onPressConnectLedger}
+        />
+      </>
+    )
   }
 
   render() {
     return (
       <Container>
-        {this.renderWallets()}
+        {this.renderSoftwareWallets()}
+        {this.renderLedgerWallets()}
         {this.renderImportView()}
+        {this.renderConnectLedgerView()}
       </Container>
     )
   }

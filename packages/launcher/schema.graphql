@@ -11,6 +11,19 @@ type AddHDWalletAccountPayload {
   clientMutationId: String
 }
 
+input AddLedgerWalletAccountInput {
+  index: Int!
+  name: String!
+  clientMutationId: String
+}
+
+type AddLedgerWalletAccountPayload {
+  address: String!
+  walletID: String!
+  viewer: Viewer!
+  clientMutationId: String
+}
+
 type App implements Node {
   """The ID of an object"""
   id: ID!
@@ -228,6 +241,7 @@ type Mutation {
   createHDWallet(input: CreateHDWalletInput!): CreateHDWalletPayload
   importHDWallet(input: ImportHDWalletInput!): ImportHDWalletPayload
   addHDWalletAccount(input: AddHDWalletAccountInput!): AddHDWalletAccountPayload
+  addLedgerWalletAccount(input: AddLedgerWalletAccountInput!): AddLedgerWalletAccountPayload
   deleteWallet(input: DeleteWalletInput!): DeleteWalletPayload
 }
 

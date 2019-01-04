@@ -72,9 +72,10 @@ export default class LedgerWallet {
   async addAccounts(indexes: Array<number>): Promise<Array<AccountAddress>> {
     const newAddresses = []
     for (let i = 0; i < indexes.length; i++) {
-      const stringIndex = String(i)
+      const index = indexes[i]
+      const stringIndex = String(index)
       if (!this._activeAccounts[stringIndex]) {
-        const address = await getAddressAtIndex({ index: i })
+        const address = await getAddressAtIndex({ index: index })
         this._activeAccounts[stringIndex] = address
         newAddresses.push(address)
       }

@@ -63,4 +63,8 @@ export default {
   openVault: (path: string, password: string) => {
     return rpc.request('vault_open', { path, password })
   },
+  // Wallet
+
+  getLedgerAccounts: (pageNum: number) =>
+    rpc.request('wallet_getLedgerAccounts', { pageNum }),
 }

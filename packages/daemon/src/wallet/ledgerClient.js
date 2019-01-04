@@ -44,7 +44,7 @@ export const getAccountsByPage = async (params: {
 }): Promise<Array<string>> => {
   const from = (params.pageNum - 1) * ITEMS_PER_PAGE
   const to = from + ITEMS_PER_PAGE
-  const accounts = getAccounts({ from, to })
+  const accounts = await getAccounts({ from, to })
   return accounts
 }
 

@@ -778,6 +778,37 @@ const createHDWalletMutation = mutationWithClientMutationId({
   },
 })
 
+const addLedgerWalletAccountMutation = mutationWithClientMutationId({
+  name: 'AddLedgerWalletAccount',
+  inputFields: {
+    index: {
+      type: new GraphQLNonNull(GraphQLInt),
+    },
+    name: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+  },
+  outputFields: {
+    address: {
+      type: new GraphQLNonNull(GraphQLString),
+      resolve: payload => payload.address,
+    },
+    walletID: {
+      type: new GraphQLNonNull(GraphQLString),
+      resolve: payload => payload.walletID,
+    },
+    viewer: {
+      type: new GraphQLNonNull(viewerType),
+      resolve: () => ({}),
+    },
+  },
+  mutateAndGetPayload: async (args, ctx) => {
+    const res = await ctx.openVault.wallets.addLedgerEthAccount(args)
+    await ctx.openVault.save()
+    return res
+  },
+})
+
 const userProfileInput = new GraphQLInputObjectType({
   name: 'UserProfileInput',
   fields: () => ({
@@ -1019,6 +1050,7 @@ const mutationType = new GraphQLObjectType({
     createHDWallet: createHDWalletMutation,
     importHDWallet: importHDWalletMutation,
     addHDWalletAccount: addHDWalletAccountMutation,
+    addLedgerWalletAccount: addLedgerWalletAccountMutation,
     deleteWallet: deleteWalletMutation,
   }),
 })
