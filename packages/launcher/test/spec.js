@@ -42,22 +42,22 @@ describe('Application launch', function() {
 
   it('shows an initial window', async function() {
     const count = await this.app.client.getWindowCount()
-    assert.strictEqual(count, 1)
+    assert.equal(count, 1)
   })
 
   it('no password', async function() {
     await this.app.client
       .element('[data-testid="create-vault-button-submit"]')
       .click()
-    assert.strictEqual(
+    assert.equal(
       await this.app.client.getValue(
-        '[data-testid="vault-manager-unlock-input-password-warning"]',
+        '[data-testid="vault-manager-unlock-input-password-errorMessage"]',
       ),
       'Password must be at least 8 characters',
     )
-    assert.strictEqual(
+    assert.equal(
       await this.app.client.getValue(
-        '[data-testid="vault-manager-unlock-confirm-password-warning"]',
+        '[data-testid="vault-manager-unlock-confirm-password-errorMessage"]',
       ),
       'Passwords do not match',
     )
@@ -73,9 +73,9 @@ describe('Application launch', function() {
     await this.app.client
       .element('[data-testid="create-vault-button-submit"]')
       .click()
-    assert.strictEqual(
+    assert.equal(
       await this.app.client.getValue(
-        '[data-testid="vault-manager-unlock-confirm-password-warning"]',
+        '[data-testid="vault-manager-unlock-confirm-password-errorMessage"]',
       ),
       'Passwords do not match',
     )
@@ -88,7 +88,7 @@ describe('Application launch', function() {
     await this.app.client
       .element('[data-testid="create-vault-button-submit"]')
       .click()
-    assert.strictEqual(
+    assert.equal(
       await this.app.client.getValue(
         '[data-testid="vault-manager-unlock-input-password-warning"]',
       ),
@@ -140,7 +140,7 @@ describe('Application launch', function() {
       '[data-testid="vault-manager-unlock-errorlabel"]',
       timeouts.unlockVault,
     )
-    assert.strictEqual(
+    assert.equal(
       await this.app.client.getValue(
         '[data-testid="vault-manager-unlock-errorlabel"]',
       ),
@@ -223,7 +223,7 @@ describe('Application launch', function() {
     await this.app.client.element(userIdentity).click()
 
     const count = await this.app.client.getWindowCount()
-    assert.strictEqual(count, 2)
+    assert.equal(count, 2)
   })
 
   it('completes app install flow and opens app', async function() {
@@ -261,6 +261,6 @@ describe('Application launch', function() {
     await this.app.client.element(identitySelector).click()
 
     const count = await this.app.client.getWindowCount()
-    assert.strictEqual(count, 3)
+    assert.equal(count, 3)
   })
 })
