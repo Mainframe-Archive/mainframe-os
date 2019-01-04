@@ -46,7 +46,7 @@ const { nodeInterface, nodeField } = nodeDefinitions(
     switch (type) {
       case 'App':
         return ctx.openVault.apps.getByID(typedID)
-      case 'EthHDWalletType':
+      case 'EthHDWallet':
         return ctx.openVault.wallets.getEthHDWallet(typedID)
       case 'EthLedgerWallet':
         return ctx.openVault.wallets.getEthLedgerWallet(typedID)

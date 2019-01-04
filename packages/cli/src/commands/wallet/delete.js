@@ -1,5 +1,6 @@
 // @flow
 import { flags } from '@oclif/command'
+import { prompt } from 'inquirer'
 
 import Command from '../../OpenVaultCommand'
 
@@ -20,13 +21,22 @@ export default class WalletDeleteCommand extends Command {
     if (client == null) {
       return
     }
-
-    await client.wallet.deleteWallet({
-      walletID: this.flags.id,
-      type: this.flags.type,
-      chain: 'ethereum',
+    const { confirmed } = await prompt({
+      type: 'confirm',
+      name: 'confirmed',
+      message: `Are you sure you want to delete the wallet "${
+        this.flags.id
+      }"? This CAN NOT be reversed.`,
+      default: false,
     })
+    if (confirmed) {
+      await client.wallet.deleteWallet({
+        walletID: this.flags.id,
+        type: this.flags.type,
+        chain: 'ethereum',
+      })
 
-    this.log(`Removed wallet: ${this.flags.id}`)
+      this.log(`Removed wallet: ${this.flags.id}`)
+    }
   }
 }

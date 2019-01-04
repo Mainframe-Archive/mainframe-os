@@ -31,6 +31,10 @@ const AccountItem = styled.Text`
   font-size: 12;
 `
 
+const ActivityContainer = styled.Text`
+  padding: 10px;
+`
+
 const MUTATION_ERR_MSG =
   'Sorry, there was a problem connecting your ledger wallet.'
 const ACCOUNT_FETCH_ERR_MSG =
@@ -106,9 +110,9 @@ export default class WalletAddLedgerModal extends Component<Props, State> {
   renderAccounts() {
     if (this.state.fetchingAccounts) {
       return (
-        <>
+        <ActivityContainer>
           <ActivityIndicator />
-        </>
+        </ActivityContainer>
       )
     }
     if (this.state.accounts) {
