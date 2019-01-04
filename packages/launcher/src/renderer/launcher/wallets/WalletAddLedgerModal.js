@@ -1,7 +1,7 @@
 // @flow
 
 import React, { Component } from 'react'
-import { graphql, commitMutation } from 'react-relay'
+import { graphql, commitMutation, type PayloadError } from 'react-relay'
 import { ActivityIndicator, TouchableOpacity } from 'react-native'
 import styled from 'styled-components/native'
 import { Row, Column, Text } from '@morpheus-ui/core'
@@ -97,7 +97,7 @@ export default class WalletAddLedgerModal extends Component<Props, State> {
     })
   }
 
-  displayError(error: Error) {
+  displayError(error: Error | PayloadError) {
     this.setState({
       errorMsg: error.message,
     })
