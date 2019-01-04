@@ -23,7 +23,11 @@ export type AppItem_installedApp = {|
         +WEB_REQUEST: ?$ReadOnlyArray<?string>,
         +BLOCKCHAIN_SEND: ?boolean,
       |},
-    |}
+    |},
+    +author: {|
+      +id: ?string,
+      +name: ?string,
+    |},
   |},
   +users: ?$ReadOnlyArray<?{|
     +localID: string,
@@ -129,6 +133,25 @@ return {
               "plural": false,
               "selections": v3
             }
+          ]
+        },
+        {
+          "kind": "LinkedField",
+          "alias": null,
+          "name": "author",
+          "storageKey": null,
+          "args": null,
+          "concreteType": "AppAuthor",
+          "plural": false,
+          "selections": [
+            {
+              "kind": "ScalarField",
+              "alias": null,
+              "name": "id",
+              "args": null,
+              "storageKey": null
+            },
+            v1
           ]
         }
       ]
@@ -238,5 +261,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '8e1cd862e62e8a15ab2cb141502f25f4';
+(node/*: any*/).hash = 'e176d545f3c129c227019985dfc14716';
 module.exports = node;

@@ -32,8 +32,6 @@ const BUTTONS: Object = {
 
 const BUTTONS_LIST = ['identities', 'wallets', 'contacts']
 
-const Container = styled.View``
-
 const ButtonsContainer = styled.View`
   padding: 20px 0;
   flex-direction: row;
@@ -53,7 +51,7 @@ type Props = {
 export default class CompleteOnboardSession extends Component<Props> {
   render() {
     return (
-      <Container>
+      <>
         <Text>
           <Text variant="bold">Well done!</Text> Just a couple more steps and
           you will be all set.
@@ -85,10 +83,11 @@ export default class CompleteOnboardSession extends Component<Props> {
               variant="completeOnboarding"
               title="SKIP"
               Icon={SkipIcon}
+              onPress={this.props.onSkip}
             />
           </ButtonWrapper>
         </ButtonsContainer>
-      </Container>
+      </>
     )
   }
 }

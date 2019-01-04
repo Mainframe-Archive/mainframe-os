@@ -1,12 +1,28 @@
 // @flow
 
 import React, { Component } from 'react'
-import { StyleSheet, TouchableOpacity } from 'react-native-web'
 import { createFragmentContainer, graphql } from 'react-relay'
 import type { AppOwnData, AppInstalledData } from '@mainframe/client'
+import styled from 'styled-components/native'
 
-import colors from '../../colors'
-import Text from '../../UIComponents/Text'
+import { Text } from '@morpheus-ui/core'
+
+const AppButtonContainer = styled.TouchableOpacity`
+  padding: 15px 10px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  width: 110px;
+`
+
+const AppIcon = styled.View`
+  width: 72px;
+  height: 72px;
+  background-color: #232323;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  transition: all 0.3s;
+`
 
 type AppData = AppOwnData | AppInstalledData
 
@@ -27,20 +43,61 @@ type Props = SharedProps & {
   isOwn?: boolean,
 }
 
-export default class AppItem extends Component<Props> {
+type State = {
+  direction: string,
+}
+
+type MouseEvent = { clientX: number }
+
+export default class AppItem extends Component<Props, State> {
+  state = {
+    direction: 'no-skew',
+  }
+
+  mousePosition: number = 0
+
+  setDirection = ({ clientX }: MouseEvent): void => {
+    if (clientX !== this.mousePosition) {
+      const direction =
+        clientX > this.mousePosition ? 'skew-right' : 'skew-left'
+      this.mousePosition = clientX
+      this.setState({
+        direction,
+      })
+    }
+  }
+
+  startMoving = ({ clientX }: MouseEvent): void => {
+    this.mousePosition = clientX
+    this.setState({
+      direction: 'no-skew',
+    })
+  }
+
+  stopMoving = (): void => {
+    this.mousePosition = 0
+    this.setState({
+      direction: 'no-skew',
+    })
+  }
+
   render() {
     const { app, isOwn, onOpenApp } = this.props
     const open = () => onOpenApp(app, !!isOwn)
     const testID = isOwn ? 'own-app-item' : 'installed-app-item'
+    // $FlowFixMe: app type
+    const devName = isOwn ? app.developer.name : app.manifest.author.name
     return (
-      <TouchableOpacity
-        onPress={open}
-        key={app.localID}
-        style={styles.app}
-        testID={testID}>
-        <Text style={styles.nameLabel}>{app.name}</Text>
-        <Text style={styles.idLabel}>{app.localID}</Text>
-      </TouchableOpacity>
+      <AppButtonContainer onPress={open} key={app.localID} testID={testID}>
+        <AppIcon
+          className={this.state.direction}
+          onMouseMove={this.setDirection}
+          onMouseOver={this.startMoving}
+          onMouseOut={this.stopMoving}
+        />
+        <Text variant="appButtonName">{app.name}</Text>
+        <Text variant="appButtonId">{devName}</Text>
+      </AppButtonContainer>
     )
   }
 }
@@ -67,6 +124,10 @@ export const InstalledAppItem = createFragmentContainer(InstalledView, {
             WEB_REQUEST
             BLOCKCHAIN_SEND
           }
+        }
+        author {
+          id
+          name
         }
       }
       users {
@@ -98,6 +159,10 @@ export const OwnAppItem = createFragmentContainer(OwnView, {
     fragment AppItem_ownApp on OwnApp {
       localID
       name
+      developer {
+        id
+        name
+      }
       versions {
         version
         permissions {
@@ -121,20 +186,4 @@ export const OwnAppItem = createFragmentContainer(OwnView, {
       }
     }
   `,
-})
-
-const styles = StyleSheet.create({
-  app: {
-    padding: 10,
-    marginTop: 10,
-    backgroundColor: colors.LIGHT_GREY_EE,
-    flexDirection: 'row',
-  },
-  nameLabel: {
-    flex: 1,
-  },
-  idLabel: {
-    fontSize: 12,
-    color: colors.GREY_MED_75,
-  },
 })

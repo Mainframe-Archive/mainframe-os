@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash b19e04fee1c51186218a882c44f7b522
+ * @relayHash f5e6fbc7360ada26fa89caffdde25d69
  */
 
 /* eslint-disable */
@@ -96,6 +96,10 @@ fragment AppItem_installedApp on App {
         BLOCKCHAIN_SEND
       }
     }
+    author {
+      id
+      name
+    }
   }
   users {
     localID
@@ -124,6 +128,10 @@ fragment AppItem_installedApp on App {
 fragment AppItem_ownApp on OwnApp {
   localID
   name
+  developer {
+    id
+    name
+  }
   versions {
     version
     permissions {
@@ -250,7 +258,11 @@ v8 = {
     }
   ]
 },
-v9 = {
+v9 = [
+  v2,
+  v4
+],
+v10 = {
   "kind": "LinkedField",
   "alias": null,
   "name": "identity",
@@ -279,7 +291,7 @@ return {
   "operationKind": "mutation",
   "name": "appMutationsAppCreateMutation",
   "id": null,
-  "text": "mutation appMutationsAppCreateMutation(\n  $input: AppCreateMutationInput!\n) {\n  createApp(input: $input) {\n    app {\n      id\n      localID\n      name\n    }\n    viewer {\n      apps {\n        ...AppsView_apps\n      }\n      id\n    }\n  }\n}\n\nfragment AppsView_apps on AppsQuery {\n  installed {\n    ...AppItem_installedApp\n    id\n  }\n  own {\n    ...AppItem_ownApp\n    id\n  }\n}\n\nfragment AppItem_installedApp on App {\n  localID\n  name\n  manifest {\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n    }\n  }\n  users {\n    localID\n    identity {\n      profile {\n        name\n      }\n      id\n    }\n    settings {\n      permissionsSettings {\n        permissionsChecked\n        grants {\n          BLOCKCHAIN_SEND\n          WEB_REQUEST {\n            granted\n            denied\n          }\n        }\n      }\n    }\n    id\n  }\n}\n\nfragment AppItem_ownApp on OwnApp {\n  localID\n  name\n  versions {\n    version\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n    }\n  }\n  users {\n    localID\n    identity {\n      profile {\n        name\n      }\n      id\n    }\n    id\n  }\n}\n",
+  "text": "mutation appMutationsAppCreateMutation(\n  $input: AppCreateMutationInput!\n) {\n  createApp(input: $input) {\n    app {\n      id\n      localID\n      name\n    }\n    viewer {\n      apps {\n        ...AppsView_apps\n      }\n      id\n    }\n  }\n}\n\nfragment AppsView_apps on AppsQuery {\n  installed {\n    ...AppItem_installedApp\n    id\n  }\n  own {\n    ...AppItem_ownApp\n    id\n  }\n}\n\nfragment AppItem_installedApp on App {\n  localID\n  name\n  manifest {\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n    }\n    author {\n      id\n      name\n    }\n  }\n  users {\n    localID\n    identity {\n      profile {\n        name\n      }\n      id\n    }\n    settings {\n      permissionsSettings {\n        permissionsChecked\n        grants {\n          BLOCKCHAIN_SEND\n          WEB_REQUEST {\n            granted\n            denied\n          }\n        }\n      }\n    }\n    id\n  }\n}\n\nfragment AppItem_ownApp on OwnApp {\n  localID\n  name\n  developer {\n    id\n    name\n  }\n  versions {\n    version\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n    }\n  }\n  users {\n    localID\n    identity {\n      profile {\n        name\n      }\n      id\n    }\n    id\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -382,7 +394,17 @@ return {
                         "concreteType": "AppManifestData",
                         "plural": false,
                         "selections": [
-                          v8
+                          v8,
+                          {
+                            "kind": "LinkedField",
+                            "alias": null,
+                            "name": "author",
+                            "storageKey": null,
+                            "args": null,
+                            "concreteType": "AppAuthor",
+                            "plural": false,
+                            "selections": v9
+                          }
                         ]
                       },
                       {
@@ -395,7 +417,7 @@ return {
                         "plural": true,
                         "selections": [
                           v3,
-                          v9,
+                          v10,
                           {
                             "kind": "LinkedField",
                             "alias": null,
@@ -482,6 +504,16 @@ return {
                       {
                         "kind": "LinkedField",
                         "alias": null,
+                        "name": "developer",
+                        "storageKey": null,
+                        "args": null,
+                        "concreteType": "AppAuthor",
+                        "plural": false,
+                        "selections": v9
+                      },
+                      {
+                        "kind": "LinkedField",
+                        "alias": null,
                         "name": "versions",
                         "storageKey": null,
                         "args": null,
@@ -508,7 +540,7 @@ return {
                         "plural": true,
                         "selections": [
                           v3,
-                          v9,
+                          v10,
                           v2
                         ]
                       },
