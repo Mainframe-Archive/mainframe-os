@@ -68,7 +68,6 @@ export default {
   vault_setSettings: vault.setSettings,
 
   wallet_createHD: wallet.createHDWallet,
-  wallet_importPK: wallet.importAccountByPK,
   wallet_importMnemonic: wallet.importMnemonic,
   wallet_addHDAccount: wallet.addHDAccount,
   wallet_delete: wallet.deleteWallet,

@@ -63,13 +63,8 @@ export default {
   openVault: (path: string, password: string) => {
     return rpc.request('vault_open', { path, password })
   },
+  // Wallet
 
-  // Wallets
-  importWalletFromMnemonic: (mnemonic: string) =>
-    rpc.request('wallet_importMnemonic', {
-      mnemonic,
-      chain: 'ethereum',
-    }),
-  createEthWallet: () => rpc.request('wallet_createEth'),
-  getEthWallets: () => rpc.request('wallet_getEthWallets'),
+  getLedgerAccounts: (pageNum: number) =>
+    rpc.request('wallet_getLedgerAccounts', { pageNum }),
 }
