@@ -45,6 +45,31 @@ describe('Application launch', function() {
     assert.equal(count, 1)
   })
 
+  it('no browser warnings after launch', async function() {
+    const severeErrors = await checkConsole(this.app, 'browser', 'SEVERE')
+    assert.equal(severeErrors.length, 0)
+  })
+
+  // Can be used when testing to save clearing state
+
+  it('opens the default vault', async function() {
+    await this.app.client
+      .element('[data-testid="vault-manager-unlock-input"]')
+      .setValue('password')
+    await this.app.client
+      .element('[data-testid="vault-manager-unlock-button"]')
+      .click()
+    await this.app.client.waitForExist(
+      '[data-testid="launcher-view"]',
+      timeouts.unlockVault,
+    )
+  })
+
+  it('no browser warnings?', async function() {
+    this.app.client.getRenderProcessLogs().then(logs => [console.log(logs)])
+    this.app.client.getRenderProcessLogs().then(logs => [console.log(logs)])
+  })
+
   it('no password', async function() {
     await this.app.client
       .element('[data-testid="create-vault-button-submit"]')
@@ -108,7 +133,7 @@ describe('Application launch', function() {
       .click()
   })
 
-  it('no password warning after clicking unlock button', async function() {
+  it('blank password field warning after clicking unlock button', async function() {
     this.app.restart()
     await this.app.client.waitForExist(
       '[data-testid="vault-manager-unlock-button"]',
