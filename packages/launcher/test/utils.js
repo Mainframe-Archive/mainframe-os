@@ -16,7 +16,7 @@ const checkConsole = (app, logType = 'browser', level = 'SEVERE') => {
   })
 }
 
-const unlockVault = async function(app,password) {
+const unlockVault = async function(app, password) {
   try {
     await app.client
       .element('[data-testid="vault-manager-unlock-input"]')
