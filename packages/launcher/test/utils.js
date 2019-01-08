@@ -1,9 +1,3 @@
-const timeouts = {
-  unlockVault: 10000,
-  input: 2000,
-  launch: 5000,
-}
-
 const clearConsole = app => {
   app.client.log('browser') //
 }
@@ -35,7 +29,6 @@ const unlockVault = async function(app, password) {
 }
 
 module.exports = {
-  timeouts: timeouts,
   checkConsole: checkConsole,
   clearConsole: clearConsole,
   unlockVault: unlockVault,

@@ -91,7 +91,7 @@ export default class CreateVaultView extends Component<Props, State> {
         title="CONTINUE"
         variant="onboarding"
         Icon={CircleArrowRight}
-        testID="create-vault-button-submit"
+        testID="create-vault-submit-button"
         submit
       />
     )

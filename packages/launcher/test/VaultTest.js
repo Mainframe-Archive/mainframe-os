@@ -5,6 +5,7 @@ const path = require('path')
 const os = require('os')
 const Application = require('spectron').Application
 const { checkConsole, unlockVault } = require('./utils')
+const { vaultTestId } = require('./config')
 
 describe('Vault operations', function() {
   this.timeout(10000)
@@ -50,14 +51,12 @@ describe('Vault operations', function() {
     })
 
     it('"Password is required" warning', async function() {
-      await this.app.client
-        .element('[data-testid="create-vault-button-submit"]')
-        .click()
+      await this.app.client.element(vaultTestId.elements.unlockButton).click()
       assert.equal(
         await this.app.client.getValue(
-          '[data-testid="vault-manager-unlock-input-errorTestId"]',
+          vaultTestId.elements.unlockPasswordValidation,
         ),
-        'Password is required.',
+        vaultTestId.messages.noPassword,
       )
     })
 
@@ -65,10 +64,8 @@ describe('Vault operations', function() {
       const unlocked = await unlockVault(this.app, 'badPassword')
       assert.equal(unlocked.unlocked, false)
       assert.equal(
-        await this.app.client.getValue(
-          '[data-testid="vault-manager-unlock-input-errorTestId"]',
-        ),
-        'Failed to unlock vault, please check you entered the correct password.',
+        await this.app.client.getValue(vaultTestId.elements.unlockMessage),
+        vaultTestId.messages.invalidPassword,
       )
     })
 
@@ -116,19 +113,19 @@ describe('Vault operations', function() {
 
     it('no password', async function() {
       await this.app.client
-        .element('[data-testid="create-vault-button-submit"]')
+        .element(vaultTestId.elements.createVaultButton)
         .click()
       assert.equal(
         await this.app.client.getValue(
-          '[data-testid="create-vault-input-password-errorTestId"]',
+          vaultTestId.elements.createPasswordValidation,
         ),
-        'Password is required.',
+        vaultTestId.messages.noPassword,
       )
     })
 
     it('passwords do not match', async function() {
       await this.app.client
-        .element('[data-testid="create-vault-input-password"]')
+        .element(vaultTestId.elements.createPassword)
         .setValue('password')
       await this.app.client
         .element('[data-testid="create-vault-input-confirm-password"]')
