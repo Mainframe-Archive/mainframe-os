@@ -5,8 +5,8 @@ import { prompt } from 'inquirer'
 
 import Command from '../../OpenVaultCommand'
 
-export default class CreateEthWalletCommand extends Command {
-  static description = 'Create Ethereum wallet'
+export default class ConnectLedgerWalletCommand extends Command {
+  static description = 'Connect Ledger Eth Wallet'
   static flags = {
     ...Command.flags,
     userID: flags.string({
@@ -21,6 +21,11 @@ export default class CreateEthWalletCommand extends Command {
         name: 'name',
         message: 'Wallet name:',
       },
+      {
+        type: 'input',
+        name: 'index',
+        message: 'Account index:',
+      },
     ])
 
     if (!answers.name.length) {
@@ -28,8 +33,8 @@ export default class CreateEthWalletCommand extends Command {
     }
 
     if (this.client) {
-      const res = await this.client.wallet.createHDWallet({
-        chain: 'ethereum',
+      const res = await this.client.wallet.addLedgerEthAccount({
+        index: Number(answers.index),
         name: answers.name,
       })
 
@@ -37,7 +42,7 @@ export default class CreateEthWalletCommand extends Command {
         await this.client.identity.linkEthWalletAccount({
           id: this.flags.userID,
           walletID: res.walletID,
-          address: res.accounts[0].address,
+          address: res.address,
         })
       }
       this.log(res)

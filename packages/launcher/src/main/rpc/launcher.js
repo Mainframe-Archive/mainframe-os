@@ -32,9 +32,9 @@ import {
   type GraphQLQueryResult,
   VAULT_SCHEMA,
   type VaultParams,
-  type WalletCreateHDResult,
-  WALLET_IMPORT_MNEMONIC_SCHEMA,
-  type WalletImportMnemonicParams,
+  type WalletGetLedgerEthAccountsParams,
+  type WalletGetLedgerEthAccountsResult,
+  WALLET_GET_LEDGER_ETH_ACCOUNTS_SCHEMA,
   /* eslint-enable import/named */
 } from '@mainframe/client'
 
@@ -185,17 +185,13 @@ export default {
 
   // Wallets
 
-  wallet_importMnemonic: {
-    params: WALLET_IMPORT_MNEMONIC_SCHEMA,
-    handler: async (ctx: LauncherContext, params: WalletImportMnemonicParams) =>
-      ctx.client.wallet.importWalletByMnemonic(params),
-  },
-
-  wallet_createEth: (ctx: LauncherContext): Promise<WalletCreateHDResult> => {
-    return ctx.client.wallet.createHDWallet({ chain: 'ethereum' })
-  },
-
-  wallet_getEthWallets: (ctx: LauncherContext) => {
-    return ctx.client.wallet.getEthWallets()
+  wallet_getLedgerAccounts: {
+    params: WALLET_GET_LEDGER_ETH_ACCOUNTS_SCHEMA,
+    handler: (
+      ctx: LauncherContext,
+      params: WalletGetLedgerEthAccountsParams,
+    ): Promise<WalletGetLedgerEthAccountsResult> => {
+      return ctx.client.wallet.getLedgerEthAccounts(params)
+    },
   },
 }
