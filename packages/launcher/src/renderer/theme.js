@@ -42,10 +42,15 @@ export default {
       borderRadius: 3,
     },
     red: {
+      borderWidth: 0,
       backgroundColor: COLORS.PRIMARY_RED,
       backgroundHoverColor: COLORS.PRIMARY_DARK_RED,
       titleColor: COLORS.WHITE,
       titleHoverColor: COLORS.WHITE,
+    },
+    modalButton: {
+      padding: '10px 30',
+      fontSize: 12,
     },
     grey: {
       titleColor: COLORS.GREY_A9,
@@ -104,6 +109,11 @@ export default {
     },
     small: {
       fontSize: 11,
+    },
+    elipsis: {
+      whiteSpace: 'nowrap',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
     },
   },
   styled: {

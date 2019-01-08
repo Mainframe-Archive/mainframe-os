@@ -29,31 +29,28 @@ import ContactsView from './ContactsView'
 //   `,
 // })
 
-export default class ContactsScreenRenderer extends Component<{}> {
-  static contextType = EnvironmentContext
+type State = {
+  data: Array<Object>,
+}
 
+export default class ContactsScreenRenderer extends Component<{}, State> {
+  static contextType = EnvironmentContext
+  state = {
+    data: [],
+  }
+
+  adddNewContact = (contact: Object) => {
+    this.setState({
+      data: [...this.state.data, contact],
+    })
+  }
   render() {
     return (
       <ContactsView
-        data={[
-          {
-            id: 'dhioauhdaio43jiojio43j43',
-            name: 'Alice',
-            status: 'sent',
-          },
-
-          {
-            id: 'dakjdkadoiasd7da7sd7a8dasdasd',
-            status: 'received',
-          },
-          {
-            id: 'dlajdajdioajdoiaj53434j3oijoi',
-            name: 'John',
-            status: 'accepted',
-          },
-        ]}
+        data={this.state.data}
         ignoreContact={contact => console.log('ignore contact', contact)}
         acceptContact={contact => console.log('accept contact', contact)}
+        onSubmitNewContact={this.adddNewContact}
       />
     )
   }
