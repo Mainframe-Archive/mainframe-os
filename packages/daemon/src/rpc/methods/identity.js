@@ -186,28 +186,41 @@ export const getUserContacts = {
     params: IdentityGetUserContactsParams,
   ): Promise<IdentityGetUserContactsResult> => {
     const result = []
-    const contacts = ctx.openVault.identities.getContactsForUser(
-      fromClientID(params.userID),
-    )
-    if (contacts) {
-      Object.keys(contacts).forEach(id => {
-        const contact = contacts[id]
-        const peer = ctx.openVault.identities.getPeerUser(
-          fromClientID(contact.peerID),
-        )
-        if (peer) {
-          const profile = { ...peer.profile, ...contact.profile }
-          const contactRes = {
-            id,
-            profile,
-            connection: contact.contactFeed ? 'connected' : 'sent',
-            // For v1 first contact, we assign a full contact state
-            // depending on if we've seen a private feed for our user
-          }
-          result.push(contactRes)
-        }
-      })
+    for (let i = 0; i < 10; i++) {
+      const contactTemplate = {
+        id: `some_id_${i}`,
+        profile: {
+          image_hash: `some_image_hash_${i}`,
+          name: `contact_name_${i}`,
+          eth_addr: `some_eth_addr_${i}`,
+        },
+        connection: `${i % 2 ? 'connected' : 'sent'}`,
+      }
+      result.push(contactTemplate)
     }
+
+    // const contacts = ctx.openVault.identities.getContactsForUser(
+    //   fromClientID(params.userID),
+    // )
+    // if (contacts) {
+    //   Object.keys(contacts).forEach(id => {
+    //     const contact = contacts[id]
+    //     const peer = ctx.openVault.identities.getPeerUser(
+    //       fromClientID(contact.peerID),
+    //     )
+    //     if (peer) {
+    //       const profile = { ...peer.profile, ...contact.profile }
+    //       const contactRes = {
+    //         id,
+    //         profile,
+    //         connection: contact.contactFeed ? 'connected' : 'sent',
+    //         // For v1 first contact, we assign a full contact state
+    //         // depending on if we've seen a private feed for our user
+    //       }
+    //       result.push(contactRes)
+    //     }
+    //   })
+    // }
     return { contacts: result }
   },
 }
