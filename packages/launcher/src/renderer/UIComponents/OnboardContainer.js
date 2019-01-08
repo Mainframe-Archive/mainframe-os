@@ -52,7 +52,7 @@ export default class OnboardContainerView extends Component<Props> {
       </Text>
     ) : null
     return (
-      <Container>
+      <Container testID="onboard-view">
         <FormContainer>
           <Content>
             <TitleContainer>

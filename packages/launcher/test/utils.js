@@ -1,3 +1,5 @@
+const { vaultTestId, launcherTestId, timeouts } = require('./config')
+
 const clearConsole = app => {
   app.client.log('browser') //
 }
@@ -13,14 +15,14 @@ const checkConsole = (app, logType = 'browser', level = 'SEVERE') => {
 const unlockVault = async function(app, password) {
   try {
     await app.client
-      .element('[data-testid="vault-manager-unlock-input"]')
+      .element(vaultTestId.elements.unlockPassword)
       .setValue(password)
     await app.client
-      .element('[data-testid="vault-manager-unlock-button"]')
+      .element(vaultTestId.elements.unlockButton)
       .click()
     await app.client.waitForExist(
-      '[data-testid="launcher-view"]',
-      timeouts.unlockVault,
+      launcherTestId.elements.launcher,
+      timeouts.viewChange,
     )
     return { unlocked: true, error: '' }
   } catch (err) {
@@ -28,8 +30,19 @@ const unlockVault = async function(app, password) {
   }
 }
 
+const createVault = async function(app, password) {
+  await app.client
+    .element(vaultTestId.elements.createPassword)
+    .setValue(password)
+  await app.client
+    .element(vaultTestId.elements.createConfirmPassword)
+    .setValue(password)
+  await app.client.element(vaultTestId.elements.createVaultButton).click()
+}
+
 module.exports = {
   checkConsole: checkConsole,
   clearConsole: clearConsole,
   unlockVault: unlockVault,
+  createVault: createVault,
 }
