@@ -18,6 +18,7 @@ import SideMenu, { type ScreenNames } from './SideMenu'
 import AppsScreen from './apps/AppsScreen'
 import IdentitiesScreen from './identities/IdentitiesScreen'
 import WalletsScreen from './wallets/WalletsScreen'
+import ContactsScreen from './contacts/ContactsScreen'
 
 const Container = styled.View`
   flex-direction: 'row';
@@ -45,7 +46,7 @@ export default class App extends Component<{}, State> {
 
   state = {
     vaultsData: undefined,
-    openScreen: 'apps',
+    openScreen: 'contacts',
   }
 
   componentDidMount() {
@@ -90,6 +91,8 @@ export default class App extends Component<{}, State> {
         return <IdentitiesScreen />
       case 'wallets':
         return <WalletsScreen />
+      case 'contacts':
+        return <ContactsScreen />
       default:
         return null
     }
