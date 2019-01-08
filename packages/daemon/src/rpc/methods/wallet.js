@@ -4,7 +4,6 @@ import {
   idType,
   WALLET_CREATE_HD_SCHEMA,
   WALLET_SIGN_TRANSACTION_SCHEMA,
-  WALLET_IMPORT_PK_SCHEMA,
   WALLET_IMPORT_MNEMONIC_SCHEMA,
   WALLET_DELETE_SCHEMA,
   WALLET_GET_LEDGER_ETH_ACCOUNTS_SCHEMA,
@@ -14,7 +13,6 @@ import {
   type WalletAddHDAccountResult,
   type WalletCreateHDParams,
   type WalletCreateHDResult,
-  type WalletImportPKParams,
   type WalletImportResult,
   type WalletImportMnemonicParams,
   type WalletDeleteParams,
@@ -41,18 +39,6 @@ export const createHDWallet = {
     const res = ctx.openVault.wallets.createHDWallet(params)
     await ctx.openVault.save()
     return res
-  },
-}
-
-export const importAccountByPK = {
-  params: WALLET_IMPORT_PK_SCHEMA,
-  handler: async (
-    ctx: RequestContext,
-    params: WalletImportPKParams,
-  ): Promise<WalletImportResult> => {
-    const simpleWallet = ctx.openVault.wallets.importPKWallet(params)
-    await ctx.openVault.save()
-    return simpleWallet
   },
 }
 
@@ -107,7 +93,6 @@ export const getEthWallets = (
     })
   return {
     hd: mapData('hd'),
-    simple: mapData('pk'),
     ledger: mapData('ledger'),
   }
 }
@@ -141,7 +126,8 @@ export const addLedgerEthAccount = {
     ctx: RequestContext,
     params: WalletAddLedgerEthAccountParams,
   ): Promise<void> => {
-    await ctx.openVault.wallets.addLedgerEthAccount(params)
+    const res = await ctx.openVault.wallets.addLedgerEthAccount(params)
     await ctx.openVault.save()
+    return res
   },
 }

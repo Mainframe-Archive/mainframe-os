@@ -184,13 +184,13 @@ export const IDENTITY_GET_USER_CONTACTS_SCHEMA = {
 
 export const IDENTITY_LINK_ETH_WALLET_SCHEMA = {
   id: LOCAL_ID_SCHEMA,
-  walletID: LOCAL_ID_SCHEMA,
+  localID: LOCAL_ID_SCHEMA,
   address: 'string',
 }
 
 export const IDENTITY_UNLINK_ETH_WALLET_SCHEMA = {
   id: LOCAL_ID_SCHEMA,
-  walletID: LOCAL_ID_SCHEMA,
+  localID: LOCAL_ID_SCHEMA,
   address: 'string',
 }
 
@@ -221,10 +221,6 @@ export const WALLET_SUPPORTED_CHAIN_SCHEMA = {
   values: ['ethereum'],
 }
 
-export const WALLET_IMPORT_PK_SCHEMA = {
-  privateKey: 'string',
-}
-
 export const WALLET_IMPORT_MNEMONIC_SCHEMA = {
   mnemonic: 'string',
 }
@@ -241,6 +237,7 @@ export const WALLET_GET_LEDGER_ETH_ACCOUNTS_SCHEMA = {
 
 export const WALLET_ADD_LEDGER_ETH_ACCOUNT_SCHEMA = {
   index: 'number',
+  name: 'string',
 }
 
 export const WALLET_ADD_HD_ACCOUNT_SCHEMA = {

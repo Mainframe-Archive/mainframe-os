@@ -3,7 +3,9 @@
 import { idType } from '@mainframe/utils-id'
 import {
   GraphQLBoolean,
+  GraphQLEnumType,
   GraphQLID,
+  GraphQLInt,
   GraphQLList,
   GraphQLObjectType,
   GraphQLNonNull,
@@ -27,6 +29,10 @@ import {
   PeerDeveloperIdentity,
   PeerUserIdentity,
 } from '../identity'
+
+import LedgerWallet from '../wallet/LedgerWallet'
+import HDWallet from '../wallet/HDWallet'
+
 import type RequestContext from '../rpc/RequestContext'
 
 const { nodeInterface, nodeField } = nodeDefinitions(
@@ -40,6 +46,10 @@ const { nodeInterface, nodeField } = nodeDefinitions(
     switch (type) {
       case 'App':
         return ctx.openVault.apps.getByID(typedID)
+      case 'EthHDWallet':
+        return ctx.openVault.wallets.getEthHDWallet(typedID)
+      case 'EthLedgerWallet':
+        return ctx.openVault.wallets.getEthLedgerWallet(typedID)
       case 'OwnApp':
         return ctx.openVault.apps.getOwnByID(typedID)
       case 'OwnAppIdentity':
@@ -61,6 +71,12 @@ const { nodeInterface, nodeField } = nodeDefinitions(
   obj => {
     if (obj instanceof App) {
       return appType
+    }
+    if (obj instanceof HDWallet) {
+      return ethHdWalletType
+    }
+    if (obj instanceof LedgerWallet) {
+      return ethLedgerWalletType
     }
     if (obj instanceof OwnApp) {
       return ownAppType
@@ -497,6 +513,92 @@ const identitiesQueryType = new GraphQLObjectType({
   }),
 })
 
+const ethLedgerWalletType = new GraphQLObjectType({
+  name: 'EthLedgerWallet',
+  interfaces: () => [nodeInterface],
+  fields: () => ({
+    id: idResolver,
+    localID: {
+      type: new GraphQLNonNull(GraphQLID),
+      resolve: self => self.localID,
+    },
+    accounts: {
+      type: new GraphQLList(namedWalletAccountType),
+      resolve: self => self.accounts,
+    },
+  }),
+})
+
+const namedWalletAccountType = new GraphQLObjectType({
+  name: 'NamedWalletAccountType',
+  fields: () => ({
+    name: {
+      type: new GraphQLNonNull(GraphQLString),
+      resolve: self => self.name,
+    },
+    address: {
+      type: new GraphQLNonNull(GraphQLString),
+      resolve: self => self.address,
+    },
+  }),
+})
+
+const ethHdWalletType = new GraphQLObjectType({
+  name: 'EthHDWallet',
+  interfaces: () => [nodeInterface],
+  fields: () => ({
+    id: idResolver,
+    localID: {
+      type: new GraphQLNonNull(GraphQLID),
+      resolve: self => self.localID,
+    },
+    accounts: {
+      type: new GraphQLList(namedWalletAccountType),
+      resolve: self => self.accounts,
+    },
+  }),
+})
+
+const ethWalletsType = new GraphQLObjectType({
+  name: 'EthWallets',
+  fields: () => ({
+    hd: {
+      type: new GraphQLList(ethHdWalletType),
+      resolve: self => {
+        return Object.keys(self.hd).map(id => {
+          return {
+            localID: id,
+            accounts: self.hd[id].getNamedAccounts(),
+          }
+        })
+      },
+    },
+    ledger: {
+      type: new GraphQLList(ethLedgerWalletType),
+      resolve: self => {
+        return Object.keys(self.ledger).map(id => {
+          return {
+            localID: id,
+            accounts: self.ledger[id].getNamedAccounts(),
+          }
+        })
+      },
+    },
+  }),
+})
+
+const walletsQueryType = new GraphQLObjectType({
+  name: 'WalletsQuery',
+  fields: () => ({
+    ethWallets: {
+      type: new GraphQLNonNull(ethWalletsType),
+      resolve: (self, args, ctx: RequestContext) => {
+        return ctx.openVault.wallets.ethWallets
+      },
+    },
+  }),
+})
+
 const viewerType = new GraphQLObjectType({
   name: 'Viewer',
   fields: () => ({
@@ -512,10 +614,200 @@ const viewerType = new GraphQLObjectType({
       type: new GraphQLNonNull(identitiesQueryType),
       resolve: () => ({}),
     },
+    wallets: {
+      type: new GraphQLNonNull(walletsQueryType),
+      resolve: () => ({}),
+    },
   }),
 })
 
 // MUTATIONS
+
+const supportedWalletsEnum = new GraphQLEnumType({
+  name: 'SupportedWallets',
+  values: {
+    ETHEREUM: { value: 'ethereum' },
+  },
+})
+
+const deleteWalletMutation = mutationWithClientMutationId({
+  name: 'DeleteWallet',
+  inputFields: {
+    walletID: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    type: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+  },
+  outputFields: {
+    viewer: {
+      type: new GraphQLNonNull(viewerType),
+      resolve: () => ({}),
+    },
+  },
+  mutateAndGetPayload: async (args, ctx) => {
+    ctx.openVault.wallets.deleteWallet({
+      chain: 'ethereum',
+      type: args.type,
+      walletID: args.walletID,
+    })
+    ctx.openVault.identityWallets.deleteWallet(args.walletID)
+    await ctx.openVault.save()
+    return {}
+  },
+})
+
+const addHDWalletAccountMutation = mutationWithClientMutationId({
+  name: 'AddHDWalletAccount',
+  inputFields: {
+    walletID: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    index: {
+      type: new GraphQLNonNull(GraphQLInt),
+    },
+    name: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+  },
+  outputFields: {
+    address: {
+      type: new GraphQLNonNull(GraphQLString),
+      resolve: payload => payload.address,
+    },
+    viewer: {
+      type: new GraphQLNonNull(viewerType),
+      resolve: () => ({}),
+    },
+  },
+  mutateAndGetPayload: async (args, ctx) => {
+    const address = ctx.openVault.wallets.addHDWalletAccount(args)
+    await ctx.openVault.save()
+    return { address }
+  },
+})
+
+const importHDWalletMutation = mutationWithClientMutationId({
+  name: 'ImportHDWallet',
+  inputFields: {
+    type: {
+      type: new GraphQLNonNull(supportedWalletsEnum),
+    },
+    mnemonic: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    name: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    linkToUserId: {
+      type: GraphQLString,
+    },
+  },
+  outputFields: {
+    hdWallet: {
+      type: ethHdWalletType,
+      resolve: payload => payload,
+    },
+    viewer: {
+      type: new GraphQLNonNull(viewerType),
+      resolve: () => ({}),
+    },
+  },
+  mutateAndGetPayload: async (args, ctx) => {
+    const words = args.mnemonic.split(' ')
+    if (words.length !== 12) {
+      throw new Error('Seed phrase must consist of 12 words.')
+    }
+    const res = ctx.openVault.wallets.importMnemonicWallet({
+      chain: args.type,
+      mnemonic: args.mnemonic,
+      name: args.name,
+    })
+    if (args.linkToUserId) {
+      await ctx.openVault.identityWallets.linkWalletToIdentity(
+        args.linkToUserId,
+      )
+    }
+    await ctx.openVault.save()
+    return {
+      localID: res.walletID,
+      accounts: [{ address: res.accounts[0], name: args.name }],
+    }
+  },
+})
+
+const createHDWalletMutation = mutationWithClientMutationId({
+  name: 'CreateHDWallet',
+  inputFields: {
+    type: {
+      type: new GraphQLNonNull(supportedWalletsEnum),
+    },
+    name: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    linkToUserId: {
+      type: GraphQLString,
+    },
+  },
+  outputFields: {
+    hdWallet: {
+      type: ethHdWalletType,
+      resolve: payload => payload,
+    },
+    viewer: {
+      type: new GraphQLNonNull(viewerType),
+      resolve: () => ({}),
+    },
+  },
+  mutateAndGetPayload: async (args, ctx) => {
+    const res = ctx.openVault.wallets.createHDWallet({
+      chain: args.type,
+      name: args.name,
+    })
+    if (args.linkToUserId) {
+      await ctx.openVault.identityWallets.linkWalletToIdentity(
+        args.linkToUserId,
+      )
+    }
+    await ctx.openVault.save()
+    return {
+      localID: res.walletID,
+      accounts: res.accounts,
+    }
+  },
+})
+
+const addLedgerWalletAccountMutation = mutationWithClientMutationId({
+  name: 'AddLedgerWalletAccount',
+  inputFields: {
+    index: {
+      type: new GraphQLNonNull(GraphQLInt),
+    },
+    name: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+  },
+  outputFields: {
+    address: {
+      type: new GraphQLNonNull(GraphQLString),
+      resolve: payload => payload.address,
+    },
+    walletID: {
+      type: new GraphQLNonNull(GraphQLString),
+      resolve: payload => payload.walletID,
+    },
+    viewer: {
+      type: new GraphQLNonNull(viewerType),
+      resolve: () => ({}),
+    },
+  },
+  mutateAndGetPayload: async (args, ctx) => {
+    const res = await ctx.openVault.wallets.addLedgerEthAccount(args)
+    await ctx.openVault.save()
+    return res
+  },
+})
 
 const userProfileInput = new GraphQLInputObjectType({
   name: 'UserProfileInput',
@@ -755,6 +1047,11 @@ const mutationType = new GraphQLObjectType({
     installApp: appInstallMutation,
     createUserIdentity: createUserIdentityMutation,
     createDeveloperIdentity: createDeveloperIdentityMutation,
+    createHDWallet: createHDWalletMutation,
+    importHDWallet: importHDWalletMutation,
+    addHDWalletAccount: addHDWalletAccountMutation,
+    addLedgerWalletAccount: addLedgerWalletAccountMutation,
+    deleteWallet: deleteWalletMutation,
   }),
 })
 
