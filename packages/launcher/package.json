@@ -44,7 +44,7 @@
     "@mainframe/utils-id": "^0.1.0",
     "@morpheus-ui/core": "0.0.10",
     "@morpheus-ui/fonts": "0.0.1",
-    "@morpheus-ui/icons": "0.0.6",
+    "@morpheus-ui/icons": "0.0.7",
     "electron-store": "^2.0.0",
     "electron-util": "^0.10.2",
     "react": "^16.6.3",
