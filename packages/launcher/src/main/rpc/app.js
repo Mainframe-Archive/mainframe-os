@@ -64,6 +64,16 @@ export const sandboxed = {
     return accounts
   },
 
+  // Contacts
+
+  contacts_getContacts: withPermission(
+    'CONTACTS_FETCH_CONTACTS',
+    (ctx: AppContext, params: any) => {
+      const userId = ctx.appSession.user.id
+      ctx.client.identity.getUserContacts({ userId })
+    },
+  ),
+
   // Temporary PSS APIs - should be removed when communication APIs are settled
   pss_baseAddr: (ctx: AppContext): Promise<string> => {
     return ctx.client.pss.baseAddr()
