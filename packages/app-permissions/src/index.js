@@ -128,6 +128,7 @@ export const checkPermission = (
 
     case 'SWARM_UPLOAD':
     case 'SWARM_DOWNLOAD':
+    case 'CONTACTS_FETCH_CONTACTS':
     case 'BLOCKCHAIN_SEND':
       if (permissions[key] == null) {
         return 'not_set'

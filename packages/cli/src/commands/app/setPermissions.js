@@ -10,6 +10,7 @@ const permissionOptions = {
   SWARM_DOWNLOAD: 'Download from Swarm',
   SWARM_UPLOAD: 'Upload to Swarm',
   BLOCKCHAIN_SEND: 'Make Blockchain Transactions',
+  CONTACTS_FETCH_CONTACTS: 'Access Contacts',
 }
 
 export default class SetPermissionsCommand extends Command {

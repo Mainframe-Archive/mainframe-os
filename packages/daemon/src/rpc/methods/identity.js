@@ -185,6 +185,7 @@ export const getUserContacts = {
     ctx: RequestContext,
     params: IdentityGetUserContactsParams,
   ): Promise<IdentityGetUserContactsResult> => {
+    //TODO: replace this with the real thing.
     const result = []
     for (let i = 0; i < 10; i++) {
       const contactTemplate = {

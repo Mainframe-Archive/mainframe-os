@@ -69,8 +69,8 @@ export const sandboxed = {
   contacts_getContacts: withPermission(
     'CONTACTS_FETCH_CONTACTS',
     (ctx: AppContext, params: any) => {
-      const userId = ctx.appSession.user.id
-      ctx.client.identity.getUserContacts({ userId })
+      const userID = ctx.appSession.user.id
+      return ctx.client.identity.getUserContacts({ userID })
     },
   ),
 

@@ -56,7 +56,8 @@ const validatorOptions = { messages: MANIFEST_SCHEMA_MESSAGES }
 const handleMessage = createHandler({ methods, validatorOptions })
 
 const permissionDescriptions = {
-  BLOCKCHAIN_SEND: 'Ethereum blockchain transaction',
+  BLOCKCHAIN_SEND: 'make a Ethereum blockchain transaction',
+  CONTACTS_FETCH_CONTACTS: 'Access Contacts',
 }
 const getPermissionDescription = (key: string, input?: ?string): ?string => {
   if (key === 'WEB_REQUEST' && input) {
@@ -204,7 +205,7 @@ export default class PermissionsManagerView extends Component<Props, State> {
         <Text
           style={
             styles.descriptionText
-          }>{`This app is asking permission to make a ${permissionLabel}.`}</Text>
+          }>{`This app is asking permission to ${permissionLabel}.`}</Text>
         <View style={styles.persistOption}>
           <Text style={styles.persistLabel}>{`Don't ask me again?`}</Text>
           <Switch value={persistGrant} onValueChange={this.onTogglePersist} />
