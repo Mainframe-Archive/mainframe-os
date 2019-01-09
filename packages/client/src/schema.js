@@ -157,7 +157,7 @@ export const IDENTITY_PUBLIC_FEEDS_SCHEMA = {
 }
 
 export const IDENTITY_ADD_PEER_SCHEMA = {
-  key: 'string',
+  mfid: 'string',
   publicFeed: 'string',
   profile: {
     type: 'object',

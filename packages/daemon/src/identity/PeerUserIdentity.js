@@ -14,28 +14,30 @@ export type Feeds = { [type: string]: FeedHash }
 export type PeerUserIdentitySerialized = {
   id: string,
   localID: string,
-  publicFeed: FeedHash,
-  otherFeeds: Feeds,
   profile: ProfileData,
+  publicFeed: FeedHash,
+  otherFeeds?: Feeds,
 }
+
+export type PeerUserIdentityParams = PeerUserIdentitySerialized
 
 export default class PeerUserIdentity extends Identity {
   static fromJSON = (params: PeerUserIdentitySerialized): PeerUserIdentity => {
-    return new PeerUserIdentity(
-      params.id,
-      params.localID,
-      params.profile,
-      params.publicFeed,
-      params.otherFeeds,
-    )
+    return new PeerUserIdentity({
+      id: params.id,
+      localID: params.localID,
+      profile: params.profile,
+      publicFeed: params.publicFeed,
+      otherFeeds: params.otherFeeds,
+    })
   }
 
   static toJSON = (peer: PeerUserIdentity): PeerUserIdentitySerialized => ({
     id: peer._id,
     localID: peer.localID,
+    profile: peer._profile,
     publicFeed: peer._publicFeed,
     otherFeeds: peer._otherFeeds,
-    profile: peer._profile,
   })
 
   _publicFeed: FeedHash
@@ -45,17 +47,11 @@ export default class PeerUserIdentity extends Identity {
     avatar?: ?string,
   }
 
-  constructor(
-    localID: string,
-    keyOrId: string | Buffer,
-    profile: ProfileData,
-    publicFeed: FeedHash,
-    otherFeeds?: Feeds,
-  ) {
-    super(localID, 'user', keyOrId)
-    this._publicFeed = publicFeed
-    this._otherFeeds = otherFeeds || {}
-    this._profile = profile
+  constructor(params: PeerUserIdentityParams) {
+    super(params.localID, 'user', params.id)
+    this._publicFeed = params.publicFeed
+    this._otherFeeds = params.otherFeeds || {}
+    this._profile = params.profile
   }
 
   get publicFeed(): FeedHash {
