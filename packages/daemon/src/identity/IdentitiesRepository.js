@@ -4,7 +4,6 @@ import { MFID } from '@mainframe/data-types'
 import type { KeyPair } from '@mainframe/utils-crypto'
 // eslint-disable-next-line import/named
 import { uniqueID, idType, type ID } from '@mainframe/utils-id'
-import multibase from 'multibase'
 
 import { mapObject } from '../utils'
 
@@ -424,23 +423,24 @@ export default class IdentitiesRepository {
   }
 
   createPeerUser(
-    publicKey: string,
+    mfid: string,
     profile: ProfileData,
     publicFeed: string,
-    feeds?: Feeds,
+    otherFeeds?: Feeds,
   ): ID {
     if (this._mfidByFeed[publicFeed]) {
       return this._byMFID[this._mfidByFeed[publicFeed]]
     }
-    const keyBuffer = multibase.decode(publicKey)
-    const id = this.addIdentity(
-      new PeerUserIdentity(uniqueID(), keyBuffer, profile, publicFeed, feeds),
-    )
-    const peer = this.getPeerUser(id)
-    if (peer != null) {
-      this._mfidByFeed[String(publicFeed)] = peer.id
-    }
-    return id
+    const peer = new PeerUserIdentity({
+      localID: uniqueID(),
+      id: mfid,
+      profile,
+      publicFeed,
+      otherFeeds,
+    })
+    const localID = this.addIdentity(peer)
+    this._mfidByFeed[publicFeed] = peer.id
+    return localID
   }
 
   createContactFromPeer(ownUserId: ID, contactParams: ContactParams): Contact {
