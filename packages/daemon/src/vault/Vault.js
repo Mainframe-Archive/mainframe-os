@@ -162,7 +162,7 @@ export default class Vault {
     this._path = path
     this._keyParams = keyParams
 
-    const vaultData = {
+    const vaultDataDefaults = {
       apps: new AppsRepository(),
       identities: new IdentitiesRepository(),
       settings: {
@@ -172,7 +172,7 @@ export default class Vault {
         web3HTTPProvider: 'https://mainnet.infura.io/KWLG1YOMaYgl4wiFlcJv',
       },
     }
-    this._data = data ? this.vaultDataWithDefaults(data, vaultData) : vaultData
+    this._data = data ? this.vaultDataWithDefaults(data, vaultDataDefaults) : vaultDataDefaults
   }
 
   vaultDataWithDefaults(vaultData: VaultData, defaultVaultData: VaultData) {

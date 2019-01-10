@@ -50,7 +50,7 @@ export default class RequestContext {
   _rpc: ?StreamRPC
   _bzz: ?BzzAPI
   _pss: ?PssAPI
-  _bluzelle: ?any
+  _bluzelle: ?BluzelleAPI
   _web3: ?Web3
   _env: Environment
   _notify: NotifyFunc
@@ -137,6 +137,7 @@ export default class RequestContext {
     this._bzz = undefined
     this._pss = undefined
     this._web3 = undefined
+    this._bluzelle = undefined
     if (this._rpc != null) {
       this._rpc.disconnect()
     }

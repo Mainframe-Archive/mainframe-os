@@ -2,42 +2,42 @@ import bluzelle from 'bluzelle'
 
 export default class BluzelleAPI {
   websocketUrl: string
-  
+
   constructor(websocketUrl) {
     this.websocketUrl = websocketUrl
   }
-  create(table, key, value) {
-    bluzelle.connect(this.websocketUrl, table)
+  create(uuid, key, value) {
+    bluzelle.connect(this.websocketUrl, uuid)
     return bluzelle.create(key, value)
   }
 
-  read(table, key) {
-    bluzelle.connect(this.websocketUrl, table)
+  read(uuid, key) {
+    bluzelle.connect(this.websocketUrl, uuid)
     return bluzelle.read(key)
   }
 
-  update(table, key, value) {
-    bluzelle.connect(this.websocketUrl, table)
+  update(uuid, key, value) {
+    bluzelle.connect(this.websocketUrl, uuid)
     return bluzelle.update(key, value)
   }
 
-  remove(table, key) {
-    bluzelle.connect(this.websocketUrl, table)
+  remove(uuid, key) {
+    bluzelle.connect(this.websocketUrl, uuid)
     return bluzelle.remove(key)
   }
 
-  has(table, key) {
-    bluzelle.connect(this.websocketUrl, table)
+  has(uuid, key) {
+    bluzelle.connect(this.websocketUrl, uuid)
     return bluzelle.has(key)
   }
 
-  keys(table) {
-    bluzelle.connect(this.websocketUrl, table)
+  keys(uuid) {
+    bluzelle.connect(this.websocketUrl, uuid)
     return bluzelle.keys()
   }
 
-  size(table) {
-    bluzelle.connect(this.websocketUrl, table)
+  size(uuid) {
+    bluzelle.connect(this.websocketUrl, uuid)
     return bluzelle.size()
   }
 }
