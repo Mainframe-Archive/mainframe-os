@@ -4,8 +4,16 @@ const assert = require('assert')
 const path = require('path')
 const os = require('os')
 const Application = require('spectron').Application
-const { checkConsole, unlockVault, createVault } = require('./utils')
+const { checkConsole, unlockVault, createVaultUI } = require('./utils')
 const { vaultTestId, onboardTestId, timeouts } = require('./config')
+const { Environment } = require('../../config/src/Environment')
+const {
+  setupDaemon,
+  startDaemon,
+  stopDaemon,
+} = require('../../toolbox/src/daemon')
+const { createVault, resolvePath } = require('../../cli/src/Command')
+const { DaemonConfig } = require('../../config/src/daemon')
 
 describe('Vault operations', function() {
   this.timeout(10000)
@@ -31,6 +39,21 @@ describe('Vault operations', function() {
   })
 
   describe('Unlock vault', function() {
+    before(async function() {
+      const binPath = path.join(__dirname, '..', '..', 'daemon/bin/run')
+      await Environment.create('vaultTest', 'testing', true)
+      const cfg = new DaemonConfig(Environment)
+      setupDaemon(cfg, {
+        binPath: resolvePath(binPath),
+        socketPath: undefined,
+      })
+      startDaemon(cfg, true)
+      createVault(cfg, binPath, cfg.defaultVault == null)
+    })
+    after(async function() {
+      stopDaemon(new DaemonConfig(Environment))
+      await Environment.destroy('vaultTest')
+    })
     this.timeout(15000)
     it('shows an initial window', async function() {
       const count = await this.app.client.getWindowCount()
@@ -97,6 +120,12 @@ describe('Vault operations', function() {
   })
 
   describe('Create vault', function() {
+    beforeAll(async function() {
+      await Environment.create('vaultTest', 'testing', true)
+    })
+    afterAll(async function() {
+      await Environment.destroy('vaultTest')
+    })
     this.timeout(10000)
     it('shows an initial window', async function() {
       const count = await this.app.client.getWindowCount()
@@ -163,7 +192,7 @@ describe('Vault operations', function() {
     })
 
     it('creates a new vault', async function() {
-      await createVault(this.app, 'password')
+      await createVaultUI(this.app, 'password')
       const onBoarding = await this.app.client.waitForExist(
         onboardTestId.elements.onboard,
         timeouts.viewChange,

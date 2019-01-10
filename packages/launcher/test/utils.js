@@ -44,5 +44,5 @@ module.exports = {
   checkConsole: checkConsole,
   clearConsole: clearConsole,
   unlockVault: unlockVault,
-  createVault: createVault,
+  createVaultUI: createVault,
 }
