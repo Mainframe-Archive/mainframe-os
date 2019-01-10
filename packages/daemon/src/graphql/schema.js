@@ -33,10 +33,10 @@ import {
 import LedgerWallet from '../wallet/LedgerWallet'
 import HDWallet from '../wallet/HDWallet'
 
-import type RequestContext from '../rpc/RequestContext'
+import type ClientContext from '../rpc/ClientContext'
 
 const { nodeInterface, nodeField } = nodeDefinitions(
-  (globalId: string, ctx: RequestContext) => {
+  (globalId: string, ctx: ClientContext) => {
     if (globalId === 'viewer') {
       return {}
     }
@@ -155,7 +155,7 @@ const appUser = new GraphQLObjectType({
     },
     identity: {
       type: new GraphQLNonNull(ownUserIdentityType),
-      resolve: (self, args, ctx: RequestContext) => {
+      resolve: (self, args, ctx: ClientContext) => {
         return ctx.openVault.identities.getOwnUser(self.localID)
       },
     },
@@ -398,7 +398,7 @@ const ownUserIdentityType = new GraphQLObjectType({
     },
     apps: {
       type: new GraphQLList(appType),
-      resolve: (self, args, ctx: RequestContext) => {
+      resolve: (self, args, ctx: ClientContext) => {
         return ctx.openVault.apps.getAppsForUser(self.localID)
       },
     },
@@ -482,13 +482,13 @@ const appsQueryType = new GraphQLObjectType({
   fields: () => ({
     installed: {
       type: new GraphQLList(appType),
-      resolve: (self, args, ctx: RequestContext) => {
+      resolve: (self, args, ctx: ClientContext) => {
         return Object.values(ctx.openVault.apps.apps)
       },
     },
     own: {
       type: new GraphQLList(ownAppType),
-      resolve: (self, args, ctx: RequestContext) => {
+      resolve: (self, args, ctx: ClientContext) => {
         return Object.values(ctx.openVault.apps.ownApps)
       },
     },
@@ -500,13 +500,13 @@ const identitiesQueryType = new GraphQLObjectType({
   fields: () => ({
     ownUsers: {
       type: new GraphQLList(ownUserIdentityType),
-      resolve: (self, args, ctx: RequestContext) => {
+      resolve: (self, args, ctx: ClientContext) => {
         return Object.values(ctx.openVault.identities.ownUsers)
       },
     },
     ownDevelopers: {
       type: new GraphQLList(ownDeveloperIdentityType),
-      resolve: (self, args, ctx: RequestContext) => {
+      resolve: (self, args, ctx: ClientContext) => {
         return Object.values(ctx.openVault.identities.ownDevelopers)
       },
     },
@@ -592,7 +592,7 @@ const walletsQueryType = new GraphQLObjectType({
   fields: () => ({
     ethWallets: {
       type: new GraphQLNonNull(ethWalletsType),
-      resolve: (self, args, ctx: RequestContext) => {
+      resolve: (self, args, ctx: ClientContext) => {
         return ctx.openVault.wallets.ethWallets
       },
     },

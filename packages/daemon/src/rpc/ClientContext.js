@@ -7,6 +7,8 @@ import type { Environment } from '@mainframe/config'
 import type StreamRPC from '@mainframe/rpc-stream'
 import createWebSocketRPC from '@mainframe/rpc-ws-node'
 import { uniqueID, type ID } from '@mainframe/utils-id'
+import type { Observable, Subscription } from 'rxjs'
+import { flatMap } from 'rxjs/operators'
 import Web3HTTPProvider from 'web3-providers-http'
 
 import type { Vault, VaultRegistry } from '../vault'
@@ -21,6 +23,11 @@ type Params = {
   notify: NotifyFunc,
   socket: Socket,
   vaults: VaultRegistry,
+}
+
+type FeedState = {
+  source: Subscription,
+  subscribers: Set<ID>,
 }
 
 export class ContextSubscription<T = ?mixed> {
@@ -45,7 +52,20 @@ export class ContextSubscription<T = ?mixed> {
   async dispose() {}
 }
 
-export default class RequestContext {
+export class FeedSubscription extends ContextSubscription<FeedState> {
+  constructor(key: string, feed: FeedState) {
+    super(`feed_update_${key}`, feed)
+    feed.subscribers.add(this.id)
+  }
+
+  async dispose() {
+    if (this.data != null) {
+      this.data.subscribers.delete(this.id)
+    }
+  }
+}
+
+export default class ClientContext {
   _rpc: ?StreamRPC
   _bzz: ?BzzAPI
   _pss: ?PssAPI
@@ -55,6 +75,8 @@ export default class RequestContext {
   _socket: Socket
   _vaults: VaultRegistry
   _subscriptions: { [ID]: ContextSubscription<any> } = {}
+  _feeds: { [key: string]: FeedState } = {}
+  _internalFeeds: { [key: string]: Subscription } = {}
 
   log: LogFunc
 
@@ -75,7 +97,7 @@ export default class RequestContext {
 
   get bzz(): BzzAPI {
     if (this._bzz == null) {
-      this._bzz = new BzzAPI(this.openVault.settings.bzzURL)
+      this._bzz = new BzzAPI({ url: this.openVault.settings.bzzURL })
     }
     return this._bzz
   }
@@ -117,12 +139,25 @@ export default class RequestContext {
   }
 
   async clear() {
+    Object.values(this._feeds).forEach(feed => {
+      // $FlowFixMe: Object.values() losing type
+      feed.source.unsubscribe()
+    })
+    this._feeds = {}
+
+    Object.values(this._internalFeeds).forEach(sub => {
+      // $FlowFixMe: Object.values() losing type
+      sub.unsubscribe()
+    })
+    this._internalFeeds = {}
+
     const disposeSubs = Object.values(this._subscriptions).map(sub => {
       // $FlowFixMe: Object.values() losing type
       return sub.dispose()
     })
     await Promise.all(disposeSubs)
     this._subscriptions = {}
+
     this._bzz = undefined
     this._pss = undefined
     this._web3HttpProvider = undefined
@@ -144,10 +179,10 @@ export default class RequestContext {
     return sub
   }
 
-  removeSubscription(id: ID) {
+  async removeSubscription(id: ID) {
     const sub = this._subscriptions[id]
     if (sub != null) {
-      sub.dispose()
+      await sub.dispose()
       delete this._subscriptions[id]
     }
   }
@@ -157,5 +192,78 @@ export default class RequestContext {
     if (sub != null) {
       this._notify(sub.method, { subscription: id, result })
     }
+  }
+
+  setFeed(
+    key: string,
+    source: Subscription,
+    subscribers?: Set<ID> = new Set(),
+  ) {
+    this._feeds[key] = { source, subscribers }
+  }
+
+  createFeed<T: Object>(key: string, feed: Observable<T>) {
+    const subscription = feed.subscribe({
+      next: data => {
+        this._feeds[key].subscribers.forEach(id => {
+          this.notify(id, data)
+        })
+      },
+      error: err => {
+        this.log('feed subscription error', key, err)
+      },
+    })
+    this.setFeed(key, subscription)
+  }
+
+  async removeFeed(key: string) {
+    const feed = this._feeds[key]
+    if (feed == null) {
+      return
+    }
+
+    feed.source.unsubscribe()
+    await Promise.all(
+      Array.from(feed.subscribers).map(async id => {
+        await this.removeSubscription(id)
+      }),
+    )
+  }
+
+  createFeedSubscription(key: string) {
+    const feed = this._feeds[key]
+    if (feed == null) {
+      throw new Error('Unexisting feed')
+    }
+
+    const sub = new FeedSubscription(key, feed)
+    this.setSubscription(sub)
+    return sub
+  }
+
+  setInternalFeed(key: string, subscription: Subscription) {
+    this._internalFeeds[key] = subscription
+  }
+
+  removeInternalFeed(key: string) {
+    const sub = this._internalFeeds[key]
+    if (sub != null) {
+      sub.unsubscribe()
+    }
+  }
+
+  createFeeds() {
+    const dummyFeed = this.bzz
+      .pollFeedValue(
+        '52403f4a66d12f9fa45433bf47c620fbdb0702bf6df75c54a8e7f18222829ca7',
+        {
+          interval: 10000,
+          mode: 'content-response',
+          whenEmpty: 'ignore',
+          contentChangedOnly: true,
+        },
+      )
+      .pipe(flatMap(res => res.json()))
+    this.createFeed('dummy', dummyFeed)
   }
 }

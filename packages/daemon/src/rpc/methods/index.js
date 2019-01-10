@@ -60,6 +60,7 @@ export default {
   pss_setPeerPublicKey: pss.setPeerPublicKey,
   pss_stringToTopic: pss.stringToTopic,
 
+  sub_feed: sub.feed,
   sub_unsubscribe: sub.unsubscribe,
 
   vault_create: vault.create,

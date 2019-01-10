@@ -4,9 +4,9 @@ import type { hexValue } from '@erebos/hex'
 import type { Subscription as RxSubscription } from 'rxjs'
 
 import {
-  type default as RequestContext,
+  type default as ClientContext,
   ContextSubscription,
-} from '../RequestContext'
+} from '../ClientContext'
 
 class TopicSubscription extends ContextSubscription<RxSubscription> {
   data: ?RxSubscription
@@ -23,7 +23,7 @@ class TopicSubscription extends ContextSubscription<RxSubscription> {
   }
 }
 
-export const baseAddr = (ctx: RequestContext): Promise<hexValue> => {
+export const baseAddr = (ctx: ClientContext): Promise<hexValue> => {
   return ctx.pss.baseAddr()
 }
 
@@ -32,7 +32,7 @@ export const createTopicSubscription = {
     topic: 'string',
   },
   handler: async (
-    ctx: RequestContext,
+    ctx: ClientContext,
     params: { topic: hexValue },
   ): Promise<string> => {
     // Create topic subscription in Swarm node
@@ -50,7 +50,7 @@ export const createTopicSubscription = {
   },
 }
 
-export const getPublicKey = (ctx: RequestContext): Promise<hexValue> => {
+export const getPublicKey = (ctx: ClientContext): Promise<hexValue> => {
   return ctx.pss.getPublicKey()
 }
 
@@ -61,7 +61,7 @@ export const sendAsym = {
     message: 'string',
   },
   handler: (
-    ctx: RequestContext,
+    ctx: ClientContext,
     params: { key: hexValue, topic: hexValue, message: hexValue },
   ): Promise<null> => {
     return ctx.pss.sendAsym(params.key, params.topic, params.message)
@@ -74,7 +74,7 @@ export const setPeerPublicKey = {
     topic: 'string',
   },
   handler: (
-    ctx: RequestContext,
+    ctx: ClientContext,
     params: { key: hexValue, topic: hexValue },
   ): Promise<null> => {
     return ctx.pss.setPeerPublicKey(params.key, params.topic)
@@ -86,7 +86,7 @@ export const stringToTopic = {
     string: 'string',
   },
   handler: (
-    ctx: RequestContext,
+    ctx: ClientContext,
     params: { string: string },
   ): Promise<hexValue> => {
     return ctx.pss.stringToTopic(params.string)

@@ -9,12 +9,12 @@ import { graphql } from 'graphql'
 
 import schema from '../../graphql/schema'
 
-import type RequestContext from '../RequestContext'
+import type ClientContext from '../ClientContext'
 
 export const query = {
   params: GRAPHQL_QUERY_SCHEMA,
   handler: async (
-    ctx: RequestContext,
+    ctx: ClientContext,
     params: GraphQLQueryParams,
   ): Promise<GraphQLQueryResult> => {
     return graphql(schema, params.query, {}, ctx, params.variables)

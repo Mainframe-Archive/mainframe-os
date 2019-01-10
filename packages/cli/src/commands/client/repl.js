@@ -12,12 +12,28 @@ export default class REPLCommand extends Command {
   async run() {
     const r = repl.start({ breakEvalOnSigint: true, prompt: '> ' })
 
+    const vaultConfig = new VaultConfig(this.env)
+    let client
+
+    const openVault = async (password: string) => {
+      if (client == null) {
+        throw new Error('No client')
+      }
+      const path = vaultConfig.defaultVault
+      if (path == null) {
+        throw new Error('No default vault path')
+      }
+      await client.vault.open({ path, password })
+      this.log('Vault open!')
+    }
+
     const initializeContext = () => {
+      client = this.createClient()
       // $FlowFixMe: VM context
       Object.defineProperty(r.context, 'client', {
         configurable: false,
         enumerable: true,
-        value: this.createClient(),
+        value: client,
       })
     }
 
@@ -38,7 +54,13 @@ export default class REPLCommand extends Command {
     Object.defineProperty(r.context, 'vaultConfig', {
       configurable: false,
       enumerable: true,
-      value: new VaultConfig(this.env),
+      value: vaultConfig,
+    })
+    // $FlowFixMe: VM context
+    Object.defineProperty(r.context, 'openVault', {
+      configurable: false,
+      enumerable: true,
+      value: openVault,
     })
 
     r.on('reset', initializeContext)
