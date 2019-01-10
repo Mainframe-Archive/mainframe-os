@@ -32,7 +32,6 @@ export default class App extends Component<null, State> {
   }
 
   componentDidMount() {
-    this.getEvents()
     this.readFromDatabase()
   }
 
@@ -41,113 +40,18 @@ export default class App extends Component<null, State> {
     this.setState({readValue: value})
   }
 
-  async getEvents() {
-    const abi = [
-      {
-        anonymous: false,
-        inputs: [
-          {
-            indexed: true,
-            name: 'owner',
-            type: 'address',
-          },
-          {
-            indexed: false,
-            name: 'whitelistAddress',
-            type: 'address',
-          },
-        ],
-        name: 'Staked',
-        type: 'event',
-      },
-    ]
-    const mfTokenAddr = '0xe3C2130530D77418b3e367Fe162808887526e74D'
-    try {
-      const latestBlock = await this.sdk.blockchain.getLatestBlock()
-      const res = await this.sdk.blockchain.getContractEvents(
-        mfTokenAddr,
-        abi,
-        'Staked',
-        { fromBlock: 5916157, toBlock: latestBlock },
-      )
-      const data = this.formatData(res)
-      this.setState({
-        stakingData: data,
-      })
-    } catch (err) {
-      this.setState({ requestErr: err })
-    }
-  }
-
-  formatData(events: Array<Object>) {
-    if (!events || !events.length) {
-      return []
-    }
-    let block = Math.floor(events[0].blockNumber / 10000) * 10000
-    const blockRange = 10000
-    const data = events.reduce((res, e) => {
-      const blockLimit = block + blockRange
-      if (e.blockNumber < blockLimit) {
-        const rangeKey = `${block}`
-        if (res[rangeKey]) {
-          res[rangeKey].push(e)
-        } else {
-          res[rangeKey] = [e]
-        }
-      } else {
-        block = blockLimit
-        const rangeKey = `${block}`
-        res[rangeKey] = [e]
-      }
-      return res
-    }, {})
-
-    const graphData: Array<Object> = Object.keys(data).map(key => {
-      const value = data[key]
-      return {
-        name: key,
-        transactions: value.length,
-        events: value,
-      }
-    })
-    return graphData
-  }
-
   render() {
-    let content
-    if (this.state.requestErr) {
-      content = (
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorLabel}>
-            Sorry, there was a problem reading from the blockchain
-          </Text>
-        </View>
-      )
-    } else {
-      content = !this.state.stakingData ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator />
-        </View>
-      ) : (
-        <View>
-          <StakingGraph graphData={this.state.stakingData} />
-          <StakingTimeline stakingData={this.state.stakingData} />
-        </View>
-      )
-    }
     return (
       <View style={styles.container}>
         <View style={styles.contentContainer}>
           <ScrollView style={styles.scrollView}>
             <View style={styles.header}>
               <Logo />
-              <Text style={styles.title}>readValue: {this.state.readValue}</Text>
-              <Text style={styles.title}>Onyx Staking</Text>
+              <Text style={styles.title}>Bluzelle Test</Text>
               <Text style={styles.descriptionLabel}>
-                Onyx staking transactions per 1000 blocks
+                Read from decentralized keystore database: {this.state.readValue}
               </Text>
             </View>
-            {content}
           </ScrollView>
         </View>
       </View>
