@@ -4,6 +4,7 @@ import { MFID } from '@mainframe/data-types'
 import type { KeyPair } from '@mainframe/utils-crypto'
 // eslint-disable-next-line import/named
 import { uniqueID, idType, type ID } from '@mainframe/utils-id'
+import { type ContactResult } from '@mainframe/client'
 
 import { mapObject } from '../utils'
 
@@ -355,6 +356,12 @@ export default class IdentitiesRepository {
     )
   }
 
+  getPeerByFeed(publicFeed: string): ?PeerUserIdentity {
+    if (this._mfidByFeed[publicFeed]) {
+      return this.getPeerUser(this._byMFID[this._mfidByFeed[publicFeed]])
+    }
+  }
+
   getIdentity(id: ID): ?Identity {
     const ref = this._refs[id]
     if (ref != null && ref.ownership !== 'contacts') {
@@ -427,44 +434,89 @@ export default class IdentitiesRepository {
     profile: ProfileData,
     publicFeed: string,
     otherFeeds?: Feeds,
-  ): ID {
-    if (this._mfidByFeed[publicFeed]) {
-      return this._byMFID[this._mfidByFeed[publicFeed]]
+  ): PeerUserIdentity {
+    let peer = this.getPeerByFeed(publicFeed)
+    if (peer) {
+      return peer
     }
-    const peer = new PeerUserIdentity({
+    peer = new PeerUserIdentity({
       localID: uniqueID(),
       id: mfid,
       profile,
       publicFeed,
       otherFeeds,
     })
-    const localID = this.addIdentity(peer)
+    this.addIdentity(peer)
     this._mfidByFeed[publicFeed] = peer.id
-    return localID
+    return peer
   }
 
-  createContactFromPeer(ownUserId: ID, contactParams: ContactParams): Contact {
+  createContactFromPeer(
+    ownUserId: string,
+    contactParams: ContactParams,
+  ): Contact {
     if (!this.getPeerUser(idType(contactParams.peerID))) {
       throw new Error('Peer not found')
     }
     if (this._identities.contacts[ownUserId]) {
-      const contacts: Array<Contact> = Object.keys(
-        this._identities.contacts[ownUserId],
-      ).map(id => this._identities.contacts[ownUserId][id])
+      const keys = Object.keys(this._identities.contacts[ownUserId])
+      const contacts = keys.map(id => this._identities.contacts[ownUserId][id])
       const existing = contacts.find(c => c.peerID === contactParams.peerID)
       if (existing) {
         return existing
       }
     }
-    const cid = uniqueID()
     const contact = new Contact(contactParams)
     if (this._identities.contacts[ownUserId]) {
-      this._identities.contacts[ownUserId][cid] = contact
+      this._identities.contacts[ownUserId][contact.localID] = contact
     } else {
-      this._identities.contacts[ownUserId] = { [String(cid)]: contact }
+      this._identities.contacts[ownUserId] = { [contact.localID]: contact }
     }
-    this._userByContact[cid] = ownUserId
+
+    this._userByContact[contact.localID] = ownUserId
     return contact
+  }
+
+  addContact(userID: string, publicFeed: string, profile: Object): Contact {
+    let peer = this.getPeerByFeed(publicFeed)
+    if (!peer) {
+      // TODO Fetch mfid from feed
+      const identity = OwnUserIdentity.create(profile)
+      const testMFID = identity.id // TODO: remove after testing
+      peer = this.createPeerUser(testMFID, profile, publicFeed)
+    }
+    // TODO create [me -> contact] feed
+    const params = {
+      localID: uniqueID(),
+      ownFeed: uniqueID(), // TODO: temp
+      peerID: peer.localID,
+      profile,
+    }
+    return this.createContactFromPeer(userID, params)
+  }
+
+  getUserContacts(userID: string): Array<ContactResult> {
+    const result = []
+    const contacts = this._identities.contacts[userID]
+    if (contacts) {
+      Object.keys(contacts).forEach(id => {
+        const contact = contacts[id]
+        const peer = this.getPeerUser(idType(contact.peerID))
+        if (peer) {
+          const profile = { ...peer.profile, ...contact.profile }
+          const contactRes = {
+            profile,
+            localID: id,
+            peerID: contact.peerID,
+            connection: contact.contactFeed ? 'connected' : 'sent',
+            // For v1 first contact, we assign a full contact state
+            // depending on if we've seen a private feed for our user
+          }
+          result.push(contactRes)
+        }
+      })
+    }
+    return result
   }
 
   deleteContact(userID: ID, contactID: ID) {

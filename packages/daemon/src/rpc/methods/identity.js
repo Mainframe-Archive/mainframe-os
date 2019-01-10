@@ -139,13 +139,13 @@ export const addPeer = {
     ctx: RequestContext,
     params: IdentityAddPeerParams,
   ): Promise<IdentityAddPeerResult> => {
-    const peerID = ctx.openVault.identities.createPeerUser(
+    const peer = ctx.openVault.identities.createPeerUser(
       params.mfid,
       params.profile,
       params.publicFeed,
       params.otherFeeds,
     )
-    return { id: toClientID(peerID) }
+    return { id: toClientID(peer.localID) }
   },
 }
 
@@ -185,29 +185,7 @@ export const getUserContacts = {
     ctx: RequestContext,
     params: IdentityGetUserContactsParams,
   ): Promise<IdentityGetUserContactsResult> => {
-    const result = []
-    const contacts = ctx.openVault.identities.getContactsForUser(
-      fromClientID(params.userID),
-    )
-    if (contacts) {
-      Object.keys(contacts).forEach(id => {
-        const contact = contacts[id]
-        const peer = ctx.openVault.identities.getPeerUser(
-          fromClientID(contact.peerID),
-        )
-        if (peer) {
-          const profile = { ...peer.profile, ...contact.profile }
-          const contactRes = {
-            id,
-            profile,
-            connection: contact.contactFeed ? 'connected' : 'sent',
-            // For v1 first contact, we assign a full contact state
-            // depending on if we've seen a private feed for our user
-          }
-          result.push(contactRes)
-        }
-      })
-    }
-    return { contacts: result }
+    const contacts = ctx.openVault.identities.getUserContacts(params.userID)
+    return { contacts }
   },
 }

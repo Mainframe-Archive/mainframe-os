@@ -2,6 +2,7 @@
 
 import React, { Component } from 'react'
 import styled from 'styled-components/native'
+import { graphql, createFragmentContainer } from 'react-relay'
 import { Text, Button, Row, Column, TextField } from '@morpheus-ui/core'
 import { Form, type FormSubmitPayload } from '@morpheus-ui/forms'
 import PlusIcon from '@morpheus-ui/icons/PlusSymbolSm'
@@ -98,7 +99,7 @@ const FormContainer = styled.View`
 
   ${props =>
     props.modal &&
-    ` 
+    `
     flex: 1;
     align-self: center;
     align-items: center;
@@ -132,24 +133,36 @@ const ModalTitle = styled.View`
   justify-content: flex-start;
 `
 
-type Contact = {
-  id: string,
-  name?: string,
+export type Contact = {
+  localID: string,
+  peerID: string,
+  profile: {
+    name?: string,
+  },
   status: 'sent' | 'received' | 'accepted',
+}
+
+export type SubmitContactInput = {
+  feedHash: string,
+  name: String,
 }
 
 type Props = {
   data: Array<Contact>,
+  contacts: {
+    userContacts: Array<Contact>,
+  },
   acceptContact: (contact: Contact) => void,
   ignoreContact: (contact: Contact) => void,
-  onSubmitNewContact: (payload: Contact) => void,
+  onSubmitNewContact: (payload: SubmitContactInput) => Promise<Contact>,
 }
 
 type State = {
   modalOpen: boolean,
+  error?: ?string,
 }
 
-export default class ContactsView extends Component<Props, State> {
+export class ContactsView extends Component<Props, State> {
   state = {
     modalOpen: false,
   }
@@ -162,22 +175,25 @@ export default class ContactsView extends Component<Props, State> {
     this.setState({ modalOpen: false })
   }
 
-  submitNewContact = (payload: FormSubmitPayload) => {
-    // eslint-disable-next-line no-console
-    console.log(payload)
+  submitNewContact = async (payload: FormSubmitPayload) => {
     if (payload.valid) {
-      this.props.onSubmitNewContact({
-        id: payload.fields.publicKey,
-        name: payload.fields.name,
-        status: 'sent',
-      })
-      if (this.state.modalOpen) {
-        this.setState({ modalOpen: false })
+      try {
+        this.setState({ error: null })
+        await this.props.onSubmitNewContact({
+          feedHash: payload.fields.publicKey,
+          name: payload.fields.name,
+        })
+        if (this.state.modalOpen) {
+          this.setState({ modalOpen: false })
+        }
+      } catch (err) {
+        this.setState({ error: err.message })
       }
     }
   }
 
   renderContactsList() {
+    const { userContacts } = this.props.contacts
     return (
       <ContactsListContainer>
         <ContactsListHeader hascontacts={this.props.data.length > 0}>
@@ -195,18 +211,18 @@ export default class ContactsView extends Component<Props, State> {
             />
           </ButtonContainer>
         </ContactsListHeader>
-        {this.props.data.length === 0 ? (
+        {userContacts.length === 0 ? (
           <NoContacts>
             <Text variant={['grey', 'small']}>No Contacts</Text>
           </NoContacts>
         ) : (
           <ScrollView>
-            {this.props.data.map(contact => {
+            {userContacts.map(contact => {
               return (
-                <ContactCard key={contact.id}>
+                <ContactCard key={contact.localID}>
                   <ContactCardText>
                     <Text variant={['greyMed', 'elipsis']} size={13}>
-                      {contact.name || contact.id}
+                      {contact.profile.name || contact.localID}
                     </Text>
                     {contact.status === 'sent' ? (
                       <Text variant={['grey']} size={10}>
@@ -244,8 +260,16 @@ export default class ContactsView extends Component<Props, State> {
   }
 
   renderAddNewContactForm(modal: boolean) {
+    const errorMsg = this.state.error ? (
+      <Row size={1}>
+        <Column>
+          <Text variant="error">{this.state.error}</Text>
+        </Column>
+      </Row>
+    ) : null
     return (
       <FormContainer modal={modal}>
+        {/* $FlowFixMe submit return type */}
         <Form onSubmit={this.submitNewContact}>
           <Row size={1}>
             {modal && (
@@ -291,6 +315,7 @@ export default class ContactsView extends Component<Props, State> {
             </Row>
           )}
         </Form>
+        {errorMsg}
       </FormContainer>
     )
   }
@@ -334,7 +359,7 @@ export default class ContactsView extends Component<Props, State> {
           </Row>
           {invites.map(contact => {
             return (
-              <InviteCard key={contact.id} status={contact.status}>
+              <InviteCard key={contact.localID} status={contact.status}>
                 <InviteCardIcon>
                   {contact.status === 'sent' ? (
                     <>
@@ -358,10 +383,10 @@ export default class ContactsView extends Component<Props, State> {
                 </InviteCardIcon>
                 <InviteCardText>
                   <Text variant={['greyMed', 'bold']}>
-                    {contact.name || 'Unknown user'}
+                    {contact.profile.name || 'Unknown user'}
                   </Text>
                   <Text variant={['greyDark', 'elipsis']} size={11}>
-                    {contact.id}
+                    {contact.localID}
                   </Text>
                 </InviteCardText>
                 <InviteCardStatus>
@@ -404,3 +429,18 @@ export default class ContactsView extends Component<Props, State> {
     )
   }
 }
+
+export default createFragmentContainer(ContactsView, {
+  contacts: graphql`
+    fragment ContactsView_contacts on ContactsQuery
+      @argumentDefinitions(userID: { type: "String!" }) {
+      userContacts(userID: $userID) {
+        peerID
+        localID
+        profile {
+          name
+        }
+      }
+    }
+  `,
+})

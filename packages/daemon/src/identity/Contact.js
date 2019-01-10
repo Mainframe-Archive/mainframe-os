@@ -8,6 +8,7 @@ export type ContactProfile = {
 }
 
 export type ContactSerialized = {
+  localID: string,
   peerID: string,
   ownFeed: string,
   contactFeed?: ?string,
@@ -19,6 +20,7 @@ export type ContactParams = ContactSerialized
 export default class Contact {
   static fromJSON = (contactSerialized: ContactSerialized): Contact =>
     new Contact({
+      localID: contactSerialized.localID,
       peerID: contactSerialized.peerID,
       ownFeed: contactSerialized.ownFeed,
       contactFeed: contactSerialized.contactFeed,
@@ -26,12 +28,14 @@ export default class Contact {
     })
 
   static toJSON = (contact: Contact): ContactSerialized => ({
+    localID: contact._localID,
     peerID: contact._peerID,
     ownFeed: contact._ownFeed,
     contactFeed: contact._contactFeed,
     profile: contact._profile,
   })
 
+  _localID: string
   _peerID: string
   _ownFeed: string
   _contactFeed: ?string
@@ -43,15 +47,21 @@ export default class Contact {
   }
 
   constructor(params: {
+    localID: string,
     peerID: string,
     profile: ContactProfile,
     ownFeed: string,
     contactFeed?: ?string,
   }) {
+    this._localID = params.localID
     this._peerID = params.peerID
     this._ownFeed = params.ownFeed
     this._contactFeed = params.contactFeed
     this._profile = params.profile
+  }
+
+  get localID(): string {
+    return this._localID
   }
 
   get peerID(): string {
