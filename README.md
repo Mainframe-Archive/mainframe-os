@@ -221,3 +221,14 @@ There are several places to look when errors arise initially or during developme
 - you can send all logs (including in-app `console.log` calls) to the terminal by starting electron with the `ELECTRON_ENABLE_LOGGING` environment variable, e.g. `ELECTRON_ENABLE_LOGGING=1 npm run dev`
 - if there are problems inside the launcher or apps, you can use the regular Chrome debugger (cmd-option-I) to view logs and diagnose issues.
 - the daemon also shows errors in the terminal, and you can enable more verbose logging by setting the `DEBUG="*"` environment variable, e.g. `DEBUG="*" ./packages/cli/bin/run daemon:start`
+
+## Release
+Once you're dapp is developed and ready for release follow the following steps to submit it to be featured by mainframe. Using the cli:
+
+- Package and upload your dapp assets.
+- Generate and sign a dApp manifest with your developer identity.
+- Upload the signed dApp manifest and note the address hash.
+- Finally, send an email to [dapp-submissions@mainframe.com](mail-to:dapp-submissions@mainframe.com) with the following details, if you'd like it featured by mainframe: 
+    - Description of the dApp.
+    - Applicable art assets (logo, etc.)
+    - Address hash of the dApp Manifest.
