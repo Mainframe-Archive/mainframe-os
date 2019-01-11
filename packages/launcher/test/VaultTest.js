@@ -75,9 +75,9 @@ describe('Vault operations', function() {
     it('"Password is required" warning', async function() {
       await this.app.client.element(vaultTestId.elements.unlockButton).click()
       assert.equal(
-        await this.app.client.getValue(
+        await this.app.client.element(
           vaultTestId.elements.unlockPasswordValidation,
-        ),
+        ).getValue(),
         vaultTestId.messages.noPassword,
       )
     })
@@ -90,7 +90,7 @@ describe('Vault operations', function() {
       //   timeouts.input,
       // )
       assert.equal(
-        await this.app.client.getValue(vaultTestId.elements.unlockMessage),
+        await this.app.client.element(vaultTestId.elements.unlockMessage).getValue(),
         vaultTestId.messages.invalidPassword,
       )
     })
@@ -142,9 +142,9 @@ describe('Vault operations', function() {
         .element(vaultTestId.elements.createVaultButton)
         .click()
       assert.equal(
-        await this.app.client.getValue(
+        await this.app.client.element(
           vaultTestId.elements.createPasswordValidation,
-        ),
+        ).getValue(),
         vaultTestId.messages.noPassword,
       )
     })
@@ -160,9 +160,9 @@ describe('Vault operations', function() {
         .element(vaultTestId.elements.createVaultButton)
         .click()
       assert.equal(
-        await this.app.client.getValue(
+        await this.app.client.element(
           vaultTestId.elements.createConfirmPasswordValidation,
-        ),
+        ).getValue(),
         vaultTestId.messages.noMatch,
       )
     })
@@ -175,20 +175,16 @@ describe('Vault operations', function() {
         .element(vaultTestId.elements.createVaultButton)
         .click()
       assert.equal(
-        await this.app.client.getValue(
+        await this.app.client.element(
           vaultTestId.elements.createPasswordValidation,
-        ),
+        ).getValue(),
         vaultTestId.messages.tooShort,
       )
     })
 
     it('creates a new vault', async function() {
-      await createVault(this.app, 'password')
-      const onBoarding = await this.app.client.waitForExist(
-        onboardTestId.elements.onboard,
-        timeouts.viewChange,
-      )
-      assert.equal(onBoarding, true)
+      const created = await createVault(this.app, 'password')
+      assert.equal(created.created, true,created.error)
     })
   })
 })

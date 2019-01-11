@@ -38,11 +38,20 @@ const createVault = async function(app, password) {
     .element(vaultTestId.elements.createConfirmPassword)
     .setValue(password)
   await app.client.element(vaultTestId.elements.createVaultButton).click()
+  try {
+    await app.client.waitForExist(
+        onboardTestId.elements.onboard,
+        timeouts.viewChange,
+    )
+    return { created:true, error:''}
+  } catch(err) {
+    return {created:false, error: err}
+  }
 }
 
 module.exports = {
   checkConsole: checkConsole,
   clearConsole: clearConsole,
   unlockVault: unlockVault,
-  createVaultUI: createVault,
+  createVault: createVault,
 }
