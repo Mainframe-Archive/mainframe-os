@@ -78,6 +78,9 @@ export class MFIDData extends MFIDParts {
 
     let buffer
     switch (this._parts[0]) {
+      case 'base64':
+        buffer = Buffer.from(this._parts[1], 'base64')
+        break
       case 'hex-string':
         buffer = Buffer.from(this._parts[1].substr(2), 'hex')
         break

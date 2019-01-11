@@ -1,3 +1,16 @@
+input AddContactInput {
+  userID: String!
+  profile: UserProfileInput!
+  publicFeed: String!
+  clientMutationId: String
+}
+
+type AddContactPayload {
+  contact: Contact
+  viewer: Viewer!
+  clientMutationId: String
+}
+
 input AddHDWalletAccountInput {
   walletID: String!
   index: Int!
@@ -144,6 +157,30 @@ type AppVersionData {
   publicationState: String!
 }
 
+type Contact implements Node {
+  """The ID of an object"""
+  id: ID!
+  localID: ID!
+  peerID: ID!
+  pubKey: String!
+  profile: ContactProfile!
+  connectionState: ContactConnection!
+}
+
+enum ContactConnection {
+  CONNECTED
+  SENT
+}
+
+type ContactProfile {
+  name: String!
+  avatar: String
+}
+
+type ContactsQuery {
+  userContacts(userID: String!): [Contact]
+}
+
 input CreateDeveloperIdentityInput {
   profile: UserProfileInput!
   clientMutationId: String
@@ -175,6 +212,16 @@ input CreateUserIdentityInput {
 
 type CreateUserIdentityPayload {
   user: OwnUserIdentity
+  viewer: Viewer!
+  clientMutationId: String
+}
+
+input DeletContactInput {
+  contactID: String!
+  clientMutationId: String
+}
+
+type DeletContactPayload {
   viewer: Viewer!
   clientMutationId: String
 }
@@ -243,6 +290,8 @@ type Mutation {
   addHDWalletAccount(input: AddHDWalletAccountInput!): AddHDWalletAccountPayload
   addLedgerWalletAccount(input: AddLedgerWalletAccountInput!): AddLedgerWalletAccountPayload
   deleteWallet(input: DeleteWalletInput!): DeleteWalletPayload
+  addContact(input: AddContactInput!): AddContactPayload
+  deleteContact(input: DeletContactInput!): DeletContactPayload
 }
 
 type NamedWalletAccountType {
@@ -327,6 +376,7 @@ type UserWalletType {
 type Viewer {
   id: ID!
   apps: AppsQuery!
+  contacts: ContactsQuery!
   identities: IdentitiesQuery!
   wallets: WalletsQuery!
 }
