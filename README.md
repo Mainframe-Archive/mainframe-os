@@ -26,6 +26,8 @@ In order to make it easier to share code among packages, this project uses [lern
 This project is in alpha, lots of breaking changes are to be expected between releases. It is using libraries and services that are themselves still in early stages of development. The cryptography and overall security have not been audited, no guarantees should be expected from this project at this stage.
 
 ## Getting Started
+### Quick Start
+Fork the [create-mainframe-dapp](https://github.com/MainframeHQ/create-mainframe-dapp) repo. This project contains a react based example dApp that is properly configured for development within our electron environment and is integrated with the mainframe SDK right out of the box. As you follow the README instructions it will send you back here to install a local copy of js-mainframe. Jump down to the [Setup](https://github.com/MainframeHQ/js-mainframe#setup) section when you get to this point in the setup process.
 
 ### Contributing
 
