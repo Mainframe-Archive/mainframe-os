@@ -482,7 +482,7 @@ export default class IdentitiesRepository {
     if (!peer) {
       // TODO Fetch mfid from feed
       const identity = OwnUserIdentity.create(profile)
-      const testMFID = identity.id // TODO: remove after testing
+      const testMFID = identity.id
       peer = this.createPeerUser(testMFID, profile, publicFeed)
     }
     // TODO create [me -> contact] feed
@@ -508,7 +508,7 @@ export default class IdentitiesRepository {
             profile,
             localID: id,
             peerID: contact.peerID,
-            connection: contact.contactFeed ? 'connected' : 'sent',
+            connectionState: contact.contactFeed ? 'connected' : 'sent',
             // For v1 first contact, we assign a full contact state
             // depending on if we've seen a private feed for our user
           }

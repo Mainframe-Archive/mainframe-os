@@ -46,7 +46,7 @@ const InviteCard = styled.TouchableOpacity`
   border-left: 3px solid ${props => props.theme.colors.PRIMARY_BLUE};
   border-radius: 3px;
   ${props =>
-    props.status === 'received' &&
+    props.connectionState === 'RECEIVED' &&
     `border-left: 3px solid ${props.theme.colors.PRIMARY_RED};`}
 `
 
@@ -139,7 +139,7 @@ export type Contact = {
   profile: {
     name?: string,
   },
-  status: 'sent' | 'received' | 'accepted',
+  connectionState: 'SENT' | 'RECEIVED' | 'CONNECTED',
 }
 
 export type SubmitContactInput = {
@@ -148,7 +148,6 @@ export type SubmitContactInput = {
 }
 
 type Props = {
-  data: Array<Contact>,
   contacts: {
     userContacts: Array<Contact>,
   },
@@ -196,7 +195,7 @@ export class ContactsView extends Component<Props, State> {
     const { userContacts } = this.props.contacts
     return (
       <ContactsListContainer>
-        <ContactsListHeader hascontacts={this.props.data.length > 0}>
+        <ContactsListHeader hascontacts={userContacts.length > 0}>
           <ButtonContainer>
             <Button
               variant={['xSmall', 'completeOnboarding']}
@@ -224,13 +223,13 @@ export class ContactsView extends Component<Props, State> {
                     <Text variant={['greyMed', 'elipsis']} size={13}>
                       {contact.profile.name || contact.localID}
                     </Text>
-                    {contact.status === 'sent' ? (
+                    {contact.connectionState === 'SENT' ? (
                       <Text variant={['grey']} size={10}>
                         Pending
                       </Text>
                     ) : null}
                   </ContactCardText>
-                  {contact.status === 'received'
+                  {contact.connectionState === 'RECEIVED'
                     ? this.renderAcceptIgnore(contact)
                     : null}
                 </ContactCard>
@@ -321,7 +320,8 @@ export class ContactsView extends Component<Props, State> {
   }
 
   renderRightSide() {
-    if (this.props.data.length === 0) {
+    const { userContacts } = this.props.contacts
+    if (userContacts.length === 0) {
       return (
         <RightContainer>
           <Row size={1}>
@@ -344,8 +344,8 @@ export class ContactsView extends Component<Props, State> {
       )
     }
 
-    const invites = this.props.data.filter(
-      contact => contact.status !== 'accepted',
+    const invites = userContacts.filter(
+      contact => contact.connectionState !== 'CONNECTED',
     )
     return (
       <RightContainer>
@@ -359,9 +359,11 @@ export class ContactsView extends Component<Props, State> {
           </Row>
           {invites.map(contact => {
             return (
-              <InviteCard key={contact.localID} status={contact.status}>
+              <InviteCard
+                key={contact.localID}
+                connectionState={contact.connectionState}>
                 <InviteCardIcon>
-                  {contact.status === 'sent' ? (
+                  {contact.connectionState === 'SENT' ? (
                     <>
                       <Text variant="blue">
                         <CircleArrowUp width={24} height={24} />
@@ -390,7 +392,7 @@ export class ContactsView extends Component<Props, State> {
                   </Text>
                 </InviteCardText>
                 <InviteCardStatus>
-                  {contact.status === 'received' ? (
+                  {contact.connectionState === 'RECEIVED' ? (
                     this.renderAcceptIgnore(contact)
                   ) : (
                     <Text variant="grey" size={10}>
@@ -437,6 +439,7 @@ export default createFragmentContainer(ContactsView, {
       userContacts(userID: $userID) {
         peerID
         localID
+        connectionState
         profile {
           name
         }

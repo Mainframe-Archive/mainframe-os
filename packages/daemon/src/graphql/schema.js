@@ -472,6 +472,14 @@ const contactProfileType = new GraphQLObjectType({
   }),
 })
 
+const contactConnectionType = new GraphQLEnumType({
+  name: 'ContactConnection',
+  values: {
+    CONNECTED: { value: 'connected' },
+    SENT: { value: 'sent' },
+  },
+})
+
 const contactType = new GraphQLObjectType({
   name: 'Contact',
   interfaces: () => [nodeInterface],
@@ -488,6 +496,9 @@ const contactType = new GraphQLObjectType({
     },
     profile: {
       type: new GraphQLNonNull(contactProfileType),
+    },
+    connectionState: {
+      type: new GraphQLNonNull(contactConnectionType),
     },
   }),
 })

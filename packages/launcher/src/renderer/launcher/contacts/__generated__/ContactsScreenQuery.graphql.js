@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 43293e311bd68230753789cb0a1dec0c
+ * @relayHash d2eb71cfc110f3a31faa63e9cc0174fb
  */
 
 /* eslint-disable */
@@ -47,6 +47,7 @@ fragment ContactsView_contacts_3iqrP on ContactsQuery {
   userContacts(userID: $userID) {
     peerID
     localID
+    connectionState
     profile {
       name
     }
@@ -76,7 +77,7 @@ return {
   "operationKind": "query",
   "name": "ContactsScreenQuery",
   "id": null,
-  "text": "query ContactsScreenQuery(\n  $userID: String!\n) {\n  viewer {\n    contacts {\n      ...ContactsScreen_contacts_3iqrP\n    }\n    id\n  }\n}\n\nfragment ContactsScreen_contacts_3iqrP on ContactsQuery {\n  ...ContactsView_contacts_3iqrP\n}\n\nfragment ContactsView_contacts_3iqrP on ContactsQuery {\n  userContacts(userID: $userID) {\n    peerID\n    localID\n    profile {\n      name\n    }\n    id\n  }\n}\n",
+  "text": "query ContactsScreenQuery(\n  $userID: String!\n) {\n  viewer {\n    contacts {\n      ...ContactsScreen_contacts_3iqrP\n    }\n    id\n  }\n}\n\nfragment ContactsScreen_contacts_3iqrP on ContactsQuery {\n  ...ContactsView_contacts_3iqrP\n}\n\nfragment ContactsView_contacts_3iqrP on ContactsQuery {\n  userContacts(userID: $userID) {\n    peerID\n    localID\n    connectionState\n    profile {\n      name\n    }\n    id\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -171,6 +172,13 @@ return {
                     "kind": "ScalarField",
                     "alias": null,
                     "name": "localID",
+                    "args": null,
+                    "storageKey": null
+                  },
+                  {
+                    "kind": "ScalarField",
+                    "alias": null,
+                    "name": "connectionState",
                     "args": null,
                     "storageKey": null
                   },

@@ -8,12 +8,14 @@
 
 /*::
 import type { ConcreteFragment } from 'relay-runtime';
+export type ContactConnection = "CONNECTED" | "SENT" | "%future added value";
 import type { FragmentReference } from "relay-runtime";
 declare export opaque type ContactsView_contacts$ref: FragmentReference;
 export type ContactsView_contacts = {|
   +userContacts: ?$ReadOnlyArray<?{|
     +peerID: string,
     +localID: string,
+    +connectionState: ContactConnection,
     +profile: {|
       +name: string
     |},
@@ -68,6 +70,13 @@ const node/*: ConcreteFragment*/ = {
           "storageKey": null
         },
         {
+          "kind": "ScalarField",
+          "alias": null,
+          "name": "connectionState",
+          "args": null,
+          "storageKey": null
+        },
+        {
           "kind": "LinkedField",
           "alias": null,
           "name": "profile",
@@ -90,5 +99,5 @@ const node/*: ConcreteFragment*/ = {
   ]
 };
 // prettier-ignore
-(node/*: any*/).hash = '3c0d928068401beadd8dcf6fa7fbd375';
+(node/*: any*/).hash = '8040c38454634df0e0e2ed7d663bf068';
 module.exports = node;

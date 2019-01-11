@@ -289,7 +289,7 @@ export type IdentityGetUserContactsParams = {
 export type ContactResult = {
   localID: string,
   peerID: string,
-  connection: 'sent' | 'connected',
+  connectionState: 'sent' | 'connected',
   profile: {
     name?: ?string,
     avatar?: ?string,

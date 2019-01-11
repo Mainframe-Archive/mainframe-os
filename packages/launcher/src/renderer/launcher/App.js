@@ -27,9 +27,7 @@ type State = {
 export default class App extends Component<{}, State> {
   static contextType = EnvironmentContext
 
-  state = {
-    vaultsData: undefined,
-  }
+  state = {}
 
   componentDidMount() {
     this.getVaultsData()

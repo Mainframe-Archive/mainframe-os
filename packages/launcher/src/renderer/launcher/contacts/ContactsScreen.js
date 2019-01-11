@@ -16,14 +16,6 @@ import ContactsView, {
   type SubmitContactInput,
 } from './ContactsView'
 
-// import ContactsView, { type Contacts } from './ContactsView'
-
-// type RendererProps = {}
-
-// type Props = RendererProps & {
-//   apps: Contacts,
-// }
-
 type QueryProps = {
   userID: string,
 }
@@ -67,14 +59,12 @@ export class ContactsScreen extends Component<Props, State> {
         name: data.name,
       },
     }
-    console.log('input: ', input)
     return new Promise((resolve, reject) => {
       commitMutation(this.context, {
         mutation: addContactMutation,
         variables: { input, userID: this.props.userID },
         onCompleted: (contact, errors) => {
           if (errors && errors.length) {
-            console.log('add contact error: ', errors[0])
             reject(errors[0])
           } else {
             resolve(contact)
@@ -87,13 +77,20 @@ export class ContactsScreen extends Component<Props, State> {
     })
   }
 
+  acceptContact = () => {
+    // TODO needs implementing
+  }
+
+  ignoreContact = () => {
+    // TODO needs implementing
+  }
+
   render() {
     return (
       <ContactsView
         contacts={this.props.contacts}
-        data={this.state.data}
-        ignoreContact={contact => console.log('ignore contact', contact)}
-        acceptContact={contact => console.log('accept contact', contact)}
+        ignoreContact={this.ignoreContact}
+        acceptContact={this.acceptContact}
         onSubmitNewContact={this.addNewContact}
       />
     )

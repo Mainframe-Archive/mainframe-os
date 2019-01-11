@@ -164,6 +164,12 @@ type Contact implements Node {
   peerID: ID!
   pubKey: String!
   profile: ContactProfile!
+  connectionState: ContactConnection!
+}
+
+enum ContactConnection {
+  CONNECTED
+  SENT
 }
 
 type ContactProfile {
