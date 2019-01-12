@@ -21,6 +21,7 @@ import OwnDeveloperIdentity, {
 } from './OwnDeveloperIdentity'
 import OwnUserIdentity, {
   type OwnUserIdentitySerialized,
+  type OwnUserProfile,
 } from './OwnUserIdentity'
 import PeerUserIdentity, {
   type PeerUserIdentitySerialized,
@@ -408,7 +409,7 @@ export default class IdentitiesRepository {
     else throw new Error('Error creating developer')
   }
 
-  createOwnUser(profile: Object = {}, keyPair?: KeyPair): OwnUserIdentity {
+  createOwnUser(profile: OwnUserProfile, keyPair?: KeyPair): OwnUserIdentity {
     const id = this.addIdentity(OwnUserIdentity.create(profile, keyPair))
     const user = this.getOwnUser(id)
     if (user) return user
@@ -428,19 +429,26 @@ export default class IdentitiesRepository {
     profile: PeerUserProfile,
     publicFeed: string,
     feeds?: Feeds,
-  ): ID {
+  ): PeerUserIdentity {
     if (this._mfidByFeed[publicFeed]) {
-      return this._byMFID[this._mfidByFeed[publicFeed]]
+      const id = this._byMFID[this._mfidByFeed[publicFeed]]
+      const identity = this.getIdentity(id)
+      if (!(identity instanceof PeerUserIdentity)) {
+        throw new Error(
+          'Error adding peer - identity already exists with publicFeed',
+        )
+      }
+      return identity
     }
     const keyBuffer = multibase.decode(publicKey)
     const id = this.addIdentity(
       new PeerUserIdentity(uniqueID(), keyBuffer, profile, publicFeed, feeds),
     )
     const peer = this.getPeerUser(id)
-    if (peer != null) {
-      this._mfidByFeed[String(publicFeed)] = peer.id
-    }
-    return id
+    if (!peer) throw new Error('Error adding peer')
+
+    this._mfidByFeed[String(publicFeed)] = peer.id
+    return peer
   }
 
   createContactFromPeer(ownUserId: ID, contactParams: ContactParams): Contact {
