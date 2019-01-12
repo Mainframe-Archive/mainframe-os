@@ -197,11 +197,19 @@ class AppsView extends Component<Props, State> {
 
   // RENDER
 
-  renderApp(app: AppData, own: boolean) {
+  renderApp(app: AppData, own: boolean, index: number) {
     return own ? (
-      <OwnAppItem ownApp={app} onOpenApp={this.onOpenApp} />
+      <OwnAppItem
+        key={`app-${index}`}
+        ownApp={app}
+        onOpenApp={this.onOpenApp}
+      />
     ) : (
-      <InstalledAppItem installedApp={app} onOpenApp={this.onOpenApp} />
+      <InstalledAppItem
+        key={`app-${index}`}
+        installedApp={app}
+        onOpenApp={this.onOpenApp}
+      />
     )
   }
 
@@ -212,7 +220,7 @@ class AppsView extends Component<Props, State> {
           {own ? 'Own Applications' : 'Installed Applications'}
         </Text>
         <AppsGrid>
-          {apps.map(app => this.renderApp(app, own))}
+          {apps.map((app, index) => this.renderApp(app, own, index))}
           {own
             ? this.renderButton(
                 'Create new',

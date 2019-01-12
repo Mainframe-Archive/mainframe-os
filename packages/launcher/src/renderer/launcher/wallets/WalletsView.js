@@ -37,7 +37,7 @@ const Container = styled.View`
 `
 
 const ButtonsContainer = styled.View`
-  flex-direction: 'row';
+  flex-direction: row;
 `
 
 const WalletView = styled.View`
