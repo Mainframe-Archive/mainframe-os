@@ -14,8 +14,6 @@ import {
   type AppOpenParams,
   APP_REMOVE_SCHEMA,
   type AppRemoveParams,
-  APP_REMOVE_OWN_SCHEMA,
-  type AppRemoveOwnParams,
   type AppSetUserSettingsParams,
   APP_SET_USER_SETTINGS_SCHEMA,
   type AppSetUserPermissionsSettingsParams,
@@ -77,9 +75,9 @@ export default {
     },
   },
   app_removeOwn: {
-    params: APP_REMOVE_OWN_SCHEMA,
-    handler: (ctx: LauncherContext, params: AppRemoveOwnParams) => {
-      return ctx.client.app.removeOwn(params)
+    params: APP_REMOVE_SCHEMA,
+    handler: (ctx: LauncherContext, params: AppRemoveParams) => {
+      return ctx.client.app.remove(params)
     },
   },
   app_readManifest: {

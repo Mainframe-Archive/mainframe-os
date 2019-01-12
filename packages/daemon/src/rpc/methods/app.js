@@ -1,7 +1,6 @@
 // @flow
 
 /* eslint-disable import/named */
-import { parseContentsURI, type ManifestData } from '@mainframe/app-manifest'
 import {
   idType as toClientID,
   APP_CHECK_PERMISSION_SCHEMA,
@@ -27,8 +26,6 @@ import {
   type AppPublishContentsResult,
   APP_REMOVE_SCHEMA,
   type AppRemoveParams,
-  APP_REMOVE_OWN_SCHEMA,
-  type AppRemoveOwnParams,
   APP_SET_PERMISSION_SCHEMA,
   type AppSetPermissionParams,
   APP_SET_PERMISSIONS_REQUIREMENTS_SCHEMA,
@@ -40,20 +37,15 @@ import {
   APP_WRITE_MANIFEST_SCHEMA,
   type AppWriteManifestParams,
 } from '@mainframe/client'
-import { getAppContentsPath, type Environment } from '@mainframe/config'
 import { idType as fromClientID, type ID } from '@mainframe/utils-id'
 /* eslint-enable import/named */
-import { ensureDir } from 'fs-extra'
 
 import type { SessionData } from '../../app/AbstractApp'
+import { downloadAppContents, getContentsPath } from '../../app/AppsRepository'
 import OwnApp from '../../app/OwnApp'
 
 import { clientError, sessionError } from '../errors'
 import type RequestContext from '../RequestContext'
-
-const getContentsPath = (env: Environment, manifest: ManifestData): string => {
-  return getAppContentsPath(env, manifest.id, manifest.version)
-}
 
 const createClientSession = (
   ctx: RequestContext,
@@ -205,28 +197,8 @@ export const install = {
       fromClientID(params.userID),
       params.permissionsSettings,
     )
-
-    // TODO: rather than waiting for contents to be downloaded, return early and let client subscribe to installation state changes
-    if (app.installationState !== 'ready') {
-      const contentsPath = getContentsPath(ctx.env, params.manifest)
-      const contentsURI = parseContentsURI(params.manifest.contentsURI)
-      if (contentsURI.nid !== 'bzz' || contentsURI.nss == null) {
-        // Unsupported contentsURI
-        app.installationState = 'download_error'
-      } else {
-        try {
-          app.installationState = 'downloading'
-          await ensureDir(contentsPath)
-          // contentsURI.nss is expected to be the bzz hash
-          // TODO?: bzz hash validation?
-          await ctx.bzz.downloadDirectoryTo(contentsURI.nss, contentsPath)
-          app.installationState = 'ready'
-        } catch (err) {
-          app.installationState = 'download_error'
-        }
-      }
-    }
-
+    const contentsPath = getContentsPath(ctx.env, params.manifest)
+    await downloadAppContents(app, contentsPath, ctx.bzz)
     await ctx.openVault.save()
     return { appID: toClientID(app.id) }
   },
@@ -259,17 +231,6 @@ export const publishContents = {
     await ctx.openVault.save()
 
     return { contentsURI }
-  },
-}
-
-export const removeOwn = {
-  params: APP_REMOVE_OWN_SCHEMA,
-  handler: async (
-    ctx: RequestContext,
-    params: AppRemoveOwnParams,
-  ): Promise<void> => {
-    ctx.openVault.removeOwnApp(fromClientID(params.appID))
-    await ctx.openVault.save()
   },
 }
 

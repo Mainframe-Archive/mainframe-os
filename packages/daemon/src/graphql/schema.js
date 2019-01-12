@@ -32,6 +32,7 @@ import {
 
 import LedgerWallet from '../wallet/LedgerWallet'
 import HDWallet from '../wallet/HDWallet'
+import { downloadAppContents, getContentsPath } from '../app/AppsRepository'
 
 import type RequestContext from '../rpc/RequestContext'
 
@@ -1034,7 +1035,13 @@ const appInstallMutation = mutationWithClientMutationId({
     { userID, manifest, permissionsSettings },
     ctx,
   ) => {
-    const app = ctx.openVault.installApp(manifest, userID, permissionsSettings)
+    const app = await ctx.openVault.installApp(
+      manifest,
+      userID,
+      permissionsSettings,
+    )
+    const contentsPath = getContentsPath(ctx.env, manifest)
+    await downloadAppContents(app, contentsPath, ctx.bzz)
     await ctx.openVault.save()
     return { app }
   },
