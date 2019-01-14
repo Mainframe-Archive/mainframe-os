@@ -98,7 +98,8 @@ export default class CreateVaultView extends Component<Props, State> {
     return (
       <OnboardContainer
         title="Welcome"
-        description="Let’s quickly secure your MainframeOS vault.">
+        description="Let’s quickly secure your MainframeOS vault."
+        testID="create-vault-view">
         <FormContainer>
           <Form onSubmit={this.onSubmit}>
             <Row size={1} top>

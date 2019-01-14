@@ -11,6 +11,7 @@ type Props = {
   children: any,
   title: string,
   description?: string,
+  testID?: string,
 }
 
 const Container = styled.View`
@@ -52,7 +53,7 @@ export default class OnboardContainerView extends Component<Props> {
       </Text>
     ) : null
     return (
-      <Container testID="onboard-view">
+      <Container testID={this.props.testID}>
         <FormContainer>
           <Content>
             <TitleContainer>

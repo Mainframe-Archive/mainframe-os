@@ -6,6 +6,8 @@ const timeouts = {
 
 const vaultTestId = {
   elements: {
+    createVault: '[data-testid="create-vault-view"]',
+    unlockVault: '[data-testid="unlock-vault-view"]',
     unlockPassword: '[data-testid="vault-manager-unlock-input"]',
     unlockButton: '[data-testid="vault-manager-unlock-button"]',
     unlockPasswordValidation:
@@ -32,13 +34,22 @@ const vaultTestId = {
 const launcherTestId = {
   elements: {
     launcher: '[data-testid="launcher-view"]',
+    identitiesNavButton: '[data-testid="nav-button-Identities"]',
+    testIdentity: '[data-testid="identity-name-test-identity"]',
   },
 }
 
 const onboardTestId = {
-    elements: {
-        onboard: '[data-testid="onboard-view"]'
-    }
+  elements: {
+    onboard: '[data-testid="onboard-view"]',
+    vaultIdentity: '[data-testid="onboard-create-identity-input-name"]',
+    vaultIdentityValidation:
+      '[data-testid="onboard-create-identity-input-name-errorTestId"]',
+    vaultIdentityButton: '[data-testid="onboard-create-identity-button"]',
+  },
+  messages: {
+    noIdentity: 'Name is required.',
+  },
 }
 
 module.exports = {

@@ -83,7 +83,8 @@ export default class UnlockVaultView extends Component<Props, State> {
     return (
       <OnboardContainer
         title="Welcome"
-        description="Enter your password to unlock your vault.">
+        description="Enter your password to unlock your vault."
+        testID="unlock-vault-view">
         <FormContainer>
           <Form onSubmit={this.onSubmit}>
             <Row size={1} top>

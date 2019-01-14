@@ -71,7 +71,9 @@ class IdentitiesView extends Component<Props> {
         <UserItem key={user.localID}>
           <IdentityFilledIcon width="24px" height="24px" />
           <Profile>
-            <Text variant="bold">{user.profile.name}</Text>
+            <Text variant="bold" testID={'identity-name-' + user.profile.name}>
+              {user.profile.name}
+            </Text>
             <Text theme={{ color: '#585858', fontSize: '11px' }}>
               {user.localID}
             </Text>

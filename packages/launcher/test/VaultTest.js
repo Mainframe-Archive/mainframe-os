@@ -5,10 +5,10 @@ const path = require('path')
 const os = require('os')
 const Application = require('spectron').Application
 const { checkConsole, unlockVault, createVault } = require('./utils')
-const { vaultTestId, onboardTestId, timeouts } = require('./config')
+const { vaultTestId, timeouts } = require('./config')
 
 describe('Vault operations', function() {
-  this.timeout(15000)
+  this.timeout(timeouts.viewChange)
   before(function() {
     const binPath =
       os.platform() === 'darwin'
@@ -58,39 +58,35 @@ describe('Vault operations', function() {
       assert.equal(count, 1)
     })
 
-    it('no browser warnings after launch', async function() {
-      const warnings = await checkConsole(this.app, 'browser', 'WARNING')
-      assert.equal(
-        warnings.length,
-        0,
-        'There are ' + warnings.length + ' warnings',
-      )
-    })
-
-    it('no browser errors after launch', async function() {
-      const errors = await checkConsole(this.app, 'browser', 'SEVERE')
-      assert.equal(errors.length, 0, 'There are ' + errors.length + ' errors')
+    it('no browser warnings/errors after launch', async function() {
+      const logs = await checkConsole(this.app, 'browser')
+      assert.equal(logs.warnings, 0, 'There are ' + logs.warnings + ' warnings')
+      assert.equal(logs.errors, 0, 'There are ' + logs.errors + ' errors')
     })
 
     it('"Password is required" warning', async function() {
+      await this.app.client.waitForExist(
+        vaultTestId.elements.unlockVault,
+        timeouts.viewChange,
+      )
       await this.app.client.element(vaultTestId.elements.unlockButton).click()
       assert.equal(
-        await this.app.client.element(
-          vaultTestId.elements.unlockPasswordValidation,
-        ).getValue(),
+        await this.app.client
+          .element(vaultTestId.elements.unlockPasswordValidation)
+          .getText(),
         vaultTestId.messages.noPassword,
       )
     })
 
     it('"Wrong password" warning', async function() {
-      const unlocked = await unlockVault(this.app, 'badPassword')
+      const unlocked = await unlockVault(this.app, 'badPassword', false)
       assert.equal(unlocked.unlocked, false)
-      // await this.app.client.waitForExist(
-      //   vaultTestId.elements.unlockMessage,
-      //   timeouts.input,
-      // )
+      await this.app.client.waitForExist(
+        vaultTestId.elements.unlockMessage,
+        timeouts.launch,
+      )
       assert.equal(
-        await this.app.client.element(vaultTestId.elements.unlockMessage).getValue(),
+        await this.app.client.getText(vaultTestId.elements.unlockMessage),
         vaultTestId.messages.invalidPassword,
       )
     })
@@ -100,20 +96,10 @@ describe('Vault operations', function() {
       assert.equal(unlocked.unlocked, true, unlocked.error)
     })
 
-    it('no browser warnings after unlocking', async function() {
-      await unlockVault(this.app, 'password')
-      const warnings = await checkConsole(this.app, 'browser', 'WARNING')
-      assert.equal(
-        warnings.length,
-        0,
-        'There are ' + warnings.length + ' warnings',
-      )
-    })
-
-    it('no browser errors after unlocking', async function() {
-      await unlockVault(this.app, 'password')
-      const errors = await checkConsole(this.app, 'browser', 'SEVERE')
-      assert.equal(errors.length, 0, 'There are ' + errors.length + ' errors')
+    it('no browser warnings/errors after unlocking', async function() {
+      const logs = await checkConsole(this.app, 'browser')
+      assert.equal(logs.warnings, 0, 'There are ' + logs.warnings + ' warnings')
+      assert.equal(logs.errors, 0, 'There are ' + logs.errors + ' errors')
     })
   })
 
@@ -123,33 +109,33 @@ describe('Vault operations', function() {
       assert.equal(count, 1)
     })
 
-    it('no browser warnings after launch', async function() {
-      const warnings = await checkConsole(this.app, 'browser', 'WARNING')
-      assert.equal(
-        warnings.length,
-        0,
-        'There are ' + warnings.length + ' warnings',
-      )
-    })
-
-    it('no browser errors after launch', async function() {
-      const errors = await checkConsole(this.app, 'browser', 'SEVERE')
-      assert.equal(errors.length, 0, 'There are ' + errors.length + ' errors')
+    it('no browser warnings/errors after launch', async function() {
+      const logs = await checkConsole(this.app, 'browser')
+      assert.equal(logs.warnings, 0, 'There are ' + logs.warnings + ' warnings')
+      assert.equal(logs.errors, 0, 'There are ' + logs.errors + ' errors')
     })
 
     it('no password', async function() {
+      await this.app.client.waitForExist(
+        vaultTestId.elements.createVault,
+        timeouts.viewChange,
+      )
       await this.app.client
         .element(vaultTestId.elements.createVaultButton)
         .click()
       assert.equal(
-        await this.app.client.element(
-          vaultTestId.elements.createPasswordValidation,
-        ).getValue(),
+        await this.app.client
+          .element(vaultTestId.elements.createPasswordValidation)
+          .getText(),
         vaultTestId.messages.noPassword,
       )
     })
 
     it('passwords do not match', async function() {
+      await this.app.client.waitForExist(
+        vaultTestId.elements.createVault,
+        timeouts.viewChange,
+      )
       await this.app.client
         .element(vaultTestId.elements.createPassword)
         .setValue('password')
@@ -160,14 +146,18 @@ describe('Vault operations', function() {
         .element(vaultTestId.elements.createVaultButton)
         .click()
       assert.equal(
-        await this.app.client.element(
-          vaultTestId.elements.createConfirmPasswordValidation,
-        ).getValue(),
+        await this.app.client
+          .element(vaultTestId.elements.createConfirmPasswordValidation)
+          .getText(),
         vaultTestId.messages.noMatch,
       )
     })
 
     it('password too short', async function() {
+      await this.app.client.waitForExist(
+        vaultTestId.elements.createVault,
+        timeouts.viewChange,
+      )
       await this.app.client
         .element(vaultTestId.elements.createPassword)
         .setValue('short')
@@ -175,16 +165,22 @@ describe('Vault operations', function() {
         .element(vaultTestId.elements.createVaultButton)
         .click()
       assert.equal(
-        await this.app.client.element(
-          vaultTestId.elements.createPasswordValidation,
-        ).getValue(),
+        await this.app.client
+          .element(vaultTestId.elements.createPasswordValidation)
+          .getText(),
         vaultTestId.messages.tooShort,
       )
     })
 
     it('creates a new vault', async function() {
       const created = await createVault(this.app, 'password')
-      assert.equal(created.created, true,created.error)
+      assert.equal(created.created, true, created.error)
+    })
+
+    it('no browser warnings/errors after creating vault', async function() {
+      const logs = await checkConsole(this.app, 'browser')
+      assert.equal(logs.warnings, 0, 'There are ' + logs.warnings + ' warnings')
+      assert.equal(logs.errors, 0, 'There are ' + logs.errors + ' errors')
     })
   })
 })

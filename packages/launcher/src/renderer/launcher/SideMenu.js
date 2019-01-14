@@ -148,6 +148,7 @@ export default class SideMenu extends Component<Props, State> {
           Icon={icon}
           variant={variant}
           title={data.title}
+          testID={'nav-button-' + data.title}
           onPress={() => this.onPressMenuItem(item)}
         />
         {selected && (
