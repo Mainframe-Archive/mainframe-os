@@ -30,10 +30,9 @@ import {
   PeerUserIdentity,
 } from '../identity'
 
+import type ClientContext from '../context/ClientContext'
 import LedgerWallet from '../wallet/LedgerWallet'
 import HDWallet from '../wallet/HDWallet'
-
-import type ClientContext from '../rpc/ClientContext'
 
 const { nodeInterface, nodeField } = nodeDefinitions(
   (globalId: string, ctx: ClientContext) => {
@@ -839,8 +838,7 @@ const createUserIdentityMutation = mutationWithClientMutationId({
     },
   },
   mutateAndGetPayload: async (args, ctx) => {
-    const user = ctx.openVault.identities.createOwnUser(args.profile)
-    await ctx.openVault.save()
+    const user = await ctx.mutations.createOwnUserIdentity(args.profile)
     return { user }
   },
 })

@@ -47,9 +47,9 @@ import { ensureDir } from 'fs-extra'
 
 import type { SessionData } from '../../app/AbstractApp'
 import OwnApp from '../../app/OwnApp'
+import type ClientContext from '../../context/ClientContext'
 
 import { clientError, sessionError } from '../errors'
-import type ClientContext from '../ClientContext'
 
 const getContentsPath = (env: Environment, manifest: ManifestData): string => {
   return getAppContentsPath(env, manifest.id, manifest.version)
@@ -219,7 +219,7 @@ export const install = {
           await ensureDir(contentsPath)
           // contentsURI.nss is expected to be the bzz hash
           // TODO?: bzz hash validation?
-          await ctx.bzz.downloadDirectoryTo(contentsURI.nss, contentsPath)
+          await ctx.io.bzz.downloadDirectoryTo(contentsURI.nss, contentsPath)
           app.installationState = 'ready'
         } catch (err) {
           app.installationState = 'download_error'
@@ -253,7 +253,7 @@ export const publishContents = {
       throw new Error('App not found')
     }
 
-    const hash = await ctx.bzz.uploadDirectoryFrom(app.contentsPath)
+    const hash = await ctx.io.bzz.uploadDirectoryFrom(app.contentsPath)
     const contentsURI = `urn:bzz:${hash}`
     app.setContentsURI(contentsURI, params.version)
     await ctx.openVault.save()

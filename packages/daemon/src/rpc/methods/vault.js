@@ -9,19 +9,15 @@ import {
   type VaultSettingsParams,
 } from '@mainframe/client'
 
+import type ClientContext from '../../context/ClientContext'
+
 import { vaultError } from '../errors'
-import type ClientContext from '../ClientContext'
 
 export const create = {
   params: VAULT_SCHEMA,
   handler: async (ctx: ClientContext, params: VaultParams) => {
     try {
-      await ctx.vaults.create(
-        ctx.socket,
-        params.path,
-        Buffer.from(params.password),
-      )
-      ctx.createFeeds()
+      await ctx.mutations.createVault(params.path, params.password)
     } catch (err) {
       // TODO: different error code depending on actual error
       throw vaultError(err.message)
@@ -37,12 +33,7 @@ export const open = {
   params: VAULT_SCHEMA,
   handler: async (ctx: ClientContext, params: VaultParams) => {
     try {
-      await ctx.vaults.open(
-        ctx.socket,
-        params.path,
-        Buffer.from(params.password),
-      )
-      ctx.createFeeds()
+      await ctx.mutations.openVault(params.path, params.password)
     } catch (err) {
       // TODO: different error code depending on actual error
       throw vaultError(err.message)

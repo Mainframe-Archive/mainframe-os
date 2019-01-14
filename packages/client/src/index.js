@@ -5,7 +5,6 @@ import type StreamRPC from '@mainframe/rpc-stream'
 
 import AppAPIs from './apis/App'
 import BlockchainAPIs from './apis/Blockchain'
-import FeedAPIs from './apis/Feed'
 import IdentityAPIs from './apis/Identity'
 import PssAPIs from './apis/Pss'
 import VaultAPIs from './apis/Vault'
@@ -20,7 +19,6 @@ export default class MainframeClient {
   _rpc: StreamRPC
   app: AppAPIs
   blockchain: BlockchainAPIs
-  feed: FeedAPIs
   identity: IdentityAPIs
   pss: PssAPIs
   vault: VaultAPIs
@@ -30,7 +28,6 @@ export default class MainframeClient {
     this._rpc = ipcRPC(socketPath)
     this.app = new AppAPIs(this._rpc)
     this.blockchain = new BlockchainAPIs(this._rpc)
-    this.feed = new FeedAPIs(this._rpc)
     this.identity = new IdentityAPIs(this._rpc)
     this.pss = new PssAPIs(this._rpc)
     this.vault = new VaultAPIs(this._rpc)

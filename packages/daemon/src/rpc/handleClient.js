@@ -11,10 +11,10 @@ import createHandler, {
 import { uniqueID } from '@mainframe/utils-id'
 import debug from 'debug'
 
+import ClientContext from '../context/ClientContext'
 import type { VaultRegistry } from '../vault'
 
 import methods from './methods'
-import ClientContext from './ClientContext'
 
 export type NotifyFunc = (method: string, params: Object) => void
 

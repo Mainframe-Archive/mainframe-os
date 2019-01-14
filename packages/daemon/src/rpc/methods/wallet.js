@@ -26,9 +26,8 @@ import {
   type WalletTypes,
 } from '@mainframe/client'
 
+import type ClientContext from '../../context/ClientContext'
 import { getAccountsByPage } from '../../wallet/ledgerClient'
-
-import type ClientContext from '../ClientContext'
 
 export const createHDWallet = {
   params: WALLET_CREATE_HD_SCHEMA,

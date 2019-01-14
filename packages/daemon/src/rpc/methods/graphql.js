@@ -7,9 +7,8 @@ import {
 } from '@mainframe/client'
 import { graphql } from 'graphql'
 
+import type ClientContext from '../../context/ClientContext'
 import schema from '../../graphql/schema'
-
-import type ClientContext from '../ClientContext'
 
 export const query = {
   params: GRAPHQL_QUERY_SCHEMA,

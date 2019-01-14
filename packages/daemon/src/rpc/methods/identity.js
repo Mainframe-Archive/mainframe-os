@@ -29,7 +29,7 @@ import {
 } from '@mainframe/client'
 import { idType as fromClientID } from '@mainframe/utils-id'
 
-import type ClientContext from '../ClientContext'
+import type ClientContext from '../../context/ClientContext'
 
 export const createDeveloper = {
   params: IDENTITY_CREATE_OWN_DEVELOPER_SCHEMA,
