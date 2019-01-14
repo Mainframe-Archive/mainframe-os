@@ -75,9 +75,9 @@ export const getContentsPath = (
 }
 
 export const downloadAppContents = async (
+  bzz: BzzAPI,
   app: App,
   contentsPath: string,
-  bzz: BzzAPI,
 ): Promise<App> => {
   if (app.installationState !== 'ready') {
     const contentsURI = parseContentsURI(app.manifest.contentsURI)

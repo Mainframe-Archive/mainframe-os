@@ -198,7 +198,7 @@ export const install = {
       params.permissionsSettings,
     )
     const contentsPath = getContentsPath(ctx.env, params.manifest)
-    await downloadAppContents(app, contentsPath, ctx.bzz)
+    await downloadAppContents(ctx.bzz, app, contentsPath)
     await ctx.openVault.save()
     return { appID: toClientID(app.id) }
   },
