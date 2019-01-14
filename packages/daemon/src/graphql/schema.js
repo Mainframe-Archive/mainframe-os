@@ -19,6 +19,7 @@ import {
   nodeDefinitions,
   mutationWithClientMutationId,
 } from 'graphql-relay'
+import { filter, map } from 'rxjs/operators'
 
 import { App, OwnApp } from '../app'
 import {
@@ -29,10 +30,11 @@ import {
   PeerDeveloperIdentity,
   PeerUserIdentity,
 } from '../identity'
-
 import type ClientContext from '../context/ClientContext'
 import LedgerWallet from '../wallet/LedgerWallet'
 import HDWallet from '../wallet/HDWallet'
+
+import observableToAsyncIterator from './observableToAsyncIterator'
 
 const { nodeInterface, nodeField } = nodeDefinitions(
   (globalId: string, ctx: ClientContext) => {
@@ -1064,7 +1066,24 @@ const queryType = new GraphQLObjectType({
   }),
 })
 
+const subscriptionType = new GraphQLObjectType({
+  name: 'Subscription',
+  fields: () => ({
+    appCreated: {
+      type: new GraphQLNonNull(ownAppType),
+      subscribe: (self, args, ctx: ClientContext) => {
+        const appCreated = ctx.pipe(
+          filter(e => e.type === 'own_app_created'),
+          map(e => ({ appCreated: e.app })),
+        )
+        return observableToAsyncIterator(appCreated)
+      },
+    },
+  }),
+})
+
 export default new GraphQLSchema({
-  query: queryType,
   mutation: mutationType,
+  query: queryType,
+  subscription: subscriptionType,
 })

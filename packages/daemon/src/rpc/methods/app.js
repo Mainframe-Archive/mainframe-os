@@ -139,14 +139,7 @@ export const create = {
     ctx: ClientContext,
     params: AppCreateParams,
   ): Promise<AppCreateResult> => {
-    const app = ctx.openVault.createApp({
-      contentsPath: params.contentsPath,
-      developerID: fromClientID(params.developerID),
-      name: params.name,
-      version: params.version,
-      permissionsRequirements: params.permissionsRequirements,
-    })
-    await ctx.openVault.save()
+    const app = await ctx.mutations.createApp(params)
     return { appID: toClientID(app.id) }
   },
 }

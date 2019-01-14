@@ -1,10 +1,14 @@
 // @flow
 
-import type { OwnUserIdentity } from '../identity'
+import type { AppCreateParams, VaultParams } from '@mainframe/client'
+import { idType as fromClientID } from '@mainframe/utils-id'
+
+import type { OwnApp } from '../app'
+
 import ClientContext from './ClientContext'
 
 export type MutationEventType =
-  | 'own_user_created'
+  | 'own_app_created'
   | 'vault_created'
   | 'vault_opened'
 
@@ -15,28 +19,38 @@ export default class ContextMutations {
     this._context = context
   }
 
-  async createVault(path: string, password: string): Promise<void> {
+  // Apps
+
+  async createApp(params: AppCreateParams): Promise<OwnApp> {
+    const app = this._context.openVault.createApp({
+      contentsPath: params.contentsPath,
+      developerID: fromClientID(params.developerID),
+      name: params.name,
+      version: params.version,
+      permissionsRequirements: params.permissionsRequirements,
+    })
+    await this._context.openVault.save()
+    this._context.next({ type: 'own_app_created', app })
+    return app
+  }
+
+  // Vault
+
+  async createVault(params: VaultParams): Promise<void> {
     await this._context.vaults.create(
       this._context.socket,
-      path,
-      Buffer.from(password),
+      params.path,
+      Buffer.from(params.password),
     )
     this._context.next({ type: 'vault_created' })
   }
 
-  async openVault(path: string, password: string): Promise<void> {
+  async openVault(params: VaultParams): Promise<void> {
     await this._context.vaults.open(
       this._context.socket,
-      path,
-      Buffer.from(password),
+      params.path,
+      Buffer.from(params.password),
     )
     this._context.next({ type: 'vault_opened' })
-  }
-
-  async createOwnUserIdentity(profile: Object): Promise<OwnUserIdentity> {
-    const user = this._context.openVault.identities.createOwnUser(profile)
-    await this._context.openVault.save()
-    this._context.next({ type: 'own_user_created', user })
-    return user
   }
 }
