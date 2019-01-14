@@ -1,14 +1,10 @@
 // @flow
 
-import elliptic from 'elliptic'
-
 import BzzAPI from '@erebos/api-bzz-node'
 import { getFeedTopic } from '@erebos/api-bzz-base'
 import { isHexValue, hexValueType, type hexValue } from '@erebos/hex'
 import { createKeyPair, type KeyPair as EthKeyPair } from '@erebos/secp256k1'
 import { pubKeyToAddress } from '@erebos/keccak256'
-
-const ec = new elliptic.ec('secp256k1')
 
 export type feedHash = string
 
@@ -30,7 +26,7 @@ export class OwnFeed {
 
   static fromJSON = (serialized: OwnFeedSerialized): OwnFeed => {
     return new OwnFeed(
-      ec.keyFromPrivate(serialized.ethPrivKey, 'hex'),
+      createKeyPair(serialized.ethPrivKey, 'hex'),
       serialized.topic,
       serialized.feedHash,
     )
