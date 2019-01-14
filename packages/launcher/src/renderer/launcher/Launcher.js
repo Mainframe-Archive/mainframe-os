@@ -15,7 +15,7 @@ import WalletsScreen from './wallets/WalletsScreen'
 import ContactsScreen from './contacts/ContactsScreen'
 
 const Container = styled.View`
-  flex-direction: 'row';
+  flex-direction: row;
   height: '100vh';
   flex: 1;
 `

@@ -37,7 +37,9 @@ const UserItem = styled.View`
   margin: 10px 0;
   padding: 30px 25px;
   background-color: ${props => props.theme.colors.LIGHT_GREY_F9};
-  border-left: 5px solid ${props => props.theme.colors.PRIMARY_BLUE};
+  border-left-width: 5px;
+  border-left-style: solid;
+  border-left-color: ${props => props.theme.colors.PRIMARY_BLUE};
   border-radius: 3px;
   flex-direction: row;
   align-items: center;

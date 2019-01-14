@@ -92,7 +92,7 @@ const ScrollView = styled.ScrollView`
 const MenuItem = styled.View`
   padding: ${props => props.theme.spacing * 2}px 0
     ${props => props.theme.spacing}px 0;
-  text-align: center;
+
   align-items: center;
 `
 

@@ -17,7 +17,7 @@ import Launcher from './Launcher'
 
 const LoadingContainer = styled.View`
   flex: 1;
-  justify-content: 'center';
+  justify-content: center;
 `
 
 type State = {

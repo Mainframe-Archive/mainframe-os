@@ -19,7 +19,9 @@ const Container = styled.View`
 
 const ContactsListContainer = styled.View`
   width: 260px;
-  border-right: 1px solid #f5f5f5;
+  border-right-width: 1px;
+  border-right-style: solid;
+  border-right-color: #f5f5f5;
   height: calc(100vh - 40px);
 `
 
@@ -27,7 +29,9 @@ const ContactCard = styled.TouchableOpacity`
   min-height: 50px;
   padding: 8px 10px 8px 0;
   flex-direction: row;
-  border-bottom: 1px solid #f5f5f5;
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  border-bottom-color: #f5f5f5;
 `
 const ContactCardText = styled.View`
   flex: 1;
@@ -43,11 +47,17 @@ const InviteCard = styled.TouchableOpacity`
   align-items: center;
   justify-content: center;
   margin-bottom: 5px;
-  border-left: 3px solid ${props => props.theme.colors.PRIMARY_BLUE};
+  border-left-width: 3px;
+  border-left-style: solid;
+  border-left-color: ${props => props.theme.colors.PRIMARY_BLUE};
   border-radius: 3px;
   ${props =>
     props.connectionState === 'RECEIVED' &&
-    `border-left: 3px solid ${props.theme.colors.PRIMARY_RED};`}
+    `
+      border-left-width: 3px;
+      border-left-style: solid;
+      border-left-color: ${props.theme.colors.PRIMARY_RED};
+    `}
 `
 
 const InviteCardIcon = styled.View`
@@ -79,7 +89,12 @@ const RightContainer = styled.View`
 const ContactsListHeader = styled.View`
   padding-bottom: 10px;
   flex-direction: row;
-  ${props => props.hascontacts && `border-bottom: 1px solid #f5f5f5;`}
+  ${props =>
+    props.hascontacts &&
+    `
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  border-bottom-color: #f5f5f5;`}
 `
 
 const ButtonContainer = styled.View`
@@ -126,7 +141,9 @@ const CloseButton = styled.TouchableOpacity`
 `
 
 const ModalTitle = styled.View`
-  border-bottom: 1px solid #f5f5f5;
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  border-bottom-color: #f5f5f5;
   height: 35px;
   margin-top: 5px;
   align-items: center;
