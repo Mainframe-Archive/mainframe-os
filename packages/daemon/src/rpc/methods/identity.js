@@ -140,7 +140,7 @@ export const addPeer = {
     params: IdentityAddPeerParams,
   ): Promise<IdentityAddPeerResult> => {
     const peerID = ctx.openVault.identities.createPeerUser(
-      params.key,
+      params.mfid,
       params.profile,
       params.publicFeed,
       params.otherFeeds,

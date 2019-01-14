@@ -209,7 +209,7 @@ export type Feeds = {
 }
 
 export type IdentityAddPeerParams = {
-  key: string,
+  mfid: string,
   profile: {
     name?: ?string,
     avatar?: ?string,
