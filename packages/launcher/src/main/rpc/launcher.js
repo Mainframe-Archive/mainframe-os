@@ -20,6 +20,8 @@ import {
   APP_SET_USER_SETTINGS_SCHEMA,
   type AppSetUserPermissionsSettingsParams,
   APP_SET_USER_PERMISSIONS_SETTINGS_SCHEMA,
+  type BlockchainWeb3SendParams,
+  ETH_REQUEST_SCHEMA,
   type IdentityCreateResult,
   type IdentityCreateUserParams,
   type IdentityCreateDeveloperParams,
@@ -183,7 +185,7 @@ export default {
     },
   },
 
-  // Wallets
+  // Wallets & Blockchain
 
   wallet_getLedgerAccounts: {
     params: WALLET_GET_LEDGER_ETH_ACCOUNTS_SCHEMA,
@@ -192,6 +194,16 @@ export default {
       params: WalletGetLedgerEthAccountsParams,
     ): Promise<WalletGetLedgerEthAccountsResult> => {
       return ctx.client.wallet.getLedgerEthAccounts(params)
+    },
+  },
+
+  blockchain_web3Send: {
+    params: ETH_REQUEST_SCHEMA,
+    handler: (
+      ctx: LauncherContext,
+      params: BlockchainWeb3SendParams,
+    ): Promise<any> => {
+      return ctx.client.blockchain.web3Send(params)
     },
   },
 }

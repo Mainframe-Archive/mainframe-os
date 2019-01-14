@@ -185,8 +185,10 @@ export type EthTransactionParams = {
 }
 
 export type BlockchainWeb3SendParams = {
-  transactionParams: EthTransactionParams,
-  walletID: ID,
+  id: number,
+  jsonrpc: string,
+  method: string,
+  params: Array<any>,
 }
 
 export type BlockchainWeb3SendResult = any
