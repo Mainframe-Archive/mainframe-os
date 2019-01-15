@@ -10,9 +10,6 @@ export default class AppDeleteCommand extends Command {
     id: flags.string({
       description: 'app local ID',
     }),
-    isOwn: flags.boolean({
-      description: 'boolean flag for own app type',
-    }),
   }
 
   async run() {
@@ -21,15 +18,9 @@ export default class AppDeleteCommand extends Command {
       return
     }
 
-    if (this.flags.isOwn) {
-      await client.app.removeOwn({
-        appID: this.flags.id,
-      })
-    } else {
-      await client.app.remove({
-        appID: this.flags.id,
-      })
-    }
+    await client.app.remove({
+      appID: this.flags.id,
+    })
 
     this.log(`Removed app: ${this.flags.id}`)
   }

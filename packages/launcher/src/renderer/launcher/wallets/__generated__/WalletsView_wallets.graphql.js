@@ -17,6 +17,10 @@ export type WalletsView_wallets = {|
       +accounts: ?$ReadOnlyArray<?{|
         +name: string,
         +address: string,
+        +balances: {|
+          +eth: string,
+          +mft: string,
+        |},
       |}>,
     |}>,
     +ledger: ?$ReadOnlyArray<?{|
@@ -24,6 +28,10 @@ export type WalletsView_wallets = {|
       +accounts: ?$ReadOnlyArray<?{|
         +name: string,
         +address: string,
+        +balances: {|
+          +eth: string,
+          +mft: string,
+        |},
       |}>,
     |}>,
   |},
@@ -63,6 +71,31 @@ var v0 = [
         "name": "address",
         "args": null,
         "storageKey": null
+      },
+      {
+        "kind": "LinkedField",
+        "alias": null,
+        "name": "balances",
+        "storageKey": null,
+        "args": null,
+        "concreteType": "WalletBalancesType",
+        "plural": false,
+        "selections": [
+          {
+            "kind": "ScalarField",
+            "alias": null,
+            "name": "eth",
+            "args": null,
+            "storageKey": null
+          },
+          {
+            "kind": "ScalarField",
+            "alias": null,
+            "name": "mft",
+            "args": null,
+            "storageKey": null
+          }
+        ]
       }
     ]
   }
@@ -109,5 +142,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '1137417336431082f3b1cfdfea25c787';
+(node/*: any*/).hash = 'bc876eb24451446e5a461af50bba6444';
 module.exports = node;
