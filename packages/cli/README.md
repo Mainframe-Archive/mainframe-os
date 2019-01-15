@@ -35,6 +35,10 @@
 - `wallet:connectLedgerAccount`: connect an account from ledger hardware wallet
 - `wallet:delete`: delete a wallet
 - `wallet:importEth`: import an Ethereum wallet
+- `swarm:createKeystore`: create a new Ethereum keystore for the embedded Swarm client
+- `swarm:importKeystore`: import an Ethereum keystore by address
+- `swarm:listKeystores`: list all of the available keystores
+- `swarm:getPrivateKey`: get the private key for the given Ethereum address
 
 ## Environment setup
 
