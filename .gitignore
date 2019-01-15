@@ -11,3 +11,5 @@ dist/
 *.log
 .DS_Store
 .idea
+release-builds/
+keystore/
