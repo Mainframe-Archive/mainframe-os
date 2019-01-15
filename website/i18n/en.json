@@ -3,7 +3,7 @@
   "localized-strings": {
     "next": "Next",
     "previous": "Previous",
-    "tagline": "A website for testing",
+    "tagline": "Get started using Mainframe.",
     "docs": {
       "doc1": {
         "title": "Latin-ish",
@@ -25,8 +25,7 @@
     "links": {
       "Docs": "Docs",
       "API": "API",
-      "Help": "Help",
-      "Blog": "Blog"
+      "Help": "Help"
     },
     "categories": {
       "Docusaurus": "Docusaurus",
