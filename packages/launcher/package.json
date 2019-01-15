@@ -49,6 +49,7 @@
     "electron-util": "^0.10.2",
     "react": "^16.6.3",
     "react-art": "^16.6.3",
+    "react-blockies": "^1.4.0",
     "react-dom": "^16.6.3",
     "react-modal": "^3.6.1",
     "react-native-web": "^0.9.9",
