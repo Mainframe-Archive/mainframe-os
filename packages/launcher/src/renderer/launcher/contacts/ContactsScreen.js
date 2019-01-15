@@ -110,7 +110,6 @@ export class ContactsScreenRenderer extends Component<QueryProps> {
   static contextType = EnvironmentContext
 
   render() {
-    console.log('context: ', this.context, this.props.userID)
     return (
       <QueryRenderer
         environment={this.context}

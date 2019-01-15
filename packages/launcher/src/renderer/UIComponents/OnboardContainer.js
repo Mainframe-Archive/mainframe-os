@@ -6,11 +6,13 @@ import styled from 'styled-components/native'
 
 import { Text } from '@morpheus-ui/core'
 import bgGraphic from '../../assets/images/onboard-background.png'
+import bgIDGraphic from '../../assets/images/identity-onboard-background.png'
 
 type Props = {
   children: any,
   title: string,
   description?: string,
+  id?: boolean,
 }
 
 const Container = styled.View`
@@ -62,7 +64,10 @@ export default class OnboardContainerView extends Component<Props> {
           </Content>
         </FormContainer>
         <BgGraphicContainer>
-          <BgImage source={bgGraphic} resizeMode="contain" />
+          <BgImage
+            source={this.props.id ? bgIDGraphic : bgGraphic}
+            resizeMode="contain"
+          />
         </BgGraphicContainer>
       </Container>
     )
