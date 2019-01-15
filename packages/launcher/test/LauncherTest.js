@@ -6,7 +6,7 @@ const os = require('os')
 const Application = require('spectron').Application
 const BzzAPI = require('@erebos/api-bzz-node').default
 const { launcherTestId, timeouts } = require('./config')
-const { checkConsole, unlockVault } = require('./utils')
+const { unlockVault } = require('./utils')
 
 const getFixture = fixture => path.join(__dirname, '../../../fixtures', fixture)
 
@@ -80,16 +80,15 @@ describe('Launcher testing', function() {
         .element(launcherTestId.elements.applications.creation.first.appVersion)
         .setValue('1.0.0')
 
-      const appContents = getFixture('test-app/index.html')
+      const appContents = getFixture('test-app')
 
       await this.app.client.waitForExist(
         launcherTestId.elements.applications.creation.first.appPath,
         timeouts.input,
       )
-      await this.app.client.chooseFile(
-        launcherTestId.elements.applications.creation.first.appPath,
-        appContents,
-      )
+      await this.app.client
+        .element(launcherTestId.elements.applications.creation.first.appPath)
+        .addValue(appContents)
       await this.app.client.waitForExist(
         launcherTestId.elements.applications.creation.first.confirm,
         timeouts.input,
