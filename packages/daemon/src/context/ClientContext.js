@@ -91,11 +91,10 @@ export default class ClientContext extends Subject<ContextEvent> {
   async clear() {
     this.unsubscribe()
 
-    const disposeSubs = Object.values(this._internalSubscriptions).map(sub => {
+    Object.values(this._internalSubscriptions).forEach(sub => {
       // $FlowFixMe: Object.values() losing type
-      return sub.dispose()
+      sub.unsubscribe()
     })
-    await Promise.all(disposeSubs)
     this._internalSubscriptions = {}
 
     await this.subscriptions.clear()

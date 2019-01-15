@@ -929,14 +929,7 @@ const appCreateMutation = mutationWithClientMutationId({
     },
   },
   mutateAndGetPayload: async (args, ctx) => {
-    const app = ctx.openVault.createApp({
-      contentsPath: args.contentsPath,
-      developerID: args.developerID,
-      name: args.name,
-      version: args.version,
-      permissionsRequirements: args.permissionsRequirements,
-    })
-    await ctx.openVault.save()
+    const app = await ctx.mutations.createApp(args)
     return { app }
   },
 })
