@@ -6,10 +6,10 @@ import url from 'url'
 import Client from '@mainframe/client'
 import { Environment, DaemonConfig, VaultConfig } from '@mainframe/config'
 import StreamRPC from '@mainframe/rpc-stream'
-import { startDaemon } from '@mainframe/toolbox'
+import { setupDaemon, startDaemon } from '@mainframe/toolbox'
 // eslint-disable-next-line import/named
 import { app, BrowserWindow, ipcMain } from 'electron'
-import { is } from 'electron-util'
+import { is, isFirstAppLaunch } from 'electron-util'
 
 import { APP_TRUSTED_REQUEST_CHANNEL } from '../constants'
 import type { AppSession } from '../types'
@@ -69,6 +69,7 @@ const launchApp = async (appSession: AppSession) => {
   const appID = appSession.app.appID
   const userID = appSession.user.id
   const appOpen = appContexts[appID] && appContexts[appID][userID]
+  const binPath = './packages/daemon/bin/run'
   if (appOpen) {
     const appWindow = appContexts[appID][userID].window
     if (appWindow.isMinimized()) {
@@ -77,6 +78,13 @@ const launchApp = async (appSession: AppSession) => {
     appWindow.show()
     appWindow.focus()
     return
+  }
+
+  if (isFirstAppLaunch()) {
+    setupDaemon(new DaemonConfig(process.env), {
+      binPath: binPath,
+      socketPath: undefined,
+    })
   }
 
   const appWindow = newWindow()

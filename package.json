@@ -1,8 +1,12 @@
 {
   "name": "js-mainframe",
+  "productName": "MainframeOS",
   "version": "0.0.0",
-  "main": "index.js",
+  "main": "packages/launcher/src/main/index.js",
   "license": "MIT",
+  "build": {
+    "appId": "org.mainframe.os"
+  },
   "private": true,
   "scripts": {
     "flow:install": "lerna exec --concurrency 1 -- flow-typed install --ignoreDeps=dev",
@@ -34,6 +38,7 @@
     "babel-jest": "^23.6.0",
     "cross-env": "^5.2.0",
     "del-cli": "^1.1.0",
+    "electron": "^2.0.10",
     "eslint": "^5.6.1",
     "eslint-config-mainframe": "^2.3.0",
     "flow-bin": "^0.87.0",
