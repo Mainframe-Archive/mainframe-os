@@ -139,8 +139,6 @@ export type AppPublishContentsResult = {
 
 export type AppRemoveParams = { appID: ID }
 
-export type AppRemoveOwnParams = { appID: ID }
-
 export type AppSetUserSettingsParams = {
   appID: ID,
   userID: ID,
