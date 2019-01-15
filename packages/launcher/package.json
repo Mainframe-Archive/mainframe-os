@@ -73,7 +73,7 @@
     "electron-webpack": "^2.6.1",
     "file-loader": "^2.0.0",
     "flow-bin": "^0.87.0",
-    "graphql": "^0.13.2",
+    "graphql": "^14.1.0",
     "mocha": "^5.2.0",
     "relay-compiler": "^1.7.0",
     "spectron": "^5.0.0",
