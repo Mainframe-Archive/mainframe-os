@@ -14,12 +14,12 @@ import {
   type AppOpenParams,
   APP_REMOVE_SCHEMA,
   type AppRemoveParams,
-  APP_REMOVE_OWN_SCHEMA,
-  type AppRemoveOwnParams,
   type AppSetUserSettingsParams,
   APP_SET_USER_SETTINGS_SCHEMA,
   type AppSetUserPermissionsSettingsParams,
   APP_SET_USER_PERMISSIONS_SETTINGS_SCHEMA,
+  type BlockchainWeb3SendParams,
+  ETH_REQUEST_SCHEMA,
   type IdentityCreateResult,
   type IdentityCreateUserParams,
   type IdentityCreateDeveloperParams,
@@ -77,9 +77,9 @@ export default {
     },
   },
   app_removeOwn: {
-    params: APP_REMOVE_OWN_SCHEMA,
-    handler: (ctx: LauncherContext, params: AppRemoveOwnParams) => {
-      return ctx.client.app.removeOwn(params)
+    params: APP_REMOVE_SCHEMA,
+    handler: (ctx: LauncherContext, params: AppRemoveParams) => {
+      return ctx.client.app.remove(params)
     },
   },
   app_readManifest: {
@@ -183,7 +183,7 @@ export default {
     },
   },
 
-  // Wallets
+  // Wallets & Blockchain
 
   wallet_getLedgerAccounts: {
     params: WALLET_GET_LEDGER_ETH_ACCOUNTS_SCHEMA,
@@ -192,6 +192,16 @@ export default {
       params: WalletGetLedgerEthAccountsParams,
     ): Promise<WalletGetLedgerEthAccountsResult> => {
       return ctx.client.wallet.getLedgerEthAccounts(params)
+    },
+  },
+
+  blockchain_web3Send: {
+    params: ETH_REQUEST_SCHEMA,
+    handler: (
+      ctx: LauncherContext,
+      params: BlockchainWeb3SendParams,
+    ): Promise<any> => {
+      return ctx.client.blockchain.web3Send(params)
     },
   },
 }

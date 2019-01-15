@@ -9,7 +9,11 @@ import { EnvironmentContext } from '../RelayEnvironment'
 import WalletImportView from './WalletImportView'
 import WalletAddLedgerModal from './WalletAddLedgerModal'
 
-export type WalletAccounts = Array<{ name: string, address: string }>
+export type WalletAccounts = Array<{
+  name: string,
+  address: string,
+  balances: { mft: string, eth: string },
+}>
 
 export type Wallet = {
   localID: string,
@@ -162,6 +166,8 @@ class WalletsView extends Component<Props, State> {
         <WalletView key={a.address}>
           <Text>{a.name}</Text>
           <Text>{a.address}</Text>
+          <Text>ETH: {a.balances.eth}</Text>
+          <Text>MFT: {a.balances.mft}</Text>
         </WalletView>
       )
     })
@@ -225,6 +231,10 @@ export default createFragmentContainer(WalletsView, {
           accounts {
             name
             address
+            balances {
+              eth
+              mft
+            }
           }
         }
         ledger {
@@ -232,6 +242,10 @@ export default createFragmentContainer(WalletsView, {
           accounts {
             name
             address
+            balances {
+              eth
+              mft
+            }
           }
         }
       }
