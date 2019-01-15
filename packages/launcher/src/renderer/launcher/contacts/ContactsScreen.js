@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 // @flow
 import React, { Component } from 'react'
 import { graphql, createFragmentContainer, QueryRenderer } from 'react-relay'
