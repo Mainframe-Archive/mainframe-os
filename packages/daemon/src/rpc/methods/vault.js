@@ -41,6 +41,7 @@ export const open = {
         params.path,
         Buffer.from(params.password),
       )
+      ctx.eth.setup()
     } catch (err) {
       // TODO: different error code depending on actual error
       throw vaultError(err.message)

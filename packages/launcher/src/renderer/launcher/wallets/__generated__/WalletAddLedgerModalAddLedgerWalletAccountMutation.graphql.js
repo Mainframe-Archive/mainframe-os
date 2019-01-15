@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash d0c196ee30e9f5d3a6c9ac15c30a3b8d
+ * @relayHash 63aa95a235cb3b4a6e3f1116887894c3
  */
 
 /* eslint-disable */
@@ -55,6 +55,10 @@ fragment WalletsView_wallets on WalletsQuery {
       accounts {
         name
         address
+        balances {
+          eth
+          mft
+        }
       }
       id
     }
@@ -63,6 +67,10 @@ fragment WalletsView_wallets on WalletsQuery {
       accounts {
         name
         address
+        balances {
+          eth
+          mft
+        }
       }
       id
     }
@@ -124,6 +132,31 @@ v3 = [
         "name": "address",
         "args": null,
         "storageKey": null
+      },
+      {
+        "kind": "LinkedField",
+        "alias": null,
+        "name": "balances",
+        "storageKey": null,
+        "args": null,
+        "concreteType": "WalletBalancesType",
+        "plural": false,
+        "selections": [
+          {
+            "kind": "ScalarField",
+            "alias": null,
+            "name": "eth",
+            "args": null,
+            "storageKey": null
+          },
+          {
+            "kind": "ScalarField",
+            "alias": null,
+            "name": "mft",
+            "args": null,
+            "storageKey": null
+          }
+        ]
       }
     ]
   },
@@ -134,7 +167,7 @@ return {
   "operationKind": "mutation",
   "name": "WalletAddLedgerModalAddLedgerWalletAccountMutation",
   "id": null,
-  "text": "mutation WalletAddLedgerModalAddLedgerWalletAccountMutation(\n  $input: AddLedgerWalletAccountInput!\n) {\n  addLedgerWalletAccount(input: $input) {\n    viewer {\n      wallets {\n        ...WalletsView_wallets\n      }\n      id\n    }\n  }\n}\n\nfragment WalletsView_wallets on WalletsQuery {\n  ethWallets {\n    hd {\n      localID\n      accounts {\n        name\n        address\n      }\n      id\n    }\n    ledger {\n      localID\n      accounts {\n        name\n        address\n      }\n      id\n    }\n  }\n}\n",
+  "text": "mutation WalletAddLedgerModalAddLedgerWalletAccountMutation(\n  $input: AddLedgerWalletAccountInput!\n) {\n  addLedgerWalletAccount(input: $input) {\n    viewer {\n      wallets {\n        ...WalletsView_wallets\n      }\n      id\n    }\n  }\n}\n\nfragment WalletsView_wallets on WalletsQuery {\n  ethWallets {\n    hd {\n      localID\n      accounts {\n        name\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n    ledger {\n      localID\n      accounts {\n        name\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
