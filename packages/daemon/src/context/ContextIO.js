@@ -13,7 +13,7 @@ export default class ContextIO {
   _rpc: ?StreamRPC
   _bzz: ?BzzAPI
   _pss: ?PssAPI
-  _eth: ?EthHandler
+  _ethHandler: ?EthHandler
 
   constructor(context: ClientContext) {
     this._context = context
@@ -50,7 +50,7 @@ export default class ContextIO {
   clear() {
     this._bzz = undefined
     this._pss = undefined
-    this._web3HttpProvider = undefined
+    this._ethHandler = undefined
     if (this._rpc != null) {
       this._rpc.disconnect()
     }
