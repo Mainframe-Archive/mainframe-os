@@ -5,10 +5,6 @@
     "previous": "Previous",
     "tagline": "Get started using Mainframe.",
     "docs": {
-      "doc1": {
-        "title": "Latin-ish",
-        "sidebar_label": "Example Page"
-      },
       "doc2": {
         "title": "document number 2"
       },
@@ -20,6 +16,10 @@
       },
       "doc5": {
         "title": "Fifth Document"
+      },
+      "introduction": {
+        "title": "Mainframe Platform",
+        "sidebar_label": "Introduction"
       }
     },
     "links": {
@@ -28,9 +28,10 @@
       "Help": "Help"
     },
     "categories": {
-      "Docusaurus": "Docusaurus",
-      "First Category": "First Category",
-      "Second Category": "Second Category"
+      "Mainframe": "Mainframe",
+      "Quick Start": "Quick Start",
+      "Second Category": "Second Category",
+      "API": "API"
     }
   },
   "pages-strings": {

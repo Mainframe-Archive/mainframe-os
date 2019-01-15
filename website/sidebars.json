@@ -1,10 +1,10 @@
 {
   "docs": {
-    "Docusaurus": ["doc1"],
-    "First Category": ["doc2"],
+    "Mainframe": ["introduction"],
+    "Quick Start": ["quick-start"],
     "Second Category": ["doc3"]
   },
   "docs-other": {
-    "First Category": ["doc4", "doc5"]
+    "API": ["doc4", "doc5"]
   }
 }
