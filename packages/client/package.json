@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@mainframe/rpc-ipc": "^0.2.3",
-    "graphql": "^0.13.2",
+    "graphql": "^14.1.0",
     "rxjs": "^6.3.3"
   },
   "devDependencies": {
