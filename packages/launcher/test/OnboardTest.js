@@ -1,8 +1,22 @@
 /*eslint-env mocha */
 
 const assert = require('assert')
-const { launcherTestId, onboardTestId, timeouts } = require('./config')
+const { timeouts } = require('./config')
+const { launcherTestId } = require('./LauncherTest')
 const { checkConsole, createVault, getApp, stopApp } = require('./utils')
+
+const configs = {
+  elements: {
+    onboard: '[data-testid="onboard-view"]',
+    vaultIdentity: '[data-testid="onboard-create-identity-input-name"]',
+    vaultIdentityValidation:
+      '[data-testid="onboard-create-identity-input-name-errorTestId"]',
+    vaultIdentityButton: '[data-testid="onboard-create-identity-button"]',
+  },
+  messages: {
+    noIdentity: 'Name is required.',
+  },
+}
 
 describe('Onboarding process', function() {
   this.timeout(timeouts.viewChange)
@@ -38,30 +52,30 @@ describe('Onboarding process', function() {
 
     it('"Name is required" warning', async function() {
       await this.app.client.waitForExist(
-        onboardTestId.elements.onboard,
+        configs.elements.onboard,
         timeouts.viewChange,
       )
       await this.app.client
-        .element(onboardTestId.elements.vaultIdentityButton)
+        .element(configs.elements.vaultIdentityButton)
         .click()
       assert.equal(
         await this.app.client
-          .element(onboardTestId.elements.vaultIdentityValidation)
+          .element(configs.elements.vaultIdentityValidation)
           .getText(),
-        onboardTestId.messages.noIdentity,
+        configs.messages.noIdentity,
       )
     })
 
     it('identity is saved correctly', async function() {
       await this.app.client.waitForExist(
-        onboardTestId.elements.onboard,
+        configs.elements.onboard,
         timeouts.viewChange,
       )
       await this.app.client
-        .element(onboardTestId.elements.vaultIdentity)
+        .element(configs.elements.vaultIdentity)
         .setValue('test-identity')
       await this.app.client
-        .element(onboardTestId.elements.vaultIdentityButton)
+        .element(configs.elements.vaultIdentityButton)
         .click()
       await this.app.client.waitForExist(
         launcherTestId.elements.launcher,

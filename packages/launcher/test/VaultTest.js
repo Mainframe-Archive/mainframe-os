@@ -8,7 +8,34 @@ const {
   getApp,
   stopApp,
 } = require('./utils')
-const { vaultTestId, timeouts } = require('./config')
+const { timeouts } = require('./config')
+
+const configs = {
+  elements: {
+    createVault: '[data-testid="create-vault-view"]',
+    unlockVault: '[data-testid="unlock-vault-view"]',
+    unlockPassword: '[data-testid="vault-manager-unlock-input"]',
+    unlockButton: '[data-testid="vault-manager-unlock-button"]',
+    unlockPasswordValidation:
+      '[data-testid="vault-manager-unlock-input-errorTestId"]',
+    unlockMessage: '[data-testid="vault-manager-unlock-input-messageTestId"]',
+    createVaultButton: '[data-testid="create-vault-submit-button"]',
+    createPasswordValidation:
+      '[data-testid="create-vault-input-password-errorTestId"]',
+    createPassword: '[data-testid="create-vault-input-password"]',
+    createConfirmPassword:
+      '[data-testid="create-vault-input-confirm-password"]',
+    createConfirmPasswordValidation:
+      '[data-testid="create-vault-input-confirm-password-errorTestId"]',
+  },
+  messages: {
+    invalidPassword:
+      'Failed to unlock vault, please check you entered the correct password.',
+    noPassword: 'Password is required.',
+    noMatch: 'Passwords do not match',
+    tooShort: 'Password must be at least 8 characters',
+  },
+}
 
 describe('Vault operations', function() {
   this.timeout(timeouts.viewChange)
@@ -60,15 +87,15 @@ describe('Vault operations', function() {
 
     it('"Password is required" warning', async function() {
       await this.app.client.waitForExist(
-        vaultTestId.elements.unlockVault,
+        configs.elements.unlockVault,
         timeouts.viewChange,
       )
-      await this.app.client.element(vaultTestId.elements.unlockButton).click()
+      await this.app.client.element(configs.elements.unlockButton).click()
       assert.equal(
         await this.app.client
-          .element(vaultTestId.elements.unlockPasswordValidation)
+          .element(configs.elements.unlockPasswordValidation)
           .getText(),
-        vaultTestId.messages.noPassword,
+        configs.messages.noPassword,
       )
     })
 
@@ -76,12 +103,12 @@ describe('Vault operations', function() {
       const unlocked = await unlockVault(this.app, 'badPassword', false)
       assert.equal(unlocked.unlocked, false)
       await this.app.client.waitForExist(
-        vaultTestId.elements.unlockMessage,
+        configs.elements.unlockMessage,
         timeouts.launch,
       )
       assert.equal(
-        await this.app.client.getText(vaultTestId.elements.unlockMessage),
-        vaultTestId.messages.invalidPassword,
+        await this.app.client.getText(configs.elements.unlockMessage),
+        configs.messages.invalidPassword,
       )
     })
 
@@ -111,58 +138,52 @@ describe('Vault operations', function() {
 
     it('no password', async function() {
       await this.app.client.waitForExist(
-        vaultTestId.elements.createVault,
+        configs.elements.createVault,
         timeouts.viewChange,
       )
-      await this.app.client
-        .element(vaultTestId.elements.createVaultButton)
-        .click()
+      await this.app.client.element(configs.elements.createVaultButton).click()
       assert.equal(
         await this.app.client
-          .element(vaultTestId.elements.createPasswordValidation)
+          .element(configs.elements.createPasswordValidation)
           .getText(),
-        vaultTestId.messages.noPassword,
+        configs.messages.noPassword,
       )
     })
 
     it('passwords do not match', async function() {
       await this.app.client.waitForExist(
-        vaultTestId.elements.createVault,
+        configs.elements.createVault,
         timeouts.viewChange,
       )
       await this.app.client
-        .element(vaultTestId.elements.createPassword)
+        .element(configs.elements.createPassword)
         .setValue('password')
       await this.app.client
-        .element(vaultTestId.elements.createConfirmPassword)
+        .element(configs.elements.createConfirmPassword)
         .setValue('different')
-      await this.app.client
-        .element(vaultTestId.elements.createVaultButton)
-        .click()
+      await this.app.client.element(configs.elements.createVaultButton).click()
       assert.equal(
         await this.app.client
-          .element(vaultTestId.elements.createConfirmPasswordValidation)
+          .element(configs.elements.createConfirmPasswordValidation)
           .getText(),
-        vaultTestId.messages.noMatch,
+        configs.messages.noMatch,
       )
     })
 
     it('password too short', async function() {
       await this.app.client.waitForExist(
-        vaultTestId.elements.createVault,
+        configs.elements.createVault,
         timeouts.viewChange,
       )
       await this.app.client
-        .element(vaultTestId.elements.createPassword)
+        .element(configs.elements.createPassword)
         .setValue('short')
-      await this.app.client
-        .element(vaultTestId.elements.createVaultButton)
-        .click()
+      await this.app.client.element(configs.elements.createVaultButton).click()
       assert.equal(
         await this.app.client
-          .element(vaultTestId.elements.createPasswordValidation)
+          .element(configs.elements.createPasswordValidation)
           .getText(),
-        vaultTestId.messages.tooShort,
+        configs.messages.tooShort,
       )
     })
 
