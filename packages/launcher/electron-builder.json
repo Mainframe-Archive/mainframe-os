@@ -1,12 +1,13 @@
 {
   "appId": "com.mainframe.launcher",
-  "productName": "Mainframe",
+  "productName": "MainframeOS",
   "artifactName": "${productName}.${ext}",
   "appImage": {
     "systemIntegration": "doNotAsk"
   },
   "mac": {
-    "target": ["dmg", "dir"]
+    "target": ["dmg", "dir"],
+    "icon": "./build/icon.png"
   },
   "linux": {
     "category": "Network",

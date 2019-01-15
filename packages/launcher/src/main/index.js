@@ -20,6 +20,7 @@ import createElectronTransport from './createElectronTransport'
 import createRPCChannels from './rpc/createChannels'
 
 const PORT = process.env.ELECTRON_WEBPACK_WDS_PORT || ''
+const binPath = './packages/daemon/bin/run'
 
 const envType =
   process.env.NODE_ENV === 'production' ? 'production' : 'development'
@@ -69,7 +70,6 @@ const launchApp = async (appSession: AppSession) => {
   const appID = appSession.app.appID
   const userID = appSession.user.id
   const appOpen = appContexts[appID] && appContexts[appID][userID]
-  const binPath = './packages/daemon/bin/run'
   if (appOpen) {
     const appWindow = appContexts[appID][userID].window
     if (appWindow.isMinimized()) {
@@ -78,13 +78,6 @@ const launchApp = async (appSession: AppSession) => {
     appWindow.show()
     appWindow.focus()
     return
-  }
-
-  if (isFirstAppLaunch()) {
-    setupDaemon(new DaemonConfig(process.env), {
-      binPath: binPath,
-      socketPath: undefined,
-    })
   }
 
   const appWindow = newWindow()
@@ -129,6 +122,12 @@ const launchApp = async (appSession: AppSession) => {
 
 // TODO: proper setup, this is just temporary logic to simplify development flow
 const setupClient = async () => {
+  if (isFirstAppLaunch()) {
+    await setupDaemon(new DaemonConfig(env), {
+      binPath: binPath,
+      socketPath: undefined,
+    })
+  }
   // /!\ Temporary only, should be handled by toolbox with installation flow
   if (daemonConfig.binPath == null) {
     daemonConfig.binPath = path.resolve(__dirname, '../../../daemon/bin/run')
