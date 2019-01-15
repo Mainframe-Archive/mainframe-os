@@ -7,9 +7,9 @@ import type { Environment } from '@mainframe/config'
 import type StreamRPC from '@mainframe/rpc-stream'
 import createWebSocketRPC from '@mainframe/rpc-ws-node'
 import { uniqueID, type ID } from '@mainframe/utils-id'
-import Web3HTTPProvider from 'web3-providers-http'
 
 import type { Vault, VaultRegistry } from '../vault'
+import EthHandler from './EthHandler'
 
 import type { NotifyFunc } from './handleClient'
 
@@ -49,7 +49,7 @@ export default class RequestContext {
   _rpc: ?StreamRPC
   _bzz: ?BzzAPI
   _pss: ?PssAPI
-  _web3HttpProvider: ?Web3HTTPProvider
+  _ethHandler: ?EthHandler
   _env: Environment
   _notify: NotifyFunc
   _socket: Socket
@@ -87,13 +87,11 @@ export default class RequestContext {
     return this._pss
   }
 
-  get web3Provider(): Web3HTTPProvider {
-    if (this._web3HttpProvider == null) {
-      this._web3HttpProvider = new Web3HTTPProvider(
-        this.openVault.settings.ethURL,
-      )
+  get eth(): EthHandler {
+    if (this._ethHandler == null) {
+      this._ethHandler = new EthHandler(this.openVault.settings.ethURL)
     }
-    return this._web3HttpProvider
+    return this._ethHandler
   }
 
   get env(): Environment {
@@ -125,7 +123,7 @@ export default class RequestContext {
     this._subscriptions = {}
     this._bzz = undefined
     this._pss = undefined
-    this._web3HttpProvider = undefined
+    this._ethHandler = undefined
     if (this._rpc != null) {
       this._rpc.disconnect()
     }

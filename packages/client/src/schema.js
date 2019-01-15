@@ -254,6 +254,13 @@ export const ETH_TRANSACTION_SCHEMA = {
   gasPrice: 'string',
 }
 
+export const ETH_REQUEST_SCHEMA = {
+  id: 'number',
+  jsonrpc: 'string',
+  method: 'string',
+  params: { type: 'array', items: 'any' },
+}
+
 export const WALLET_SIGN_ETH_TRANSACTION_SCHEMA = ETH_TRANSACTION_SCHEMA
 
 export const WALLET_SIGN_TRANSACTION_SCHEMA = {

@@ -250,10 +250,6 @@ export default class Vault {
     return app
   }
 
-  removeOwnApp(appID: ID) {
-    this.apps.removeOwn(appID)
-  }
-
   removeApp(appID: ID) {
     this.apps.remove(appID)
   }

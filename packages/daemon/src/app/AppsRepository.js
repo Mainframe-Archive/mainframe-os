@@ -1,12 +1,19 @@
 // @flow
 
-import { validateManifest, type ManifestData } from '@mainframe/app-manifest'
+import {
+  parseContentsURI,
+  validateManifest,
+  type ManifestData,
+} from '@mainframe/app-manifest'
+import type BzzAPI from '@erebos/api-bzz-node'
+import { ensureDir } from 'fs-extra'
 import {
   getRequirementsDifference,
   type PermissionKey,
   type PermissionGrant,
 } from '@mainframe/app-permissions'
 import { MFID } from '@mainframe/data-types'
+import { getAppContentsPath, type Environment } from '@mainframe/config'
 import { uniqueID, idType, type ID } from '@mainframe/utils-id'
 
 import { mapObject } from '../utils'
@@ -58,6 +65,39 @@ export type AppsRepositorySerialized = {
   apps: { [string]: AppSerialized },
   updates: { [string]: AppUpdateSerialized },
   ownApps: { [string]: OwnAppSerialized },
+}
+
+export const getContentsPath = (
+  env: Environment,
+  manifest: ManifestData,
+): string => {
+  return getAppContentsPath(env, manifest.id, manifest.version)
+}
+
+export const downloadAppContents = async (
+  bzz: BzzAPI,
+  app: App,
+  contentsPath: string,
+): Promise<App> => {
+  if (app.installationState !== 'ready') {
+    const contentsURI = parseContentsURI(app.manifest.contentsURI)
+    if (contentsURI.nid !== 'bzz' || contentsURI.nss == null) {
+      // Unsupported contentsURI
+      app.installationState = 'download_error'
+    } else {
+      try {
+        app.installationState = 'downloading'
+        await ensureDir(contentsPath)
+        // contentsURI.nss is expected to be the bzz hash
+        // TODO?: bzz hash validation?
+        await bzz.downloadDirectoryTo(contentsURI.nss, contentsPath)
+        app.installationState = 'ready'
+      } catch (err) {
+        app.installationState = 'download_error'
+      }
+    }
+  }
+  return app
 }
 
 export default class AppsRepository {
@@ -235,21 +275,18 @@ export default class AppsRepository {
     app.removeUser(userID)
   }
 
-  removeOwn(id: ID): void {
-    const app = this.getOwnByID(id)
-    if (app != null) {
-      delete this._byMFID[app.mfid]
-      delete this._ownApps[id]
-    }
-  }
-
   remove(id: ID): void {
     // TODO: support removing own apps - might be other method/flag to avoid accidents?
     const app = this.getByID(id)
     if (app != null) {
-      // TODO: handle "clean" option to remove the app contents
-      delete this._byMFID[app.manifest.id]
-      delete this._apps[id]
+      if (app instanceof OwnApp) {
+        delete this._byMFID[app.mfid]
+        delete this._ownApps[id]
+      } else {
+        // TODO: handle "clean" option to remove the app contents
+        delete this._byMFID[app.manifest.id]
+        delete this._apps[id]
+      }
     }
   }
 
