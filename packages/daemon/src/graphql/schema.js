@@ -530,6 +530,26 @@ const ethLedgerWalletType = new GraphQLObjectType({
   }),
 })
 
+const walletBalancesType = new GraphQLObjectType({
+  name: 'WalletBalancesType',
+  fields: () => ({
+    eth: {
+      type: new GraphQLNonNull(GraphQLString),
+      resolve: async (self, args, ctx) => {
+        const balance = await ctx.eth.getETHBalance(self)
+        return balance || 0
+      },
+    },
+    mft: {
+      type: new GraphQLNonNull(GraphQLString),
+      resolve: async (self, args, ctx) => {
+        const balance = await ctx.eth.getMFTBalance(self)
+        return balance || 0
+      },
+    },
+  }),
+})
+
 const namedWalletAccountType = new GraphQLObjectType({
   name: 'NamedWalletAccountType',
   fields: () => ({
@@ -539,6 +559,10 @@ const namedWalletAccountType = new GraphQLObjectType({
     },
     address: {
       type: new GraphQLNonNull(GraphQLString),
+      resolve: self => self.address,
+    },
+    balances: {
+      type: new GraphQLNonNull(walletBalancesType),
       resolve: self => self.address,
     },
   }),

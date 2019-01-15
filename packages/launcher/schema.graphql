@@ -248,6 +248,7 @@ type Mutation {
 type NamedWalletAccountType {
   name: String!
   address: String!
+  balances: WalletBalancesType!
 }
 
 """An object with an ID"""
@@ -329,6 +330,11 @@ type Viewer {
   apps: AppsQuery!
   identities: IdentitiesQuery!
   wallets: WalletsQuery!
+}
+
+type WalletBalancesType {
+  eth: String!
+  mft: String!
 }
 
 type WalletsQuery {
