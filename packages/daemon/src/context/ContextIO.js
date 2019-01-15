@@ -4,16 +4,16 @@ import BzzAPI from '@erebos/api-bzz-node'
 import PssAPI from '@erebos/api-pss'
 import type StreamRPC from '@mainframe/rpc-stream'
 import createWebSocketRPC from '@mainframe/rpc-ws-node'
-import Web3HTTPProvider from 'web3-providers-http'
 
-import ClientContext from './ClientContext'
+import type ClientContext from './ClientContext'
+import EthHandler from './EthHandler'
 
 export default class ContextIO {
   _context: ClientContext
   _rpc: ?StreamRPC
   _bzz: ?BzzAPI
   _pss: ?PssAPI
-  _web3HttpProvider: ?Web3HTTPProvider
+  _eth: ?EthHandler
 
   constructor(context: ClientContext) {
     this._context = context
@@ -40,13 +40,11 @@ export default class ContextIO {
     return this._pss
   }
 
-  get web3Provider(): Web3HTTPProvider {
-    if (this._web3HttpProvider == null) {
-      this._web3HttpProvider = new Web3HTTPProvider(
-        this._context.openVault.settings.ethURL,
-      )
+  get eth(): EthHandler {
+    if (this._ethHandler == null) {
+      this._ethHandler = new EthHandler(this._context.openVault.settings.ethURL)
     }
-    return this._web3HttpProvider
+    return this._ethHandler
   }
 
   clear() {

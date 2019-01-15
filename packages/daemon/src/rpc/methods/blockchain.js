@@ -11,13 +11,5 @@ export const web3Send = async (
   ctx: ClientContext,
   params: BlockchainWeb3SendParams,
 ): Promise<BlockchainWeb3SendResult> => {
-  return new Promise((resolve, reject) => {
-    ctx.io.web3Provider.send(params, (err, res) => {
-      if (err || res.error) {
-        reject(err || res.error)
-      } else {
-        resolve(res.result)
-      }
-    })
-  })
+  return ctx.io.eth.send(params)
 }

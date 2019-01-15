@@ -33,6 +33,7 @@ import {
 import type ClientContext from '../context/ClientContext'
 import LedgerWallet from '../wallet/LedgerWallet'
 import HDWallet from '../wallet/HDWallet'
+import { downloadAppContents, getContentsPath } from '../app/AppsRepository'
 
 import observableToAsyncIterator from './observableToAsyncIterator'
 
@@ -530,6 +531,26 @@ const ethLedgerWalletType = new GraphQLObjectType({
   }),
 })
 
+const walletBalancesType = new GraphQLObjectType({
+  name: 'WalletBalancesType',
+  fields: () => ({
+    eth: {
+      type: new GraphQLNonNull(GraphQLString),
+      resolve: async (self, args, ctx) => {
+        const balance = await ctx.io.eth.getETHBalance(self)
+        return balance || 0
+      },
+    },
+    mft: {
+      type: new GraphQLNonNull(GraphQLString),
+      resolve: async (self, args, ctx) => {
+        const balance = await ctx.io.eth.getMFTBalance(self)
+        return balance || 0
+      },
+    },
+  }),
+})
+
 const namedWalletAccountType = new GraphQLObjectType({
   name: 'NamedWalletAccountType',
   fields: () => ({
@@ -539,6 +560,10 @@ const namedWalletAccountType = new GraphQLObjectType({
     },
     address: {
       type: new GraphQLNonNull(GraphQLString),
+      resolve: self => self.address,
+    },
+    balances: {
+      type: new GraphQLNonNull(walletBalancesType),
       resolve: self => self.address,
     },
   }),
@@ -1027,7 +1052,13 @@ const appInstallMutation = mutationWithClientMutationId({
     { userID, manifest, permissionsSettings },
     ctx,
   ) => {
-    const app = ctx.openVault.installApp(manifest, userID, permissionsSettings)
+    const app = await ctx.openVault.installApp(
+      manifest,
+      userID,
+      permissionsSettings,
+    )
+    const contentsPath = getContentsPath(ctx.env, manifest)
+    await downloadAppContents(ctx.bzz, app, contentsPath)
     await ctx.openVault.save()
     return { app }
   },

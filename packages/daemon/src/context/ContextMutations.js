@@ -5,7 +5,7 @@ import { idType as fromClientID } from '@mainframe/utils-id'
 
 import type { OwnApp } from '../app'
 
-import ClientContext from './ClientContext'
+import type ClientContext from './ClientContext'
 
 export type MutationEventType =
   | 'own_app_created'
@@ -42,6 +42,7 @@ export default class ContextMutations {
       params.path,
       Buffer.from(params.password),
     )
+    await this._context.io.eth.setup()
     this._context.next({ type: 'vault_created' })
   }
 
@@ -51,6 +52,7 @@ export default class ContextMutations {
       params.path,
       Buffer.from(params.password),
     )
+    await this._context.io.eth.setup()
     this._context.next({ type: 'vault_opened' })
   }
 }

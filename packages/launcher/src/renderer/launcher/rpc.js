@@ -127,8 +127,11 @@ export default {
     return rpc.request('vault_open', { path, password })
   },
 
-  // Wallet
+  // Wallets & Blockchain
   getLedgerAccounts: (pageNum: number) => {
     return rpc.request('wallet_getLedgerAccounts', { pageNum })
+  },
+  ethereumRequest: (params: Object) => {
+    return rpc.request('blockchain_web3Send', params)
   },
 }

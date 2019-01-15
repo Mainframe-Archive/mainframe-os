@@ -2,7 +2,7 @@
 
 import { uniqueID, type ID } from '@mainframe/utils-id'
 
-import ClientContext from './ClientContext'
+import type ClientContext from './ClientContext'
 
 export class ContextSubscription<T = ?mixed> {
   _id: ID
