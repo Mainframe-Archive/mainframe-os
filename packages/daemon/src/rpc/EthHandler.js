@@ -18,21 +18,11 @@ export const NETWORKS = {
   '42': 'kovan',
 }
 
-const requestID = () => Math.floor(Math.random() * 10000 + 1)
-
-const generateReq = (method: string, params: Array<any>) => {
-  return {
-    id: requestID(),
-    jsonrpc: '2.0',
-    method: method,
-    params: params,
-  }
-}
-
 export default class EthHandler {
   _web3HttpProvider: ?Web3HTTPProvider
   _network: ?string
   _ethURL: string
+  _requestCount: number = 0
 
   constructor(ethURL: string) {
     this._ethURL = ethURL
@@ -61,6 +51,16 @@ export default class EthHandler {
 
   // Requests
 
+  createRequest(method: string, params: Array<any>) {
+    this._requestCount += 1
+    return {
+      id: this._requestCount,
+      jsonrpc: '2.0',
+      method: method,
+      params: params,
+    }
+  }
+
   async send(params: Object): Promise<any> {
     return new Promise((resolve, reject) => {
       this.web3Provider.send(params, (err, res) => {
@@ -74,7 +74,7 @@ export default class EthHandler {
   }
 
   async getNetworkID() {
-    const req = generateReq('net_version', [])
+    const req = this.createRequest('net_version', [])
     const res = await this.send(req)
     return NETWORKS[res]
   }
@@ -85,7 +85,7 @@ export default class EthHandler {
   ): Promise<Object> {
     const contract = new Web3Contract(ABI.ERC20, tokenAddress)
     const data = contract.methods.balanceOf(accountAddress).encodeABI()
-    const mftBalanceReq = generateReq('eth_call', [
+    const mftBalanceReq = this.createRequest('eth_call', [
       { data, to: tokenAddress },
       'latest',
     ])
@@ -102,7 +102,10 @@ export default class EthHandler {
   }
 
   async getETHBalance(address: string) {
-    const ethBalanceReq = generateReq('eth_getBalance', [address, 'latest'])
+    const ethBalanceReq = this.createRequest('eth_getBalance', [
+      address,
+      'latest',
+    ])
     const res = await this.send(ethBalanceReq)
     return web3Utils.fromWei(res, 'ether')
   }
