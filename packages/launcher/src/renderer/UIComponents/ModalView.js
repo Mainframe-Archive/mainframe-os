@@ -9,6 +9,7 @@ import colors from '../colors'
 type Props = {
   onRequestClose?: () => void,
   children?: ?Node,
+  testID?: ?String,
 }
 
 export default class ModalView extends Component<Props> {
@@ -18,7 +19,11 @@ export default class ModalView extends Component<Props> {
         isOpen={true}
         onRequestClose={this.props.onRequestClose}
         {...this.props}>
-        <View style={styles.container}>{this.props.children}</View>
+        <View
+          testID={this.props.testID ? this.props.testID : {}}
+          style={styles.container}>
+          {this.props.children}
+        </View>
       </ReactModal>
     )
   }

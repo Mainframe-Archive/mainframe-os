@@ -84,7 +84,7 @@ export default class AppItem extends Component<Props, State> {
   render() {
     const { app, isOwn, onOpenApp } = this.props
     const open = () => onOpenApp(app, !!isOwn)
-    const testID = isOwn ? 'own-app-item' : 'installed-app-item'
+    const testID = (isOwn ? 'own-app-' : 'installed-app-') + app.name
     // $FlowFixMe: app type
     const devName = isOwn ? app.developer.name : app.manifest.author.name
     return (

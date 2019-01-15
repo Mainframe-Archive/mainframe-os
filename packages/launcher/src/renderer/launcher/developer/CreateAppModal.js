@@ -420,7 +420,10 @@ export default class CreateAppModal extends Component<Props, State> {
 
   render() {
     return (
-      <ModalView isOpen={true} onRequestClose={this.props.onRequestClose}>
+      <ModalView
+        isOpen={true}
+        onRequestClose={this.props.onRequestClose}
+        testID={'app-create-modal'}>
         {this.renderContent()}
         {this.renderError()}
       </ModalView>

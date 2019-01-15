@@ -188,7 +188,7 @@ class IdentitySelectorView extends Component<Props, State> {
             onPress={this.onPressCreateId}
             title="Create"
             disabled={!this.state.newName}
-            testID="create-identity-button-submit"
+            testID="create-identity-submit-button"
           />
         </View>
       </View>

@@ -10,7 +10,7 @@ const { checkConsole, createVault } = require('./utils')
 describe('Onboarding process', function() {
   this.timeout(timeouts.viewChange)
 
-  before(async function() {
+  before(function() {
     const launcherPath =
       os.platform() === 'darwin'
         ? 'dist/mac/Mainframe.app/Contents/MacOS/Mainframe'
@@ -29,7 +29,7 @@ describe('Onboarding process', function() {
     return this.app.start()
   })
 
-  after(async function() {
+  after(function() {
     // stopDaemon(new DaemonConfig(Environment))
     // await Environment.destroy('vaultTest')
     if (this.app && this.app.isRunning()) {

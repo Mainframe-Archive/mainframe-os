@@ -34,8 +34,48 @@ const vaultTestId = {
 const launcherTestId = {
   elements: {
     launcher: '[data-testid="launcher-view"]',
-    identitiesNavButton: '[data-testid="nav-button-Identities"]',
-    testIdentity: '[data-testid="identity-name-test-identity"]',
+    navigation: {
+      applicationsNavButton: '[data-testid="nav-button-Applications"]',
+      identitiesNavButton: '[data-testid="nav-button-Identities"]',
+      walletsNavButton: '[data-testid="nav-button-Wallets"]',
+    },
+    applications: {
+      createAppButton: '[data-testid="launcher-create-app-button"]',
+      installAppButton: '[data-testid="launcher-install-app-button"]',
+      appCreateModal: '[data-testid="app-create-modal"]',
+      createdAppItem: '[data-testid="own-app-test-app"]',
+      installedAppItem: '[data-testid="installed-app-manifest-test"]',
+      testIdentity: '[data-testid="identity-selector-select-test-identity"]',
+      creation: {
+        first: {
+          appName: '[data-testid="create-app-name-input"]',
+          appVersion: '[data-testid="create-app-version-input"]',
+          appPath: '[id="app-contents-file-selector"]',
+          confirm: '[data-testid="create-app-set-info-button"]',
+        },
+        second: {
+          identityInput: '[data-testid="create-identity-input-name"]',
+          confirm: '[data-testid="create-identity-submit-button"]',
+          devIdentitySelect: '[data-testid="identity-selector-select-dev"]',
+        },
+        third: {
+          confirm: '[data-testid="set-permission-requirements"]',
+        },
+        final: {
+          confirm: '[data-testid="create-app-complete-button"]',
+        },
+      },
+      installation: {
+        appPath: '[id="installer-file-selector"]',
+        identityInput: '[data-testid="create-identity-input-name"]',
+        createIdentity: '[data-testid="create-identity-submit-button"]',
+        testerIdentitySelect: '[data-testid="identity-selector-select-tester"]',
+      },
+    },
+    identities: {
+      testIdentity: '[data-testid="identity-name-test-identity"]',
+    },
+    wallets: {},
   },
 }
 
