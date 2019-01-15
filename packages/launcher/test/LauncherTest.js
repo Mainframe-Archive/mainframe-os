@@ -2,11 +2,9 @@
 
 const assert = require('assert')
 const path = require('path')
-const os = require('os')
-const Application = require('spectron').Application
 const BzzAPI = require('@erebos/api-bzz-node').default
 const { launcherTestId, timeouts } = require('./config')
-const { unlockVault } = require('./utils')
+const { unlockVault, getApp, stopApp } = require('./utils')
 
 const getFixture = fixture => path.join(__dirname, '../../../fixtures', fixture)
 
@@ -14,13 +12,7 @@ describe('Launcher testing', function() {
   this.timeout(timeouts.viewChange)
 
   before(function() {
-    const launcherPath =
-      os.platform() === 'darwin'
-        ? 'dist/mac/Mainframe.app/Contents/MacOS/Mainframe'
-        : 'dist/linux-unpacked/mainframe'
-    this.app = new Application({
-      path: path.join(__dirname, '..', launcherPath),
-    })
+    return getApp(this)
     // const daemonPath = path.join(__dirname, '..', '..', 'daemon/bin/run')
     // await Environment.create('vaultTest', 'testing', true)
     // const cfg = new DaemonConfig(Environment)
@@ -29,15 +21,12 @@ describe('Launcher testing', function() {
     //   socketPath: undefined,
     // })
     // startDaemon(cfg, true)
-    return this.app.start()
   })
 
   after(function() {
     // stopDaemon(new DaemonConfig(Environment))
     // await Environment.destroy('vaultTest')
-    if (this.app && this.app.isRunning()) {
-      return this.app.stop()
-    }
+    stopApp(this.app)
   })
 
   beforeEach(async function() {

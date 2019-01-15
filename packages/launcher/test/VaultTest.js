@@ -1,23 +1,19 @@
 /*eslint-env mocha */
 
 const assert = require('assert')
-const path = require('path')
-const os = require('os')
-const Application = require('spectron').Application
-const { checkConsole, unlockVault, createVault } = require('./utils')
+const {
+  checkConsole,
+  unlockVault,
+  createVault,
+  getApp,
+  stopApp,
+} = require('./utils')
 const { vaultTestId, timeouts } = require('./config')
 
 describe('Vault operations', function() {
   this.timeout(timeouts.viewChange)
   before(function() {
-    const binPath =
-      os.platform() === 'darwin'
-        ? 'dist/mac/Mainframe.app/Contents/MacOS/Mainframe'
-        : 'dist/linux-unpacked/mainframe'
-    this.app = new Application({
-      path: path.join(__dirname, '..', binPath),
-    })
-    return this.app.start()
+    return getApp(this)
     // const { Environment } = await import('../../config/src/Environment')
     // const {
     //   setupDaemon,
@@ -41,9 +37,7 @@ describe('Vault operations', function() {
   // })
 
   after(function() {
-    if (this.app && this.app.isRunning()) {
-      return this.app.stop()
-    }
+    stopApp(this.app)
     // const {
     //   stopDaemon,
     // } = await import('../../toolbox/src/daemon')
@@ -60,8 +54,8 @@ describe('Vault operations', function() {
 
     it('no browser warnings/errors after launch', async function() {
       const logs = await checkConsole(this.app, 'browser')
-      assert.equal(logs.warnings, 0, 'There are ' + logs.warnings + ' warnings')
-      assert.equal(logs.errors, 0, 'There are ' + logs.errors + ' errors')
+      assert.equal(logs.warnings.length, 0, logs.warnings.warnings)
+      assert.equal(logs.errors.length, 0, logs.errors.errors)
     })
 
     it('"Password is required" warning', async function() {
@@ -98,8 +92,8 @@ describe('Vault operations', function() {
 
     it('no browser warnings/errors after unlocking', async function() {
       const logs = await checkConsole(this.app, 'browser')
-      assert.equal(logs.warnings, 0, 'There are ' + logs.warnings + ' warnings')
-      assert.equal(logs.errors, 0, 'There are ' + logs.errors + ' errors')
+      assert.equal(logs.warnings.length, 0, logs.warnings.warnings)
+      assert.equal(logs.errors.length, 0, logs.errors.errors)
     })
   })
 
@@ -111,8 +105,8 @@ describe('Vault operations', function() {
 
     it('no browser warnings/errors after launch', async function() {
       const logs = await checkConsole(this.app, 'browser')
-      assert.equal(logs.warnings, 0, 'There are ' + logs.warnings + ' warnings')
-      assert.equal(logs.errors, 0, 'There are ' + logs.errors + ' errors')
+      assert.equal(logs.warnings.length, 0, logs.warnings.warnings)
+      assert.equal(logs.errors.length, 0, logs.errors.errors)
     })
 
     it('no password', async function() {
@@ -179,8 +173,8 @@ describe('Vault operations', function() {
 
     it('no browser warnings/errors after creating vault', async function() {
       const logs = await checkConsole(this.app, 'browser')
-      assert.equal(logs.warnings, 0, 'There are ' + logs.warnings + ' warnings')
-      assert.equal(logs.errors, 0, 'There are ' + logs.errors + ' errors')
+      assert.equal(logs.warnings.length, 0, logs.warnings.warnings)
+      assert.equal(logs.errors.length, 0, logs.errors.errors)
     })
   })
 })

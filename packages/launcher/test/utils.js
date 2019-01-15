@@ -1,3 +1,6 @@
+const path = require('path')
+const os = require('os')
+const Application = require('spectron').Application
 const {
   vaultTestId,
   launcherTestId,
@@ -5,21 +8,38 @@ const {
   timeouts,
 } = require('./config')
 
+const getApp = test => {
+  const binPath =
+    os.platform() === 'darwin'
+      ? 'dist/mac/Mainframe.app/Contents/MacOS/Mainframe'
+      : 'dist/linux-unpacked/mainframe'
+  test.app = new Application({
+    path: path.join(__dirname, '..', binPath),
+  })
+  return test.app.start()
+}
+
+const stopApp = app => {
+  if (app && app.isRunning()) {
+    return app.stop()
+  }
+}
+
 const clearConsole = app => {
-  app.client.log('browser') //
+  app.client.log('browser') // When you request the log, it clears all the logs
 }
 
 const checkConsole = (app, logType = 'browser') => {
-  let warnings = 0,
-    errors = 0
+  const warnings = [],
+    errors = []
   return app.client.log(logType).then(logs => {
     logs.value.forEach(log => {
       switch (log.level) {
         case 'SEVERE':
-          errors++
+          errors.push(log.message)
           break
         case 'WARNING':
-          warnings++
+          warnings.push(log.message)
           break
         default:
           break
@@ -29,6 +49,13 @@ const checkConsole = (app, logType = 'browser') => {
   })
 }
 
+/**
+ * This function does the unlock process in mainframe launcher
+ * @param app
+ * @param password
+ * @param waitForLauncher Used for skipping 15 seconds waiting to unlock the vault. Can be set to false if you know you are sending bad password.
+ * @returns {Promise<*>}
+ */
 const unlockVault = async function(app, password, waitForLauncher = true) {
   try {
     await app.client.waitForExist(
@@ -39,6 +66,7 @@ const unlockVault = async function(app, password, waitForLauncher = true) {
       .element(vaultTestId.elements.unlockPassword)
       .setValue(password)
     await app.client.element(vaultTestId.elements.unlockButton).click()
+    // Sometimes we don't want to wait for the launcher because we already know that it will fail
     if (waitForLauncher) {
       await app.client.waitForExist(
         launcherTestId.elements.launcher,
@@ -49,9 +77,15 @@ const unlockVault = async function(app, password, waitForLauncher = true) {
   } catch (err) {
     return { unlocked: false, error: err }
   }
-  return { unlocked: false, error: 'Vault was not unlocked correctly' }
+  return { unlocked: false, error: 'Vault was probably not unlocked' }
 }
 
+/**
+ * This function goes through the vault creation process
+ * @param app
+ * @param password
+ * @returns {Promise<*>}
+ */
 const createVault = async function(app, password) {
   await app.client.waitForExist(
     vaultTestId.elements.createVault,
@@ -76,6 +110,8 @@ const createVault = async function(app, password) {
 }
 
 module.exports = {
+  getApp: getApp,
+  stopApp: stopApp,
   checkConsole: checkConsole,
   clearConsole: clearConsole,
   unlockVault: unlockVault,

@@ -1,23 +1,14 @@
 /*eslint-env mocha */
 
 const assert = require('assert')
-const path = require('path')
-const os = require('os')
-const Application = require('spectron').Application
 const { launcherTestId, onboardTestId, timeouts } = require('./config')
-const { checkConsole, createVault } = require('./utils')
+const { checkConsole, createVault, getApp, stopApp } = require('./utils')
 
 describe('Onboarding process', function() {
   this.timeout(timeouts.viewChange)
 
   before(function() {
-    const launcherPath =
-      os.platform() === 'darwin'
-        ? 'dist/mac/Mainframe.app/Contents/MacOS/Mainframe'
-        : 'dist/linux-unpacked/mainframe'
-    this.app = new Application({
-      path: path.join(__dirname, '..', launcherPath),
-    })
+    return getApp(this)
     // const daemonPath = path.join(__dirname, '..', '..', 'daemon/bin/run')
     // await Environment.create('vaultTest', 'testing', true)
     // const cfg = new DaemonConfig(Environment)
@@ -26,15 +17,12 @@ describe('Onboarding process', function() {
     //   socketPath: undefined,
     // })
     // startDaemon(cfg, true)
-    return this.app.start()
   })
 
   after(function() {
     // stopDaemon(new DaemonConfig(Environment))
     // await Environment.destroy('vaultTest')
-    if (this.app && this.app.isRunning()) {
-      return this.app.stop()
-    }
+    stopApp(this.app)
   })
   describe('Creating identity', function() {
     it('vault created correctly before onboarding process', async function() {
@@ -44,8 +32,8 @@ describe('Onboarding process', function() {
 
     it('no browser warnings/errors before onboarding', async function() {
       const logs = await checkConsole(this.app, 'browser')
-      assert.equal(logs.warnings, 0, 'There are ' + logs.warnings + ' warnings')
-      assert.equal(logs.errors, 0, 'There are ' + logs.errors + ' errors')
+      assert.equal(logs.warnings.length, 0, logs.warnings.warnings)
+      assert.equal(logs.errors.length, 0, logs.errors.errors)
     })
 
     it('"Name is required" warning', async function() {
@@ -93,8 +81,8 @@ describe('Onboarding process', function() {
 
     it('no browser warnings/errors after onboarding', async function() {
       const logs = await checkConsole(this.app, 'browser')
-      assert.equal(logs.warnings, 0, 'There are ' + logs.warnings + ' warnings')
-      assert.equal(logs.errors, 0, 'There are ' + logs.errors + ' errors')
+      assert.equal(logs.warnings.length, 0, logs.warnings.warnings)
+      assert.equal(logs.errors.length, 0, logs.errors.errors)
     })
   })
 })
