@@ -5,7 +5,7 @@ import crypto from 'crypto'
 import * as path from 'path'
 import keytar from 'keytar'
 import keythereum from 'keythereum'
-import fs from 'fs-extra'
+import * as fs from 'fs-extra'
 
 export type KeyObject = {
   address: string,
@@ -92,7 +92,7 @@ export const getPrivateKey = async (
 export const listKeyStores = async (): Promise<KeyObject[]> => {
   fs.ensureDir(datadir)
   let i = 0
-  let keyObjects
+  let keyObjects = []
   const keystores = await fs.readdir(keystorePath)
   if (keystores.length >= 1) {
     keyObjects = []
