@@ -13,8 +13,9 @@ import PeerUserIdentity, {
   type PeerUserProfile,
   type Feeds,
 } from '../identity/PeerUserIdentity'
+import Contact from '../identity/Contact'
 import type RequestContext from '../rpc/RequestContext'
-import { type bzzHash } from '../swarm/feed.js'
+import { type bzzHash } from '../swarm/feed'
 
 export const createDeveloper = async (
   ctx: RequestContext,
@@ -69,6 +70,19 @@ export const addPeer = async (
   )
   await ctx.openVault.save()
   return peer
+}
+
+export const createContactFromPeer = async (
+  ctx: RequestContext,
+  userID: ID,
+  peerID: ID,
+): Promise<Contact> => {
+  const contact = ctx.openVault.identities.createContactFromPeer(userID, peerID)
+  await ctx.openVault.save()
+
+  // TODO: Publish feeds
+
+  return contact
 }
 
 export const deleteContact = async (

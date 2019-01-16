@@ -29,7 +29,7 @@ import PeerUserIdentity, {
   type PeerUserProfile,
   type Feeds,
 } from './PeerUserIdentity'
-import Contact, { type ContactParams, type ContactSerialized } from './Contact'
+import Contact, { type ContactSerialized } from './Contact'
 
 type PeerIdentitiesRepositoryGroupSerialized = {
   apps?: { [id: string]: AppIdentitySerialized },
@@ -460,21 +460,25 @@ export default class IdentitiesRepository {
     return peer
   }
 
-  createContactFromPeer(ownUserId: ID, contactParams: ContactParams): Contact {
-    if (!this.getPeerUser(idType(contactParams.peerID))) {
+  createContactFromPeer(ownUserId: ID, peerID: ID): Contact {
+    const peer = this.getPeerUser(idType(peerID))
+    if (!peer) {
       throw new Error('Peer not found')
     }
     if (this._identities.contacts[ownUserId]) {
       const contacts: Array<Contact> = Object.keys(
         this._identities.contacts[ownUserId],
       ).map(id => this._identities.contacts[ownUserId][id])
-      const existing = contacts.find(c => c.peerID === contactParams.peerID)
+      const existing = contacts.find(c => c.peerID === peerID)
       if (existing) {
         return existing
       }
     }
     const cid = uniqueID()
-    const contact = new Contact(contactParams)
+    const contact = Contact.create(peerID, {
+      name: peer.profile.name,
+      avatar: peer.profile.avatar,
+    })
     if (this._identities.contacts[ownUserId]) {
       this._identities.contacts[ownUserId][cid] = contact
     } else {

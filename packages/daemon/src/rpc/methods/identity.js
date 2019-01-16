@@ -6,6 +6,8 @@ import {
   type IdentityAddPeerParams,
   type IdentityAddPeerResult,
   type IdentityAddPeerByFeedParams,
+  type IdentityCreateContactFromPeerParams,
+  type IdentityCreateContactResult,
   type IdentityCreateDeveloperParams,
   type IdentityCreateUserParams,
   type IdentityCreateResult,
@@ -19,6 +21,7 @@ import {
   type IdentityUnlinkEthWalletAccountParams,
   IDENTITY_ADD_PEER_SCHEMA,
   IDENTITY_ADD_PEER_BY_FEED_SCHEMA,
+  IDENTITY_CREATE_CONTACT_FROM_PEER_SCHEMA,
   IDENTITY_CREATE_OWN_USER_SCHEMA,
   IDENTITY_CREATE_OWN_DEVELOPER_SCHEMA,
   IDENTITY_DELETE_CONTACT_SCHEMA,
@@ -166,6 +169,21 @@ export const getPeers = (ctx: RequestContext): IdentityGetPeersResult => {
     }
   })
   return { peers }
+}
+
+export const createContactFromPeer = {
+  params: IDENTITY_CREATE_CONTACT_FROM_PEER_SCHEMA,
+  handler: async (
+    ctx: RequestContext,
+    params: IdentityCreateContactFromPeerParams,
+  ): Promise<IdentityCreateContactResult> => {
+    await mutation.createContactFromPeer(
+      ctx,
+      fromClientID(params.userID),
+      fromClientID(params.peerID),
+    )
+    return { id: toClientID(params.peerID) }
+  },
 }
 
 export const deleteContact = {

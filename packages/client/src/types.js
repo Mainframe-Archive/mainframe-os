@@ -264,6 +264,11 @@ export type IdentityCreateContactParams = {
   },
 }
 
+export type IdentityCreateContactFromPeerParams = {
+  userID: string,
+  peerID: string,
+}
+
 export type IdentityCreateContactResult = { id: ID }
 
 export type IdentityGetOwnDevelopersResult = {
@@ -291,7 +296,7 @@ export type ContactResult = {
   id: string,
   name?: ?string,
   avatar?: ?string,
-  connection: 'sent' | 'connected',
+  connection: 'connected' | 'sent' | 'sending',
 }
 
 export type IdentityGetUserContactsResult = {

@@ -5,6 +5,8 @@ import type {
   IdentityAddPeerByFeedParams,
   IdentityAddPeerParams,
   IdentityAddPeerResult,
+  IdentityCreateContactFromPeerParams,
+  IdentityCreateContactResult,
   IdentityCreateDeveloperParams,
   IdentityCreateUserParams,
   IdentityCreateResult,
@@ -51,6 +53,12 @@ export default class IdentityAPIs extends ClientAPIs {
 
   getPeers(): Promise<IdentityGetPeersResult> {
     return this._rpc.request('identity_getPeers')
+  }
+
+  createContactFromPeer(
+    params: IdentityCreateContactFromPeerParams,
+  ): Promise<IdentityCreateContactResult> {
+    return this._rpc.request('identity_createContactFromPeer', params)
   }
 
   deleteContact(params: IdentityDeleteContactParams): Promise<void> {
