@@ -474,17 +474,16 @@ export default class IdentitiesRepository {
         return existing
       }
     }
-    const cid = uniqueID()
     const contact = Contact.create(peerID, {
       name: peer.profile.name,
       avatar: peer.profile.avatar,
     })
     if (this._identities.contacts[ownUserId]) {
-      this._identities.contacts[ownUserId][cid] = contact
+      this._identities.contacts[ownUserId][contact.localID] = contact
     } else {
-      this._identities.contacts[ownUserId] = { [String(cid)]: contact }
+      this._identities.contacts[ownUserId] = { [contact.localID]: contact }
     }
-    this._userByContact[cid] = ownUserId
+    this._userByContact[contact.localID] = ownUserId
     return contact
   }
 

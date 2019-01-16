@@ -1,6 +1,8 @@
 // @flow
 
-import { OwnFeed, randomTopic, type OwnFeedSerialized } from '../swarm/feed.js'
+import { uniqueID } from '@mainframe/utils-id'
+
+import { OwnFeed, randomTopic, type OwnFeedSerialized } from '../swarm/feed'
 
 export type ContactProfile = {
   aliasName?: ?string,
@@ -10,6 +12,7 @@ export type ContactProfile = {
 }
 
 export type ContactSerialized = {
+  localID: string,
   peerID: string,
   profile: ContactProfile,
   ownFeed: OwnFeedSerialized,
@@ -24,8 +27,10 @@ export default class Contact {
     peerID: string,
     profile: ContactProfile,
     contactFeed?: ?string,
+    localID?: string,
   ): Contact => {
     return new Contact(
+      localID || uniqueID(),
       peerID,
       profile,
       OwnFeed.create(undefined, randomTopic()),
@@ -36,6 +41,7 @@ export default class Contact {
 
   static fromJSON = (contactSerialized: ContactSerialized): Contact =>
     new Contact(
+      contactSerialized.localID,
       contactSerialized.peerID,
       contactSerialized.profile,
       OwnFeed.fromJSON(contactSerialized.ownFeed),
@@ -44,6 +50,7 @@ export default class Contact {
     )
 
   static toJSON = (contact: Contact): ContactSerialized => ({
+    localID: contact.localID,
     peerID: contact.peerID,
     profile: contact.profile,
     ownFeed: OwnFeed.toJSON(contact.ownFeed),
@@ -51,6 +58,7 @@ export default class Contact {
     contactFeed: contact.contactFeed,
   })
 
+  _localID: string
   _peerID: string
   _ownFeed: OwnFeed
   _requestSent: boolean
@@ -63,17 +71,23 @@ export default class Contact {
   }
 
   constructor(
+    localID: string,
     peerID: string,
     profile: ContactProfile,
     ownFeed: OwnFeed,
     requestSent?: boolean,
     contactFeed?: ?string,
   ) {
+    this._localID = localID
     this._peerID = peerID
     this._profile = profile
     this._ownFeed = ownFeed
     this._requestSent = !!requestSent
     this._contactFeed = contactFeed
+  }
+
+  get localID(): string {
+    return this.localID
   }
 
   get peerID(): string {

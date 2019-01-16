@@ -6,13 +6,13 @@ import { uniqueID } from '@mainframe/utils-id'
 import multibase from 'multibase'
 import { type hexValue } from '@erebos/hex'
 
-import { OwnFeed, type OwnFeedSerialized } from '../swarm/feed.js'
+import { OwnFeed, type OwnFeedSerialized } from '../swarm/feed'
 import OwnIdentity, {
   parseKeyPair,
   serializeKeyPair,
   type KeyPairSerialized,
 } from './OwnIdentity'
-import { type PeerUserProfile } from './PeerUserIdentity.js'
+import { type PeerUserProfile } from './PeerUserIdentity'
 
 export type OwnUserProfile = {
   name: string,
