@@ -63,7 +63,6 @@
     "fs-extra": "^7.0.1",
     "graphql": "^0.13.2",
     "graphql-relay": "^0.5.5",
-    "keythereum": "^1.0.4",
     "multibase": "^0.6.0",
     "oboe": "^2.1.4",
     "rxjs": "^6.3.3",
