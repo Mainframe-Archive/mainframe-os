@@ -14,8 +14,7 @@
     "@mainframe/config": "*",
     "execa": "^1.0.0",
     "fs-extra": "^7.0.0",
-    "keytar": "^4.3.0",
-    "keythereum": "^1.0.4"
+    "keytar": "^4.3.0"
   },
   "devDependencies": {
     "flow-bin": "^0.87.0"
