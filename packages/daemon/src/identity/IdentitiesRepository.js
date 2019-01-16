@@ -4,6 +4,8 @@ import { MFID } from '@mainframe/data-types'
 import type { KeyPair } from '@mainframe/utils-crypto'
 // eslint-disable-next-line import/named
 import { uniqueID, idType, type ID } from '@mainframe/utils-id'
+import multibase from 'multibase'
+import { type hexValue } from '@erebos/hex'
 
 import { mapObject } from '../utils'
 
@@ -20,10 +22,11 @@ import OwnDeveloperIdentity, {
 } from './OwnDeveloperIdentity'
 import OwnUserIdentity, {
   type OwnUserIdentitySerialized,
+  type OwnUserProfile,
 } from './OwnUserIdentity'
 import PeerUserIdentity, {
   type PeerUserIdentitySerialized,
-  type ProfileData,
+  type PeerUserProfile,
   type Feeds,
 } from './PeerUserIdentity'
 import Contact, { type ContactParams, type ContactSerialized } from './Contact'
@@ -407,7 +410,7 @@ export default class IdentitiesRepository {
     else throw new Error('Error creating developer')
   }
 
-  createOwnUser(profile: Object = {}, keyPair?: KeyPair): OwnUserIdentity {
+  createOwnUser(profile: OwnUserProfile, keyPair?: KeyPair): OwnUserIdentity {
     const id = this.addIdentity(OwnUserIdentity.create(profile, keyPair))
     const user = this.getOwnUser(id)
     if (user) return user
@@ -423,24 +426,38 @@ export default class IdentitiesRepository {
   }
 
   createPeerUser(
-    mfid: string,
-    profile: ProfileData,
+    publicKey: string,
+    profile: PeerUserProfile,
     publicFeed: string,
-    otherFeeds?: Feeds,
-  ): ID {
+    firstContactAddress: hexValue,
+    feeds?: Feeds,
+  ): PeerUserIdentity {
     if (this._mfidByFeed[publicFeed]) {
-      return this._byMFID[this._mfidByFeed[publicFeed]]
+      const id = this._byMFID[this._mfidByFeed[publicFeed]]
+      const identity = this.getIdentity(id)
+      if (!(identity instanceof PeerUserIdentity)) {
+        throw new Error(
+          'Error adding peer - identity already exists with publicFeed',
+        )
+      }
+      return identity
     }
-    const peer = new PeerUserIdentity({
-      localID: uniqueID(),
-      id: mfid,
-      profile,
-      publicFeed,
-      otherFeeds,
-    })
-    const localID = this.addIdentity(peer)
-    this._mfidByFeed[publicFeed] = peer.id
-    return localID
+    const keyBuffer = multibase.decode(publicKey)
+    const id = this.addIdentity(
+      new PeerUserIdentity(
+        uniqueID(),
+        keyBuffer,
+        profile,
+        publicFeed,
+        firstContactAddress,
+        feeds,
+      ),
+    )
+    const peer = this.getPeerUser(id)
+    if (!peer) throw new Error('Error adding peer')
+
+    this._mfidByFeed[String(publicFeed)] = peer.id
+    return peer
   }
 
   createContactFromPeer(ownUserId: ID, contactParams: ContactParams): Contact {

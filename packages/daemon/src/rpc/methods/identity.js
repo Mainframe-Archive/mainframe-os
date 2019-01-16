@@ -28,8 +28,10 @@ import {
   /* eslint-enable import/named */
 } from '@mainframe/client'
 import { idType as fromClientID } from '@mainframe/utils-id'
+import { hexValueType } from '@erebos/hex'
 
 import type ClientContext from '../../context/ClientContext'
+import * as mutation from '../../store/mutation'
 
 export const createDeveloper = {
   params: IDENTITY_CREATE_OWN_DEVELOPER_SCHEMA,
@@ -37,8 +39,7 @@ export const createDeveloper = {
     ctx: ClientContext,
     params: IdentityCreateDeveloperParams,
   ): Promise<IdentityCreateResult> => {
-    const dev = ctx.openVault.identities.createOwnDeveloper(params.profile)
-    await ctx.openVault.save()
+    const dev = await mutation.createDeveloper(ctx, params.profile)
     return { id: toClientID(dev.localID) }
   },
 }
@@ -49,8 +50,7 @@ export const createUser = {
     ctx: ClientContext,
     params: IdentityCreateUserParams,
   ): Promise<IdentityCreateResult> => {
-    const user = ctx.openVault.identities.createOwnUser(params.profile)
-    await ctx.openVault.save()
+    const user = await mutation.createUser(ctx, params.profile)
     return { id: toClientID(user.localID) }
   },
 }
@@ -80,6 +80,7 @@ export const getOwnUsers = (ctx: ClientContext): IdentityGetOwnUsersResult => {
       id: ownUsers[id].id,
       localID: id,
       profile: ownUsers[id].profile,
+      feedHash: ownUsers[id].publicFeed.feedHash,
       ethWallets: wallets,
     }
   })
@@ -125,11 +126,11 @@ export const unlinkEthWallet = {
 export const addPeerByFeed = {
   params: IDENTITY_ADD_PEER_BY_FEED_SCHEMA,
   handler: async (
-    _ctx: ClientContext,
-    _params: IdentityAddPeerByFeedParams,
+    ctx: ClientContext,
+    params: IdentityAddPeerByFeedParams,
   ): Promise<IdentityAddPeerResult> => {
-    // TODO - Fetch key and profile from feed and create peer
-    throw new Error('not yet implemented')
+    const peer = await mutation.addPeerByFeed(ctx, params.feedHash)
+    return { id: toClientID(peer.localID) }
   },
 }
 
@@ -139,13 +140,15 @@ export const addPeer = {
     ctx: ClientContext,
     params: IdentityAddPeerParams,
   ): Promise<IdentityAddPeerResult> => {
-    const peerID = ctx.openVault.identities.createPeerUser(
-      params.mfid,
+    const peer = await mutation.addPeer(
+      ctx,
+      params.key,
       params.profile,
       params.publicFeed,
+      hexValueType(params.firstContactAddress),
       params.otherFeeds,
     )
-    return { id: toClientID(peerID) }
+    return { id: toClientID(peer.localID) }
   },
 }
 
@@ -171,11 +174,11 @@ export const deleteContact = {
     ctx: ClientContext,
     params: IdentityDeleteContactParams,
   ): Promise<void> => {
-    ctx.openVault.identities.deleteContact(
+    await mutation.deleteContact(
+      ctx,
       fromClientID(params.userID),
       fromClientID(params.contactID),
     )
-    await ctx.openVault.save()
   },
 }
 
