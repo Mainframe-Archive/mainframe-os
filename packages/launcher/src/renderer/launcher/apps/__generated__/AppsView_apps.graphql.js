@@ -14,17 +14,27 @@ import type { FragmentReference } from "relay-runtime";
 declare export opaque type AppsView_apps$ref: FragmentReference;
 export type AppsView_apps = {|
   +installed: ?$ReadOnlyArray<?{|
-    +$fragmentRefs: AppItem_installedApp$ref
+    +localID: string,
+    +$fragmentRefs: AppItem_installedApp$ref,
   |}>,
   +own: ?$ReadOnlyArray<?{|
-    +$fragmentRefs: AppItem_ownApp$ref
+    +localID: string,
+    +$fragmentRefs: AppItem_ownApp$ref,
   |}>,
   +$refType: AppsView_apps$ref,
 |};
 */
 
 
-const node/*: ConcreteFragment*/ = {
+const node/*: ConcreteFragment*/ = (function(){
+var v0 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "localID",
+  "args": null,
+  "storageKey": null
+};
+return {
   "kind": "Fragment",
   "name": "AppsView_apps",
   "type": "AppsQuery",
@@ -40,6 +50,7 @@ const node/*: ConcreteFragment*/ = {
       "concreteType": "App",
       "plural": true,
       "selections": [
+        v0,
         {
           "kind": "FragmentSpread",
           "name": "AppItem_installedApp",
@@ -56,6 +67,7 @@ const node/*: ConcreteFragment*/ = {
       "concreteType": "OwnApp",
       "plural": true,
       "selections": [
+        v0,
         {
           "kind": "FragmentSpread",
           "name": "AppItem_ownApp",
@@ -65,6 +77,7 @@ const node/*: ConcreteFragment*/ = {
     }
   ]
 };
+})();
 // prettier-ignore
-(node/*: any*/).hash = '14b0bdf3c2a460fa11844ddb1c152a77';
+(node/*: any*/).hash = 'b7e985623e76c700c85962aa2cfc8991';
 module.exports = node;

@@ -197,16 +197,12 @@ class AppsView extends Component<Props, State> {
 
   // RENDER
 
-  renderApp(app: AppData, own: boolean, index: number) {
+  renderApp(app: AppData, own: boolean) {
     return own ? (
-      <OwnAppItem
-        key={`app-${index}`}
-        ownApp={app}
-        onOpenApp={this.onOpenApp}
-      />
+      <OwnAppItem key={app.localID} ownApp={app} onOpenApp={this.onOpenApp} />
     ) : (
       <InstalledAppItem
-        key={`app-${index}`}
+        key={app.localID}
         installedApp={app}
         onOpenApp={this.onOpenApp}
       />
@@ -220,7 +216,7 @@ class AppsView extends Component<Props, State> {
           {own ? 'Own Applications' : 'Installed Applications'}
         </Text>
         <AppsGrid>
-          {apps.map((app, index) => this.renderApp(app, own, index))}
+          {apps.map(app => this.renderApp(app, own))}
           {own
             ? this.renderButton(
                 'Create new',
@@ -345,9 +341,11 @@ export default createFragmentContainer(AppsView, {
   apps: graphql`
     fragment AppsView_apps on AppsQuery {
       installed {
+        localID
         ...AppItem_installedApp
       }
       own {
+        localID
         ...AppItem_ownApp
       }
     }

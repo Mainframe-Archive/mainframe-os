@@ -2,15 +2,17 @@
 
 import React, { Component } from 'react'
 import styled from 'styled-components/native'
-import { graphql, createFragmentContainer } from 'react-relay'
+import { graphql, commitMutation, createFragmentContainer } from 'react-relay'
 import { Text, Button, Row, Column, TextField } from '@morpheus-ui/core'
 import { Form, type FormSubmitPayload } from '@morpheus-ui/forms'
+
 import PlusIcon from '@morpheus-ui/icons/PlusSymbolSm'
 import SearchIcon from '@morpheus-ui/icons/SearchSm'
 import CircleArrowRight from '@morpheus-ui/icons/CircleArrowRight'
 import CircleArrowDown from '@morpheus-ui/icons/CircleArrowDownMd'
 import CircleArrowUp from '@morpheus-ui/icons/CircleArrowUpMd'
 import CloseIcon from '@morpheus-ui/icons/Close'
+import { EnvironmentContext } from '../RelayEnvironment'
 
 const Container = styled.View`
   position: relative;
@@ -165,12 +167,12 @@ export type SubmitContactInput = {
 }
 
 type Props = {
+  userID: string,
   contacts: {
     userContacts: Array<Contact>,
   },
   acceptContact: (contact: Contact) => void,
   ignoreContact: (contact: Contact) => void,
-  onSubmitNewContact: (payload: SubmitContactInput) => Promise<Contact>,
 }
 
 type State = {
@@ -178,7 +180,24 @@ type State = {
   error?: ?string,
 }
 
+export const addContactMutation = graphql`
+  mutation ContactsViewAddContactMutation(
+    $input: AddContactInput!
+    $userID: String!
+  ) {
+    addContact(input: $input) {
+      viewer {
+        contacts {
+          ...ContactsView_contacts @arguments(userID: $userID)
+        }
+      }
+    }
+  }
+`
+
 export class ContactsView extends Component<Props, State> {
+  static contextType = EnvironmentContext
+
   state = {
     modalOpen: false,
   }
@@ -193,17 +212,34 @@ export class ContactsView extends Component<Props, State> {
 
   submitNewContact = async (payload: FormSubmitPayload) => {
     if (payload.valid) {
-      try {
-        this.setState({ error: null })
-        await this.props.onSubmitNewContact({
-          feedHash: payload.fields.publicKey,
+      this.setState({ error: null })
+      const input = {
+        userID: this.props.userID,
+        publicFeed: payload.fields.publicKey,
+        profile: {
           name: payload.fields.name,
-        })
-        if (this.state.modalOpen) {
-          this.setState({ modalOpen: false })
-        }
-      } catch (err) {
-        this.setState({ error: err.message })
+        },
+      }
+
+      commitMutation(this.context, {
+        mutation: addContactMutation,
+        variables: { input, userID: this.props.userID },
+        onCompleted: (contact, errors) => {
+          if (errors && errors.length) {
+            this.setState({ error: errors[0].message })
+          } else {
+            if (this.state.modalOpen) {
+              this.setState({ modalOpen: false })
+            }
+          }
+        },
+        onError: err => {
+          this.setState({ error: err.message })
+        },
+      })
+
+      if (this.state.modalOpen) {
+        this.setState({ modalOpen: false })
       }
     }
   }

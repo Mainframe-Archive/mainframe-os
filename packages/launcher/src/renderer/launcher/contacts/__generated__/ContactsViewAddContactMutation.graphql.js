@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 1aacf9fb84df79086571e381cabed0de
+ * @relayHash d89c50ee187c6360aa84b919986a3974
  */
 
 /* eslint-disable */
@@ -20,11 +20,11 @@ export type UserProfileInput = {
   name: string,
   avatar?: ?string,
 };
-export type ContactsScreenAddContactMutationVariables = {|
+export type ContactsViewAddContactMutationVariables = {|
   input: AddContactInput,
   userID: string,
 |};
-export type ContactsScreenAddContactMutationResponse = {|
+export type ContactsViewAddContactMutationResponse = {|
   +addContact: ?{|
     +viewer: {|
       +contacts: {|
@@ -33,15 +33,15 @@ export type ContactsScreenAddContactMutationResponse = {|
     |}
   |}
 |};
-export type ContactsScreenAddContactMutation = {|
-  variables: ContactsScreenAddContactMutationVariables,
-  response: ContactsScreenAddContactMutationResponse,
+export type ContactsViewAddContactMutation = {|
+  variables: ContactsViewAddContactMutationVariables,
+  response: ContactsViewAddContactMutationResponse,
 |};
 */
 
 
 /*
-mutation ContactsScreenAddContactMutation(
+mutation ContactsViewAddContactMutation(
   $input: AddContactInput!
   $userID: String!
 ) {
@@ -101,13 +101,13 @@ v2 = {
 return {
   "kind": "Request",
   "operationKind": "mutation",
-  "name": "ContactsScreenAddContactMutation",
+  "name": "ContactsViewAddContactMutation",
   "id": null,
-  "text": "mutation ContactsScreenAddContactMutation(\n  $input: AddContactInput!\n  $userID: String!\n) {\n  addContact(input: $input) {\n    viewer {\n      contacts {\n        ...ContactsView_contacts_3iqrP\n      }\n      id\n    }\n  }\n}\n\nfragment ContactsView_contacts_3iqrP on ContactsQuery {\n  userContacts(userID: $userID) {\n    peerID\n    localID\n    connectionState\n    profile {\n      name\n    }\n    id\n  }\n}\n",
+  "text": "mutation ContactsViewAddContactMutation(\n  $input: AddContactInput!\n  $userID: String!\n) {\n  addContact(input: $input) {\n    viewer {\n      contacts {\n        ...ContactsView_contacts_3iqrP\n      }\n      id\n    }\n  }\n}\n\nfragment ContactsView_contacts_3iqrP on ContactsQuery {\n  userContacts(userID: $userID) {\n    peerID\n    localID\n    connectionState\n    profile {\n      name\n    }\n    id\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
-    "name": "ContactsScreenAddContactMutation",
+    "name": "ContactsViewAddContactMutation",
     "type": "Mutation",
     "metadata": null,
     "argumentDefinitions": v0,
@@ -161,7 +161,7 @@ return {
   },
   "operation": {
     "kind": "Operation",
-    "name": "ContactsScreenAddContactMutation",
+    "name": "ContactsViewAddContactMutation",
     "argumentDefinitions": v0,
     "selections": [
       {
@@ -261,5 +261,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '3a9a38f2f460d1afabb073765e0f84f4';
+(node/*: any*/).hash = '91c0e59898d874cbe2446b1dd502b48e';
 module.exports = node;

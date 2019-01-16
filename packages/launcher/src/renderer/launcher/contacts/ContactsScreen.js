@@ -1,20 +1,11 @@
-/* eslint-disable no-console */
 // @flow
 import React, { Component } from 'react'
-import {
-  graphql,
-  createFragmentContainer,
-  commitMutation,
-  QueryRenderer,
-} from 'react-relay'
+import { graphql, createFragmentContainer, QueryRenderer } from 'react-relay'
 
 import { EnvironmentContext } from '../RelayEnvironment'
 import LauncherContext from '../LauncherContext'
 import RelayLoaderView from '../RelayLoaderView'
-import ContactsView, {
-  type Contact,
-  type SubmitContactInput,
-} from './ContactsView'
+import ContactsView, { type Contact } from './ContactsView'
 
 type QueryProps = {
   userID: string,
@@ -30,52 +21,8 @@ type State = {
   data: Array<Object>,
 }
 
-export const addContactMutation = graphql`
-  mutation ContactsScreenAddContactMutation(
-    $input: AddContactInput!
-    $userID: String!
-  ) {
-    addContact(input: $input) {
-      viewer {
-        contacts {
-          ...ContactsView_contacts @arguments(userID: $userID)
-        }
-      }
-    }
-  }
-`
-
 export class ContactsScreen extends Component<Props, State> {
   static contextType = EnvironmentContext
-  state = {
-    data: [],
-  }
-
-  addNewContact = (data: SubmitContactInput): Promise<Contact> => {
-    const input = {
-      userID: this.props.userID,
-      publicFeed: data.feedHash,
-      profile: {
-        name: data.name,
-      },
-    }
-    return new Promise((resolve, reject) => {
-      commitMutation(this.context, {
-        mutation: addContactMutation,
-        variables: { input, userID: this.props.userID },
-        onCompleted: (contact, errors) => {
-          if (errors && errors.length) {
-            reject(errors[0])
-          } else {
-            resolve(contact)
-          }
-        },
-        onError: err => {
-          reject(err)
-        },
-      })
-    })
-  }
 
   acceptContact = () => {
     // TODO needs implementing
@@ -88,10 +35,10 @@ export class ContactsScreen extends Component<Props, State> {
   render() {
     return (
       <ContactsView
+        userID={this.props.userID}
         contacts={this.props.contacts}
         ignoreContact={this.ignoreContact}
         acceptContact={this.acceptContact}
-        onSubmitNewContact={this.addNewContact}
       />
     )
   }
