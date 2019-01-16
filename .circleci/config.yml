@@ -16,6 +16,7 @@ jobs:
           command: |
             sudo apt-get update
             sudo apt-get install build-essential libudev-dev libusb-1.0-0-dev -y
+            sudo apt-get install libsecret-1-dev
       - run:
           name: Setup
           command: npm install && npm run bootstrap:ci
