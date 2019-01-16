@@ -1,6 +1,8 @@
 // @flow
 
 import os from 'os'
+import crypto from 'crypto'
+import keytar from 'keytar'
 import keythereum from 'keythereum'
 import fs from 'fs-extra'
 
@@ -26,8 +28,31 @@ export type KeyObject = {
 }
 
 const homedir = os.homedir()
-const password = 'mainframe'
+const service = 'com.mainframe.services.swarm'
+const account = 'mainframe'
 const datadir = `${homedir}/.ethereum`
+
+export const getSwarmKeystorePassword = async (): Promise<string> => {
+  let password = await keytar.getPassword(service, account)
+  if (password == null) {
+    // eslint-disable-next-line no-console
+    console.log(
+      'Service password was not found in keychain, creating a new entry',
+    )
+    const buffer = crypto.randomBytes(48)
+    password = buffer.toString('hex')
+    await keytar.setPassword(service, account, password)
+    // eslint-disable-next-line no-console
+    console.log(
+      `Created a new keychain entry com.mainframe.services.swarm: ${password}`,
+    )
+    return password
+  } else {
+    // eslint-disable-next-line no-console
+    console.log(`Found service password in keychain: ${password}`)
+    return password
+  }
+}
 
 export const createKeyStore = async (): Promise<string> => {
   const params = { keyBytes: 32, ivBytes: 16 }
@@ -43,7 +68,7 @@ export const createKeyStore = async (): Promise<string> => {
       prf: 'hmac-sha256',
     },
   }
-
+  const password = await getSwarmKeystorePassword()
   const keyObject = keythereum.dump(
     password,
     dk.privateKey,
@@ -66,6 +91,7 @@ export const getPrivateKey = async (
   address: string,
   encoding: string,
 ): Promise<string> => {
+  const password = await getSwarmKeystorePassword()
   const keyObject = keythereum.importFromFile(address, datadir)
   const keyBuffer = await keythereum.recover(password, keyObject)
   return keyBuffer.toString(encoding)
