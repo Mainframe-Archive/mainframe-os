@@ -3,6 +3,7 @@
 import React, { Component } from 'react'
 import styled from 'styled-components/native'
 import { graphql, commitMutation, createFragmentContainer } from 'react-relay'
+import { debounce } from 'lodash'
 import { Text, Button, Row, Column, TextField } from '@morpheus-ui/core'
 import { Form, type FormSubmitPayload } from '@morpheus-ui/forms'
 
@@ -12,7 +13,9 @@ import CircleArrowRight from '@morpheus-ui/icons/CircleArrowRight'
 import CircleArrowDown from '@morpheus-ui/icons/CircleArrowDownMd'
 import CircleArrowUp from '@morpheus-ui/icons/CircleArrowUpMd'
 import CloseIcon from '@morpheus-ui/icons/Close'
+
 import { EnvironmentContext } from '../RelayEnvironment'
+import Avatar from '../../UIComponents/Avatar'
 
 const Container = styled.View`
   position: relative;
@@ -124,6 +127,15 @@ const FormContainer = styled.View`
     margin-top: 15vh;`}
 `
 
+const AvatarWrapper = styled.View`
+  flex-direction: row;
+  align-items: center;
+`
+
+const Blocky = styled.View`
+  margin-right: 15px;
+`
+
 const InternalModal = styled.View`
   position: absolute;
   top: 0;
@@ -178,6 +190,7 @@ type Props = {
 type State = {
   modalOpen: boolean,
   error?: ?string,
+  publicKey?: ?string,
 }
 
 export const addContactMutation = graphql`
@@ -210,14 +223,15 @@ export class ContactsView extends Component<Props, State> {
     this.setState({ modalOpen: false })
   }
 
-  submitNewContact = async (payload: FormSubmitPayload) => {
+  submitNewContact = (payload: FormSubmitPayload) => {
     if (payload.valid) {
       this.setState({ error: null })
       const input = {
         userID: this.props.userID,
         publicFeed: payload.fields.publicKey,
+        //TODO: get the proper user deta
         profile: {
-          name: payload.fields.name,
+          name: 'Unknown User ',
         },
       }
 
@@ -244,6 +258,17 @@ export class ContactsView extends Component<Props, State> {
     }
   }
 
+  onFormChange = debounce(
+    (payload: FormSubmitPayload) => {
+      //TODO: should fetch the user data.
+      this.setState({
+        publicKey: payload.fields.publicKey,
+      })
+    },
+    250,
+    { maxWait: 1000 },
+  )
+
   renderContactsList() {
     const { userContacts } = this.props.contacts
     return (
@@ -251,13 +276,13 @@ export class ContactsView extends Component<Props, State> {
         <ContactsListHeader hascontacts={userContacts.length > 0}>
           <ButtonContainer>
             <Button
-              variant={['xSmall', 'completeOnboarding']}
+              variant={['xSmallIconOnly', 'completeOnboarding']}
               Icon={SearchIcon}
             />
           </ButtonContainer>
           <ButtonContainer>
             <Button
-              variant={['xSmall', 'completeOnboarding']}
+              variant={['xSmallIconOnly', 'completeOnboarding']}
               Icon={PlusIcon}
               onPress={this.openModal}
             />
@@ -321,8 +346,7 @@ export class ContactsView extends Component<Props, State> {
     ) : null
     return (
       <FormContainer modal={modal}>
-        {/* $FlowFixMe submit return type */}
-        <Form onSubmit={this.submitNewContact}>
+        <Form onChange={this.onFormChange} onSubmit={this.submitNewContact}>
           <Row size={1}>
             {modal && (
               <Column>
@@ -330,18 +354,26 @@ export class ContactsView extends Component<Props, State> {
                   variant="greyMid"
                   size={12}
                   theme={{ textAlign: 'center', marginBottom: 50 }}>
-                  Lorem ipsum dolor amet sitim opsos calibri
-                  <br />
-                  dos ipsum dolor amet sitimus.
+                  You have no contacts in your address book. Add someone to join
+                  you by entering their Mainframe ID or scanning their QR code.
                 </Text>
               </Column>
             )}
             <Column>
-              <TextField name="publicKey" required label="Publick Key" />
+              <TextField name="publicKey" required label="Mainframe ID" />
             </Column>
-            <Column>
-              <TextField name="name" label="Name" />
-            </Column>
+            {this.state.publicKey && (
+              <Column>
+                <AvatarWrapper>
+                  <Blocky>
+                    <Avatar id={this.state.publicKey} size="small" />
+                  </Blocky>
+                  <Text variant="greyDark23" size={13}>
+                    Unknown User
+                  </Text>
+                </AvatarWrapper>
+              </Column>
+            )}
           </Row>
           {modal ? (
             <Row size={1}>
@@ -351,14 +383,14 @@ export class ContactsView extends Component<Props, State> {
                   variant={['no-border', 'grey', 'modalButton']}
                   onPress={this.closeModal}
                 />
-                <Button title="SEND" variant={['red', 'modalButton']} submit />
+                <Button title="ADD" variant={['red', 'modalButton']} submit />
               </Column>
             </Row>
           ) : (
             <Row size={2} top>
               <Column styles="align-items:flex-end;" smOffset={1}>
                 <Button
-                  title="SEND INVITATION"
+                  title="ADD"
                   variant="onboarding"
                   Icon={CircleArrowRight}
                   submit

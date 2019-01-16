@@ -37,7 +37,7 @@ type State = {
 
 class Launcher extends Component<Props, State> {
   state = {
-    openScreen: 'apps',
+    openScreen: 'contacts',
   }
 
   setOpenScreen = (name: ScreenNames) => {
