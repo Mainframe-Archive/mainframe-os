@@ -1,6 +1,7 @@
 // @flow
 
 import { type ID } from '@mainframe/utils-id'
+import { type hexValue } from '@erebos/hex'
 
 import OwnDeveloperIdentity, {
   type OwnDeveloperProfile,
@@ -13,7 +14,7 @@ import PeerUserIdentity, {
   type Feeds,
 } from '../identity/PeerUserIdentity'
 import type RequestContext from '../rpc/RequestContext'
-import { type feedHash } from '../swarm/feed.js'
+import { type bzzHash } from '../swarm/feed.js'
 
 export const createDeveloper = async (
   ctx: RequestContext,
@@ -40,11 +41,15 @@ export const createUser = async (
 
 export const addPeerByFeed = async (
   ctx: RequestContext,
-  feedHash: feedHash,
+  feedHash: bzzHash,
 ): Promise<PeerUserIdentity> => {
   const peerPublicData = await ctx.bzz.download(feedHash)
-  const { publicKey, profile } = await peerPublicData.json()
-  return addPeer(ctx, publicKey, profile, feedHash)
+  const {
+    publicKey,
+    profile,
+    firstContactAddress,
+  } = await peerPublicData.json()
+  return addPeer(ctx, publicKey, profile, feedHash, firstContactAddress)
 }
 
 export const addPeer = async (
@@ -52,12 +57,14 @@ export const addPeer = async (
   publicKey: string,
   profile: PeerUserProfile,
   publicFeed: string,
+  firstContactAddress: hexValue,
   feeds?: Feeds,
 ): Promise<PeerUserIdentity> => {
   const peer = ctx.openVault.identities.createPeerUser(
     publicKey,
     profile,
     publicFeed,
+    firstContactAddress,
     feeds,
   )
   await ctx.openVault.save()

@@ -1,17 +1,22 @@
 // @flow
 
+import crypto from 'crypto'
 import BzzAPI from '@erebos/api-bzz-node'
 import { getFeedTopic } from '@erebos/api-bzz-base'
 import { isHexValue, hexValueType, type hexValue } from '@erebos/hex'
 import { createKeyPair, type KeyPair as EthKeyPair } from '@erebos/secp256k1'
 import { pubKeyToAddress } from '@erebos/keccak256'
 
-export type feedHash = string
+export type bzzHash = string
 
 export type OwnFeedSerialized = {
   ethPrivKey: hexValue,
   topic: hexValue,
-  feedHash: ?feedHash,
+  feedHash: ?bzzHash,
+}
+
+export const randomTopic = (): hexValue => {
+  return hexValueType('0x' + crypto.randomBytes(32).toString('hex'))
 }
 
 export class OwnFeed {
@@ -41,32 +46,38 @@ export class OwnFeed {
   }
 
   _keyPair: EthKeyPair
+  _address: hexValue
   _topic: hexValue
-  _feedHash: ?feedHash
+  _feedHash: ?bzzHash
 
-  constructor(keyPair: EthKeyPair, topic: hexValue, feedHash: ?feedHash) {
+  constructor(keyPair: EthKeyPair, topic: hexValue, feedHash: ?bzzHash) {
     this._keyPair = keyPair
     this._topic = topic
     this._feedHash = feedHash
+    // $FlowFixMe: pubKeyToAddress inferred as string type rather then erebos hexValue
+    this._address = pubKeyToAddress(keyPair.getPublic().encode())
   }
 
   get keyPair(): EthKeyPair {
     return this._keyPair
   }
 
+  get address(): hexValue {
+    return this._address
+  }
+
   get topic(): hexValue {
     return this._topic
   }
 
-  get feedHash(): ?feedHash {
+  get feedHash(): ?bzzHash {
     return this._feedHash
   }
 
   async syncManifest(bzz: BzzAPI): Promise<boolean> {
     if (this.feedHash) return false
 
-    const address = pubKeyToAddress(this.keyPair.getPublic().encode())
-    const feedHash = await bzz.createFeedManifest(address, {
+    const feedHash = await bzz.createFeedManifest(this.address, {
       topic: this.topic,
     })
     this._feedHash = feedHash

@@ -28,6 +28,7 @@ import {
   /* eslint-enable import/named */
 } from '@mainframe/client'
 import { idType as fromClientID } from '@mainframe/utils-id'
+import { hexValueType } from '@erebos/hex'
 
 import * as mutation from '../../store/mutation'
 import type RequestContext from '../RequestContext'
@@ -144,6 +145,7 @@ export const addPeer = {
       params.key,
       params.profile,
       params.publicFeed,
+      hexValueType(params.firstContactAddress),
       params.otherFeeds,
     )
     return { id: toClientID(peer.localID) }

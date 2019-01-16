@@ -5,6 +5,7 @@ import type { KeyPair } from '@mainframe/utils-crypto'
 // eslint-disable-next-line import/named
 import { uniqueID, idType, type ID } from '@mainframe/utils-id'
 import multibase from 'multibase'
+import { type hexValue } from '@erebos/hex'
 
 import { mapObject } from '../utils'
 
@@ -428,6 +429,7 @@ export default class IdentitiesRepository {
     publicKey: string,
     profile: PeerUserProfile,
     publicFeed: string,
+    firstContactAddress: hexValue,
     feeds?: Feeds,
   ): PeerUserIdentity {
     if (this._mfidByFeed[publicFeed]) {
@@ -442,7 +444,14 @@ export default class IdentitiesRepository {
     }
     const keyBuffer = multibase.decode(publicKey)
     const id = this.addIdentity(
-      new PeerUserIdentity(uniqueID(), keyBuffer, profile, publicFeed, feeds),
+      new PeerUserIdentity(
+        uniqueID(),
+        keyBuffer,
+        profile,
+        publicFeed,
+        firstContactAddress,
+        feeds,
+      ),
     )
     const peer = this.getPeerUser(id)
     if (!peer) throw new Error('Error adding peer')

@@ -215,6 +215,7 @@ export type IdentityAddPeerParams = {
     avatar?: ?string,
   },
   publicFeed: string,
+  firstContactAddress: string,
   otherFeeds: Feeds,
 }
 

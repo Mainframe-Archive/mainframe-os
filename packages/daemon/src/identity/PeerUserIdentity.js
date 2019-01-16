@@ -1,5 +1,7 @@
 // @flow
 
+import { type hexValue } from '@erebos/hex'
+
 import Identity from './Identity'
 
 type FeedHash = string
@@ -15,6 +17,7 @@ export type PeerUserIdentitySerialized = {
   id: string,
   localID: string,
   publicFeed: FeedHash,
+  firstContactAddress: hexValue,
   otherFeeds: Feeds,
   profile: PeerUserProfile,
 }
@@ -26,19 +29,22 @@ export default class PeerUserIdentity extends Identity {
       params.localID,
       params.profile,
       params.publicFeed,
+      params.firstContactAddress,
       params.otherFeeds,
     )
   }
 
   static toJSON = (peer: PeerUserIdentity): PeerUserIdentitySerialized => ({
-    id: peer._id,
+    id: peer.id,
     localID: peer.localID,
-    publicFeed: peer._publicFeed,
-    otherFeeds: peer._otherFeeds,
-    profile: peer._profile,
+    publicFeed: peer.publicFeed,
+    firstContactAddress: peer.firstContactAddress,
+    otherFeeds: peer.otherFeeds,
+    profile: peer.profile,
   })
 
   _publicFeed: FeedHash
+  _firstContactAddress: hexValue
   _otherFeeds: Feeds
   _profile: {
     name?: ?string,
@@ -50,10 +56,12 @@ export default class PeerUserIdentity extends Identity {
     keyOrId: string | Buffer,
     profile: PeerUserProfile,
     publicFeed: FeedHash,
+    firstContactAddress: hexValue,
     otherFeeds?: Feeds,
   ) {
     super(localID, 'user', keyOrId)
     this._publicFeed = publicFeed
+    this._firstContactAddress = firstContactAddress
     this._otherFeeds = otherFeeds || {}
     this._profile = profile
   }
@@ -64,6 +72,10 @@ export default class PeerUserIdentity extends Identity {
 
   get profile(): PeerUserProfile {
     return this._profile
+  }
+
+  get firstContactAddress(): hexValue {
+    return this._firstContactAddress
   }
 
   get otherFeeds(): Feeds {
