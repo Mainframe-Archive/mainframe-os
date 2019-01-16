@@ -46,7 +46,7 @@ export class OwnFeed {
   }
 
   _keyPair: EthKeyPair
-  _address: hexValue
+  _address: ?hexValue
   _topic: hexValue
   _feedHash: ?bzzHash
 
@@ -54,8 +54,6 @@ export class OwnFeed {
     this._keyPair = keyPair
     this._topic = topic
     this._feedHash = feedHash
-    // $FlowFixMe: pubKeyToAddress inferred as string type rather then erebos hexValue
-    this._address = pubKeyToAddress(keyPair.getPublic().encode())
   }
 
   get keyPair(): EthKeyPair {
@@ -63,6 +61,9 @@ export class OwnFeed {
   }
 
   get address(): hexValue {
+    if (this._address == null) {
+      this._address = pubKeyToAddress(this._keyPair.getPublic().encode())
+    }
     return this._address
   }
 
@@ -86,13 +87,12 @@ export class OwnFeed {
   }
 
   async publishJSON(bzz: BzzAPI, payload: Object): Promise<string> {
-    const body = JSON.stringify(payload)
-    const dataHash = await bzz.uploadFile(body, {
-      contentType: 'application/json',
-    })
-    await bzz.postFeedValue(this.keyPair, `0x${dataHash}`, {
-      topic: this.topic,
-    })
-    return dataHash
+    return await bzz.uploadFeedValue(
+      this.address,
+      JSON.stringify(payload),
+      { topic: this.topic },
+      { contentType: 'application/json' },
+      this.keyPair.getPrivate(),
+    )
   }
 }

@@ -2,6 +2,7 @@
 
 import BzzAPI from '@erebos/api-bzz-node'
 import PssAPI from '@erebos/api-pss'
+import { sign } from '@erebos/secp256k1'
 import type StreamRPC from '@mainframe/rpc-stream'
 import createWebSocketRPC from '@mainframe/rpc-ws-node'
 
@@ -28,7 +29,15 @@ export default class ContextIO {
 
   get bzz(): BzzAPI {
     if (this._bzz == null) {
-      this._bzz = new BzzAPI({ url: this._context.openVault.settings.bzzURL })
+      this._bzz = new BzzAPI({
+        url: this._context.openVault.settings.bzzURL,
+        signFeedDigest: async (digest: Array<number>, key: ?Object) => {
+          if (key == null) {
+            throw new Error('Missing signing key')
+          }
+          return sign(digest, key)
+        },
+      })
     }
     return this._bzz
   }

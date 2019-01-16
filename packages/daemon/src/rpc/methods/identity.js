@@ -28,10 +28,8 @@ import {
   /* eslint-enable import/named */
 } from '@mainframe/client'
 import { idType as fromClientID } from '@mainframe/utils-id'
-import { hexValueType } from '@erebos/hex'
 
 import type ClientContext from '../../context/ClientContext'
-import * as mutation from '../../store/mutation'
 
 export const createDeveloper = {
   params: IDENTITY_CREATE_OWN_DEVELOPER_SCHEMA,
@@ -39,7 +37,7 @@ export const createDeveloper = {
     ctx: ClientContext,
     params: IdentityCreateDeveloperParams,
   ): Promise<IdentityCreateResult> => {
-    const dev = await mutation.createDeveloper(ctx, params.profile)
+    const dev = await ctx.mutations.createDeveloper(params)
     return { id: toClientID(dev.localID) }
   },
 }
@@ -50,7 +48,7 @@ export const createUser = {
     ctx: ClientContext,
     params: IdentityCreateUserParams,
   ): Promise<IdentityCreateResult> => {
-    const user = await mutation.createUser(ctx, params.profile)
+    const user = await ctx.mutations.createUser(params)
     return { id: toClientID(user.localID) }
   },
 }
@@ -129,7 +127,7 @@ export const addPeerByFeed = {
     ctx: ClientContext,
     params: IdentityAddPeerByFeedParams,
   ): Promise<IdentityAddPeerResult> => {
-    const peer = await mutation.addPeerByFeed(ctx, params.feedHash)
+    const peer = await ctx.mutations.addPeerByFeed(params)
     return { id: toClientID(peer.localID) }
   },
 }
@@ -140,14 +138,7 @@ export const addPeer = {
     ctx: ClientContext,
     params: IdentityAddPeerParams,
   ): Promise<IdentityAddPeerResult> => {
-    const peer = await mutation.addPeer(
-      ctx,
-      params.key,
-      params.profile,
-      params.publicFeed,
-      hexValueType(params.firstContactAddress),
-      params.otherFeeds,
-    )
+    const peer = await ctx.mutations.addPeer(params)
     return { id: toClientID(peer.localID) }
   },
 }
@@ -174,11 +165,7 @@ export const deleteContact = {
     ctx: ClientContext,
     params: IdentityDeleteContactParams,
   ): Promise<void> => {
-    await mutation.deleteContact(
-      ctx,
-      fromClientID(params.userID),
-      fromClientID(params.contactID),
-    )
+    await ctx.mutations.deleteContact(params)
   },
 }
 

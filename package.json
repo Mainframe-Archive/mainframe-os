@@ -5,6 +5,7 @@
   "license": "MIT",
   "private": true,
   "scripts": {
+    "clean": "lerna clean -y",
     "flow:install": "lerna exec --concurrency 1 -- flow-typed install --ignoreDeps=dev",
     "bootstrap": "lerna bootstrap && npm run flow:install",
     "bootstrap:ci": "lerna bootstrap --concurrency 1 && npm run flow:install",
