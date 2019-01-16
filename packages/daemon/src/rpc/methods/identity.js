@@ -37,7 +37,7 @@ export const createDeveloper = {
     ctx: ClientContext,
     params: IdentityCreateDeveloperParams,
   ): Promise<IdentityCreateResult> => {
-    const dev = await ctx.mutations.createDeveloper(params)
+    const dev = await ctx.mutations.createDeveloper(params.profile)
     return { id: toClientID(dev.localID) }
   },
 }
@@ -48,7 +48,7 @@ export const createUser = {
     ctx: ClientContext,
     params: IdentityCreateUserParams,
   ): Promise<IdentityCreateResult> => {
-    const user = await ctx.mutations.createUser(params)
+    const user = await ctx.mutations.createUser(params.profile)
     return { id: toClientID(user.localID) }
   },
 }
@@ -127,7 +127,7 @@ export const addPeerByFeed = {
     ctx: ClientContext,
     params: IdentityAddPeerByFeedParams,
   ): Promise<IdentityAddPeerResult> => {
-    const peer = await ctx.mutations.addPeerByFeed(params)
+    const peer = await ctx.mutations.addPeerByFeed(params.feedHash)
     return { id: toClientID(peer.localID) }
   },
 }
@@ -165,7 +165,10 @@ export const deleteContact = {
     ctx: ClientContext,
     params: IdentityDeleteContactParams,
   ): Promise<void> => {
-    await ctx.mutations.deleteContact(params)
+    await ctx.mutations.deleteContact(
+      fromClientID(params.userID),
+      fromClientID(params.contactID),
+    )
   },
 }
 

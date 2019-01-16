@@ -1,16 +1,8 @@
 // @flow
 
 import { hexValueType } from '@erebos/hex'
-import type {
-  AppCreateParams,
-  IdentityAddPeerByFeedParams,
-  IdentityAddPeerParams,
-  IdentityCreateDeveloperParams,
-  IdentityCreateUserParams,
-  IdentityDeleteContactParams,
-  VaultParams,
-} from '@mainframe/client'
-import { idType as fromClientID } from '@mainframe/utils-id'
+import type { StrictPermissionsRequirements } from '@mainframe/app-permissions'
+import type { ID } from '@mainframe/utils-id'
 
 import type { OwnApp } from '../app'
 import type {
@@ -18,8 +10,35 @@ import type {
   OwnUserIdentity,
   PeerUserIdentity,
 } from '../identity'
+import type { OwnDeveloperProfile } from '../identity/OwnDeveloperIdentity'
+import type { OwnUserProfile } from '../identity/OwnUserIdentity'
 
 import type ClientContext from './ClientContext'
+
+export type FeedHash = string
+
+export type Feeds = {
+  [type: string]: FeedHash,
+}
+
+export type CreateAppParams = {
+  contentsPath: string,
+  developerID: ID,
+  name?: ?string,
+  version?: ?string,
+  permissionsRequirements?: ?StrictPermissionsRequirements,
+}
+
+export type AddPeerParams = {
+  key: string,
+  profile: {
+    name?: ?string,
+    avatar?: ?string,
+  },
+  publicFeed: string,
+  firstContactAddress: string,
+  otherFeeds: Feeds,
+}
 
 export type MutationEventType =
   | 'own_app_created'
@@ -35,10 +54,10 @@ export default class ContextMutations {
 
   // Apps
 
-  async createApp(params: AppCreateParams): Promise<OwnApp> {
+  async createApp(params: CreateAppParams): Promise<OwnApp> {
     const app = this._context.openVault.createApp({
       contentsPath: params.contentsPath,
-      developerID: fromClientID(params.developerID),
+      developerID: params.developerID,
       name: params.name,
       version: params.version,
       permissionsRequirements: params.permissionsRequirements,
@@ -50,7 +69,7 @@ export default class ContextMutations {
 
   // Contacts
 
-  async addPeer(params: IdentityAddPeerParams): Promise<PeerUserIdentity> {
+  async addPeer(params: AddPeerParams): Promise<PeerUserIdentity> {
     const peer = this._context.openVault.identities.createPeerUser(
       params.key,
       params.profile,
@@ -62,45 +81,36 @@ export default class ContextMutations {
     return peer
   }
 
-  async addPeerByFeed(
-    params: IdentityAddPeerByFeedParams,
-  ): Promise<PeerUserIdentity> {
+  async addPeerByFeed(hash: FeedHash): Promise<PeerUserIdentity> {
     // TODO: validate peer data
-    const peerPublicRes = await this._context.io.bzz.download(params.feedHash)
+    const peerPublicRes = await this._context.io.bzz.download(hash)
     const data = await peerPublicRes.json()
     return await this.addPeer({
       key: data.publicKey,
       profile: data.profile,
       firstContactAddress: data.firstContactAddress,
-      publicFeed: params.feedHash,
+      publicFeed: hash,
       otherFeeds: {},
     })
   }
 
-  async deleteContact(params: IdentityDeleteContactParams): Promise<void> {
-    this._context.openVault.identities.deleteContact(
-      fromClientID(params.userID),
-      fromClientID(params.contactID),
-    )
+  async deleteContact(userID: ID, contactID: ID): Promise<void> {
+    this._context.openVault.identities.deleteContact(userID, contactID)
     await this._context.openVault.save()
   }
 
   // Identities
 
   async createDeveloper(
-    params: IdentityCreateDeveloperParams,
+    profile: OwnDeveloperProfile,
   ): Promise<OwnDeveloperIdentity> {
-    const dev = this._context.openVault.identities.createOwnDeveloper(
-      params.profile,
-    )
+    const dev = this._context.openVault.identities.createOwnDeveloper(profile)
     await this._context.openVault.save()
     return dev
   }
 
-  async createUser(params: IdentityCreateUserParams): Promise<OwnUserIdentity> {
-    const user = this._context.openVault.identities.createOwnUser(
-      params.profile,
-    )
+  async createUser(profile: OwnUserProfile): Promise<OwnUserIdentity> {
+    const user = this._context.openVault.identities.createOwnUser(profile)
     await this._context.openVault.save()
 
     const saveRequired = await user.publicFeed.syncManifest(
@@ -114,22 +124,14 @@ export default class ContextMutations {
 
   // Vault
 
-  async createVault(params: VaultParams): Promise<void> {
-    await this._context.vaults.create(
-      this._context.socket,
-      params.path,
-      Buffer.from(params.password),
-    )
+  async createVault(path: string, password: Buffer): Promise<void> {
+    await this._context.vaults.create(this._context.socket, path, password)
     await this._context.io.eth.setup()
     this._context.next({ type: 'vault_created' })
   }
 
-  async openVault(params: VaultParams): Promise<void> {
-    await this._context.vaults.open(
-      this._context.socket,
-      params.path,
-      Buffer.from(params.password),
-    )
+  async openVault(path: string, password: Buffer): Promise<void> {
+    await this._context.vaults.open(this._context.socket, path, password)
     await this._context.io.eth.setup()
     this._context.next({ type: 'vault_opened' })
   }

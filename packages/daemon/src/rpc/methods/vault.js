@@ -17,7 +17,7 @@ export const create = {
   params: VAULT_SCHEMA,
   handler: async (ctx: ClientContext, params: VaultParams) => {
     try {
-      await ctx.mutations.createVault(params)
+      await ctx.mutations.createVault(params.path, Buffer.from(params.password))
     } catch (err) {
       // TODO: different error code depending on actual error
       throw vaultError(err.message)
@@ -33,7 +33,7 @@ export const open = {
   params: VAULT_SCHEMA,
   handler: async (ctx: ClientContext, params: VaultParams) => {
     try {
-      await ctx.mutations.openVault(params)
+      await ctx.mutations.openVault(params.path, Buffer.from(params.password))
     } catch (err) {
       // TODO: different error code depending on actual error
       throw vaultError(err.message)

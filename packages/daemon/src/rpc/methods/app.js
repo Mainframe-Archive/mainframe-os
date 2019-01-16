@@ -131,7 +131,11 @@ export const create = {
     ctx: ClientContext,
     params: AppCreateParams,
   ): Promise<AppCreateResult> => {
-    const app = await ctx.mutations.createApp(params)
+    const { developerID, ...data } = params
+    const app = await ctx.mutations.createApp({
+      ...data,
+      developerID: fromClientID(developerID),
+    })
     return { appID: toClientID(app.id) }
   },
 }
