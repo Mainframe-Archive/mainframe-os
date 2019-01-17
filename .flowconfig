@@ -1,4 +1,5 @@
 [ignore]
+.*/.git
 .*/node_modules/config-chain/test/.*
 .*/node_modules/graphql/utilities/buildASTSchema.js.flow
 .*/node_modules/oboe/test/.*

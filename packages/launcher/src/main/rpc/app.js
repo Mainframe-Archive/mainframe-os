@@ -44,6 +44,12 @@ export const sandboxed = {
     // TODO notify app if using ledger to feedback awaiting sign
   ),
 
+  wallet_getEthWallets: async (
+    ctx: AppContext,
+  ): Promise<WalletGetEthWalletsResult> => {
+    return ctx.client.wallet.getEthWallets()
+  },
+
   wallet_getEthAccounts: async (ctx: AppContext): Promise<Array<string>> => {
     const ethWallets = await ctx.client.wallet.getEthWallets()
     const accounts = Object.keys(ethWallets).reduce((acc, key) => {
@@ -134,20 +140,5 @@ export const trusted = {
     handler: (ctx: AppContext, params: { id: string }): void => {
       ctx.removeSubscription(params.id)
     },
-  },
-
-  // WALLET
-
-  wallet_getEthWallets: async (
-    ctx: AppContext,
-  ): Promise<WalletGetEthWalletsResult> => {
-    return ctx.client.wallet.getEthWallets()
-  },
-
-  blockchain_web3Send: async (
-    ctx: AppContext,
-    params: BlockchainWeb3SendParams,
-  ): Promise<Object> => {
-    return ctx.client.blockchain.web3Send(params)
   },
 }

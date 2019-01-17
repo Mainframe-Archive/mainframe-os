@@ -31,18 +31,16 @@ import {
   /* eslint-enable import/named */
 } from '@mainframe/client'
 import { idType as fromClientID } from '@mainframe/utils-id'
-import { hexValueType } from '@erebos/hex'
 
-import * as mutation from '../../store/mutation'
-import type RequestContext from '../RequestContext'
+import type ClientContext from '../../context/ClientContext'
 
 export const createDeveloper = {
   params: IDENTITY_CREATE_OWN_DEVELOPER_SCHEMA,
   handler: async (
-    ctx: RequestContext,
+    ctx: ClientContext,
     params: IdentityCreateDeveloperParams,
   ): Promise<IdentityCreateResult> => {
-    const dev = await mutation.createDeveloper(ctx, params.profile)
+    const dev = await ctx.mutations.createDeveloper(params.profile)
     return { id: toClientID(dev.localID) }
   },
 }
@@ -50,16 +48,16 @@ export const createDeveloper = {
 export const createUser = {
   params: IDENTITY_CREATE_OWN_USER_SCHEMA,
   handler: async (
-    ctx: RequestContext,
+    ctx: ClientContext,
     params: IdentityCreateUserParams,
   ): Promise<IdentityCreateResult> => {
-    const user = await mutation.createUser(ctx, params.profile)
+    const user = await ctx.mutations.createUser(params.profile)
     return { id: toClientID(user.localID) }
   },
 }
 
 export const getOwnDevelopers = (
-  ctx: RequestContext,
+  ctx: ClientContext,
 ): IdentityGetOwnDevelopersResult => {
   const { ownDevelopers } = ctx.openVault.identities
   const developers = Object.keys(ownDevelopers).map(id => {
@@ -74,7 +72,7 @@ export const getOwnDevelopers = (
   return { developers }
 }
 
-export const getOwnUsers = (ctx: RequestContext): IdentityGetOwnUsersResult => {
+export const getOwnUsers = (ctx: ClientContext): IdentityGetOwnUsersResult => {
   const { ownUsers } = ctx.openVault.identities
   const users = Object.keys(ownUsers).map(id => {
     const wallets = ctx.openVault.getWalletsForIdentity(id)
@@ -93,7 +91,7 @@ export const getOwnUsers = (ctx: RequestContext): IdentityGetOwnUsersResult => {
 export const linkEthWallet = {
   params: IDENTITY_LINK_ETH_WALLET_SCHEMA,
   handler: async (
-    ctx: RequestContext,
+    ctx: ClientContext,
     params: IdentityLinkEthWalletAccountParams,
   ): Promise<void> => {
     if (!ctx.openVault.wallets.getEthWalletByID(params.walletID)) {
@@ -114,7 +112,7 @@ export const linkEthWallet = {
 export const unlinkEthWallet = {
   params: IDENTITY_UNLINK_ETH_WALLET_SCHEMA,
   handler: async (
-    ctx: RequestContext,
+    ctx: ClientContext,
     params: IdentityUnlinkEthWalletAccountParams,
   ): Promise<void> => {
     ctx.openVault.identityWallets.unlinkWalletToIdentity(
@@ -129,10 +127,10 @@ export const unlinkEthWallet = {
 export const addPeerByFeed = {
   params: IDENTITY_ADD_PEER_BY_FEED_SCHEMA,
   handler: async (
-    ctx: RequestContext,
+    ctx: ClientContext,
     params: IdentityAddPeerByFeedParams,
   ): Promise<IdentityAddPeerResult> => {
-    const peer = await mutation.addPeerByFeed(ctx, params.feedHash)
+    const peer = await ctx.mutations.addPeerByFeed(params.feedHash)
     return { id: toClientID(peer.localID) }
   },
 }
@@ -140,22 +138,15 @@ export const addPeerByFeed = {
 export const addPeer = {
   params: IDENTITY_ADD_PEER_SCHEMA,
   handler: async (
-    ctx: RequestContext,
+    ctx: ClientContext,
     params: IdentityAddPeerParams,
   ): Promise<IdentityAddPeerResult> => {
-    const peer = await mutation.addPeer(
-      ctx,
-      params.key,
-      params.profile,
-      params.publicFeed,
-      hexValueType(params.firstContactAddress),
-      params.otherFeeds,
-    )
+    const peer = await ctx.mutations.addPeer(params)
     return { id: toClientID(peer.localID) }
   },
 }
 
-export const getPeers = (ctx: RequestContext): IdentityGetPeersResult => {
+export const getPeers = (ctx: ClientContext): IdentityGetPeersResult => {
   const peerUsers = ctx.openVault.identities.peerUsers
   const peers = Object.keys(peerUsers).map(id => {
     const peer = peerUsers[id]
@@ -174,11 +165,10 @@ export const getPeers = (ctx: RequestContext): IdentityGetPeersResult => {
 export const createContactFromPeer = {
   params: IDENTITY_CREATE_CONTACT_FROM_PEER_SCHEMA,
   handler: async (
-    ctx: RequestContext,
+    ctx: ClientContext,
     params: IdentityCreateContactFromPeerParams,
   ): Promise<IdentityCreateContactResult> => {
-    const contact = await mutation.createContactFromPeer(
-      ctx,
+    const contact = await ctx.mutations.createContactFromPeer(
       fromClientID(params.userID),
       fromClientID(params.peerID),
     )
@@ -189,11 +179,10 @@ export const createContactFromPeer = {
 export const deleteContact = {
   params: IDENTITY_DELETE_CONTACT_SCHEMA,
   handler: async (
-    ctx: RequestContext,
+    ctx: ClientContext,
     params: IdentityDeleteContactParams,
   ): Promise<void> => {
-    await mutation.deleteContact(
-      ctx,
+    await ctx.mutations.deleteContact(
       fromClientID(params.userID),
       fromClientID(params.contactID),
     )
@@ -203,7 +192,7 @@ export const deleteContact = {
 export const getUserContacts = {
   params: IDENTITY_GET_USER_CONTACTS_SCHEMA,
   handler: async (
-    ctx: RequestContext,
+    ctx: ClientContext,
     params: IdentityGetUserContactsParams,
   ): Promise<IdentityGetUserContactsResult> => {
     const result = []

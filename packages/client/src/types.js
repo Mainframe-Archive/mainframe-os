@@ -15,7 +15,7 @@ import type { ExecutionResult } from 'graphql'
 
 export type { ID } from '@mainframe/utils-id'
 
-export type WalletTypes = 'hd' | 'pk' | 'ledger'
+export type WalletTypes = 'hd' | 'ledger'
 export type WalletSupportedChains = 'ethereum'
 export type WalletAccount = string
 export type IdentityOwnData = {
@@ -139,8 +139,6 @@ export type AppPublishContentsResult = {
 
 export type AppRemoveParams = { appID: ID }
 
-export type AppRemoveOwnParams = { appID: ID }
-
 export type AppSetUserSettingsParams = {
   appID: ID,
   userID: ID,
@@ -185,8 +183,10 @@ export type EthTransactionParams = {
 }
 
 export type BlockchainWeb3SendParams = {
-  transactionParams: EthTransactionParams,
-  walletID: ID,
+  id: number,
+  jsonrpc: string,
+  method: string,
+  params: Array<any>,
 }
 
 export type BlockchainWeb3SendResult = any
@@ -336,12 +336,12 @@ export type VaultSettingsParams = $Shape<VaultSettings>
 export type WalletImportMnemonicParams = {
   chain: WalletSupportedChains,
   mnemonic: string,
+  name: string,
 }
 
-export type WalletImportPKParams = {
-  chain: WalletSupportedChains,
-  privateKey: string,
-  walletID?: ID,
+export type WalletNamedAccount = {
+  name: string,
+  address: string,
 }
 
 export type WalletResult = {
@@ -350,16 +350,21 @@ export type WalletResult = {
   accounts: Array<string>,
 }
 
-export type WalletImportResult = WalletResult
+export type WalletImportResult = {
+  walletID: ID,
+  type: WalletTypes,
+  accounts: Array<WalletNamedAccount>,
+}
 
 export type WalletCreateHDParams = {
   chain: WalletSupportedChains,
+  name: string,
 }
 
 export type WalletCreateHDResult = {
   walletID: ID,
   type: WalletTypes,
-  accounts: Array<string>,
+  accounts: Array<WalletNamedAccount>,
   mnemonic: string,
 }
 
@@ -373,7 +378,6 @@ export type WalletDeleteParams = {
 
 export type WalletGetEthWalletsResult = {
   hd: WalletResults,
-  simple: WalletResults,
   ledger: WalletResults,
 }
 
@@ -398,11 +402,18 @@ export type WalletGetLedgerEthAccountsResult = Array<string>
 
 export type WalletAddLedgerEthAccountParams = {
   index: number,
+  name: string,
 }
 
 export type WalletAddHDAccountParams = {
+  name: string,
   index: number,
   walletID: ID,
 }
 
 export type WalletAddHDAccountResult = string
+
+export type WalletAddLedgerResult = {
+  walletID: string,
+  address: string,
+}

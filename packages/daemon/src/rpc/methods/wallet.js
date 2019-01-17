@@ -4,7 +4,6 @@ import {
   idType,
   WALLET_CREATE_HD_SCHEMA,
   WALLET_SIGN_TRANSACTION_SCHEMA,
-  WALLET_IMPORT_PK_SCHEMA,
   WALLET_IMPORT_MNEMONIC_SCHEMA,
   WALLET_DELETE_SCHEMA,
   WALLET_GET_LEDGER_ETH_ACCOUNTS_SCHEMA,
@@ -14,7 +13,6 @@ import {
   type WalletAddHDAccountResult,
   type WalletCreateHDParams,
   type WalletCreateHDResult,
-  type WalletImportPKParams,
   type WalletImportResult,
   type WalletImportMnemonicParams,
   type WalletDeleteParams,
@@ -28,14 +26,13 @@ import {
   type WalletTypes,
 } from '@mainframe/client'
 
+import type ClientContext from '../../context/ClientContext'
 import { getAccountsByPage } from '../../wallet/ledgerClient'
-
-import type RequestContext from '../RequestContext'
 
 export const createHDWallet = {
   params: WALLET_CREATE_HD_SCHEMA,
   handler: async (
-    ctx: RequestContext,
+    ctx: ClientContext,
     params: WalletCreateHDParams,
   ): Promise<WalletCreateHDResult> => {
     const res = ctx.openVault.wallets.createHDWallet(params)
@@ -44,22 +41,10 @@ export const createHDWallet = {
   },
 }
 
-export const importAccountByPK = {
-  params: WALLET_IMPORT_PK_SCHEMA,
-  handler: async (
-    ctx: RequestContext,
-    params: WalletImportPKParams,
-  ): Promise<WalletImportResult> => {
-    const simpleWallet = ctx.openVault.wallets.importPKWallet(params)
-    await ctx.openVault.save()
-    return simpleWallet
-  },
-}
-
 export const importMnemonic = {
   params: WALLET_IMPORT_MNEMONIC_SCHEMA,
   handler: async (
-    ctx: RequestContext,
+    ctx: ClientContext,
     params: WalletImportMnemonicParams,
   ): Promise<WalletImportResult> => {
     const hdWallet = ctx.openVault.wallets.importMnemonicWallet(params)
@@ -71,7 +56,7 @@ export const importMnemonic = {
 export const addHDAccount = {
   params: WALLET_ADD_HD_ACCOUNT_SCHEMA,
   handler: async (
-    ctx: RequestContext,
+    ctx: ClientContext,
     params: WalletAddHDAccountParams,
   ): Promise<WalletAddHDAccountResult> => {
     const newAddress = ctx.openVault.wallets.addHDWalletAccount(params)
@@ -83,7 +68,7 @@ export const addHDAccount = {
 export const deleteWallet = {
   params: WALLET_DELETE_SCHEMA,
   handler: async (
-    ctx: RequestContext,
+    ctx: ClientContext,
     params: WalletDeleteParams,
   ): Promise<void> => {
     await ctx.openVault.wallets.deleteWallet(params)
@@ -93,7 +78,7 @@ export const deleteWallet = {
 }
 
 export const getEthWallets = (
-  ctx: RequestContext,
+  ctx: ClientContext,
 ): WalletGetEthWalletsResult => {
   const mapData = (type: WalletTypes): WalletResults =>
     Object.keys(ctx.openVault.wallets.ethWallets[type]).map(id => {
@@ -107,7 +92,6 @@ export const getEthWallets = (
     })
   return {
     hd: mapData('hd'),
-    simple: mapData('pk'),
     ledger: mapData('ledger'),
   }
 }
@@ -115,7 +99,7 @@ export const getEthWallets = (
 export const signTransaction = {
   params: WALLET_SIGN_TRANSACTION_SCHEMA,
   handler: async (
-    ctx: RequestContext,
+    ctx: ClientContext,
     params: WalletSignTxParams,
   ): Promise<WalletSignTxResult> => {
     if (params.chain === 'ethereum') {
@@ -128,7 +112,7 @@ export const signTransaction = {
 export const getLedgerEthAccounts = {
   params: WALLET_GET_LEDGER_ETH_ACCOUNTS_SCHEMA,
   handler: async (
-    ctx: RequestContext,
+    ctx: ClientContext,
     params: WalletGetLedgerEthAccountsParams,
   ): Promise<WalletGetLedgerEthAccountsResult> => {
     return getAccountsByPage(params)
@@ -138,10 +122,11 @@ export const getLedgerEthAccounts = {
 export const addLedgerEthAccount = {
   params: WALLET_ADD_LEDGER_ETH_ACCOUNT_SCHEMA,
   handler: async (
-    ctx: RequestContext,
+    ctx: ClientContext,
     params: WalletAddLedgerEthAccountParams,
   ): Promise<void> => {
-    await ctx.openVault.wallets.addLedgerEthAccount(params)
+    const res = await ctx.openVault.wallets.addLedgerEthAccount(params)
     await ctx.openVault.save()
+    return res
   },
 }

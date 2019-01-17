@@ -1,9 +1,11 @@
 // @flow
 
 import { flags } from '@oclif/command'
+import { prompt } from 'inquirer'
+
 import Command from '../../OpenVaultCommand'
 
-export default class IdentityCreateCommand extends Command {
+export default class CreateEthWalletCommand extends Command {
   static description = 'Create Ethereum wallet'
   static flags = {
     ...Command.flags,
@@ -13,18 +15,32 @@ export default class IdentityCreateCommand extends Command {
   }
 
   async run() {
-    if (this.client == null) {
-      return
-    }
-    const res = await this.client.wallet.createHDWallet({ chain: 'ethereum' })
+    const answers = await prompt([
+      {
+        type: 'input',
+        name: 'name',
+        message: 'Wallet name:',
+      },
+    ])
 
-    if (this.flags.userID && this.client) {
-      await this.client.identity.linkEthWalletAccount({
-        id: this.flags.userID,
-        walletID: res.walletID,
-        address: res.accounts[0],
-      })
+    if (!answers.name.length) {
+      throw new Error('Please provide a name.')
     }
-    this.log(res)
+
+    if (this.client) {
+      const res = await this.client.wallet.createHDWallet({
+        chain: 'ethereum',
+        name: answers.name,
+      })
+
+      if (this.flags.userID && this.client) {
+        await this.client.identity.linkEthWalletAccount({
+          id: this.flags.userID,
+          walletID: res.walletID,
+          address: res.accounts[0].address,
+        })
+      }
+      this.log(res)
+    }
   }
 }

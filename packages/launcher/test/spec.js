@@ -134,7 +134,7 @@ describe('Application launch', function() {
       .click()
 
     // Ensure test app is uploaded to Swarm before trying to install it
-    const bzz = new BzzAPI('http://swarm-gateways.net')
+    const bzz = new BzzAPI({ url: 'http://swarm-gateways.net' })
     await bzz.uploadDirectoryFrom(getFixture('test-app'))
     const manifestPath = getFixture('test-app-manifest.json')
 

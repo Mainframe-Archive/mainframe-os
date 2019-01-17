@@ -27,9 +27,10 @@
     "start": "node -r esm lib"
   },
   "dependencies": {
-    "@erebos/api-bzz-node": "^0.5.1",
-    "@erebos/api-pss": "^0.5.2",
-    "@erebos/hex": "^0.5.0",
+    "@babel/polyfill": "^7.2.5",
+    "@erebos/api-bzz-node": "^0.6.2",
+    "@erebos/api-pss": "^0.5.3",
+    "@erebos/hex": "^0.5.4",
     "@erebos/keccak256": "^0.6.0",
     "@erebos/secp256k1": "^0.6.0",
     "@ledgerhq/hw-app-eth": "^4.24.0",
@@ -38,6 +39,7 @@
     "@mainframe/app-permissions": "*",
     "@mainframe/client": "*",
     "@mainframe/config": "*",
+    "@mainframe/contract-utils": "*",
     "@mainframe/data-types": "*",
     "@mainframe/rpc-error": "^0.3.0",
     "@mainframe/rpc-handler": "^0.2.1",
@@ -63,6 +65,7 @@
     "graphql-relay": "^0.5.5",
     "multibase": "^0.6.0",
     "rxjs": "^6.3.3",
+    "web3-eth-contract": "^1.0.0-beta.37",
     "web3-provider-engine": "^14.0.6",
     "web3-providers-http": "^1.0.0-beta.36",
     "web3-utils": "^1.0.0-beta.36"

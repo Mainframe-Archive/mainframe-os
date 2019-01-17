@@ -22,6 +22,8 @@ export type PeerUserIdentitySerialized = {
   profile: PeerUserProfile,
 }
 
+export type PeerUserIdentityParams = PeerUserIdentitySerialized
+
 export default class PeerUserIdentity extends Identity {
   static fromJSON = (params: PeerUserIdentitySerialized): PeerUserIdentity => {
     return new PeerUserIdentity(

@@ -18,7 +18,6 @@ export default {
   app_close: app.close,
   app_install: app.install,
   app_remove: app.remove,
-  app_removeOwn: app.removeOwn,
   app_open: app.open,
   app_getAll: app.getAll,
   app_setPermission: app.setPermission,
@@ -39,6 +38,7 @@ export default {
   blockchain_web3Send: blockchain.web3Send,
 
   graphql_query: graphql.query,
+  graphql_subscription: graphql.subscription,
 
   identity_addPeer: identity.addPeer,
   identity_addPeerByFeed: identity.addPeerByFeed,
@@ -69,7 +69,6 @@ export default {
   vault_setSettings: vault.setSettings,
 
   wallet_createHD: wallet.createHDWallet,
-  wallet_importPK: wallet.importAccountByPK,
   wallet_importMnemonic: wallet.importMnemonic,
   wallet_addHDAccount: wallet.addHDAccount,
   wallet_delete: wallet.deleteWallet,

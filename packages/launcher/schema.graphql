@@ -1,3 +1,29 @@
+input AddHDWalletAccountInput {
+  walletID: String!
+  index: Int!
+  name: String!
+  clientMutationId: String
+}
+
+type AddHDWalletAccountPayload {
+  address: String!
+  viewer: Viewer!
+  clientMutationId: String
+}
+
+input AddLedgerWalletAccountInput {
+  index: Int!
+  name: String!
+  clientMutationId: String
+}
+
+type AddLedgerWalletAccountPayload {
+  address: String!
+  walletID: String!
+  viewer: Viewer!
+  clientMutationId: String
+}
+
 type App implements Node {
   """The ID of an object"""
   id: ID!
@@ -129,6 +155,19 @@ type CreateDeveloperIdentityPayload {
   clientMutationId: String
 }
 
+input CreateHDWalletInput {
+  type: SupportedWallets!
+  name: String!
+  linkToUserId: String
+  clientMutationId: String
+}
+
+type CreateHDWalletPayload {
+  hdWallet: EthHDWallet
+  viewer: Viewer!
+  clientMutationId: String
+}
+
 input CreateUserIdentityInput {
   profile: UserProfileInput!
   clientMutationId: String
@@ -140,9 +179,53 @@ type CreateUserIdentityPayload {
   clientMutationId: String
 }
 
+input DeleteWalletInput {
+  walletID: String!
+  type: String!
+  clientMutationId: String
+}
+
+type DeleteWalletPayload {
+  viewer: Viewer!
+  clientMutationId: String
+}
+
+type EthHDWallet implements Node {
+  """The ID of an object"""
+  id: ID!
+  localID: ID!
+  accounts: [NamedWalletAccountType]
+}
+
+type EthLedgerWallet implements Node {
+  """The ID of an object"""
+  id: ID!
+  localID: ID!
+  accounts: [NamedWalletAccountType]
+}
+
+type EthWallets {
+  hd: [EthHDWallet]
+  ledger: [EthLedgerWallet]
+}
+
 type IdentitiesQuery {
   ownUsers: [OwnUserIdentity]
   ownDevelopers: [OwnDeveloperIdentity]
+}
+
+input ImportHDWalletInput {
+  type: SupportedWallets!
+  mnemonic: String!
+  name: String!
+  linkToUserId: String
+  clientMutationId: String
+}
+
+type ImportHDWalletPayload {
+  hdWallet: EthHDWallet
+  viewer: Viewer!
+  clientMutationId: String
 }
 
 input ManifestAuthorInput {
@@ -155,6 +238,17 @@ type Mutation {
   installApp(input: AppInstallMutationInput!): AppInstallMutationPayload
   createUserIdentity(input: CreateUserIdentityInput!): CreateUserIdentityPayload
   createDeveloperIdentity(input: CreateDeveloperIdentityInput!): CreateDeveloperIdentityPayload
+  createHDWallet(input: CreateHDWalletInput!): CreateHDWalletPayload
+  importHDWallet(input: ImportHDWalletInput!): ImportHDWalletPayload
+  addHDWalletAccount(input: AddHDWalletAccountInput!): AddHDWalletAccountPayload
+  addLedgerWalletAccount(input: AddLedgerWalletAccountInput!): AddLedgerWalletAccountPayload
+  deleteWallet(input: DeleteWalletInput!): DeleteWalletPayload
+}
+
+type NamedWalletAccountType {
+  name: String!
+  address: String!
+  balances: WalletBalancesType!
 }
 
 """An object with an ID"""
@@ -217,6 +311,14 @@ type Query {
   viewer: Viewer!
 }
 
+type Subscription {
+  appCreated: OwnApp!
+}
+
+enum SupportedWallets {
+  ETHEREUM
+}
+
 input UserProfileInput {
   name: String!
   avatar: String
@@ -231,6 +333,16 @@ type Viewer {
   id: ID!
   apps: AppsQuery!
   identities: IdentitiesQuery!
+  wallets: WalletsQuery!
+}
+
+type WalletBalancesType {
+  eth: String!
+  mft: String!
+}
+
+type WalletsQuery {
+  ethWallets: EthWallets!
 }
 
 input WebRequestGrantInput {
