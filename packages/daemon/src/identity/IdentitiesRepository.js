@@ -493,24 +493,6 @@ export default class IdentitiesRepository {
     return contact
   }
 
-  addContact(userID: string, publicFeed: string, profile: Object): Contact {
-    let peer = this.getPeerByFeed(publicFeed)
-    if (!peer) {
-      // TODO Fetch mfid from feed
-      const identity = OwnUserIdentity.create(profile)
-      const testMFID = identity.id
-      peer = this.createPeerUser(testMFID, profile, publicFeed)
-    }
-    // TODO create [me -> contact] feed
-    const params = {
-      localID: uniqueID(),
-      ownFeed: uniqueID(), // TODO: temp
-      peerID: peer.localID,
-      profile,
-    }
-    return this.createContactFromPeer(userID, params)
-  }
-
   getUserContacts(userID: string): Array<ContactResult> {
     const result = []
     const contacts = this._identities.contacts[userID]

@@ -956,14 +956,8 @@ const addContactMutation = mutationWithClientMutationId({
       resolve: () => ({}),
     },
   },
-  mutateAndGetPayload: async (args, ctx) => {
-    const contact = ctx.openVault.identities.addContact(
-      args.userID,
-      args.publicFeed,
-      args.profile,
-    )
-    await ctx.openVault.save()
-    return { contact }
+  mutateAndGetPayload: async () => {
+    throw new Error('needs implementing')
   },
 })
 
