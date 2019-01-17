@@ -209,12 +209,13 @@ export type Feeds = {
 }
 
 export type IdentityAddPeerParams = {
-  mfid: string,
+  key: string,
   profile: {
     name?: ?string,
     avatar?: ?string,
   },
   publicFeed: string,
+  firstContactAddress: string,
   otherFeeds: Feeds,
 }
 

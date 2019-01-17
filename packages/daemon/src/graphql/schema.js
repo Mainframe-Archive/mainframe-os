@@ -19,6 +19,7 @@ import {
   nodeDefinitions,
   mutationWithClientMutationId,
 } from 'graphql-relay'
+import { filter, map } from 'rxjs/operators'
 
 import { App, OwnApp } from '../app'
 import {
@@ -29,15 +30,15 @@ import {
   PeerDeveloperIdentity,
   PeerUserIdentity,
 } from '../identity'
-
+import type ClientContext from '../context/ClientContext'
 import LedgerWallet from '../wallet/LedgerWallet'
 import HDWallet from '../wallet/HDWallet'
 import { downloadAppContents, getContentsPath } from '../app/AppsRepository'
 
-import type RequestContext from '../rpc/RequestContext'
+import observableToAsyncIterator from './observableToAsyncIterator'
 
 const { nodeInterface, nodeField } = nodeDefinitions(
-  (globalId: string, ctx: RequestContext) => {
+  (globalId: string, ctx: ClientContext) => {
     if (globalId === 'viewer') {
       return {}
     }
@@ -155,7 +156,7 @@ const appUser = new GraphQLObjectType({
     },
     identity: {
       type: new GraphQLNonNull(ownUserIdentityType),
-      resolve: (self, args, ctx: RequestContext) => {
+      resolve: (self, args, ctx: ClientContext) => {
         return ctx.openVault.identities.getOwnUser(self.localID)
       },
     },
@@ -385,7 +386,7 @@ const ownUserIdentityType = new GraphQLObjectType({
     },
     apps: {
       type: new GraphQLList(appType),
-      resolve: (self, args, ctx: RequestContext) => {
+      resolve: (self, args, ctx: ClientContext) => {
         return ctx.openVault.apps.getAppsForUser(self.localID)
       },
     },
@@ -524,13 +525,13 @@ const appsQueryType = new GraphQLObjectType({
   fields: () => ({
     installed: {
       type: new GraphQLList(appType),
-      resolve: (self, args, ctx: RequestContext) => {
+      resolve: (self, args, ctx: ClientContext) => {
         return Object.values(ctx.openVault.apps.apps)
       },
     },
     own: {
       type: new GraphQLList(ownAppType),
-      resolve: (self, args, ctx: RequestContext) => {
+      resolve: (self, args, ctx: ClientContext) => {
         return Object.values(ctx.openVault.apps.ownApps)
       },
     },
@@ -542,13 +543,13 @@ const identitiesQueryType = new GraphQLObjectType({
   fields: () => ({
     ownUsers: {
       type: new GraphQLList(ownUserIdentityType),
-      resolve: (self, args, ctx: RequestContext) => {
+      resolve: (self, args, ctx: ClientContext) => {
         return Object.values(ctx.openVault.identities.ownUsers)
       },
     },
     ownDevelopers: {
       type: new GraphQLList(ownDeveloperIdentityType),
-      resolve: (self, args, ctx: RequestContext) => {
+      resolve: (self, args, ctx: ClientContext) => {
         return Object.values(ctx.openVault.identities.ownDevelopers)
       },
     },
@@ -575,14 +576,14 @@ const walletBalancesType = new GraphQLObjectType({
     eth: {
       type: new GraphQLNonNull(GraphQLString),
       resolve: async (self, args, ctx) => {
-        const balance = await ctx.eth.getETHBalance(self)
+        const balance = await ctx.io.eth.getETHBalance(self)
         return balance || 0
       },
     },
     mft: {
       type: new GraphQLNonNull(GraphQLString),
       resolve: async (self, args, ctx) => {
-        const balance = await ctx.eth.getMFTBalance(self)
+        const balance = await ctx.io.eth.getMFTBalance(self)
         return balance || 0
       },
     },
@@ -652,7 +653,7 @@ const walletsQueryType = new GraphQLObjectType({
   fields: () => ({
     ethWallets: {
       type: new GraphQLNonNull(ethWalletsType),
-      resolve: (self, args, ctx: RequestContext) => {
+      resolve: (self, args, ctx: ClientContext) => {
         return ctx.openVault.wallets.ethWallets
       },
     },
@@ -903,8 +904,7 @@ const createUserIdentityMutation = mutationWithClientMutationId({
     },
   },
   mutateAndGetPayload: async (args, ctx) => {
-    const user = ctx.openVault.identities.createOwnUser(args.profile)
-    await ctx.openVault.save()
+    const user = await ctx.mutations.createOwnUserIdentity(args.profile)
     return { user }
   },
 })
@@ -1046,14 +1046,7 @@ const appCreateMutation = mutationWithClientMutationId({
     },
   },
   mutateAndGetPayload: async (args, ctx) => {
-    const app = ctx.openVault.createApp({
-      contentsPath: args.contentsPath,
-      developerID: args.developerID,
-      name: args.name,
-      version: args.version,
-      permissionsRequirements: args.permissionsRequirements,
-    })
-    await ctx.openVault.save()
+    const app = await ctx.mutations.createApp(args)
     return { app }
   },
 })
@@ -1191,7 +1184,24 @@ const queryType = new GraphQLObjectType({
   }),
 })
 
+const subscriptionType = new GraphQLObjectType({
+  name: 'Subscription',
+  fields: () => ({
+    appCreated: {
+      type: new GraphQLNonNull(ownAppType),
+      subscribe: (self, args, ctx: ClientContext) => {
+        const appCreated = ctx.pipe(
+          filter(e => e.type === 'own_app_created'),
+          map(e => ({ appCreated: e.app })),
+        )
+        return observableToAsyncIterator(appCreated)
+      },
+    },
+  }),
+})
+
 export default new GraphQLSchema({
-  query: queryType,
   mutation: mutationType,
+  query: queryType,
+  subscription: subscriptionType,
 })

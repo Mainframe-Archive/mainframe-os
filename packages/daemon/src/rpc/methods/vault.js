@@ -9,18 +9,15 @@ import {
   type VaultSettingsParams,
 } from '@mainframe/client'
 
+import type ClientContext from '../../context/ClientContext'
+
 import { vaultError } from '../errors'
-import type RequestContext from '../RequestContext'
 
 export const create = {
   params: VAULT_SCHEMA,
-  handler: async (ctx: RequestContext, params: VaultParams) => {
+  handler: async (ctx: ClientContext, params: VaultParams) => {
     try {
-      await ctx.vaults.create(
-        ctx.socket,
-        params.path,
-        Buffer.from(params.password),
-      )
+      await ctx.mutations.createVault(params.path, Buffer.from(params.password))
     } catch (err) {
       // TODO: different error code depending on actual error
       throw vaultError(err.message)
@@ -28,20 +25,15 @@ export const create = {
   },
 }
 
-export const getSettings = (ctx: RequestContext): VaultSettings => {
+export const getSettings = (ctx: ClientContext): VaultSettings => {
   return ctx.openVault.settings
 }
 
 export const open = {
   params: VAULT_SCHEMA,
-  handler: async (ctx: RequestContext, params: VaultParams) => {
+  handler: async (ctx: ClientContext, params: VaultParams) => {
     try {
-      await ctx.vaults.open(
-        ctx.socket,
-        params.path,
-        Buffer.from(params.password),
-      )
-      ctx.eth.setup()
+      await ctx.mutations.openVault(params.path, Buffer.from(params.password))
     } catch (err) {
       // TODO: different error code depending on actual error
       throw vaultError(err.message)
@@ -52,7 +44,7 @@ export const open = {
 export const setSettings = {
   params: VAULT_SETTINGS_SCHEMA,
   handler: async (
-    ctx: RequestContext,
+    ctx: ClientContext,
     settings: VaultSettingsParams,
   ): Promise<VaultSettings> => {
     const newSettings = ctx.openVault.setSettings(settings)

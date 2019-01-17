@@ -5,11 +5,11 @@ import type StreamRPC from '@mainframe/rpc-stream'
 
 import AppAPIs from './apis/App'
 import BlockchainAPIs from './apis/Blockchain'
+import GraphQLAPIs from './apis/GraphQL'
 import IdentityAPIs from './apis/Identity'
 import PssAPIs from './apis/Pss'
 import VaultAPIs from './apis/Vault'
 import WalletAPIs from './apis/Wallet'
-import type { GraphQLQueryParams, GraphQLQueryResult } from './types'
 
 export { idType } from '@mainframe/utils-id'
 export * from './schema'
@@ -19,6 +19,7 @@ export default class MainframeClient {
   _rpc: StreamRPC
   app: AppAPIs
   blockchain: BlockchainAPIs
+  graphql: GraphQLAPIs
   identity: IdentityAPIs
   pss: PssAPIs
   vault: VaultAPIs
@@ -28,6 +29,7 @@ export default class MainframeClient {
     this._rpc = ipcRPC(socketPath)
     this.app = new AppAPIs(this._rpc)
     this.blockchain = new BlockchainAPIs(this._rpc)
+    this.graphql = new GraphQLAPIs(this._rpc)
     this.identity = new IdentityAPIs(this._rpc)
     this.pss = new PssAPIs(this._rpc)
     this.vault = new VaultAPIs(this._rpc)
@@ -42,11 +44,5 @@ export default class MainframeClient {
 
   apiVersion(): Promise<number> {
     return this._rpc.request('api_version')
-  }
-
-  // GraphQL
-
-  graphql(params: GraphQLQueryParams): Promise<GraphQLQueryResult> {
-    return this._rpc.request('graphql_query', params)
   }
 }
