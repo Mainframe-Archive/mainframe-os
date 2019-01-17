@@ -27,6 +27,7 @@
     "start": "node -r esm lib"
   },
   "dependencies": {
+    "@babel/polyfill": "^7.2.5",
     "@erebos/api-bzz-node": "^0.6.2",
     "@erebos/api-pss": "^0.5.3",
     "@erebos/hex": "^0.5.4",
