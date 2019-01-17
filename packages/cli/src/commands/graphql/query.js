@@ -21,7 +21,7 @@ export default class GraphQLQueryCommand extends Command {
       return
     }
 
-    const res = await client.graphql({ query: this.args.query })
+    const res = await client.graphql.query({ query: this.args.query })
     this.log(inspect(res, { colors: true, depth: null }))
   }
 }

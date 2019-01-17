@@ -311,6 +311,10 @@ type Query {
   viewer: Viewer!
 }
 
+type Subscription {
+  appCreated: OwnApp!
+}
+
 enum SupportedWallets {
   ETHEREUM
 }

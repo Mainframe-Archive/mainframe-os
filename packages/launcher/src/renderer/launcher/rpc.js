@@ -5,8 +5,10 @@ import type {
   AppCreateParams,
   AppUserSettings,
   AppUserPermissionsSettings,
+  GraphQLQueryResult,
 } from '@mainframe/client'
 import electronRPC from '@mainframe/rpc-electron'
+import { Observable } from 'rxjs'
 
 import { LAUNCHER_CHANNEL } from '../../constants'
 
@@ -30,14 +32,18 @@ export default {
   },
   readManifest: (path: string) => rpc.request('app_readManifest', { path }),
   setAppUserSettings: (appID: ID, userID: ID, settings: AppUserSettings) => {
-    rpc.request('app_setUserSettings', { appID, userID, settings })
+    return rpc.request('app_setUserSettings', { appID, userID, settings })
   },
   setAppUserPermissionsSettings: (
     appID: ID,
     userID: ID,
     settings: AppUserPermissionsSettings,
   ) => {
-    rpc.request('app_setUserPermissionsSettings', { appID, userID, settings })
+    return rpc.request('app_setUserPermissionsSettings', {
+      appID,
+      userID,
+      settings,
+    })
   },
 
   // Identity
@@ -51,8 +57,65 @@ export default {
   getOwnDevIdentities: () => rpc.request('identity_getOwnDevelopers'),
 
   // GraphQL
-  graphql: (query: string, variables?: ?Object) => {
+  graphqlQuery: (
+    query: string,
+    variables?: ?Object,
+  ): Promise<GraphQLQueryResult> => {
     return rpc.request('graphql_query', { query, variables })
+  },
+  graphqlSubscription: (
+    query: string,
+    variables?: ?Object,
+  ): Observable<GraphQLQueryResult> => {
+    let subscription
+    let unsubscribed = false
+
+    const unsubscribe = () => {
+      if (subscription == null) {
+        unsubscribed = true
+      } else {
+        rpc.request('sub_unsubscribe', { id: subscription })
+      }
+    }
+
+    rpc.request('graphql_subscription', { query, variables }).then(id => {
+      if (unsubscribed) {
+        return rpc.request('sub_unsubscribe', { id })
+      }
+      subscription = id
+    })
+
+    return Observable.create(observer => {
+      rpc.subscribe({
+        next: msg => {
+          if (
+            msg.method === 'graphql_subscription_update' &&
+            msg.params != null &&
+            msg.params.subscription === subscription
+          ) {
+            const { result } = msg.params
+            if (result != null) {
+              try {
+                observer.next(result)
+              } catch (err) {
+                // eslint-disable-next-line no-console
+                console.warn('Error handling message', result, err)
+              }
+            }
+          }
+        },
+        error: err => {
+          observer.error(err)
+          unsubscribe()
+        },
+        complete: () => {
+          observer.complete()
+          unsubscribe()
+        },
+      })
+
+      return unsubscribe
+    })
   },
 
   // Vault
@@ -65,8 +128,10 @@ export default {
   },
 
   // Wallets & Blockchain
-  getLedgerAccounts: (pageNum: number) =>
-    rpc.request('wallet_getLedgerAccounts', { pageNum }),
-  ethereumRequest: (params: Object) =>
-    rpc.request('blockchain_web3Send', params),
+  getLedgerAccounts: (pageNum: number) => {
+    return rpc.request('wallet_getLedgerAccounts', { pageNum })
+  },
+  ethereumRequest: (params: Object) => {
+    return rpc.request('blockchain_web3Send', params)
+  },
 }

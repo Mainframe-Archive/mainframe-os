@@ -38,6 +38,7 @@ export default {
   blockchain_web3Send: blockchain.web3Send,
 
   graphql_query: graphql.query,
+  graphql_subscription: graphql.subscription,
 
   identity_addPeer: identity.addPeer,
   identity_addPeerByFeed: identity.addPeerByFeed,
