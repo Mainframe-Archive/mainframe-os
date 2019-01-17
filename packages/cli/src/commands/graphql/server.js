@@ -24,7 +24,9 @@ export default class GraphQLServerCommand extends Command {
     }
 
     const port = await getPort({ port: parseInt(this.flags.port, 10) })
-    const server = micro(async req => await client.graphql(await json(req)))
+    const server = micro(async req => {
+      return await client.graphql.query(await json(req))
+    })
 
     server.listen(port, () => {
       this.log(`GraphQL server listening on http://localhost:${port}`)

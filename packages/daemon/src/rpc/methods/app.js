@@ -43,12 +43,12 @@ import { idType as fromClientID, type ID } from '@mainframe/utils-id'
 import type { SessionData } from '../../app/AbstractApp'
 import { downloadAppContents, getContentsPath } from '../../app/AppsRepository'
 import OwnApp from '../../app/OwnApp'
+import type ClientContext from '../../context/ClientContext'
 
 import { clientError, sessionError } from '../errors'
-import type RequestContext from '../RequestContext'
 
 const createClientSession = (
-  ctx: RequestContext,
+  ctx: ClientContext,
   appID: ID,
   userID: ID,
   session: SessionData,
@@ -105,7 +105,7 @@ const createClientSession = (
 export const checkPermission = {
   params: APP_CHECK_PERMISSION_SCHEMA,
   handler: (
-    ctx: RequestContext,
+    ctx: ClientContext,
     params: AppCheckPermissionParams,
   ): AppCheckPermissionResult => {
     const session = ctx.openVault.getSession(fromClientID(params.sessID))
@@ -120,7 +120,7 @@ export const checkPermission = {
 
 export const close = {
   params: APP_CLOSE_SCHEMA,
-  handler: (ctx: RequestContext, params: AppCloseParams): void => {
+  handler: (ctx: ClientContext, params: AppCloseParams): void => {
     ctx.openVault.closeApp(fromClientID(params.sessID))
   },
 }
@@ -128,22 +128,19 @@ export const close = {
 export const create = {
   params: APP_CREATE_SCHEMA,
   handler: async (
-    ctx: RequestContext,
+    ctx: ClientContext,
     params: AppCreateParams,
   ): Promise<AppCreateResult> => {
-    const app = ctx.openVault.createApp({
-      contentsPath: params.contentsPath,
-      developerID: fromClientID(params.developerID),
-      name: params.name,
-      version: params.version,
-      permissionsRequirements: params.permissionsRequirements,
+    const { developerID, ...data } = params
+    const app = await ctx.mutations.createApp({
+      ...data,
+      developerID: fromClientID(developerID),
     })
-    await ctx.openVault.save()
     return { appID: toClientID(app.id) }
   },
 }
 
-export const getAll = (ctx: RequestContext): AppGetAllResult => {
+export const getAll = (ctx: ClientContext): AppGetAllResult => {
   const { apps, ownApps } = ctx.openVault.apps
   const mapList = (mapApps: Object) => {
     return Object.keys(mapApps).map(appID => {
@@ -176,7 +173,7 @@ export const getAll = (ctx: RequestContext): AppGetAllResult => {
 export const getManifestData = {
   params: APP_GET_MANIFEST_DATA_SCHEMA,
   handler: async (
-    ctx: RequestContext,
+    ctx: ClientContext,
     params: AppGetManifestDataParams,
   ): Promise<AppGetManifestDataResult> => ({
     data: ctx.openVault.getAppManifestData(
@@ -189,7 +186,7 @@ export const getManifestData = {
 export const install = {
   params: APP_INSTALL_SCHEMA,
   handler: async (
-    ctx: RequestContext,
+    ctx: ClientContext,
     params: AppInstallParams,
   ): Promise<AppInstallResult> => {
     const app = ctx.openVault.installApp(
@@ -198,7 +195,7 @@ export const install = {
       params.permissionsSettings,
     )
     const contentsPath = getContentsPath(ctx.env, params.manifest)
-    await downloadAppContents(ctx.bzz, app, contentsPath)
+    await downloadAppContents(ctx.io.bzz, app, contentsPath)
     await ctx.openVault.save()
     return { appID: toClientID(app.id) }
   },
@@ -206,7 +203,7 @@ export const install = {
 
 export const open = {
   params: APP_OPEN_SCHEMA,
-  handler: (ctx: RequestContext, params: AppOpenParams): AppOpenResult => {
+  handler: (ctx: ClientContext, params: AppOpenParams): AppOpenResult => {
     const appID = fromClientID(params.appID)
     const userID = fromClientID(params.userID)
     const session = ctx.openVault.openApp(appID, userID)
@@ -217,7 +214,7 @@ export const open = {
 export const publishContents = {
   params: APP_PUBLISH_CONTENTS_SCHEMA,
   handler: async (
-    ctx: RequestContext,
+    ctx: ClientContext,
     params: AppPublishContentsParams,
   ): Promise<AppPublishContentsResult> => {
     const app = ctx.openVault.apps.getOwnByID(fromClientID(params.appID))
@@ -225,7 +222,7 @@ export const publishContents = {
       throw new Error('App not found')
     }
 
-    const hash = await ctx.bzz.uploadDirectoryFrom(app.contentsPath)
+    const hash = await ctx.io.bzz.uploadDirectoryFrom(app.contentsPath)
     const contentsURI = `urn:bzz:${hash}`
     app.setContentsURI(contentsURI, params.version)
     await ctx.openVault.save()
@@ -237,7 +234,7 @@ export const publishContents = {
 export const remove = {
   params: APP_REMOVE_SCHEMA,
   handler: async (
-    ctx: RequestContext,
+    ctx: ClientContext,
     params: AppRemoveParams,
   ): Promise<void> => {
     ctx.openVault.removeApp(fromClientID(params.appID))
@@ -247,7 +244,7 @@ export const remove = {
 export const setUserSettings = {
   params: APP_SET_USER_SETTINGS_SCHEMA,
   handler: async (
-    ctx: RequestContext,
+    ctx: ClientContext,
     params: AppSetUserSettingsParams,
   ): Promise<void> => {
     const appID = fromClientID(params.appID)
@@ -260,7 +257,7 @@ export const setUserSettings = {
 export const setUserPermissionsSettings = {
   params: APP_SET_USER_PERMISSIONS_SETTINGS_SCHEMA,
   handler: async (
-    ctx: RequestContext,
+    ctx: ClientContext,
     params: AppSetUserPermissionsSettingsParams,
   ): Promise<void> => {
     const appID = fromClientID(params.appID)
@@ -273,7 +270,7 @@ export const setUserPermissionsSettings = {
 export const setPermission = {
   params: APP_SET_PERMISSION_SCHEMA,
   handler: async (
-    ctx: RequestContext,
+    ctx: ClientContext,
     params: AppSetPermissionParams,
   ): Promise<void> => {
     const session = ctx.openVault.getSession(fromClientID(params.sessID))
@@ -294,7 +291,7 @@ export const setPermission = {
 export const setPermissionsRequirements = {
   params: APP_SET_PERMISSIONS_REQUIREMENTS_SCHEMA,
   handler: async (
-    ctx: RequestContext,
+    ctx: ClientContext,
     params: AppSetPermissionsRequirementsParams,
   ): Promise<void> => {
     const app = ctx.openVault.apps.getOwnByID(fromClientID(params.appID))
@@ -309,7 +306,7 @@ export const setPermissionsRequirements = {
 export const writeManifest = {
   params: APP_WRITE_MANIFEST_SCHEMA,
   handler: async (
-    ctx: RequestContext,
+    ctx: ClientContext,
     params: AppWriteManifestParams,
   ): Promise<void> => {
     await ctx.openVault.writeAppManifest(

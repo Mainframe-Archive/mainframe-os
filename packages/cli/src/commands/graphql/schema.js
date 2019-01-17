@@ -26,7 +26,9 @@ export default class GraphQLSchemaCommand extends Command {
     }
 
     // $FlowFixMe: Flow doesn't seem to properly type the returned data
-    const schema = await client.graphql({ query: getIntrospectionQuery() })
+    const schema = await client.graphql.query({
+      query: getIntrospectionQuery(),
+    })
     if (schema.data == null) {
       return this.error('Failed to retrieve GraphQL schema')
     }
