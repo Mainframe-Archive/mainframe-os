@@ -177,12 +177,12 @@ export const createContactFromPeer = {
     ctx: RequestContext,
     params: IdentityCreateContactFromPeerParams,
   ): Promise<IdentityCreateContactResult> => {
-    await mutation.createContactFromPeer(
+    const contact = await mutation.createContactFromPeer(
       ctx,
       fromClientID(params.userID),
       fromClientID(params.peerID),
     )
-    return { id: toClientID(params.peerID) }
+    return { id: toClientID(contact.localID) }
   },
 }
 
@@ -221,9 +221,7 @@ export const getUserContacts = {
           const contactRes = {
             id,
             profile,
-            connection: contact.contactFeed ? 'connected' : 'sent',
-            // For v1 first contact, we assign a full contact state
-            // depending on if we've seen a private feed for our user
+            connection: contact.connection,
           }
           result.push(contactRes)
         }

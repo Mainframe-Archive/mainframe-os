@@ -42,6 +42,7 @@ export default {
 
   identity_addPeer: identity.addPeer,
   identity_addPeerByFeed: identity.addPeerByFeed,
+  identity_createContactFromPeer: identity.createContactFromPeer,
   identity_createUser: identity.createUser,
   identity_createDeveloper: identity.createDeveloper,
   identity_deleteContact: identity.deleteContact,

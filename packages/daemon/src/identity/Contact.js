@@ -2,7 +2,12 @@
 
 import { uniqueID } from '@mainframe/utils-id'
 
-import { OwnFeed, randomTopic, type OwnFeedSerialized } from '../swarm/feed'
+import {
+  OwnFeed,
+  randomTopic,
+  type OwnFeedSerialized,
+  type bzzHash,
+} from '../swarm/feed'
 
 export type ContactProfile = {
   aliasName?: ?string,
@@ -18,6 +23,10 @@ export type ContactSerialized = {
   ownFeed: OwnFeedSerialized,
   requestSent: boolean,
   contactFeed?: ?string,
+}
+
+export type FirstContactSerialized = {
+  privateFeed: bzzHash,
 }
 
 export type ContactConnection = 'connected' | 'sent' | 'sending'
@@ -87,7 +96,7 @@ export default class Contact {
   }
 
   get localID(): string {
-    return this.localID
+    return this._localID
   }
 
   get peerID(): string {
@@ -110,8 +119,21 @@ export default class Contact {
     return this._profile.aliasName || this._profile.name
   }
 
+  set requestSent(requestSent: boolean): void {
+    this._requestSent = requestSent
+  }
+
   get connection(): ContactConnection {
     if (this.contactFeed) return 'connected'
     return this._requestSent ? 'sent' : 'sending'
+  }
+
+  firstContactData(): FirstContactSerialized {
+    if (!this.ownFeed.feedHash) {
+      throw new Error('Contact feed manifest has not been synced')
+    }
+    return {
+      privateFeed: this.ownFeed.feedHash,
+    }
   }
 }

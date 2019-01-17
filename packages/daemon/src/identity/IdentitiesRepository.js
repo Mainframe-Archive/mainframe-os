@@ -462,9 +462,8 @@ export default class IdentitiesRepository {
 
   createContactFromPeer(ownUserId: ID, peerID: ID): Contact {
     const peer = this.getPeerUser(idType(peerID))
-    if (!peer) {
-      throw new Error('Peer not found')
-    }
+    if (!peer) throw new Error('Peer not found')
+
     if (this._identities.contacts[ownUserId]) {
       const contacts: Array<Contact> = Object.keys(
         this._identities.contacts[ownUserId],

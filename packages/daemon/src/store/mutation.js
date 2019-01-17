@@ -15,7 +15,7 @@ import PeerUserIdentity, {
 } from '../identity/PeerUserIdentity'
 import Contact from '../identity/Contact'
 import type RequestContext from '../rpc/RequestContext'
-import { type bzzHash } from '../swarm/feed'
+import { OwnFeed, type bzzHash } from '../swarm/feed'
 
 export const createDeveloper = async (
   ctx: RequestContext,
@@ -33,9 +33,10 @@ export const createUser = async (
   const user = ctx.openVault.identities.createOwnUser(profile)
   await ctx.openVault.save()
 
+  // TODO: Process feed work asynchronously
   const saveRequired = await user.publicFeed.syncManifest(ctx.bzz)
   if (saveRequired) await ctx.openVault.save()
-  user.publicFeed.publishJSON(ctx.bzz, user.publicFeedData)
+  await user.publicFeed.publishJSON(ctx.bzz, user.publicFeedData())
 
   return user
 }
@@ -80,7 +81,24 @@ export const createContactFromPeer = async (
   const contact = ctx.openVault.identities.createContactFromPeer(userID, peerID)
   await ctx.openVault.save()
 
-  // TODO: Publish feeds
+  // TODO: Process feed work asynchronously
+  const user = ctx.openVault.identities.getOwnUser(userID)
+  if (!user) throw new Error('User not found')
+  const peer = ctx.openVault.identities.getPeerUser(peerID)
+  if (!peer) throw new Error('Peer not found')
+
+  await contact.ownFeed.syncManifest(ctx.bzz)
+  // TODO: Actual data
+  await contact.ownFeed.publishJSON(ctx.bzz, { message: 'connected' })
+
+  // Create ephemeral one-use feed from the first-contact keypair and peer-specific topic
+  const firstContactFeed = OwnFeed.create(
+    user.firstContactFeed.keyPair,
+    peer.base64PublicKey(),
+  )
+  await firstContactFeed.publishJSON(ctx.bzz, contact.firstContactData())
+  contact.requestSent = true
+  await ctx.openVault.save()
 
   return contact
 }

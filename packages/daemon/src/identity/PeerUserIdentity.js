@@ -25,8 +25,8 @@ export type PeerUserIdentitySerialized = {
 export default class PeerUserIdentity extends Identity {
   static fromJSON = (params: PeerUserIdentitySerialized): PeerUserIdentity => {
     return new PeerUserIdentity(
-      params.id,
       params.localID,
+      params.id,
       params.profile,
       params.publicFeed,
       params.firstContactAddress,
