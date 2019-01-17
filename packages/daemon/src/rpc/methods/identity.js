@@ -208,7 +208,7 @@ export const getUserContacts = {
         if (peer) {
           const profile = { ...peer.profile, ...contact.profile }
           const contactRes = {
-            id,
+            id: toClientID(contact.localID),
             profile,
             connection: contact.connection,
           }

@@ -111,6 +111,10 @@ export default class Contact {
     return this._contactFeed
   }
 
+  set contactFeed(contactFeed: string): void {
+    this._contactFeed = contactFeed
+  }
+
   get profile(): ContactProfile {
     return this._profile
   }

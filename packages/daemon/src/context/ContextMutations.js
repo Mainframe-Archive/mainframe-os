@@ -3,6 +3,7 @@
 import { hexValueType } from '@erebos/hex'
 import type { StrictPermissionsRequirements } from '@mainframe/app-permissions'
 import type { ID } from '@mainframe/utils-id'
+import { getFeedTopic } from '@erebos/api-bzz-base'
 
 import type { OwnApp } from '../app'
 import type {
@@ -125,6 +126,22 @@ export default class ContextMutations {
     contact.requestSent = true
     await this._context.openVault.save()
 
+    // Check if other user created feed
+    try {
+      const topic = getFeedTopic({ name: user.base64PublicKey() })
+      const peerFeedRes = await this._context.io.bzz.getFeedValue(
+        peer.firstContactAddress,
+        { topic },
+        { mode: 'content-response' },
+      )
+      const data = await peerFeedRes.json()
+      contact.contactFeed = data.privateFeed
+      await this._context.openVault.save()
+    } catch (_e) {
+      // Should always be due to contact feed not being ready
+      // TODO: Rethrow other errors
+    }
+
     return contact
   }
 
@@ -152,7 +169,10 @@ export default class ContextMutations {
       this._context.io.bzz,
     )
     if (saveRequired) await this._context.openVault.save()
-    await user.publicFeed.publishJSON(this._context.io.bzz, user.publicFeedData())
+    await user.publicFeed.publishJSON(
+      this._context.io.bzz,
+      user.publicFeedData(),
+    )
 
     return user
   }
