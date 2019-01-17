@@ -36,6 +36,7 @@ export default {
   GREY_DARK_30: '#303030',
   GREY_DARK_38: '#383838',
   GREY_DARK_2A: '#2A2A2A',
+  GREY_DARK_23: '#232323',
   GREY_DARK_80: '#808080',
   GREY_A9: '#A9A9A9',
   WHITE: '#FFFFFF',

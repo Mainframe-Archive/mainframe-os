@@ -41,6 +41,13 @@ export default {
       fontSize: 9,
       borderRadius: 3,
     },
+    xSmallIconOnly: {
+      iconWidth: 14,
+      iconHeight: 14,
+      padding: '5px 5px 2px 5',
+      fontSize: 9,
+      borderRadius: 3,
+    },
     red: {
       borderWidth: 0,
       backgroundColor: COLORS.PRIMARY_RED,
@@ -97,6 +104,9 @@ export default {
     },
     greyDark: {
       color: COLORS.GREY_DARK_30,
+    },
+    greyDark23: {
+      color: COLORS.GREY_DARK_23,
     },
     blue: {
       color: COLORS.DARK_BLUE,
