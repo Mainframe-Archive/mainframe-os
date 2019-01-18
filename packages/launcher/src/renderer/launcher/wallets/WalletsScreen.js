@@ -3,10 +3,13 @@ import React, { Component } from 'react'
 import { graphql, createFragmentContainer, QueryRenderer } from 'react-relay'
 
 import { EnvironmentContext } from '../RelayEnvironment'
+import LauncherContext from '../LauncherContext'
 import RelayLoaderView from '../RelayLoaderView'
 import WalletsView, { type Wallets } from './WalletsView'
 
-type RendererProps = {}
+type RendererProps = {
+  userID: string,
+}
 
 type Props = RendererProps & {
   wallets: Wallets,
@@ -14,19 +17,22 @@ type Props = RendererProps & {
 
 class WalletsScreen extends Component<Props> {
   render() {
-    return <WalletsView wallets={this.props.wallets} />
+    return (
+      <WalletsView userID={this.props.userID} wallets={this.props.wallets} />
+    )
   }
 }
 
 const WalletsScreenRelayContainer = createFragmentContainer(WalletsScreen, {
   wallets: graphql`
-    fragment WalletsScreen_wallets on WalletsQuery {
-      ...WalletsView_wallets
+    fragment WalletsScreen_wallets on WalletsQuery
+      @argumentDefinitions(userID: { type: "String!" }) {
+      ...WalletsView_wallets @arguments(userID: $userID)
     }
   `,
 })
 
-export default class WalletsScreenRenderer extends Component<{}> {
+export class WalletsScreenRenderer extends Component<RendererProps> {
   static contextType = EnvironmentContext
 
   render() {
@@ -34,15 +40,15 @@ export default class WalletsScreenRenderer extends Component<{}> {
       <QueryRenderer
         environment={this.context}
         query={graphql`
-          query WalletsScreenQuery {
+          query WalletsScreenQuery($userID: String!) {
             viewer {
               wallets {
-                ...WalletsScreen_wallets
+                ...WalletsScreen_wallets @arguments(userID: $userID)
               }
             }
           }
         `}
-        variables={{}}
+        variables={{ userID: this.props.userID }}
         render={({ error, props }) => {
           if (error || !props) {
             return <RelayLoaderView error={error ? error.message : undefined} />
@@ -54,5 +60,12 @@ export default class WalletsScreenRenderer extends Component<{}> {
         }}
       />
     )
+  }
+}
+
+export default class WalletsScreenContextWrapper extends Component<{}> {
+  static contextType = LauncherContext
+  render() {
+    return <WalletsScreenRenderer userID={this.context.userID} />
   }
 }

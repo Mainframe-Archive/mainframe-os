@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 40351cde14efb964daffbd0dd8776b80
+ * @relayHash 4c83dbb840456bcff552a3252fb68e7f
  */
 
 /* eslint-disable */
@@ -19,7 +19,8 @@ export type ImportHDWalletInput = {
   clientMutationId?: ?string,
 };
 export type WalletImportViewImportHDWalletMutationVariables = {|
-  input: ImportHDWalletInput
+  input: ImportHDWalletInput,
+  userID: string,
 |};
 export type WalletImportViewImportHDWalletMutationResponse = {|
   +importHDWallet: ?{|
@@ -47,6 +48,7 @@ export type WalletImportViewImportHDWalletMutation = {|
 /*
 mutation WalletImportViewImportHDWalletMutation(
   $input: ImportHDWalletInput!
+  $userID: String!
 ) {
   importHDWallet(input: $input) {
     hdWallet {
@@ -59,15 +61,15 @@ mutation WalletImportViewImportHDWalletMutation(
     }
     viewer {
       wallets {
-        ...WalletsView_wallets
+        ...WalletsView_wallets_3iqrP
       }
       id
     }
   }
 }
 
-fragment WalletsView_wallets on WalletsQuery {
-  ethWallets {
+fragment WalletsView_wallets_3iqrP on WalletsQuery {
+  ethWallets(userID: $userID) {
     hd {
       localID
       accounts {
@@ -102,6 +104,12 @@ var v0 = [
     "kind": "LocalArgument",
     "name": "input",
     "type": "ImportHDWalletInput!",
+    "defaultValue": null
+  },
+  {
+    "kind": "LocalArgument",
+    "name": "userID",
+    "type": "String!",
     "defaultValue": null
   }
 ],
@@ -201,7 +209,7 @@ return {
   "operationKind": "mutation",
   "name": "WalletImportViewImportHDWalletMutation",
   "id": null,
-  "text": "mutation WalletImportViewImportHDWalletMutation(\n  $input: ImportHDWalletInput!\n) {\n  importHDWallet(input: $input) {\n    hdWallet {\n      accounts {\n        name\n        address\n      }\n      localID\n      id\n    }\n    viewer {\n      wallets {\n        ...WalletsView_wallets\n      }\n      id\n    }\n  }\n}\n\nfragment WalletsView_wallets on WalletsQuery {\n  ethWallets {\n    hd {\n      localID\n      accounts {\n        name\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n    ledger {\n      localID\n      accounts {\n        name\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n  }\n}\n",
+  "text": "mutation WalletImportViewImportHDWalletMutation(\n  $input: ImportHDWalletInput!\n  $userID: String!\n) {\n  importHDWallet(input: $input) {\n    hdWallet {\n      accounts {\n        name\n        address\n      }\n      localID\n      id\n    }\n    viewer {\n      wallets {\n        ...WalletsView_wallets_3iqrP\n      }\n      id\n    }\n  }\n}\n\nfragment WalletsView_wallets_3iqrP on WalletsQuery {\n  ethWallets(userID: $userID) {\n    hd {\n      localID\n      accounts {\n        name\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n    ledger {\n      localID\n      accounts {\n        name\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -253,7 +261,14 @@ return {
                   {
                     "kind": "FragmentSpread",
                     "name": "WalletsView_wallets",
-                    "args": null
+                    "args": [
+                      {
+                        "kind": "Variable",
+                        "name": "userID",
+                        "variableName": "userID",
+                        "type": null
+                      }
+                    ]
                   }
                 ]
               }
@@ -314,7 +329,14 @@ return {
                     "alias": null,
                     "name": "ethWallets",
                     "storageKey": null,
-                    "args": null,
+                    "args": [
+                      {
+                        "kind": "Variable",
+                        "name": "userID",
+                        "variableName": "userID",
+                        "type": "String!"
+                      }
+                    ],
                     "concreteType": "EthWallets",
                     "plural": false,
                     "selections": [
@@ -352,5 +374,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '7b8f7d454a610c7bf2e7b16febc231fe';
+(node/*: any*/).hash = '2c1f0cc9fb645eddea4ae6fc94cf9b12';
 module.exports = node;

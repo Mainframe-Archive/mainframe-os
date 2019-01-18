@@ -1,7 +1,6 @@
 // @flow
 
 import {
-  idType,
   WALLET_CREATE_HD_SCHEMA,
   WALLET_SIGN_TRANSACTION_SCHEMA,
   WALLET_IMPORT_MNEMONIC_SCHEMA,
@@ -9,6 +8,8 @@ import {
   WALLET_GET_LEDGER_ETH_ACCOUNTS_SCHEMA,
   WALLET_ADD_LEDGER_ETH_ACCOUNT_SCHEMA,
   WALLET_ADD_HD_ACCOUNT_SCHEMA,
+  WALLET_GET_USER_ETH_ACCOUNTS_SCHEMA,
+  WALLET_GET_USER_ETH_WALLETS_SCHEMA,
   type WalletAddHDAccountParams,
   type WalletAddHDAccountResult,
   type WalletCreateHDParams,
@@ -16,14 +17,15 @@ import {
   type WalletImportResult,
   type WalletImportMnemonicParams,
   type WalletDeleteParams,
-  type WalletResults,
+  type WalletGetUserEthAccountsParams,
+  type WalletGetUserEthWalletsParams,
   type WalletGetEthWalletsResult,
+  type WalletGetEthAccountsResult,
   type WalletGetLedgerEthAccountsParams,
   type WalletGetLedgerEthAccountsResult,
   type WalletAddLedgerEthAccountParams,
   type WalletSignTxParams,
   type WalletSignTxResult,
-  type WalletTypes,
 } from '@mainframe/client'
 
 import type ClientContext from '../../context/ClientContext'
@@ -71,29 +73,33 @@ export const deleteWallet = {
     ctx: ClientContext,
     params: WalletDeleteParams,
   ): Promise<void> => {
-    await ctx.openVault.wallets.deleteWallet(params)
-    ctx.openVault.identityWallets.deleteWallet(params.walletID)
+    ctx.openVault.deleteWallet(params.chain, params.type, params.localID)
     await ctx.openVault.save()
   },
 }
 
-export const getEthWallets = (
-  ctx: ClientContext,
-): WalletGetEthWalletsResult => {
-  const mapData = (type: WalletTypes): WalletResults =>
-    Object.keys(ctx.openVault.wallets.ethWallets[type]).map(id => {
-      const wallet = ctx.openVault.wallets.ethWallets[type][id]
-      const accounts = wallet.getAccounts()
-      return {
-        type: type,
-        walletID: idType(id),
-        accounts,
-      }
-    })
-  return {
-    hd: mapData('hd'),
-    ledger: mapData('ledger'),
-  }
+export const getUserEthWallets = {
+  params: WALLET_GET_USER_ETH_WALLETS_SCHEMA,
+  handler: async (
+    ctx: ClientContext,
+    params: WalletGetUserEthWalletsParams,
+  ): Promise<WalletGetEthWalletsResult> => {
+    const wallets = ctx.openVault.getUserEthWallets(params.userID)
+    return {
+      hd: wallets.filter(w => w.type === 'hd'),
+      ledger: wallets.filter(w => w.type === 'ledger'),
+    }
+  },
+}
+
+export const getUserEthAccounts = {
+  params: WALLET_GET_USER_ETH_ACCOUNTS_SCHEMA,
+  handler: async (
+    ctx: ClientContext,
+    params: WalletGetUserEthAccountsParams,
+  ): Promise<WalletGetEthAccountsResult> => {
+    return ctx.openVault.getUserEthAccounts(params.userID)
+  },
 }
 
 export const signTransaction = {

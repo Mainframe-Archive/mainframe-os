@@ -15,6 +15,7 @@ input AddHDWalletAccountInput {
   walletID: String!
   index: Int!
   name: String!
+  linkToUserId: String!
   clientMutationId: String
 }
 
@@ -27,12 +28,13 @@ type AddHDWalletAccountPayload {
 input AddLedgerWalletAccountInput {
   index: Int!
   name: String!
+  linkToUserId: String
   clientMutationId: String
 }
 
 type AddLedgerWalletAccountPayload {
   address: String!
-  walletID: String!
+  localID: String!
   viewer: Viewer!
   clientMutationId: String
 }
@@ -392,7 +394,7 @@ type WalletBalancesType {
 }
 
 type WalletsQuery {
-  ethWallets: EthWallets!
+  ethWallets(userID: String!): EthWallets!
 }
 
 input WebRequestGrantInput {

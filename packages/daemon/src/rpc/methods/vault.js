@@ -18,6 +18,7 @@ export const create = {
   handler: async (ctx: ClientContext, params: VaultParams) => {
     try {
       await ctx.mutations.createVault(params.path, Buffer.from(params.password))
+      ctx.io.eth.setup()
     } catch (err) {
       // TODO: different error code depending on actual error
       throw vaultError(err.message)
@@ -34,6 +35,7 @@ export const open = {
   handler: async (ctx: ClientContext, params: VaultParams) => {
     try {
       await ctx.mutations.openVault(params.path, Buffer.from(params.password))
+      ctx.io.eth.setup()
     } catch (err) {
       // TODO: different error code depending on actual error
       throw vaultError(err.message)

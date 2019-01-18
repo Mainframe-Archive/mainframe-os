@@ -11,6 +11,7 @@ import ModalView from '../../UIComponents/ModalView'
 import { EnvironmentContext } from '../RelayEnvironment'
 
 type Props = {
+  userID: string,
   onClose: () => void,
 }
 
@@ -43,11 +44,12 @@ const ACCOUNT_FETCH_ERR_MSG =
 const addLedgerWalletMutation = graphql`
   mutation WalletAddLedgerModalAddLedgerWalletAccountMutation(
     $input: AddLedgerWalletAccountInput!
+    $userID: String!
   ) {
     addLedgerWalletAccount(input: $input) {
       viewer {
         wallets {
-          ...WalletsView_wallets
+          ...WalletsView_wallets @arguments(userID: $userID)
         }
       }
     }
@@ -81,11 +83,15 @@ export default class WalletAddLedgerModal extends Component<Props, State> {
 
   onSelectAccount = (index: number) => {
     // TODO input name
-    const input = { index, name: `Ledger ${index}` }
+    const input = {
+      index,
+      name: `Ledger ${index}`,
+      linkToUserId: this.props.userID,
+    }
 
     commitMutation(this.context, {
       mutation: addLedgerWalletMutation,
-      variables: { input },
+      variables: { input, userID: this.props.userID },
       onCompleted: (response, errors) => {
         if (errors || !response) {
           const error =

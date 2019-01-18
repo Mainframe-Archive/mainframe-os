@@ -7,9 +7,12 @@ import type {
   WalletCreateHDParams,
   WalletImportResult,
   WalletImportMnemonicParams,
+  WalletGetUserEthWalletsParams,
   WalletGetEthWalletsResult,
   WalletCreateHDResult,
   WalletDeleteParams,
+  WalletGetUserEthAccountsParams,
+  WalletGetEthAccountsResult,
   WalletSignTxParams,
   WalletSignTxResult,
 } from '../types'
@@ -37,8 +40,16 @@ export default class WalletAPIs extends ClientAPIs {
     return this._rpc.request('wallet_delete', params)
   }
 
-  async getEthWallets(): Promise<WalletGetEthWalletsResult> {
-    return this._rpc.request('wallet_getEthWallets')
+  async getUserEthWallets(
+    params: WalletGetUserEthWalletsParams,
+  ): Promise<WalletGetEthWalletsResult> {
+    return this._rpc.request('wallet_getUserEthWallets', params)
+  }
+
+  async getUserEthAccounts(
+    params: WalletGetUserEthAccountsParams,
+  ): Promise<WalletGetEthAccountsResult> {
+    return this._rpc.request('wallet_getUserEthAccounts', params)
   }
 
   async signTransaction(

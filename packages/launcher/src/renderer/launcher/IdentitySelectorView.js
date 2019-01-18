@@ -4,10 +4,8 @@ import type { ID } from '@mainframe/client'
 import React, { Component } from 'react'
 import {
   View,
-  TouchableOpacity,
   StyleSheet,
   TextInput,
-  ScrollView,
   ActivityIndicator,
 } from 'react-native-web'
 import { QueryRenderer, graphql, commitMutation } from 'react-relay'
@@ -128,10 +126,10 @@ class IdentitySelectorView extends Component<Props, State> {
     commitMutation(this.context, {
       mutation: mutation,
       variables: { input },
-      onCompleted: user => {
+      onCompleted: ({ createDeveloperIdentity }) => {
         this.setState({ newName: '' })
         if (this.props.onCreatedId) {
-          this.props.onCreatedId(user.localID)
+          this.props.onCreatedId(createDeveloperIdentity.user.localID)
         }
       },
       onError: err => {
@@ -152,26 +150,6 @@ class IdentitySelectorView extends Component<Props, State> {
 
   render() {
     const header = `Select ${this.props.type} ID`
-    const rowRender = (id, name, handler) => {
-      return (
-        <TouchableOpacity
-          testID={`identity-selector-select-${name}`}
-          onPress={handler}
-          style={styles.idRow}
-          key={id}>
-          <Text style={styles.nameLabel}>{name}</Text>
-          <Text style={styles.idLabel}>{id}</Text>
-        </TouchableOpacity>
-      )
-    }
-
-    const type = this.props.type === 'user' ? 'ownUsers' : 'ownDevelopers'
-    const idRows = Object.values(this.props.identities[type]).map(user => {
-      // $FlowFixMe mixed map type
-      const handler = () => this.props.onSelectId(user.localID)
-      // $FlowFixMe mixed map type
-      return rowRender(user.localID, user.profile.name, handler)
-    })
 
     const createIdentity = this.props.enableCreate ? (
       <View style={styles.createIdContainer}>
@@ -198,9 +176,6 @@ class IdentitySelectorView extends Component<Props, State> {
       <View>
         <Text style={styles.header}>{header}</Text>
         {createIdentity}
-        <ScrollView>
-          <View style={styles.scrollInner}>{idRows}</View>
-        </ScrollView>
       </View>
     )
   }
@@ -259,24 +234,6 @@ export default class IdentitySelectorQueryContainer extends Component<ContainerP
 }
 
 const styles = StyleSheet.create({
-  scrollInner: {
-    maxHeight: 260,
-  },
-  idRow: {
-    padding: 10,
-    borderRadius: 3,
-    backgroundColor: colors.LIGHT_GREY_EE,
-    marginTop: 10,
-    flexDirection: 'column',
-  },
-  nameLabel: {
-    flex: 1,
-  },
-  idLabel: {
-    color: colors.GREY_MED_75,
-    fontSize: 11,
-    fontStyle: 'italic',
-  },
   createIdContainer: {
     padding: 12,
     borderWidth: 1,
