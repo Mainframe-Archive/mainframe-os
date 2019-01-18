@@ -6,6 +6,7 @@ import {
   type IdentityAddPeerParams,
   type IdentityAddPeerResult,
   type IdentityAddPeerByFeedParams,
+  type IdentityCreateContactFromFeedParams,
   type IdentityCreateContactFromPeerParams,
   type IdentityCreateContactResult,
   type IdentityCreateDeveloperParams,
@@ -21,6 +22,7 @@ import {
   type IdentityUnlinkEthWalletAccountParams,
   IDENTITY_ADD_PEER_SCHEMA,
   IDENTITY_ADD_PEER_BY_FEED_SCHEMA,
+  IDENTITY_CREATE_CONTACT_FROM_FEED_SCHEMA,
   IDENTITY_CREATE_CONTACT_FROM_PEER_SCHEMA,
   IDENTITY_CREATE_OWN_USER_SCHEMA,
   IDENTITY_CREATE_OWN_DEVELOPER_SCHEMA,
@@ -171,6 +173,20 @@ export const createContactFromPeer = {
     const contact = await ctx.mutations.createContactFromPeer(
       fromClientID(params.userID),
       fromClientID(params.peerID),
+    )
+    return { id: toClientID(contact.localID) }
+  },
+}
+
+export const createContactFromFeed = {
+  params: IDENTITY_CREATE_CONTACT_FROM_FEED_SCHEMA,
+  handler: async (
+    ctx: ClientContext,
+    params: IdentityCreateContactFromFeedParams,
+  ): Promise<IdentityCreateContactResult> => {
+    const contact = await ctx.mutations.createContactFromFeed(
+      fromClientID(params.userID),
+      params.feedHash,
     )
     return { id: toClientID(contact.localID) }
   },

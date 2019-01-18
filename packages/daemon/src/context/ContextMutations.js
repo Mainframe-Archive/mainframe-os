@@ -2,7 +2,7 @@
 
 import { hexValueType } from '@erebos/hex'
 import type { StrictPermissionsRequirements } from '@mainframe/app-permissions'
-import type { ID } from '@mainframe/utils-id'
+import { idType, type ID } from '@mainframe/utils-id'
 import { getFeedTopic } from '@erebos/api-bzz-base'
 
 import type { OwnApp } from '../app'
@@ -143,6 +143,11 @@ export default class ContextMutations {
     }
 
     return contact
+  }
+
+  async createContactFromFeed(userID: ID, hash: bzzHash): Promise<Contact> {
+    const peer = await this.addPeerByFeed(hash)
+    return await this.createContactFromPeer(userID, idType(peer.localID))
   }
 
   async deleteContact(userID: ID, contactID: ID): Promise<void> {

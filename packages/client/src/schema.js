@@ -178,6 +178,11 @@ export const IDENTITY_CREATE_CONTACT_FROM_PEER_SCHEMA = {
   peerID: 'string',
 }
 
+export const IDENTITY_CREATE_CONTACT_FROM_FEED_SCHEMA = {
+  userID: 'string',
+  feedHash: 'string',
+}
+
 export const IDENTITY_DELETE_CONTACT_SCHEMA = {
   userID: LOCAL_ID_SCHEMA,
   contactID: LOCAL_ID_SCHEMA,

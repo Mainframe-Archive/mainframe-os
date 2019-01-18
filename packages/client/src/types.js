@@ -269,6 +269,11 @@ export type IdentityCreateContactFromPeerParams = {
   peerID: string,
 }
 
+export type IdentityCreateContactFromFeedParams = {
+  userID: string,
+  feedHash: string,
+}
+
 export type IdentityCreateContactResult = { id: ID }
 
 export type IdentityGetOwnDevelopersResult = {
