@@ -86,7 +86,7 @@ export default class WalletAddLedgerModal extends Component<Props, State> {
     const input = {
       index,
       name: `Ledger ${index}`,
-      linkToUserId: this.props.userID,
+      userID: this.props.userID,
     }
 
     commitMutation(this.context, {

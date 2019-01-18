@@ -102,10 +102,10 @@ export default class WalletImportView extends Component<Props, State> {
 
   commitImportMutation = (seed: string) => {
     const importInput = {
-      type: 'ETHEREUM',
+      blockchain: 'ETHEREUM',
       mnemonic: seed,
       name: 'Account 1',
-      linkToUserId: this.props.userID,
+      userID: this.props.userID,
     }
 
     commitMutation(this.context, {

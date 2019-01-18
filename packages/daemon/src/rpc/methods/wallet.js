@@ -11,7 +11,6 @@ import {
   WALLET_GET_USER_ETH_ACCOUNTS_SCHEMA,
   WALLET_GET_USER_ETH_WALLETS_SCHEMA,
   type WalletAddHDAccountParams,
-  type WalletAddHDAccountResult,
   type WalletCreateHDParams,
   type WalletCreateHDResult,
   type WalletImportResult,
@@ -24,6 +23,7 @@ import {
   type WalletGetLedgerEthAccountsParams,
   type WalletGetLedgerEthAccountsResult,
   type WalletAddLedgerEthAccountParams,
+  type WalletAddLedgerResult,
   type WalletSignTxParams,
   type WalletSignTxResult,
 } from '@mainframe/client'
@@ -37,9 +37,17 @@ export const createHDWallet = {
     ctx: ClientContext,
     params: WalletCreateHDParams,
   ): Promise<WalletCreateHDResult> => {
-    const res = ctx.openVault.wallets.createHDWallet(params)
-    await ctx.openVault.save()
-    return res
+    // $FlowFixMe Issue with promise type
+    const hdWallet = await ctx.mutations.createHDWallet(
+      params.blockchain,
+      params.firstAccountName,
+      params.userID,
+    )
+    return {
+      localID: hdWallet.localID,
+      mnemonic: hdWallet.mnemonic,
+      accounts: hdWallet.getNamedAccounts(),
+    }
   },
 }
 
@@ -49,9 +57,12 @@ export const importMnemonic = {
     ctx: ClientContext,
     params: WalletImportMnemonicParams,
   ): Promise<WalletImportResult> => {
-    const hdWallet = ctx.openVault.wallets.importMnemonicWallet(params)
-    await ctx.openVault.save()
-    return hdWallet
+    // $FlowFixMe Issue with promise type
+    const hdWallet = await ctx.mutations.importHDWallet(params)
+    return {
+      localID: hdWallet.localID,
+      accounts: hdWallet.getNamedAccounts(),
+    }
   },
 }
 
@@ -60,10 +71,8 @@ export const addHDAccount = {
   handler: async (
     ctx: ClientContext,
     params: WalletAddHDAccountParams,
-  ): Promise<WalletAddHDAccountResult> => {
-    const newAddress = ctx.openVault.wallets.addHDWalletAccount(params)
-    await ctx.openVault.save()
-    return newAddress
+  ): Promise<string> => {
+    return ctx.mutations.addHDWalletAccount(params)
   },
 }
 
@@ -73,8 +82,7 @@ export const deleteWallet = {
     ctx: ClientContext,
     params: WalletDeleteParams,
   ): Promise<void> => {
-    ctx.openVault.deleteWallet(params.chain, params.type, params.localID)
-    await ctx.openVault.save()
+    await ctx.mutations.deleteWallet(params.chain, params.type, params.localID)
   },
 }
 
@@ -130,9 +138,11 @@ export const addLedgerEthAccount = {
   handler: async (
     ctx: ClientContext,
     params: WalletAddLedgerEthAccountParams,
-  ): Promise<void> => {
-    const res = await ctx.openVault.wallets.addLedgerEthAccount(params)
-    await ctx.openVault.save()
-    return res
+  ): Promise<WalletAddLedgerResult> => {
+    return ctx.mutations.addLedgerWalletAccount(
+      params.index,
+      params.name,
+      params.userID,
+    )
   },
 }

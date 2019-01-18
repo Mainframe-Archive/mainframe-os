@@ -342,9 +342,10 @@ export type VaultSettingsParams = $Shape<VaultSettings>
 // Wallet
 
 export type WalletImportMnemonicParams = {
-  chain: WalletSupportedChains,
+  blockchain: WalletSupportedChains,
   mnemonic: string,
-  name: string,
+  firstAccountName: string,
+  userID?: string,
 }
 
 export type WalletNamedAccount = {
@@ -354,18 +355,17 @@ export type WalletNamedAccount = {
 
 export type WalletImportResult = {
   localID: ID,
-  type: WalletTypes,
   accounts: Array<WalletNamedAccount>,
 }
 
 export type WalletCreateHDParams = {
-  chain: WalletSupportedChains,
-  name: string,
+  blockchain: WalletSupportedChains,
+  firstAccountName: string,
+  userID?: string,
 }
 
 export type WalletCreateHDResult = {
   localID: ID,
-  type: WalletTypes,
   accounts: Array<WalletNamedAccount>,
   mnemonic: string,
 }
@@ -415,12 +415,14 @@ export type WalletGetEthAccountsResult = Array<string>
 export type WalletAddLedgerEthAccountParams = {
   index: number,
   name: string,
+  userID?: string,
 }
 
 export type WalletAddHDAccountParams = {
   name: string,
   index: number,
-  walletID: ID,
+  walletID: string,
+  userID?: string,
 }
 
 export type WalletAddHDAccountResult = string

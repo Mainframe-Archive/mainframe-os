@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash a178e2f975dc08f6d76395242c6c6c69
+ * @relayHash 4d07bda1318a50edd01388b8a6402143
  */
 
 /* eslint-disable */
@@ -13,7 +13,7 @@ type WalletsView_wallets$ref = any;
 export type AddLedgerWalletAccountInput = {
   index: number,
   name: string,
-  linkToUserId?: ?string,
+  userID?: ?string,
   clientMutationId?: ?string,
 };
 export type WalletAddLedgerModalAddLedgerWalletAccountMutationVariables = {|

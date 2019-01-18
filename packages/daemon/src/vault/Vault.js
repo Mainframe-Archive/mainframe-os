@@ -44,7 +44,6 @@ import IdentitiesRepository, {
 } from '../identity/IdentitiesRepository'
 import WalletsRepository, {
   type WalletsRepositorySerialized,
-  type WalletTypes,
 } from '../wallet/WalletsRepository'
 import IdentityWallets, {
   type IdentityWalletsSerialized,
@@ -253,11 +252,6 @@ export default class Vault {
       // $FlowFixMe concat types
       return acc.concat(w.accounts.map(a => a.address))
     }, [])
-  }
-
-  deleteWallet(chain: string, type: WalletTypes, localID: string) {
-    this.wallets.deleteWallet(chain, type, localID)
-    this.identityWallets.deleteWallet(localID)
   }
 
   // App lifecycle

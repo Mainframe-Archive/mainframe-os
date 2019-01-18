@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 7b32ddedc1122fd5d2bf461fdedd0610
+ * @relayHash c488a7611a79403a841a1d91af0effd4
  */
 
 /* eslint-disable */
@@ -12,9 +12,9 @@ import type { ConcreteRequest } from 'relay-runtime';
 type WalletsView_wallets$ref = any;
 export type SupportedWallets = "ETHEREUM" | "%future added value";
 export type CreateHDWalletInput = {
-  type: SupportedWallets,
+  blockchain: SupportedWallets,
   name: string,
-  linkToUserId?: ?string,
+  userID?: ?string,
   clientMutationId?: ?string,
 };
 export type WalletsViewCreateHDWalletMutationVariables = {|

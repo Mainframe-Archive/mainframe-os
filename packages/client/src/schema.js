@@ -207,8 +207,13 @@ export const VAULT_SETTINGS_SCHEMA = {
   ethURL: VAULT_SETTING_SCHEMA,
 }
 
+export const WALLET_SUPPORTED_CHAIN_SCHEMA = {
+  type: 'enum',
+  values: ['ethereum'],
+}
+
 export const WALLET_CREATE_HD_SCHEMA = {
-  chain: 'string',
+  blockchain: WALLET_SUPPORTED_CHAIN_SCHEMA,
 }
 
 export const WALLET_TYPE_SCHEMA = {
@@ -216,17 +221,12 @@ export const WALLET_TYPE_SCHEMA = {
   values: ['hd', 'simple', 'ledger'],
 }
 
-export const WALLET_SUPPORTED_CHAIN_SCHEMA = {
-  type: 'enum',
-  values: ['ethereum'],
-}
-
 export const WALLET_IMPORT_MNEMONIC_SCHEMA = {
   mnemonic: 'string',
 }
 
 export const WALLET_DELETE_SCHEMA = {
-  chain: WALLET_SUPPORTED_CHAIN_SCHEMA,
+  blockchain: WALLET_SUPPORTED_CHAIN_SCHEMA,
   type: WALLET_TYPE_SCHEMA,
   localID: LOCAL_ID_SCHEMA,
 }

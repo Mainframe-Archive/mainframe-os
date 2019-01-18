@@ -106,16 +106,16 @@ class WalletsView extends Component<Props, State> {
       walletMutation = addWalletMutation
       input = {
         walletID: ethWallets.hd[0].localID,
-        linkToUserId: this.props.userID,
+        userID: this.props.userID,
         index: newIndex,
         name: `Account ${newIndex + 1}`,
       }
     } else {
       walletMutation = createWalletMutation
       input = {
-        type: 'ETHEREUM',
+        blockchain: 'ETHEREUM',
         name: 'Account 1',
-        linkToUserId: this.props.userID,
+        userID: this.props.userID,
       }
     }
 
