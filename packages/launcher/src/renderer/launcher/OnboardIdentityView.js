@@ -76,8 +76,9 @@ export default class OnboardIdentityView extends Component<Props, State> {
     )
     return (
       <OnboardContainer
-        title="Welcome!"
-        description="Let’s quickly secure your MainframeOS vault.">
+        id
+        title="Identity"
+        description="Create your first identity">
         <FormContainer>
           <Form onSubmit={this.onSubmit}>
             <Row size={1} top>

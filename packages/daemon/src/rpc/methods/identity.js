@@ -195,27 +195,7 @@ export const getUserContacts = {
     ctx: ClientContext,
     params: IdentityGetUserContactsParams,
   ): Promise<IdentityGetUserContactsResult> => {
-    const result = []
-    const contacts = ctx.openVault.identities.getContactsForUser(
-      fromClientID(params.userID),
-    )
-    if (contacts) {
-      Object.keys(contacts).forEach(id => {
-        const contact = contacts[id]
-        const peer = ctx.openVault.identities.getPeerUser(
-          fromClientID(contact.peerID),
-        )
-        if (peer) {
-          const profile = { ...peer.profile, ...contact.profile }
-          const contactRes = {
-            id: toClientID(contact.localID),
-            profile,
-            connection: contact.connection,
-          }
-          result.push(contactRes)
-        }
-      })
-    }
-    return { contacts: result }
+    const contacts = ctx.openVault.identities.getUserContacts(params.userID)
+    return { contacts }
   },
 }

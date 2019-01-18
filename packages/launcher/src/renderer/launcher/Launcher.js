@@ -1,26 +1,21 @@
 //@flow
 
 import React, { Component } from 'react'
-import { ScrollView, ActivityIndicator } from 'react-native'
+import { ScrollView } from 'react-native'
 import styled from 'styled-components/native'
-import { ThemeProvider as MFThemeProvider } from '@morpheus-ui/core'
+import { graphql, QueryRenderer } from 'react-relay'
 
-import THEME from '../theme'
-
-import type { VaultsData } from '../../types'
-
-import rpc from './rpc'
 import { EnvironmentContext } from './RelayEnvironment'
-
-import OnboardView from './OnboardView'
-import UnlockVaultView from './UnlockVaultView'
+import LauncherContext from './LauncherContext'
+import RelayLoaderView from './RelayLoaderView'
 import SideMenu, { type ScreenNames } from './SideMenu'
 import AppsScreen from './apps/AppsScreen'
 import IdentitiesScreen from './identities/IdentitiesScreen'
 import WalletsScreen from './wallets/WalletsScreen'
+import ContactsScreen from './contacts/ContactsScreen'
 
 const Container = styled.View`
-  flex-direction: 'row';
+  flex-direction: row;
   height: '100vh';
   flex: 1;
 `
@@ -30,56 +25,25 @@ const ContentContainer = styled.View`
   flex: 1;
 `
 
-const LoadingContainer = styled.View`
-  flex: 1;
-  justify-content: 'center';
-`
+type Props = {
+  identities: {
+    ownUsers: Array<{ localID: string }>,
+  },
+}
 
 type State = {
-  vaultsData?: VaultsData,
   openScreen: ScreenNames,
 }
 
-export default class App extends Component<{}, State> {
-  static contextType = EnvironmentContext
-
+class Launcher extends Component<Props, State> {
   state = {
-    vaultsData: undefined,
     openScreen: 'apps',
-  }
-
-  componentDidMount() {
-    this.getVaultsData()
-  }
-
-  // HANDLERS
-
-  getVaultsData = async () => {
-    try {
-      const vaultsData = await rpc.getVaultsData()
-      this.setState({
-        vaultsData,
-      })
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.warn(err)
-    }
-  }
-
-  onOpenedVault = () => {
-    this.getVaultsData()
   }
 
   setOpenScreen = (name: ScreenNames) => {
     this.setState({
       openScreen: name,
     })
-  }
-
-  // RENDER
-
-  renderOnboarding() {
-    return <OnboardView onboardComplete={this.getVaultsData} />
   }
 
   renderScreen() {
@@ -90,49 +54,62 @@ export default class App extends Component<{}, State> {
         return <IdentitiesScreen />
       case 'wallets':
         return <WalletsScreen />
+      case 'contacts':
+        return <ContactsScreen />
       default:
         return null
     }
   }
 
-  renderInside() {
-    if (!this.state.vaultsData) {
-      return (
-        <LoadingContainer>
-          <ActivityIndicator />
-        </LoadingContainer>
-      )
-    }
-
-    if (!this.state.vaultsData.defaultVault) {
-      return this.renderOnboarding()
-    }
-
-    if (!this.state.vaultsData.vaultOpen) {
-      return (
-        <UnlockVaultView
-          vaultsData={this.state.vaultsData || {}}
-          onUnlockVault={this.onOpenedVault}
-        />
-      )
+  render() {
+    const { ownUsers } = this.props.identities
+    if (!ownUsers || !ownUsers.length) {
+      return <Container /> //TODO: error view
     }
 
     return (
-      <Container testID="launcher-view">
-        <SideMenu
-          selected={this.state.openScreen}
-          onSelectMenuItem={this.setOpenScreen}
-        />
-        <ContentContainer>
-          <ScrollView>{this.renderScreen()}</ScrollView>
-        </ContentContainer>
-      </Container>
+      <LauncherContext.Provider value={{ userID: ownUsers[0].localID }}>
+        <Container testID="launcher-view">
+          <SideMenu
+            selected={this.state.openScreen}
+            onSelectMenuItem={this.setOpenScreen}
+          />
+          <ContentContainer>
+            <ScrollView>{this.renderScreen()}</ScrollView>
+          </ContentContainer>
+        </Container>
+      </LauncherContext.Provider>
     )
   }
+}
+
+export default class LauncherQueryRenderer extends Component<{}> {
+  static contextType = EnvironmentContext
 
   render() {
     return (
-      <MFThemeProvider theme={THEME}>{this.renderInside()}</MFThemeProvider>
+      <QueryRenderer
+        environment={this.context}
+        query={graphql`
+          query LauncherQuery {
+            viewer {
+              identities {
+                ownUsers {
+                  localID
+                }
+              }
+            }
+          }
+        `}
+        variables={{}}
+        render={({ error, props }) => {
+          if (error || !props) {
+            return <RelayLoaderView error={error ? error.message : undefined} />
+          } else {
+            return <Launcher {...props.viewer} {...this.props} />
+          }
+        }}
+      />
     )
   }
 }

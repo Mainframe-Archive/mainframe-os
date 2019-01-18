@@ -34,6 +34,34 @@ export default {
       borderHoverColor: 'transparent',
       hoverShadow: true,
     },
+    xSmall: {
+      iconWidth: 14,
+      iconHeight: 14,
+      padding: 5,
+      fontSize: 9,
+      borderRadius: 3,
+    },
+    xSmallIconOnly: {
+      iconWidth: 14,
+      iconHeight: 14,
+      padding: '5px 5px 2px 5',
+      fontSize: 9,
+      borderRadius: 3,
+    },
+    red: {
+      borderWidth: 0,
+      backgroundColor: COLORS.PRIMARY_RED,
+      backgroundHoverColor: COLORS.PRIMARY_DARK_RED,
+      titleColor: COLORS.WHITE,
+      titleHoverColor: COLORS.WHITE,
+    },
+    modalButton: {
+      padding: '10px 30',
+      fontSize: 12,
+    },
+    grey: {
+      titleColor: COLORS.GREY_A9,
+    },
   },
   Text: {
     default: {
@@ -67,6 +95,35 @@ export default {
       overflow: 'hidden',
       whiteSpace: 'nowrap',
       textOverflow: 'elipsis',
+    },
+    grey: {
+      color: COLORS.GREY_A9,
+    },
+    greyMed: {
+      color: COLORS.GREY_MED_58,
+    },
+    greyDark: {
+      color: COLORS.GREY_DARK_30,
+    },
+    greyDark23: {
+      color: COLORS.GREY_DARK_23,
+    },
+    blue: {
+      color: COLORS.DARK_BLUE,
+    },
+    red: {
+      color: COLORS.PRIMARY_RED,
+    },
+    noPadding: {
+      padding: 0,
+    },
+    small: {
+      fontSize: 11,
+    },
+    elipsis: {
+      whiteSpace: 'nowrap',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
     },
   },
   styled: {

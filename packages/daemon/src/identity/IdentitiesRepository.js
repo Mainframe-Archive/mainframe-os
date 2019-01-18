@@ -6,6 +6,7 @@ import type { KeyPair } from '@mainframe/utils-crypto'
 import { uniqueID, idType, type ID } from '@mainframe/utils-id'
 import multibase from 'multibase'
 import { type hexValue } from '@erebos/hex'
+import { type ContactResult } from '@mainframe/client'
 
 import { mapObject } from '../utils'
 
@@ -358,6 +359,12 @@ export default class IdentitiesRepository {
     )
   }
 
+  getPeerByFeed(publicFeed: string): ?PeerUserIdentity {
+    if (this._mfidByFeed[publicFeed]) {
+      return this.getPeerUser(this._byMFID[this._mfidByFeed[publicFeed]])
+    }
+  }
+
   getIdentity(id: ID): ?Identity {
     const ref = this._refs[id]
     if (ref != null && ref.ownership !== 'contacts') {
@@ -465,9 +472,8 @@ export default class IdentitiesRepository {
     if (!peer) throw new Error('Peer not found')
 
     if (this._identities.contacts[ownUserId]) {
-      const contacts: Array<Contact> = Object.keys(
-        this._identities.contacts[ownUserId],
-      ).map(id => this._identities.contacts[ownUserId][id])
+      const keys = Object.keys(this._identities.contacts[ownUserId])
+      const contacts = keys.map(id => this._identities.contacts[ownUserId][id])
       const existing = contacts.find(c => c.peerID === peerID)
       if (existing) {
         return existing
@@ -484,6 +490,28 @@ export default class IdentitiesRepository {
     }
     this._userByContact[contact.localID] = ownUserId
     return contact
+  }
+
+  getUserContacts(userID: string): Array<ContactResult> {
+    const result = []
+    const contacts = this._identities.contacts[userID]
+    if (contacts) {
+      Object.keys(contacts).forEach(id => {
+        const contact = contacts[id]
+        const peer = this.getPeerUser(idType(contact.peerID))
+        if (peer) {
+          const profile = { ...peer.profile, ...contact.profile }
+          const contactRes = {
+            profile,
+            localID: id,
+            peerID: contact.peerID,
+            connectionState: contact.connectionState,
+          }
+          result.push(contactRes)
+        }
+      })
+    }
+    return result
   }
 
   deleteContact(userID: ID, contactID: ID) {

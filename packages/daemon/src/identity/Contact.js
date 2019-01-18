@@ -127,7 +127,7 @@ export default class Contact {
     this._requestSent = requestSent
   }
 
-  get connection(): ContactConnection {
+  get connectionState(): ContactConnection {
     if (this.contactFeed) return 'connected'
     return this._requestSent ? 'sent' : 'sending'
   }
