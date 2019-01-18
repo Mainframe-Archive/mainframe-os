@@ -8,7 +8,7 @@ const getFixture = fixture => path.join(__dirname, '../../../fixtures', fixture)
 
 describe('Application launch', function() {
   // mocha requires non arrow style function to bind context
-  this.timeout(10000)
+  this.timeout(20000)
 
   before(function() {
     const binPath =
@@ -74,7 +74,7 @@ describe('Application launch', function() {
 
   it('creates an app', async function() {
     const createAppSelector = '[data-testid="launcher-create-app-button"]'
-    await this.app.client.waitForExist(createAppSelector, 2000)
+    await this.app.client.waitForExist(createAppSelector, 20000)
     await this.app.client.element(createAppSelector).click()
 
     const appNameInput = '[data-testid="create-app-name-input"]'
