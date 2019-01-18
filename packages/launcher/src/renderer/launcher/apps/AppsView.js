@@ -199,9 +199,13 @@ class AppsView extends Component<Props, State> {
 
   renderApp(app: AppData, own: boolean) {
     return own ? (
-      <OwnAppItem ownApp={app} onOpenApp={this.onOpenApp} />
+      <OwnAppItem key={app.localID} ownApp={app} onOpenApp={this.onOpenApp} />
     ) : (
-      <InstalledAppItem installedApp={app} onOpenApp={this.onOpenApp} />
+      <InstalledAppItem
+        key={app.localID}
+        installedApp={app}
+        onOpenApp={this.onOpenApp}
+      />
     )
   }
 
@@ -337,9 +341,11 @@ export default createFragmentContainer(AppsView, {
   apps: graphql`
     fragment AppsView_apps on AppsQuery {
       installed {
+        localID
         ...AppItem_installedApp
       }
       own {
+        localID
         ...AppItem_ownApp
       }
     }

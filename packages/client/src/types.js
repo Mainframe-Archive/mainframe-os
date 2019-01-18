@@ -288,10 +288,13 @@ export type IdentityGetUserContactsParams = {
 }
 
 export type ContactResult = {
-  id: string,
-  name?: ?string,
-  avatar?: ?string,
-  connection: 'sent' | 'connected',
+  localID: string,
+  peerID: string,
+  connectionState: 'sent' | 'connected',
+  profile: {
+    name?: ?string,
+    avatar?: ?string,
+  },
 }
 
 export type IdentityGetUserContactsResult = {

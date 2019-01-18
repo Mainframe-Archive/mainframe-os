@@ -21,7 +21,6 @@ const AppIcon = styled.View`
   background-color: #232323;
   border-radius: 5px;
   margin-bottom: 10px;
-  transition: all 0.3s;
 `
 
 type AppData = AppOwnData | AppInstalledData

@@ -7,8 +7,9 @@ import type { AppInstalledData } from '@mainframe/client'
 
 import { Text, Button } from '@morpheus-ui/core'
 
-import IdentityFilledIcon from '@morpheus-ui/icons/IdentityFilledMd'
 import PlusIcon from '@morpheus-ui/icons/PlusSymbolCircled'
+
+import Avatar from '../../UIComponents/Avatar'
 
 type Wallet = {
   localID: string,
@@ -37,7 +38,9 @@ const UserItem = styled.View`
   margin: 10px 0;
   padding: 30px 25px;
   background-color: ${props => props.theme.colors.LIGHT_GREY_F9};
-  border-left: 5px solid ${props => props.theme.colors.PRIMARY_BLUE};
+  border-left-width: 5px;
+  border-left-style: solid;
+  border-left-color: ${props => props.theme.colors.PRIMARY_BLUE};
   border-radius: 3px;
   flex-direction: row;
   align-items: center;
@@ -69,7 +72,7 @@ class IdentitiesView extends Component<Props> {
     return identities.map((user: Object) => {
       return (
         <UserItem key={user.localID}>
-          <IdentityFilledIcon width="24px" height="24px" />
+          <Avatar size="medium" id={user.localID} />
           <Profile>
             <Text variant="bold">{user.profile.name}</Text>
             <Text theme={{ color: '#585858', fontSize: '11px' }}>
