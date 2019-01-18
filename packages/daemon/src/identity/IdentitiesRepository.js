@@ -30,7 +30,7 @@ import PeerUserIdentity, {
   type PeerUserProfile,
   type Feeds,
 } from './PeerUserIdentity'
-import Contact, { type ContactParams, type ContactSerialized } from './Contact'
+import Contact, { type ContactSerialized } from './Contact'
 
 type PeerIdentitiesRepositoryGroupSerialized = {
   apps?: { [id: string]: AppIdentitySerialized },
@@ -467,28 +467,27 @@ export default class IdentitiesRepository {
     return peer
   }
 
-  createContactFromPeer(
-    ownUserId: string,
-    contactParams: ContactParams,
-  ): Contact {
-    if (!this.getPeerUser(idType(contactParams.peerID))) {
-      throw new Error('Peer not found')
-    }
+  createContactFromPeer(ownUserId: ID, peerID: ID): Contact {
+    const peer = this.getPeerUser(idType(peerID))
+    if (!peer) throw new Error('Peer not found')
+
     if (this._identities.contacts[ownUserId]) {
       const keys = Object.keys(this._identities.contacts[ownUserId])
       const contacts = keys.map(id => this._identities.contacts[ownUserId][id])
-      const existing = contacts.find(c => c.peerID === contactParams.peerID)
+      const existing = contacts.find(c => c.peerID === peerID)
       if (existing) {
         return existing
       }
     }
-    const contact = new Contact(contactParams)
+    const contact = Contact.create(peerID, {
+      name: peer.profile.name,
+      avatar: peer.profile.avatar,
+    })
     if (this._identities.contacts[ownUserId]) {
       this._identities.contacts[ownUserId][contact.localID] = contact
     } else {
       this._identities.contacts[ownUserId] = { [contact.localID]: contact }
     }
-
     this._userByContact[contact.localID] = ownUserId
     return contact
   }
@@ -506,9 +505,7 @@ export default class IdentitiesRepository {
             profile,
             localID: id,
             peerID: contact.peerID,
-            connectionState: contact.contactFeed ? 'connected' : 'sent',
-            // For v1 first contact, we assign a full contact state
-            // depending on if we've seen a private feed for our user
+            connectionState: contact.connectionState,
           }
           result.push(contactRes)
         }
