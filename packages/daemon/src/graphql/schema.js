@@ -380,6 +380,10 @@ const ownUserIdentityType = new GraphQLObjectType({
     localID: {
       type: new GraphQLNonNull(GraphQLID),
     },
+    feedHash: {
+      type: new GraphQLNonNull(GraphQLString),
+      resolve: self => self.publicFeed.feedHash,
+    },
     mfid: {
       type: new GraphQLNonNull(GraphQLID),
       resolve: self => self.id,
@@ -458,6 +462,18 @@ const peerUserIdentityType = new GraphQLObjectType({
     },
     pubKey: {
       type: new GraphQLNonNull(GraphQLString),
+    },
+  }),
+})
+
+const peerType = new GraphQLObjectType({
+  name: 'Peer',
+  fields: () => ({
+    publicKey: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    profile: {
+      type: new GraphQLNonNull(contactProfileType),
     },
   }),
 })
@@ -551,6 +567,32 @@ const identitiesQueryType = new GraphQLObjectType({
       type: new GraphQLList(ownDeveloperIdentityType),
       resolve: (self, args, ctx: ClientContext) => {
         return Object.values(ctx.openVault.identities.ownDevelopers)
+      },
+    },
+  }),
+})
+
+const peersQueryType = new GraphQLObjectType({
+  name: 'PeersQuery',
+  fields: () => ({
+    peerLookupByFeed: {
+      type: peerType,
+      args: {
+        feedHash: { type: new GraphQLNonNull(GraphQLString) },
+      },
+      resolve: async (self, args, ctx: ClientContext) => {
+        try {
+          const peerPublicRes = await ctx.io.bzz.download(args.feedHash)
+          const data = await peerPublicRes.json()
+          return {
+            profile: data.profile,
+            publicKey: data.publicKey,
+          }
+        } catch (err) {
+          // eslint-disable-next-line no-console
+          console.warn(err)
+          return null
+        }
       },
     },
   }),
@@ -939,11 +981,11 @@ const addContactMutation = mutationWithClientMutationId({
     userID: {
       type: new GraphQLNonNull(GraphQLString),
     },
-    profile: {
-      type: new GraphQLNonNull(userProfileInput),
-    },
     publicFeed: {
       type: new GraphQLNonNull(GraphQLString),
+    },
+    aliasName: {
+      type: GraphQLString,
     },
   },
   outputFields: {
@@ -956,8 +998,12 @@ const addContactMutation = mutationWithClientMutationId({
       resolve: () => ({}),
     },
   },
-  mutateAndGetPayload: async () => {
-    throw new Error('needs implementing')
+  mutateAndGetPayload: async (args, ctx) => {
+    return await ctx.mutations.createContactFromFeed(
+      args.userID,
+      args.publicFeed,
+      args.aliasName,
+    )
   },
 })
 
@@ -1173,6 +1219,10 @@ const queryType = new GraphQLObjectType({
     node: nodeField,
     viewer: {
       type: new GraphQLNonNull(viewerType),
+      resolve: () => ({}),
+    },
+    peers: {
+      type: new GraphQLNonNull(peersQueryType),
       resolve: () => ({}),
     },
   }),

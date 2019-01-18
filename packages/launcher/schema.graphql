@@ -1,7 +1,7 @@
 input AddContactInput {
   userID: String!
-  profile: UserProfileInput!
   publicFeed: String!
+  aliasName: UserProfileInput!
   clientMutationId: String
 }
 
@@ -333,6 +333,7 @@ type OwnUserIdentity implements Node {
   """The ID of an object"""
   id: ID!
   localID: ID!
+  feedHash: String!
   mfid: ID!
   apps: [App]
   wallets: [UserWalletType]
@@ -342,6 +343,15 @@ type OwnUserIdentity implements Node {
 
 type OwnUserProfile {
   name: String!
+}
+
+type Peer {
+  publicKey: String!
+  profile: ContactProfile!
+}
+
+type PeersQuery {
+  peerLookupByFeed(feedHash: String!): Peer
 }
 
 input PermissionGrantsInput {
@@ -358,6 +368,7 @@ type Query {
     id: ID!
   ): Node
   viewer: Viewer!
+  peers: PeersQuery!
 }
 
 type Subscription {

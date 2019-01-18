@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash d89c50ee187c6360aa84b919986a3974
+ * @relayHash b70d1b161ac335934fdb8b2b88ab2b68
  */
 
 /* eslint-disable */
@@ -12,8 +12,8 @@ import type { ConcreteRequest } from 'relay-runtime';
 type ContactsView_contacts$ref = any;
 export type AddContactInput = {
   userID: string,
-  profile: UserProfileInput,
   publicFeed: string,
+  aliasName: UserProfileInput,
   clientMutationId?: ?string,
 };
 export type UserProfileInput = {

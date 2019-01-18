@@ -95,10 +95,15 @@ export default class ContextMutations {
     })
   }
 
-  async createContactFromPeer(userID: ID, peerID: ID): Promise<Contact> {
+  async createContactFromPeer(
+    userID: ID,
+    peerID: ID,
+    aliasName?: string,
+  ): Promise<Contact> {
     const contact = this._context.openVault.identities.createContactFromPeer(
       userID,
       peerID,
+      aliasName,
     )
     await this._context.openVault.save()
 
