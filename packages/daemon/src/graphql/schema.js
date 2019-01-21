@@ -1170,7 +1170,7 @@ const appInstallMutation = mutationWithClientMutationId({
       permissionsSettings,
     )
     const contentsPath = getContentsPath(ctx.env, manifest)
-    await downloadAppContents(ctx.bzz, app, contentsPath)
+    await downloadAppContents(ctx.io.bzz, app, contentsPath)
     await ctx.openVault.save()
     return { app }
   },
