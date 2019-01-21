@@ -192,6 +192,17 @@ export const IDENTITY_GET_USER_CONTACTS_SCHEMA = {
   userID: LOCAL_ID_SCHEMA,
 }
 
+export const IDENTITY_UPDATE_USER_SCHEMA = {
+  userID: 'string',
+  profile: {
+    type: 'object',
+    props: {
+      name: { type: 'string', optional: true },
+      avatar: { type: 'string', optional: true },
+    },
+  },
+}
+
 export const IDENTITY_LINK_ETH_WALLET_SCHEMA = {
   id: LOCAL_ID_SCHEMA,
   localID: LOCAL_ID_SCHEMA,

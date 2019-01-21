@@ -50,6 +50,7 @@ export default {
   identity_getOwnUsers: identity.getOwnUsers,
   identity_getOwnDevelopers: identity.getOwnDevelopers,
   identity_getPeers: identity.getPeers,
+  identity_updateUser: identity.updateUser,
   identity_linkEthWallet: identity.linkEthWallet,
   identity_unlinkEthWallet: identity.unlinkEthWallet,
   identity_getUserContacts: identity.getUserContacts,

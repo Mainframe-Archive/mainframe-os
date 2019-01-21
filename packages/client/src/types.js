@@ -321,6 +321,14 @@ export type IdentityGetUserContactsResult = {
   contacts: Array<ContactResult>,
 }
 
+export type IdentityUpdateUserParams = {
+  userID: string,
+  profile: {
+    name?: ?string,
+    avatar?: ?string,
+  },
+}
+
 export type IdentityLinkEthWalletAccountParams = {
   id: ID,
   walletID: ID,
