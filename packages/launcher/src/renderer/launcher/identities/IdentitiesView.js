@@ -69,7 +69,7 @@ class IdentitiesView extends Component<Props> {
           <Profile>
             <Text variant="bold">{user.profile.name}</Text>
             <Text theme={{ color: '#585858', fontSize: '11px' }}>
-              {user.localID}
+              {user.feedHash}
             </Text>
           </Profile>
           <Text theme={{ color: '#585858', fontSize: '11px' }}>
@@ -94,6 +94,7 @@ export default createFragmentContainer(IdentitiesView, {
     fragment IdentitiesView_identities on IdentitiesQuery {
       ownUsers {
         localID
+        feedHash
         profile {
           name
         }

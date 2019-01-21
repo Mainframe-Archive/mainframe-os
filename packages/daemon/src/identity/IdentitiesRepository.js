@@ -467,7 +467,11 @@ export default class IdentitiesRepository {
     return peer
   }
 
-  createContactFromPeer(ownUserId: ID, peerID: ID): Contact {
+  createContactFromPeer(
+    ownUserId: ID,
+    peerID: ID,
+    aliasName?: string,
+  ): Contact {
     const peer = this.getPeerUser(idType(peerID))
     if (!peer) throw new Error('Peer not found')
 
@@ -480,6 +484,7 @@ export default class IdentitiesRepository {
       }
     }
     const contact = Contact.create(peerID, {
+      aliasName,
       name: peer.profile.name,
       avatar: peer.profile.avatar,
     })
