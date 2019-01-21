@@ -589,8 +589,7 @@ const peersQueryType = new GraphQLObjectType({
             publicKey: data.publicKey,
           }
         } catch (err) {
-          // eslint-disable-next-line no-console
-          console.warn(err)
+          ctx.log(err)
           return null
         }
       },

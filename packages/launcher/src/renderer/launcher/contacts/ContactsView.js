@@ -218,6 +218,19 @@ export const addContactMutation = graphql`
   }
 `
 
+const peerLookupQuery = graphql`
+  query ContactsViewQuery($feedHash: String!) {
+    peers {
+      peerLookupByFeed(feedHash: $feedHash) {
+        profile {
+          name
+        }
+        publicKey
+      }
+    }
+  }
+`
+
 export class ContactsView extends Component<Props, State> {
   static contextType = EnvironmentContext
 
@@ -242,19 +255,8 @@ export class ContactsView extends Component<Props, State> {
     this.setState({
       queryInProgress: true,
     })
-    const query = graphql`
-      query ContactsViewQuery($feedHash: String!) {
-        peers {
-          peerLookupByFeed(feedHash: $feedHash) {
-            profile {
-              name
-            }
-            publicKey
-          }
-        }
-      }
-    `
-    const peerQueryResult = await fetchQuery(this.context, query, {
+
+    const peerQueryResult = await fetchQuery(this.context, peerLookupQuery, {
       feedHash,
     })
     this.setState({

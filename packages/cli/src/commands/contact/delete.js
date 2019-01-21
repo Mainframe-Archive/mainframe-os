@@ -9,7 +9,7 @@ export default class ContactDeleteCommand extends Command {
   static flags = {
     ...Command.flags,
     uid: flags.string({
-      description: 'user id',
+      description: 'local user id',
     }),
     cid: flags.string({
       description: 'local contact ID',
@@ -35,7 +35,7 @@ export default class ContactDeleteCommand extends Command {
         contactID: this.flags.cid,
       })
 
-      this.log(`Removed conatct: ${this.flags.cid}`)
+      this.log(`Removed contact: ${this.flags.cid}`)
     }
   }
 }

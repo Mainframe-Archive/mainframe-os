@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash b70d1b161ac335934fdb8b2b88ab2b68
+ * @relayHash 64303d0ba910470012751aee0480c3f6
  */
 
 /* eslint-disable */
@@ -13,12 +13,8 @@ type ContactsView_contacts$ref = any;
 export type AddContactInput = {
   userID: string,
   publicFeed: string,
-  aliasName: UserProfileInput,
+  aliasName?: ?string,
   clientMutationId?: ?string,
-};
-export type UserProfileInput = {
-  name: string,
-  avatar?: ?string,
 };
 export type ContactsViewAddContactMutationVariables = {|
   input: AddContactInput,
