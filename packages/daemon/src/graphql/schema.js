@@ -390,6 +390,12 @@ const ownUserIdentityType = new GraphQLObjectType({
         return ctx.openVault.apps.getAppsForUser(self.localID)
       },
     },
+    defaultEthAddress: {
+      type: GraphQLString,
+      resolve: (self, args, ctx) => {
+        return ctx.openVault.getUserDefaultEthAccount(self.localID)
+      },
+    },
     wallets: {
       type: new GraphQLList(userWalletType),
       resolve: (self, args, ctx) => {
@@ -855,6 +861,28 @@ const addLedgerWalletAccountMutation = mutationWithClientMutationId({
   },
 })
 
+const setDefaultWalletMutation = mutationWithClientMutationId({
+  name: 'SetDefaultWallet',
+  inputFields: {
+    userID: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    address: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+  },
+  outputFields: {
+    viewer: {
+      type: new GraphQLNonNull(viewerType),
+      resolve: () => ({}),
+    },
+  },
+  mutateAndGetPayload: async (args, ctx) => {
+    await ctx.mutations.setUsersDefaultWallet(args.userID, args.address)
+    return {}
+  },
+})
+
 const userProfileInput = new GraphQLInputObjectType({
   name: 'UserProfileInput',
   fields: () => ({
@@ -1145,6 +1173,7 @@ const mutationType = new GraphQLObjectType({
     deleteWallet: deleteWalletMutation,
     addContact: addContactMutation,
     deleteContact: deleteContactMutation,
+    setDefaultWallet: setDefaultWalletMutation,
   }),
 })
 

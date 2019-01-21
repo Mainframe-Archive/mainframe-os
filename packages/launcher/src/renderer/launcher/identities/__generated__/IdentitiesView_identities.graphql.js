@@ -13,6 +13,7 @@ declare export opaque type IdentitiesView_identities$ref: FragmentReference;
 export type IdentitiesView_identities = {|
   +ownUsers: ?$ReadOnlyArray<?{|
     +localID: string,
+    +defaultEthAddress: ?string,
     +profile: ?{|
       +name: string
     |},
@@ -82,6 +83,13 @@ return {
       "plural": true,
       "selections": [
         v0,
+        {
+          "kind": "ScalarField",
+          "alias": null,
+          "name": "defaultEthAddress",
+          "args": null,
+          "storageKey": null
+        },
         {
           "kind": "LinkedField",
           "alias": null,
@@ -219,5 +227,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '3a588857335af2777dd4c7b0b3d7954b';
+(node/*: any*/).hash = '71f9defa719df217226737ba85bfcff8';
 module.exports = node;

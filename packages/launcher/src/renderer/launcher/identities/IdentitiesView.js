@@ -70,6 +70,7 @@ class IdentitiesView extends Component<Props> {
             <Text variant="bold">{user.profile.name}</Text>
             <Text theme={{ color: '#585858', fontSize: '11px' }}>
               {user.localID}
+              {user.defaultEthWallet}
             </Text>
           </Profile>
           <Text theme={{ color: '#585858', fontSize: '11px' }}>
@@ -94,6 +95,7 @@ export default createFragmentContainer(IdentitiesView, {
     fragment IdentitiesView_identities on IdentitiesQuery {
       ownUsers {
         localID
+        defaultEthAddress
         profile {
           name
         }

@@ -3,12 +3,12 @@ import React, { Component } from 'react'
 import { graphql, createFragmentContainer, QueryRenderer } from 'react-relay'
 
 import { EnvironmentContext } from '../RelayEnvironment'
-import LauncherContext from '../LauncherContext'
+import LauncherContext, { type CurrentUser } from '../LauncherContext'
 import RelayLoaderView from '../RelayLoaderView'
 import ContactsView, { type Contact } from './ContactsView'
 
 type QueryProps = {
-  userID: string,
+  user: CurrentUser,
 }
 
 type Props = QueryProps & {
@@ -35,7 +35,7 @@ export class ContactsScreen extends Component<Props, State> {
   render() {
     return (
       <ContactsView
-        userID={this.props.userID}
+        user={this.props.user}
         contacts={this.props.contacts}
         ignoreContact={this.ignoreContact}
         acceptContact={this.acceptContact}
@@ -69,7 +69,7 @@ export class ContactsScreenRenderer extends Component<QueryProps> {
             }
           }
         `}
-        variables={{ userID: this.props.userID }}
+        variables={{ userID: this.props.user.localID }}
         render={({ error, props }) => {
           if (error || !props) {
             return <RelayLoaderView error={error ? error.message : undefined} />
@@ -87,8 +87,6 @@ export class ContactsScreenRenderer extends Component<QueryProps> {
 export default class ContactsContextWrapper extends Component<{}> {
   static contextType = LauncherContext
   render() {
-    return (
-      <ContactsScreenRenderer userID={this.context.userID} {...this.props} />
-    )
+    return <ContactsScreenRenderer user={this.context.user} {...this.props} />
   }
 }

@@ -39,6 +39,9 @@ const walletImportMutation = graphql`
         localID
       }
       viewer {
+        identities {
+          ...Launcher_identities
+        }
         wallets {
           ...WalletsView_wallets @arguments(userID: $userID)
         }

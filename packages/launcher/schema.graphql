@@ -294,6 +294,7 @@ type Mutation {
   deleteWallet(input: DeleteWalletInput!): DeleteWalletPayload
   addContact(input: AddContactInput!): AddContactPayload
   deleteContact(input: DeletContactInput!): DeletContactPayload
+  setDefaultWallet(input: SetDefaultWalletInput!): SetDefaultWalletPayload
 }
 
 type NamedWalletAccountType {
@@ -337,6 +338,7 @@ type OwnUserIdentity implements Node {
   localID: ID!
   mfid: ID!
   apps: [App]
+  defaultEthAddress: String
   wallets: [UserWalletType]
   profile: OwnUserProfile
   pubKey: String!
@@ -360,6 +362,17 @@ type Query {
     id: ID!
   ): Node
   viewer: Viewer!
+}
+
+input SetDefaultWalletInput {
+  userID: String!
+  address: String!
+  clientMutationId: String
+}
+
+type SetDefaultWalletPayload {
+  viewer: Viewer!
+  clientMutationId: String
 }
 
 type Subscription {

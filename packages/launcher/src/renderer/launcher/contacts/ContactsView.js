@@ -14,6 +14,7 @@ import CircleArrowDown from '@morpheus-ui/icons/CircleArrowDownMd'
 import CircleArrowUp from '@morpheus-ui/icons/CircleArrowUpMd'
 import CloseIcon from '@morpheus-ui/icons/Close'
 
+import { type CurrentUser } from '../LauncherContext'
 import { EnvironmentContext } from '../RelayEnvironment'
 import Avatar from '../../UIComponents/Avatar'
 
@@ -179,7 +180,7 @@ export type SubmitContactInput = {
 }
 
 type Props = {
-  userID: string,
+  user: CurrentUser,
   contacts: {
     userContacts: Array<Contact>,
   },
@@ -224,10 +225,11 @@ export class ContactsView extends Component<Props, State> {
   }
 
   submitNewContact = (payload: FormSubmitPayload) => {
+    const { user } = this.props
     if (payload.valid) {
       this.setState({ error: null })
       const input = {
-        userID: this.props.userID,
+        userID: user.localID,
         publicFeed: payload.fields.publicKey,
         //TODO: get the proper user deta
         profile: {
@@ -237,7 +239,7 @@ export class ContactsView extends Component<Props, State> {
 
       commitMutation(this.context, {
         mutation: addContactMutation,
-        variables: { input, userID: this.props.userID },
+        variables: { input, userID: user.localID },
         onCompleted: (contact, errors) => {
           if (errors && errors.length) {
             this.setState({ error: errors[0].message })
