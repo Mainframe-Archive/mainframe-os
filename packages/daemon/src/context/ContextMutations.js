@@ -16,6 +16,13 @@ import type { OwnDeveloperProfile } from '../identity/OwnDeveloperIdentity'
 import type { OwnUserProfile } from '../identity/OwnUserIdentity'
 import { OwnFeed, type bzzHash } from '../swarm/feed'
 
+import type {
+  Blockchains,
+  WalletTypes,
+  WalletAddLedgerResult,
+} from '../wallet/WalletsRepository'
+import type HDWallet from '../wallet/HDWallet'
+
 import type ClientContext from './ClientContext'
 
 export type Feeds = {
@@ -39,6 +46,20 @@ export type AddPeerParams = {
   publicFeed: string,
   firstContactAddress: string,
   otherFeeds: Feeds,
+}
+
+export type ImportHDWalletParams = {
+  blockchain: Blockchains,
+  mnemonic: string,
+  firstAccountName: string,
+  userID?: string,
+}
+
+export type AddHDWalletAccountParams = {
+  walletID: string,
+  index: number,
+  name: string,
+  userID?: string,
 }
 
 export type MutationEventType =
@@ -199,5 +220,84 @@ export default class ContextMutations {
     await this._context.vaults.open(this._context.socket, path, password)
     await this._context.io.eth.setup()
     this._context.next({ type: 'vault_opened' })
+  }
+
+  // Wallets
+
+  async createHDWallet(
+    blockchain: Blockchains,
+    firstAccountName: string,
+    userID?: string,
+  ): Promise<HDWallet> {
+    const { openVault } = this._context
+    const wallet = openVault.wallets.createHDWallet(
+      blockchain,
+      firstAccountName,
+    )
+    if (userID) {
+      openVault.identityWallets.linkWalletToIdentity(
+        userID,
+        wallet.localID,
+        wallet.getAccounts()[0],
+      )
+    }
+    await openVault.save()
+    return wallet
+  }
+
+  async importHDWallet(params: ImportHDWalletParams): Promise<HDWallet> {
+    const { openVault } = this._context
+    const words = params.mnemonic.split(' ')
+    if (words.length !== 12) {
+      throw new Error('Seed phrase must consist of 12 words.')
+    }
+    const wallet = openVault.wallets.importMnemonicWallet(params)
+    if (params.userID) {
+      openVault.identityWallets.linkWalletToIdentity(
+        params.userID,
+        wallet.localID,
+        wallet.getAccounts()[0],
+      )
+    }
+    await openVault.save()
+    return wallet
+  }
+
+  async addHDWalletAccount(params: AddHDWalletAccountParams): Promise<string> {
+    const { openVault } = this._context
+    const address = openVault.wallets.addHDWalletAccount(params)
+    if (params.userID) {
+      openVault.identityWallets.linkWalletToIdentity(
+        params.userID,
+        params.walletID,
+        address,
+      )
+    }
+    return address
+  }
+
+  async addLedgerWalletAccount(
+    index: number,
+    name: string,
+    userID?: string,
+  ): Promise<WalletAddLedgerResult> {
+    const { openVault } = this._context
+    const res = await openVault.wallets.addLedgerEthAccount(index, name)
+    if (userID) {
+      openVault.identityWallets.linkWalletToIdentity(
+        userID,
+        res.localID,
+        res.address,
+      )
+    }
+    await openVault.save()
+    return res
+  }
+
+  async deleteWallet(blockchain: string, type: WalletTypes, localID: string) {
+    const { openVault } = this._context
+    openVault.wallets.deleteWallet(blockchain, type, localID)
+    openVault.identityWallets.deleteWallet(localID)
+    await openVault.save()
   }
 }

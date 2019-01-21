@@ -5,10 +5,10 @@ import type {
   PermissionRequirement,
   StrictPermissionsRequirements,
 } from '@mainframe/app-permissions'
-import type { ID, AppCreateParams, IdentityOwnData } from '@mainframe/client'
+import type { AppCreateParams, IdentityOwnData } from '@mainframe/client'
 import { isValidSemver } from '@mainframe/app-manifest'
 import React, { createRef, Component, type ElementRef } from 'react'
-import { commitMutation } from 'react-relay'
+import { graphql, QueryRenderer, commitMutation } from 'react-relay'
 import {
   View,
   ScrollView,
@@ -16,9 +16,9 @@ import {
   TouchableOpacity,
 } from 'react-native-web'
 
-import rpc from '../rpc'
 import colors from '../../colors'
 import globalStyles from '../../styles'
+import RelayLoaderView from '../RelayLoaderView'
 import Button from '../../UIComponents/Button'
 import Text from '../../UIComponents/Text'
 import TextInput from '../../UIComponents/TextInput'
@@ -30,36 +30,38 @@ import PermissionsRequirementsView, {
   PERMISSIONS_DESCRIPTIONS,
 } from './PermissionsRequirements'
 
-type Props = {
+type RendererProps = {
   onRequestClose: () => void,
   onAppCreated: () => void,
+}
+
+type Props = RendererProps & {
+  ownDevelopers: Array<IdentityOwnData>,
 }
 
 type AppData = {
   name?: string,
   version?: string,
   contentsPath?: string,
-  developerID?: ID,
+  developerID?: string,
 }
 
 type State = {
   inputValue: string,
   screen: 'info' | 'identity' | 'permissions' | 'summary',
   permissionsRequirements: StrictPermissionsRequirements,
-  userId?: ID,
-  devIdentities: Array<IdentityOwnData>,
+  userId?: string,
   appData: AppData,
   errorMsg?: string,
 }
 
-export default class CreateAppModal extends Component<Props, State> {
+export class CreateAppModal extends Component<Props, State> {
   static contextType = EnvironmentContext
 
   state = {
     inputValue: '',
     screen: 'info',
     manifest: null,
-    devIdentities: [],
     appData: {},
     permissionsRequirements: {
       optional: {
@@ -74,24 +76,9 @@ export default class CreateAppModal extends Component<Props, State> {
   // $FlowFixMe: React Ref
   fileInput: ElementRef<'input'> = createRef()
 
-  componentDidMount() {
-    this.getOwnIdentities()
-  }
-
   // HANDLERS
 
-  async getOwnIdentities() {
-    try {
-      const res = await rpc.getOwnDevIdentities()
-      this.setState({ devIdentities: res.developers })
-    } catch (err) {
-      // TODO: Handle error
-      // eslint-disable-next-line no-console
-      console.warn(err)
-    }
-  }
-
-  onSelectId = (id: ID) => {
+  onSelectId = (id: string) => {
     this.setState(({ appData }) => ({
       screen: 'permissions',
       appData: {
@@ -99,10 +86,6 @@ export default class CreateAppModal extends Component<Props, State> {
         developerID: id,
       },
     }))
-  }
-
-  onCreatedId = () => {
-    this.getOwnIdentities()
   }
 
   getCreateParams = (
@@ -196,6 +179,7 @@ export default class CreateAppModal extends Component<Props, State> {
 
   onSetAppData = () => {
     const { appData } = this.state
+    const { ownDevelopers } = this.props
     if (!appData.name || !appData.version || !appData.contentsPath) {
       this.setState({
         errorMsg: 'Please complete all fields.',
@@ -205,10 +189,14 @@ export default class CreateAppModal extends Component<Props, State> {
         errorMsg: 'Please provide a valid verison number, e.g. 1.0.0',
       })
     } else {
-      this.setState({
-        errorMsg: undefined,
-        screen: 'identity',
-      })
+      if (ownDevelopers.length) {
+        this.onSelectId(ownDevelopers[0].localID)
+      } else {
+        this.setState({
+          errorMsg: undefined,
+          screen: 'identity',
+        })
+      }
     }
   }
 
@@ -274,7 +262,7 @@ export default class CreateAppModal extends Component<Props, State> {
           enableCreate
           type="developer"
           onSelectId={this.onSelectId}
-          onCreatedId={this.onCreatedId}
+          onCreatedId={this.onSelectId}
         />
       </View>
     )
@@ -424,6 +412,39 @@ export default class CreateAppModal extends Component<Props, State> {
         {this.renderContent()}
         {this.renderError()}
       </ModalView>
+    )
+  }
+}
+
+export default class CreateAppModalRenderer extends Component<RendererProps> {
+  static contextType = EnvironmentContext
+
+  render() {
+    return (
+      <QueryRenderer
+        environment={this.context}
+        query={graphql`
+          query CreateAppModalQuery {
+            viewer {
+              identities {
+                ownDevelopers {
+                  localID
+                }
+              }
+            }
+          }
+        `}
+        variables={{}}
+        render={({ error, props }) => {
+          if (error || !props) {
+            return <RelayLoaderView error={error ? error.message : undefined} />
+          } else {
+            return (
+              <CreateAppModal {...props.viewer.identities} {...this.props} />
+            )
+          }
+        }}
+      />
     )
   }
 }

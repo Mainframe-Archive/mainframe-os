@@ -55,8 +55,8 @@ export const importMnemonic = async (cmd: Command, client: Client) => {
 
   const res = await client.wallet.importWalletByMnemonic({
     mnemonic,
-    name,
-    chain: 'ethereum',
+    firstAccountName: name,
+    blockchain: 'ethereum',
   })
   client.close()
   cmd.log('Imported HD wallet:')

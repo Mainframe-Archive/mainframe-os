@@ -31,9 +31,11 @@ export default class HDWallet extends AbstractSoftwareWallet {
   _root: HDkey
   _mnemonic: string
   _hdPath: string
+  _type: 'hd'
 
   constructor(params: HDWalletParams) {
     super()
+    this._type = 'hd'
     this._wallets = {}
     this._hdPath = params.hdPath ? params.hdPath : HD_PATH_STRING
     this._localID = params.localID
@@ -63,6 +65,10 @@ export default class HDWallet extends AbstractSoftwareWallet {
 
   get mnemonic(): string {
     return this._mnemonic
+  }
+
+  get type(): 'hd' {
+    return this._type
   }
 
   getAccounts(): Array<string> {

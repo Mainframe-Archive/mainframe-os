@@ -55,7 +55,7 @@ export default class WalletTxRequestView extends Component<Props, State> {
   }
 
   async getEthWallets() {
-    const wallets = await rpc.getEthWallets()
+    const wallets = await rpc.getUserEthWallets()
     this.setState({ wallets })
   }
 
