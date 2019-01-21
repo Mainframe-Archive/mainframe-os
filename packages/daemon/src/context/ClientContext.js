@@ -9,14 +9,10 @@ import type { Vault, VaultRegistry } from '../vault'
 
 import ContextEvents from './ContextEvents'
 import ContextIO from './ContextIO'
-import ContextMutations, { type MutationEventType } from './ContextMutations'
+import ContextMutations, { type MutationEvent } from './ContextMutations'
 import ContextSubscriptions from './ContextSubscriptions'
 
-export type ContextEventType = MutationEventType
-
-export type ContextEvent = {
-  type: ContextEventType,
-}
+export type ContextEvent = MutationEvent
 
 type LogFunc = (...args: Array<any>) => void
 

@@ -2,6 +2,7 @@
 
 import type { Observable, Subscription } from 'rxjs'
 import { filter } from 'rxjs/operators'
+import { idType } from '@mainframe/utils-id'
 
 import { OwnFeed } from '../swarm/feed'
 import type ClientContext, { ContextEvent } from './ClientContext'
@@ -67,6 +68,9 @@ export default class ContextEvents {
           }),
         )
         .subscribe(async (e: ContextEvent) => {
+          // Hint for flow
+          if (!(e.type === 'user_created' || e.type === 'user_changed')) return
+
           const { user } = e
           await user.publicFeed.publishJSON(
             this._context.io.bzz,
@@ -90,16 +94,21 @@ export default class ContextEvents {
         .pipe(
           filter((e: ContextEvent) => {
             return (
-              (e.type === 'contact_created' || e.type === 'contact_loaded') &&
+              e.type === 'contact_created' &&
               e.contact.connectionState === 'sending'
             )
           }),
         )
         .subscribe(async (e: ContextEvent) => {
+          // Hint for flow
+          if (!(e.type === 'contact_created')) return
+
           const { contact, userID } = e
-          const user = this._context.openVault.identities.getOwnUser(userID)
+          const user = this._context.openVault.identities.getOwnUser(
+            idType(userID),
+          )
           const peer = this._context.openVault.identities.getPeerUser(
-            contact.peerID,
+            idType(contact.peerID),
           )
           if (!user || !peer) return
 
@@ -123,6 +132,7 @@ export default class ContextEvents {
           this._context.next({
             type: 'contact_changed',
             contact,
+            userID,
             change: 'requestSent',
           })
 

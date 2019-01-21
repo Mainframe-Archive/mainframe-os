@@ -40,19 +40,24 @@ export type AddPeerParams = {
   otherFeeds: Feeds,
 }
 
-export type MutationEventType =
-  | 'own_app_created'
-  | 'vault_created'
-  | 'vault_opened'
-  | 'user_created'
-  | 'user_changed'
-  | 'user_deleted'
-  | 'peer_created'
-  | 'peer_changed'
-  | 'peer_deleted'
-  | 'contact_created'
-  | 'contact_changed'
-  | 'contact_deleted'
+export type MutationEvent =
+  | { type: 'vault_created' | 'vault_opened' }
+  | { type: 'own_app_created', app: OwnApp }
+  | { type: 'user_created' | 'user_deleted', user: OwnUserIdentity }
+  | { type: 'user_changed', user: OwnUserIdentity, change: string }
+  | { type: 'peer_created' | 'peer_deleted', peer: PeerUserIdentity }
+  | { type: 'peer_changed', peer: PeerUserIdentity, change: string }
+  | {
+      type: 'contact_created' | 'contact_deleted',
+      contact: Contact,
+      userID: string,
+    }
+  | {
+      type: 'contact_changed',
+      contact: Contact,
+      userID: string,
+      change: string,
+    }
 
 export default class ContextMutations {
   _context: ClientContext
