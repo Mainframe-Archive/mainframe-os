@@ -397,7 +397,7 @@ const ownUserIdentityType = new GraphQLObjectType({
     wallets: {
       type: new GraphQLList(userWalletType),
       resolve: (self, args, ctx) => {
-        const wallets = ctx.openVault.getUserEthWallets(self.localID)
+        const wallets = ctx.queries.getUserEthWallets(self.localID)
         return Object.keys(wallets).map(id => {
           return {
             localID: id,
@@ -530,7 +530,7 @@ const contactsQueryType = new GraphQLObjectType({
         userID: { type: new GraphQLNonNull(GraphQLString) },
       },
       resolve: (self, args, ctx) => {
-        return ctx.openVault.identities.getUserContacts(args.userID)
+        return ctx.queries.getUserContacts(args.userID)
       },
     },
   }),
@@ -688,7 +688,7 @@ const walletsQueryType = new GraphQLObjectType({
         userID: { type: new GraphQLNonNull(GraphQLString) },
       },
       resolve: (self, args, ctx: ClientContext) => {
-        return ctx.openVault.getUserEthWallets(args.userID)
+        return ctx.queries.getUserEthWallets(args.userID)
       },
     },
   }),

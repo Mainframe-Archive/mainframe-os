@@ -82,7 +82,7 @@ const createClientSession = (
           manifest: app.manifest,
           contentsPath: getContentsPath(ctx.env, app.manifest),
         }
-  const wallets = ctx.openVault.getUserEthWallets(userID)
+  const wallets = ctx.queries.getUserEthWallets(userID)
 
   return {
     user: {

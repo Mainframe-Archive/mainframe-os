@@ -92,7 +92,7 @@ export const getUserEthWallets = {
     ctx: ClientContext,
     params: WalletGetUserEthWalletsParams,
   ): Promise<WalletGetEthWalletsResult> => {
-    const wallets = ctx.openVault.getUserEthWallets(params.userID)
+    const wallets = ctx.queries.getUserEthWallets(params.userID)
     return {
       hd: wallets.filter(w => w.type === 'hd'),
       ledger: wallets.filter(w => w.type === 'ledger'),
@@ -106,7 +106,7 @@ export const getUserEthAccounts = {
     ctx: ClientContext,
     params: WalletGetUserEthAccountsParams,
   ): Promise<WalletGetEthAccountsResult> => {
-    return ctx.openVault.getUserEthAccounts(params.userID)
+    return ctx.queries.getUserEthAccounts(params.userID)
   },
 }
 
