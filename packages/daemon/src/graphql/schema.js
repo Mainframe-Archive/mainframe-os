@@ -393,11 +393,11 @@ const ownUserIdentityType = new GraphQLObjectType({
     wallets: {
       type: new GraphQLList(userWalletType),
       resolve: (self, args, ctx) => {
-        const wallets = ctx.openVault.getWalletsForIdentity(self.localID)
+        const wallets = ctx.openVault.getUserEthWallets(self.localID)
         return Object.keys(wallets).map(id => {
           return {
             localID: id,
-            accounts: wallets[id],
+            accounts: wallets[id].getAccounts(),
           }
         })
       },
@@ -626,23 +626,13 @@ const ethWalletsType = new GraphQLObjectType({
     hd: {
       type: new GraphQLList(ethHdWalletType),
       resolve: self => {
-        return Object.keys(self.hd).map(id => {
-          return {
-            localID: id,
-            accounts: self.hd[id].getNamedAccounts(),
-          }
-        })
+        return self.filter(w => w.type === 'hd')
       },
     },
     ledger: {
       type: new GraphQLList(ethLedgerWalletType),
       resolve: self => {
-        return Object.keys(self.ledger).map(id => {
-          return {
-            localID: id,
-            accounts: self.ledger[id].getNamedAccounts(),
-          }
-        })
+        return self.filter(w => w.type === 'ledger')
       },
     },
   }),
@@ -653,8 +643,11 @@ const walletsQueryType = new GraphQLObjectType({
   fields: () => ({
     ethWallets: {
       type: new GraphQLNonNull(ethWalletsType),
+      args: {
+        userID: { type: new GraphQLNonNull(GraphQLString) },
+      },
       resolve: (self, args, ctx: ClientContext) => {
-        return ctx.openVault.wallets.ethWallets
+        return ctx.openVault.getUserEthWallets(args.userID)
       },
     },
   }),
@@ -712,13 +705,7 @@ const deleteWalletMutation = mutationWithClientMutationId({
     },
   },
   mutateAndGetPayload: async (args, ctx) => {
-    ctx.openVault.wallets.deleteWallet({
-      chain: 'ethereum',
-      type: args.type,
-      walletID: args.walletID,
-    })
-    ctx.openVault.identityWallets.deleteWallet(args.walletID)
-    await ctx.openVault.save()
+    await ctx.mutations.deleteWallet('ethereum', args.type, args.walletID)
     return {}
   },
 })
@@ -735,6 +722,9 @@ const addHDWalletAccountMutation = mutationWithClientMutationId({
     name: {
       type: new GraphQLNonNull(GraphQLString),
     },
+    userID: {
+      type: GraphQLString,
+    },
   },
   outputFields: {
     address: {
@@ -747,8 +737,7 @@ const addHDWalletAccountMutation = mutationWithClientMutationId({
     },
   },
   mutateAndGetPayload: async (args, ctx) => {
-    const address = ctx.openVault.wallets.addHDWalletAccount(args)
-    await ctx.openVault.save()
+    const address = await ctx.mutations.addHDWalletAccount(args)
     return { address }
   },
 })
@@ -756,7 +745,7 @@ const addHDWalletAccountMutation = mutationWithClientMutationId({
 const importHDWalletMutation = mutationWithClientMutationId({
   name: 'ImportHDWallet',
   inputFields: {
-    type: {
+    blockchain: {
       type: new GraphQLNonNull(supportedWalletsEnum),
     },
     mnemonic: {
@@ -765,7 +754,7 @@ const importHDWalletMutation = mutationWithClientMutationId({
     name: {
       type: new GraphQLNonNull(GraphQLString),
     },
-    linkToUserId: {
+    userID: {
       type: GraphQLString,
     },
   },
@@ -780,24 +769,15 @@ const importHDWalletMutation = mutationWithClientMutationId({
     },
   },
   mutateAndGetPayload: async (args, ctx) => {
-    const words = args.mnemonic.split(' ')
-    if (words.length !== 12) {
-      throw new Error('Seed phrase must consist of 12 words.')
-    }
-    const res = ctx.openVault.wallets.importMnemonicWallet({
-      chain: args.type,
+    const wallet = await ctx.mutations.importHDWallet({
+      blockchain: args.blockchain,
       mnemonic: args.mnemonic,
-      name: args.name,
+      firstAccountName: args.name,
+      userID: args.userID,
     })
-    if (args.linkToUserId) {
-      await ctx.openVault.identityWallets.linkWalletToIdentity(
-        args.linkToUserId,
-      )
-    }
-    await ctx.openVault.save()
     return {
-      localID: res.walletID,
-      accounts: [{ address: res.accounts[0], name: args.name }],
+      localID: wallet.localID,
+      accounts: wallet.getNamedAccounts(),
     }
   },
 })
@@ -805,13 +785,13 @@ const importHDWalletMutation = mutationWithClientMutationId({
 const createHDWalletMutation = mutationWithClientMutationId({
   name: 'CreateHDWallet',
   inputFields: {
-    type: {
+    blockchain: {
       type: new GraphQLNonNull(supportedWalletsEnum),
     },
     name: {
       type: new GraphQLNonNull(GraphQLString),
     },
-    linkToUserId: {
+    userID: {
       type: GraphQLString,
     },
   },
@@ -826,19 +806,14 @@ const createHDWalletMutation = mutationWithClientMutationId({
     },
   },
   mutateAndGetPayload: async (args, ctx) => {
-    const res = ctx.openVault.wallets.createHDWallet({
-      chain: args.type,
-      name: args.name,
-    })
-    if (args.linkToUserId) {
-      await ctx.openVault.identityWallets.linkWalletToIdentity(
-        args.linkToUserId,
-      )
-    }
-    await ctx.openVault.save()
+    const wallet = await ctx.mutations.createHDWallet(
+      args.blockchain,
+      args.name,
+      args.userID,
+    )
     return {
-      localID: res.walletID,
-      accounts: res.accounts,
+      localID: wallet.localID,
+      accounts: wallet.getNamedAccounts(),
     }
   },
 })
@@ -852,15 +827,18 @@ const addLedgerWalletAccountMutation = mutationWithClientMutationId({
     name: {
       type: new GraphQLNonNull(GraphQLString),
     },
+    userID: {
+      type: GraphQLString,
+    },
   },
   outputFields: {
     address: {
       type: new GraphQLNonNull(GraphQLString),
       resolve: payload => payload.address,
     },
-    walletID: {
+    localID: {
       type: new GraphQLNonNull(GraphQLString),
-      resolve: payload => payload.walletID,
+      resolve: payload => payload.localID,
     },
     viewer: {
       type: new GraphQLNonNull(viewerType),
@@ -868,8 +846,11 @@ const addLedgerWalletAccountMutation = mutationWithClientMutationId({
     },
   },
   mutateAndGetPayload: async (args, ctx) => {
-    const res = await ctx.openVault.wallets.addLedgerEthAccount(args)
-    await ctx.openVault.save()
+    const res = await ctx.mutations.addLedgerWalletAccount(
+      args.index,
+      args.name,
+      args.userID,
+    )
     return res
   },
 })

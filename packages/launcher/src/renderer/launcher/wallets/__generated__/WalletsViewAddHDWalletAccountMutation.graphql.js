@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 8e38b707847052034fa01d0f6863202d
+ * @relayHash c51426f1680235371682fd8079e256e8
  */
 
 /* eslint-disable */
@@ -14,10 +14,12 @@ export type AddHDWalletAccountInput = {
   walletID: string,
   index: number,
   name: string,
+  userID?: ?string,
   clientMutationId?: ?string,
 };
 export type WalletsViewAddHDWalletAccountMutationVariables = {|
-  input: AddHDWalletAccountInput
+  input: AddHDWalletAccountInput,
+  userID: string,
 |};
 export type WalletsViewAddHDWalletAccountMutationResponse = {|
   +addHDWalletAccount: ?{|
@@ -39,20 +41,21 @@ export type WalletsViewAddHDWalletAccountMutation = {|
 /*
 mutation WalletsViewAddHDWalletAccountMutation(
   $input: AddHDWalletAccountInput!
+  $userID: String!
 ) {
   addHDWalletAccount(input: $input) {
     address
     viewer {
       wallets {
-        ...WalletsView_wallets
+        ...WalletsView_wallets_3iqrP
       }
       id
     }
   }
 }
 
-fragment WalletsView_wallets on WalletsQuery {
-  ethWallets {
+fragment WalletsView_wallets_3iqrP on WalletsQuery {
+  ethWallets(userID: $userID) {
     hd {
       localID
       accounts {
@@ -87,6 +90,12 @@ var v0 = [
     "kind": "LocalArgument",
     "name": "input",
     "type": "AddHDWalletAccountInput!",
+    "defaultValue": null
+  },
+  {
+    "kind": "LocalArgument",
+    "name": "userID",
+    "type": "String!",
     "defaultValue": null
   }
 ],
@@ -171,7 +180,7 @@ return {
   "operationKind": "mutation",
   "name": "WalletsViewAddHDWalletAccountMutation",
   "id": null,
-  "text": "mutation WalletsViewAddHDWalletAccountMutation(\n  $input: AddHDWalletAccountInput!\n) {\n  addHDWalletAccount(input: $input) {\n    address\n    viewer {\n      wallets {\n        ...WalletsView_wallets\n      }\n      id\n    }\n  }\n}\n\nfragment WalletsView_wallets on WalletsQuery {\n  ethWallets {\n    hd {\n      localID\n      accounts {\n        name\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n    ledger {\n      localID\n      accounts {\n        name\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n  }\n}\n",
+  "text": "mutation WalletsViewAddHDWalletAccountMutation(\n  $input: AddHDWalletAccountInput!\n  $userID: String!\n) {\n  addHDWalletAccount(input: $input) {\n    address\n    viewer {\n      wallets {\n        ...WalletsView_wallets_3iqrP\n      }\n      id\n    }\n  }\n}\n\nfragment WalletsView_wallets_3iqrP on WalletsQuery {\n  ethWallets(userID: $userID) {\n    hd {\n      localID\n      accounts {\n        name\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n    ledger {\n      localID\n      accounts {\n        name\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -211,7 +220,14 @@ return {
                   {
                     "kind": "FragmentSpread",
                     "name": "WalletsView_wallets",
-                    "args": null
+                    "args": [
+                      {
+                        "kind": "Variable",
+                        "name": "userID",
+                        "variableName": "userID",
+                        "type": null
+                      }
+                    ]
                   }
                 ]
               }
@@ -259,7 +275,14 @@ return {
                     "alias": null,
                     "name": "ethWallets",
                     "storageKey": null,
-                    "args": null,
+                    "args": [
+                      {
+                        "kind": "Variable",
+                        "name": "userID",
+                        "variableName": "userID",
+                        "type": "String!"
+                      }
+                    ],
                     "concreteType": "EthWallets",
                     "plural": false,
                     "selections": [
@@ -297,5 +320,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '787d206bf98f734e6f9cd5fec1af651a';
+(node/*: any*/).hash = '2c778c973c68b9f5c1474020d812e91b';
 module.exports = node;

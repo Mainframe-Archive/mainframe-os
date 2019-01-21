@@ -23,15 +23,29 @@ const node/*: ConcreteFragment*/ = {
   "name": "WalletsScreen_wallets",
   "type": "WalletsQuery",
   "metadata": null,
-  "argumentDefinitions": [],
+  "argumentDefinitions": [
+    {
+      "kind": "LocalArgument",
+      "name": "userID",
+      "type": "String!",
+      "defaultValue": null
+    }
+  ],
   "selections": [
     {
       "kind": "FragmentSpread",
       "name": "WalletsView_wallets",
-      "args": null
+      "args": [
+        {
+          "kind": "Variable",
+          "name": "userID",
+          "variableName": "userID",
+          "type": null
+        }
+      ]
     }
   ]
 };
 // prettier-ignore
-(node/*: any*/).hash = '70571484ea10632e22ecf7ed13d758ef';
+(node/*: any*/).hash = '11e829838834195d86533ed5be8165f5';
 module.exports = node;
