@@ -3,7 +3,6 @@
 import { hexValueType } from '@erebos/hex'
 import type { StrictPermissionsRequirements } from '@mainframe/app-permissions'
 import { idType, type ID } from '@mainframe/utils-id'
-import { getFeedTopic } from '@erebos/api-bzz-base'
 
 import type { OwnApp } from '../app'
 import type {
@@ -14,7 +13,7 @@ import type {
 } from '../identity'
 import type { OwnDeveloperProfile } from '../identity/OwnDeveloperIdentity'
 import type { OwnUserProfile } from '../identity/OwnUserIdentity'
-import { OwnFeed, type bzzHash } from '../swarm/feed'
+import type { bzzHash } from '../swarm/feed'
 
 import type ClientContext from './ClientContext'
 
@@ -45,6 +44,15 @@ export type MutationEventType =
   | 'own_app_created'
   | 'vault_created'
   | 'vault_opened'
+  | 'user_created'
+  | 'user_changed'
+  | 'user_deleted'
+  | 'peer_created'
+  | 'peer_changed'
+  | 'peer_deleted'
+  | 'contact_created'
+  | 'contact_changed'
+  | 'contact_deleted'
 
 export default class ContextMutations {
   _context: ClientContext
@@ -100,48 +108,7 @@ export default class ContextMutations {
       userID,
       peerID,
     )
-    await this._context.openVault.save()
-
-    // TODO: Process feed work asynchronously
-    const user = this._context.openVault.identities.getOwnUser(userID)
-    if (!user) throw new Error('User not found')
-    const peer = this._context.openVault.identities.getPeerUser(peerID)
-    if (!peer) throw new Error('Peer not found')
-
-    await contact.ownFeed.syncManifest(this._context.io.bzz)
-    // TODO: Actual data
-    await contact.ownFeed.publishJSON(this._context.io.bzz, {
-      message: 'connected',
-    })
-
-    // Create ephemeral one-use feed from the first-contact keypair and peer-specific topic
-    const firstContactFeed = OwnFeed.create(
-      user.firstContactFeed.keyPair,
-      peer.base64PublicKey(),
-    )
-    await firstContactFeed.publishJSON(
-      this._context.io.bzz,
-      contact.firstContactData(),
-    )
-    contact.requestSent = true
-    await this._context.openVault.save()
-
-    // Check if other user created feed
-    try {
-      const topic = getFeedTopic({ name: user.base64PublicKey() })
-      const peerFeedRes = await this._context.io.bzz.getFeedValue(
-        peer.firstContactAddress,
-        { topic },
-        { mode: 'content-response' },
-      )
-      const data = await peerFeedRes.json()
-      contact.contactFeed = data.privateFeed
-      await this._context.openVault.save()
-    } catch (_e) {
-      // Should always be due to contact feed not being ready
-      // TODO: Rethrow other errors
-    }
-
+    this._context.next({ type: 'contact_created', contact, userID })
     return contact
   }
 
@@ -168,17 +135,7 @@ export default class ContextMutations {
   async createUser(profile: OwnUserProfile): Promise<OwnUserIdentity> {
     const user = this._context.openVault.identities.createOwnUser(profile)
     await this._context.openVault.save()
-
-    // TODO: Process feed work asynchronously
-    const saveRequired = await user.publicFeed.syncManifest(
-      this._context.io.bzz,
-    )
-    if (saveRequired) await this._context.openVault.save()
-    await user.publicFeed.publishJSON(
-      this._context.io.bzz,
-      user.publicFeedData(),
-    )
-
+    this._context.next({ type: 'user_created', user })
     return user
   }
 
