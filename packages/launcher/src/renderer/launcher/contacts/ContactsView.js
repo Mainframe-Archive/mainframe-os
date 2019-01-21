@@ -3,6 +3,8 @@
 import React, { Component } from 'react'
 import styled from 'styled-components/native'
 import { graphql, commitMutation, createFragmentContainer } from 'react-relay'
+import { fetchQuery } from 'relay-runtime'
+import { ActivityIndicator } from 'react-native'
 import { debounce } from 'lodash'
 import { Text, Button, Row, Column, TextField } from '@morpheus-ui/core'
 import { Form, type FormSubmitPayload } from '@morpheus-ui/forms'
@@ -189,9 +191,17 @@ type Props = {
 }
 
 type State = {
-  modalOpen: boolean,
+  modalOpen?: boolean,
   error?: ?string,
-  publicKey?: ?string,
+  peerLookupHash?: ?string,
+  queryInProgress?: ?boolean,
+  addingContact?: ?boolean,
+  foundPeer?: {
+    profile: {
+      name: string,
+    },
+    publicKey: string,
+  },
 }
 
 export const addContactMutation = graphql`
@@ -209,12 +219,23 @@ export const addContactMutation = graphql`
   }
 `
 
+const peerLookupQuery = graphql`
+  query ContactsViewQuery($feedHash: String!) {
+    peers {
+      peerLookupByFeed(feedHash: $feedHash) {
+        profile {
+          name
+        }
+        publicKey
+      }
+    }
+  }
+`
+
 export class ContactsView extends Component<Props, State> {
   static contextType = EnvironmentContext
 
-  state = {
-    modalOpen: false,
-  }
+  state: State = {}
 
   openModal = () => {
     this.setState({ modalOpen: true })
@@ -224,17 +245,41 @@ export class ContactsView extends Component<Props, State> {
     this.setState({ modalOpen: false })
   }
 
+  lookupPeer = async (feedHash: string) => {
+    if (!feedHash || feedHash.length !== 64) {
+      this.setState({
+        foundPeer: undefined,
+        queryInProgress: false,
+      })
+      return
+    }
+    this.setState({
+      queryInProgress: true,
+    })
+
+    const peerQueryResult = await fetchQuery(this.context, peerLookupQuery, {
+      feedHash,
+    })
+    this.setState({
+      foundPeer: peerQueryResult.peers.peerLookupByFeed,
+      queryInProgress: false,
+    })
+  }
+
   submitNewContact = (payload: FormSubmitPayload) => {
     const { user } = this.props
     if (payload.valid) {
-      this.setState({ error: null })
+      this.setState({ error: null, addingContact: true })
       const input = {
         userID: user.localID,
-        publicFeed: payload.fields.publicKey,
-        //TODO: get the proper user deta
-        profile: {
-          name: 'Unknown User ',
-        },
+        publicFeed: payload.fields.peerLookupHash,
+      }
+
+      const requestComplete = error => {
+        this.setState({
+          error,
+          addingContact: false,
+        })
       }
 
       commitMutation(this.context, {
@@ -242,15 +287,13 @@ export class ContactsView extends Component<Props, State> {
         variables: { input, userID: user.localID },
         onCompleted: (contact, errors) => {
           if (errors && errors.length) {
-            this.setState({ error: errors[0].message })
+            requestComplete(errors[0].message)
           } else {
-            if (this.state.modalOpen) {
-              this.setState({ modalOpen: false })
-            }
+            requestComplete()
           }
         },
         onError: err => {
-          this.setState({ error: err.message })
+          requestComplete(err.message)
         },
       })
 
@@ -263,8 +306,9 @@ export class ContactsView extends Component<Props, State> {
   onFormChange = debounce(
     (payload: FormSubmitPayload) => {
       //TODO: should fetch the user data.
+      this.lookupPeer(payload.fields.peerLookupHash)
       this.setState({
-        publicKey: payload.fields.publicKey,
+        peerLookupHash: payload.fields.peerLookupHash,
       })
     },
     250,
@@ -338,14 +382,61 @@ export class ContactsView extends Component<Props, State> {
     )
   }
 
+  renderPeerLookup() {
+    const { foundPeer, queryInProgress } = this.state
+    return queryInProgress ? (
+      <ActivityIndicator />
+    ) : (
+      foundPeer && (
+        <Column>
+          <AvatarWrapper>
+            <Blocky>
+              <Avatar id={foundPeer.publicKey} size="small" />
+            </Blocky>
+            <Text variant="greyDark23" size={13}>
+              {foundPeer.profile.name}
+            </Text>
+          </AvatarWrapper>
+        </Column>
+      )
+    )
+  }
+
   renderAddNewContactForm(modal: boolean) {
-    const errorMsg = this.state.error ? (
+    const { error, addingContact } = this.state
+    const errorMsg = error ? (
       <Row size={1}>
         <Column>
-          <Text variant="error">{this.state.error}</Text>
+          <Text variant="error">{error}</Text>
         </Column>
       </Row>
     ) : null
+    const addButton = addingContact ? (
+      <ActivityIndicator />
+    ) : modal ? (
+      <Row size={1}>
+        <Column styles="align-items:center; justify-content: center; flex-direction: row;">
+          <Button
+            title="CANCEL"
+            variant={['no-border', 'grey', 'modalButton']}
+            onPress={this.closeModal}
+          />
+          <Button title="ADD" variant={['red', 'modalButton']} submit />
+        </Column>
+      </Row>
+    ) : (
+      <Row size={2} top>
+        <Column styles="align-items:flex-end;" smOffset={1}>
+          <Button
+            title="ADD"
+            variant="onboarding"
+            Icon={CircleArrowRight}
+            submit
+          />
+        </Column>
+      </Row>
+    )
+
     return (
       <FormContainer modal={modal}>
         <Form onChange={this.onFormChange} onSubmit={this.submitNewContact}>
@@ -362,44 +453,11 @@ export class ContactsView extends Component<Props, State> {
               </Column>
             )}
             <Column>
-              <TextField name="publicKey" required label="Mainframe ID" />
+              <TextField name="peerLookupHash" required label="Mainframe ID" />
             </Column>
-            {this.state.publicKey && (
-              <Column>
-                <AvatarWrapper>
-                  <Blocky>
-                    <Avatar id={this.state.publicKey} size="small" />
-                  </Blocky>
-                  <Text variant="greyDark23" size={13}>
-                    Unknown User
-                  </Text>
-                </AvatarWrapper>
-              </Column>
-            )}
+            {this.renderPeerLookup()}
           </Row>
-          {modal ? (
-            <Row size={1}>
-              <Column styles="align-items:center; justify-content: center; flex-direction: row;">
-                <Button
-                  title="CANCEL"
-                  variant={['no-border', 'grey', 'modalButton']}
-                  onPress={this.closeModal}
-                />
-                <Button title="ADD" variant={['red', 'modalButton']} submit />
-              </Column>
-            </Row>
-          ) : (
-            <Row size={2} top>
-              <Column styles="align-items:flex-end;" smOffset={1}>
-                <Button
-                  title="ADD"
-                  variant="onboarding"
-                  Icon={CircleArrowRight}
-                  submit
-                />
-              </Column>
-            </Row>
-          )}
+          {addButton}
         </Form>
         {errorMsg}
       </FormContainer>

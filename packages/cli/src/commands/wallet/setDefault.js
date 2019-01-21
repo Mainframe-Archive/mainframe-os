@@ -1,6 +1,5 @@
 // @flow
 import { flags } from '@oclif/command'
-import { prompt } from 'inquirer'
 
 import Command from '../../OpenVaultCommand'
 
@@ -9,7 +8,7 @@ export default class WalletSetDefaultCommand extends Command {
   static flags = {
     ...Command.flags,
     userID: flags.string({
-      description: 'wallet local ID',
+      description: 'user local ID',
     }),
     address: flags.string({
       description: 'wallet account address',
@@ -21,21 +20,11 @@ export default class WalletSetDefaultCommand extends Command {
     if (client == null) {
       return
     }
-    const { confirmed } = await prompt({
-      type: 'confirm',
-      name: 'confirmed',
-      message: `Are you sure you want to delete the wallet "${
-        this.flags.id
-      }"? This CAN NOT be reversed.`,
-      default: false,
+    await client.wallet.setUsersDefaultWallet({
+      userID: this.flags.userID,
+      address: this.flags.address,
     })
-    if (confirmed) {
-      await client.wallet.setUsersDefaultWallet({
-        userID: this.flags.userID,
-        address: this.flags.address,
-      })
 
-      this.log('Added wallet')
-    }
+    this.log('Default wallet set')
   }
 }

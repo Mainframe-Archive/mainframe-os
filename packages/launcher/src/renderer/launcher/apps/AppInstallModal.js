@@ -216,7 +216,9 @@ export class AppInstallModal extends Component<ViewProps, State> {
 export default class AppInstallContextWrapper extends Component<Props> {
   static contextType = LauncherContext
   render() {
-    return <AppInstallModal userID={this.context.userID} {...this.props} />
+    return (
+      <AppInstallModal userID={this.context.user.localID} {...this.props} />
+    )
   }
 }
 
