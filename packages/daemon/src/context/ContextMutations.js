@@ -210,15 +210,12 @@ export default class ContextMutations {
 
   async updateUser(
     userID: ID,
-    profile: { name?: ?string, avatar?: ?string },
+    profile: $Shape<OwnUserProfile>,
   ): Promise<void> {
     const user = this._context.openVault.identities.getOwnUser(userID)
     if (!user) throw new Error('User not found')
 
-    user.profile = {
-      name: profile.name || user.profile.name,
-      avatar: profile.avatar || user.profile.avatar,
-    }
+    user.profile = { ...user.profile, ...profile }
     await this._context.openVault.save()
     await user.publicFeed.publishJSON(
       this._context.io.bzz,
