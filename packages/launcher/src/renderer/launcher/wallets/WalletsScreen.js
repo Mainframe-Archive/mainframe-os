@@ -3,12 +3,12 @@ import React, { Component } from 'react'
 import { graphql, createFragmentContainer, QueryRenderer } from 'react-relay'
 
 import { EnvironmentContext } from '../RelayEnvironment'
-import LauncherContext from '../LauncherContext'
+import LauncherContext, { type CurrentUser } from '../LauncherContext'
 import RelayLoaderView from '../RelayLoaderView'
 import WalletsView, { type Wallets } from './WalletsView'
 
 type RendererProps = {
-  userID: string,
+  user: CurrentUser,
 }
 
 type Props = RendererProps & {
@@ -17,9 +17,7 @@ type Props = RendererProps & {
 
 class WalletsScreen extends Component<Props> {
   render() {
-    return (
-      <WalletsView userID={this.props.userID} wallets={this.props.wallets} />
-    )
+    return <WalletsView user={this.props.user} wallets={this.props.wallets} />
   }
 }
 
@@ -48,7 +46,7 @@ export class WalletsScreenRenderer extends Component<RendererProps> {
             }
           }
         `}
-        variables={{ userID: this.props.userID }}
+        variables={{ userID: this.props.user.localID }}
         render={({ error, props }) => {
           if (error || !props) {
             return <RelayLoaderView error={error ? error.message : undefined} />
@@ -66,6 +64,6 @@ export class WalletsScreenRenderer extends Component<RendererProps> {
 export default class WalletsScreenContextWrapper extends Component<{}> {
   static contextType = LauncherContext
   render() {
-    return <WalletsScreenRenderer userID={this.context.userID} />
+    return <WalletsScreenRenderer user={this.context.user} />
   }
 }

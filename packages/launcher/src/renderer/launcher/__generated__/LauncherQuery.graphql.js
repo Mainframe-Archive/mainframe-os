@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash a5ac857c620dfc1c46723567a5b37bd1
+ * @relayHash ddd3696632e19329827215cd2d9c6d23
  */
 
 /* eslint-disable */
@@ -9,13 +9,12 @@
 
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
+type Launcher_identities$ref = any;
 export type LauncherQueryVariables = {||};
 export type LauncherQueryResponse = {|
   +viewer: {|
     +identities: {|
-      +ownUsers: ?$ReadOnlyArray<?{|
-        +localID: string
-      |}>
+      +$fragmentRefs: Launcher_identities$ref
     |}
   |}
 |};
@@ -30,11 +29,16 @@ export type LauncherQuery = {|
 query LauncherQuery {
   viewer {
     identities {
-      ownUsers {
-        localID
-        id
-      }
+      ...Launcher_identities
     }
+    id
+  }
+}
+
+fragment Launcher_identities on IdentitiesQuery {
+  ownUsers {
+    defaultEthAddress
+    localID
     id
   }
 }
@@ -42,13 +46,6 @@ query LauncherQuery {
 
 const node/*: ConcreteRequest*/ = (function(){
 var v0 = {
-  "kind": "ScalarField",
-  "alias": null,
-  "name": "localID",
-  "args": null,
-  "storageKey": null
-},
-v1 = {
   "kind": "ScalarField",
   "alias": null,
   "name": "id",
@@ -60,7 +57,7 @@ return {
   "operationKind": "query",
   "name": "LauncherQuery",
   "id": null,
-  "text": "query LauncherQuery {\n  viewer {\n    identities {\n      ownUsers {\n        localID\n        id\n      }\n    }\n    id\n  }\n}\n",
+  "text": "query LauncherQuery {\n  viewer {\n    identities {\n      ...Launcher_identities\n    }\n    id\n  }\n}\n\nfragment Launcher_identities on IdentitiesQuery {\n  ownUsers {\n    defaultEthAddress\n    localID\n    id\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -88,16 +85,9 @@ return {
             "plural": false,
             "selections": [
               {
-                "kind": "LinkedField",
-                "alias": null,
-                "name": "ownUsers",
-                "storageKey": null,
-                "args": null,
-                "concreteType": "OwnUserIdentity",
-                "plural": true,
-                "selections": [
-                  v0
-                ]
+                "kind": "FragmentSpread",
+                "name": "Launcher_identities",
+                "args": null
               }
             ]
           }
@@ -137,13 +127,26 @@ return {
                 "concreteType": "OwnUserIdentity",
                 "plural": true,
                 "selections": [
-                  v0,
-                  v1
+                  {
+                    "kind": "ScalarField",
+                    "alias": null,
+                    "name": "defaultEthAddress",
+                    "args": null,
+                    "storageKey": null
+                  },
+                  {
+                    "kind": "ScalarField",
+                    "alias": null,
+                    "name": "localID",
+                    "args": null,
+                    "storageKey": null
+                  },
+                  v0
                 ]
               }
             ]
           },
-          v1
+          v0
         ]
       }
     ]
@@ -151,5 +154,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '9c817f2905c715fb5f0767e94334b6ab';
+(node/*: any*/).hash = '7b17d4721b814a9fdf9e02d9022a155d';
 module.exports = node;

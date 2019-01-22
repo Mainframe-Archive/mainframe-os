@@ -6,7 +6,7 @@ import {
   havePermissionsToGrant,
   type StrictPermissionsGrants,
 } from '@mainframe/app-permissions'
-import type { AppOwnData, AppInstalledData, ID } from '@mainframe/client'
+import type { AppOwnData, AppInstalledData } from '@mainframe/client'
 import styled from 'styled-components/native'
 import { Text } from '@morpheus-ui/core'
 import PlusIcon from '@morpheus-ui/icons/PlusSymbolCircled'
@@ -68,7 +68,6 @@ type State = {
     data?: ?{
       app: AppData,
       own: boolean,
-      userID?: ID,
     },
   },
   showOnboarding: boolean,
@@ -105,16 +104,16 @@ class AppsView extends Component<Props, State> {
     if (
       this.state.showModal &&
       this.state.showModal.type === 'accept_permissions' &&
-      this.state.showModal.data &&
-      this.state.showModal.data.userID
+      this.state.showModal.data
     ) {
-      const { app, userID } = this.state.showModal.data
+      const { app } = this.state.showModal.data
+      const { user } = this.context
       try {
-        await rpc.setAppUserPermissionsSettings(app.localID, userID, {
+        await rpc.setAppUserPermissionsSettings(app.localID, user.localID, {
           grants: permissionSettings,
           permissionsChecked: true,
         })
-        await rpc.launchApp(app.localID, userID)
+        await rpc.launchApp(app.localID, user.localID)
       } catch (err) {
         // TODO: - Error feedback
         // eslint-disable-next-line no-console
@@ -137,12 +136,12 @@ class AppsView extends Component<Props, State> {
   }
 
   onOpenApp = async (app: AppData, own: boolean) => {
-    const { userID } = this.context
-    const user = app.users.find(u => u.localID === userID)
+    const { user } = this.context
+    const appUser = app.users.find(u => u.localID === user.localID)
     if (
       !own &&
       havePermissionsToGrant(app.manifest.permissions) &&
-      (!user || !user.settings.permissionsSettings.permissionsChecked)
+      (!appUser || !appUser.settings.permissionsSettings.permissionsChecked)
     ) {
       // If this user hasn't used the app before
       // we need to ask to accept permissions
@@ -157,7 +156,7 @@ class AppsView extends Component<Props, State> {
       })
     } else {
       try {
-        await rpc.launchApp(app.localID, userID)
+        await rpc.launchApp(app.localID, user.localID)
       } catch (err) {
         // TODO: - Error feedback
       }

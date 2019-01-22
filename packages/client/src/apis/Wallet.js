@@ -13,6 +13,7 @@ import type {
   WalletDeleteParams,
   WalletGetUserEthAccountsParams,
   WalletGetEthAccountsResult,
+  WalletSetUserDefaulParams,
   WalletSignTxParams,
   WalletSignTxResult,
 } from '../types'
@@ -64,5 +65,9 @@ export default class WalletAPIs extends ClientAPIs {
 
   async addLedgerEthAccount(params: { index: number }) {
     return this._rpc.request('wallet_ledgerAddEthAccount', params)
+  }
+
+  async setUsersDefaultWallet(params: WalletSetUserDefaulParams) {
+    return this._rpc.request('wallet_setUserDefault', params)
   }
 }
