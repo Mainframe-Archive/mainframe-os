@@ -232,7 +232,7 @@ const peerLookupQuery = graphql`
   }
 `
 
-export class ContactsView extends Component<Props, State> {
+class ContactsView extends Component<Props, State> {
   static contextType = EnvironmentContext
 
   state: State = {}

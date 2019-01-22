@@ -99,23 +99,17 @@ export class OwnFeed {
   }
 }
 
-export class PeerFeed {
-  _bzz: BzzAPI
-  _hash: string
-
-  constructor(bzz: BzzAPI, hash: string) {
-    this._bzz = bzz
-    this._hash = hash
-  }
-
-  pollJSON<T: Object>(options: PollOptions): Observable<T> {
-    return this._bzz
-      .pollFeedValue(this._hash, {
-        mode: 'content-value',
-        whenEmpty: 'ignore',
-        contentChangedOnly: true,
-        ...options,
-      })
-      .pipe(flatMap(res => res.json()))
-  }
+export const pollFeedJSON = <T: Object>(
+  bzz: BzzAPI,
+  hash: string,
+  options: PollOptions,
+): Observable<T> => {
+  return bzz
+    .pollFeedValue(hash, {
+      mode: 'content-response',
+      whenEmpty: 'ignore',
+      contentChangedOnly: true,
+      ...options,
+    })
+    .pipe(flatMap(res => res.json()))
 }

@@ -165,18 +165,13 @@ type Contact implements Node {
   localID: ID!
   peerID: ID!
   pubKey: String!
-  profile: ContactProfile!
+  profile: NamedProfile!
   connectionState: ContactConnection!
 }
 
 enum ContactConnection {
   CONNECTED
   SENT
-}
-
-type ContactProfile {
-  name: String!
-  avatar: String
 }
 
 type ContactsQuery {
@@ -258,6 +253,11 @@ type EthWallets {
   ledger: [EthLedgerWallet]
 }
 
+type GenericProfile {
+  name: String
+  avatar: String
+}
+
 type IdentitiesQuery {
   ownUsers: [OwnUserIdentity]
   ownDevelopers: [OwnDeveloperIdentity]
@@ -297,6 +297,11 @@ type Mutation {
   setDefaultWallet(input: SetDefaultWalletInput!): SetDefaultWalletPayload
 }
 
+type NamedProfile {
+  name: String!
+  avatar: String
+}
+
 type NamedWalletAccountType {
   name: String!
   address: String!
@@ -325,11 +330,7 @@ type OwnDeveloperIdentity implements Node {
   localID: ID!
   mfid: ID!
   pubKey: String!
-  profile: OwnDeveloperProfile
-}
-
-type OwnDeveloperProfile {
-  name: String!
+  profile: NamedProfile!
 }
 
 type OwnUserIdentity implements Node {
@@ -341,17 +342,13 @@ type OwnUserIdentity implements Node {
   apps: [App]
   defaultEthAddress: String
   wallets: [UserWalletType]
-  profile: OwnUserProfile
+  profile: NamedProfile!
   pubKey: String!
-}
-
-type OwnUserProfile {
-  name: String!
 }
 
 type Peer {
   publicKey: String!
-  profile: ContactProfile!
+  profile: GenericProfile!
 }
 
 type PeersQuery {
@@ -387,7 +384,7 @@ type SetDefaultWalletPayload {
 }
 
 type Subscription {
-  appCreated: OwnApp!
+  contactChanged: Contact!
 }
 
 enum SupportedWallets {

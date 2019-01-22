@@ -62,20 +62,6 @@ export type AddHDWalletAccountParams = {
   userID?: string,
 }
 
-export type MutationEventType =
-  | 'own_app_created'
-  | 'vault_created'
-  | 'vault_opened'
-  | 'user_created'
-  | 'user_changed'
-  | 'user_deleted'
-  | 'peer_created'
-  | 'peer_changed'
-  | 'peer_deleted'
-  | 'contact_created'
-  | 'contact_changed'
-  | 'contact_deleted'
-
 export default class ContextMutations {
   _context: ClientContext
 
@@ -94,7 +80,7 @@ export default class ContextMutations {
       permissionsRequirements: params.permissionsRequirements,
     })
     await this._context.openVault.save()
-    this._context.next({ type: 'own_app_created', app })
+    this._context.next({ type: 'app_created', app })
     return app
   }
 
@@ -149,7 +135,7 @@ export default class ContextMutations {
     await this._context.openVault.save()
   }
 
-  updatePeerProfile(peerID: ID, profile: PeerUserProfile) {
+  updatePeerProfile(peerID: string, profile: PeerUserProfile) {
     const peer = this._context.openVault.identities.getPeerUser(peerID)
     if (peer == null) {
       throw new Error('Peer not found')

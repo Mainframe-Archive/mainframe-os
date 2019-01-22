@@ -19,7 +19,7 @@ import {
   nodeDefinitions,
   mutationWithClientMutationId,
 } from 'graphql-relay'
-import { map, tap } from 'rxjs/operators'
+import { map } from 'rxjs/operators'
 
 import { App, OwnApp } from '../app'
 import {
@@ -518,7 +518,10 @@ const contactType = new GraphQLObjectType({
       type: new GraphQLNonNull(GraphQLString),
     },
     profile: {
-      type: new GraphQLNonNull(namedProfileType),
+      type: new GraphQLNonNull(genericProfileType),
+      resolve: (self, args, ctx: ClientContext) => {
+        return ctx.openVault.identities.getContactProfile(self.localID)
+      },
     },
     connectionState: {
       type: new GraphQLNonNull(contactConnectionType),
@@ -1203,26 +1206,6 @@ const appInstallMutation = mutationWithClientMutationId({
   },
 })
 
-const contactChangedSubscription = new GraphQLObjectType({
-  name: 'ContactChanged',
-  fields: () => ({
-    contact: {
-      type: new GraphQLNonNull(contactType),
-      subscribe: (self, args, ctx: ClientContext) => {
-        console.log('subscribe to contacts changed')
-        const { source, dispose } = ctx.peerUsersFeeds.observe()
-        const contactChanged = source.pipe(
-          map(e => ({ contact: e.contact })),
-          tap(data => {
-            console.log('contact changed subscription pushes', data)
-          }),
-        )
-        return observableToAsyncIterator(contactChanged, dispose)
-      },
-    },
-  }),
-})
-
 const mutationType = new GraphQLObjectType({
   name: 'Mutation',
   fields: () => ({
@@ -1259,17 +1242,16 @@ const queryType = new GraphQLObjectType({
 const subscriptionType = new GraphQLObjectType({
   name: 'Subscription',
   fields: () => ({
-    // appCreated: {
-    //   type: new GraphQLNonNull(ownAppType),
-    //   subscribe: (self, args, ctx: ClientContext) => {
-    //     const appCreated = ctx.pipe(
-    //       filter(e => e.type === 'own_app_created'),
-    //       map(e => ({ appCreated: e.app })),
-    //     )
-    //     return observableToAsyncIterator(appCreated)
-    //   },
-    // },
-    contactChanged: contactChangedSubscription,
+    contactChanged: {
+      type: new GraphQLNonNull(contactType),
+      subscribe: async (self, args, ctx: ClientContext) => {
+        const { source, dispose } = await ctx.contactsFeeds.observe()
+        const contactChanged = source.pipe(
+          map(e => ({ contactChanged: e.contact })),
+        )
+        return observableToAsyncIterator(contactChanged, dispose)
+      },
+    },
   }),
 })
 

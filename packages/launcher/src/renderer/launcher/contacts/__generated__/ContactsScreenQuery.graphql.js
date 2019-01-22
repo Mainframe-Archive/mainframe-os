@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash d2eb71cfc110f3a31faa63e9cc0174fb
+ * @relayHash 107ccec6d203423357ab1b9f0bd7c1e8
  */
 
 /* eslint-disable */
@@ -188,7 +188,7 @@ return {
                     "name": "profile",
                     "storageKey": null,
                     "args": null,
-                    "concreteType": "ContactProfile",
+                    "concreteType": "NamedProfile",
                     "plural": false,
                     "selections": [
                       {

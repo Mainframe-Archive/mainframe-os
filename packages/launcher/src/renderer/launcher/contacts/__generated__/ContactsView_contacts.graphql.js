@@ -82,7 +82,7 @@ const node/*: ConcreteFragment*/ = {
           "name": "profile",
           "storageKey": null,
           "args": null,
-          "concreteType": "ContactProfile",
+          "concreteType": "NamedProfile",
           "plural": false,
           "selections": [
             {

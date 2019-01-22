@@ -38,7 +38,7 @@ type State = {
   errorMsg?: string,
 }
 
-export class AppInstallModal extends Component<ViewProps, State> {
+class AppInstallModal extends Component<ViewProps, State> {
   static contextType = EnvironmentContext
 
   state = {

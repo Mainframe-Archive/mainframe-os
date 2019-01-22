@@ -4,7 +4,15 @@ import type { Observable, Subscription } from 'rxjs'
 import { debounceTime, filter } from 'rxjs/operators'
 
 import { OwnFeed } from '../swarm/feed'
-import type ClientContext, { ContextEvent } from './ClientContext'
+
+import type ClientContext from './ClientContext'
+import type {
+  ContextEvent,
+  ContactCreatedEvent,
+  ContactLoadedEvent,
+  UserCreatedEvent,
+  UserChangedEvent,
+} from './types'
 
 export default class ContextEvents {
   vaultOpened: Observable<ContextEvent>
@@ -59,7 +67,7 @@ export default class ContextEvents {
             )
           }),
         )
-        .subscribe(async (e: ContextEvent) => {
+        .subscribe(async (e: UserCreatedEvent | UserChangedEvent) => {
           const { user } = e
           await user.publicFeed.publishJSON(
             this._context.io.bzz,
@@ -88,7 +96,7 @@ export default class ContextEvents {
             )
           }),
         )
-        .subscribe(async (e: ContextEvent) => {
+        .subscribe(async (e: ContactCreatedEvent | ContactLoadedEvent) => {
           const { contact, userID } = e
           const user = this._context.openVault.identities.getOwnUser(userID)
           const peer = this._context.openVault.identities.getPeerUser(
@@ -116,6 +124,7 @@ export default class ContextEvents {
           this._context.next({
             type: 'contact_changed',
             contact,
+            userID,
             change: 'requestSent',
           })
 
