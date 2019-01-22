@@ -208,6 +208,24 @@ export default class ContextMutations {
     return user
   }
 
+  async updateUser(
+    userID: ID,
+    profile: { name?: ?string, avatar?: ?string },
+  ): Promise<void> {
+    const user = this._context.openVault.identities.getOwnUser(userID)
+    if (!user) throw new Error('User not found')
+
+    user.profile = {
+      name: profile.name || user.profile.name,
+      avatar: profile.avatar || user.profile.avatar,
+    }
+    await this._context.openVault.save()
+    await user.publicFeed.publishJSON(
+      this._context.io.bzz,
+      user.publicFeedData(),
+    )
+  }
+
   // Vault
 
   async createVault(path: string, password: Buffer): Promise<void> {
