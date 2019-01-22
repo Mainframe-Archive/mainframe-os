@@ -85,6 +85,10 @@ export default class OwnUserIdentity extends OwnIdentity {
     return this._profile
   }
 
+  set profile(profile: OwnUserProfile) {
+    this._profile = profile
+  }
+
   get publicFeed(): OwnFeed {
     return this._publicFeed
   }

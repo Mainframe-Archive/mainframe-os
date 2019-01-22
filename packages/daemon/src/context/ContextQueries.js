@@ -74,4 +74,19 @@ export default class ContextQueries {
       return acc.concat(w.accounts.map(a => a.address))
     }, [])
   }
+
+  getUserDefaultEthAccount(userID: string): ?string {
+    const { identityWallets } = this._context.openVault
+    const defaultAcc = identityWallets.getDefaultEthWallet(userID)
+    if (defaultAcc) {
+      return defaultAcc
+    }
+    // Use first account if no default
+    const wallets = this.getUserEthWallets(userID)
+    if (wallets.length && wallets[0].accounts.length) {
+      const addr = wallets[0].accounts[0].address
+      this._context.mutations.setUsersDefaultWallet(userID, addr)
+      return addr
+    }
+  }
 }

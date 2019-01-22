@@ -321,6 +321,14 @@ export type IdentityGetUserContactsResult = {
   contacts: Array<ContactResult>,
 }
 
+export type IdentityUpdateUserParams = {
+  userID: string,
+  profile: {
+    name?: ?string,
+    avatar?: ?string,
+  },
+}
+
 export type IdentityLinkEthWalletAccountParams = {
   id: ID,
   walletID: ID,
@@ -439,5 +447,10 @@ export type WalletAddHDAccountResult = string
 
 export type WalletAddLedgerResult = {
   localID: string,
+  address: string,
+}
+
+export type WalletSetUserDefaulParams = {
+  userID: string,
   address: string,
 }

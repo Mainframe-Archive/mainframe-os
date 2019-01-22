@@ -208,6 +208,24 @@ export default class ContextMutations {
     return user
   }
 
+  async updateUser(
+    userID: ID,
+    profile: { name?: ?string, avatar?: ?string },
+  ): Promise<void> {
+    const user = this._context.openVault.identities.getOwnUser(userID)
+    if (!user) throw new Error('User not found')
+
+    user.profile = {
+      name: profile.name || user.profile.name,
+      avatar: profile.avatar || user.profile.avatar,
+    }
+    await this._context.openVault.save()
+    await user.publicFeed.publishJSON(
+      this._context.io.bzz,
+      user.publicFeedData(),
+    )
+  }
+
   // Vault
 
   async createVault(path: string, password: Buffer): Promise<void> {
@@ -298,6 +316,20 @@ export default class ContextMutations {
     const { openVault } = this._context
     openVault.wallets.deleteWallet(blockchain, type, localID)
     openVault.identityWallets.deleteWallet(localID)
+    await openVault.save()
+  }
+
+  async setUsersDefaultWallet(userID: string, address: string): Promise<void> {
+    const { openVault } = this._context
+    const wallet = openVault.wallets.getEthWalletByAccount(address)
+    if (!wallet) {
+      throw new Error(`Could not find a wallet containing account: ${address}`)
+    }
+    openVault.identityWallets.setDefaultEthWallet(
+      userID,
+      wallet.localID,
+      address,
+    )
     await openVault.save()
   }
 }

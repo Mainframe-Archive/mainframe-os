@@ -10,6 +10,7 @@ import {
   WALLET_ADD_HD_ACCOUNT_SCHEMA,
   WALLET_GET_USER_ETH_ACCOUNTS_SCHEMA,
   WALLET_GET_USER_ETH_WALLETS_SCHEMA,
+  WALLET_SET_USER_DEFAULT_SCHEMA,
   type WalletAddHDAccountParams,
   type WalletCreateHDParams,
   type WalletCreateHDResult,
@@ -24,6 +25,7 @@ import {
   type WalletGetLedgerEthAccountsResult,
   type WalletAddLedgerEthAccountParams,
   type WalletAddLedgerResult,
+  type WalletSetUserDefaulParams,
   type WalletSignTxParams,
   type WalletSignTxResult,
 } from '@mainframe/client'
@@ -144,5 +146,15 @@ export const addLedgerEthAccount = {
       params.name,
       params.userID,
     )
+  },
+}
+
+export const setUsersDefaultWallet = {
+  params: WALLET_SET_USER_DEFAULT_SCHEMA,
+  handler: async (
+    ctx: ClientContext,
+    params: WalletSetUserDefaulParams,
+  ): Promise<void> => {
+    return ctx.mutations.setUsersDefaultWallet(params.userID, params.address)
   },
 }
