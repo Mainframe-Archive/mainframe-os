@@ -66,15 +66,6 @@ type VaultKeyParams = {
   kdf: VaultKDF,
 }
 
-type Wallet = {
-  localID: string,
-  type: 'ledger' | 'hd',
-  accounts: Array<{
-    name: string,
-    address: string,
-  }>,
-}
-
 export const createVaultKeyParams = async (
   password: Buffer,
 ): Promise<VaultKeyParams> => {
@@ -225,48 +216,6 @@ export default class Vault {
 
   get identityWallets(): IdentityWallets {
     return this._data.identityWallets
-  }
-
-  getUserEthWallets(id: string): Array<Wallet> {
-    if (this.identityWallets.walletsByIdentity[id]) {
-      return Object.keys(this.identityWallets.walletsByIdentity[id]).reduce(
-        (acc, wid) => {
-          const wallet = this.wallets.getEthWalletByID(wid)
-          if (wallet) {
-            acc.push({
-              localID: wallet.localID,
-              type: wallet.type,
-              accounts: wallet.getNamedAccounts(),
-            })
-          }
-          return acc
-        },
-        [],
-      )
-    }
-    return []
-  }
-
-  getUserEthAccounts(userID: string) {
-    return this.getUserEthWallets(userID).reduce((acc, w) => {
-      // $FlowFixMe concat types
-      return acc.concat(w.accounts.map(a => a.address))
-    }, [])
-  }
-
-  getUserDefaultEthAccount(userID: string): ?string {
-    const defaultAcc = this.identityWallets.getDefaultEthWallet(userID)
-    if (defaultAcc) {
-      return defaultAcc
-    }
-    // Use first account if no default
-    this.getUserEthWallets(userID).forEach(w => {
-      if (w.accounts.length) {
-        const addr = w.accounts[0].address
-        this.identityWallets.setDefaultEthWallet(userID, addr, w.localID)
-        return addr
-      }
-    })
   }
 
   // App lifecycle
