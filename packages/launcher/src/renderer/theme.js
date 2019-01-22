@@ -2,6 +2,14 @@ import COLORS from './colors'
 
 export default {
   Button: {
+    default: {
+      backgroundColor: 'transparent',
+      backgroundHoverColor: 'transparent',
+      backgroundDisabledColor: 'transparent',
+      iconBackgroundColor: 'transparent',
+      iconHoverBackgroundColor: 'transparent',
+      iconHoverColor: COLORS.PRIMARY_RED,
+    },
     onboarding: {
       padding: 0,
       titleColor: COLORS.PRIMARY_RED,
@@ -9,6 +17,7 @@ export default {
       iconColor: COLORS.PRIMARY_RED,
       iconHoverColor: COLORS.PRIMARY_DARK_RED,
       borderWidth: 0,
+      iconPadding: 0,
     },
     leftNav: {
       iconPosition: 'top',
@@ -20,7 +29,8 @@ export default {
       padding: 0,
       fontWeight: 'normal',
       fontSize: 13,
-      iconMargin: 5,
+      iconPadding: '5px',
+      iconMargin: 0,
     },
     leftNavActive: {
       fontWeight: 'bold',
@@ -44,7 +54,7 @@ export default {
     xSmallIconOnly: {
       iconWidth: 14,
       iconHeight: 14,
-      padding: '5px 5px 2px 5',
+      iconPadding: '5px',
       fontSize: 9,
       borderRadius: 3,
     },
@@ -56,11 +66,14 @@ export default {
       titleHoverColor: COLORS.WHITE,
     },
     modalButton: {
-      padding: '10px 30',
+      titlePadding: '10px 30px',
       fontSize: 12,
     },
     grey: {
       titleColor: COLORS.GREY_A9,
+    },
+    noTitle: {
+      titlePadding: '0',
     },
   },
   Text: {
