@@ -6,7 +6,6 @@ import type { KeyPair } from '@mainframe/utils-crypto'
 import { uniqueID, idType, type ID } from '@mainframe/utils-id'
 import multibase from 'multibase'
 import { type hexValue } from '@erebos/hex'
-import { type ContactResult } from '@mainframe/client'
 
 import { mapObject } from '../utils'
 
@@ -309,7 +308,7 @@ export default class IdentitiesRepository {
     return this._identities.contacts
   }
 
-  getContactsForUser(userID: ID | string): { [id: string]: Contact } {
+  getContactsForUser(userID: string): { [id: string]: Contact } {
     return this._identities.contacts[userID]
   }
 
@@ -491,28 +490,6 @@ export default class IdentitiesRepository {
     }
     this._userByContact[contact.localID] = ownUserId
     return contact
-  }
-
-  getUserContacts(userID: string): Array<ContactResult> {
-    const result = []
-    const contacts = this._identities.contacts[userID]
-    if (contacts) {
-      Object.keys(contacts).forEach(id => {
-        const contact = contacts[id]
-        const peer = this.getPeerUser(idType(contact.peerID))
-        if (peer) {
-          const profile = { ...peer.profile, ...contact.profile }
-          const contactRes = {
-            profile,
-            localID: id,
-            peerID: contact.peerID,
-            connectionState: contact.connectionState,
-          }
-          result.push(contactRes)
-        }
-      })
-    }
-    return result
   }
 
   deleteContact(userID: ID, contactID: ID) {

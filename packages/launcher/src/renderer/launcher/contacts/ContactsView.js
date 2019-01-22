@@ -322,13 +322,13 @@ class ContactsView extends Component<Props, State> {
         <ContactsListHeader hascontacts={userContacts.length > 0}>
           <ButtonContainer>
             <Button
-              variant={['xSmallIconOnly', 'completeOnboarding']}
+              variant={['xSmallIconOnly', 'completeOnboarding', 'noTitle']}
               Icon={SearchIcon}
             />
           </ButtonContainer>
           <ButtonContainer>
             <Button
-              variant={['xSmallIconOnly', 'completeOnboarding']}
+              variant={['xSmallIconOnly', 'completeOnboarding', 'noTitle']}
               Icon={PlusIcon}
               onPress={this.openModal}
             />
