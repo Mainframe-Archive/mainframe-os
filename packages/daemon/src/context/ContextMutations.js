@@ -208,10 +208,7 @@ export default class ContextMutations {
     return user
   }
 
-  async updateUser(
-    userID: ID,
-    profile: $Shape<OwnUserProfile>,
-  ): Promise<void> {
+  async updateUser(userID: ID, profile: $Shape<OwnUserProfile>): Promise<void> {
     const user = this._context.openVault.identities.getOwnUser(userID)
     if (!user) throw new Error('User not found')
 
