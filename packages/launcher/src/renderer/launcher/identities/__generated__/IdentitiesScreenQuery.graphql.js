@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash eec3ec0944a0edb2e0c20bc023ede5f2
+ * @relayHash 5032360b7555f28e0574140a38789532
  */
 
 /* eslint-disable */
@@ -42,6 +42,7 @@ fragment IdentitiesScreen_identities on IdentitiesQuery {
 fragment IdentitiesView_identities on IdentitiesQuery {
   ownUsers {
     localID
+    feedHash
     profile {
       name
     }
@@ -108,7 +109,7 @@ return {
   "operationKind": "query",
   "name": "IdentitiesScreenQuery",
   "id": null,
-  "text": "query IdentitiesScreenQuery {\n  viewer {\n    identities {\n      ...IdentitiesScreen_identities\n    }\n    id\n  }\n}\n\nfragment IdentitiesScreen_identities on IdentitiesQuery {\n  ...IdentitiesView_identities\n}\n\nfragment IdentitiesView_identities on IdentitiesQuery {\n  ownUsers {\n    localID\n    profile {\n      name\n    }\n    wallets {\n      localID\n      accounts\n    }\n    apps {\n      localID\n      manifest {\n        name\n      }\n      users {\n        settings {\n          permissionsSettings {\n            permissionsChecked\n            grants {\n              BLOCKCHAIN_SEND\n            }\n          }\n        }\n        id\n      }\n      id\n    }\n    id\n  }\n  ownDevelopers {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n}\n",
+  "text": "query IdentitiesScreenQuery {\n  viewer {\n    identities {\n      ...IdentitiesScreen_identities\n    }\n    id\n  }\n}\n\nfragment IdentitiesScreen_identities on IdentitiesQuery {\n  ...IdentitiesView_identities\n}\n\nfragment IdentitiesView_identities on IdentitiesQuery {\n  ownUsers {\n    localID\n    feedHash\n    profile {\n      name\n    }\n    wallets {\n      localID\n      accounts\n    }\n    apps {\n      localID\n      manifest {\n        name\n      }\n      users {\n        settings {\n          permissionsSettings {\n            permissionsChecked\n            grants {\n              BLOCKCHAIN_SEND\n            }\n          }\n        }\n        id\n      }\n      id\n    }\n    id\n  }\n  ownDevelopers {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -179,6 +180,13 @@ return {
                 "plural": true,
                 "selections": [
                   v0,
+                  {
+                    "kind": "ScalarField",
+                    "alias": null,
+                    "name": "feedHash",
+                    "args": null,
+                    "storageKey": null
+                  },
                   {
                     "kind": "LinkedField",
                     "alias": null,

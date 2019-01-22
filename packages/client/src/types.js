@@ -18,11 +18,21 @@ export type { ID } from '@mainframe/utils-id'
 export type WalletTypes = 'hd' | 'ledger'
 export type WalletSupportedChains = 'ethereum'
 export type WalletAccount = string
+
+export type WalletResult = {
+  localID: string,
+  type: 'ledger' | 'hd',
+  accounts: Array<{
+    name: string,
+    address: string,
+  }>,
+}
+
 export type IdentityOwnData = {
   id: string,
   localID: string,
   profile: Object,
-  ethWallets: { [walletID: string]: Array<WalletAccount> },
+  ethWallets: Array<WalletResult>,
 }
 
 export type AppCheckPermissionParams = {
@@ -44,7 +54,7 @@ export type AppCloseParams = { sessID: ID }
 
 export type AppCreateParams = {
   contentsPath: string,
-  developerID: ID,
+  developerID: string,
   name?: ?string,
   version?: ?string,
   permissionsRequirements?: ?StrictPermissionsRequirements,
@@ -311,6 +321,14 @@ export type IdentityGetUserContactsResult = {
   contacts: Array<ContactResult>,
 }
 
+export type IdentityUpdateUserParams = {
+  userID: string,
+  profile: {
+    name?: ?string,
+    avatar?: ?string,
+  },
+}
+
 export type IdentityLinkEthWalletAccountParams = {
   id: ID,
   walletID: ID,
@@ -342,9 +360,10 @@ export type VaultSettingsParams = $Shape<VaultSettings>
 // Wallet
 
 export type WalletImportMnemonicParams = {
-  chain: WalletSupportedChains,
+  blockchain: WalletSupportedChains,
   mnemonic: string,
-  name: string,
+  firstAccountName: string,
+  userID?: string,
 }
 
 export type WalletNamedAccount = {
@@ -352,26 +371,19 @@ export type WalletNamedAccount = {
   address: string,
 }
 
-export type WalletResult = {
-  walletID: ID,
-  type: WalletTypes,
-  accounts: Array<string>,
-}
-
 export type WalletImportResult = {
-  walletID: ID,
-  type: WalletTypes,
+  localID: ID,
   accounts: Array<WalletNamedAccount>,
 }
 
 export type WalletCreateHDParams = {
-  chain: WalletSupportedChains,
-  name: string,
+  blockchain: WalletSupportedChains,
+  firstAccountName: string,
+  userID?: string,
 }
 
 export type WalletCreateHDResult = {
-  walletID: ID,
-  type: WalletTypes,
+  localID: ID,
   accounts: Array<WalletNamedAccount>,
   mnemonic: string,
 }
@@ -381,7 +393,7 @@ export type WalletResults = Array<WalletResult>
 export type WalletDeleteParams = {
   chain: string,
   type: WalletTypes,
-  walletID: ID,
+  localID: string,
 }
 
 export type WalletGetEthWalletsResult = {
@@ -390,7 +402,7 @@ export type WalletGetEthWalletsResult = {
 }
 
 export type WalletEthSignDataParams = {
-  walletID: ID,
+  localID: ID,
   address: string,
   data: string,
 }
@@ -406,22 +418,39 @@ export type WalletGetLedgerEthAccountsParams = {
   pageNum: number,
 }
 
+export type WalletGetUserEthAccountsParams = {
+  userID: string,
+}
+
+export type WalletGetUserEthWalletsParams = {
+  userID: string,
+}
+
 export type WalletGetLedgerEthAccountsResult = Array<string>
+
+export type WalletGetEthAccountsResult = Array<string>
 
 export type WalletAddLedgerEthAccountParams = {
   index: number,
   name: string,
+  userID?: string,
 }
 
 export type WalletAddHDAccountParams = {
   name: string,
   index: number,
-  walletID: ID,
+  walletID: string,
+  userID?: string,
 }
 
 export type WalletAddHDAccountResult = string
 
 export type WalletAddLedgerResult = {
-  walletID: string,
+  localID: string,
+  address: string,
+}
+
+export type WalletSetUserDefaulParams = {
+  userID: string,
   address: string,
 }

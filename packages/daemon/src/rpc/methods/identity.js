@@ -20,6 +20,7 @@ import {
   type IdentityGetUserContactsResult,
   type IdentityLinkEthWalletAccountParams,
   type IdentityUnlinkEthWalletAccountParams,
+  type IdentityUpdateUserParams,
   IDENTITY_ADD_PEER_SCHEMA,
   IDENTITY_ADD_PEER_BY_FEED_SCHEMA,
   IDENTITY_CREATE_CONTACT_FROM_FEED_SCHEMA,
@@ -30,6 +31,7 @@ import {
   IDENTITY_GET_USER_CONTACTS_SCHEMA,
   IDENTITY_LINK_ETH_WALLET_SCHEMA,
   IDENTITY_UNLINK_ETH_WALLET_SCHEMA,
+  IDENTITY_UPDATE_USER_SCHEMA,
   /* eslint-enable import/named */
 } from '@mainframe/client'
 import { idType as fromClientID } from '@mainframe/utils-id'
@@ -63,7 +65,7 @@ export const getOwnDevelopers = (
 ): IdentityGetOwnDevelopersResult => {
   const { ownDevelopers } = ctx.openVault.identities
   const developers = Object.keys(ownDevelopers).map(id => {
-    const wallets = ctx.openVault.getWalletsForIdentity(id)
+    const wallets = ctx.openVault.getUserEthWallets(id)
     return {
       id: ownDevelopers[id].id,
       localID: ownDevelopers[id].localID,
@@ -77,7 +79,7 @@ export const getOwnDevelopers = (
 export const getOwnUsers = (ctx: ClientContext): IdentityGetOwnUsersResult => {
   const { ownUsers } = ctx.openVault.identities
   const users = Object.keys(ownUsers).map(id => {
-    const wallets = ctx.openVault.getWalletsForIdentity(id)
+    const wallets = ctx.openVault.getUserEthWallets(id)
 
     return {
       id: ownUsers[id].id,
@@ -88,6 +90,16 @@ export const getOwnUsers = (ctx: ClientContext): IdentityGetOwnUsersResult => {
     }
   })
   return { users }
+}
+
+export const updateUser = {
+  params: IDENTITY_UPDATE_USER_SCHEMA,
+  handler: async (
+    ctx: ClientContext,
+    params: IdentityUpdateUserParams,
+  ): Promise<void> => {
+    await ctx.mutations.updateUser(fromClientID(params.userID), params.profile)
+  },
 }
 
 export const linkEthWallet = {

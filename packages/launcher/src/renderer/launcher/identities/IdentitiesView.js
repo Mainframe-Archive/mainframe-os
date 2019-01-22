@@ -5,9 +5,7 @@ import { createFragmentContainer, graphql } from 'react-relay'
 import styled from 'styled-components/native'
 import type { AppInstalledData } from '@mainframe/client'
 
-import { Text, Button } from '@morpheus-ui/core'
-
-import PlusIcon from '@morpheus-ui/icons/PlusSymbolCircled'
+import { Text } from '@morpheus-ui/core'
 
 import Avatar from '../../UIComponents/Avatar'
 
@@ -51,11 +49,6 @@ const Profile = styled.View`
   margin-left: 15px;
 `
 
-const ButtonContainer = styled.View`
-  margin-top: 15px;
-  align-items: flex-end;
-`
-
 class IdentitiesView extends Component<Props> {
   renderUsers(): Array<ElementRef<any>> {
     const identities = [
@@ -76,7 +69,7 @@ class IdentitiesView extends Component<Props> {
           <Profile>
             <Text variant="bold">{user.profile.name}</Text>
             <Text theme={{ color: '#585858', fontSize: '11px' }}>
-              {user.localID}
+              {user.feedHash}
             </Text>
           </Profile>
           <Text theme={{ color: '#585858', fontSize: '11px' }}>
@@ -91,9 +84,6 @@ class IdentitiesView extends Component<Props> {
       <>
         <Text variant="smallTitle">Indentities</Text>
         {this.renderUsers()}
-        <ButtonContainer>
-          <Button variant="completeOnboarding" Icon={PlusIcon} title="New" />
-        </ButtonContainer>
       </>
     )
   }
@@ -104,6 +94,7 @@ export default createFragmentContainer(IdentitiesView, {
     fragment IdentitiesView_identities on IdentitiesQuery {
       ownUsers {
         localID
+        feedHash
         profile {
           name
         }
