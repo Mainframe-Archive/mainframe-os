@@ -5,19 +5,19 @@ import {
   type StrictPermissionsGrants,
   createStrictPermissionGrants,
 } from '@mainframe/app-permissions'
-import type { ID, IdentityOwnData } from '@mainframe/client'
+import type { IdentityOwnData } from '@mainframe/client'
 import type { ManifestData } from '@mainframe/app-manifest'
 import React, { createRef, Component, type ElementRef } from 'react'
 import { View, StyleSheet } from 'react-native-web'
 import { commitMutation } from 'react-relay'
 import { EnvironmentContext } from '../RelayEnvironment'
 
+import LauncherContext from '../LauncherContext'
 import Button from '../../UIComponents/Button'
 import Text from '../../UIComponents/Text'
 import ModalView from '../../UIComponents/ModalView'
 import rpc from '../rpc'
 import PermissionsView from '../PermissionsView'
-import IdentitySelectorView from '../IdentitySelectorView'
 import { appInstallMutation } from './appMutations'
 
 type Props = {
@@ -25,17 +25,20 @@ type Props = {
   onInstallComplete: () => void,
 }
 
+type ViewProps = Props & {
+  userID: string,
+}
+
 type State = {
   inputValue: string,
-  installStep: 'manifest' | 'identity' | 'permissions' | 'download',
+  installStep: 'manifest' | 'permissions' | 'download',
   manifest: ?ManifestData,
   userPermissions?: StrictPermissionsGrants,
-  userId?: ID,
   ownUsers: Array<IdentityOwnData>,
   errorMsg?: string,
 }
 
-export default class AppInstallModal extends Component<Props, State> {
+export class AppInstallModal extends Component<ViewProps, State> {
   static contextType = EnvironmentContext
 
   state = {
@@ -47,10 +50,6 @@ export default class AppInstallModal extends Component<Props, State> {
 
   // $FlowFixMe: React Ref
   fileInput: ElementRef<'input'> = createRef()
-
-  componentDidMount() {
-    this.getOwnIdentities()
-  }
 
   // HANDLERS
 
@@ -72,8 +71,15 @@ export default class AppInstallModal extends Component<Props, State> {
         ) {
           this.setState({
             manifest: manifest.data,
-            installStep: 'identity',
           })
+          if (havePermissionsToGrant(manifest.permissions)) {
+            this.setState({
+              installStep: 'permissions',
+            })
+          } else {
+            const strictGrants = createStrictPermissionGrants({})
+            this.onSubmitPermissions(strictGrants)
+          }
         } else {
           // eslint-disable-next-line no-console
           console.log('invalid manifest')
@@ -96,43 +102,10 @@ export default class AppInstallModal extends Component<Props, State> {
     )
   }
 
-  async getOwnIdentities() {
-    try {
-      const res = await rpc.getOwnUserIdentities()
-      this.setState({ ownUsers: res.users })
-    } catch (err) {
-      // TODO: Handle error
-      // eslint-disable-next-line no-console
-      console.warn(err)
-    }
-  }
-
-  onSelectId = (id: ID) => {
-    const { manifest } = this.state
-    if (
-      manifest &&
-      manifest.permissions &&
-      havePermissionsToGrant(manifest.permissions)
-    ) {
-      this.setState({
-        installStep: 'permissions',
-        userId: id,
-      })
-    } else {
-      this.setState({ userId: id })
-      const strictGrants = createStrictPermissionGrants({})
-      this.onSubmitPermissions(strictGrants)
-    }
-  }
-
-  onCreatedId = () => {
-    this.getOwnIdentities()
-  }
-
   saveApp = async () => {
     // $FlowFixMe: userPermissions key in state
-    const { manifest, userPermissions, userId } = this.state
-    if (manifest == null || userPermissions == null || userId == null) {
+    const { manifest, userPermissions } = this.state
+    if (manifest == null || userPermissions == null) {
       // eslint-disable-next-line no-console
       console.log('invalid manifest or permissions to save app')
       // TODO: Display error
@@ -145,7 +118,7 @@ export default class AppInstallModal extends Component<Props, State> {
     }
 
     const params = {
-      userID: userId,
+      userID: this.props.userID,
       manifest,
       permissionsSettings,
     }
@@ -191,17 +164,6 @@ export default class AppInstallModal extends Component<Props, State> {
     )
   }
 
-  renderSetIdentity() {
-    return (
-      <IdentitySelectorView
-        type="user"
-        enableCreate
-        onSelectId={this.onSelectId}
-        onCreatedId={this.onCreatedId}
-      />
-    )
-  }
-
   renderPermissions() {
     const { manifest } = this.state
 
@@ -233,8 +195,6 @@ export default class AppInstallModal extends Component<Props, State> {
     switch (this.state.installStep) {
       case 'manifest':
         return this.renderManifestImport()
-      case 'identity':
-        return this.renderSetIdentity()
       case 'permissions':
         return this.renderPermissions()
       case 'download':
@@ -249,6 +209,15 @@ export default class AppInstallModal extends Component<Props, State> {
       <ModalView isOpen={true} onRequestClose={this.props.onRequestClose}>
         {this.renderContent()}
       </ModalView>
+    )
+  }
+}
+
+export default class AppInstallContextWrapper extends Component<Props> {
+  static contextType = LauncherContext
+  render() {
+    return (
+      <AppInstallModal userID={this.context.user.localID} {...this.props} />
     )
   }
 }

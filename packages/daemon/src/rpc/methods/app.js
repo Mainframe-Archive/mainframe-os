@@ -61,7 +61,10 @@ const createClientSession = (
   if (user == null) {
     throw clientError('Invalid userID')
   }
-  let defaultEthAccount = app.getDefaultEthAccount(userID)
+  let defaultEthAccount =
+    app.getDefaultEthAccount(userID) ||
+    ctx.queries.getUserDefaultEthAccount(userID)
+
   if (!defaultEthAccount) {
     // TODO: add a setting for default eth account on identity
     const ethWallet = ctx.openVault.wallets.getFirstEthWallet()
@@ -82,8 +85,7 @@ const createClientSession = (
           manifest: app.manifest,
           contentsPath: getContentsPath(ctx.env, app.manifest),
         }
-  const wallets =
-    ctx.openVault.identityWallets.walletsByIdentity[toClientID(userID)] || {}
+  const wallets = ctx.queries.getUserEthWallets(userID)
 
   return {
     user: {

@@ -6,7 +6,7 @@ import {
   havePermissionsToGrant,
   type StrictPermissionsGrants,
 } from '@mainframe/app-permissions'
-import type { AppOwnData, AppInstalledData, ID } from '@mainframe/client'
+import type { AppOwnData, AppInstalledData } from '@mainframe/client'
 import styled from 'styled-components/native'
 import { Text } from '@morpheus-ui/core'
 import PlusIcon from '@morpheus-ui/icons/PlusSymbolCircled'
@@ -14,10 +14,10 @@ import PlusIcon from '@morpheus-ui/icons/PlusSymbolCircled'
 import rpc from '../rpc'
 import globalStyles from '../../styles'
 import ModalView from '../../UIComponents/ModalView'
-import IdentitySelectorView from '../IdentitySelectorView'
 import CreateAppModal from '../developer/CreateAppModal'
 import PermissionsView from '../PermissionsView'
 import OSLogo from '../../UIComponents/MainframeOSLogo'
+import LauncherContext from '../LauncherContext'
 import CompleteOnboardSession from './CompleteOnboardSession'
 
 import AppInstallModal from './AppInstallModal'
@@ -64,17 +64,17 @@ type Props = {
 
 type State = {
   showModal: ?{
-    type: 'select_id' | 'accept_permissions' | 'app_install' | 'app_create',
+    type: 'accept_permissions' | 'app_install' | 'app_create',
     data?: ?{
       app: AppData,
       own: boolean,
-      userID?: ID,
     },
   },
   showOnboarding: boolean,
 }
 
 class AppsView extends Component<Props, State> {
+  static contextType = LauncherContext
   state = {
     showModal: null,
     showOnboarding: true,
@@ -104,16 +104,16 @@ class AppsView extends Component<Props, State> {
     if (
       this.state.showModal &&
       this.state.showModal.type === 'accept_permissions' &&
-      this.state.showModal.data &&
-      this.state.showModal.data.userID
+      this.state.showModal.data
     ) {
-      const { app, userID } = this.state.showModal.data
+      const { app } = this.state.showModal.data
+      const { user } = this.context
       try {
-        await rpc.setAppUserPermissionsSettings(app.localID, userID, {
+        await rpc.setAppUserPermissionsSettings(app.localID, user.localID, {
           grants: permissionSettings,
           permissionsChecked: true,
         })
-        await rpc.launchApp(app.localID, userID)
+        await rpc.launchApp(app.localID, user.localID)
       } catch (err) {
         // TODO: - Error feedback
         // eslint-disable-next-line no-console
@@ -135,52 +135,30 @@ class AppsView extends Component<Props, State> {
     })
   }
 
-  onOpenApp = (app: AppData, own: boolean) => {
-    this.setState({
-      showModal: {
-        type: 'select_id',
-        data: {
-          app,
-          own,
-        },
-      },
-    })
-  }
-
-  onSelectAppUser = async (userID: ID) => {
-    const { showModal } = this.state
+  onOpenApp = async (app: AppData, own: boolean) => {
+    const { user } = this.context
+    const appUser = app.users.find(u => u.localID === user.localID)
     if (
-      showModal &&
-      showModal.data &&
-      showModal.data.app &&
-      showModal.type === 'select_id'
+      !own &&
+      havePermissionsToGrant(app.manifest.permissions) &&
+      (!appUser || !appUser.settings.permissionsSettings.permissionsChecked)
     ) {
-      const { app, own } = showModal.data
-      const user = app.users.find(u => u.localID === userID)
-      if (
-        !own &&
-        havePermissionsToGrant(app.manifest.permissions) &&
-        (!user || !user.settings.permissionsSettings.permissionsChecked)
-      ) {
-        // If this user hasn't used the app before
-        // we need to ask to accept permissions
-        const data = { ...showModal.data }
-        data['userID'] = userID
-        this.setState({
-          showModal: {
-            type: 'accept_permissions',
-            data,
+      // If this user hasn't used the app before
+      // we need to ask to accept permissions
+      this.setState({
+        showModal: {
+          type: 'accept_permissions',
+          data: {
+            app,
+            own,
           },
-        })
-      } else {
-        try {
-          await rpc.launchApp(app.localID, userID)
-        } catch (err) {
-          // TODO: - Error feedback
-        }
-        this.setState({
-          showModal: undefined,
-        })
+        },
+      })
+    } else {
+      try {
+        await rpc.launchApp(app.localID, user.localID)
+      } catch (err) {
+        // TODO: - Error feedback
       }
     }
   }
@@ -199,9 +177,13 @@ class AppsView extends Component<Props, State> {
 
   renderApp(app: AppData, own: boolean) {
     return own ? (
-      <OwnAppItem ownApp={app} onOpenApp={this.onOpenApp} />
+      <OwnAppItem key={app.localID} ownApp={app} onOpenApp={this.onOpenApp} />
     ) : (
-      <InstalledAppItem installedApp={app} onOpenApp={this.onOpenApp} />
+      <InstalledAppItem
+        key={app.localID}
+        installedApp={app}
+        onOpenApp={this.onOpenApp}
+      />
     )
   }
 
@@ -237,19 +219,6 @@ class AppsView extends Component<Props, State> {
     return this.renderApps(this.props.apps.own, true)
   }
 
-  renderIdentitySelector() {
-    return (
-      <ModalView isOpen={true} onRequestClose={this.onCloseModal}>
-        <IdentitySelectorView
-          enableCreate
-          type="user"
-          onSelectId={this.onSelectAppUser}
-          onCreatedId={this.onSelectAppUser}
-        />
-      </ModalView>
-    )
-  }
-
   renderButton(title: string, onPress: () => void, testID: string) {
     return (
       <AppInstallContainer onPress={onPress} testID={testID}>
@@ -276,9 +245,6 @@ class AppsView extends Component<Props, State> {
     let modal
     if (this.state.showModal) {
       switch (this.state.showModal.type) {
-        case 'select_id':
-          modal = this.renderIdentitySelector()
-          break
         case 'app_install':
           modal = (
             <AppInstallModal
@@ -337,9 +303,11 @@ export default createFragmentContainer(AppsView, {
   apps: graphql`
     fragment AppsView_apps on AppsQuery {
       installed {
+        localID
         ...AppItem_installedApp
       }
       own {
+        localID
         ...AppItem_ownApp
       }
     }

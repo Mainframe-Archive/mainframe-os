@@ -6,6 +6,7 @@ import styled from 'styled-components/native'
 import { Text, Button } from '@morpheus-ui/core'
 
 import { EnvironmentContext } from '../RelayEnvironment'
+import type { CurrentUser } from '../LauncherContext'
 import WalletImportView from './WalletImportView'
 import WalletAddLedgerModal from './WalletAddLedgerModal'
 
@@ -29,6 +30,7 @@ export type Wallets = {
 
 type Props = {
   wallets: Wallets,
+  user: CurrentUser,
 }
 
 type State = {
@@ -41,7 +43,7 @@ const Container = styled.View`
 `
 
 const ButtonsContainer = styled.View`
-  flex-direction: 'row';
+  flex-direction: row;
 `
 
 const WalletView = styled.View`
@@ -55,7 +57,10 @@ const WalletTypeLabel = styled.Text`
 `
 
 const createWalletMutation = graphql`
-  mutation WalletsViewCreateHDWalletMutation($input: CreateHDWalletInput!) {
+  mutation WalletsViewCreateHDWalletMutation(
+    $input: CreateHDWalletInput!
+    $userID: String!
+  ) {
     createHDWallet(input: $input) {
       hdWallet {
         accounts {
@@ -65,8 +70,11 @@ const createWalletMutation = graphql`
         localID
       }
       viewer {
+        identities {
+          ...Launcher_identities
+        }
         wallets {
-          ...WalletsView_wallets
+          ...WalletsView_wallets @arguments(userID: $userID)
         }
       }
     }
@@ -76,12 +84,34 @@ const createWalletMutation = graphql`
 const addWalletMutation = graphql`
   mutation WalletsViewAddHDWalletAccountMutation(
     $input: AddHDWalletAccountInput!
+    $userID: String!
   ) {
     addHDWalletAccount(input: $input) {
       address
       viewer {
+        identities {
+          ...Launcher_identities
+        }
         wallets {
-          ...WalletsView_wallets
+          ...WalletsView_wallets @arguments(userID: $userID)
+        }
+      }
+    }
+  }
+`
+
+const setDefaultWalletMutation = graphql`
+  mutation WalletsViewSetDefaultWalletMutation(
+    $input: SetDefaultWalletInput!
+    $userID: String!
+  ) {
+    setDefaultWallet(input: $input) {
+      viewer {
+        identities {
+          ...Launcher_identities
+        }
+        wallets {
+          ...WalletsView_wallets @arguments(userID: $userID)
         }
       }
     }
@@ -101,21 +131,47 @@ class WalletsView extends Component<Props, State> {
       walletMutation = addWalletMutation
       input = {
         walletID: ethWallets.hd[0].localID,
+        userID: this.props.user.localID,
         index: newIndex,
         name: `Account ${newIndex + 1}`,
       }
     } else {
       walletMutation = createWalletMutation
-      input = { type: 'ETHEREUM', name: 'Account 1' }
+      input = {
+        blockchain: 'ETHEREUM',
+        name: 'Account 1',
+        userID: this.props.user.localID,
+      }
     }
 
     commitMutation(this.context, {
       mutation: walletMutation,
       // $FlowFixMe: Relay type
-      variables: { input },
+      variables: { input, userID: this.props.user.localID },
       onError: err => {
         const msg =
           err.message || 'Sorry, there was a problem creating the wallet.'
+        this.setState({
+          errorMsg: msg,
+        })
+      },
+    })
+  }
+
+  onPressSetDefault = (address: string) => {
+    const { user } = this.props
+    const input = {
+      address,
+      userID: user.localID,
+    }
+
+    commitMutation(this.context, {
+      mutation: setDefaultWalletMutation,
+      variables: { input, userID: user.localID },
+      onError: err => {
+        const msg =
+          err.message ||
+          'Sorry, there was a problem setting your default wallet.'
         this.setState({
           errorMsg: msg,
         })
@@ -150,24 +206,37 @@ class WalletsView extends Component<Props, State> {
       <WalletImportView
         onClose={this.onCloseModal}
         currentWalletID={currentWallet}
+        userID={this.props.user.localID}
       />
     ) : null
   }
 
   renderConnectLedgerView() {
     return this.state.showModal === 'connect_ledger' ? (
-      <WalletAddLedgerModal onClose={this.onCloseModal} />
+      <WalletAddLedgerModal
+        userID={this.props.user.localID}
+        onClose={this.onCloseModal}
+      />
     ) : null
   }
 
   renderWalletAccounts(accounts: WalletAccounts): Array<ElementRef<any>> {
     return accounts.map(a => {
+      const isDefault = a.address === this.props.user.defaultEthAddress
+      const onPress = () => this.onPressSetDefault(a.address)
+      const setDefaultButton = <Button title="Set Default" onPress={onPress} />
+      const defaultFlag = isDefault ? (
+        <Text>Default wallet</Text>
+      ) : (
+        setDefaultButton
+      )
       return (
         <WalletView key={a.address}>
           <Text>{a.name}</Text>
           <Text>{a.address}</Text>
           <Text>ETH: {a.balances.eth}</Text>
           <Text>MFT: {a.balances.mft}</Text>
+          {defaultFlag}
         </WalletView>
       )
     })
@@ -224,8 +293,9 @@ class WalletsView extends Component<Props, State> {
 
 export default createFragmentContainer(WalletsView, {
   wallets: graphql`
-    fragment WalletsView_wallets on WalletsQuery {
-      ethWallets {
+    fragment WalletsView_wallets on WalletsQuery
+      @argumentDefinitions(userID: { type: "String!" }) {
+      ethWallets(userID: $userID) {
         hd {
           localID
           accounts {

@@ -21,13 +21,12 @@ const AppIcon = styled.View`
   background-color: #232323;
   border-radius: 5px;
   margin-bottom: 10px;
-  transition: all 0.3s;
 `
 
 type AppData = AppOwnData | AppInstalledData
 
 type SharedProps = {
-  onOpenApp: (app: AppData, own: boolean) => void,
+  onOpenApp: (app: AppData, own: boolean) => any,
 }
 
 type InstalledProps = SharedProps & {

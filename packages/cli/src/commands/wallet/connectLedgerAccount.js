@@ -41,7 +41,7 @@ export default class ConnectLedgerWalletCommand extends Command {
       if (this.flags.userID && this.client) {
         await this.client.identity.linkEthWalletAccount({
           id: this.flags.userID,
-          walletID: res.walletID,
+          walletID: res.localID,
           address: res.address,
         })
       }

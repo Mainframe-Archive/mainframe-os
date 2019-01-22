@@ -3,16 +3,15 @@
 // eslint-disable-next-line import/named
 import { createSignKeyPair, type KeyPair } from '@mainframe/utils-crypto'
 import { uniqueID } from '@mainframe/utils-id'
-import multibase from 'multibase'
 import { type hexValue } from '@erebos/hex'
 
-import { OwnFeed, type OwnFeedSerialized } from '../swarm/feed.js'
+import { OwnFeed, type OwnFeedSerialized } from '../swarm/feed'
 import OwnIdentity, {
   parseKeyPair,
   serializeKeyPair,
   type KeyPairSerialized,
 } from './OwnIdentity'
-import { type PeerUserProfile } from './PeerUserIdentity.js'
+import { type PeerUserProfile } from './PeerUserIdentity'
 
 export type OwnUserProfile = {
   name: string,
@@ -86,6 +85,10 @@ export default class OwnUserIdentity extends OwnIdentity {
     return this._profile
   }
 
+  set profile(profile: OwnUserProfile) {
+    this._profile = profile
+  }
+
   get publicFeed(): OwnFeed {
     return this._publicFeed
   }
@@ -94,11 +97,11 @@ export default class OwnUserIdentity extends OwnIdentity {
     return this._firstContactFeed
   }
 
-  get publicFeedData(): PublicFeedSerialized {
+  publicFeedData(): PublicFeedSerialized {
     const { name, avatar } = this.profile
 
     return {
-      publicKey: multibase.encode('base64', this.keyPair.publicKey).toString(),
+      publicKey: this.base64PublicKey(),
       profile: { name, avatar },
       firstContactAddress: this.firstContactFeed.address,
     }

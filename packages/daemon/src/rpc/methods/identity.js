@@ -6,6 +6,9 @@ import {
   type IdentityAddPeerParams,
   type IdentityAddPeerResult,
   type IdentityAddPeerByFeedParams,
+  type IdentityCreateContactFromFeedParams,
+  type IdentityCreateContactFromPeerParams,
+  type IdentityCreateContactResult,
   type IdentityCreateDeveloperParams,
   type IdentityCreateUserParams,
   type IdentityCreateResult,
@@ -17,14 +20,18 @@ import {
   type IdentityGetUserContactsResult,
   type IdentityLinkEthWalletAccountParams,
   type IdentityUnlinkEthWalletAccountParams,
+  type IdentityUpdateUserParams,
   IDENTITY_ADD_PEER_SCHEMA,
   IDENTITY_ADD_PEER_BY_FEED_SCHEMA,
+  IDENTITY_CREATE_CONTACT_FROM_FEED_SCHEMA,
+  IDENTITY_CREATE_CONTACT_FROM_PEER_SCHEMA,
   IDENTITY_CREATE_OWN_USER_SCHEMA,
   IDENTITY_CREATE_OWN_DEVELOPER_SCHEMA,
   IDENTITY_DELETE_CONTACT_SCHEMA,
   IDENTITY_GET_USER_CONTACTS_SCHEMA,
   IDENTITY_LINK_ETH_WALLET_SCHEMA,
   IDENTITY_UNLINK_ETH_WALLET_SCHEMA,
+  IDENTITY_UPDATE_USER_SCHEMA,
   /* eslint-enable import/named */
 } from '@mainframe/client'
 import { idType as fromClientID } from '@mainframe/utils-id'
@@ -58,7 +65,7 @@ export const getOwnDevelopers = (
 ): IdentityGetOwnDevelopersResult => {
   const { ownDevelopers } = ctx.openVault.identities
   const developers = Object.keys(ownDevelopers).map(id => {
-    const wallets = ctx.openVault.getWalletsForIdentity(id)
+    const wallets = ctx.queries.getUserEthWallets(id)
     return {
       id: ownDevelopers[id].id,
       localID: ownDevelopers[id].localID,
@@ -72,7 +79,7 @@ export const getOwnDevelopers = (
 export const getOwnUsers = (ctx: ClientContext): IdentityGetOwnUsersResult => {
   const { ownUsers } = ctx.openVault.identities
   const users = Object.keys(ownUsers).map(id => {
-    const wallets = ctx.openVault.getWalletsForIdentity(id)
+    const wallets = ctx.queries.getUserEthWallets(id)
 
     return {
       id: ownUsers[id].id,
@@ -83,6 +90,16 @@ export const getOwnUsers = (ctx: ClientContext): IdentityGetOwnUsersResult => {
     }
   })
   return { users }
+}
+
+export const updateUser = {
+  params: IDENTITY_UPDATE_USER_SCHEMA,
+  handler: async (
+    ctx: ClientContext,
+    params: IdentityUpdateUserParams,
+  ): Promise<void> => {
+    await ctx.mutations.updateUser(fromClientID(params.userID), params.profile)
+  },
 }
 
 export const linkEthWallet = {
@@ -159,6 +176,34 @@ export const getPeers = (ctx: ClientContext): IdentityGetPeersResult => {
   return { peers }
 }
 
+export const createContactFromPeer = {
+  params: IDENTITY_CREATE_CONTACT_FROM_PEER_SCHEMA,
+  handler: async (
+    ctx: ClientContext,
+    params: IdentityCreateContactFromPeerParams,
+  ): Promise<IdentityCreateContactResult> => {
+    const contact = await ctx.mutations.createContactFromPeer(
+      fromClientID(params.userID),
+      fromClientID(params.peerID),
+    )
+    return { id: toClientID(contact.localID) }
+  },
+}
+
+export const createContactFromFeed = {
+  params: IDENTITY_CREATE_CONTACT_FROM_FEED_SCHEMA,
+  handler: async (
+    ctx: ClientContext,
+    params: IdentityCreateContactFromFeedParams,
+  ): Promise<IdentityCreateContactResult> => {
+    const contact = await ctx.mutations.createContactFromFeed(
+      fromClientID(params.userID),
+      params.feedHash,
+    )
+    return { id: toClientID(contact.localID) }
+  },
+}
+
 export const deleteContact = {
   params: IDENTITY_DELETE_CONTACT_SCHEMA,
   handler: async (
@@ -178,29 +223,7 @@ export const getUserContacts = {
     ctx: ClientContext,
     params: IdentityGetUserContactsParams,
   ): Promise<IdentityGetUserContactsResult> => {
-    const result = []
-    const contacts = ctx.openVault.identities.getContactsForUser(
-      fromClientID(params.userID),
-    )
-    if (contacts) {
-      Object.keys(contacts).forEach(id => {
-        const contact = contacts[id]
-        const peer = ctx.openVault.identities.getPeerUser(
-          fromClientID(contact.peerID),
-        )
-        if (peer) {
-          const profile = { ...peer.profile, ...contact.profile }
-          const contactRes = {
-            id,
-            profile,
-            connection: contact.contactFeed ? 'connected' : 'sent',
-            // For v1 first contact, we assign a full contact state
-            // depending on if we've seen a private feed for our user
-          }
-          result.push(contactRes)
-        }
-      })
-    }
-    return { contacts: result }
+    const contacts = ctx.queries.getUserContacts(params.userID)
+    return { contacts }
   },
 }

@@ -1,7 +1,6 @@
 // @flow
 
 import {
-  idType,
   WALLET_CREATE_HD_SCHEMA,
   WALLET_SIGN_TRANSACTION_SCHEMA,
   WALLET_IMPORT_MNEMONIC_SCHEMA,
@@ -9,21 +8,26 @@ import {
   WALLET_GET_LEDGER_ETH_ACCOUNTS_SCHEMA,
   WALLET_ADD_LEDGER_ETH_ACCOUNT_SCHEMA,
   WALLET_ADD_HD_ACCOUNT_SCHEMA,
+  WALLET_GET_USER_ETH_ACCOUNTS_SCHEMA,
+  WALLET_GET_USER_ETH_WALLETS_SCHEMA,
+  WALLET_SET_USER_DEFAULT_SCHEMA,
   type WalletAddHDAccountParams,
-  type WalletAddHDAccountResult,
   type WalletCreateHDParams,
   type WalletCreateHDResult,
   type WalletImportResult,
   type WalletImportMnemonicParams,
   type WalletDeleteParams,
-  type WalletResults,
+  type WalletGetUserEthAccountsParams,
+  type WalletGetUserEthWalletsParams,
   type WalletGetEthWalletsResult,
+  type WalletGetEthAccountsResult,
   type WalletGetLedgerEthAccountsParams,
   type WalletGetLedgerEthAccountsResult,
   type WalletAddLedgerEthAccountParams,
+  type WalletAddLedgerResult,
+  type WalletSetUserDefaulParams,
   type WalletSignTxParams,
   type WalletSignTxResult,
-  type WalletTypes,
 } from '@mainframe/client'
 
 import type ClientContext from '../../context/ClientContext'
@@ -35,9 +39,17 @@ export const createHDWallet = {
     ctx: ClientContext,
     params: WalletCreateHDParams,
   ): Promise<WalletCreateHDResult> => {
-    const res = ctx.openVault.wallets.createHDWallet(params)
-    await ctx.openVault.save()
-    return res
+    // $FlowFixMe Issue with promise type
+    const hdWallet = await ctx.mutations.createHDWallet(
+      params.blockchain,
+      params.firstAccountName,
+      params.userID,
+    )
+    return {
+      localID: hdWallet.localID,
+      mnemonic: hdWallet.mnemonic,
+      accounts: hdWallet.getNamedAccounts(),
+    }
   },
 }
 
@@ -47,9 +59,12 @@ export const importMnemonic = {
     ctx: ClientContext,
     params: WalletImportMnemonicParams,
   ): Promise<WalletImportResult> => {
-    const hdWallet = ctx.openVault.wallets.importMnemonicWallet(params)
-    await ctx.openVault.save()
-    return hdWallet
+    // $FlowFixMe Issue with promise type
+    const hdWallet = await ctx.mutations.importHDWallet(params)
+    return {
+      localID: hdWallet.localID,
+      accounts: hdWallet.getNamedAccounts(),
+    }
   },
 }
 
@@ -58,10 +73,8 @@ export const addHDAccount = {
   handler: async (
     ctx: ClientContext,
     params: WalletAddHDAccountParams,
-  ): Promise<WalletAddHDAccountResult> => {
-    const newAddress = ctx.openVault.wallets.addHDWalletAccount(params)
-    await ctx.openVault.save()
-    return newAddress
+  ): Promise<string> => {
+    return ctx.mutations.addHDWalletAccount(params)
   },
 }
 
@@ -71,29 +84,32 @@ export const deleteWallet = {
     ctx: ClientContext,
     params: WalletDeleteParams,
   ): Promise<void> => {
-    await ctx.openVault.wallets.deleteWallet(params)
-    ctx.openVault.identityWallets.deleteWallet(params.walletID)
-    await ctx.openVault.save()
+    await ctx.mutations.deleteWallet(params.chain, params.type, params.localID)
   },
 }
 
-export const getEthWallets = (
-  ctx: ClientContext,
-): WalletGetEthWalletsResult => {
-  const mapData = (type: WalletTypes): WalletResults =>
-    Object.keys(ctx.openVault.wallets.ethWallets[type]).map(id => {
-      const wallet = ctx.openVault.wallets.ethWallets[type][id]
-      const accounts = wallet.getAccounts()
-      return {
-        type: type,
-        walletID: idType(id),
-        accounts,
-      }
-    })
-  return {
-    hd: mapData('hd'),
-    ledger: mapData('ledger'),
-  }
+export const getUserEthWallets = {
+  params: WALLET_GET_USER_ETH_WALLETS_SCHEMA,
+  handler: async (
+    ctx: ClientContext,
+    params: WalletGetUserEthWalletsParams,
+  ): Promise<WalletGetEthWalletsResult> => {
+    const wallets = ctx.queries.getUserEthWallets(params.userID)
+    return {
+      hd: wallets.filter(w => w.type === 'hd'),
+      ledger: wallets.filter(w => w.type === 'ledger'),
+    }
+  },
+}
+
+export const getUserEthAccounts = {
+  params: WALLET_GET_USER_ETH_ACCOUNTS_SCHEMA,
+  handler: async (
+    ctx: ClientContext,
+    params: WalletGetUserEthAccountsParams,
+  ): Promise<WalletGetEthAccountsResult> => {
+    return ctx.queries.getUserEthAccounts(params.userID)
+  },
 }
 
 export const signTransaction = {
@@ -124,9 +140,21 @@ export const addLedgerEthAccount = {
   handler: async (
     ctx: ClientContext,
     params: WalletAddLedgerEthAccountParams,
+  ): Promise<WalletAddLedgerResult> => {
+    return ctx.mutations.addLedgerWalletAccount(
+      params.index,
+      params.name,
+      params.userID,
+    )
+  },
+}
+
+export const setUsersDefaultWallet = {
+  params: WALLET_SET_USER_DEFAULT_SCHEMA,
+  handler: async (
+    ctx: ClientContext,
+    params: WalletSetUserDefaulParams,
   ): Promise<void> => {
-    const res = await ctx.openVault.wallets.addLedgerEthAccount(params)
-    await ctx.openVault.save()
-    return res
+    return ctx.mutations.setUsersDefaultWallet(params.userID, params.address)
   },
 }

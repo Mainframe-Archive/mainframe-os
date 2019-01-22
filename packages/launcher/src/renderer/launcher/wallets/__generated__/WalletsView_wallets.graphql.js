@@ -105,14 +105,28 @@ return {
   "name": "WalletsView_wallets",
   "type": "WalletsQuery",
   "metadata": null,
-  "argumentDefinitions": [],
+  "argumentDefinitions": [
+    {
+      "kind": "LocalArgument",
+      "name": "userID",
+      "type": "String!",
+      "defaultValue": null
+    }
+  ],
   "selections": [
     {
       "kind": "LinkedField",
       "alias": null,
       "name": "ethWallets",
       "storageKey": null,
-      "args": null,
+      "args": [
+        {
+          "kind": "Variable",
+          "name": "userID",
+          "variableName": "userID",
+          "type": "String!"
+        }
+      ],
       "concreteType": "EthWallets",
       "plural": false,
       "selections": [
@@ -142,5 +156,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = 'bc876eb24451446e5a461af50bba6444';
+(node/*: any*/).hash = 'd724c1acc782e82ec15273499bfc6129';
 module.exports = node;

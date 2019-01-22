@@ -47,8 +47,8 @@ export default {
     })
   },
 
-  getEthWallets: async () => {
-    return rpc.request('wallet_getEthWallets')
+  getUserEthWallets: async () => {
+    return rpc.request('wallet_getUserEthWallets')
   },
 
   web3Send: async (params: Object) => {

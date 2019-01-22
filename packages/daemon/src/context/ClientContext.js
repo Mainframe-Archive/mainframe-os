@@ -10,6 +10,7 @@ import type { Vault, VaultRegistry } from '../vault'
 import ContextEvents from './ContextEvents'
 import ContextIO from './ContextIO'
 import ContextMutations, { type MutationEventType } from './ContextMutations'
+import ContextQueries from './ContextQueries'
 import ContextSubscriptions from './ContextSubscriptions'
 
 export type ContextEventType = MutationEventType
@@ -35,6 +36,7 @@ export default class ClientContext extends Subject<ContextEvent> {
   log: LogFunc
   mutations: ContextMutations
   notify: NotifyFunc
+  queries: ContextQueries
   socket: Socket
   subscriptions: ContextSubscriptions
   vaults: VaultRegistry
@@ -49,6 +51,7 @@ export default class ClientContext extends Subject<ContextEvent> {
     this.events = new ContextEvents(this)
     this.io = new ContextIO(this)
     this.mutations = new ContextMutations(this)
+    this.queries = new ContextQueries(this)
     this.subscriptions = new ContextSubscriptions(this)
   }
 
