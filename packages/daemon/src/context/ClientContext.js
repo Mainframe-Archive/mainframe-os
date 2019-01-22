@@ -11,6 +11,7 @@ import ContextEvents from './ContextEvents'
 import ContextIO from './ContextIO'
 import ContextMutations, { type MutationEventType } from './ContextMutations'
 import ContextSubscriptions from './ContextSubscriptions'
+import { PeerUsersFeedsHandler } from './FeedsHandler'
 
 export type ContextEventType = MutationEventType
 
@@ -38,6 +39,7 @@ export default class ClientContext extends Subject<ContextEvent> {
   socket: Socket
   subscriptions: ContextSubscriptions
   vaults: VaultRegistry
+  peerUsersFeeds: PeerUsersFeedsHandler
 
   constructor(params: Params) {
     super()
@@ -50,6 +52,7 @@ export default class ClientContext extends Subject<ContextEvent> {
     this.io = new ContextIO(this)
     this.mutations = new ContextMutations(this)
     this.subscriptions = new ContextSubscriptions(this)
+    this.peerUsersFeeds = new PeerUsersFeedsHandler(this)
   }
 
   get openVault(): Vault {

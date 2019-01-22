@@ -19,7 +19,7 @@ import {
   nodeDefinitions,
   mutationWithClientMutationId,
 } from 'graphql-relay'
-import { filter, map } from 'rxjs/operators'
+import { map, tap } from 'rxjs/operators'
 
 import { App, OwnApp } from '../app'
 import {
@@ -323,6 +323,30 @@ const userWalletType = new GraphQLObjectType({
   }),
 })
 
+const genericProfileType = new GraphQLObjectType({
+  name: 'GenericProfile',
+  fields: () => ({
+    name: {
+      type: GraphQLString,
+    },
+    avatar: {
+      type: GraphQLString,
+    },
+  }),
+})
+
+const namedProfileType = new GraphQLObjectType({
+  name: 'NamedProfile',
+  fields: () => ({
+    name: {
+      type: GraphQLNonNull(GraphQLString),
+    },
+    avatar: {
+      type: GraphQLString,
+    },
+  }),
+})
+
 const ownAppIdentityType = new GraphQLObjectType({
   name: 'OwnAppIdentity',
   interfaces: () => [nodeInterface],
@@ -358,15 +382,7 @@ const ownDeveloperIdentityType = new GraphQLObjectType({
       type: new GraphQLNonNull(GraphQLString),
     },
     profile: {
-      type: new GraphQLObjectType({
-        name: 'OwnDeveloperProfile',
-        fields: () => ({
-          name: {
-            type: GraphQLNonNull(GraphQLString),
-            resolve: self => self.name,
-          },
-        }),
-      }),
+      type: new GraphQLNonNull(namedProfileType),
       resolve: self => self.profile,
     },
   }),
@@ -403,15 +419,7 @@ const ownUserIdentityType = new GraphQLObjectType({
       },
     },
     profile: {
-      type: new GraphQLObjectType({
-        name: 'OwnUserProfile',
-        fields: () => ({
-          name: {
-            type: GraphQLNonNull(GraphQLString),
-            resolve: self => self.name,
-          },
-        }),
-      }),
+      type: new GraphQLNonNull(namedProfileType),
       resolve: self => self.profile,
     },
     pubKey: {
@@ -459,17 +467,8 @@ const peerUserIdentityType = new GraphQLObjectType({
     pubKey: {
       type: new GraphQLNonNull(GraphQLString),
     },
-  }),
-})
-
-const contactProfileType = new GraphQLObjectType({
-  name: 'ContactProfile',
-  fields: () => ({
-    name: {
-      type: GraphQLNonNull(GraphQLString),
-    },
-    avatar: {
-      type: GraphQLString,
+    profile: {
+      type: new GraphQLNonNull(genericProfileType),
     },
   }),
 })
@@ -497,7 +496,7 @@ const contactType = new GraphQLObjectType({
       type: new GraphQLNonNull(GraphQLString),
     },
     profile: {
-      type: new GraphQLNonNull(contactProfileType),
+      type: new GraphQLNonNull(namedProfileType),
     },
     connectionState: {
       type: new GraphQLNonNull(contactConnectionType),
@@ -1150,6 +1149,26 @@ const appInstallMutation = mutationWithClientMutationId({
   },
 })
 
+const contactChangedSubscription = new GraphQLObjectType({
+  name: 'ContactChanged',
+  fields: () => ({
+    contact: {
+      type: new GraphQLNonNull(contactType),
+      subscribe: (self, args, ctx: ClientContext) => {
+        console.log('subscribe to contacts changed')
+        const { source, dispose } = ctx.peerUsersFeeds.observe()
+        const contactChanged = source.pipe(
+          map(e => ({ contact: e.contact })),
+          tap(data => {
+            console.log('contact changed subscription pushes', data)
+          }),
+        )
+        return observableToAsyncIterator(contactChanged, dispose)
+      },
+    },
+  }),
+})
+
 const mutationType = new GraphQLObjectType({
   name: 'Mutation',
   fields: () => ({
@@ -1181,16 +1200,17 @@ const queryType = new GraphQLObjectType({
 const subscriptionType = new GraphQLObjectType({
   name: 'Subscription',
   fields: () => ({
-    appCreated: {
-      type: new GraphQLNonNull(ownAppType),
-      subscribe: (self, args, ctx: ClientContext) => {
-        const appCreated = ctx.pipe(
-          filter(e => e.type === 'own_app_created'),
-          map(e => ({ appCreated: e.app })),
-        )
-        return observableToAsyncIterator(appCreated)
-      },
-    },
+    // appCreated: {
+    //   type: new GraphQLNonNull(ownAppType),
+    //   subscribe: (self, args, ctx: ClientContext) => {
+    //     const appCreated = ctx.pipe(
+    //       filter(e => e.type === 'own_app_created'),
+    //       map(e => ({ appCreated: e.app })),
+    //     )
+    //     return observableToAsyncIterator(appCreated)
+    //   },
+    // },
+    contactChanged: contactChangedSubscription,
   }),
 })
 

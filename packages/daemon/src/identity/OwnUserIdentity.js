@@ -3,7 +3,6 @@
 // eslint-disable-next-line import/named
 import { createSignKeyPair, type KeyPair } from '@mainframe/utils-crypto'
 import { uniqueID } from '@mainframe/utils-id'
-import { type hexValue } from '@erebos/hex'
 
 import { OwnFeed, type OwnFeedSerialized } from '../swarm/feed'
 import OwnIdentity, {
@@ -11,7 +10,7 @@ import OwnIdentity, {
   serializeKeyPair,
   type KeyPairSerialized,
 } from './OwnIdentity'
-import { type PeerUserProfile } from './PeerUserIdentity'
+import { type PublicFeedSerialized } from './PeerUserIdentity'
 
 export type OwnUserProfile = {
   name: string,
@@ -24,12 +23,6 @@ export type OwnUserIdentitySerialized = {
   profile?: OwnUserProfile,
   publicFeed: OwnFeedSerialized,
   firstContactFeed: OwnFeedSerialized,
-}
-
-export type PublicFeedSerialized = {
-  publicKey: string,
-  profile?: PeerUserProfile,
-  firstContactAddress: hexValue,
 }
 
 export default class OwnUserIdentity extends OwnIdentity {

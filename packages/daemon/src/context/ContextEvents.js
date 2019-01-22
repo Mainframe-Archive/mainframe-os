@@ -1,7 +1,7 @@
 // @flow
 
 import type { Observable, Subscription } from 'rxjs'
-import { filter } from 'rxjs/operators'
+import { debounceTime, filter } from 'rxjs/operators'
 
 import { OwnFeed } from '../swarm/feed'
 import type ClientContext, { ContextEvent } from './ClientContext'
@@ -39,15 +39,8 @@ export default class ContextEvents {
 
     // Using addSubscription() will make sure the subscription will be cleared when the client disconnects
     this.addSubscription(
-      'vaultOpened',
-      this.vaultOpened.subscribe(() => {
-        this._context.log('vault got opened!')
-      }),
-    )
-    this.addSubscription(
-      'vaultModified',
-      this.vaultModified.subscribe(async () => {
-        // TODO: Debounce
+      'autoSaveVault',
+      this.vaultModified.pipe(debounceTime(1000)).subscribe(async () => {
         try {
           await this._context.openVault.save()
         } catch (e) {

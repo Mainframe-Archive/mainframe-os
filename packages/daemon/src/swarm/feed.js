@@ -1,11 +1,13 @@
 // @flow
 
 import crypto from 'crypto'
-import BzzAPI from '@erebos/api-bzz-node'
+import BzzAPI, { type PollOptions } from '@erebos/api-bzz-node'
 import { getFeedTopic } from '@erebos/api-bzz-base'
 import { isHexValue, hexValueType, type hexValue } from '@erebos/hex'
 import { createKeyPair, type KeyPair as EthKeyPair } from '@erebos/secp256k1'
 import { pubKeyToAddress } from '@erebos/keccak256'
+import type { Observable } from 'rxjs'
+import { flatMap } from 'rxjs/operators'
 
 export type bzzHash = string
 
@@ -94,5 +96,26 @@ export class OwnFeed {
       { contentType: 'application/json' },
       this.keyPair.getPrivate(),
     )
+  }
+}
+
+export class PeerFeed {
+  _bzz: BzzAPI
+  _hash: string
+
+  constructor(bzz: BzzAPI, hash: string) {
+    this._bzz = bzz
+    this._hash = hash
+  }
+
+  pollJSON<T: Object>(options: PollOptions): Observable<T> {
+    return this._bzz
+      .pollFeedValue(this._hash, {
+        mode: 'content-value',
+        whenEmpty: 'ignore',
+        contentChangedOnly: true,
+        ...options,
+      })
+      .pipe(flatMap(res => res.json()))
   }
 }

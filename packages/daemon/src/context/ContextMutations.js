@@ -13,6 +13,7 @@ import type {
 } from '../identity'
 import type { OwnDeveloperProfile } from '../identity/OwnDeveloperIdentity'
 import type { OwnUserProfile } from '../identity/OwnUserIdentity'
+import type { PeerUserProfile } from '../identity/PeerUserIdentity'
 import type { bzzHash } from '../swarm/feed'
 
 import type ClientContext from './ClientContext'
@@ -120,6 +121,15 @@ export default class ContextMutations {
   async deleteContact(userID: ID, contactID: ID): Promise<void> {
     this._context.openVault.identities.deleteContact(userID, contactID)
     await this._context.openVault.save()
+  }
+
+  updatePeerProfile(peerID: ID, profile: PeerUserProfile) {
+    const peer = this._context.openVault.identities.getPeerUser(peerID)
+    if (peer == null) {
+      throw new Error('Peer not found')
+    }
+    peer.updateProfile(profile)
+    this._context.next({ type: 'peer_changed', peer })
   }
 
   // Identities
