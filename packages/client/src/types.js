@@ -449,3 +449,8 @@ export type WalletAddLedgerResult = {
   localID: string,
   address: string,
 }
+
+export type WalletSetUserDefaulParams = {
+  userID: string,
+  address: string,
+}

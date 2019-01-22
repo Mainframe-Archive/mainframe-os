@@ -318,4 +318,18 @@ export default class ContextMutations {
     openVault.identityWallets.deleteWallet(localID)
     await openVault.save()
   }
+
+  async setUsersDefaultWallet(userID: string, address: string): Promise<void> {
+    const { openVault } = this._context
+    const wallet = openVault.wallets.getEthWalletByAccount(address)
+    if (!wallet) {
+      throw new Error(`Could not find a wallet containing account: ${address}`)
+    }
+    openVault.identityWallets.setDefaultEthWallet(
+      userID,
+      wallet.localID,
+      address,
+    )
+    await openVault.save()
+  }
 }

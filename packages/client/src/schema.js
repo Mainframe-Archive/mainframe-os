@@ -296,3 +296,8 @@ export const WALLET_GET_USER_ETH_ACCOUNTS_SCHEMA = {
 export const WALLET_GET_USER_ETH_WALLETS_SCHEMA = {
   userID: 'string',
 }
+
+export const WALLET_SET_USER_DEFAULT_SCHEMA = {
+  userID: 'string',
+  address: 'string',
+}

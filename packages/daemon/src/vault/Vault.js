@@ -254,6 +254,21 @@ export default class Vault {
     }, [])
   }
 
+  getUserDefaultEthAccount(userID: string): ?string {
+    const defaultAcc = this.identityWallets.getDefaultEthWallet(userID)
+    if (defaultAcc) {
+      return defaultAcc
+    }
+    // Use first account if no default
+    this.getUserEthWallets(userID).forEach(w => {
+      if (w.accounts.length) {
+        const addr = w.accounts[0].address
+        this.identityWallets.setDefaultEthWallet(userID, addr, w.localID)
+        return addr
+      }
+    })
+  }
+
   // App lifecycle
 
   closeApp(sessID: ID): void {
