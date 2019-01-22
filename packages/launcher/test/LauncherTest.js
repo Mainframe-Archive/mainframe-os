@@ -61,19 +61,9 @@ describe('Launcher testing', function() {
 
   before(function() {
     return getApp(this)
-    // const daemonPath = path.join(__dirname, '..', '..', 'daemon/bin/run')
-    // await Environment.create('vaultTest', 'testing', true)
-    // const cfg = new DaemonConfig(Environment)
-    // setupDaemon(cfg, {
-    //   binPath: resolvePath(daemonPath),
-    //   socketPath: undefined,
-    // })
-    // startDaemon(cfg, true)
   })
 
   after(function() {
-    // stopDaemon(new DaemonConfig(Environment))
-    // await Environment.destroy('vaultTest')
     stopApp(this.app)
   })
 

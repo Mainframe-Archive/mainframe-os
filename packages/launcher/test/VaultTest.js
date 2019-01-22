@@ -41,6 +41,7 @@ describe('Vault operations', function() {
   this.timeout(timeouts.viewChange)
   before(function() {
     return getApp(this)
+    // TODO: find a way to create test env, setup daemon and start it automatically
     // const { Environment } = await import('../../config/src/Environment')
     // const {
     //   setupDaemon,
@@ -65,6 +66,7 @@ describe('Vault operations', function() {
 
   after(function() {
     stopApp(this.app)
+    // TODO: find a way to stop daemon and destroy env automatically
     // const {
     //   stopDaemon,
     // } = await import('../../toolbox/src/daemon')
