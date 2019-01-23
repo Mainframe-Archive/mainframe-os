@@ -21,7 +21,7 @@ type State = {
   data: Array<Object>,
 }
 
-export class ContactsScreen extends Component<Props, State> {
+export class ContactsScreenComponent extends Component<Props, State> {
   static contextType = EnvironmentContext
 
   acceptContact = () => {
@@ -44,14 +44,17 @@ export class ContactsScreen extends Component<Props, State> {
   }
 }
 
-const ContactsScreenRelayContainer = createFragmentContainer(ContactsScreen, {
-  contacts: graphql`
-    fragment ContactsScreen_contacts on ContactsQuery
-      @argumentDefinitions(userID: { type: "String!" }) {
-      ...ContactsView_contacts @arguments(userID: $userID)
-    }
-  `,
-})
+const ContactsScreenRelayContainer = createFragmentContainer(
+  ContactsScreenComponent,
+  {
+    contacts: graphql`
+      fragment ContactsScreen_contacts on ContactsQuery
+        @argumentDefinitions(userID: { type: "String!" }) {
+        ...ContactsView_contacts @arguments(userID: $userID)
+      }
+    `,
+  },
+)
 
 export class ContactsScreenRenderer extends Component<QueryProps> {
   static contextType = EnvironmentContext
@@ -84,7 +87,7 @@ export class ContactsScreenRenderer extends Component<QueryProps> {
   }
 }
 
-export default class ContactsContextWrapper extends Component<{}> {
+export default class ContactScreen extends Component<{}> {
   static contextType = LauncherContext
   render() {
     return <ContactsScreenRenderer user={this.context.user} {...this.props} />
