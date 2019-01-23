@@ -32,7 +32,7 @@ export type AppItem_installedApp = {|
   +users: ?$ReadOnlyArray<?{|
     +localID: string,
     +identity: {|
-      +profile: ?{|
+      +profile: {|
         +name: string
       |}
     |},
@@ -181,7 +181,7 @@ return {
               "name": "profile",
               "storageKey": null,
               "args": null,
-              "concreteType": "OwnUserProfile",
+              "concreteType": "NamedProfile",
               "plural": false,
               "selections": [
                 v1

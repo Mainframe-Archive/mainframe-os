@@ -13,7 +13,15 @@ import type {
 } from '../identity'
 import type { OwnDeveloperProfile } from '../identity/OwnDeveloperIdentity'
 import type { OwnUserProfile } from '../identity/OwnUserIdentity'
+import type { PeerUserProfile } from '../identity/PeerUserIdentity'
 import type { bzzHash } from '../swarm/feed'
+
+import type {
+  Blockchains,
+  WalletTypes,
+  WalletAddLedgerResult,
+} from '../wallet/WalletsRepository'
+import type HDWallet from '../wallet/HDWallet'
 
 import type ClientContext from './ClientContext'
 
@@ -40,24 +48,19 @@ export type AddPeerParams = {
   otherFeeds: Feeds,
 }
 
-export type MutationEvent =
-  | { type: 'vault_created' | 'vault_opened' }
-  | { type: 'own_app_created', app: OwnApp }
-  | { type: 'user_created' | 'user_deleted', user: OwnUserIdentity }
-  | { type: 'user_changed', user: OwnUserIdentity, change: string }
-  | { type: 'peer_created' | 'peer_deleted', peer: PeerUserIdentity }
-  | { type: 'peer_changed', peer: PeerUserIdentity, change: string }
-  | {
-      type: 'contact_created' | 'contact_deleted',
-      contact: Contact,
-      userID: string,
-    }
-  | {
-      type: 'contact_changed',
-      contact: Contact,
-      userID: string,
-      change: string,
-    }
+export type ImportHDWalletParams = {
+  blockchain: Blockchains,
+  mnemonic: string,
+  firstAccountName: string,
+  userID?: string,
+}
+
+export type AddHDWalletAccountParams = {
+  walletID: string,
+  index: number,
+  name: string,
+  userID?: string,
+}
 
 export default class ContextMutations {
   _context: ClientContext
@@ -77,7 +80,7 @@ export default class ContextMutations {
       permissionsRequirements: params.permissionsRequirements,
     })
     await this._context.openVault.save()
-    this._context.next({ type: 'own_app_created', app })
+    this._context.next({ type: 'app_created', app })
     return app
   }
 
@@ -108,10 +111,15 @@ export default class ContextMutations {
     })
   }
 
-  async createContactFromPeer(userID: ID, peerID: ID): Promise<Contact> {
+  async createContactFromPeer(
+    userID: ID,
+    peerID: ID,
+    aliasName?: string,
+  ): Promise<Contact> {
     const contact = this._context.openVault.identities.createContactFromPeer(
       userID,
       peerID,
+      aliasName,
     )
     this._context.next({ type: 'contact_created', contact, userID })
     return contact
@@ -125,6 +133,15 @@ export default class ContextMutations {
   async deleteContact(userID: ID, contactID: ID): Promise<void> {
     this._context.openVault.identities.deleteContact(userID, contactID)
     await this._context.openVault.save()
+  }
+
+  updatePeerProfile(peerID: string, profile: PeerUserProfile) {
+    const peer = this._context.openVault.identities.getPeerUser(peerID)
+    if (peer == null) {
+      throw new Error('Peer not found')
+    }
+    peer.updateProfile(profile)
+    this._context.next({ type: 'peer_changed', peer })
   }
 
   // Identities
@@ -144,6 +161,18 @@ export default class ContextMutations {
     return user
   }
 
+  async updateUser(userID: ID, profile: $Shape<OwnUserProfile>): Promise<void> {
+    const user = this._context.openVault.identities.getOwnUser(userID)
+    if (!user) throw new Error('User not found')
+
+    user.profile = { ...user.profile, ...profile }
+    await this._context.openVault.save()
+    await user.publicFeed.publishJSON(
+      this._context.io.bzz,
+      user.publicFeedData(),
+    )
+  }
+
   // Vault
 
   async createVault(path: string, password: Buffer): Promise<void> {
@@ -156,5 +185,98 @@ export default class ContextMutations {
     await this._context.vaults.open(this._context.socket, path, password)
     await this._context.io.eth.setup()
     this._context.next({ type: 'vault_opened' })
+  }
+
+  // Wallets
+
+  async createHDWallet(
+    blockchain: Blockchains,
+    firstAccountName: string,
+    userID?: string,
+  ): Promise<HDWallet> {
+    const { openVault } = this._context
+    const wallet = openVault.wallets.createHDWallet(
+      blockchain,
+      firstAccountName,
+    )
+    if (userID) {
+      openVault.identityWallets.linkWalletToIdentity(
+        userID,
+        wallet.localID,
+        wallet.getAccounts()[0],
+      )
+    }
+    await openVault.save()
+    return wallet
+  }
+
+  async importHDWallet(params: ImportHDWalletParams): Promise<HDWallet> {
+    const { openVault } = this._context
+    const words = params.mnemonic.split(' ')
+    if (words.length !== 12) {
+      throw new Error('Seed phrase must consist of 12 words.')
+    }
+    const wallet = openVault.wallets.importMnemonicWallet(params)
+    if (params.userID) {
+      openVault.identityWallets.linkWalletToIdentity(
+        params.userID,
+        wallet.localID,
+        wallet.getAccounts()[0],
+      )
+    }
+    await openVault.save()
+    return wallet
+  }
+
+  async addHDWalletAccount(params: AddHDWalletAccountParams): Promise<string> {
+    const { openVault } = this._context
+    const address = openVault.wallets.addHDWalletAccount(params)
+    if (params.userID) {
+      openVault.identityWallets.linkWalletToIdentity(
+        params.userID,
+        params.walletID,
+        address,
+      )
+    }
+    return address
+  }
+
+  async addLedgerWalletAccount(
+    index: number,
+    name: string,
+    userID?: string,
+  ): Promise<WalletAddLedgerResult> {
+    const { openVault } = this._context
+    const res = await openVault.wallets.addLedgerEthAccount(index, name)
+    if (userID) {
+      openVault.identityWallets.linkWalletToIdentity(
+        userID,
+        res.localID,
+        res.address,
+      )
+    }
+    await openVault.save()
+    return res
+  }
+
+  async deleteWallet(blockchain: string, type: WalletTypes, localID: string) {
+    const { openVault } = this._context
+    openVault.wallets.deleteWallet(blockchain, type, localID)
+    openVault.identityWallets.deleteWallet(localID)
+    await openVault.save()
+  }
+
+  async setUsersDefaultWallet(userID: string, address: string): Promise<void> {
+    const { openVault } = this._context
+    const wallet = openVault.wallets.getEthWalletByAccount(address)
+    if (!wallet) {
+      throw new Error(`Could not find a wallet containing account: ${address}`)
+    }
+    openVault.identityWallets.setDefaultEthWallet(
+      userID,
+      wallet.localID,
+      address,
+    )
+    await openVault.save()
   }
 }

@@ -104,10 +104,6 @@ describe('Application launch', function() {
     await this.app.client.waitForExist(identityButtonSelector, 2000)
     await this.app.client.element(identityButtonSelector).click()
 
-    const identitySelector = '[data-testid="identity-selector-select-dev"]'
-    await this.app.client.waitForExist(identitySelector, 2000)
-    await this.app.client.element(identitySelector).click()
-
     const setPermissionsButton = '[data-testid="set-permission-requirements"]'
     await this.app.client.waitForExist(setPermissionsButton, 2000)
     await this.app.client.element(setPermissionsButton).click()
@@ -119,10 +115,6 @@ describe('Application launch', function() {
     const appItemSelector = '[data-testid="own-app-item"]'
     await this.app.client.waitForExist(appItemSelector, 5000)
     await this.app.client.element(appItemSelector).click()
-
-    const userIdentity = '[data-testid="identity-selector-select-tester"]'
-    await this.app.client.waitForExist(userIdentity, 5000)
-    await this.app.client.element(userIdentity).click()
 
     const count = await this.app.client.getWindowCount()
     assert.equal(count, 2)
@@ -142,25 +134,9 @@ describe('Application launch', function() {
     await this.app.client.waitForExist(fileInputSelector, 2000)
     await this.app.client.chooseFile(fileInputSelector, manifestPath)
 
-    const identityInputSelector = '[data-testid="create-identity-input-name"]'
-    await this.app.client.waitForExist(identityInputSelector, 2000)
-    await this.app.client.element(identityInputSelector).setValue('tester')
-
-    const identityButtonSelector =
-      '[data-testid="create-identity-button-submit"]'
-    await this.app.client.waitForExist(identityButtonSelector, 2000)
-    await this.app.client.element(identityButtonSelector).click()
-
-    const identitySelector = '[data-testid="identity-selector-select-tester"]'
-    await this.app.client.waitForExist(identitySelector, 2000)
-    await this.app.client.element(identitySelector).click()
-
     const appItemSelector = '[data-testid="installed-app-item"]'
     await this.app.client.waitForExist(appItemSelector, 5000)
     await this.app.client.element(appItemSelector).click()
-
-    await this.app.client.waitForExist(identitySelector, 2000)
-    await this.app.client.element(identitySelector).click()
 
     const count = await this.app.client.getWindowCount()
     assert.equal(count, 3)

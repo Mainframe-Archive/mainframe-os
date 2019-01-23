@@ -26,7 +26,7 @@ const AppIcon = styled.View`
 type AppData = AppOwnData | AppInstalledData
 
 type SharedProps = {
-  onOpenApp: (app: AppData, own: boolean) => void,
+  onOpenApp: (app: AppData, own: boolean) => any,
 }
 
 type InstalledProps = SharedProps & {

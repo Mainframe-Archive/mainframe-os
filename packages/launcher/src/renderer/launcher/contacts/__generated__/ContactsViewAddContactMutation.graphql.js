@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash d89c50ee187c6360aa84b919986a3974
+ * @relayHash 9a6534678f35ef98f4763db4e540d50c
  */
 
 /* eslint-disable */
@@ -12,13 +12,9 @@ import type { ConcreteRequest } from 'relay-runtime';
 type ContactsView_contacts$ref = any;
 export type AddContactInput = {
   userID: string,
-  profile: UserProfileInput,
   publicFeed: string,
+  aliasName?: ?string,
   clientMutationId?: ?string,
-};
-export type UserProfileInput = {
-  name: string,
-  avatar?: ?string,
 };
 export type ContactsViewAddContactMutationVariables = {|
   input: AddContactInput,
@@ -55,7 +51,7 @@ mutation ContactsViewAddContactMutation(
   }
 }
 
-fragment ContactsView_contacts_3iqrP on ContactsQuery {
+fragment ContactsView_contacts_3iqrP on Contacts {
   userContacts(userID: $userID) {
     peerID
     localID
@@ -103,7 +99,7 @@ return {
   "operationKind": "mutation",
   "name": "ContactsViewAddContactMutation",
   "id": null,
-  "text": "mutation ContactsViewAddContactMutation(\n  $input: AddContactInput!\n  $userID: String!\n) {\n  addContact(input: $input) {\n    viewer {\n      contacts {\n        ...ContactsView_contacts_3iqrP\n      }\n      id\n    }\n  }\n}\n\nfragment ContactsView_contacts_3iqrP on ContactsQuery {\n  userContacts(userID: $userID) {\n    peerID\n    localID\n    connectionState\n    profile {\n      name\n    }\n    id\n  }\n}\n",
+  "text": "mutation ContactsViewAddContactMutation(\n  $input: AddContactInput!\n  $userID: String!\n) {\n  addContact(input: $input) {\n    viewer {\n      contacts {\n        ...ContactsView_contacts_3iqrP\n      }\n      id\n    }\n  }\n}\n\nfragment ContactsView_contacts_3iqrP on Contacts {\n  userContacts(userID: $userID) {\n    peerID\n    localID\n    connectionState\n    profile {\n      name\n    }\n    id\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -136,7 +132,7 @@ return {
                 "name": "contacts",
                 "storageKey": null,
                 "args": null,
-                "concreteType": "ContactsQuery",
+                "concreteType": "Contacts",
                 "plural": false,
                 "selections": [
                   {
@@ -188,7 +184,7 @@ return {
                 "name": "contacts",
                 "storageKey": null,
                 "args": null,
-                "concreteType": "ContactsQuery",
+                "concreteType": "Contacts",
                 "plural": false,
                 "selections": [
                   {
@@ -234,7 +230,7 @@ return {
                         "name": "profile",
                         "storageKey": null,
                         "args": null,
-                        "concreteType": "ContactProfile",
+                        "concreteType": "GenericProfile",
                         "plural": false,
                         "selections": [
                           {

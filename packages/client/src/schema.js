@@ -192,6 +192,17 @@ export const IDENTITY_GET_USER_CONTACTS_SCHEMA = {
   userID: LOCAL_ID_SCHEMA,
 }
 
+export const IDENTITY_UPDATE_USER_SCHEMA = {
+  userID: 'string',
+  profile: {
+    type: 'object',
+    props: {
+      name: { type: 'string', optional: true },
+      avatar: { type: 'string', optional: true },
+    },
+  },
+}
+
 export const IDENTITY_LINK_ETH_WALLET_SCHEMA = {
   id: LOCAL_ID_SCHEMA,
   localID: LOCAL_ID_SCHEMA,
@@ -217,8 +228,13 @@ export const VAULT_SETTINGS_SCHEMA = {
   ethURL: VAULT_SETTING_SCHEMA,
 }
 
+export const WALLET_SUPPORTED_CHAIN_SCHEMA = {
+  type: 'enum',
+  values: ['ethereum'],
+}
+
 export const WALLET_CREATE_HD_SCHEMA = {
-  chain: 'string',
+  blockchain: WALLET_SUPPORTED_CHAIN_SCHEMA,
 }
 
 export const WALLET_TYPE_SCHEMA = {
@@ -226,19 +242,14 @@ export const WALLET_TYPE_SCHEMA = {
   values: ['hd', 'simple', 'ledger'],
 }
 
-export const WALLET_SUPPORTED_CHAIN_SCHEMA = {
-  type: 'enum',
-  values: ['ethereum'],
-}
-
 export const WALLET_IMPORT_MNEMONIC_SCHEMA = {
   mnemonic: 'string',
 }
 
 export const WALLET_DELETE_SCHEMA = {
-  chain: WALLET_SUPPORTED_CHAIN_SCHEMA,
+  blockchain: WALLET_SUPPORTED_CHAIN_SCHEMA,
   type: WALLET_TYPE_SCHEMA,
-  walletID: LOCAL_ID_SCHEMA,
+  localID: LOCAL_ID_SCHEMA,
 }
 
 export const WALLET_GET_LEDGER_ETH_ACCOUNTS_SCHEMA = {
@@ -251,7 +262,7 @@ export const WALLET_ADD_LEDGER_ETH_ACCOUNT_SCHEMA = {
 }
 
 export const WALLET_ADD_HD_ACCOUNT_SCHEMA = {
-  walletID: 'string',
+  localID: 'string',
   index: 'number',
 }
 
@@ -276,4 +287,17 @@ export const WALLET_SIGN_ETH_TRANSACTION_SCHEMA = ETH_TRANSACTION_SCHEMA
 export const WALLET_SIGN_TRANSACTION_SCHEMA = {
   chain: WALLET_SUPPORTED_CHAIN_SCHEMA,
   transactionData: 'object',
+}
+
+export const WALLET_GET_USER_ETH_ACCOUNTS_SCHEMA = {
+  userID: 'string',
+}
+
+export const WALLET_GET_USER_ETH_WALLETS_SCHEMA = {
+  userID: 'string',
+}
+
+export const WALLET_SET_USER_DEFAULT_SCHEMA = {
+  userID: 'string',
+  address: 'string',
 }

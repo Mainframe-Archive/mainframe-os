@@ -3,7 +3,7 @@
 import React, { Component } from 'react'
 import { ScrollView } from 'react-native'
 import styled from 'styled-components/native'
-import { graphql, QueryRenderer } from 'react-relay'
+import { graphql, QueryRenderer, createFragmentContainer } from 'react-relay'
 
 import { EnvironmentContext } from './RelayEnvironment'
 import LauncherContext from './LauncherContext'
@@ -27,7 +27,7 @@ const ContentContainer = styled.View`
 
 type Props = {
   identities: {
-    ownUsers: Array<{ localID: string }>,
+    ownUsers: Array<{ localID: string, defaultEthAddress: ?string }>,
   },
 }
 
@@ -67,8 +67,10 @@ class Launcher extends Component<Props, State> {
       return <Container /> //TODO: error view
     }
 
+    const user = ownUsers[0]
+
     return (
-      <LauncherContext.Provider value={{ userID: ownUsers[0].localID }}>
+      <LauncherContext.Provider value={{ user }}>
         <Container testID="launcher-view">
           <SideMenu
             selected={this.state.openScreen}
@@ -83,6 +85,17 @@ class Launcher extends Component<Props, State> {
   }
 }
 
+const LauncherRelayContaier = createFragmentContainer(Launcher, {
+  identities: graphql`
+    fragment Launcher_identities on Identities {
+      ownUsers {
+        defaultEthAddress
+        localID
+      }
+    }
+  `,
+})
+
 export default class LauncherQueryRenderer extends Component<{}> {
   static contextType = EnvironmentContext
 
@@ -94,9 +107,7 @@ export default class LauncherQueryRenderer extends Component<{}> {
           query LauncherQuery {
             viewer {
               identities {
-                ownUsers {
-                  localID
-                }
+                ...Launcher_identities
               }
             }
           }
@@ -106,7 +117,7 @@ export default class LauncherQueryRenderer extends Component<{}> {
           if (error || !props) {
             return <RelayLoaderView error={error ? error.message : undefined} />
           } else {
-            return <Launcher {...props.viewer} {...this.props} />
+            return <LauncherRelayContaier {...props.viewer} {...this.props} />
           }
         }}
       />

@@ -21,7 +21,7 @@ export type ContactsScreen_contacts = {|
 const node/*: ConcreteFragment*/ = {
   "kind": "Fragment",
   "name": "ContactsScreen_contacts",
-  "type": "ContactsQuery",
+  "type": "Contacts",
   "metadata": null,
   "argumentDefinitions": [
     {
@@ -47,5 +47,5 @@ const node/*: ConcreteFragment*/ = {
   ]
 };
 // prettier-ignore
-(node/*: any*/).hash = '165bae5c9c5f21cf5a4854d74ba469fb';
+(node/*: any*/).hash = 'c6619f68f3c445a4f92339d1ce78cfc9';
 module.exports = node;

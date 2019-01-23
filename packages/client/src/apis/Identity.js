@@ -19,6 +19,7 @@ import type {
   IdentityGetUserContactsResult,
   IdentityLinkEthWalletAccountParams,
   IdentityUnlinkEthWalletAccountParams,
+  IdentityUpdateUserParams,
 } from '../types'
 
 export default class IdentityAPIs extends ClientAPIs {
@@ -38,6 +39,10 @@ export default class IdentityAPIs extends ClientAPIs {
 
   getOwnUsers(): Promise<IdentityGetOwnUsersResult> {
     return this._rpc.request('identity_getOwnUsers')
+  }
+
+  updateUser(params: IdentityUpdateUserParams): Promise<void> {
+    return this._rpc.request('identity_updateUser', params)
   }
 
   // Contacts

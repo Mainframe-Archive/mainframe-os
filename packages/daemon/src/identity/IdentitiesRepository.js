@@ -6,7 +6,6 @@ import type { KeyPair } from '@mainframe/utils-crypto'
 import { uniqueID, idType, type ID } from '@mainframe/utils-id'
 import multibase from 'multibase'
 import { type hexValue } from '@erebos/hex'
-import { type ContactResult } from '@mainframe/client'
 
 import { mapObject } from '../utils'
 
@@ -309,31 +308,31 @@ export default class IdentitiesRepository {
     return this._identities.contacts
   }
 
-  getContactsForUser(userID: ID): { [id: string]: Contact } {
+  getContactsForUser(userID: string): { [id: string]: Contact } {
     return this._identities.contacts[userID]
   }
 
-  getOwnApp(id: ID): ?OwnAppIdentity {
+  getOwnApp(id: ID | string): ?OwnAppIdentity {
     return this._identities.own.apps[id]
   }
 
-  getOwnDeveloper(id: ID): ?OwnDeveloperIdentity {
+  getOwnDeveloper(id: ID | string): ?OwnDeveloperIdentity {
     return this._identities.own.developers[id]
   }
 
-  getOwnUser(id: ID): ?OwnUserIdentity {
+  getOwnUser(id: ID | string): ?OwnUserIdentity {
     return this._identities.own.users[id]
   }
 
-  getPeerApp(id: ID): ?AppIdentity {
+  getPeerApp(id: ID | string): ?AppIdentity {
     return this._identities.peers.apps[id]
   }
 
-  getPeerDeveloper(id: ID): ?DeveloperIdentity {
+  getPeerDeveloper(id: ID | string): ?DeveloperIdentity {
     return this._identities.peers.developers[id]
   }
 
-  getPeerUser(id: ID): ?PeerUserIdentity {
+  getPeerUser(id: ID | string): ?PeerUserIdentity {
     return this._identities.peers.users[id]
   }
 
@@ -467,7 +466,11 @@ export default class IdentitiesRepository {
     return peer
   }
 
-  createContactFromPeer(ownUserId: ID, peerID: ID): Contact {
+  createContactFromPeer(
+    ownUserId: ID,
+    peerID: ID,
+    aliasName?: string,
+  ): Contact {
     const peer = this.getPeerUser(idType(peerID))
     if (!peer) throw new Error('Peer not found')
 
@@ -479,10 +482,7 @@ export default class IdentitiesRepository {
         return existing
       }
     }
-    const contact = Contact.create(peerID, {
-      name: peer.profile.name,
-      avatar: peer.profile.avatar,
-    })
+    const contact = Contact.create(peerID, { aliasName })
     if (this._identities.contacts[ownUserId]) {
       this._identities.contacts[ownUserId][contact.localID] = contact
     } else {
@@ -492,34 +492,36 @@ export default class IdentitiesRepository {
     return contact
   }
 
-  getUserContacts(userID: string): Array<ContactResult> {
-    const result = []
-    const contacts = this._identities.contacts[userID]
-    if (contacts) {
-      Object.keys(contacts).forEach(id => {
-        const contact = contacts[id]
-        const peer = this.getPeerUser(idType(contact.peerID))
-        if (peer) {
-          const profile = { ...peer.profile, ...contact.profile }
-          const contactRes = {
-            profile,
-            localID: id,
-            peerID: contact.peerID,
-            connectionState: contact.connectionState,
-          }
-          result.push(contactRes)
-        }
-      })
-    }
-    return result
-  }
-
   deleteContact(userID: ID, contactID: ID) {
     if (this._identities.contacts[userID]) {
       delete this._identities.contacts[userID][contactID]
     }
     if (this._userByContact[contactID]) {
       delete this._userByContact[contactID]
+    }
+  }
+
+  getContactProfile(contactID: ID): PeerUserProfile {
+    const userID = this._userByContact[contactID]
+    if (userID == null) {
+      return {}
+    }
+
+    const userContacts = this._identities.contacts[userID]
+    if (userContacts == null) {
+      return {}
+    }
+
+    const contact = userContacts[contactID]
+    if (contact == null) {
+      return {}
+    }
+    const peer = this._identities.peers.users[contact.peerID]
+    const peerProfile = peer ? peer.profile : {}
+
+    return {
+      name: contact.name || peerProfile.name,
+      avatar: contact.profile.avatar || peerProfile.avatar,
     }
   }
 }

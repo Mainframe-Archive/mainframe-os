@@ -78,7 +78,7 @@ var v0 = [
         "name": "balances",
         "storageKey": null,
         "args": null,
-        "concreteType": "WalletBalancesType",
+        "concreteType": "WalletBalances",
         "plural": false,
         "selections": [
           {
@@ -103,16 +103,30 @@ var v0 = [
 return {
   "kind": "Fragment",
   "name": "WalletsView_wallets",
-  "type": "WalletsQuery",
+  "type": "Wallets",
   "metadata": null,
-  "argumentDefinitions": [],
+  "argumentDefinitions": [
+    {
+      "kind": "LocalArgument",
+      "name": "userID",
+      "type": "String!",
+      "defaultValue": null
+    }
+  ],
   "selections": [
     {
       "kind": "LinkedField",
       "alias": null,
       "name": "ethWallets",
       "storageKey": null,
-      "args": null,
+      "args": [
+        {
+          "kind": "Variable",
+          "name": "userID",
+          "variableName": "userID",
+          "type": "String!"
+        }
+      ],
       "concreteType": "EthWallets",
       "plural": false,
       "selections": [
@@ -142,5 +156,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = 'bc876eb24451446e5a461af50bba6444';
+(node/*: any*/).hash = '6122ce4dd7aae54f4ef063f5ed5b64a3';
 module.exports = node;

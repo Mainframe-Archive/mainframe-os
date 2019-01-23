@@ -1,12 +1,20 @@
 // @flow
 
 import type { Observable, Subscription } from 'rxjs'
-import { filter } from 'rxjs/operators'
+import { debounceTime, filter } from 'rxjs/operators'
 import { idType } from '@mainframe/utils-id'
 import { getFeedTopic } from '@erebos/api-bzz-base'
 
 import { OwnFeed } from '../swarm/feed'
-import type ClientContext, { ContextEvent } from './ClientContext'
+
+import type ClientContext from './ClientContext'
+import type {
+  ContextEvent,
+  ContactCreatedEvent,
+  ContactChangedEvent,
+  UserCreatedEvent,
+  UserChangedEvent,
+} from './types'
 
 export default class ContextEvents {
   vaultOpened: Observable<ContextEvent>
@@ -41,15 +49,8 @@ export default class ContextEvents {
 
     // Using addSubscription() will make sure the subscription will be cleared when the client disconnects
     this.addSubscription(
-      'vaultOpened',
-      this.vaultOpened.subscribe(() => {
-        this._context.log('vault got opened!')
-      }),
-    )
-    this.addSubscription(
-      'vaultModified',
-      this.vaultModified.subscribe(async () => {
-        // TODO: Debounce
+      'autoSaveVault',
+      this.vaultModified.pipe(debounceTime(1000)).subscribe(async () => {
         try {
           await this._context.openVault.save()
         } catch (e) {
@@ -68,10 +69,7 @@ export default class ContextEvents {
             )
           }),
         )
-        .subscribe(async (e: ContextEvent) => {
-          // Hint for flow
-          if (!(e.type === 'user_created' || e.type === 'user_changed')) return
-
+        .subscribe(async (e: UserCreatedEvent | UserChangedEvent) => {
           const { user } = e
           await user.publicFeed.publishJSON(
             this._context.io.bzz,
@@ -100,11 +98,7 @@ export default class ContextEvents {
             )
           }),
         )
-        .subscribe(async (e: ContextEvent) => {
-          // Hint for flow
-          if (!(e.type === 'contact_created' || e.type === 'contact_changed'))
-            return
-
+        .subscribe(async (e: ContactCreatedEvent | ContactChangedEvent) => {
           const { contact, userID } = e
           const user = this._context.openVault.identities.getOwnUser(
             idType(userID),
@@ -151,11 +145,7 @@ export default class ContextEvents {
             )
           }),
         )
-        .subscribe(async (e: ContextEvent) => {
-          // Hint for flow
-          if (!(e.type === 'contact_created' || e.type === 'contact_changed'))
-            return
-
+        .subscribe(async (e: ContactCreatedEvent | ContactChangedEvent) => {
           const { contact, userID } = e
           const user = this._context.openVault.identities.getOwnUser(
             idType(userID),

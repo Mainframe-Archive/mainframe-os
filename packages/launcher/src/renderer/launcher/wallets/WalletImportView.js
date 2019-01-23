@@ -12,6 +12,7 @@ import { EnvironmentContext } from '../RelayEnvironment'
 type Props = {
   currentWalletID: ?string,
   onClose: () => void,
+  userID: string,
 }
 
 type State = {
@@ -27,6 +28,7 @@ const IMPORT_ERR_MSG = 'Sorry, there was a problem importing your wallet.'
 const walletImportMutation = graphql`
   mutation WalletImportViewImportHDWalletMutation(
     $input: ImportHDWalletInput!
+    $userID: String!
   ) {
     importHDWallet(input: $input) {
       hdWallet {
@@ -37,8 +39,11 @@ const walletImportMutation = graphql`
         localID
       }
       viewer {
+        identities {
+          ...Launcher_identities
+        }
         wallets {
-          ...WalletsView_wallets
+          ...WalletsView_wallets @arguments(userID: $userID)
         }
       }
     }
@@ -46,11 +51,14 @@ const walletImportMutation = graphql`
 `
 
 const deleteWalletMutation = graphql`
-  mutation WalletImportViewDeleteWalletMutation($input: DeleteWalletInput!) {
+  mutation WalletImportViewDeleteWalletMutation(
+    $input: DeleteWalletInput!
+    $userID: String!
+  ) {
     deleteWallet(input: $input) {
       viewer {
         wallets {
-          ...WalletsView_wallets
+          ...WalletsView_wallets @arguments(userID: $userID)
         }
       }
     }
@@ -76,7 +84,7 @@ export default class WalletImportView extends Component<Props, State> {
 
       commitMutation(this.context, {
         mutation: deleteWalletMutation,
-        variables: { input: deleteInput },
+        variables: { input: deleteInput, userID: this.props.userID },
         onCompleted: (response, errors) => {
           if (errors || !response) {
             const error =
@@ -97,14 +105,15 @@ export default class WalletImportView extends Component<Props, State> {
 
   commitImportMutation = (seed: string) => {
     const importInput = {
-      type: 'ETHEREUM',
+      blockchain: 'ETHEREUM',
       mnemonic: seed,
       name: 'Account 1',
+      userID: this.props.userID,
     }
 
     commitMutation(this.context, {
       mutation: walletImportMutation,
-      variables: { input: importInput },
+      variables: { input: importInput, userID: this.props.userID },
       onCompleted: (response, errors) => {
         if (errors || !response) {
           const error =

@@ -13,7 +13,8 @@ declare export opaque type IdentitiesView_identities$ref: FragmentReference;
 export type IdentitiesView_identities = {|
   +ownUsers: ?$ReadOnlyArray<?{|
     +localID: string,
-    +profile: ?{|
+    +feedHash: string,
+    +profile: {|
       +name: string
     |},
     +wallets: ?$ReadOnlyArray<?{|
@@ -39,7 +40,7 @@ export type IdentitiesView_identities = {|
   |}>,
   +ownDevelopers: ?$ReadOnlyArray<?{|
     +localID: string,
-    +profile: ?{|
+    +profile: {|
       +name: string
     |},
   |}>,
@@ -64,11 +65,21 @@ v1 = [
     "args": null,
     "storageKey": null
   }
-];
+],
+v2 = {
+  "kind": "LinkedField",
+  "alias": null,
+  "name": "profile",
+  "storageKey": null,
+  "args": null,
+  "concreteType": "NamedProfile",
+  "plural": false,
+  "selections": v1
+};
 return {
   "kind": "Fragment",
   "name": "IdentitiesView_identities",
-  "type": "IdentitiesQuery",
+  "type": "Identities",
   "metadata": null,
   "argumentDefinitions": [],
   "selections": [
@@ -83,22 +94,20 @@ return {
       "selections": [
         v0,
         {
-          "kind": "LinkedField",
+          "kind": "ScalarField",
           "alias": null,
-          "name": "profile",
-          "storageKey": null,
+          "name": "feedHash",
           "args": null,
-          "concreteType": "OwnUserProfile",
-          "plural": false,
-          "selections": v1
+          "storageKey": null
         },
+        v2,
         {
           "kind": "LinkedField",
           "alias": null,
           "name": "wallets",
           "storageKey": null,
           "args": null,
-          "concreteType": "UserWalletType",
+          "concreteType": "UserWallet",
           "plural": true,
           "selections": [
             v0,
@@ -203,21 +212,12 @@ return {
       "plural": true,
       "selections": [
         v0,
-        {
-          "kind": "LinkedField",
-          "alias": null,
-          "name": "profile",
-          "storageKey": null,
-          "args": null,
-          "concreteType": "OwnDeveloperProfile",
-          "plural": false,
-          "selections": v1
-        }
+        v2
       ]
     }
   ]
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '3a588857335af2777dd4c7b0b3d7954b';
+(node/*: any*/).hash = 'e9b89ca4b1525682abdc70d0bd638497';
 module.exports = node;

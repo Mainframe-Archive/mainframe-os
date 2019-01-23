@@ -21,17 +21,31 @@ export type WalletsScreen_wallets = {|
 const node/*: ConcreteFragment*/ = {
   "kind": "Fragment",
   "name": "WalletsScreen_wallets",
-  "type": "WalletsQuery",
+  "type": "Wallets",
   "metadata": null,
-  "argumentDefinitions": [],
+  "argumentDefinitions": [
+    {
+      "kind": "LocalArgument",
+      "name": "userID",
+      "type": "String!",
+      "defaultValue": null
+    }
+  ],
   "selections": [
     {
       "kind": "FragmentSpread",
       "name": "WalletsView_wallets",
-      "args": null
+      "args": [
+        {
+          "kind": "Variable",
+          "name": "userID",
+          "variableName": "userID",
+          "type": null
+        }
+      ]
     }
   ]
 };
 // prettier-ignore
-(node/*: any*/).hash = '70571484ea10632e22ecf7ed13d758ef';
+(node/*: any*/).hash = 'f7d69fbf2bbfe9f24d17213aaba27daa';
 module.exports = node;
