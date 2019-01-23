@@ -1,30 +1,11 @@
 // @flow
-
 import React, { Component } from 'react'
-import {
-  graphql,
-  createFragmentContainer,
-  QueryRenderer,
-  // $FlowFixMe: requestSubscription not present in Flow definition but exported by library
-  requestSubscription,
-  type Disposable,
-} from 'react-relay'
+import { graphql, createFragmentContainer, QueryRenderer } from 'react-relay'
 
 import { EnvironmentContext } from '../RelayEnvironment'
 import LauncherContext, { type CurrentUser } from '../LauncherContext'
 import RelayLoaderView from '../RelayLoaderView'
 import ContactsView, { type Contact } from './ContactsView'
-
-const CONTACT_CHANGED_SUBSCRIPTION = graphql`
-  subscription ContactsScreenContactChangedSubscription {
-    contactChanged {
-      connectionState
-      profile {
-        name
-      }
-    }
-  }
-`
 
 type QueryProps = {
   user: CurrentUser,
@@ -40,7 +21,7 @@ type State = {
   data: Array<Object>,
 }
 
-class ContactsScreen extends Component<Props, State> {
+class ContactsScreenComponent extends Component<Props, State> {
   static contextType = EnvironmentContext
 
   acceptContact = () => {
@@ -63,31 +44,20 @@ class ContactsScreen extends Component<Props, State> {
   }
 }
 
-const ContactsScreenRelayContainer = createFragmentContainer(ContactsScreen, {
-  contacts: graphql`
-    fragment ContactsScreen_contacts on Contacts
-      @argumentDefinitions(userID: { type: "String!" }) {
-      ...ContactsView_contacts @arguments(userID: $userID)
-    }
-  `,
-})
+const ContactsScreenRelayContainer = createFragmentContainer(
+  ContactsScreenComponent,
+  {
+    contacts: graphql`
+      fragment ContactsScreen_contacts on Contacts
+        @argumentDefinitions(userID: { type: "String!" }) {
+        ...ContactsView_contacts @arguments(userID: $userID)
+      }
+    `,
+  },
+)
 
 export class ContactsScreenRenderer extends Component<QueryProps> {
   static contextType = EnvironmentContext
-
-  _subscription: ?Disposable
-
-  componentDidMount() {
-    this._subscription = requestSubscription(this.context, {
-      subscription: CONTACT_CHANGED_SUBSCRIPTION,
-    })
-  }
-
-  componentWillUnmount() {
-    if (this._subscription != null) {
-      this._subscription.dispose()
-    }
-  }
 
   render() {
     return (
@@ -117,7 +87,7 @@ export class ContactsScreenRenderer extends Component<QueryProps> {
   }
 }
 
-export default class ContactsContextWrapper extends Component<{}> {
+export default class ContactScreen extends Component<{}> {
   static contextType = LauncherContext
   render() {
     return <ContactsScreenRenderer user={this.context.user} {...this.props} />
