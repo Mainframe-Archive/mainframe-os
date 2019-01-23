@@ -1,6 +1,6 @@
 // @flow
 
-import { createKeyPair } from '@erebos/api-bzz-base'
+import { createKeyPair } from '@erebos/secp256k1'
 import {
   createStrictPermissionGrants,
   type PermissionGrant,
