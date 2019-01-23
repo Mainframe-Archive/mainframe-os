@@ -23,7 +23,7 @@ export type Launcher_identities = {|
 const node/*: ConcreteFragment*/ = {
   "kind": "Fragment",
   "name": "Launcher_identities",
-  "type": "IdentitiesQuery",
+  "type": "Identities",
   "metadata": null,
   "argumentDefinitions": [],
   "selections": [
@@ -55,5 +55,5 @@ const node/*: ConcreteFragment*/ = {
   ]
 };
 // prettier-ignore
-(node/*: any*/).hash = 'e3592432b2cb0532d9f4feffdebd94b0';
+(node/*: any*/).hash = '951702969b1e38597cf1c78f4c080ab0';
 module.exports = node;

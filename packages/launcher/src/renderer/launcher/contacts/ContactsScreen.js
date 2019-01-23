@@ -18,9 +18,9 @@ import ContactsView, { type Contact } from './ContactsView'
 const CONTACT_CHANGED_SUBSCRIPTION = graphql`
   subscription ContactsScreenContactChangedSubscription {
     contactChanged {
+      connectionState
       profile {
         name
-        avatar
       }
     }
   }
@@ -65,7 +65,7 @@ class ContactsScreen extends Component<Props, State> {
 
 const ContactsScreenRelayContainer = createFragmentContainer(ContactsScreen, {
   contacts: graphql`
-    fragment ContactsScreen_contacts on ContactsQuery
+    fragment ContactsScreen_contacts on Contacts
       @argumentDefinitions(userID: { type: "String!" }) {
       ...ContactsView_contacts @arguments(userID: $userID)
     }

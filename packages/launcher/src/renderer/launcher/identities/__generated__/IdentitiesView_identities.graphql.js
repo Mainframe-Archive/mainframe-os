@@ -79,7 +79,7 @@ v2 = {
 return {
   "kind": "Fragment",
   "name": "IdentitiesView_identities",
-  "type": "IdentitiesQuery",
+  "type": "Identities",
   "metadata": null,
   "argumentDefinitions": [],
   "selections": [
@@ -107,7 +107,7 @@ return {
           "name": "wallets",
           "storageKey": null,
           "args": null,
-          "concreteType": "UserWalletType",
+          "concreteType": "UserWallet",
           "plural": true,
           "selections": [
             v0,
@@ -219,5 +219,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = 'cf6517a38523c2387dcf5f4aa7fd2804';
+(node/*: any*/).hash = 'e9b89ca4b1525682abdc70d0bd638497';
 module.exports = node;

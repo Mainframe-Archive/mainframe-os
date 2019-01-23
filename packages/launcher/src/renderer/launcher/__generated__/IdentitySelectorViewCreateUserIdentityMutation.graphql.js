@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash e6c06bfd29e3d75bffa343869867f4e8
+ * @relayHash 0d4e257289c089d750b70ab4e2fe65ab
  */
 
 /* eslint-disable */
@@ -191,7 +191,7 @@ return {
                 "name": "identities",
                 "storageKey": null,
                 "args": null,
-                "concreteType": "IdentitiesQuery",
+                "concreteType": "Identities",
                 "plural": false,
                 "selections": [
                   {
@@ -265,7 +265,7 @@ return {
                 "name": "identities",
                 "storageKey": null,
                 "args": null,
-                "concreteType": "IdentitiesQuery",
+                "concreteType": "Identities",
                 "plural": false,
                 "selections": [
                   {

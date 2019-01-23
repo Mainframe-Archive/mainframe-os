@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 2a0273cc9810651cb0ede96caec7d6e0
+ * @relayHash b8088b4dd07bcf92a14c04a4b97075c8
  */
 
 /* eslint-disable */
@@ -9,12 +9,14 @@
 
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
+export type ContactConnection = "CONNECTED" | "SENT" | "%future added value";
 export type ContactsScreenContactChangedSubscriptionVariables = {||};
 export type ContactsScreenContactChangedSubscriptionResponse = {|
   +contactChanged: {|
+    +connectionState: ContactConnection,
     +profile: {|
-      +name: string
-    |}
+      +name: ?string
+    |},
   |}
 |};
 export type ContactsScreenContactChangedSubscription = {|
@@ -27,6 +29,7 @@ export type ContactsScreenContactChangedSubscription = {|
 /*
 subscription ContactsScreenContactChangedSubscription {
   contactChanged {
+    connectionState
     profile {
       name
     }
@@ -37,12 +40,19 @@ subscription ContactsScreenContactChangedSubscription {
 
 const node/*: ConcreteRequest*/ = (function(){
 var v0 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "connectionState",
+  "args": null,
+  "storageKey": null
+},
+v1 = {
   "kind": "LinkedField",
   "alias": null,
   "name": "profile",
   "storageKey": null,
   "args": null,
-  "concreteType": "NamedProfile",
+  "concreteType": "GenericProfile",
   "plural": false,
   "selections": [
     {
@@ -59,7 +69,7 @@ return {
   "operationKind": "subscription",
   "name": "ContactsScreenContactChangedSubscription",
   "id": null,
-  "text": "subscription ContactsScreenContactChangedSubscription {\n  contactChanged {\n    profile {\n      name\n    }\n    id\n  }\n}\n",
+  "text": "subscription ContactsScreenContactChangedSubscription {\n  contactChanged {\n    connectionState\n    profile {\n      name\n    }\n    id\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -77,7 +87,8 @@ return {
         "concreteType": "Contact",
         "plural": false,
         "selections": [
-          v0
+          v0,
+          v1
         ]
       }
     ]
@@ -97,6 +108,7 @@ return {
         "plural": false,
         "selections": [
           v0,
+          v1,
           {
             "kind": "ScalarField",
             "alias": null,
@@ -111,5 +123,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '485f47046c724f51c1f3820de3f6460f';
+(node/*: any*/).hash = '660677dabb02eb8278fb4d58b2625308';
 module.exports = node;

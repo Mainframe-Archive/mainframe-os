@@ -37,7 +37,7 @@ var v0 = {
 return {
   "kind": "Fragment",
   "name": "AppsView_apps",
-  "type": "AppsQuery",
+  "type": "Apps",
   "metadata": null,
   "argumentDefinitions": [],
   "selections": [
@@ -79,5 +79,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = 'b7e985623e76c700c85962aa2cfc8991';
+(node/*: any*/).hash = 'd976de76cf532fdf122180f431635174';
 module.exports = node;

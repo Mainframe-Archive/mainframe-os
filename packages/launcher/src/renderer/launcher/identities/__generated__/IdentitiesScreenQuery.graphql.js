@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 5553fd1e36d0adbc249fac0f66f795c8
+ * @relayHash aeb9806f7686d8d2638775728c647334
  */
 
 /* eslint-disable */
@@ -35,11 +35,11 @@ query IdentitiesScreenQuery {
   }
 }
 
-fragment IdentitiesScreen_identities on IdentitiesQuery {
+fragment IdentitiesScreen_identities on Identities {
   ...IdentitiesView_identities
 }
 
-fragment IdentitiesView_identities on IdentitiesQuery {
+fragment IdentitiesView_identities on Identities {
   ownUsers {
     localID
     feedHash
@@ -119,7 +119,7 @@ return {
   "operationKind": "query",
   "name": "IdentitiesScreenQuery",
   "id": null,
-  "text": "query IdentitiesScreenQuery {\n  viewer {\n    identities {\n      ...IdentitiesScreen_identities\n    }\n    id\n  }\n}\n\nfragment IdentitiesScreen_identities on IdentitiesQuery {\n  ...IdentitiesView_identities\n}\n\nfragment IdentitiesView_identities on IdentitiesQuery {\n  ownUsers {\n    localID\n    feedHash\n    profile {\n      name\n    }\n    wallets {\n      localID\n      accounts\n    }\n    apps {\n      localID\n      manifest {\n        name\n      }\n      users {\n        settings {\n          permissionsSettings {\n            permissionsChecked\n            grants {\n              BLOCKCHAIN_SEND\n            }\n          }\n        }\n        id\n      }\n      id\n    }\n    id\n  }\n  ownDevelopers {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n}\n",
+  "text": "query IdentitiesScreenQuery {\n  viewer {\n    identities {\n      ...IdentitiesScreen_identities\n    }\n    id\n  }\n}\n\nfragment IdentitiesScreen_identities on Identities {\n  ...IdentitiesView_identities\n}\n\nfragment IdentitiesView_identities on Identities {\n  ownUsers {\n    localID\n    feedHash\n    profile {\n      name\n    }\n    wallets {\n      localID\n      accounts\n    }\n    apps {\n      localID\n      manifest {\n        name\n      }\n      users {\n        settings {\n          permissionsSettings {\n            permissionsChecked\n            grants {\n              BLOCKCHAIN_SEND\n            }\n          }\n        }\n        id\n      }\n      id\n    }\n    id\n  }\n  ownDevelopers {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -143,7 +143,7 @@ return {
             "name": "identities",
             "storageKey": null,
             "args": null,
-            "concreteType": "IdentitiesQuery",
+            "concreteType": "Identities",
             "plural": false,
             "selections": [
               {
@@ -177,7 +177,7 @@ return {
             "name": "identities",
             "storageKey": null,
             "args": null,
-            "concreteType": "IdentitiesQuery",
+            "concreteType": "Identities",
             "plural": false,
             "selections": [
               {
@@ -204,7 +204,7 @@ return {
                     "name": "wallets",
                     "storageKey": null,
                     "args": null,
-                    "concreteType": "UserWalletType",
+                    "concreteType": "UserWallet",
                     "plural": true,
                     "selections": [
                       v0,

@@ -293,7 +293,7 @@ class WalletsView extends Component<Props, State> {
 
 export default createFragmentContainer(WalletsView, {
   wallets: graphql`
-    fragment WalletsView_wallets on WalletsQuery
+    fragment WalletsView_wallets on Wallets
       @argumentDefinitions(userID: { type: "String!" }) {
       ethWallets(userID: $userID) {
         hd {

@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 433ddb971bac7365c07ecf316ef7ec05
+ * @relayHash 890374fa0da5240c5c15094c5b365283
  */
 
 /* eslint-disable */
@@ -60,7 +60,7 @@ v1 = [
     "name": "peers",
     "storageKey": null,
     "args": null,
-    "concreteType": "PeersQuery",
+    "concreteType": "Peers",
     "plural": false,
     "selections": [
       {

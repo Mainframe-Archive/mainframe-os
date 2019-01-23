@@ -136,7 +136,7 @@ input AppPermissionsSettingsInput {
   grants: PermissionGrantsInput!
 }
 
-type AppsQuery {
+type Apps {
   installed: [App]
   own: [OwnApp]
 }
@@ -165,7 +165,7 @@ type Contact implements Node {
   localID: ID!
   peerID: ID!
   pubKey: String!
-  profile: NamedProfile!
+  profile: GenericProfile!
   connectionState: ContactConnection!
 }
 
@@ -174,7 +174,7 @@ enum ContactConnection {
   SENT
 }
 
-type ContactsQuery {
+type Contacts {
   userContacts(userID: String!): [Contact]
 }
 
@@ -258,7 +258,7 @@ type GenericProfile {
   avatar: String
 }
 
-type IdentitiesQuery {
+type Identities {
   ownUsers: [OwnUserIdentity]
   ownDevelopers: [OwnDeveloperIdentity]
 }
@@ -305,7 +305,7 @@ type NamedProfile {
 type NamedWalletAccountType {
   name: String!
   address: String!
-  balances: WalletBalancesType!
+  balances: WalletBalances!
 }
 
 """An object with an ID"""
@@ -341,7 +341,7 @@ type OwnUserIdentity implements Node {
   mfid: ID!
   apps: [App]
   defaultEthAddress: String
-  wallets: [UserWalletType]
+  wallets: [UserWallet]
   profile: NamedProfile!
   pubKey: String!
 }
@@ -351,7 +351,7 @@ type Peer {
   profile: GenericProfile!
 }
 
-type PeersQuery {
+type Peers {
   peerLookupByFeed(feedHash: String!): Peer
 }
 
@@ -369,7 +369,7 @@ type Query {
     id: ID!
   ): Node
   viewer: Viewer!
-  peers: PeersQuery!
+  peers: Peers!
 }
 
 input SetDefaultWalletInput {
@@ -396,25 +396,25 @@ input UserProfileInput {
   avatar: String
 }
 
-type UserWalletType {
+type UserWallet {
   localID: ID!
   accounts: [String]
 }
 
 type Viewer {
   id: ID!
-  apps: AppsQuery!
-  contacts: ContactsQuery!
-  identities: IdentitiesQuery!
-  wallets: WalletsQuery!
+  apps: Apps!
+  contacts: Contacts!
+  identities: Identities!
+  wallets: Wallets!
 }
 
-type WalletBalancesType {
+type WalletBalances {
   eth: String!
   mft: String!
 }
 
-type WalletsQuery {
+type Wallets {
   ethWallets(userID: String!): EthWallets!
 }
 

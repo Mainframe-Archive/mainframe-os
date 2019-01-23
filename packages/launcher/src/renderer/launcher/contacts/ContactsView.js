@@ -579,7 +579,7 @@ class ContactsView extends Component<Props, State> {
 
 export default createFragmentContainer(ContactsView, {
   contacts: graphql`
-    fragment ContactsView_contacts on ContactsQuery
+    fragment ContactsView_contacts on Contacts
       @argumentDefinitions(userID: { type: "String!" }) {
       userContacts(userID: $userID) {
         peerID
