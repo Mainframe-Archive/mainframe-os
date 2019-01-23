@@ -19,7 +19,7 @@ export default class PKWallet extends AbstractSoftwareWallet {
 
   // $FlowFixMe: Wallet type
   static toJSON = (pkWallet: PKWallet): PKWalletSerialized => ({
-    walletID: pkWallet._walletID,
+    localID: pkWallet._localID,
     privateKeys: Object.keys(pkWallet._wallets).map(k => {
       return pkWallet._wallets[k].getPrivateKey().toString('hex')
     }),
@@ -28,7 +28,7 @@ export default class PKWallet extends AbstractSoftwareWallet {
   constructor(params?: PKWalletParams) {
     super()
     if (params) {
-      this._walletID = params.walletID
+      this._localID = params.localID
       this._wallets = params.privateKeys.reduce((acc, pk) => {
         const wallet = this._getWalletFromPrivateKey(pk)
         const address = wallet.getAddress()

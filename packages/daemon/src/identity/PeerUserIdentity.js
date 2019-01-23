@@ -1,10 +1,12 @@
 // @flow
 
+import { type hexValue } from '@erebos/hex'
+
 import Identity from './Identity'
 
 type FeedHash = string
 
-export type ProfileData = {
+export type PeerUserProfile = {
   name?: ?string,
   avatar?: ?string,
 }
@@ -13,29 +15,38 @@ export type Feeds = { [type: string]: FeedHash }
 
 export type PeerUserIdentitySerialized = {
   id: string,
+  localID: string,
   publicFeed: FeedHash,
+  firstContactAddress: hexValue,
   otherFeeds: Feeds,
-  profile: ProfileData,
+  profile: PeerUserProfile,
 }
+
+export type PeerUserIdentityParams = PeerUserIdentitySerialized
 
 export default class PeerUserIdentity extends Identity {
   static fromJSON = (params: PeerUserIdentitySerialized): PeerUserIdentity => {
     return new PeerUserIdentity(
+      params.localID,
       params.id,
       params.profile,
       params.publicFeed,
+      params.firstContactAddress,
       params.otherFeeds,
     )
   }
 
   static toJSON = (peer: PeerUserIdentity): PeerUserIdentitySerialized => ({
-    id: peer._id,
-    publicFeed: peer._publicFeed,
-    otherFeeds: peer._otherFeeds,
-    profile: peer._profile,
+    id: peer.id,
+    localID: peer.localID,
+    publicFeed: peer.publicFeed,
+    firstContactAddress: peer.firstContactAddress,
+    otherFeeds: peer.otherFeeds,
+    profile: peer.profile,
   })
 
   _publicFeed: FeedHash
+  _firstContactAddress: hexValue
   _otherFeeds: Feeds
   _profile: {
     name?: ?string,
@@ -43,13 +54,16 @@ export default class PeerUserIdentity extends Identity {
   }
 
   constructor(
+    localID: string,
     keyOrId: string | Buffer,
-    profile: ProfileData,
+    profile: PeerUserProfile,
     publicFeed: FeedHash,
+    firstContactAddress: hexValue,
     otherFeeds?: Feeds,
   ) {
-    super('user', keyOrId)
+    super(localID, 'user', keyOrId)
     this._publicFeed = publicFeed
+    this._firstContactAddress = firstContactAddress
     this._otherFeeds = otherFeeds || {}
     this._profile = profile
   }
@@ -58,8 +72,12 @@ export default class PeerUserIdentity extends Identity {
     return this._publicFeed
   }
 
-  get profile(): ProfileData {
+  get profile(): PeerUserProfile {
     return this._profile
+  }
+
+  get firstContactAddress(): hexValue {
+    return this._firstContactAddress
   }
 
   get otherFeeds(): Feeds {

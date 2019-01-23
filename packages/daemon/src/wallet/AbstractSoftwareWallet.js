@@ -8,22 +8,25 @@ import type {
   EthTransactionParams,
   WalletEthSignDataParams,
 } from '@mainframe/client'
-import type { ID } from '@mainframe/utils-id'
 
 export type AbstractWalletParams = {
-  walletID: ID,
+  localID: string,
 }
 
 export type AbstractWalletSerialized = AbstractWalletParams
 
 export default class AbstractSoftwareWallet {
-  _walletID: ID
+  _localID: string
   _wallets: { [index: string]: EthWallet }
 
   // Getters
 
-  get id(): ID {
-    return this._walletID
+  get id(): string {
+    return this._localID
+  }
+
+  get localID(): string {
+    return this._localID
   }
 
   getAccounts(): Array<string> {

@@ -3,6 +3,7 @@
 import HDkey from 'ethereumjs-wallet/hdkey'
 import sigUtil from 'eth-sig-util'
 import bip39 from 'bip39'
+import { uniqueID } from '@mainframe/utils-id'
 
 import AbstractSoftwareWallet, {
   type AbstractWalletParams,
@@ -10,45 +11,37 @@ import AbstractSoftwareWallet, {
 
 type AccountIndex = string
 
-type HDWalletParams = AbstractWalletParams & {
+export type HDWalletParams = AbstractWalletParams & {
   mnemonic: string,
   hdPath?: string,
   activeAccounts?: Array<AccountIndex>,
 }
 
-export type HDWalletSerialized = HDWalletParams
-
 const HD_PATH_STRING = `m/44'/60'/0'/0`
 
+export const generateWalletParams = () => ({
+  localID: uniqueID(),
+  mnemonic: bip39.generateMnemonic(),
+  hdPath: HD_PATH_STRING,
+  activeAccounts: ['0'],
+})
+
 export default class HDWallet extends AbstractSoftwareWallet {
-  static fromJSON = (params: HDWalletSerialized): HDWallet =>
-    new HDWallet(params)
-
-  // $FlowFixMe: Wallet type
-  static toJSON = (hdWallet: HDWallet): HDWalletSerialized => ({
-    mnemonic: hdWallet._mnemonic,
-    walletID: hdWallet._walletID,
-    // $FlowFixMe: Keys are numbers
-    activeAccounts: Object.keys(hdWallet._wallets),
-  })
-
   _hdKey: HDkey
   _root: HDkey
   _mnemonic: string
   _hdPath: string
+  _type: 'hd'
 
-  constructor(params?: HDWalletParams) {
+  constructor(params: HDWalletParams) {
     super()
+    this._type = 'hd'
     this._wallets = {}
-    this._hdPath = params && params.hdPath ? params.hdPath : HD_PATH_STRING
-    if (params) {
-      this._walletID = params.walletID
-      this._initFromMnemonic(params.mnemonic)
-      if (params.activeAccounts && params.activeAccounts.length) {
-        this.addAccounts(params.activeAccounts.map(a => Number(a)))
-      }
-    } else {
-      this._initFromMnemonic(bip39.generateMnemonic())
+    this._hdPath = params.hdPath ? params.hdPath : HD_PATH_STRING
+    this._localID = params.localID
+    this._initFromMnemonic(params.mnemonic)
+    if (params.activeAccounts && params.activeAccounts.length) {
+      this.addAccounts(params.activeAccounts.map(a => Number(a)))
     }
     if (!this._wallets.length) {
       this.addAccounts([0])
@@ -68,6 +61,14 @@ export default class HDWallet extends AbstractSoftwareWallet {
 
   get publicExtendedKey() {
     return this._hdKey.publicExtendedKey()
+  }
+
+  get mnemonic(): string {
+    return this._mnemonic
+  }
+
+  get type(): 'hd' {
+    return this._type
   }
 
   getAccounts(): Array<string> {

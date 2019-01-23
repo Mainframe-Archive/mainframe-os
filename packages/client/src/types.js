@@ -12,16 +12,28 @@ import type {
 } from '@mainframe/app-permissions'
 import type { base64 } from '@mainframe/utils-base64'
 import type { ID } from '@mainframe/utils-id'
+import type { ExecutionResult } from 'graphql'
 
 export type { ID } from '@mainframe/utils-id'
 
-export type WalletTypes = 'hd' | 'pk' | 'ledger'
+export type WalletTypes = 'hd' | 'ledger'
 export type WalletSupportedChains = 'ethereum'
 export type WalletAccount = string
+
+export type WalletResult = {
+  localID: string,
+  type: 'ledger' | 'hd',
+  accounts: Array<{
+    name: string,
+    address: string,
+  }>,
+}
+
 export type IdentityOwnData = {
-  id: ID,
-  data: Object,
-  ethWallets: { [walletID: ID]: Array<WalletAccount> },
+  id: string,
+  localID: string,
+  profile: Object,
+  ethWallets: Array<WalletResult>,
 }
 
 export type AppCheckPermissionParams = {
@@ -43,7 +55,7 @@ export type AppCloseParams = { sessID: ID }
 
 export type AppCreateParams = {
   contentsPath: string,
-  developerID?: ?ID,
+  developerID: string,
   name?: ?string,
   version?: ?string,
   permissionsRequirements?: ?StrictPermissionsRequirements,
@@ -51,16 +63,31 @@ export type AppCreateParams = {
 
 export type AppCreateResult = { appID: ID }
 
+export type WalletSettings = {
+  defaultEthAccount: ?string,
+}
+
+export type AppUserSettings = {
+  permissionsSettings: AppUserPermissionsSettings,
+  walletSettings: WalletSettings,
+}
+
+export type AppUser = IdentityOwnData & {
+  settings: AppUserSettings,
+}
+
 export type AppInstalledData = {
-  appID: ID,
+  localID: ID,
   manifest: ManifestData,
-  users: Array<IdentityOwnData>,
+  users: Array<AppUser>,
+  name: string,
 }
 
 export type AppOwnData = {
-  appID: ID,
+  localID: ID,
   manifest: ManifestData,
-  users: Array<IdentityOwnData>,
+  users: Array<AppUser>,
+  name: string,
 }
 
 export type AppGetInstalledResult = {
@@ -79,14 +106,6 @@ export type AppGetManifestDataParams = {
 
 export type AppGetManifestDataResult = {
   data: PartialManifestData,
-}
-
-export type WalletSettings = {
-  defaultEthAccount: ?string,
-}
-export type AppUserSettings = {
-  permissionsSettings: AppUserPermissionsSettings,
-  walletSettings: WalletSettings,
 }
 
 export type AppInstallParams = {
@@ -138,8 +157,6 @@ export type AppPublishContentsResult = {
 
 export type AppRemoveParams = { appID: ID }
 
-export type AppRemoveOwnParams = { appID: ID }
-
 export type AppSetUserSettingsParams = {
   appID: ID,
   userID: ID,
@@ -184,87 +201,22 @@ export type EthTransactionParams = {
 }
 
 export type BlockchainWeb3SendParams = {
-  transactionParams: EthTransactionParams,
-  walletID: ID,
+  id: number,
+  jsonrpc: string,
+  method: string,
+  params: Array<any>,
 }
 
 export type BlockchainWeb3SendResult = any
 
-// Wallet
+// GraphQL
 
-export type WalletImportMnemonicParams = {
-  chain: WalletSupportedChains,
-  mnemonic: string,
+export type GraphQLQueryParams = {
+  query: string,
+  variables?: Object,
 }
 
-export type WalletImportPKParams = {
-  chain: WalletSupportedChains,
-  privateKey: string,
-  walletID?: ID,
-}
-
-export type WalletResult = {
-  walletID: ID,
-  type: WalletTypes,
-  accounts: Array<string>,
-}
-
-export type WalletImportResult = WalletResult
-
-export type WalletCreateHDParams = {
-  chain: WalletSupportedChains,
-}
-
-export type WalletCreateHDResult = {
-  walletID: ID,
-  type: WalletTypes,
-  accounts: Array<string>,
-  mnemonic: string,
-}
-
-export type WalletResults = Array<WalletResult>
-
-export type WalletDeleteParams = {
-  chain: string,
-  type: WalletTypes,
-  walletID: ID,
-}
-
-export type WalletGetEthWalletsResult = {
-  hd: WalletResults,
-  simple: WalletResults,
-  ledger: WalletResults,
-}
-
-export type WalletEthSignDataParams = {
-  walletID: ID,
-  address: string,
-  data: string,
-}
-
-export type WalletSignTxParams = {
-  chain: WalletSupportedChains,
-  transactionData: EthTransactionParams,
-}
-
-export type WalletSignTxResult = string
-
-export type WalletGetLedgerEthAccountsParams = {
-  pageNum: number,
-}
-
-export type WalletGetLedgerEthAccountsResult = Array<string>
-
-export type WalletAddLedgerEthAccountParams = {
-  index: number,
-}
-
-export type WalletAddHDAccountParams = {
-  index: number,
-  walletID: ID,
-}
-
-export type WalletAddHDAccountResult = string
+export type GraphQLQueryResult = ExecutionResult
 
 // Identity
 
@@ -281,6 +233,7 @@ export type IdentityAddPeerParams = {
     avatar?: ?string,
   },
   publicFeed: string,
+  firstContactAddress: string,
   otherFeeds: Feeds,
 }
 
@@ -300,11 +253,17 @@ export type IdentityPeerResult = {
 export type IdentityAddPeerResult = { id: ID }
 
 export type IdentityCreateDeveloperParams = {
-  data?: Object,
+  profile: {
+    name: string,
+    avatar?: ?string,
+  },
 }
 
 export type IdentityCreateUserParams = {
-  data?: Object,
+  profile: {
+    name: string,
+    avatar?: ?string,
+  },
 }
 
 export type IdentityCreateResult = { id: ID }
@@ -321,6 +280,16 @@ export type IdentityCreateContactParams = {
     ownFeed?: ?string,
     contactFeed?: ?string,
   },
+}
+
+export type IdentityCreateContactFromPeerParams = {
+  userID: string,
+  peerID: string,
+}
+
+export type IdentityCreateContactFromFeedParams = {
+  userID: string,
+  feedHash: string,
 }
 
 export type IdentityCreateContactResult = { id: ID }
@@ -347,14 +316,25 @@ export type IdentityGetUserContactsParams = {
 }
 
 export type ContactResult = {
-  id: string,
-  name?: ?string,
-  avatar?: ?string,
-  connection: 'sent' | 'connected',
+  localID: string,
+  peerID: string,
+  connectionState: 'connected' | 'sent' | 'sending',
+  profile: {
+    name?: ?string,
+    avatar?: ?string,
+  },
 }
 
 export type IdentityGetUserContactsResult = {
   contacts: Array<ContactResult>,
+}
+
+export type IdentityUpdateUserParams = {
+  userID: string,
+  profile: {
+    name?: ?string,
+    avatar?: ?string,
+  },
 }
 
 export type IdentityLinkEthWalletAccountParams = {
@@ -384,3 +364,101 @@ export type VaultSettings = {
 }
 
 export type VaultSettingsParams = $Shape<VaultSettings>
+
+// Wallet
+
+export type WalletImportMnemonicParams = {
+  blockchain: WalletSupportedChains,
+  mnemonic: string,
+  firstAccountName: string,
+  userID?: string,
+}
+
+export type WalletNamedAccount = {
+  name: string,
+  address: string,
+}
+
+export type WalletImportResult = {
+  localID: ID,
+  accounts: Array<WalletNamedAccount>,
+}
+
+export type WalletCreateHDParams = {
+  blockchain: WalletSupportedChains,
+  firstAccountName: string,
+  userID?: string,
+}
+
+export type WalletCreateHDResult = {
+  localID: ID,
+  accounts: Array<WalletNamedAccount>,
+  mnemonic: string,
+}
+
+export type WalletResults = Array<WalletResult>
+
+export type WalletDeleteParams = {
+  chain: string,
+  type: WalletTypes,
+  localID: string,
+}
+
+export type WalletGetEthWalletsResult = {
+  hd: WalletResults,
+  ledger: WalletResults,
+}
+
+export type WalletEthSignDataParams = {
+  localID: ID,
+  address: string,
+  data: string,
+}
+
+export type WalletSignTxParams = {
+  chain: WalletSupportedChains,
+  transactionData: EthTransactionParams,
+}
+
+export type WalletSignTxResult = string
+
+export type WalletGetLedgerEthAccountsParams = {
+  pageNum: number,
+}
+
+export type WalletGetUserEthAccountsParams = {
+  userID: string,
+}
+
+export type WalletGetUserEthWalletsParams = {
+  userID: string,
+}
+
+export type WalletGetLedgerEthAccountsResult = Array<string>
+
+export type WalletGetEthAccountsResult = Array<string>
+
+export type WalletAddLedgerEthAccountParams = {
+  index: number,
+  name: string,
+  userID?: string,
+}
+
+export type WalletAddHDAccountParams = {
+  name: string,
+  index: number,
+  walletID: string,
+  userID?: string,
+}
+
+export type WalletAddHDAccountResult = string
+
+export type WalletAddLedgerResult = {
+  localID: string,
+  address: string,
+}
+
+export type WalletSetUserDefaulParams = {
+  userID: string,
+  address: string,
+}

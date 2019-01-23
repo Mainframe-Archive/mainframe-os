@@ -11,7 +11,11 @@ import type { BrowserWindow, WebContents } from 'electron'
 
 import type { AppSession } from '../types'
 
-import { APP_SANDBOXED_CHANNEL, APP_TRUSTED_CHANNEL } from '../constants'
+import {
+  APP_SANDBOXED_CHANNEL,
+  APP_TRUSTED_CHANNEL,
+  LAUNCHER_CHANNEL,
+} from '../constants'
 
 export type LaunchAppFunc = (
   data: AppOpenResult,
@@ -41,6 +45,8 @@ export class ContextSubscription<T = ?mixed> {
 }
 
 export class Context {
+  client: Client
+  window: BrowserWindow
   _subscriptions: { [string]: ContextSubscription<any> } = {}
 
   async clear() {
@@ -89,7 +95,6 @@ type AppStorageSettings = {
 
 export class AppContext extends Context {
   appSession: AppSession
-  client: Client
   sandbox: ?WebContents
   settings: VaultSettings
   trustedRPC: StreamRPC
@@ -171,10 +176,10 @@ export type LauncherContextParams = {
   client: Client,
   launchApp: LaunchAppFunc,
   vaultConfig: VaultConfig,
+  window: BrowserWindow,
 }
 
 export class LauncherContext extends Context {
-  client: Client
   launchApp: LaunchAppFunc
   vaultConfig: VaultConfig
   vaultOpen: ?string
@@ -184,5 +189,17 @@ export class LauncherContext extends Context {
     this.client = params.client
     this.launchApp = params.launchApp
     this.vaultConfig = params.vaultConfig
+    this.window = params.window
+  }
+
+  notify(id: string, result?: Object = {}) {
+    const sub = this._subscriptions[id]
+    if (sub != null) {
+      this.window.send(LAUNCHER_CHANNEL, {
+        jsonrpc: '2.0',
+        method: sub.method,
+        params: { subscription: id, result },
+      })
+    }
   }
 }

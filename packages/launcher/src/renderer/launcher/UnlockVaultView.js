@@ -1,15 +1,18 @@
 //@flow
 
 import React, { Component } from 'react'
-import { StyleSheet, ActivityIndicator } from 'react-native-web'
+import { ActivityIndicator } from 'react-native'
 
-import Button from '../UIComponents/Button'
-import MFTextInput from '../UIComponents/TextInput'
-import Text from '../UIComponents/Text'
-import OnboardContainerView from '../UIComponents/OnboardContainer'
-import colors from '../colors'
+import { Button, TextField, Row, Column, Text } from '@morpheus-ui/core'
+import CircleArrowRight from '@morpheus-ui/icons/CircleArrowRight'
+import { Form, type FormSubmitPayload } from '@morpheus-ui/forms'
+
+import styled from 'styled-components/native'
+
+import OnboardContainer from '../UIComponents/OnboardContainer'
 
 import type { VaultsData } from '../../types'
+
 import rpc from './rpc'
 
 type Props = {
@@ -19,20 +22,21 @@ type Props = {
 
 type State = {
   error?: ?string,
-  password: string,
   awaitingResponse?: boolean,
 }
 
-export default class UnlockVaultView extends Component<Props, State> {
-  constructor(props: Props) {
-    super(props)
-    this.state = {
-      password: '',
-    }
-  }
+const FormContainer = styled.View`
+  max-width: 260px;
+`
 
-  onUnlockVault = () => {
-    this.unlockVault(this.state.password)
+export default class UnlockVaultView extends Component<Props, State> {
+  state = {}
+
+  onSubmit = (payload: FormSubmitPayload) => {
+    if (payload.valid) {
+      const { password } = payload.fields
+      this.unlockVault(password)
+    }
   }
 
   async unlockVault(password: string) {
@@ -53,55 +57,52 @@ export default class UnlockVaultView extends Component<Props, State> {
     }
   }
 
-  onChangePassword = (value: string) => {
-    this.setState({
-      password: value,
-    })
-  }
-
   render() {
     const errorMsg = this.state.error ? (
-      <Text style={styles.errorLabel}>{this.state.error}</Text>
+      <Row size={1}>
+        <Column>
+          <Text variant="error">{this.state.error}</Text>
+        </Column>
+      </Row>
     ) : null
     const action = this.state.awaitingResponse ? (
       <ActivityIndicator />
     ) : (
       <Button
-        title="Unlock Vault"
+        title="UNLOCK"
+        variant="onboarding"
+        Icon={CircleArrowRight}
         testID="vault-manager-unlock-button"
-        onPress={this.onUnlockVault}
+        submit
       />
     )
     return (
-      <OnboardContainerView
+      <OnboardContainer
         title="Welcome"
-        description="Enter your password to unlock your vault">
-        <MFTextInput
-          secureTextEntry
-          testID="vault-manager-unlock-input"
-          style={styles.input}
-          onChangeText={this.onChangePassword}
-          onSubmitEditing={this.onUnlockVault}
-          value={this.state.password}
-          placeholder="Password"
-        />
-        {errorMsg}
-        {action}
-      </OnboardContainerView>
+        description="Enter your password to unlock your vault.">
+        <FormContainer>
+          <Form onSubmit={this.onSubmit}>
+            <Row size={1} top>
+              <Column>
+                <TextField
+                  autoFocus
+                  label="Password"
+                  name="password"
+                  type="password"
+                  testID="vault-manager-unlock-input"
+                  required
+                />
+              </Column>
+            </Row>
+            {errorMsg}
+            <Row size={2} top>
+              <Column styles="align-items:flex-end;" smOffset={1}>
+                {action}
+              </Column>
+            </Row>
+          </Form>
+        </FormContainer>
+      </OnboardContainer>
     )
   }
 }
-
-const PADDING = 10
-
-const styles = StyleSheet.create({
-  input: {
-    marginBottom: PADDING,
-    maxWidth: 300,
-  },
-  errorLabel: {
-    fontSize: 12,
-    paddingBottom: PADDING,
-    color: colors.PRIMARY_RED,
-  },
-})

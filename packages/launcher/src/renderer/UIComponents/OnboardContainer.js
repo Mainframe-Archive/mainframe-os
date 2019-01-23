@@ -1,77 +1,75 @@
 //@flow
 
 import React, { Component } from 'react'
-import { View, StyleSheet, Image } from 'react-native-web'
 
-import Text from '../UIComponents/Text'
-import colors from '../colors'
+import styled from 'styled-components/native'
+
+import { Text } from '@morpheus-ui/core'
 import bgGraphic from '../../assets/images/onboard-background.png'
+import bgIDGraphic from '../../assets/images/identity-onboard-background.png'
 
 type Props = {
   children: any,
   title: string,
   description?: string,
+  id?: boolean,
 }
+
+const Container = styled.View`
+  flex: 1;
+`
+
+const TitleContainer = styled.View`
+  margin-bottom: ${props => props.theme.spacing * 4};
+`
+
+const BgGraphicContainer = styled.View`
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  width: 348;
+  height: 575;
+`
+const Content = styled.View`
+  max-width: 400;
+  margin-left: 100;
+`
+
+const FormContainer = styled.View`
+  justify-content: center;
+  flex-direction: column;
+  flex: 1;
+`
+
+const BgImage = styled.Image`
+  flex: 1;
+`
 
 export default class OnboardContainerView extends Component<Props> {
   render() {
     const description = this.props.description ? (
-      <Text style={styles.description}>{this.props.description}</Text>
+      <Text variant="regular" size={16}>
+        {this.props.description}
+      </Text>
     ) : null
     return (
-      <View style={styles.container}>
-        <View style={styles.formContainer}>
-          <View style={styles.content}>
-            <Text style={styles.title}>{this.props.title}</Text>
-            {description}
+      <Container>
+        <FormContainer>
+          <Content>
+            <TitleContainer>
+              <Text variant="h1">{this.props.title}</Text>
+              {description}
+            </TitleContainer>
             {this.props.children}
-          </View>
-        </View>
-        <View style={styles.bgGraphicContainer}>
-          <Image
-            style={styles.bgImage}
-            source={bgGraphic}
+          </Content>
+        </FormContainer>
+        <BgGraphicContainer>
+          <BgImage
+            source={this.props.id ? bgIDGraphic : bgGraphic}
             resizeMode="contain"
           />
-        </View>
-      </View>
+        </BgGraphicContainer>
+      </Container>
     )
   }
 }
-
-const PADDING = 10
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  formContainer: {
-    justifyContent: 'center',
-    flexDirection: 'column',
-    flex: 1,
-  },
-  content: {
-    maxWidth: 400,
-    marginLeft: 100,
-  },
-  bgGraphicContainer: {
-    position: 'fixed',
-    right: 0,
-    bottom: 0,
-    width: 348,
-    height: 575,
-  },
-  bgImage: {
-    flex: 1,
-  },
-  title: {
-    fontWeight: 'bold',
-    fontSize: 34,
-    paddingBottom: PADDING,
-    color: colors.PRIMARY_BLUE,
-  },
-  description: {
-    fontSize: 14,
-    paddingBottom: PADDING * 2,
-  },
-})

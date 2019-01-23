@@ -23,11 +23,18 @@
 - `vault:delete`: delete a vault
 - `vault:list`: list existing vaults
 - `vault:settings`: set and/or display a vault settings
+- `graphql:query`: execute a GraphQL query
+- `graphql:schema`: write the GraphQL schema
+- `graphql:server`: create a HTTP proxy for GraphQL queries
 - `identity:create`: create an identity
 - `identity:list`: list identities
 - `app:create`: create an app
 - `app:publishContents`: publish the app contents to Swarm
 - `app:writeManifest`: writes the app manifest
+- `wallet:createEth`: create a new Ethereum wallet
+- `wallet:connectLedgerAccount`: connect an account from ledger hardware wallet
+- `wallet:delete`: delete a wallet
+- `wallet:importEth`: import an Ethereum wallet
 
 ## Environment setup
 

@@ -1,12 +1,19 @@
 // @flow
 
-import { validateManifest, type ManifestData } from '@mainframe/app-manifest'
+import {
+  parseContentsURI,
+  validateManifest,
+  type ManifestData,
+} from '@mainframe/app-manifest'
+import type BzzAPI from '@erebos/api-bzz-node'
+import { ensureDir } from 'fs-extra'
 import {
   getRequirementsDifference,
   type PermissionKey,
   type PermissionGrant,
 } from '@mainframe/app-permissions'
 import { MFID } from '@mainframe/data-types'
+import { getAppContentsPath, type Environment } from '@mainframe/config'
 import { uniqueID, idType, type ID } from '@mainframe/utils-id'
 
 import { mapObject } from '../utils'
@@ -60,6 +67,39 @@ export type AppsRepositorySerialized = {
   ownApps: { [string]: OwnAppSerialized },
 }
 
+export const getContentsPath = (
+  env: Environment,
+  manifest: ManifestData,
+): string => {
+  return getAppContentsPath(env, manifest.id, manifest.version)
+}
+
+export const downloadAppContents = async (
+  bzz: BzzAPI,
+  app: App,
+  contentsPath: string,
+): Promise<App> => {
+  if (app.installationState !== 'ready') {
+    const contentsURI = parseContentsURI(app.manifest.contentsURI)
+    if (contentsURI.nid !== 'bzz' || contentsURI.nss == null) {
+      // Unsupported contentsURI
+      app.installationState = 'download_error'
+    } else {
+      try {
+        app.installationState = 'downloading'
+        await ensureDir(contentsPath)
+        // contentsURI.nss is expected to be the bzz hash
+        // TODO?: bzz hash validation?
+        await bzz.downloadDirectoryTo(contentsURI.nss, contentsPath)
+        app.installationState = 'ready'
+      } catch (err) {
+        app.installationState = 'download_error'
+      }
+    }
+  }
+  return app
+}
+
 export default class AppsRepository {
   static fromJSON = (serialized: AppsRepositorySerialized): AppsRepository => {
     return new AppsRepository({
@@ -85,15 +125,27 @@ export default class AppsRepository {
   _updates: AppUpdates
   _ownApps: OwnApps
   _byMFID: { [mfid: string]: ID }
+  _appsByUser: { [uid: ID]: Array<ID> }
 
   constructor(params: AppsRepositoryParams = {}) {
     this._apps = params.apps || {}
-    this._byMFID = Object.keys(this._apps).reduce((acc, appID) => {
+    this._byMFID = {}
+    this._appsByUser = {}
+    Object.keys(this._apps).forEach(appID => {
       const id = idType(appID)
-      const mfid = MFID.canonical(this._apps[id].manifest.id)
-      acc[mfid] = id
-      return acc
-    }, {})
+      const app = this._apps[id]
+      const mfid = MFID.canonical(app.manifest.id)
+      this._byMFID[mfid] = id
+
+      Object.keys(app.settings).forEach(uid => {
+        const userID = idType(uid)
+        if (this._appsByUser[userID]) {
+          this._appsByUser[userID].push(idType(appID))
+        } else {
+          this._appsByUser[userID] = [idType(appID)]
+        }
+      })
+    })
     this._updates = params.updates || {}
     this._ownApps = params.ownApps || {}
   }
@@ -140,6 +192,19 @@ export default class AppsRepository {
 
   getAnyByID(id: ID): ?(App | OwnApp) {
     return this.getByID(id) || this.getOwnByID(id)
+  }
+
+  getAppsForUser(id: ID): ?Array<App> {
+    const apps = []
+    if (this._appsByUser[id]) {
+      this._appsByUser[id].forEach(id => {
+        const app = this.getByID(id)
+        if (app) {
+          apps.push(app)
+        }
+      })
+    }
+    return apps
   }
 
   // App lifecycle
@@ -210,21 +275,18 @@ export default class AppsRepository {
     app.removeUser(userID)
   }
 
-  removeOwn(id: ID): void {
-    const app = this.getOwnByID(id)
-    if (app != null) {
-      delete this._byMFID[app.mfid]
-      delete this._ownApps[id]
-    }
-  }
-
   remove(id: ID): void {
     // TODO: support removing own apps - might be other method/flag to avoid accidents?
     const app = this.getByID(id)
     if (app != null) {
-      // TODO: handle "clean" option to remove the app contents
-      delete this._byMFID[app.manifest.id]
-      delete this._apps[id]
+      if (app instanceof OwnApp) {
+        delete this._byMFID[app.mfid]
+        delete this._ownApps[id]
+      } else {
+        // TODO: handle "clean" option to remove the app contents
+        delete this._byMFID[app.manifest.id]
+        delete this._apps[id]
+      }
     }
   }
 

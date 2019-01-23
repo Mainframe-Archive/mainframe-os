@@ -12,7 +12,7 @@ import { app, BrowserWindow, ipcMain } from 'electron'
 import { is } from 'electron-util'
 
 import { APP_TRUSTED_REQUEST_CHANNEL } from '../constants'
-import type { AppSession, AppSessions } from '../types'
+import type { AppSession } from '../types'
 
 import { AppContext, LauncherContext } from './contexts'
 import { interceptWebRequests } from './permissions'
@@ -38,8 +38,10 @@ const vaultConfig = new VaultConfig(env)
 let client
 let launcherWindow
 
-const appSessions: AppSessions = {}
-const appContexts: WeakMap<BrowserWindow, AppContext> = new WeakMap()
+type AppContexts = { [appID: string]: { [userID: string]: AppContext } }
+
+const appContexts: AppContexts = {}
+const contextsByWindow: WeakMap<BrowserWindow, AppContext> = new WeakMap()
 
 const newWindow = (params: Object = {}) => {
   const window = new BrowserWindow({
@@ -69,13 +71,35 @@ const launchApp = async (
 ) => {
   const appID = appSession.app.appID
   const userID = appSession.user.id
-  const appOpen = appSessions[appID] && appSessions[appID][userID]
+  const appOpen = appContexts[appID] && appContexts[appID][userID]
   if (appOpen) {
-    // Already open
+    const appWindow = appContexts[appID][userID].window
+    if (appWindow.isMinimized()) {
+      appWindow.restore()
+    }
+    appWindow.show()
+    appWindow.focus()
     return
   }
 
   const appWindow = newWindow()
+  if (is.development) {
+    appWindow.webContents.on('did-attach-webview', () => {
+      // Open a separate developer tools window for the app
+      appWindow.webContents.executeJavaScript(
+        `document.getElementById('sandbox-webview').openDevTools()`,
+      )
+    })
+  }
+  appWindow.on('closed', async () => {
+    await client.app.close({ sessID: appSession.session.sessID })
+    const ctx = contextsByWindow.get(appWindow)
+    if (ctx != null) {
+      await ctx.clear()
+      contextsByWindow.delete(appWindow)
+    }
+    delete appContexts[appID][userID]
+  })
 
   const appContext = new AppContext({
     appSession,
@@ -86,14 +110,14 @@ const launchApp = async (
     window: appWindow,
     settings: vaultSettings,
   })
-  appContexts.set(appWindow, appContext)
+  contextsByWindow.set(appWindow, appContext)
   interceptWebRequests(appContext)
 
-  if (appSessions[appID]) {
-    appSessions[appID][userID] = appSession
+  if (appContexts[appID]) {
+    appContexts[appID][userID] = appContext
   } else {
     // $FlowFixMe: can't assign ID type
-    appSessions[appID] = { [userID]: appSession }
+    appContexts[appID] = { [userID]: appContext }
   }
 
   appWindow.webContents.on('did-attach-webview', (event, webContents) => {
@@ -148,17 +172,19 @@ const createLauncherWindow = async () => {
     client,
     launchApp,
     vaultConfig,
+    window: launcherWindow,
   })
-  createRPCChannels(launcherContext, appContexts)
+  createRPCChannels(launcherContext, contextsByWindow)
 
   // Emitted when the window is closed.
-  launcherWindow.on('closed', () => {
+  launcherWindow.on('closed', async () => {
     // TODO: fix below to not error on close
     // const keys = Object.keys(appWindows)
     // Object.keys(appWindows).forEach(w => {
     //   appWindows[w].close()
     // })
     launcherWindow = null
+    await launcherContext.clear()
   })
 }
 
@@ -186,7 +212,7 @@ ipcMain.on('init-window', event => {
   if (window === launcherWindow) {
     window.webContents.send('start', { type: 'launcher' })
   } else {
-    const appContext = appContexts.get(window)
+    const appContext = contextsByWindow.get(window)
     if (appContext != null) {
       window.webContents.send('start', {
         type: 'app',

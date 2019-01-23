@@ -1,5 +1,7 @@
 [ignore]
+.*/.git
 .*/node_modules/config-chain/test/.*
+.*/node_modules/graphql/utilities/buildASTSchema.js.flow
 .*/node_modules/oboe/test/.*
 <PROJECT_ROOT>/applications/swarmchat/.*
 
@@ -10,5 +12,6 @@
 [lints]
 
 [options]
+module.name_mapper='^react-native$' -> 'react-native-web'
 
 [strict]

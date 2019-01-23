@@ -1,54 +1,58 @@
 // @flow
 import {
   type WalletAddHDAccountParams,
-  type WalletCreateHDParams,
-  type WalletCreateHDResult,
   type WalletImportMnemonicParams,
-  type WalletImportPKParams,
-  type WalletResult,
   type WalletSignTxParams,
   type WalletSignTxResult,
-  type WalletTypes,
-  idType as toClientId,
-  type ID,
 } from '@mainframe/client'
 
-import { uniqueID, idType } from '@mainframe/utils-id'
+import { uniqueID } from '@mainframe/utils-id'
 
 import { mapObject } from '../utils'
-import HDWallet, { type HDWalletSerialized } from './HDWallet'
-import PKWallet, { type PKWalletSerialized } from './PKWallet'
-import LedgerWallet, { type LedgerWalletSerialized } from './LedgerWallet'
-import AbstractWallet from './AbstractSoftwareWallet'
+import HDWallet, { type HDWalletLabeledSerialized } from './HDWalletLabeled'
+import LedgerWallet, {
+  type LedgerWalletLabeledSerialized,
+} from './LedgerWalletLabeled'
 import { getAddressAtIndex } from './ledgerClient'
 
 const hdWalletsToJSON = mapObject(HDWallet.toJSON)
 const hdWalletsFromJSON = mapObject(HDWallet.fromJSON)
-const pkWalletsToJSON = mapObject(PKWallet.toJSON)
-const pkWalletsFromJSON = mapObject(PKWallet.fromJSON)
 const ledgerWalletsToJSON = mapObject(LedgerWallet.toJSON)
 const ledgerWalletsFromJSON = mapObject(LedgerWallet.fromJSON)
+
+export type WalletTypes = 'hd' | 'ledger'
+
+export type Blockchains = 'ethereum'
 
 export type WalletCollection = {
   hd: { [id: string]: HDWallet },
   ledger: { [id: string]: LedgerWallet },
-  pk: { [id: string]: PKWallet },
 }
 
 export type Wallets = {
   ethereum: WalletCollection,
 }
 
+export type NamedWalletAccount = { name: string, address: string }
+
 export type WalletsRepositoryParams = {
-  ethereum: WalletCollection,
+  wallets: {
+    ethereum: WalletCollection,
+  },
 }
 
 export type WalletsRepositorySerialized = {
-  ethereum: {
-    hd: { [id: string]: HDWalletSerialized },
-    ledger: { [id: string]: LedgerWalletSerialized },
-    pk: { [id: string]: PKWalletSerialized },
+  wallets: {
+    ethereum: {
+      hd: { [id: string]: HDWalletLabeledSerialized },
+      ledger: { [id: string]: LedgerWalletLabeledSerialized },
+    },
   },
+}
+
+export type WalletAddLedgerResult = {
+  localID: string,
+  address: string,
 }
 
 export default class WalletsRepository {
@@ -56,13 +60,13 @@ export default class WalletsRepository {
     serialized: WalletsRepositorySerialized,
   ): WalletsRepository => {
     return new WalletsRepository({
-      ethereum: {
-        // $FlowFixMe: mapping type
-        hd: hdWalletsFromJSON(serialized.ethereum.hd),
-        // $FlowFixMe: mapping type
-        pk: pkWalletsFromJSON(serialized.ethereum.pk),
-        // $FlowFixMe: mapping type
-        ledger: ledgerWalletsFromJSON(serialized.ethereum.ledger),
+      wallets: {
+        ethereum: {
+          // $FlowFixMe: mapping type
+          hd: hdWalletsFromJSON(serialized.wallets.ethereum.hd),
+          // $FlowFixMe: mapping type
+          ledger: ledgerWalletsFromJSON(serialized.wallets.ethereum.ledger),
+        },
       },
     })
   }
@@ -71,13 +75,13 @@ export default class WalletsRepository {
     registry: WalletsRepository,
   ): WalletsRepositorySerialized => {
     return {
-      ethereum: {
-        // $FlowFixMe: mapping type
-        hd: hdWalletsToJSON(registry.ethWallets.hd),
-        // $FlowFixMe: mapping type
-        pk: pkWalletsToJSON(registry.ethWallets.pk),
-        // $FlowFixMe: mapping type
-        ledger: ledgerWalletsToJSON(registry.ethWallets.ledger),
+      wallets: {
+        ethereum: {
+          // $FlowFixMe: mapping type
+          hd: hdWalletsToJSON(registry.ethWallets.hd),
+          // $FlowFixMe: mapping type
+          ledger: ledgerWalletsToJSON(registry.ethWallets.ledger),
+        },
       },
     }
   }
@@ -85,31 +89,36 @@ export default class WalletsRepository {
   _wallets: Wallets
 
   constructor(params?: WalletsRepositoryParams) {
-    this._wallets = params
-      ? params
-      : {
-          ethereum: {
-            hd: {},
-            pk: {},
-            ledger: {},
-          },
-        }
+    if (params) {
+      this._wallets = params.wallets
+    } else {
+      this._wallets = {
+        ethereum: {
+          hd: {},
+          ledger: {},
+        },
+      }
+    }
   }
 
   get ethWallets(): WalletCollection {
     return this._wallets.ethereum
   }
 
-  getEthWalletByID(id: string): ?AbstractWallet {
-    return (
-      this.ethWallets.hd[id] ||
-      this.ethWallets.pk[id] ||
-      this.ethWallets.ledger[id]
-    )
+  getEthWalletByID(id: string): ?LedgerWallet | ?HDWallet {
+    return this.ethWallets.hd[id] || this.ethWallets.ledger[id]
   }
 
-  getFirstEthWallet(): ?AbstractWallet | ?LedgerWallet {
-    const priority = ['ledger', 'hd', 'pk']
+  getEthHDWallet(id: string): ?HDWallet {
+    return this.ethWallets.hd[id]
+  }
+
+  getEthLedgerWallet(id: string): ?LedgerWallet {
+    return this.ethWallets.ledger[id]
+  }
+
+  getFirstEthWallet(): ?HDWallet | ?LedgerWallet {
+    const priority = ['ledger', 'hd']
     let wallet
     priority.some(type => {
       if (Object.keys(this.ethWallets[type]).length) {
@@ -121,110 +130,7 @@ export default class WalletsRepository {
     return wallet
   }
 
-  createHDWallet(params: WalletCreateHDParams): WalletCreateHDResult {
-    switch (params.chain) {
-      case 'ethereum': {
-        const hdWallet = new HDWallet()
-        const accounts = hdWallet.getAccounts()
-        hdWallet._walletID = uniqueID()
-        this.ethWallets.hd[hdWallet.id] = hdWallet
-        return {
-          type: 'hd',
-          walletID: toClientId(hdWallet._walletID),
-          mnemonic: hdWallet._mnemonic,
-          accounts,
-        }
-      }
-      default: {
-        throw new Error(`Unsupported chain type: ${params.chain}`)
-      }
-    }
-  }
-
-  importPKWallet(params: WalletImportPKParams): WalletResult {
-    switch (params.chain) {
-      case 'ethereum': {
-        let wallet
-        let walletID
-        if (params.walletID) {
-          // Add to specific wallet
-          wallet = this.ethWallets.pk[params.walletID]
-          walletID = params.walletID
-        } else if (Object.keys(this.ethWallets.pk)[0]) {
-          // Use the first wallet
-          const firstSimpleWalletID = idType(Object.keys(this.ethWallets.pk)[0])
-          wallet = this.ethWallets.pk[firstSimpleWalletID]
-          walletID = firstSimpleWalletID
-        } else {
-          // Create a new PK wallet
-          walletID = uniqueID()
-          wallet = new PKWallet({ walletID, privateKeys: [] })
-          this.ethWallets.pk[walletID] = wallet
-        }
-        wallet.importAccountByPK(params.privateKey)
-        const accounts = wallet.getAccounts()
-        return {
-          type: 'pk',
-          walletID: toClientId(wallet.id),
-          accounts,
-        }
-      }
-      default: {
-        throw new Error(`Unsupported chain type: ${params.chain}`)
-      }
-    }
-  }
-
-  importMnemonicWallet(params: WalletImportMnemonicParams): WalletResult {
-    switch (params.chain) {
-      case 'ethereum': {
-        const alreadyExists = Object.keys(this.ethWallets.hd).find(id => {
-          return this.ethWallets.hd[id]._mnemonic === params.mnemonic
-        })
-        if (alreadyExists) {
-          throw new Error('Wallet with this mnemonic phrase already exists')
-        }
-        const walletID = uniqueID()
-        const hdWallet = new HDWallet({
-          walletID,
-          mnemonic: params.mnemonic,
-        })
-
-        this.ethWallets.hd[walletID] = hdWallet
-        const accounts = hdWallet.getAccounts()
-        return {
-          type: 'hd',
-          walletID: toClientId(hdWallet.id),
-          accounts,
-        }
-      }
-      default: {
-        throw new Error(`Unsupported chain type: ${params.chain}`)
-      }
-    }
-  }
-
-  addHDWalletAccount(params: WalletAddHDAccountParams): string {
-    if (!this.ethWallets.hd[params.walletID]) {
-      throw new Error('Wallet not found')
-    }
-    const address = this.ethWallets.hd[params.walletID].addAccounts([
-      params.index,
-    ])
-    return address[0]
-  }
-
-  deleteWallet(params: { chain: string, type: WalletTypes, walletID: ID }) {
-    if (!this._wallets[params.chain]) {
-      throw new Error(`Unsupported chain ${params.chain}`)
-    }
-    if (!this._wallets[params.chain][params.type]) {
-      throw new Error(`Invalid wallet type ${params.type}`)
-    }
-    delete this._wallets[params.chain][params.type][params.walletID]
-  }
-
-  getEthWalletByAccount(account: string): ?AbstractWallet {
+  getEthWalletByAccount(account: string): ?HDWallet | ?LedgerWallet {
     let wallet
     Object.keys(this.ethWallets).forEach(type => {
       Object.keys(this.ethWallets[type]).forEach(w => {
@@ -236,6 +142,64 @@ export default class WalletsRepository {
       })
     })
     return wallet
+  }
+
+  createHDWallet(blockchain: Blockchains, name: string): HDWallet {
+    switch (blockchain) {
+      case 'ethereum': {
+        const hdWallet = HDWallet.create(name)
+        this.ethWallets.hd[hdWallet.id] = hdWallet
+        return hdWallet
+      }
+      default: {
+        throw new Error(`Unsupported blockchain type: ${blockchain}`)
+      }
+    }
+  }
+
+  importMnemonicWallet(params: WalletImportMnemonicParams): HDWallet {
+    switch (params.blockchain) {
+      case 'ethereum': {
+        const alreadyExists = Object.keys(this.ethWallets.hd).find(id => {
+          return this.ethWallets.hd[id].mnemonic === params.mnemonic
+        })
+        if (alreadyExists) {
+          throw new Error('Wallet with this mnemonic phrase already exists')
+        }
+        const hdWallet = HDWallet.import({
+          mnemonic: params.mnemonic,
+          firstAccountName: params.firstAccountName,
+        })
+        this.ethWallets.hd[hdWallet.id] = hdWallet
+        return hdWallet
+      }
+      default: {
+        throw new Error(`Unsupported blockchain type: ${params.blockchain}`)
+      }
+    }
+  }
+
+  addHDWalletAccount(params: WalletAddHDAccountParams): string {
+    const wallet = this.getEthHDWallet(params.walletID)
+    if (!wallet) {
+      throw new Error('Wallet not found')
+    }
+    const newAddress = wallet.addAccount(params.index, params.name)
+    return newAddress
+  }
+
+  deleteWallet(chain: string, type: WalletTypes, walletID: string) {
+    if (!this._wallets[chain]) {
+      throw new Error(`Unsupported chain: ${chain}`)
+    }
+    if (!this._wallets[chain][type]) {
+      throw new Error(`Invalid wallet type: ${type}`)
+    }
+    const wallet = this._wallets[chain][type][walletID]
+    if (!wallet) {
+      throw new Error('Wallet not found')
+    }
+    delete this._wallets[chain][type][walletID]
   }
 
   // Signing
@@ -274,19 +238,27 @@ export default class WalletsRepository {
     }
   }
 
-  async addLedgerEthAccount(params: { index: number }): Promise<void> {
+  async addLedgerEthAccount(
+    index: number,
+    name: string,
+  ): Promise<WalletAddLedgerResult> {
     // Identify ledger wallets with first address
     const firstLedgerAddr = await getAddressAtIndex({ index: 0 })
-    const wallet = this.getLedgerEthWalletByFirstAddr(firstLedgerAddr)
-    if (wallet) {
-      wallet.addAccounts([params.index])
-      return
+    let ledgerWallet = this.getLedgerEthWalletByFirstAddr(firstLedgerAddr)
+    if (!ledgerWallet) {
+      ledgerWallet = new LedgerWallet()
+      const walletID = uniqueID()
+      ledgerWallet._firstAddress = firstLedgerAddr
+      ledgerWallet._localID = walletID
+      this._wallets.ethereum.ledger[walletID] = ledgerWallet
     }
-    const ledgerWallet = new LedgerWallet()
-    const walletID = uniqueID()
-    ledgerWallet._firstAddress = firstLedgerAddr
-    ledgerWallet._walletID = walletID
-    this._wallets.ethereum.ledger[walletID] = ledgerWallet
-    ledgerWallet.addAccounts([params.index])
+
+    const addr = await ledgerWallet.addAccount(index, name)
+    ledgerWallet.accountNames[addr] = name
+
+    return {
+      localID: ledgerWallet.id,
+      address: addr,
+    }
   }
 }

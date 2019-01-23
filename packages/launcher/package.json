@@ -12,6 +12,7 @@
     "dist:dir": "npm run dist --dir -c.compression=store -c.mac.identity=null",
     "dist:electron": "electron-builder",
     "build:flow": "flow-copy-source src lib",
+    "relay": "relay-compiler --src ./src --schema ./schema.graphql",
     "test:types": "flow check",
     "test": "mocha"
   },
@@ -23,8 +24,13 @@
       "@mainframe/client",
       "@mainframe/contract-utils",
       "@mainframe/config",
-      "@mainframe/toolbox"
-    ]
+      "@mainframe/toolbox",
+      "@morpheus-ui/core",
+      "@morpheus-ui/fonts"
+    ],
+    "renderer": {
+      "webpackConfig": "webpack.renderer.additions.js"
+    }
   },
   "dependencies": {
     "@erebos/api-bzz-base": "^0.5.1",
@@ -39,14 +45,19 @@
     "@mainframe/toolbox": "*",
     "@mainframe/utils-base64": "^0.1.1",
     "@mainframe/utils-id": "^0.1.0",
+    "@morpheus-ui/core": "0.0.16",
+    "@morpheus-ui/fonts": "0.0.1",
+    "@morpheus-ui/icons": "0.0.9",
     "electron-store": "^2.0.0",
     "electron-util": "^0.10.2",
-    "mime": "^2.4.0",
-    "react": "^16.5.2",
-    "react-art": "^16.5.2",
-    "react-dom": "^16.5.2",
+    "react": "^16.6.3",
+    "react-art": "^16.6.3",
+    "react-blockies": "^1.4.0",
+    "react-dom": "^16.6.3",
     "react-modal": "^3.6.1",
-    "react-native-web": "^0.9.1",
+    "react-native-web": "^0.9.9",
+    "react-relay": "^1.7.0",
+    "relay-runtime": "^1.7.0",
     "rxjs": "^6.3.3",
     "source-map-support": "^0.5.9",
     "web3-eth-abi": "^1.0.0-beta.36",
@@ -55,17 +66,22 @@
   },
   "devDependencies": {
     "@babel/plugin-syntax-dynamic-import": "^7.0.0",
+    "@erebos/api-bzz-node": "^0.6.2",
     "@mainframe/utils-id": "^0.1.0",
     "babel-loader": "^8.0.4",
-    "babel-plugin-react-native-web": "^0.9.1",
+    "babel-plugin-react-native-web": "^0.9.9",
+    "babel-plugin-relay": "^1.7.0",
+    "css-loader": "^2.0.0",
     "electron": "^3.0.9",
     "electron-builder": "^20.38.2",
     "electron-webpack": "^2.6.1",
     "file-loader": "^2.0.0",
     "flow-bin": "^0.87.0",
+    "graphql": "^0.13.2",
     "mocha": "^5.2.0",
+    "relay-compiler": "^1.7.0",
     "spectron": "^5.0.0",
     "url-loader": "^1.1.2",
-    "webpack": "^4.20.2"
+    "webpack": "^4.27.0"
   }
 }

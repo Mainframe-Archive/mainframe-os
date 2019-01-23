@@ -7,7 +7,6 @@ import Command from '../../OpenVaultCommand'
 
 export default class ImportEthWalletCommand extends Command {
   static description = 'Import ethereum wallet'
-  static flags = Command.flags
 
   async run() {
     if (this.client == null) {
@@ -34,18 +33,30 @@ export const promptImportMnemonic = async (): Promise<string> => {
   return answers.Mnemonic
 }
 
-export const importMnemonic = async (cmd: Command, client: Client) => {
-  let mnemonic
-  while (mnemonic == null) {
-    try {
-      mnemonic = await promptImportMnemonic()
-    } catch (err) {
-      cmd.warn(err)
-    }
+export const promptAccountName = async (): Promise<string> => {
+  const answers = await prompt([
+    {
+      type: 'input',
+      name: 'name',
+      message: 'Account name:',
+    },
+  ])
+
+  if (answers.name.length === 0) {
+    throw new Error('Please provide a name.')
   }
+
+  return answers.name
+}
+
+export const importMnemonic = async (cmd: Command, client: Client) => {
+  const mnemonic = await promptImportMnemonic()
+  const name = await promptAccountName()
+
   const res = await client.wallet.importWalletByMnemonic({
     mnemonic,
-    chain: 'ethereum',
+    firstAccountName: name,
+    blockchain: 'ethereum',
   })
   client.close()
   cmd.log('Imported HD wallet:')

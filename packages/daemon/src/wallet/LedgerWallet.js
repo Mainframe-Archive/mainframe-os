@@ -6,46 +6,58 @@ import type {
   EthTransactionParams,
   WalletEthSignDataParams,
 } from '@mainframe/client'
-import { uniqueID, type ID } from '@mainframe/utils-id'
+import { uniqueID } from '@mainframe/utils-id'
 
 import { getAddressAtIndex, signTransaction } from './ledgerClient'
 import { type AbstractWalletParams } from './AbstractSoftwareWallet'
 
 type AccountAddress = string
 
-type LedgerWalletParams = AbstractWalletParams & {
-  activeAccounts: { [index: number]: AccountAddress },
+type ActiveAccounts = { [index: string]: AccountAddress }
+
+export type LedgerWalletParams = AbstractWalletParams & {
+  activeAccounts: { [index: string]: AccountAddress },
   firstAddress: string,
-  walletID: ID,
+  localID: string,
 }
 
-export type LedgerWalletSerialized = LedgerWalletParams
-
 export default class LedgerWallet {
-  static fromJSON = (params: LedgerWalletSerialized): LedgerWallet =>
-    new LedgerWallet(params)
-
-  // $FlowFixMe: Wallet type
-  static toJSON = (hdWallet: HDWallet): HDWalletSerialized => ({
-    activeAccounts: hdWallet._activeAccounts,
-    walletID: hdWallet._walletID,
-    firstAddress: hdWallet._firstAddress,
-  })
-
   // Store address at 0 to identify ledger
-  _walletID: ID
+  _type: 'ledger'
+  _localID: string
   _firstAddress: string
-  _activeAccounts: { [index: number]: AccountAddress }
+  _activeAccounts: ActiveAccounts
 
   constructor(params?: LedgerWalletParams) {
+    this._type = 'ledger'
     if (params) {
       this._activeAccounts = params.activeAccounts
-      this._walletID = params.walletID
+      this._localID = params.localID
       this._firstAddress = params.firstAddress
     } else {
       this._activeAccounts = {}
-      this._walletID = uniqueID()
+      this._localID = uniqueID()
     }
+  }
+
+  get id(): string {
+    return this._localID
+  }
+
+  get localID(): string {
+    return this._localID
+  }
+
+  get type(): 'ledger' {
+    return this._type
+  }
+
+  get firstAddress(): string {
+    return this._firstAddress
+  }
+
+  get activeAccounts(): ActiveAccounts {
+    return this._activeAccounts
   }
 
   // Public
@@ -63,19 +75,21 @@ export default class LedgerWallet {
 
   getIndexForAccount(account: string): ?string {
     return Object.keys(this._activeAccounts).find(i => {
-      return this._activeAccounts[Number(i)] === toChecksumAddress(account)
+      return this._activeAccounts[i] === toChecksumAddress(account)
     })
   }
 
-  addAccounts(indexes: Array<number>): Array<AccountAddress> {
+  async addAccounts(indexes: Array<number>): Promise<Array<AccountAddress>> {
     const newAddresses = []
-    indexes.forEach(async i => {
-      if (!this._activeAccounts[i]) {
-        const address = await getAddressAtIndex({ index: i })
-        this._activeAccounts[i] = address
+    for (let i = 0; i < indexes.length; i++) {
+      const index = indexes[i]
+      const stringIndex = String(index)
+      if (!this._activeAccounts[stringIndex]) {
+        const address = await getAddressAtIndex({ index: index })
+        this._activeAccounts[stringIndex] = address
         newAddresses.push(address)
       }
-    })
+    }
     return newAddresses
   }
 

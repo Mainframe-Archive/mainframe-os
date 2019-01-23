@@ -1,11 +1,12 @@
 // @flow
 
 import * as app from './app'
+import * as blockchain from './blockchain'
+import * as graphql from './graphql'
 import * as identity from './identity'
 import * as pss from './pss'
 import * as sub from './subscription'
 import * as vault from './vault'
-import * as blockchain from './blockchain'
 import * as wallet from './wallet'
 
 const noop = () => {}
@@ -17,7 +18,6 @@ export default {
   app_close: app.close,
   app_install: app.install,
   app_remove: app.remove,
-  app_removeOwn: app.removeOwn,
   app_open: app.open,
   app_getAll: app.getAll,
   app_setPermission: app.setPermission,
@@ -37,14 +37,20 @@ export default {
 
   blockchain_web3Send: blockchain.web3Send,
 
+  graphql_query: graphql.query,
+  graphql_subscription: graphql.subscription,
+
   identity_addPeer: identity.addPeer,
   identity_addPeerByFeed: identity.addPeerByFeed,
+  identity_createContactFromFeed: identity.createContactFromFeed,
+  identity_createContactFromPeer: identity.createContactFromPeer,
   identity_createUser: identity.createUser,
   identity_createDeveloper: identity.createDeveloper,
   identity_deleteContact: identity.deleteContact,
   identity_getOwnUsers: identity.getOwnUsers,
   identity_getOwnDevelopers: identity.getOwnDevelopers,
   identity_getPeers: identity.getPeers,
+  identity_updateUser: identity.updateUser,
   identity_linkEthWallet: identity.linkEthWallet,
   identity_unlinkEthWallet: identity.unlinkEthWallet,
   identity_getUserContacts: identity.getUserContacts,
@@ -65,12 +71,13 @@ export default {
   vault_setSettings: vault.setSettings,
 
   wallet_createHD: wallet.createHDWallet,
-  wallet_importPK: wallet.importAccountByPK,
   wallet_importMnemonic: wallet.importMnemonic,
   wallet_addHDAccount: wallet.addHDAccount,
   wallet_delete: wallet.deleteWallet,
-  wallet_getEthWallets: wallet.getEthWallets,
+  wallet_getUserEthWallets: wallet.getUserEthWallets,
+  wallet_getUserEthAccounts: wallet.getUserEthAccounts,
   wallet_ledgerGetEthAccounts: wallet.getLedgerEthAccounts,
   wallet_ledgerAddEthAccount: wallet.addLedgerEthAccount,
+  wallet_setUserDefault: wallet.setUsersDefaultWallet,
   wallet_signTx: wallet.signTransaction,
 }

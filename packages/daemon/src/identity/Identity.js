@@ -2,15 +2,18 @@
 
 import { MFID } from '@mainframe/data-types'
 import { openSigned, verifySignature } from '@mainframe/utils-crypto'
+import multibase from 'multibase'
 
 const KEY_TYPE = 'pub-key:ed25519'
 
 export default class Identity {
   _id: string
+  _localID: string
   _key: Buffer
 
-  constructor(idType: string, keyOrID: string | Buffer) {
+  constructor(localID: string, idType: string, keyOrID: string | Buffer) {
     const type = `${idType}:${KEY_TYPE}`
+    this._localID = localID
     if (typeof keyOrID === 'string') {
       const id = new MFID(keyOrID)
       if (id.type.value !== type) {
@@ -30,8 +33,16 @@ export default class Identity {
     return this._id
   }
 
+  get localID(): string {
+    return this._localID
+  }
+
   get publicKey(): Buffer {
     return this._key
+  }
+
+  base64PublicKey(): string {
+    return multibase.encode('base64', this.publicKey).toString()
   }
 
   verifySignature(message: Buffer, signature: Buffer): boolean {

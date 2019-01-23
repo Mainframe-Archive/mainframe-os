@@ -1,7 +1,6 @@
 // @flow
 
 /* eslint-disable import/named */
-import { parseContentsURI, type ManifestData } from '@mainframe/app-manifest'
 import {
   idType as toClientID,
   APP_CHECK_PERMISSION_SCHEMA,
@@ -27,8 +26,6 @@ import {
   type AppPublishContentsResult,
   APP_REMOVE_SCHEMA,
   type AppRemoveParams,
-  APP_REMOVE_OWN_SCHEMA,
-  type AppRemoveOwnParams,
   APP_SET_PERMISSION_SCHEMA,
   type AppSetPermissionParams,
   APP_SET_PERMISSIONS_REQUIREMENTS_SCHEMA,
@@ -40,23 +37,18 @@ import {
   APP_WRITE_MANIFEST_SCHEMA,
   type AppWriteManifestParams,
 } from '@mainframe/client'
-import { getAppContentsPath, type Environment } from '@mainframe/config'
 import { idType as fromClientID, type ID } from '@mainframe/utils-id'
 /* eslint-enable import/named */
-import { ensureDir } from 'fs-extra'
 
 import type { SessionData } from '../../app/AbstractApp'
+import { downloadAppContents, getContentsPath } from '../../app/AppsRepository'
 import OwnApp from '../../app/OwnApp'
+import type ClientContext from '../../context/ClientContext'
 
 import { clientError, sessionError } from '../errors'
-import type RequestContext from '../RequestContext'
-
-const getContentsPath = (env: Environment, manifest: ManifestData): string => {
-  return getAppContentsPath(env, manifest.id, manifest.version)
-}
 
 const createClientSession = (
-  ctx: RequestContext,
+  ctx: ClientContext,
   appID: ID,
   userID: ID,
   session: SessionData,
@@ -69,7 +61,10 @@ const createClientSession = (
   if (user == null) {
     throw clientError('Invalid userID')
   }
-  let defaultEthAccount = app.getDefaultEthAccount(userID)
+  let defaultEthAccount =
+    app.getDefaultEthAccount(userID) ||
+    ctx.queries.getUserDefaultEthAccount(userID)
+
   if (!defaultEthAccount) {
     // TODO: add a setting for default eth account on identity
     const ethWallet = ctx.openVault.wallets.getFirstEthWallet()
@@ -90,13 +85,13 @@ const createClientSession = (
           manifest: app.manifest,
           contentsPath: getContentsPath(ctx.env, app.manifest),
         }
-  const wallets =
-    ctx.openVault.identityWallets.walletsByIdentity[toClientID(userID)] || {}
+  const wallets = ctx.queries.getUserEthWallets(userID)
 
   return {
     user: {
       id: toClientID(userID),
-      data: user.data,
+      localID: user.localID,
+      profile: user.profile,
       ethWallets: wallets,
     },
     session: {
@@ -113,7 +108,7 @@ const createClientSession = (
 export const checkPermission = {
   params: APP_CHECK_PERMISSION_SCHEMA,
   handler: (
-    ctx: RequestContext,
+    ctx: ClientContext,
     params: AppCheckPermissionParams,
   ): AppCheckPermissionResult => {
     const session = ctx.openVault.getSession(fromClientID(params.sessID))
@@ -128,7 +123,7 @@ export const checkPermission = {
 
 export const close = {
   params: APP_CLOSE_SCHEMA,
-  handler: (ctx: RequestContext, params: AppCloseParams): void => {
+  handler: (ctx: ClientContext, params: AppCloseParams): void => {
     ctx.openVault.closeApp(fromClientID(params.sessID))
   },
 }
@@ -136,22 +131,19 @@ export const close = {
 export const create = {
   params: APP_CREATE_SCHEMA,
   handler: async (
-    ctx: RequestContext,
+    ctx: ClientContext,
     params: AppCreateParams,
   ): Promise<AppCreateResult> => {
-    const app = ctx.openVault.createApp({
-      contentsPath: params.contentsPath,
-      developerID: fromClientID(params.developerID),
-      name: params.name,
-      version: params.version,
-      permissionsRequirements: params.permissionsRequirements,
+    const { developerID, ...data } = params
+    const app = await ctx.mutations.createApp({
+      ...data,
+      developerID: fromClientID(developerID),
     })
-    await ctx.openVault.save()
     return { appID: toClientID(app.id) }
   },
 }
 
-export const getAll = (ctx: RequestContext): AppGetAllResult => {
+export const getAll = (ctx: ClientContext): AppGetAllResult => {
   const { apps, ownApps } = ctx.openVault.apps
   const mapList = (mapApps: Object) => {
     return Object.keys(mapApps).map(appID => {
@@ -161,14 +153,15 @@ export const getAll = (ctx: RequestContext): AppGetAllResult => {
         if (user) {
           acc.push({
             id: toClientID(id),
-            data: user.data,
+            profile: user.profile,
             settings: app.getSettings(id),
           })
         }
         return acc
       }, [])
       return {
-        appID: toClientID(appID),
+        localID: toClientID(appID),
+        name: app instanceof OwnApp ? app.data.name : app.manifest.name,
         manifest: app.manifest || app._data,
         users: users,
       }
@@ -183,7 +176,7 @@ export const getAll = (ctx: RequestContext): AppGetAllResult => {
 export const getManifestData = {
   params: APP_GET_MANIFEST_DATA_SCHEMA,
   handler: async (
-    ctx: RequestContext,
+    ctx: ClientContext,
     params: AppGetManifestDataParams,
   ): Promise<AppGetManifestDataResult> => ({
     data: ctx.openVault.getAppManifestData(
@@ -196,7 +189,7 @@ export const getManifestData = {
 export const install = {
   params: APP_INSTALL_SCHEMA,
   handler: async (
-    ctx: RequestContext,
+    ctx: ClientContext,
     params: AppInstallParams,
   ): Promise<AppInstallResult> => {
     const app = ctx.openVault.installApp(
@@ -204,28 +197,8 @@ export const install = {
       fromClientID(params.userID),
       params.permissionsSettings,
     )
-
-    // TODO: rather than waiting for contents to be downloaded, return early and let client subscribe to installation state changes
-    if (app.installationState !== 'ready') {
-      const contentsPath = getContentsPath(ctx.env, params.manifest)
-      const contentsURI = parseContentsURI(params.manifest.contentsURI)
-      if (contentsURI.nid !== 'bzz' || contentsURI.nss == null) {
-        // Unsupported contentsURI
-        app.installationState = 'download_error'
-      } else {
-        try {
-          app.installationState = 'downloading'
-          await ensureDir(contentsPath)
-          // contentsURI.nss is expected to be the bzz hash
-          // TODO?: bzz hash validation?
-          await ctx.bzz.downloadDirectoryTo(contentsURI.nss, contentsPath)
-          app.installationState = 'ready'
-        } catch (err) {
-          app.installationState = 'download_error'
-        }
-      }
-    }
-
+    const contentsPath = getContentsPath(ctx.env, params.manifest)
+    await downloadAppContents(ctx.io.bzz, app, contentsPath)
     await ctx.openVault.save()
     return { appID: toClientID(app.id) }
   },
@@ -233,7 +206,7 @@ export const install = {
 
 export const open = {
   params: APP_OPEN_SCHEMA,
-  handler: (ctx: RequestContext, params: AppOpenParams): AppOpenResult => {
+  handler: (ctx: ClientContext, params: AppOpenParams): AppOpenResult => {
     const appID = fromClientID(params.appID)
     const userID = fromClientID(params.userID)
     const session = ctx.openVault.openApp(appID, userID)
@@ -244,7 +217,7 @@ export const open = {
 export const publishContents = {
   params: APP_PUBLISH_CONTENTS_SCHEMA,
   handler: async (
-    ctx: RequestContext,
+    ctx: ClientContext,
     params: AppPublishContentsParams,
   ): Promise<AppPublishContentsResult> => {
     const app = ctx.openVault.apps.getOwnByID(fromClientID(params.appID))
@@ -252,7 +225,7 @@ export const publishContents = {
       throw new Error('App not found')
     }
 
-    const hash = await ctx.bzz.uploadDirectoryFrom(app.contentsPath)
+    const hash = await ctx.io.bzz.uploadDirectoryFrom(app.contentsPath)
     const contentsURI = `urn:bzz:${hash}`
     app.setContentsURI(contentsURI, params.version)
     await ctx.openVault.save()
@@ -261,21 +234,10 @@ export const publishContents = {
   },
 }
 
-export const removeOwn = {
-  params: APP_REMOVE_OWN_SCHEMA,
-  handler: async (
-    ctx: RequestContext,
-    params: AppRemoveOwnParams,
-  ): Promise<void> => {
-    ctx.openVault.removeOwnApp(fromClientID(params.appID))
-    await ctx.openVault.save()
-  },
-}
-
 export const remove = {
   params: APP_REMOVE_SCHEMA,
   handler: async (
-    ctx: RequestContext,
+    ctx: ClientContext,
     params: AppRemoveParams,
   ): Promise<void> => {
     ctx.openVault.removeApp(fromClientID(params.appID))
@@ -285,7 +247,7 @@ export const remove = {
 export const setUserSettings = {
   params: APP_SET_USER_SETTINGS_SCHEMA,
   handler: async (
-    ctx: RequestContext,
+    ctx: ClientContext,
     params: AppSetUserSettingsParams,
   ): Promise<void> => {
     const appID = fromClientID(params.appID)
@@ -298,7 +260,7 @@ export const setUserSettings = {
 export const setUserPermissionsSettings = {
   params: APP_SET_USER_PERMISSIONS_SETTINGS_SCHEMA,
   handler: async (
-    ctx: RequestContext,
+    ctx: ClientContext,
     params: AppSetUserPermissionsSettingsParams,
   ): Promise<void> => {
     const appID = fromClientID(params.appID)
@@ -311,7 +273,7 @@ export const setUserPermissionsSettings = {
 export const setPermission = {
   params: APP_SET_PERMISSION_SCHEMA,
   handler: async (
-    ctx: RequestContext,
+    ctx: ClientContext,
     params: AppSetPermissionParams,
   ): Promise<void> => {
     const session = ctx.openVault.getSession(fromClientID(params.sessID))
@@ -332,7 +294,7 @@ export const setPermission = {
 export const setPermissionsRequirements = {
   params: APP_SET_PERMISSIONS_REQUIREMENTS_SCHEMA,
   handler: async (
-    ctx: RequestContext,
+    ctx: ClientContext,
     params: AppSetPermissionsRequirementsParams,
   ): Promise<void> => {
     const app = ctx.openVault.apps.getOwnByID(fromClientID(params.appID))
@@ -347,7 +309,7 @@ export const setPermissionsRequirements = {
 export const writeManifest = {
   params: APP_WRITE_MANIFEST_SCHEMA,
   handler: async (
-    ctx: RequestContext,
+    ctx: ClientContext,
     params: AppWriteManifestParams,
   ): Promise<void> => {
     await ctx.openVault.writeAppManifest(

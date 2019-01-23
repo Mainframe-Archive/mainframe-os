@@ -2,16 +2,26 @@
 
 import Identity from './Identity'
 
+export type DeveloperProfile = {
+  name: string,
+  avatar?: ?string,
+}
+
 export type DeveloperIdentitySerialized = {
   id: string,
-  data: Object,
+  localID: string,
+  profile: DeveloperProfile,
 }
 
 export default class DeveloperIdentity extends Identity {
   static fromJSON = (
     serialized: DeveloperIdentitySerialized,
   ): DeveloperIdentity => {
-    return new DeveloperIdentity(serialized.id, serialized.data)
+    return new DeveloperIdentity(
+      serialized.localID,
+      serialized.id,
+      serialized.profile,
+    )
   }
 
   static toJSON = (
@@ -19,14 +29,23 @@ export default class DeveloperIdentity extends Identity {
   ): DeveloperIdentitySerialized => {
     return {
       id: identity.id,
-      data: identity.data,
+      profile: identity.profile,
+      localID: identity.localID,
     }
   }
 
-  data: Object
+  _profile: DeveloperProfile
 
-  constructor(key: string | Buffer, data: Object = {}) {
-    super('dev', key)
-    this.data = data
+  constructor(
+    localID: string,
+    key: string | Buffer,
+    profile: DeveloperProfile,
+  ) {
+    super(localID, 'dev', key)
+    this._profile = profile
+  }
+
+  get profile(): DeveloperProfile {
+    return this._profile
   }
 }

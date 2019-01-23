@@ -22,6 +22,7 @@ describe('app-manifest', () => {
     id: createID('id'),
     author: {
       id: createID('author'),
+      name: 'test',
     },
     name: 'app',
     version: '0.2.0',
@@ -91,6 +92,7 @@ describe('app-manifest', () => {
         id: 'bad id',
         author: {
           id: 'bad id',
+          name: 'a',
         },
         name: 'no',
         version: 2,
@@ -116,6 +118,14 @@ describe('app-manifest', () => {
         field: 'author.id',
         message: "The value 'bad id' is not a valid Mainframe ID!",
         type: 'id',
+      },
+      {
+        actual: 1,
+        expected: 3,
+        field: 'author.name',
+        message:
+          "The 'author.name' field length must be greater than or equal to 3 characters long!",
+        type: 'stringMin',
       },
       {
         actual: 2,
@@ -192,6 +202,13 @@ describe('app-manifest', () => {
           expected: undefined,
           field: 'author.id',
           message: "The 'author.id' field is required!",
+          type: 'required',
+        },
+        {
+          actual: undefined,
+          expected: undefined,
+          field: 'author.name',
+          message: "The 'author.name' field is required!",
           type: 'required',
         },
         {

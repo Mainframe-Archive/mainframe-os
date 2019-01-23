@@ -2,11 +2,13 @@
 
 import React from 'react'
 import Modal from 'react-modal'
-import { AppRegistry } from 'react-native-web'
+import { AppRegistry } from 'react-native'
 import { ipcRenderer } from 'electron'
+
+import '@morpheus-ui/fonts'
 import './styles.css'
 
-import Launcher from './launcher/Launcher.js'
+import Launcher from './launcher/App.js'
 import AppContainer from './app/AppContainer.js'
 
 const callback = () => ipcRenderer.send('ready-window')

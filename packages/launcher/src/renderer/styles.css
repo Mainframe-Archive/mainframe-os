@@ -1,27 +1,3 @@
-@font-face {
-  font-family: 'Poppins';
-  font-style: normal;
-  font-weight: 300;
-  src: local('Poppins Regular'), local('Poppins-Regular'),
-    url(../assets/fonts/Poppins-Regular.woff2) format('woff2');
-}
-
-@font-face {
-  font-family: 'Poppins';
-  font-style: normal;
-  font-weight: 500;
-  src: local('Poppins Medium'), local('Poppins-Medium'),
-    url(../assets/fonts/Poppins-Medium.woff2) format('woff2');
-}
-
-@font-face {
-  font-family: 'Poppins';
-  font-style: normal;
-  font-weight: 700, 'bold';
-  src: local('Poppins SemiBold'), local('Poppins-SemiBold'),
-    url(../assets/fonts/Poppins-SemiBold.woff2) format('woff2');
-}
-
 html,
 body,
 #app {
@@ -59,4 +35,17 @@ body,
   outline: none !important;
   padding: 0px !important;
   margin: auto !important;
+}
+.no-skew {
+  transition: all 0.3s;
+  transform: perspective(400px) rotateY(0deg);
+}
+.skew-left {
+  transition: all 0.3s;
+  transform: perspective(400px) rotateY(-15deg);
+}
+
+.skew-right {
+  transition: all 0.3s;
+  transform: perspective(400px) rotateY(15deg);
 }

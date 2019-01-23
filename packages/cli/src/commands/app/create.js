@@ -29,6 +29,11 @@ export default class AppCreateCommand extends Command {
       },
       {
         type: 'input',
+        name: 'developerID',
+        message: 'Developer ID:',
+      },
+      {
+        type: 'input',
         name: 'version',
         message: 'Version:',
         default: '1.0.0',
@@ -55,6 +60,7 @@ export default class AppCreateCommand extends Command {
 
     const res = await client.app.create({
       contentsPath: contentsPath,
+      developerID: answers.developerID,
       name: answers.name,
       version: answers.version,
     })

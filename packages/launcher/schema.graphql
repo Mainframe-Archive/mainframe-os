@@ -1,0 +1,432 @@
+input AddContactInput {
+  userID: String!
+  publicFeed: String!
+  aliasName: String
+  clientMutationId: String
+}
+
+type AddContactPayload {
+  contact: Contact
+  viewer: Viewer!
+  clientMutationId: String
+}
+
+input AddHDWalletAccountInput {
+  walletID: String!
+  index: Int!
+  name: String!
+  userID: String
+  clientMutationId: String
+}
+
+type AddHDWalletAccountPayload {
+  address: String!
+  viewer: Viewer!
+  clientMutationId: String
+}
+
+input AddLedgerWalletAccountInput {
+  index: Int!
+  name: String!
+  userID: String
+  clientMutationId: String
+}
+
+type AddLedgerWalletAccountPayload {
+  address: String!
+  localID: String!
+  viewer: Viewer!
+  clientMutationId: String
+}
+
+type App implements Node {
+  """The ID of an object"""
+  id: ID!
+  localID: ID!
+  name: String!
+  manifest: AppManifestData!
+  users: [AppUser]
+}
+
+type AppAuthor {
+  id: String
+  name: String
+}
+
+input AppCreateMutationInput {
+  name: String!
+  contentsPath: String!
+  version: String!
+  developerID: String!
+  permissionsRequirements: AppPermissionsRequirementsInput!
+  clientMutationId: String
+}
+
+type AppCreateMutationPayload {
+  app: OwnApp
+  viewer: Viewer!
+  clientMutationId: String
+}
+
+input AppInstallMutationInput {
+  userID: String!
+  manifest: AppManifestInput!
+  permissionsSettings: AppPermissionsSettingsInput!
+  clientMutationId: String
+}
+
+type AppInstallMutationPayload {
+  app: App
+  viewer: Viewer!
+  clientMutationId: String
+}
+
+type AppManifestData {
+  name: String!
+  version: String!
+  permissions: AppPermissionsRequirements!
+  author: AppAuthor!
+}
+
+input AppManifestInput {
+  id: String!
+  name: String!
+  version: String!
+  contentsURI: String!
+  permissions: AppPermissionsRequirementsInput!
+  author: ManifestAuthorInput!
+}
+
+type AppPermissionDefinitions {
+  WEB_REQUEST: [String]
+  BLOCKCHAIN_SEND: Boolean
+}
+
+input AppPermissionDefinitionsInput {
+  WEB_REQUEST: [String]
+  BLOCKCHAIN_SEND: Boolean
+  SWARM_UPLOAD: Boolean
+  SWARM_DOWNLOAD: Boolean
+}
+
+type AppPermissions {
+  BLOCKCHAIN_SEND: Boolean
+  SWARM_UPLOAD: Boolean
+  SWARM_DOWNLOAD: Boolean
+  WEB_REQUEST: WebRequestGrants!
+}
+
+type AppPermissionsRequirements {
+  optional: AppPermissionDefinitions!
+  required: AppPermissionDefinitions!
+}
+
+input AppPermissionsRequirementsInput {
+  optional: AppPermissionDefinitionsInput!
+  required: AppPermissionDefinitionsInput!
+}
+
+type AppPermissionsSettings {
+  permissionsChecked: Boolean!
+  grants: AppPermissions!
+}
+
+input AppPermissionsSettingsInput {
+  permissionsChecked: Boolean!
+  grants: PermissionGrantsInput!
+}
+
+type AppsQuery {
+  installed: [App]
+  own: [OwnApp]
+}
+
+type AppUser {
+  """The ID of an object"""
+  id: ID!
+  localID: ID!
+  identity: OwnUserIdentity!
+  settings: AppUserSettings!
+}
+
+type AppUserSettings {
+  permissionsSettings: AppPermissionsSettings!
+}
+
+type AppVersionData {
+  version: String!
+  permissions: AppPermissionsRequirements!
+  publicationState: String!
+}
+
+type Contact implements Node {
+  """The ID of an object"""
+  id: ID!
+  localID: ID!
+  peerID: ID!
+  pubKey: String!
+  profile: ContactProfile!
+  connectionState: ContactConnection!
+}
+
+enum ContactConnection {
+  CONNECTED
+  SENT
+}
+
+type ContactProfile {
+  name: String!
+  avatar: String
+}
+
+type ContactsQuery {
+  userContacts(userID: String!): [Contact]
+}
+
+input CreateDeveloperIdentityInput {
+  profile: UserProfileInput!
+  clientMutationId: String
+}
+
+type CreateDeveloperIdentityPayload {
+  user: OwnDeveloperIdentity
+  viewer: Viewer!
+  clientMutationId: String
+}
+
+input CreateHDWalletInput {
+  blockchain: SupportedWallets!
+  name: String!
+  userID: String
+  clientMutationId: String
+}
+
+type CreateHDWalletPayload {
+  hdWallet: EthHDWallet
+  viewer: Viewer!
+  clientMutationId: String
+}
+
+input CreateUserIdentityInput {
+  profile: UserProfileInput!
+  clientMutationId: String
+}
+
+type CreateUserIdentityPayload {
+  user: OwnUserIdentity
+  viewer: Viewer!
+  clientMutationId: String
+}
+
+input DeletContactInput {
+  contactID: String!
+  clientMutationId: String
+}
+
+type DeletContactPayload {
+  viewer: Viewer!
+  clientMutationId: String
+}
+
+input DeleteWalletInput {
+  walletID: String!
+  type: String!
+  clientMutationId: String
+}
+
+type DeleteWalletPayload {
+  viewer: Viewer!
+  clientMutationId: String
+}
+
+type EthHDWallet implements Node {
+  """The ID of an object"""
+  id: ID!
+  localID: ID!
+  accounts: [NamedWalletAccountType]
+}
+
+type EthLedgerWallet implements Node {
+  """The ID of an object"""
+  id: ID!
+  localID: ID!
+  accounts: [NamedWalletAccountType]
+}
+
+type EthWallets {
+  hd: [EthHDWallet]
+  ledger: [EthLedgerWallet]
+}
+
+type IdentitiesQuery {
+  ownUsers: [OwnUserIdentity]
+  ownDevelopers: [OwnDeveloperIdentity]
+}
+
+input ImportHDWalletInput {
+  blockchain: SupportedWallets!
+  mnemonic: String!
+  name: String!
+  userID: String
+  clientMutationId: String
+}
+
+type ImportHDWalletPayload {
+  hdWallet: EthHDWallet
+  viewer: Viewer!
+  clientMutationId: String
+}
+
+input ManifestAuthorInput {
+  id: String!
+  name: String!
+}
+
+type Mutation {
+  createApp(input: AppCreateMutationInput!): AppCreateMutationPayload
+  installApp(input: AppInstallMutationInput!): AppInstallMutationPayload
+  createUserIdentity(input: CreateUserIdentityInput!): CreateUserIdentityPayload
+  createDeveloperIdentity(input: CreateDeveloperIdentityInput!): CreateDeveloperIdentityPayload
+  createHDWallet(input: CreateHDWalletInput!): CreateHDWalletPayload
+  importHDWallet(input: ImportHDWalletInput!): ImportHDWalletPayload
+  addHDWalletAccount(input: AddHDWalletAccountInput!): AddHDWalletAccountPayload
+  addLedgerWalletAccount(input: AddLedgerWalletAccountInput!): AddLedgerWalletAccountPayload
+  deleteWallet(input: DeleteWalletInput!): DeleteWalletPayload
+  addContact(input: AddContactInput!): AddContactPayload
+  deleteContact(input: DeletContactInput!): DeletContactPayload
+  setDefaultWallet(input: SetDefaultWalletInput!): SetDefaultWalletPayload
+}
+
+type NamedWalletAccountType {
+  name: String!
+  address: String!
+  balances: WalletBalancesType!
+}
+
+"""An object with an ID"""
+interface Node {
+  """The id of the object."""
+  id: ID!
+}
+
+type OwnApp implements Node {
+  """The ID of an object"""
+  id: ID!
+  localID: ID!
+  name: String!
+  versions: [AppVersionData]
+  developer: AppAuthor!
+  users: [AppUser]
+}
+
+type OwnDeveloperIdentity implements Node {
+  """The ID of an object"""
+  id: ID!
+  localID: ID!
+  mfid: ID!
+  pubKey: String!
+  profile: OwnDeveloperProfile
+}
+
+type OwnDeveloperProfile {
+  name: String!
+}
+
+type OwnUserIdentity implements Node {
+  """The ID of an object"""
+  id: ID!
+  localID: ID!
+  feedHash: String!
+  mfid: ID!
+  apps: [App]
+  defaultEthAddress: String
+  wallets: [UserWalletType]
+  profile: OwnUserProfile
+  pubKey: String!
+}
+
+type OwnUserProfile {
+  name: String!
+}
+
+type Peer {
+  publicKey: String!
+  profile: ContactProfile!
+}
+
+type PeersQuery {
+  peerLookupByFeed(feedHash: String!): Peer
+}
+
+input PermissionGrantsInput {
+  BLOCKCHAIN_SEND: Boolean
+  SWARM_UPLOAD: Boolean
+  SWARM_DOWNLOAD: Boolean
+  WEB_REQUEST: WebRequestGrantInput!
+}
+
+type Query {
+  """Fetches an object given its ID"""
+  node(
+    """The ID of an object"""
+    id: ID!
+  ): Node
+  viewer: Viewer!
+  peers: PeersQuery!
+}
+
+input SetDefaultWalletInput {
+  userID: String!
+  address: String!
+  clientMutationId: String
+}
+
+type SetDefaultWalletPayload {
+  viewer: Viewer!
+  clientMutationId: String
+}
+
+type Subscription {
+  appCreated: OwnApp!
+}
+
+enum SupportedWallets {
+  ETHEREUM
+}
+
+input UserProfileInput {
+  name: String!
+  avatar: String
+}
+
+type UserWalletType {
+  localID: ID!
+  accounts: [String]
+}
+
+type Viewer {
+  id: ID!
+  apps: AppsQuery!
+  contacts: ContactsQuery!
+  identities: IdentitiesQuery!
+  wallets: WalletsQuery!
+}
+
+type WalletBalancesType {
+  eth: String!
+  mft: String!
+}
+
+type WalletsQuery {
+  ethWallets(userID: String!): EthWallets!
+}
+
+input WebRequestGrantInput {
+  granted: [String]
+  denied: [String]
+}
+
+type WebRequestGrants {
+  granted: [String]
+  denied: [String]
+}

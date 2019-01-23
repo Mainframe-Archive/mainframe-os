@@ -8,7 +8,7 @@ const getFixture = fixture => path.join(__dirname, '../../../fixtures', fixture)
 
 describe('Application launch', function() {
   // mocha requires non arrow style function to bind context
-  this.timeout(10000)
+  this.timeout(20000)
 
   before(function() {
     const binPath =
@@ -73,12 +73,8 @@ describe('Application launch', function() {
   })
 
   it('creates an app', async function() {
-    const devButtonSelector = '[data-testid="launcher-toggle-dev-button"]'
-    await this.app.client.waitForExist(devButtonSelector, 2000)
-    await this.app.client.element(devButtonSelector).click()
-
     const createAppSelector = '[data-testid="launcher-create-app-button"]'
-    await this.app.client.waitForExist(createAppSelector, 2000)
+    await this.app.client.waitForExist(createAppSelector, 20000)
     await this.app.client.element(createAppSelector).click()
 
     const appNameInput = '[data-testid="create-app-name-input"]'
@@ -108,10 +104,6 @@ describe('Application launch', function() {
     await this.app.client.waitForExist(identityButtonSelector, 2000)
     await this.app.client.element(identityButtonSelector).click()
 
-    const identitySelector = '[data-testid="identity-selector-select-dev"]'
-    await this.app.client.waitForExist(identitySelector, 2000)
-    await this.app.client.element(identitySelector).click()
-
     const setPermissionsButton = '[data-testid="set-permission-requirements"]'
     await this.app.client.waitForExist(setPermissionsButton, 2000)
     await this.app.client.element(setPermissionsButton).click()
@@ -120,33 +112,21 @@ describe('Application launch', function() {
     await this.app.client.waitForExist(completeCreateAppBtn, 5000)
     await this.app.client.element(completeCreateAppBtn).click()
 
-    const appItemSelector = '[data-testid="launcher-open-app"]'
+    const appItemSelector = '[data-testid="own-app-item"]'
     await this.app.client.waitForExist(appItemSelector, 5000)
     await this.app.client.element(appItemSelector).click()
-
-    await this.app.client.waitForExist(identityInputSelector, 2000)
-    await this.app.client.element(identityInputSelector).setValue('user')
-    await this.app.client.element(identityButtonSelector).click()
-
-    const userIdentity = '[data-testid="identity-selector-select-user"]'
-    await this.app.client.waitForExist(userIdentity, 2000)
-    await this.app.client.element(userIdentity).click()
 
     const count = await this.app.client.getWindowCount()
     assert.equal(count, 2)
   })
 
   it('completes app install flow and opens app', async function() {
-    const devButtonSelector = '[data-testid="launcher-toggle-dev-button"]'
-    await this.app.client.waitForExist(devButtonSelector, 2000)
-    await this.app.client.element(devButtonSelector).click()
-
     await this.app.client
       .element('[data-testid="launcher-install-app-button"]')
       .click()
 
     // Ensure test app is uploaded to Swarm before trying to install it
-    const bzz = new BzzAPI('http://swarm-gateways.net')
+    const bzz = new BzzAPI({ url: 'http://swarm-gateways.net' })
     await bzz.uploadDirectoryFrom(getFixture('test-app'))
     const manifestPath = getFixture('test-app-manifest.json')
 
@@ -154,25 +134,9 @@ describe('Application launch', function() {
     await this.app.client.waitForExist(fileInputSelector, 2000)
     await this.app.client.chooseFile(fileInputSelector, manifestPath)
 
-    const identityInputSelector = '[data-testid="create-identity-input-name"]'
-    await this.app.client.waitForExist(identityInputSelector, 2000)
-    await this.app.client.element(identityInputSelector).setValue('tester')
-
-    const identityButtonSelector =
-      '[data-testid="create-identity-button-submit"]'
-    await this.app.client.waitForExist(identityButtonSelector, 2000)
-    await this.app.client.element(identityButtonSelector).click()
-
-    const identitySelector = '[data-testid="identity-selector-select-tester"]'
-    await this.app.client.waitForExist(identitySelector, 2000)
-    await this.app.client.element(identitySelector).click()
-
-    const appItemSelector = '[data-testid="launcher-open-app"]'
+    const appItemSelector = '[data-testid="installed-app-item"]'
     await this.app.client.waitForExist(appItemSelector, 5000)
     await this.app.client.element(appItemSelector).click()
-
-    await this.app.client.waitForExist(identitySelector, 2000)
-    await this.app.client.element(identitySelector).click()
 
     const count = await this.app.client.getWindowCount()
     assert.equal(count, 3)
