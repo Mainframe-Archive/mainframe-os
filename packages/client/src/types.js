@@ -324,7 +324,7 @@ export type IdentityGetUserContactsResult = {
 export type IdentityUpdateUserParams = {
   userID: string,
   profile: {
-    name?: ?string,
+    name?: string,
     avatar?: ?string,
   },
 }
