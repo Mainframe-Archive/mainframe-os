@@ -363,7 +363,7 @@ export class ContactsView extends Component<Props, State> {
         )
       : userContacts
     return (
-      <ContactsListContainer className="no-z-index">
+      <ContactsListContainer>
         <ContactsListHeader hascontacts={userContacts.length > 0}>
           <ButtonContainer>
             {this.state.searching ? (
@@ -399,14 +399,13 @@ export class ContactsView extends Component<Props, State> {
             <Text variant={['grey', 'small']}>No Contacts</Text>
           </NoContacts>
         ) : (
-          <ScrollView className="no-z-index">
+          <ScrollView>
             {list.map(contact => {
               const selected =
                 this.state.selectedContact &&
                 this.state.selectedContact.localID === contact.localID
               return (
                 <ContactCard
-                  className="no-z-index"
                   key={contact.localID}
                   onPress={() => this.selectContact(contact)}
                   selected={selected}>
@@ -700,7 +699,7 @@ export class ContactsView extends Component<Props, State> {
 
   render() {
     return (
-      <Container className="no-z-index">
+      <Container>
         {this.renderContactsList()}
         {this.renderRightSide()}
         {this.renderAddModal()}

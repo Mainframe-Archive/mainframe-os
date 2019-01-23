@@ -49,7 +49,3 @@ body,
   transition: all 0.3s;
   transform: perspective(400px) rotateY(15deg);
 }
-
-.no-z-index {
-  z-index: initial;
-}
