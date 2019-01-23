@@ -1,4 +1,3 @@
-/* eslint-disable react-native/no-raw-text */
 //@flow
 
 import React, { Component } from 'react'
@@ -86,9 +85,11 @@ export default class OnboardContainerView extends Component<Props> {
         </FormContainer>
         {this.props.step && (
           <Steps>
+            {/*eslint-disable react-native/no-raw-text */}
             <StepIndicator selected={this.props.step === 1}>1</StepIndicator>
             <StepIndicator selected={this.props.step === 2}>2</StepIndicator>
             <StepIndicator selected={this.props.step === 3}>3</StepIndicator>
+            {/*eslint-enable react-native/no-raw-text */}
           </Steps>
         )}
         <BgGraphicContainer>

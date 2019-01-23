@@ -12,7 +12,6 @@ import SideMenu, { type ScreenNames } from './SideMenu'
 import AppsScreen from './apps/AppsScreen'
 import IdentitiesScreen from './identities/IdentitiesScreen'
 import WalletsScreen from './wallets/WalletsScreen'
-// eslint-disable-next-line import/no-named-as-default
 import ContactsScreen from './contacts/ContactsScreen'
 
 const Container = styled.View`
