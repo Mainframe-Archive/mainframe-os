@@ -33,8 +33,6 @@
     }
   },
   "dependencies": {
-    "@erebos/api-bzz-base": "^0.5.1",
-    "@erebos/api-bzz-node": "^0.5.1",
     "@mainframe/app-manifest": "*",
     "@mainframe/app-permissions": "*",
     "@mainframe/client": "*",
@@ -43,13 +41,13 @@
     "@mainframe/rpc-electron": "^0.1.0",
     "@mainframe/rpc-handler": "^0.2.1",
     "@mainframe/toolbox": "*",
-    "@mainframe/utils-base64": "^0.1.1",
     "@mainframe/utils-id": "^0.1.0",
     "@morpheus-ui/core": "0.0.16",
     "@morpheus-ui/fonts": "0.0.1",
     "@morpheus-ui/icons": "0.0.9",
     "electron-store": "^2.0.0",
     "electron-util": "^0.10.2",
+    "mime": "^2.4.0",
     "react": "^16.6.3",
     "react-art": "^16.6.3",
     "react-blockies": "^1.4.0",
