@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 915bf9683fcfec90c15ba662601a520c
+ * @relayHash 54c5059b93b0660447726cdeb4cc1372
  */
 
 /* eslint-disable */
@@ -39,11 +39,11 @@ query WalletsScreenQuery(
   }
 }
 
-fragment WalletsScreen_wallets_3iqrP on WalletsQuery {
+fragment WalletsScreen_wallets_3iqrP on Wallets {
   ...WalletsView_wallets_3iqrP
 }
 
-fragment WalletsView_wallets_3iqrP on WalletsQuery {
+fragment WalletsView_wallets_3iqrP on Wallets {
   ethWallets(userID: $userID) {
     hd {
       localID
@@ -126,7 +126,7 @@ v2 = [
         "name": "balances",
         "storageKey": null,
         "args": null,
-        "concreteType": "WalletBalancesType",
+        "concreteType": "WalletBalances",
         "plural": false,
         "selections": [
           {
@@ -154,7 +154,7 @@ return {
   "operationKind": "query",
   "name": "WalletsScreenQuery",
   "id": null,
-  "text": "query WalletsScreenQuery(\n  $userID: String!\n) {\n  viewer {\n    wallets {\n      ...WalletsScreen_wallets_3iqrP\n    }\n    id\n  }\n}\n\nfragment WalletsScreen_wallets_3iqrP on WalletsQuery {\n  ...WalletsView_wallets_3iqrP\n}\n\nfragment WalletsView_wallets_3iqrP on WalletsQuery {\n  ethWallets(userID: $userID) {\n    hd {\n      localID\n      accounts {\n        name\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n    ledger {\n      localID\n      accounts {\n        name\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n  }\n}\n",
+  "text": "query WalletsScreenQuery(\n  $userID: String!\n) {\n  viewer {\n    wallets {\n      ...WalletsScreen_wallets_3iqrP\n    }\n    id\n  }\n}\n\nfragment WalletsScreen_wallets_3iqrP on Wallets {\n  ...WalletsView_wallets_3iqrP\n}\n\nfragment WalletsView_wallets_3iqrP on Wallets {\n  ethWallets(userID: $userID) {\n    hd {\n      localID\n      accounts {\n        name\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n    ledger {\n      localID\n      accounts {\n        name\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -178,7 +178,7 @@ return {
             "name": "wallets",
             "storageKey": null,
             "args": null,
-            "concreteType": "WalletsQuery",
+            "concreteType": "Wallets",
             "plural": false,
             "selections": [
               {
@@ -219,7 +219,7 @@ return {
             "name": "wallets",
             "storageKey": null,
             "args": null,
-            "concreteType": "WalletsQuery",
+            "concreteType": "Wallets",
             "plural": false,
             "selections": [
               {

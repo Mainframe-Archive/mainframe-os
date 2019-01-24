@@ -301,7 +301,7 @@ class AppsView extends Component<Props, State> {
 
 export default createFragmentContainer(AppsView, {
   apps: graphql`
-    fragment AppsView_apps on AppsQuery {
+    fragment AppsView_apps on Apps {
       installed {
         localID
         ...AppItem_installedApp

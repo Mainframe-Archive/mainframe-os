@@ -128,8 +128,8 @@ export default class Contact {
   }
 
   get connectionState(): ContactConnection {
-    if (this.contactFeed) return 'connected'
-    return this._requestSent ? 'sent' : 'sending'
+    if (!this._requestSent) return 'sending'
+    return this.contactFeed ? 'connected' : 'sent'
   }
 
   firstContactData(): FirstContactSerialized {

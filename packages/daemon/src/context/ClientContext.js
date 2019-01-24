@@ -9,15 +9,11 @@ import type { Vault, VaultRegistry } from '../vault'
 
 import ContextEvents from './ContextEvents'
 import ContextIO from './ContextIO'
-import ContextMutations, { type MutationEventType } from './ContextMutations'
+import ContextMutations from './ContextMutations'
 import ContextQueries from './ContextQueries'
 import ContextSubscriptions from './ContextSubscriptions'
-
-export type ContextEventType = MutationEventType
-
-export type ContextEvent = {
-  type: ContextEventType,
-}
+import { ContactsFeedsHandler } from './FeedsHandler'
+import type { ContextEvent } from './types'
 
 type LogFunc = (...args: Array<any>) => void
 
@@ -40,6 +36,7 @@ export default class ClientContext extends Subject<ContextEvent> {
   socket: Socket
   subscriptions: ContextSubscriptions
   vaults: VaultRegistry
+  contactsFeeds: ContactsFeedsHandler
 
   constructor(params: Params) {
     super()
@@ -53,6 +50,7 @@ export default class ClientContext extends Subject<ContextEvent> {
     this.mutations = new ContextMutations(this)
     this.queries = new ContextQueries(this)
     this.subscriptions = new ContextSubscriptions(this)
+    this.contactsFeeds = new ContactsFeedsHandler(this)
   }
 
   get openVault(): Vault {

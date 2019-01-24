@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash c30ad28ceb51b94d5543e99b7a0aa829
+ * @relayHash 0f94fc6dff94015f55067172e18a9857
  */
 
 /* eslint-disable */
@@ -35,11 +35,11 @@ query AppsScreenQuery {
   }
 }
 
-fragment AppsScreen_apps on AppsQuery {
+fragment AppsScreen_apps on Apps {
   ...AppsView_apps
 }
 
-fragment AppsView_apps on AppsQuery {
+fragment AppsView_apps on Apps {
   installed {
     localID
     ...AppItem_installedApp
@@ -217,7 +217,7 @@ v7 = {
       "name": "profile",
       "storageKey": null,
       "args": null,
-      "concreteType": "OwnUserProfile",
+      "concreteType": "NamedProfile",
       "plural": false,
       "selections": [
         v1
@@ -231,7 +231,7 @@ return {
   "operationKind": "query",
   "name": "AppsScreenQuery",
   "id": null,
-  "text": "query AppsScreenQuery {\n  viewer {\n    apps {\n      ...AppsScreen_apps\n    }\n    id\n  }\n}\n\nfragment AppsScreen_apps on AppsQuery {\n  ...AppsView_apps\n}\n\nfragment AppsView_apps on AppsQuery {\n  installed {\n    localID\n    ...AppItem_installedApp\n    id\n  }\n  own {\n    localID\n    ...AppItem_ownApp\n    id\n  }\n}\n\nfragment AppItem_installedApp on App {\n  localID\n  name\n  manifest {\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n    }\n    author {\n      id\n      name\n    }\n  }\n  users {\n    localID\n    identity {\n      profile {\n        name\n      }\n      id\n    }\n    settings {\n      permissionsSettings {\n        permissionsChecked\n        grants {\n          BLOCKCHAIN_SEND\n          WEB_REQUEST {\n            granted\n            denied\n          }\n        }\n      }\n    }\n    id\n  }\n}\n\nfragment AppItem_ownApp on OwnApp {\n  localID\n  name\n  developer {\n    id\n    name\n  }\n  versions {\n    version\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n    }\n  }\n  users {\n    localID\n    identity {\n      profile {\n        name\n      }\n      id\n    }\n    id\n  }\n}\n",
+  "text": "query AppsScreenQuery {\n  viewer {\n    apps {\n      ...AppsScreen_apps\n    }\n    id\n  }\n}\n\nfragment AppsScreen_apps on Apps {\n  ...AppsView_apps\n}\n\nfragment AppsView_apps on Apps {\n  installed {\n    localID\n    ...AppItem_installedApp\n    id\n  }\n  own {\n    localID\n    ...AppItem_ownApp\n    id\n  }\n}\n\nfragment AppItem_installedApp on App {\n  localID\n  name\n  manifest {\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n    }\n    author {\n      id\n      name\n    }\n  }\n  users {\n    localID\n    identity {\n      profile {\n        name\n      }\n      id\n    }\n    settings {\n      permissionsSettings {\n        permissionsChecked\n        grants {\n          BLOCKCHAIN_SEND\n          WEB_REQUEST {\n            granted\n            denied\n          }\n        }\n      }\n    }\n    id\n  }\n}\n\nfragment AppItem_ownApp on OwnApp {\n  localID\n  name\n  developer {\n    id\n    name\n  }\n  versions {\n    version\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n    }\n  }\n  users {\n    localID\n    identity {\n      profile {\n        name\n      }\n      id\n    }\n    id\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -255,7 +255,7 @@ return {
             "name": "apps",
             "storageKey": null,
             "args": null,
-            "concreteType": "AppsQuery",
+            "concreteType": "Apps",
             "plural": false,
             "selections": [
               {
@@ -289,7 +289,7 @@ return {
             "name": "apps",
             "storageKey": null,
             "args": null,
-            "concreteType": "AppsQuery",
+            "concreteType": "Apps",
             "plural": false,
             "selections": [
               {

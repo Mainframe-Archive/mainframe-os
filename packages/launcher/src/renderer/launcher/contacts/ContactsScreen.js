@@ -21,7 +21,7 @@ type State = {
   data: Array<Object>,
 }
 
-export class ContactsScreenComponent extends Component<Props, State> {
+class ContactsScreenComponent extends Component<Props, State> {
   static contextType = EnvironmentContext
 
   acceptContact = () => {
@@ -48,7 +48,7 @@ const ContactsScreenRelayContainer = createFragmentContainer(
   ContactsScreenComponent,
   {
     contacts: graphql`
-      fragment ContactsScreen_contacts on ContactsQuery
+      fragment ContactsScreen_contacts on Contacts
         @argumentDefinitions(userID: { type: "String!" }) {
         ...ContactsView_contacts @arguments(userID: $userID)
       }

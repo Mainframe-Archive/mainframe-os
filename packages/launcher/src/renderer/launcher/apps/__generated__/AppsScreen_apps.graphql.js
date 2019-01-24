@@ -21,7 +21,7 @@ export type AppsScreen_apps = {|
 const node/*: ConcreteFragment*/ = {
   "kind": "Fragment",
   "name": "AppsScreen_apps",
-  "type": "AppsQuery",
+  "type": "Apps",
   "metadata": null,
   "argumentDefinitions": [],
   "selections": [
@@ -33,5 +33,5 @@ const node/*: ConcreteFragment*/ = {
   ]
 };
 // prettier-ignore
-(node/*: any*/).hash = 'e2342f3cf34c8589001c99fc64c312e9';
+(node/*: any*/).hash = '190ab832e765e8fdce0578811f0cb737';
 module.exports = node;

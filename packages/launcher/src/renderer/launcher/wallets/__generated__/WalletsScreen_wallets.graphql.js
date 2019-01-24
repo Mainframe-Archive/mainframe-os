@@ -21,7 +21,7 @@ export type WalletsScreen_wallets = {|
 const node/*: ConcreteFragment*/ = {
   "kind": "Fragment",
   "name": "WalletsScreen_wallets",
-  "type": "WalletsQuery",
+  "type": "Wallets",
   "metadata": null,
   "argumentDefinitions": [
     {
@@ -47,5 +47,5 @@ const node/*: ConcreteFragment*/ = {
   ]
 };
 // prettier-ignore
-(node/*: any*/).hash = '11e829838834195d86533ed5be8165f5';
+(node/*: any*/).hash = 'f7d69fbf2bbfe9f24d17213aaba27daa';
 module.exports = node;
