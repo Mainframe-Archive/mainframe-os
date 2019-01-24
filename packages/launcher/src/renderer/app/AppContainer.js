@@ -7,6 +7,8 @@ import type { ID } from '@mainframe/utils-id'
 import React, { Component } from 'react'
 import { View, StyleSheet } from 'react-native-web'
 
+import styled from 'styled-components/native/'
+
 import colors from '../colors'
 import Text from '../UIComponents/Text'
 import Button from '../UIComponents/Button'
@@ -51,6 +53,17 @@ type State = {
 }
 
 const store = new Store()
+
+const TitleBar = styled.View`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 20px;
+  background-color: transparent;
+  align-items: center;
+  justify-content: center;
+`
 
 export default class AppContainer extends Component<Props, State> {
   constructor(props: Props) {
@@ -162,14 +175,15 @@ export default class AppContainer extends Component<Props, State> {
     return (
       <View style={styles.outerContainer}>
         <View style={styles.header}>
-          <View style={styles.appInfo}>
-            <Text style={styles.headerLabel}>
-              App:
-              <Text style={styles.boldLabel}>
-                {` ${appSession.app.manifest.name}`}
-              </Text>{' '}
-            </Text>
-          </View>
+          <TitleBar className="draggable">
+            <View style={styles.appInfo}>
+              <Text style={styles.headerLabel}>
+                <Text style={styles.boldLabel}>
+                  {appSession.app.manifest.name}
+                </Text>
+              </Text>
+            </View>
+          </TitleBar>
           {urlBar}
           <View style={styles.identity}>
             <Text style={styles.headerLabel}>
@@ -200,9 +214,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    height: 40,
+    paddingTop: 20,
+    height: 60,
     flexDirection: 'row',
-    backgroundColor: colors.LIGHT_GREY_F7,
+    backgroundColor: colors.GREY_DARK_54,
     alignItems: 'center',
   },
   appInfo: {
@@ -217,7 +232,7 @@ const styles = StyleSheet.create({
   },
   headerLabel: {
     textAlign: 'left',
-    color: colors.GREY_DARK_54,
+    color: colors.LIGHT_GREY_F7,
     fontSize: 12,
   },
   boldLabel: {
@@ -228,12 +243,14 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginRight: 8,
     minWidth: 250,
+    color: colors.LIGHT_GREY_F7,
   },
   rowContainer: {
     flexDirection: 'row',
   },
   urlContainer: {
     alignItems: 'center',
+    marginLeft: 10,
   },
   reloadButton: {
     height: 30,
@@ -243,9 +260,10 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   resetButton: {
-    backgroundColor: colors.GREY_DARK_54,
+    backgroundColor: colors.LIGHT_GREY_F7,
   },
   buttonTextStyle: {
     fontSize: 12,
+    color: colors.GREY_DARK_54,
   },
 })

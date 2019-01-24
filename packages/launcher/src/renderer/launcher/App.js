@@ -20,6 +20,19 @@ const LoadingContainer = styled.View`
   justify-content: center;
 `
 
+const Container = styled.View`
+  flex: 1;
+`
+
+const TitleBar = styled.View`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 20px;
+  background-color: transparent;
+`
+
 type State = {
   vaultsData?: VaultsData,
 }
@@ -83,7 +96,12 @@ export default class App extends Component<{}, State> {
 
   render() {
     return (
-      <MFThemeProvider theme={THEME}>{this.renderContent()}</MFThemeProvider>
+      <MFThemeProvider theme={THEME}>
+        <Container>
+          <TitleBar className="draggable" />
+          {this.renderContent()}
+        </Container>
+      </MFThemeProvider>
     )
   }
 }
