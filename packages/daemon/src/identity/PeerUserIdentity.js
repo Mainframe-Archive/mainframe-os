@@ -11,6 +11,12 @@ export type PeerUserProfile = {
   avatar?: ?string,
 }
 
+export type PublicFeedSerialized = {
+  publicKey: string,
+  profile?: PeerUserProfile,
+  firstContactAddress: hexValue,
+}
+
 export type Feeds = { [type: string]: FeedHash }
 
 export type PeerUserIdentitySerialized = {
@@ -90,5 +96,9 @@ export default class PeerUserIdentity extends Identity {
 
   get avatar(): ?string {
     return this._profile.avatar
+  }
+
+  set profile(profile: PeerUserProfile = {}) {
+    this._profile = profile
   }
 }

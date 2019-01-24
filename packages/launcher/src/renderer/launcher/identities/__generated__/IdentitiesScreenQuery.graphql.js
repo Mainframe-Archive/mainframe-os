@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 71fdf30af863b58310ce3d41bff1e290
+ * @relayHash 2723c2774eca10ac0b7b4d33469a7c49
  */
 
 /* eslint-disable */
@@ -35,11 +35,11 @@ query IdentitiesScreenQuery {
   }
 }
 
-fragment IdentitiesScreen_identities on IdentitiesQuery {
+fragment IdentitiesScreen_identities on Identities {
   ...IdentitiesView_identities
 }
 
-fragment IdentitiesView_identities on IdentitiesQuery {
+fragment IdentitiesView_identities on Identities {
   ownUsers {
     localID
     feedHash
@@ -105,7 +105,7 @@ return {
   "operationKind": "query",
   "name": "IdentitiesScreenQuery",
   "id": null,
-  "text": "query IdentitiesScreenQuery {\n  viewer {\n    identities {\n      ...IdentitiesScreen_identities\n    }\n    id\n  }\n}\n\nfragment IdentitiesScreen_identities on IdentitiesQuery {\n  ...IdentitiesView_identities\n}\n\nfragment IdentitiesView_identities on IdentitiesQuery {\n  ownUsers {\n    localID\n    feedHash\n    profile {\n      name\n    }\n    apps {\n      localID\n      manifest {\n        name\n      }\n      users {\n        settings {\n          permissionsSettings {\n            permissionsChecked\n            grants {\n              BLOCKCHAIN_SEND\n            }\n          }\n        }\n        id\n      }\n      id\n    }\n    id\n  }\n  ownDevelopers {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n}\n",
+  "text": "query IdentitiesScreenQuery {\n  viewer {\n    identities {\n      ...IdentitiesScreen_identities\n    }\n    id\n  }\n}\n\nfragment IdentitiesScreen_identities on Identities {\n  ...IdentitiesView_identities\n}\n\nfragment IdentitiesView_identities on Identities {\n  ownUsers {\n    localID\n    feedHash\n    profile {\n      name\n    }\n    apps {\n      localID\n      manifest {\n        name\n      }\n      users {\n        settings {\n          permissionsSettings {\n            permissionsChecked\n            grants {\n              BLOCKCHAIN_SEND\n            }\n          }\n        }\n        id\n      }\n      id\n    }\n    id\n  }\n  ownDevelopers {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -129,7 +129,7 @@ return {
             "name": "identities",
             "storageKey": null,
             "args": null,
-            "concreteType": "IdentitiesQuery",
+            "concreteType": "Identities",
             "plural": false,
             "selections": [
               {
@@ -163,7 +163,7 @@ return {
             "name": "identities",
             "storageKey": null,
             "args": null,
-            "concreteType": "IdentitiesQuery",
+            "concreteType": "Identities",
             "plural": false,
             "selections": [
               {
@@ -294,7 +294,7 @@ return {
                     "name": "profile",
                     "storageKey": null,
                     "args": null,
-                    "concreteType": "OwnDeveloperProfile",
+                    "concreteType": "NamedProfile",
                     "plural": false,
                     "selections": v1
                   },

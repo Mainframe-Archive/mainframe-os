@@ -234,7 +234,7 @@ const peerLookupQuery = graphql`
   }
 `
 
-export class ContactsViewComponent extends Component<Props, State> {
+class ContactsViewComponent extends Component<Props, State> {
   static contextType = EnvironmentContext
 
   constructor(props: Props) {
@@ -711,7 +711,7 @@ export class ContactsViewComponent extends Component<Props, State> {
 
 const ContactsView = createFragmentContainer(ContactsViewComponent, {
   contacts: graphql`
-    fragment ContactsView_contacts on ContactsQuery
+    fragment ContactsView_contacts on Contacts
       @argumentDefinitions(userID: { type: "String!" }) {
       userContacts(userID: $userID) {
         peerID

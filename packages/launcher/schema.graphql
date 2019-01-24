@@ -136,7 +136,7 @@ input AppPermissionsSettingsInput {
   grants: PermissionGrantsInput!
 }
 
-type AppsQuery {
+type Apps {
   installed: [App]
   own: [OwnApp]
 }
@@ -165,7 +165,7 @@ type Contact implements Node {
   localID: ID!
   peerID: ID!
   pubKey: String!
-  profile: ContactProfile!
+  profile: GenericProfile!
   connectionState: ContactConnection!
 }
 
@@ -174,12 +174,7 @@ enum ContactConnection {
   SENT
 }
 
-type ContactProfile {
-  name: String!
-  avatar: String
-}
-
-type ContactsQuery {
+type Contacts {
   userContacts(userID: String!): [Contact]
 }
 
@@ -259,7 +254,12 @@ type EthWallets {
   ledger: [EthLedgerWallet]
 }
 
-type IdentitiesQuery {
+type GenericProfile {
+  name: String
+  avatar: String
+}
+
+type Identities {
   ownUsers: [OwnUserIdentity]
   ownDevelopers: [OwnDeveloperIdentity]
 }
@@ -298,10 +298,15 @@ type Mutation {
   setDefaultWallet(input: SetDefaultWalletInput!): SetDefaultWalletPayload
 }
 
+type NamedProfile {
+  name: String!
+  avatar: String
+}
+
 type NamedWalletAccountType {
   name: String!
   address: String!
-  balances: WalletBalancesType!
+  balances: WalletBalances!
 }
 
 """An object with an ID"""
@@ -326,11 +331,7 @@ type OwnDeveloperIdentity implements Node {
   localID: ID!
   mfid: ID!
   pubKey: String!
-  profile: OwnDeveloperProfile
-}
-
-type OwnDeveloperProfile {
-  name: String!
+  profile: NamedProfile!
 }
 
 type OwnUserIdentity implements Node {
@@ -352,10 +353,10 @@ type OwnUserProfile {
 
 type Peer {
   publicKey: String!
-  profile: ContactProfile!
+  profile: GenericProfile!
 }
 
-type PeersQuery {
+type Peers {
   peerLookupByFeed(feedHash: String!): Peer
 }
 
@@ -373,7 +374,7 @@ type Query {
     id: ID!
   ): Node
   viewer: Viewer!
-  peers: PeersQuery!
+  peers: Peers!
 }
 
 input SetDefaultWalletInput {
@@ -388,7 +389,7 @@ type SetDefaultWalletPayload {
 }
 
 type Subscription {
-  appCreated: OwnApp!
+  contactChanged: Contact!
 }
 
 enum SupportedWallets {
@@ -402,18 +403,18 @@ input UserProfileInput {
 
 type Viewer {
   id: ID!
-  apps: AppsQuery!
-  contacts: ContactsQuery!
-  identities: IdentitiesQuery!
-  wallets: WalletsQuery!
+  apps: Apps!
+  contacts: Contacts!
+  identities: Identities!
+  wallets: Wallets!
 }
 
-type WalletBalancesType {
+type WalletBalances {
   eth: String!
   mft: String!
 }
 
-type WalletsQuery {
+type Wallets {
   ethWallets(userID: String!): EthWallets!
 }
 

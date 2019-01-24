@@ -21,7 +21,7 @@ export type IdentitiesScreen_identities = {|
 const node/*: ConcreteFragment*/ = {
   "kind": "Fragment",
   "name": "IdentitiesScreen_identities",
-  "type": "IdentitiesQuery",
+  "type": "Identities",
   "metadata": null,
   "argumentDefinitions": [],
   "selections": [
@@ -33,5 +33,5 @@ const node/*: ConcreteFragment*/ = {
   ]
 };
 // prettier-ignore
-(node/*: any*/).hash = '3c803c7e306a17d3f84a52eb37b4f956';
+(node/*: any*/).hash = '636dcae4cb62af26f3fc20fa6a477925';
 module.exports = node;

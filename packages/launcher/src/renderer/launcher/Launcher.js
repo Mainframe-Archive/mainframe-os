@@ -124,7 +124,7 @@ class Launcher extends Component<Props, State> {
 
 const LauncherRelayContainer = createFragmentContainer(Launcher, {
   identities: graphql`
-    fragment Launcher_identities on IdentitiesQuery {
+    fragment Launcher_identities on Identities {
       ownUsers {
         defaultEthAddress
         localID

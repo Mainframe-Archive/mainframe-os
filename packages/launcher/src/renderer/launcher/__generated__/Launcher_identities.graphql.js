@@ -42,7 +42,7 @@ v1 = [
 return {
   "kind": "Fragment",
   "name": "Launcher_identities",
-  "type": "IdentitiesQuery",
+  "type": "Identities",
   "metadata": null,
   "argumentDefinitions": [],
   "selections": [
@@ -100,5 +100,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '58670fd4e8ce47c7290062199c93aeaa';
+(node/*: any*/).hash = '82938eb56aaddef4d1a16c90b79c2828';
 module.exports = node;

@@ -36,7 +36,7 @@ export type IdentitiesView_identities = {|
   |}>,
   +ownDevelopers: ?$ReadOnlyArray<?{|
     +localID: string,
-    +profile: ?{|
+    +profile: {|
       +name: string
     |},
   |}>,
@@ -65,7 +65,7 @@ v1 = [
 return {
   "kind": "Fragment",
   "name": "IdentitiesView_identities",
-  "type": "IdentitiesQuery",
+  "type": "Identities",
   "metadata": null,
   "argumentDefinitions": [],
   "selections": [
@@ -194,7 +194,7 @@ return {
           "name": "profile",
           "storageKey": null,
           "args": null,
-          "concreteType": "OwnDeveloperProfile",
+          "concreteType": "NamedProfile",
           "plural": false,
           "selections": v1
         }
@@ -204,5 +204,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '0e179cacbc6c191308e8031215cde4c4';
+(node/*: any*/).hash = '4e7318a7227ec8695f1b723901bc22ef';
 module.exports = node;

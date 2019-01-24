@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 19a1da24ecbcc4d472f0c386aefc14a5
+ * @relayHash 5def09ab83fc0b73c98421ffe8072605
  */
 
 /* eslint-disable */
@@ -57,7 +57,7 @@ mutation WalletsViewSetDefaultWalletMutation(
   }
 }
 
-fragment Launcher_identities on IdentitiesQuery {
+fragment Launcher_identities on Identities {
   ownUsers {
     defaultEthAddress
     localID
@@ -75,7 +75,7 @@ fragment Launcher_identities on IdentitiesQuery {
   }
 }
 
-fragment WalletsView_wallets_3iqrP on WalletsQuery {
+fragment WalletsView_wallets_3iqrP on Wallets {
   ethWallets(userID: $userID) {
     hd {
       localID
@@ -177,7 +177,7 @@ v5 = [
         "name": "balances",
         "storageKey": null,
         "args": null,
-        "concreteType": "WalletBalancesType",
+        "concreteType": "WalletBalances",
         "plural": false,
         "selections": [
           {
@@ -205,7 +205,7 @@ return {
   "operationKind": "mutation",
   "name": "WalletsViewSetDefaultWalletMutation",
   "id": null,
-  "text": "mutation WalletsViewSetDefaultWalletMutation(\n  $input: SetDefaultWalletInput!\n  $userID: String!\n) {\n  setDefaultWallet(input: $input) {\n    viewer {\n      identities {\n        ...Launcher_identities\n      }\n      wallets {\n        ...WalletsView_wallets_3iqrP\n      }\n      id\n    }\n  }\n}\n\nfragment Launcher_identities on IdentitiesQuery {\n  ownUsers {\n    defaultEthAddress\n    localID\n    wallets {\n      hd {\n        localID\n        id\n      }\n      ledger {\n        localID\n        id\n      }\n    }\n    id\n  }\n}\n\nfragment WalletsView_wallets_3iqrP on WalletsQuery {\n  ethWallets(userID: $userID) {\n    hd {\n      localID\n      accounts {\n        name\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n    ledger {\n      localID\n      accounts {\n        name\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n  }\n}\n",
+  "text": "mutation WalletsViewSetDefaultWalletMutation(\n  $input: SetDefaultWalletInput!\n  $userID: String!\n) {\n  setDefaultWallet(input: $input) {\n    viewer {\n      identities {\n        ...Launcher_identities\n      }\n      wallets {\n        ...WalletsView_wallets_3iqrP\n      }\n      id\n    }\n  }\n}\n\nfragment Launcher_identities on Identities {\n  ownUsers {\n    defaultEthAddress\n    localID\n    wallets {\n      hd {\n        localID\n        id\n      }\n      ledger {\n        localID\n        id\n      }\n    }\n    id\n  }\n}\n\nfragment WalletsView_wallets_3iqrP on Wallets {\n  ethWallets(userID: $userID) {\n    hd {\n      localID\n      accounts {\n        name\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n    ledger {\n      localID\n      accounts {\n        name\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -238,7 +238,7 @@ return {
                 "name": "identities",
                 "storageKey": null,
                 "args": null,
-                "concreteType": "IdentitiesQuery",
+                "concreteType": "Identities",
                 "plural": false,
                 "selections": [
                   {
@@ -254,7 +254,7 @@ return {
                 "name": "wallets",
                 "storageKey": null,
                 "args": null,
-                "concreteType": "WalletsQuery",
+                "concreteType": "Wallets",
                 "plural": false,
                 "selections": [
                   {
@@ -306,7 +306,7 @@ return {
                 "name": "identities",
                 "storageKey": null,
                 "args": null,
-                "concreteType": "IdentitiesQuery",
+                "concreteType": "Identities",
                 "plural": false,
                 "selections": [
                   {
@@ -368,7 +368,7 @@ return {
                 "name": "wallets",
                 "storageKey": null,
                 "args": null,
-                "concreteType": "WalletsQuery",
+                "concreteType": "Wallets",
                 "plural": false,
                 "selections": [
                   {

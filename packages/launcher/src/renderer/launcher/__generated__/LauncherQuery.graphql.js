@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 48a2de22060b5f84c3d0a29b0e96dd73
+ * @relayHash 4519e46e1b508ccc411f552ab2526032
  */
 
 /* eslint-disable */
@@ -35,7 +35,7 @@ query LauncherQuery {
   }
 }
 
-fragment Launcher_identities on IdentitiesQuery {
+fragment Launcher_identities on Identities {
   ownUsers {
     defaultEthAddress
     localID
@@ -78,7 +78,7 @@ return {
   "operationKind": "query",
   "name": "LauncherQuery",
   "id": null,
-  "text": "query LauncherQuery {\n  viewer {\n    identities {\n      ...Launcher_identities\n    }\n    id\n  }\n}\n\nfragment Launcher_identities on IdentitiesQuery {\n  ownUsers {\n    defaultEthAddress\n    localID\n    wallets {\n      hd {\n        localID\n        id\n      }\n      ledger {\n        localID\n        id\n      }\n    }\n    id\n  }\n}\n",
+  "text": "query LauncherQuery {\n  viewer {\n    identities {\n      ...Launcher_identities\n    }\n    id\n  }\n}\n\nfragment Launcher_identities on Identities {\n  ownUsers {\n    defaultEthAddress\n    localID\n    wallets {\n      hd {\n        localID\n        id\n      }\n      ledger {\n        localID\n        id\n      }\n    }\n    id\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -102,7 +102,7 @@ return {
             "name": "identities",
             "storageKey": null,
             "args": null,
-            "concreteType": "IdentitiesQuery",
+            "concreteType": "Identities",
             "plural": false,
             "selections": [
               {
@@ -136,7 +136,7 @@ return {
             "name": "identities",
             "storageKey": null,
             "args": null,
-            "concreteType": "IdentitiesQuery",
+            "concreteType": "Identities",
             "plural": false,
             "selections": [
               {

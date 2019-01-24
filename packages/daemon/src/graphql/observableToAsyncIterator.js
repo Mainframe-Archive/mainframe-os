@@ -9,6 +9,7 @@ export type SubscriptionIterator<T> = AsyncIterator<T> & {
 // Adapted from https://github.com/graphql/graphql-js/blob/master/src/subscription/__tests__/eventEmitterAsyncIterator.js
 const observableToAsyncIterator = <T>(
   observable: Observable<T>,
+  dispose?: () => void,
 ): AsyncIterator<T> => {
   const pullQueue = []
   const pushQueue = []
@@ -42,6 +43,9 @@ const observableToAsyncIterator = <T>(
       }
       pullQueue.length = 0
       pushQueue.length = 0
+      if (dispose != null) {
+        dispose()
+      }
     }
   }
 

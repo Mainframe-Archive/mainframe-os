@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash e63d1d3ffcd5929114b9cfcc3bf0bade
+ * @relayHash 6cb8d2f7e4d6c08fe7b43252899e4fe0
  */
 
 /* eslint-disable */
@@ -73,7 +73,7 @@ mutation OnboardIdentityViewCreateUserIdentityMutation(
   }
 }
 
-fragment Launcher_identities on IdentitiesQuery {
+fragment Launcher_identities on Identities {
   ownUsers {
     defaultEthAddress
     localID
@@ -157,7 +157,7 @@ return {
   "operationKind": "mutation",
   "name": "OnboardIdentityViewCreateUserIdentityMutation",
   "id": null,
-  "text": "mutation OnboardIdentityViewCreateUserIdentityMutation(\n  $input: CreateUserIdentityInput!\n) {\n  createUserIdentity(input: $input) {\n    user {\n      localID\n      profile {\n        name\n      }\n      id\n    }\n    viewer {\n      identities {\n        ownUsers {\n          defaultEthAddress\n          localID\n          id\n        }\n        ...Launcher_identities\n      }\n      id\n    }\n  }\n}\n\nfragment Launcher_identities on IdentitiesQuery {\n  ownUsers {\n    defaultEthAddress\n    localID\n    wallets {\n      hd {\n        localID\n        id\n      }\n      ledger {\n        localID\n        id\n      }\n    }\n    id\n  }\n}\n",
+  "text": "mutation OnboardIdentityViewCreateUserIdentityMutation(\n  $input: CreateUserIdentityInput!\n) {\n  createUserIdentity(input: $input) {\n    user {\n      localID\n      profile {\n        name\n      }\n      id\n    }\n    viewer {\n      identities {\n        ownUsers {\n          defaultEthAddress\n          localID\n          id\n        }\n        ...Launcher_identities\n      }\n      id\n    }\n  }\n}\n\nfragment Launcher_identities on Identities {\n  ownUsers {\n    defaultEthAddress\n    localID\n    wallets {\n      hd {\n        localID\n        id\n      }\n      ledger {\n        localID\n        id\n      }\n    }\n    id\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -203,7 +203,7 @@ return {
                 "name": "identities",
                 "storageKey": null,
                 "args": null,
-                "concreteType": "IdentitiesQuery",
+                "concreteType": "Identities",
                 "plural": false,
                 "selections": [
                   {
@@ -275,7 +275,7 @@ return {
                 "name": "identities",
                 "storageKey": null,
                 "args": null,
-                "concreteType": "IdentitiesQuery",
+                "concreteType": "Identities",
                 "plural": false,
                 "selections": [
                   {

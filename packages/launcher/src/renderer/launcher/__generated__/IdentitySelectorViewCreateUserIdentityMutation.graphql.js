@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash b4ef967f9d9ce111978b1c7d1eb70417
+ * @relayHash a861065a1c266d570ac0da8a88159886
  */
 
 /* eslint-disable */
@@ -36,7 +36,7 @@ export type IdentitySelectorViewCreateUserIdentityMutationResponse = {|
           |}
         |}>,
         +ownDevelopers: ?$ReadOnlyArray<?{|
-          +profile: ?{|
+          +profile: {|
             +name: string
           |}
         |}>,
@@ -133,7 +133,7 @@ v5 = {
   "name": "profile",
   "storageKey": null,
   "args": null,
-  "concreteType": "OwnDeveloperProfile",
+  "concreteType": "NamedProfile",
   "plural": false,
   "selections": v3
 },
@@ -195,7 +195,7 @@ return {
                 "name": "identities",
                 "storageKey": null,
                 "args": null,
-                "concreteType": "IdentitiesQuery",
+                "concreteType": "Identities",
                 "plural": false,
                 "selections": [
                   {
@@ -273,7 +273,7 @@ return {
                 "name": "identities",
                 "storageKey": null,
                 "args": null,
-                "concreteType": "IdentitiesQuery",
+                "concreteType": "Identities",
                 "plural": false,
                 "selections": [
                   {
