@@ -140,7 +140,7 @@ export default class ContextMutations {
     if (peer == null) {
       throw new Error('Peer not found')
     }
-    peer.updateProfile(profile)
+    peer.profile = profile
     this._context.next({ type: 'peer_changed', peer })
   }
 
