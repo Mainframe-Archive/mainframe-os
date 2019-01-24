@@ -7,8 +7,6 @@ import {
 } from '@mainframe/client'
 import { dialog } from 'electron'
 import type { Subscription as RxSubscription } from 'rxjs'
-import { pubKeyToAddress } from '@erebos/api-bzz-base'
-
 import { type AppContext, ContextSubscription } from '../contexts'
 import { withPermission } from '../permissions'
 import { PrependInitializationVector } from '../storage'
@@ -138,20 +136,18 @@ export const sandboxed = {
             if (filePaths.length !== 0) {
               try {
                 const filePath = filePaths[0]
-                const { encryptionKey, feedHash, feedKeyPair } = ctx.storage
-                const pubKey = feedKeyPair.getPublic(feedKeyPair)
-                const address = pubKeyToAddress(pubKey)
+                const { address, encryptionKey, feedHash } = ctx.storage
 
                 // TODO: move out encryption code to a separate file
                 const iv = crypto.randomBytes(16) // TODO: use a constant for the length of the IV
                 const cipher = crypto.createCipheriv('aes256', encryptionKey, iv)
-                const body = createReadStream(filePath).pipe(cipher).pipe(new PrependInitializationVector(iv))
-                const dataHash = await ctx.bzz._upload(body, {}, { 'content-type': mime.getType(filePath) })
+                const stream = createReadStream(filePath).pipe(cipher).pipe(new PrependInitializationVector(iv))
                 const feedManifest = feedHash || await ctx.bzz.createFeedManifest(address)
-                const feedMetaData = await ctx.bzz.getFeedMetadata(feedManifest)
-                const postFeedReq = await ctx.bzz.postFeedValue(feedKeyPair, `0x${dataHash}`)
-                const url = await ctx.bzz.getDownloadURL(feedManifest, { mode: 'default' })
-
+                const [dataHash, feedMetadata] = await Promise.all([
+                  ctx.bzz.uploadFileStream(stream, { contentType: mime.getType(filePath) }),
+                  ctx.bzz.getFeedMetadata(feedManifest),
+                ])
+                await ctx.bzz.postFeedValue(feedMetadata, `0x${dataHash}`)
                 // TODO: persist to the vault, atm feedHash is lost with the current session
                 ctx.storage.feedHash = feedManifest
                 resolve(params.name)

@@ -1,6 +1,8 @@
 // @flow
 
-import { createKeyPair, type KeyPair } from '@erebos/api-bzz-base'
+import { createKeyPair, sign } from '@erebos/secp256k1'
+import { pubKeyToAddress } from '@erebos/keccak256'
+import type { SignFeedDigestFunc } from '@erebos/api-bzz-base'
 import BzzAPI from '@erebos/api-bzz-node'
 import type Client, { AppOpenResult, VaultSettings } from '@mainframe/client'
 import type { VaultConfig } from '@mainframe/config'
@@ -88,9 +90,10 @@ export type AppContextParams = {
 }
 
 type AppStorageSettings = {
+  address: string,
   encryptionKey: Buffer,
   feedHash: ?string,
-  feedKeyPair: KeyPair,
+  signFeedDigest: SignFeedDigestFunc,
 }
 
 export class AppContext extends Context {
@@ -114,17 +117,23 @@ export class AppContext extends Context {
 
   get bzz(): BzzAPI {
     if (this._bzz == null) {
-      this._bzz = new BzzAPI(this.settings.bzzURL)
+      this._bzz = new BzzAPI({
+        url: this.settings.bzzURL,
+        signFeedDigest: this.storage.signFeedDigest,
+      })
     }
     return this._bzz
   }
 
   get storage(): AppStorageSettings {
     if (this._storage == null) {
+      const keyPair = createKeyPair(this.appSession.storage.feedKey, 'hex')
+      const privKey = keyPair.getPrivate()
       this._storage = {
+        address: pubKeyToAddress(keyPair.getPublic().encode()),
         encryptionKey: decodeBase64(this.appSession.storage.encryptionKey),
         feedHash: this.appSession.storage.feedHash,
-        feedKeyPair: createKeyPair(this.appSession.storage.feedKey, 'hex'),
+        signFeedDigest: async digest => sign(digest, privKey),
       }
     }
     return this._storage

@@ -33,6 +33,7 @@
     }
   },
   "dependencies": {
+    "@erebos/secp256k1": "^0.6.0",
     "@mainframe/app-manifest": "*",
     "@mainframe/app-permissions": "*",
     "@mainframe/client": "*",
