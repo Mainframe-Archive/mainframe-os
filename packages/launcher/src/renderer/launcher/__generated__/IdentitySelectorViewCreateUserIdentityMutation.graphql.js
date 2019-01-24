@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash a861065a1c266d570ac0da8a88159886
+ * @relayHash 0d4e257289c089d750b70ab4e2fe65ab
  */
 
 /* eslint-disable */
@@ -24,14 +24,14 @@ export type IdentitySelectorViewCreateUserIdentityMutationResponse = {|
   +createUserIdentity: ?{|
     +user: ?{|
       +localID: string,
-      +profile: ?{|
+      +profile: {|
         +name: string
       |},
     |},
     +viewer: {|
       +identities: {|
         +ownUsers: ?$ReadOnlyArray<?{|
-          +profile: ?{|
+          +profile: {|
             +name: string
           |}
         |}>,
@@ -108,26 +108,7 @@ v2 = {
   "args": null,
   "storageKey": null
 },
-v3 = [
-  {
-    "kind": "ScalarField",
-    "alias": null,
-    "name": "name",
-    "args": null,
-    "storageKey": null
-  }
-],
-v4 = {
-  "kind": "LinkedField",
-  "alias": null,
-  "name": "profile",
-  "storageKey": null,
-  "args": null,
-  "concreteType": "OwnUserProfile",
-  "plural": false,
-  "selections": v3
-},
-v5 = {
+v3 = {
   "kind": "LinkedField",
   "alias": null,
   "name": "profile",
@@ -135,15 +116,30 @@ v5 = {
   "args": null,
   "concreteType": "NamedProfile",
   "plural": false,
-  "selections": v3
+  "selections": [
+    {
+      "kind": "ScalarField",
+      "alias": null,
+      "name": "name",
+      "args": null,
+      "storageKey": null
+    }
+  ]
 },
-v6 = {
+v4 = [
+  v3
+],
+v5 = {
   "kind": "ScalarField",
   "alias": null,
   "name": "id",
   "args": null,
   "storageKey": null
-};
+},
+v6 = [
+  v3,
+  v5
+];
 return {
   "kind": "Request",
   "operationKind": "mutation",
@@ -177,7 +173,7 @@ return {
             "plural": false,
             "selections": [
               v2,
-              v4
+              v3
             ]
           },
           {
@@ -206,9 +202,7 @@ return {
                     "args": null,
                     "concreteType": "OwnUserIdentity",
                     "plural": true,
-                    "selections": [
-                      v4
-                    ]
+                    "selections": v4
                   },
                   {
                     "kind": "LinkedField",
@@ -218,9 +212,7 @@ return {
                     "args": null,
                     "concreteType": "OwnDeveloperIdentity",
                     "plural": true,
-                    "selections": [
-                      v5
-                    ]
+                    "selections": v4
                   }
                 ]
               }
@@ -254,8 +246,8 @@ return {
             "plural": false,
             "selections": [
               v2,
-              v4,
-              v6
+              v3,
+              v5
             ]
           },
           {
@@ -284,10 +276,7 @@ return {
                     "args": null,
                     "concreteType": "OwnUserIdentity",
                     "plural": true,
-                    "selections": [
-                      v4,
-                      v6
-                    ]
+                    "selections": v6
                   },
                   {
                     "kind": "LinkedField",
@@ -297,14 +286,11 @@ return {
                     "args": null,
                     "concreteType": "OwnDeveloperIdentity",
                     "plural": true,
-                    "selections": [
-                      v5,
-                      v6
-                    ]
+                    "selections": v6
                   }
                 ]
               },
-              v6
+              v5
             ]
           }
         ]

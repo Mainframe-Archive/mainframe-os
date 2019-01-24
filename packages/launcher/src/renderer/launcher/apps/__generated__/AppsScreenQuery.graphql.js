@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 92ac97a62adcdeca1c40a9aa60ea6624
+ * @relayHash 0f94fc6dff94015f55067172e18a9857
  */
 
 /* eslint-disable */
@@ -217,7 +217,7 @@ v7 = {
       "name": "profile",
       "storageKey": null,
       "args": null,
-      "concreteType": "OwnUserProfile",
+      "concreteType": "NamedProfile",
       "plural": false,
       "selections": [
         v1

@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 6cb8d2f7e4d6c08fe7b43252899e4fe0
+ * @relayHash 8b9ad5223b33f9748c614ab3f42a4d46
  */
 
 /* eslint-disable */
@@ -25,7 +25,7 @@ export type OnboardIdentityViewCreateUserIdentityMutationResponse = {|
   +createUserIdentity: ?{|
     +user: ?{|
       +localID: string,
-      +profile: ?{|
+      +profile: {|
         +name: string
       |},
     |},
@@ -122,7 +122,7 @@ v3 = {
   "name": "profile",
   "storageKey": null,
   "args": null,
-  "concreteType": "OwnUserProfile",
+  "concreteType": "NamedProfile",
   "plural": false,
   "selections": [
     {
