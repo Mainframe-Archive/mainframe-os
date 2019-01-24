@@ -7,7 +7,7 @@ import type { ID } from '@mainframe/utils-id'
 import React, { Component } from 'react'
 import { View, StyleSheet } from 'react-native-web'
 
-import styled from 'styled-components/native/'
+import styled from 'styled-components/native'
 
 import colors from '../colors'
 import Text from '../UIComponents/Text'
