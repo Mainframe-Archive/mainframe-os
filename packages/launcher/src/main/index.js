@@ -146,17 +146,19 @@ const createLauncherWindow = async () => {
     client,
     launchApp,
     vaultConfig,
+    window: launcherWindow,
   })
   createRPCChannels(launcherContext, contextsByWindow)
 
   // Emitted when the window is closed.
-  launcherWindow.on('closed', () => {
+  launcherWindow.on('closed', async () => {
     // TODO: fix below to not error on close
     // const keys = Object.keys(appWindows)
     // Object.keys(appWindows).forEach(w => {
     //   appWindows[w].close()
     // })
     launcherWindow = null
+    await launcherContext.clear()
   })
 }
 

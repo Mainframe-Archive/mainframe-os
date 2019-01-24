@@ -17,6 +17,10 @@ export type WalletsView_wallets = {|
       +accounts: ?$ReadOnlyArray<?{|
         +name: string,
         +address: string,
+        +balances: {|
+          +eth: string,
+          +mft: string,
+        |},
       |}>,
     |}>,
     +ledger: ?$ReadOnlyArray<?{|
@@ -24,6 +28,10 @@ export type WalletsView_wallets = {|
       +accounts: ?$ReadOnlyArray<?{|
         +name: string,
         +address: string,
+        +balances: {|
+          +eth: string,
+          +mft: string,
+        |},
       |}>,
     |}>,
   |},
@@ -63,6 +71,31 @@ var v0 = [
         "name": "address",
         "args": null,
         "storageKey": null
+      },
+      {
+        "kind": "LinkedField",
+        "alias": null,
+        "name": "balances",
+        "storageKey": null,
+        "args": null,
+        "concreteType": "WalletBalances",
+        "plural": false,
+        "selections": [
+          {
+            "kind": "ScalarField",
+            "alias": null,
+            "name": "eth",
+            "args": null,
+            "storageKey": null
+          },
+          {
+            "kind": "ScalarField",
+            "alias": null,
+            "name": "mft",
+            "args": null,
+            "storageKey": null
+          }
+        ]
       }
     ]
   }
@@ -70,16 +103,30 @@ var v0 = [
 return {
   "kind": "Fragment",
   "name": "WalletsView_wallets",
-  "type": "WalletsQuery",
+  "type": "Wallets",
   "metadata": null,
-  "argumentDefinitions": [],
+  "argumentDefinitions": [
+    {
+      "kind": "LocalArgument",
+      "name": "userID",
+      "type": "String!",
+      "defaultValue": null
+    }
+  ],
   "selections": [
     {
       "kind": "LinkedField",
       "alias": null,
       "name": "ethWallets",
       "storageKey": null,
-      "args": null,
+      "args": [
+        {
+          "kind": "Variable",
+          "name": "userID",
+          "variableName": "userID",
+          "type": "String!"
+        }
+      ],
       "concreteType": "EthWallets",
       "plural": false,
       "selections": [
@@ -109,5 +156,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '1137417336431082f3b1cfdfea25c787';
+(node/*: any*/).hash = '6122ce4dd7aae54f4ef063f5ed5b64a3';
 module.exports = node;

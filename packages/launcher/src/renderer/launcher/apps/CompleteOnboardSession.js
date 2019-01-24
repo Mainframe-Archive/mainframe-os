@@ -4,8 +4,6 @@ import styled from 'styled-components/native'
 import { Button, Text } from '@morpheus-ui/core'
 
 //import Icons
-import IdentityIcon from '@morpheus-ui/icons/IdentityMd'
-import IdentityFilledIcon from '@morpheus-ui/icons/IdentityFilledMd'
 import ContactsIcon from '@morpheus-ui/icons/ContactsMd'
 import ContactsFilledIcon from '@morpheus-ui/icons/ContactsFilledMd'
 import WalletsIcon from '@morpheus-ui/icons/WalletsMd'
@@ -13,11 +11,6 @@ import WalletsFilledIcon from '@morpheus-ui/icons/WalletsFilledMd'
 import SkipIcon from '@morpheus-ui/icons/ArrowRightSm'
 
 const BUTTONS: Object = {
-  identities: {
-    title: 'Complete identity',
-    Icon: IdentityIcon,
-    HoverIcon: IdentityFilledIcon,
-  },
   wallets: {
     title: 'Setup your wallet',
     Icon: WalletsIcon,
@@ -30,7 +23,7 @@ const BUTTONS: Object = {
   },
 }
 
-const BUTTONS_LIST = ['identities', 'wallets', 'contacts']
+const BUTTONS_LIST = ['wallets', 'contacts']
 
 const ButtonsContainer = styled.View`
   padding: 20px 0;

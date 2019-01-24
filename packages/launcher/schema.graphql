@@ -1,7 +1,21 @@
+input AddContactInput {
+  userID: String!
+  publicFeed: String!
+  aliasName: String
+  clientMutationId: String
+}
+
+type AddContactPayload {
+  contact: Contact
+  viewer: Viewer!
+  clientMutationId: String
+}
+
 input AddHDWalletAccountInput {
   walletID: String!
   index: Int!
   name: String!
+  userID: String
   clientMutationId: String
 }
 
@@ -14,12 +28,13 @@ type AddHDWalletAccountPayload {
 input AddLedgerWalletAccountInput {
   index: Int!
   name: String!
+  userID: String
   clientMutationId: String
 }
 
 type AddLedgerWalletAccountPayload {
   address: String!
-  walletID: String!
+  localID: String!
   viewer: Viewer!
   clientMutationId: String
 }
@@ -121,7 +136,7 @@ input AppPermissionsSettingsInput {
   grants: PermissionGrantsInput!
 }
 
-type AppsQuery {
+type Apps {
   installed: [App]
   own: [OwnApp]
 }
@@ -144,6 +159,25 @@ type AppVersionData {
   publicationState: String!
 }
 
+type Contact implements Node {
+  """The ID of an object"""
+  id: ID!
+  localID: ID!
+  peerID: ID!
+  pubKey: String!
+  profile: GenericProfile!
+  connectionState: ContactConnection!
+}
+
+enum ContactConnection {
+  CONNECTED
+  SENT
+}
+
+type Contacts {
+  userContacts(userID: String!): [Contact]
+}
+
 input CreateDeveloperIdentityInput {
   profile: UserProfileInput!
   clientMutationId: String
@@ -156,9 +190,9 @@ type CreateDeveloperIdentityPayload {
 }
 
 input CreateHDWalletInput {
-  type: SupportedWallets!
+  blockchain: SupportedWallets!
   name: String!
-  linkToUserId: String
+  userID: String
   clientMutationId: String
 }
 
@@ -175,6 +209,16 @@ input CreateUserIdentityInput {
 
 type CreateUserIdentityPayload {
   user: OwnUserIdentity
+  viewer: Viewer!
+  clientMutationId: String
+}
+
+input DeletContactInput {
+  contactID: String!
+  clientMutationId: String
+}
+
+type DeletContactPayload {
   viewer: Viewer!
   clientMutationId: String
 }
@@ -209,16 +253,21 @@ type EthWallets {
   ledger: [EthLedgerWallet]
 }
 
-type IdentitiesQuery {
+type GenericProfile {
+  name: String
+  avatar: String
+}
+
+type Identities {
   ownUsers: [OwnUserIdentity]
   ownDevelopers: [OwnDeveloperIdentity]
 }
 
 input ImportHDWalletInput {
-  type: SupportedWallets!
+  blockchain: SupportedWallets!
   mnemonic: String!
   name: String!
-  linkToUserId: String
+  userID: String
   clientMutationId: String
 }
 
@@ -243,11 +292,20 @@ type Mutation {
   addHDWalletAccount(input: AddHDWalletAccountInput!): AddHDWalletAccountPayload
   addLedgerWalletAccount(input: AddLedgerWalletAccountInput!): AddLedgerWalletAccountPayload
   deleteWallet(input: DeleteWalletInput!): DeleteWalletPayload
+  addContact(input: AddContactInput!): AddContactPayload
+  deleteContact(input: DeletContactInput!): DeletContactPayload
+  setDefaultWallet(input: SetDefaultWalletInput!): SetDefaultWalletPayload
+}
+
+type NamedProfile {
+  name: String!
+  avatar: String
 }
 
 type NamedWalletAccountType {
   name: String!
   address: String!
+  balances: WalletBalances!
 }
 
 """An object with an ID"""
@@ -272,26 +330,29 @@ type OwnDeveloperIdentity implements Node {
   localID: ID!
   mfid: ID!
   pubKey: String!
-  profile: OwnDeveloperProfile
-}
-
-type OwnDeveloperProfile {
-  name: String!
+  profile: NamedProfile!
 }
 
 type OwnUserIdentity implements Node {
   """The ID of an object"""
   id: ID!
   localID: ID!
+  feedHash: String!
   mfid: ID!
   apps: [App]
-  wallets: [UserWalletType]
-  profile: OwnUserProfile
+  defaultEthAddress: String
+  wallets: [UserWallet]
+  profile: NamedProfile!
   pubKey: String!
 }
 
-type OwnUserProfile {
-  name: String!
+type Peer {
+  publicKey: String!
+  profile: GenericProfile!
+}
+
+type Peers {
+  peerLookupByFeed(feedHash: String!): Peer
 }
 
 input PermissionGrantsInput {
@@ -308,6 +369,22 @@ type Query {
     id: ID!
   ): Node
   viewer: Viewer!
+  peers: Peers!
+}
+
+input SetDefaultWalletInput {
+  userID: String!
+  address: String!
+  clientMutationId: String
+}
+
+type SetDefaultWalletPayload {
+  viewer: Viewer!
+  clientMutationId: String
+}
+
+type Subscription {
+  contactChanged: Contact!
 }
 
 enum SupportedWallets {
@@ -319,20 +396,26 @@ input UserProfileInput {
   avatar: String
 }
 
-type UserWalletType {
+type UserWallet {
   localID: ID!
   accounts: [String]
 }
 
 type Viewer {
   id: ID!
-  apps: AppsQuery!
-  identities: IdentitiesQuery!
-  wallets: WalletsQuery!
+  apps: Apps!
+  contacts: Contacts!
+  identities: Identities!
+  wallets: Wallets!
 }
 
-type WalletsQuery {
-  ethWallets: EthWallets!
+type WalletBalances {
+  eth: String!
+  mft: String!
+}
+
+type Wallets {
+  ethWallets(userID: String!): EthWallets!
 }
 
 input WebRequestGrantInput {

@@ -4,6 +4,8 @@ import { MFID } from '@mainframe/data-types'
 import type { KeyPair } from '@mainframe/utils-crypto'
 // eslint-disable-next-line import/named
 import { uniqueID, idType, type ID } from '@mainframe/utils-id'
+import multibase from 'multibase'
+import { type hexValue } from '@erebos/hex'
 
 import { mapObject } from '../utils'
 
@@ -20,13 +22,14 @@ import OwnDeveloperIdentity, {
 } from './OwnDeveloperIdentity'
 import OwnUserIdentity, {
   type OwnUserIdentitySerialized,
+  type OwnUserProfile,
 } from './OwnUserIdentity'
 import PeerUserIdentity, {
   type PeerUserIdentitySerialized,
-  type ProfileData,
+  type PeerUserProfile,
   type Feeds,
 } from './PeerUserIdentity'
-import Contact, { type ContactParams, type ContactSerialized } from './Contact'
+import Contact, { type ContactSerialized } from './Contact'
 
 type PeerIdentitiesRepositoryGroupSerialized = {
   apps?: { [id: string]: AppIdentitySerialized },
@@ -305,31 +308,31 @@ export default class IdentitiesRepository {
     return this._identities.contacts
   }
 
-  getContactsForUser(userID: ID): { [id: string]: Contact } {
+  getContactsForUser(userID: string): { [id: string]: Contact } {
     return this._identities.contacts[userID]
   }
 
-  getOwnApp(id: ID): ?OwnAppIdentity {
+  getOwnApp(id: ID | string): ?OwnAppIdentity {
     return this._identities.own.apps[id]
   }
 
-  getOwnDeveloper(id: ID): ?OwnDeveloperIdentity {
+  getOwnDeveloper(id: ID | string): ?OwnDeveloperIdentity {
     return this._identities.own.developers[id]
   }
 
-  getOwnUser(id: ID): ?OwnUserIdentity {
+  getOwnUser(id: ID | string): ?OwnUserIdentity {
     return this._identities.own.users[id]
   }
 
-  getPeerApp(id: ID): ?AppIdentity {
+  getPeerApp(id: ID | string): ?AppIdentity {
     return this._identities.peers.apps[id]
   }
 
-  getPeerDeveloper(id: ID): ?DeveloperIdentity {
+  getPeerDeveloper(id: ID | string): ?DeveloperIdentity {
     return this._identities.peers.developers[id]
   }
 
-  getPeerUser(id: ID): ?PeerUserIdentity {
+  getPeerUser(id: ID | string): ?PeerUserIdentity {
     return this._identities.peers.users[id]
   }
 
@@ -353,6 +356,12 @@ export default class IdentitiesRepository {
     return (
       this.getPeerApp(id) || this.getPeerDeveloper(id) || this.getPeerUser(id)
     )
+  }
+
+  getPeerByFeed(publicFeed: string): ?PeerUserIdentity {
+    if (this._mfidByFeed[publicFeed]) {
+      return this.getPeerUser(this._byMFID[this._mfidByFeed[publicFeed]])
+    }
   }
 
   getIdentity(id: ID): ?Identity {
@@ -407,7 +416,7 @@ export default class IdentitiesRepository {
     else throw new Error('Error creating developer')
   }
 
-  createOwnUser(profile: Object = {}, keyPair?: KeyPair): OwnUserIdentity {
+  createOwnUser(profile: OwnUserProfile, keyPair?: KeyPair): OwnUserIdentity {
     const id = this.addIdentity(OwnUserIdentity.create(profile, keyPair))
     const user = this.getOwnUser(id)
     if (user) return user
@@ -423,47 +432,63 @@ export default class IdentitiesRepository {
   }
 
   createPeerUser(
-    mfid: string,
-    profile: ProfileData,
+    publicKey: string,
+    profile: PeerUserProfile,
     publicFeed: string,
-    otherFeeds?: Feeds,
-  ): ID {
+    firstContactAddress: hexValue,
+    feeds?: Feeds,
+  ): PeerUserIdentity {
     if (this._mfidByFeed[publicFeed]) {
-      return this._byMFID[this._mfidByFeed[publicFeed]]
+      const id = this._byMFID[this._mfidByFeed[publicFeed]]
+      const identity = this.getIdentity(id)
+      if (!(identity instanceof PeerUserIdentity)) {
+        throw new Error(
+          'Error adding peer - identity already exists with publicFeed',
+        )
+      }
+      return identity
     }
-    const peer = new PeerUserIdentity({
-      localID: uniqueID(),
-      id: mfid,
-      profile,
-      publicFeed,
-      otherFeeds,
-    })
-    const localID = this.addIdentity(peer)
-    this._mfidByFeed[publicFeed] = peer.id
-    return localID
+    const keyBuffer = multibase.decode(publicKey)
+    const id = this.addIdentity(
+      new PeerUserIdentity(
+        uniqueID(),
+        keyBuffer,
+        profile,
+        publicFeed,
+        firstContactAddress,
+        feeds,
+      ),
+    )
+    const peer = this.getPeerUser(id)
+    if (!peer) throw new Error('Error adding peer')
+
+    this._mfidByFeed[String(publicFeed)] = peer.id
+    return peer
   }
 
-  createContactFromPeer(ownUserId: ID, contactParams: ContactParams): Contact {
-    if (!this.getPeerUser(idType(contactParams.peerID))) {
-      throw new Error('Peer not found')
-    }
+  createContactFromPeer(
+    ownUserId: ID,
+    peerID: ID,
+    aliasName?: string,
+  ): Contact {
+    const peer = this.getPeerUser(idType(peerID))
+    if (!peer) throw new Error('Peer not found')
+
     if (this._identities.contacts[ownUserId]) {
-      const contacts: Array<Contact> = Object.keys(
-        this._identities.contacts[ownUserId],
-      ).map(id => this._identities.contacts[ownUserId][id])
-      const existing = contacts.find(c => c.peerID === contactParams.peerID)
+      const keys = Object.keys(this._identities.contacts[ownUserId])
+      const contacts = keys.map(id => this._identities.contacts[ownUserId][id])
+      const existing = contacts.find(c => c.peerID === peerID)
       if (existing) {
         return existing
       }
     }
-    const cid = uniqueID()
-    const contact = new Contact(contactParams)
+    const contact = Contact.create(peerID, { aliasName })
     if (this._identities.contacts[ownUserId]) {
-      this._identities.contacts[ownUserId][cid] = contact
+      this._identities.contacts[ownUserId][contact.localID] = contact
     } else {
-      this._identities.contacts[ownUserId] = { [String(cid)]: contact }
+      this._identities.contacts[ownUserId] = { [contact.localID]: contact }
     }
-    this._userByContact[cid] = ownUserId
+    this._userByContact[contact.localID] = ownUserId
     return contact
   }
 
@@ -473,6 +498,30 @@ export default class IdentitiesRepository {
     }
     if (this._userByContact[contactID]) {
       delete this._userByContact[contactID]
+    }
+  }
+
+  getContactProfile(contactID: ID): PeerUserProfile {
+    const userID = this._userByContact[contactID]
+    if (userID == null) {
+      return {}
+    }
+
+    const userContacts = this._identities.contacts[userID]
+    if (userContacts == null) {
+      return {}
+    }
+
+    const contact = userContacts[contactID]
+    if (contact == null) {
+      return {}
+    }
+    const peer = this._identities.peers.users[contact.peerID]
+    const peerProfile = peer ? peer.profile : {}
+
+    return {
+      name: contact.name || peerProfile.name,
+      avatar: contact.profile.avatar || peerProfile.avatar,
     }
   }
 }

@@ -3,7 +3,7 @@
 import React, { Component } from 'react'
 import { ActivityIndicator } from 'react-native'
 
-import { Button, TextField, Row, Column, Text } from '@morpheus-ui/core'
+import { Button, TextField, Row, Column, Text, Switch } from '@morpheus-ui/core'
 import CircleArrowRight from '@morpheus-ui/icons/CircleArrowRight'
 import { Form, type FormSubmitPayload } from '@morpheus-ui/forms'
 
@@ -76,8 +76,10 @@ export default class OnboardIdentityView extends Component<Props, State> {
     )
     return (
       <OnboardContainer
-        title="Welcome!"
-        description="Let’s quickly secure your MainframeOS vault.">
+        id
+        step={2}
+        title="Identity"
+        description="Create your first identity">
         <FormContainer>
           <Form onSubmit={this.onSubmit}>
             <Row size={1} top>
@@ -90,7 +92,11 @@ export default class OnboardIdentityView extends Component<Props, State> {
                   testID="onboard-create-identity-input-name"
                 />
               </Column>
+              <Column>
+                <Switch label="Make my name discoverable" name="discoverable" />
+              </Column>
             </Row>
+
             {errorMsg}
             <Row size={2} top>
               <Column styles="align-items:flex-end;" smOffset={1}>

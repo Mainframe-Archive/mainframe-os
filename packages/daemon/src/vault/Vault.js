@@ -218,10 +218,6 @@ export default class Vault {
     return this._data.identityWallets
   }
 
-  getWalletsForIdentity(id: string): { [walletID: string]: Array<string> } {
-    return this.identityWallets.walletsByIdentity[id] || {}
-  }
-
   // App lifecycle
 
   closeApp(sessID: ID): void {
@@ -248,10 +244,6 @@ export default class Vault {
       this.apps.setUserPermissionsSettings(app.id, userID, settings)
     }
     return app
-  }
-
-  removeOwnApp(appID: ID) {
-    this.apps.removeOwn(appID)
   }
 
   removeApp(appID: ID) {

@@ -6,11 +6,14 @@ import styled from 'styled-components/native'
 
 import { Text } from '@morpheus-ui/core'
 import bgGraphic from '../../assets/images/onboard-background.png'
+import bgIDGraphic from '../../assets/images/identity-onboard-background.png'
 
 type Props = {
   children: any,
   title: string,
   description?: string,
+  id?: boolean,
+  step?: 1 | 2 | 3,
 }
 
 const Container = styled.View`
@@ -41,7 +44,25 @@ const FormContainer = styled.View`
 
 const BgImage = styled.Image`
   flex: 1;
-  text-align: right;
+`
+
+const Steps = styled.View`
+  flex-direction: row;
+  margin: 0 0 50px 90px;
+`
+
+const StepIndicator = styled.Text`
+  border-top-width: 1px;
+  border-top-color: #d3d3d3;
+  border-top-style: solid;
+  width: 45px;
+  font-size: 11px;
+  margin: 0 5px;
+  color: transparent;
+  text-align: center;
+  padding: 5px;
+
+  ${props => props.selected && `color: #1F3464; border-top-color: #1F3464;`}
 `
 
 export default class OnboardContainerView extends Component<Props> {
@@ -62,8 +83,20 @@ export default class OnboardContainerView extends Component<Props> {
             {this.props.children}
           </Content>
         </FormContainer>
+        {this.props.step && (
+          <Steps>
+            {/*eslint-disable react-native/no-raw-text */}
+            <StepIndicator selected={this.props.step === 1}>1</StepIndicator>
+            <StepIndicator selected={this.props.step === 2}>2</StepIndicator>
+            <StepIndicator selected={this.props.step === 3}>3</StepIndicator>
+            {/*eslint-enable react-native/no-raw-text */}
+          </Steps>
+        )}
         <BgGraphicContainer>
-          <BgImage source={bgGraphic} resizeMode="contain" />
+          <BgImage
+            source={this.props.id ? bgIDGraphic : bgGraphic}
+            resizeMode="contain"
+          />
         </BgGraphicContainer>
       </Container>
     )

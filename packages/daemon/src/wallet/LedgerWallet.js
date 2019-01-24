@@ -23,11 +23,13 @@ export type LedgerWalletParams = AbstractWalletParams & {
 
 export default class LedgerWallet {
   // Store address at 0 to identify ledger
+  _type: 'ledger'
   _localID: string
   _firstAddress: string
   _activeAccounts: ActiveAccounts
 
   constructor(params?: LedgerWalletParams) {
+    this._type = 'ledger'
     if (params) {
       this._activeAccounts = params.activeAccounts
       this._localID = params.localID
@@ -40,6 +42,14 @@ export default class LedgerWallet {
 
   get id(): string {
     return this._localID
+  }
+
+  get localID(): string {
+    return this._localID
+  }
+
+  get type(): 'ledger' {
+    return this._type
   }
 
   get firstAddress(): string {

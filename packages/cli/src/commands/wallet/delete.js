@@ -31,7 +31,7 @@ export default class WalletDeleteCommand extends Command {
     })
     if (confirmed) {
       await client.wallet.deleteWallet({
-        walletID: this.flags.id,
+        localID: this.flags.id,
         type: this.flags.type,
         chain: 'ethereum',
       })

@@ -5,10 +5,9 @@ import { createFragmentContainer, graphql } from 'react-relay'
 import styled from 'styled-components/native'
 import type { AppInstalledData } from '@mainframe/client'
 
-import { Text, Button } from '@morpheus-ui/core'
+import { Text } from '@morpheus-ui/core'
 
-import IdentityFilledIcon from '@morpheus-ui/icons/IdentityFilledMd'
-import PlusIcon from '@morpheus-ui/icons/PlusSymbolCircled'
+import Avatar from '../../UIComponents/Avatar'
 
 type Wallet = {
   localID: string,
@@ -37,7 +36,9 @@ const UserItem = styled.View`
   margin: 10px 0;
   padding: 30px 25px;
   background-color: ${props => props.theme.colors.LIGHT_GREY_F9};
-  border-left: 5px solid ${props => props.theme.colors.PRIMARY_BLUE};
+  border-left-width: 5px;
+  border-left-style: solid;
+  border-left-color: ${props => props.theme.colors.PRIMARY_BLUE};
   border-radius: 3px;
   flex-direction: row;
   align-items: center;
@@ -46,11 +47,6 @@ const UserItem = styled.View`
 const Profile = styled.View`
   flex: 1;
   margin-left: 15px;
-`
-
-const ButtonContainer = styled.View`
-  margin-top: 15px;
-  align-items: flex-end;
 `
 
 class IdentitiesView extends Component<Props> {
@@ -69,11 +65,11 @@ class IdentitiesView extends Component<Props> {
     return identities.map((user: Object) => {
       return (
         <UserItem key={user.localID}>
-          <IdentityFilledIcon width="24px" height="24px" />
+          <Avatar size="medium" id={user.localID} />
           <Profile>
             <Text variant="bold">{user.profile.name}</Text>
             <Text theme={{ color: '#585858', fontSize: '11px' }}>
-              {user.localID}
+              {user.feedHash}
             </Text>
           </Profile>
           <Text theme={{ color: '#585858', fontSize: '11px' }}>
@@ -88,9 +84,6 @@ class IdentitiesView extends Component<Props> {
       <>
         <Text variant="smallTitle">Indentities</Text>
         {this.renderUsers()}
-        <ButtonContainer>
-          <Button variant="completeOnboarding" Icon={PlusIcon} title="New" />
-        </ButtonContainer>
       </>
     )
   }
@@ -98,9 +91,10 @@ class IdentitiesView extends Component<Props> {
 
 export default createFragmentContainer(IdentitiesView, {
   identities: graphql`
-    fragment IdentitiesView_identities on IdentitiesQuery {
+    fragment IdentitiesView_identities on Identities {
       ownUsers {
         localID
+        feedHash
         profile {
           name
         }

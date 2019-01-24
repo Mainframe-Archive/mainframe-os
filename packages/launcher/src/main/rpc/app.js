@@ -45,14 +45,11 @@ export const sandboxed = {
   ),
 
   wallet_getEthAccounts: async (ctx: AppContext): Promise<Array<string>> => {
-    const ethWallets = await ctx.client.wallet.getEthWallets()
-    const accounts = Object.keys(ethWallets).reduce((acc, key) => {
-      ethWallets[key].forEach(w => acc.push(...w.accounts))
-      return acc
-    }, [])
+    // $FlowFixMe indexer property
+    const accounts = await ctx.client.wallet.getUserEthAccounts({
+      userID: ctx.appSession.user.localID,
+    })
     if (
-      // TODO: We'll also eventually want default
-      // accounts attached to identities
       ctx.appSession.defaultEthAccount &&
       accounts.includes(ctx.appSession.defaultEthAccount)
     ) {
@@ -146,18 +143,11 @@ export const trusted = {
     },
   },
 
-  // WALLET
-
-  wallet_getEthWallets: async (
+  wallet_getUserEthWallets: async (
     ctx: AppContext,
   ): Promise<WalletGetEthWalletsResult> => {
-    return ctx.client.wallet.getEthWallets()
-  },
-
-  blockchain_web3Send: async (
-    ctx: AppContext,
-    params: BlockchainWeb3SendParams,
-  ): Promise<Object> => {
-    return ctx.client.blockchain.web3Send(params)
+    return ctx.client.wallet.getUserEthWallets({
+      userID: ctx.appSession.user.localID,
+    })
   },
 }

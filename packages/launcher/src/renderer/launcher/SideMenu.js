@@ -20,6 +20,8 @@ import SettingsFilledIcon from '@morpheus-ui/icons/SettingsFilledMd'
 import NotificationsIcon from '@morpheus-ui/icons/NotificationsMd'
 import NotificationsFilledIcon from '@morpheus-ui/icons/NotificationsFilledMd'
 
+import SvgSelectedPointer from '../UIComponents/SVGSelectedPointer'
+
 export type ScreenNames =
   | 'apps'
   | 'identities'
@@ -90,9 +92,7 @@ const ScrollView = styled.ScrollView`
 `
 
 const MenuItem = styled.View`
-  padding: ${props => props.theme.spacing * 2}px 0
-    ${props => props.theme.spacing}px 0;
-  text-align: center;
+  padding: 10px 0 15px 0;
   align-items: center;
 `
 
@@ -112,16 +112,6 @@ const SelectedPointer = styled.View`
   right: -21px;
   margin-top: -8px;
 `
-
-const SvgSelected = props => (
-  <svg width="21px" height="42px" viewBox="0 0 29 60" {...props}>
-    <path
-      d="M28.05 60.016L2.243 34.208a6 6 0 0 1 0-8.485L27.965 0l.085 60.016z"
-      fill="#FFF"
-      fillRule="evenodd"
-    />
-  </svg>
-)
 
 export default class SideMenu extends Component<Props, State> {
   static defaultProps = {
@@ -152,7 +142,7 @@ export default class SideMenu extends Component<Props, State> {
         />
         {selected && (
           <SelectedPointer>
-            <SvgSelected />
+            <SvgSelectedPointer />
           </SelectedPointer>
         )}
         {<NotificationDot notifications={notifications} />}
