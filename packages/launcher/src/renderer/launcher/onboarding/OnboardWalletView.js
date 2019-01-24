@@ -12,7 +12,7 @@ type Props = {
 }
 
 type State = {
-  view: 'start' | 'create' | 'create-bakcup' | 'import' | 'ledger',
+  view: 'start' | 'create' | 'import' | 'ledger',
 }
 
 export default class OnboardWalletView extends Component<Props, State> {
@@ -66,8 +66,8 @@ export default class OnboardWalletView extends Component<Props, State> {
   render() {
     return (
       <OnboardContainer
-        title="Welcome"
-        description="Let’s quickly secure your MainframeOS vault.">
+        title="Wallet"
+        description="Create or import your Ethereum wallet.">
         {this.renderContent()}
       </OnboardContainer>
     )
