@@ -9,9 +9,8 @@ import { Form, type FormSubmitPayload } from '@morpheus-ui/forms'
 
 import styled from 'styled-components/native'
 
-import OnboardContainer from '../UIComponents/OnboardContainer'
-
 import type { VaultsData } from '../../types'
+import OnboardContainer from './onboarding/OnboardContainer'
 
 import rpc from './rpc'
 

@@ -5,8 +5,8 @@ import React, { Component } from 'react'
 import styled from 'styled-components/native'
 
 import { Text } from '@morpheus-ui/core'
-import bgGraphic from '../../assets/images/onboard-background.png'
-import bgIDGraphic from '../../assets/images/identity-onboard-background.png'
+import bgGraphic from '../../../assets/images/onboard-background.png'
+import bgIDGraphic from '../../../assets/images/identity-onboard-background.png'
 
 type Props = {
   children: any,

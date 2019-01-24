@@ -243,6 +243,7 @@ type EthHDWallet implements Node {
   """The ID of an object"""
   id: ID!
   localID: ID!
+  mnemonic: String!
   accounts: [NamedWalletAccountType]
 }
 
@@ -340,7 +341,7 @@ type OwnUserIdentity implements Node {
   mfid: ID!
   apps: [App]
   defaultEthAddress: String
-  wallets: [UserWalletType]
+  wallets: EthWallets!
   profile: OwnUserProfile
   pubKey: String!
 }
@@ -397,11 +398,6 @@ enum SupportedWallets {
 input UserProfileInput {
   name: String!
   avatar: String
-}
-
-type UserWalletType {
-  localID: ID!
-  accounts: [String]
 }
 
 type Viewer {

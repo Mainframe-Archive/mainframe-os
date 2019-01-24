@@ -17,10 +17,6 @@ export type IdentitiesView_identities = {|
     +profile: ?{|
       +name: string
     |},
-    +wallets: ?$ReadOnlyArray<?{|
-      +localID: string,
-      +accounts: ?$ReadOnlyArray<?string>,
-    |}>,
     +apps: ?$ReadOnlyArray<?{|
       +localID: string,
       +manifest: {|
@@ -99,25 +95,6 @@ return {
           "concreteType": "OwnUserProfile",
           "plural": false,
           "selections": v1
-        },
-        {
-          "kind": "LinkedField",
-          "alias": null,
-          "name": "wallets",
-          "storageKey": null,
-          "args": null,
-          "concreteType": "UserWalletType",
-          "plural": true,
-          "selections": [
-            v0,
-            {
-              "kind": "ScalarField",
-              "alias": null,
-              "name": "accounts",
-              "args": null,
-              "storageKey": null
-            }
-          ]
         },
         {
           "kind": "LinkedField",
@@ -227,5 +204,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = 'cf6517a38523c2387dcf5f4aa7fd2804';
+(node/*: any*/).hash = '0e179cacbc6c191308e8031215cde4c4';
 module.exports = node;

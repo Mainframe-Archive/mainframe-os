@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash ddd3696632e19329827215cd2d9c6d23
+ * @relayHash 48a2de22060b5f84c3d0a29b0e96dd73
  */
 
 /* eslint-disable */
@@ -39,6 +39,16 @@ fragment Launcher_identities on IdentitiesQuery {
   ownUsers {
     defaultEthAddress
     localID
+    wallets {
+      hd {
+        localID
+        id
+      }
+      ledger {
+        localID
+        id
+      }
+    }
     id
   }
 }
@@ -48,16 +58,27 @@ const node/*: ConcreteRequest*/ = (function(){
 var v0 = {
   "kind": "ScalarField",
   "alias": null,
+  "name": "localID",
+  "args": null,
+  "storageKey": null
+},
+v1 = {
+  "kind": "ScalarField",
+  "alias": null,
   "name": "id",
   "args": null,
   "storageKey": null
-};
+},
+v2 = [
+  v0,
+  v1
+];
 return {
   "kind": "Request",
   "operationKind": "query",
   "name": "LauncherQuery",
   "id": null,
-  "text": "query LauncherQuery {\n  viewer {\n    identities {\n      ...Launcher_identities\n    }\n    id\n  }\n}\n\nfragment Launcher_identities on IdentitiesQuery {\n  ownUsers {\n    defaultEthAddress\n    localID\n    id\n  }\n}\n",
+  "text": "query LauncherQuery {\n  viewer {\n    identities {\n      ...Launcher_identities\n    }\n    id\n  }\n}\n\nfragment Launcher_identities on IdentitiesQuery {\n  ownUsers {\n    defaultEthAddress\n    localID\n    wallets {\n      hd {\n        localID\n        id\n      }\n      ledger {\n        localID\n        id\n      }\n    }\n    id\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -134,19 +155,44 @@ return {
                     "args": null,
                     "storageKey": null
                   },
+                  v0,
                   {
-                    "kind": "ScalarField",
+                    "kind": "LinkedField",
                     "alias": null,
-                    "name": "localID",
+                    "name": "wallets",
+                    "storageKey": null,
                     "args": null,
-                    "storageKey": null
+                    "concreteType": "EthWallets",
+                    "plural": false,
+                    "selections": [
+                      {
+                        "kind": "LinkedField",
+                        "alias": null,
+                        "name": "hd",
+                        "storageKey": null,
+                        "args": null,
+                        "concreteType": "EthHDWallet",
+                        "plural": true,
+                        "selections": v2
+                      },
+                      {
+                        "kind": "LinkedField",
+                        "alias": null,
+                        "name": "ledger",
+                        "storageKey": null,
+                        "args": null,
+                        "concreteType": "EthLedgerWallet",
+                        "plural": true,
+                        "selections": v2
+                      }
+                    ]
                   },
-                  v0
+                  v1
                 ]
               }
             ]
           },
-          v0
+          v1
         ]
       }
     ]

@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 5032360b7555f28e0574140a38789532
+ * @relayHash 71fdf30af863b58310ce3d41bff1e290
  */
 
 /* eslint-disable */
@@ -45,10 +45,6 @@ fragment IdentitiesView_identities on IdentitiesQuery {
     feedHash
     profile {
       name
-    }
-    wallets {
-      localID
-      accounts
     }
     apps {
       localID
@@ -109,7 +105,7 @@ return {
   "operationKind": "query",
   "name": "IdentitiesScreenQuery",
   "id": null,
-  "text": "query IdentitiesScreenQuery {\n  viewer {\n    identities {\n      ...IdentitiesScreen_identities\n    }\n    id\n  }\n}\n\nfragment IdentitiesScreen_identities on IdentitiesQuery {\n  ...IdentitiesView_identities\n}\n\nfragment IdentitiesView_identities on IdentitiesQuery {\n  ownUsers {\n    localID\n    feedHash\n    profile {\n      name\n    }\n    wallets {\n      localID\n      accounts\n    }\n    apps {\n      localID\n      manifest {\n        name\n      }\n      users {\n        settings {\n          permissionsSettings {\n            permissionsChecked\n            grants {\n              BLOCKCHAIN_SEND\n            }\n          }\n        }\n        id\n      }\n      id\n    }\n    id\n  }\n  ownDevelopers {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n}\n",
+  "text": "query IdentitiesScreenQuery {\n  viewer {\n    identities {\n      ...IdentitiesScreen_identities\n    }\n    id\n  }\n}\n\nfragment IdentitiesScreen_identities on IdentitiesQuery {\n  ...IdentitiesView_identities\n}\n\nfragment IdentitiesView_identities on IdentitiesQuery {\n  ownUsers {\n    localID\n    feedHash\n    profile {\n      name\n    }\n    apps {\n      localID\n      manifest {\n        name\n      }\n      users {\n        settings {\n          permissionsSettings {\n            permissionsChecked\n            grants {\n              BLOCKCHAIN_SEND\n            }\n          }\n        }\n        id\n      }\n      id\n    }\n    id\n  }\n  ownDevelopers {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -196,25 +192,6 @@ return {
                     "concreteType": "OwnUserProfile",
                     "plural": false,
                     "selections": v1
-                  },
-                  {
-                    "kind": "LinkedField",
-                    "alias": null,
-                    "name": "wallets",
-                    "storageKey": null,
-                    "args": null,
-                    "concreteType": "UserWalletType",
-                    "plural": true,
-                    "selections": [
-                      v0,
-                      {
-                        "kind": "ScalarField",
-                        "alias": null,
-                        "name": "accounts",
-                        "args": null,
-                        "storageKey": null
-                      }
-                    ]
                   },
                   {
                     "kind": "LinkedField",

@@ -310,19 +310,6 @@ const ownAppType = new GraphQLObjectType({
   }),
 })
 
-const userWalletType = new GraphQLObjectType({
-  name: 'UserWalletType',
-  fields: () => ({
-    localID: {
-      type: new GraphQLNonNull(GraphQLID),
-    },
-    accounts: {
-      type: new GraphQLList(GraphQLString),
-      resolve: self => self.accounts,
-    },
-  }),
-})
-
 const ownAppIdentityType = new GraphQLObjectType({
   name: 'OwnAppIdentity',
   interfaces: () => [nodeInterface],
@@ -401,15 +388,9 @@ const ownUserIdentityType = new GraphQLObjectType({
       },
     },
     wallets: {
-      type: new GraphQLList(userWalletType),
+      type: new GraphQLNonNull(ethWalletsType),
       resolve: (self, args, ctx) => {
-        const wallets = ctx.queries.getUserEthWallets(self.localID)
-        return Object.keys(wallets).map(id => {
-          return {
-            localID: id,
-            accounts: wallets[id].getAccounts(),
-          }
-        })
+        return ctx.queries.getUserEthWallets(self.localID)
       },
     },
     profile: {
@@ -661,6 +642,9 @@ const ethHdWalletType = new GraphQLObjectType({
     localID: {
       type: new GraphQLNonNull(GraphQLID),
     },
+    mnemonic: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
     accounts: {
       type: new GraphQLList(namedWalletAccountType),
     },
@@ -860,6 +844,7 @@ const createHDWalletMutation = mutationWithClientMutationId({
     )
     return {
       localID: wallet.localID,
+      mnemonic: wallet.mnemonic,
       accounts: wallet.getNamedAccounts(),
     }
   },
@@ -954,7 +939,7 @@ const createUserIdentityMutation = mutationWithClientMutationId({
     },
   },
   mutateAndGetPayload: async (args, ctx) => {
-    const user = await ctx.mutations.createOwnUserIdentity(args.profile)
+    const user = await ctx.mutations.createUser(args.profile)
     return { user }
   },
 })

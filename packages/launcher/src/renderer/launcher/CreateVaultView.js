@@ -14,9 +14,8 @@ import {
 
 import styled from 'styled-components/native'
 
-import OnboardContainer from '../UIComponents/OnboardContainer'
-
 import rpc from './rpc'
+import OnboardContainer from './onboarding/OnboardContainer'
 
 type Props = {
   onVaultCreated: () => void,
