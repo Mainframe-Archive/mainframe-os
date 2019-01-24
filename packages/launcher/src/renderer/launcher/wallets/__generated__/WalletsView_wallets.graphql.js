@@ -78,7 +78,7 @@ var v0 = [
         "name": "balances",
         "storageKey": null,
         "args": null,
-        "concreteType": "WalletBalancesType",
+        "concreteType": "WalletBalances",
         "plural": false,
         "selections": [
           {
@@ -103,7 +103,7 @@ var v0 = [
 return {
   "kind": "Fragment",
   "name": "WalletsView_wallets",
-  "type": "WalletsQuery",
+  "type": "Wallets",
   "metadata": null,
   "argumentDefinitions": [
     {
@@ -156,5 +156,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = 'd724c1acc782e82ec15273499bfc6129';
+(node/*: any*/).hash = '6122ce4dd7aae54f4ef063f5ed5b64a3';
 module.exports = node;

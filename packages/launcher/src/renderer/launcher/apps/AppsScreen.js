@@ -1,25 +1,10 @@
 // @flow
 import React, { Component } from 'react'
-import {
-  graphql,
-  createFragmentContainer,
-  // $FlowFixMe: missing requestSubscription type even though it is exported
-  requestSubscription,
-  QueryRenderer,
-  type Disposable,
-} from 'react-relay'
+import { graphql, createFragmentContainer, QueryRenderer } from 'react-relay'
 
 import { EnvironmentContext } from '../RelayEnvironment'
 import RelayLoaderView from '../RelayLoaderView'
 import AppsView, { type Apps } from './AppsView'
-
-const subscription = graphql`
-  subscription AppsScreenAppCreatedSubscription {
-    appCreated {
-      name
-    }
-  }
-`
 
 type RendererProps = {}
 
@@ -35,7 +20,7 @@ class AppsScreen extends Component<Props> {
 
 const AppsScreenRelayContainer = createFragmentContainer(AppsScreen, {
   apps: graphql`
-    fragment AppsScreen_apps on AppsQuery {
+    fragment AppsScreen_apps on Apps {
       ...AppsView_apps
     }
   `,
@@ -43,24 +28,6 @@ const AppsScreenRelayContainer = createFragmentContainer(AppsScreen, {
 
 export default class AppsScreenRenderer extends Component<{}> {
   static contextType = EnvironmentContext
-
-  _subscription: ?Disposable
-
-  componentDidMount() {
-    this._subscription = requestSubscription(this.context, {
-      subscription,
-      onNext: payload => {
-        // eslint-disable-next-line no-console
-        console.log('subscription update', payload)
-      },
-    })
-  }
-
-  componentWillUnmount() {
-    if (this._subscription != null) {
-      this._subscription.dispose()
-    }
-  }
 
   render() {
     return (

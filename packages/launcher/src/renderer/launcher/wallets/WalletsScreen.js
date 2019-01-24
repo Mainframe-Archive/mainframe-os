@@ -23,7 +23,7 @@ class WalletsScreen extends Component<Props> {
 
 const WalletsScreenRelayContainer = createFragmentContainer(WalletsScreen, {
   wallets: graphql`
-    fragment WalletsScreen_wallets on WalletsQuery
+    fragment WalletsScreen_wallets on Wallets
       @argumentDefinitions(userID: { type: "String!" }) {
       ...WalletsView_wallets @arguments(userID: $userID)
     }

@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 854d7e52afb78f3b96a939d373bf4d85
+ * @relayHash 890374fa0da5240c5c15094c5b365283
  */
 
 /* eslint-disable */
@@ -16,7 +16,7 @@ export type ContactsViewQueryResponse = {|
   +peers: {|
     +peerLookupByFeed: ?{|
       +profile: {|
-        +name: string
+        +name: ?string
       |},
       +publicKey: string,
     |}
@@ -60,7 +60,7 @@ v1 = [
     "name": "peers",
     "storageKey": null,
     "args": null,
-    "concreteType": "PeersQuery",
+    "concreteType": "Peers",
     "plural": false,
     "selections": [
       {
@@ -85,7 +85,7 @@ v1 = [
             "name": "profile",
             "storageKey": null,
             "args": null,
-            "concreteType": "ContactProfile",
+            "concreteType": "GenericProfile",
             "plural": false,
             "selections": [
               {

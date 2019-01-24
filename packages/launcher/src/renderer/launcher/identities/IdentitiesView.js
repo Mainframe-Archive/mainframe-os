@@ -91,7 +91,7 @@ class IdentitiesView extends Component<Props> {
 
 export default createFragmentContainer(IdentitiesView, {
   identities: graphql`
-    fragment IdentitiesView_identities on IdentitiesQuery {
+    fragment IdentitiesView_identities on Identities {
       ownUsers {
         localID
         feedHash

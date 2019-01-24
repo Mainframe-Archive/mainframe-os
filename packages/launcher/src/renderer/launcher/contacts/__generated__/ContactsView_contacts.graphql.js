@@ -17,7 +17,7 @@ export type ContactsView_contacts = {|
     +localID: string,
     +connectionState: ContactConnection,
     +profile: {|
-      +name: string
+      +name: ?string
     |},
   |}>,
   +$refType: ContactsView_contacts$ref,
@@ -28,7 +28,7 @@ export type ContactsView_contacts = {|
 const node/*: ConcreteFragment*/ = {
   "kind": "Fragment",
   "name": "ContactsView_contacts",
-  "type": "ContactsQuery",
+  "type": "Contacts",
   "metadata": null,
   "argumentDefinitions": [
     {
@@ -82,7 +82,7 @@ const node/*: ConcreteFragment*/ = {
           "name": "profile",
           "storageKey": null,
           "args": null,
-          "concreteType": "ContactProfile",
+          "concreteType": "GenericProfile",
           "plural": false,
           "selections": [
             {
@@ -99,5 +99,5 @@ const node/*: ConcreteFragment*/ = {
   ]
 };
 // prettier-ignore
-(node/*: any*/).hash = '8040c38454634df0e0e2ed7d663bf068';
+(node/*: any*/).hash = '5e88177880bca9d7531c1e599636bfc4';
 module.exports = node;
