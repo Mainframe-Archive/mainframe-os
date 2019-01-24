@@ -138,7 +138,7 @@ const launchApp = async (
       await ctx.clear()
       appContexts.delete(appWindow)
     }
-    delete appSessions[appID][userID]
+    delete appContexts[appID][userID]
   })
 }
 
