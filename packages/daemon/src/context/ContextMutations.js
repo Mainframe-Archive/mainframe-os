@@ -17,6 +17,8 @@ import type { PeerUserProfile } from '../identity/PeerUserIdentity'
 import type { bzzHash } from '../swarm/feed'
 
 import type {
+  AddHDWalletAccountParams,
+  ImportHDWalletParams,
   Blockchains,
   WalletTypes,
   WalletAddLedgerResult,
@@ -46,20 +48,6 @@ export type AddPeerParams = {
   publicFeed: string,
   firstContactAddress: string,
   otherFeeds: Feeds,
-}
-
-export type ImportHDWalletParams = {
-  blockchain: Blockchains,
-  mnemonic: string,
-  firstAccountName: string,
-  userID?: string,
-}
-
-export type AddHDWalletAccountParams = {
-  walletID: string,
-  index: number,
-  name: string,
-  userID?: string,
 }
 
 export default class ContextMutations {
@@ -191,14 +179,11 @@ export default class ContextMutations {
 
   async createHDWallet(
     blockchain: Blockchains,
-    firstAccountName: string,
+    name: string,
     userID?: string,
   ): Promise<HDWallet> {
     const { openVault } = this._context
-    const wallet = openVault.wallets.createHDWallet(
-      blockchain,
-      firstAccountName,
-    )
+    const wallet = openVault.wallets.createHDWallet(blockchain, name)
     if (userID) {
       openVault.identityWallets.linkWalletToIdentity(
         userID,
