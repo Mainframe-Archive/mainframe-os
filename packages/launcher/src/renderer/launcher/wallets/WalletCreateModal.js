@@ -197,7 +197,12 @@ export default class WalletCreateModal extends Component<Props, State> {
                 variant={['no-border', 'grey', 'modalButton']}
                 onPress={this.props.onClose}
               />
-              <Button title="CREATE" variant={['red', 'modalButton']} submit />
+              <Button
+                title="CREATE"
+                variant={['red', 'modalButton']}
+                testID="wallet-create-submit-button"
+                submit
+              />
             </Column>
           </Row>
         </Form>
@@ -248,6 +253,7 @@ export default class WalletCreateModal extends Component<Props, State> {
           <Column styles="align-items:center; justify-content: center; flex-direction: row;">
             <Button
               title="NEXT"
+              testID="wallet-create-confirm-backup-button"
               variant={['red', 'modalButton']}
               onPress={this.onPressBackupComplete}
             />
@@ -269,7 +275,14 @@ export default class WalletCreateModal extends Component<Props, State> {
 
     const wordLabels = seedWords.map(w => {
       const onPress = () => this.onPressConfirmWord(w.value, w.index)
-      return <Button key={w.value} onPress={onPress} title={w.value} />
+      return (
+        <Button
+          testID={`seed-word-${w.index}`}
+          key={w.value}
+          onPress={onPress}
+          title={w.value}
+        />
+      )
     })
     return (
       <Container>
@@ -287,6 +300,7 @@ export default class WalletCreateModal extends Component<Props, State> {
             />
             <Button
               title="CONFIRM"
+              testID="wallet-create-backup-test-submit"
               variant={['red', 'modalButton']}
               onPress={this.onPressConfirmBackup}
             />

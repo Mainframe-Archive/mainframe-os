@@ -33,7 +33,11 @@ export default class OnboardWalletView extends Component<Props, State> {
   renderStart() {
     return (
       <Row>
-        <Button title="Create" onPress={this.onPressCreate} />
+        <Button
+          title="Create"
+          onPress={this.onPressCreate}
+          testID="onboard-create-wallet-button"
+        />
         <Button title="Import" />
         <Button title="Connect Ledger" />
       </Row>
