@@ -171,9 +171,9 @@ export class ContactsFeedsHandler extends FeedsHandler {
     }
   }
 
-  async observe(): Promise<ObserveFeed<ContactChangedEvent>> {
+  observe(): ObserveFeed<ContactChangedEvent> {
     if (this._observers.size === 0) {
-      await this._setup()
+      this._setup()
     }
 
     const source = this._context.pipe(filter(e => e.type === 'contact_changed'))

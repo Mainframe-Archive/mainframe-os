@@ -98,7 +98,7 @@ export default class PeerUserIdentity extends Identity {
     return this._profile.avatar
   }
 
-  updateProfile(profile: PeerUserProfile = {}) {
+  set profile(profile: PeerUserProfile = {}) {
     this._profile = profile
   }
 }
