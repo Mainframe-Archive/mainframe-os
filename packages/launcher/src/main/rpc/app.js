@@ -1,5 +1,7 @@
 // @flow
 
+import { createReadStream } from 'fs'
+import crypto from 'crypto'
 import {
   LOCAL_ID_SCHEMA,
   type BlockchainWeb3SendParams,
@@ -7,12 +9,10 @@ import {
 } from '@mainframe/client'
 import { dialog } from 'electron'
 import type { Subscription as RxSubscription } from 'rxjs'
+import * as mime from 'mime'
 import { type AppContext, ContextSubscription } from '../contexts'
 import { withPermission } from '../permissions'
 import { PrependInitializationVector } from '../storage'
-import { createReadStream } from 'fs'
-import * as mime from 'mime'
-import crypto from 'crypto'
 
 class TopicSubscription extends ContextSubscription<RxSubscription> {
   data: ?RxSubscription
@@ -140,11 +140,20 @@ export const sandboxed = {
 
                 // TODO: move out encryption code to a separate file
                 const iv = crypto.randomBytes(16) // TODO: use a constant for the length of the IV
-                const cipher = crypto.createCipheriv('aes256', encryptionKey, iv)
-                const stream = createReadStream(filePath).pipe(cipher).pipe(new PrependInitializationVector(iv))
-                const feedManifest = feedHash || await ctx.bzz.createFeedManifest(address)
+                const cipher = crypto.createCipheriv(
+                  'aes256',
+                  encryptionKey,
+                  iv,
+                )
+                const stream = createReadStream(filePath)
+                  .pipe(cipher)
+                  .pipe(new PrependInitializationVector(iv))
+                const feedManifest =
+                  feedHash || (await ctx.bzz.createFeedManifest(address))
                 const [dataHash, feedMetadata] = await Promise.all([
-                  ctx.bzz.uploadFileStream(stream, { contentType: mime.getType(filePath) }),
+                  ctx.bzz.uploadFileStream(stream, {
+                    contentType: mime.getType(filePath),
+                  }),
                   ctx.bzz.getFeedMetadata(feedManifest),
                 ])
                 await ctx.bzz.postFeedValue(feedMetadata, `0x${dataHash}`)

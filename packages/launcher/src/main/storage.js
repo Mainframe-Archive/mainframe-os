@@ -1,10 +1,9 @@
 // @flow
 
-import * as mime from 'mime'
 import crypto from 'crypto'
-import url from 'url'
-import type { AppContext } from './contexts'
 import { Transform } from 'stream'
+import * as mime from 'mime'
+import type { AppContext } from './contexts'
 
 const INITIALIZATION_VECTOR_SIZE = 16
 
@@ -64,13 +63,15 @@ export const registerStreamProtocol = (context: AppContext) => {
         })
       } else {
         const contentType = mime.getType(filePath)
-        const res = await context.bzz._download(`${context.storage.feedHash}/${filePath}`, 'default')
+        const res = await context.bzz.download(
+          `${context.storage.feedHash}/${filePath}`,
+        )
         const data = res.body.pipe(new Decrypt(context.storage.encryptionKey))
         callback({
           headers: {
-            'content-type': contentType
+            'content-type': contentType,
           },
-          data: data
+          data: data,
         })
       }
     },
