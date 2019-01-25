@@ -413,7 +413,8 @@ class ContactsViewComponent extends Component<Props, State> {
                     <Text variant={['greyMed', 'elipsis']} bold size={13}>
                       {contact.profile.name || contact.localID}
                     </Text>
-                    {contact.connectionState === 'SENT' ? (
+                    {contact.connectionState === 'SENT' ||
+                    contact.connectionState === 'SENDING' ? (
                       <Text variant={['grey']} size={10}>
                         Pending
                       </Text>
