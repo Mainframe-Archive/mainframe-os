@@ -476,6 +476,7 @@ export const contactConnection = new GraphQLEnumType({
   name: 'ContactConnection',
   values: {
     CONNECTED: { value: 'connected' },
+    SENDING: { value: 'sending' },
     SENT: { value: 'sent' },
   },
 })
