@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 2723c2774eca10ac0b7b4d33469a7c49
+ * @relayHash 38a723a75aa54f5521363340c8fe08cd
  */
 
 /* eslint-disable */
@@ -94,6 +94,16 @@ v1 = [
   }
 ],
 v2 = {
+  "kind": "LinkedField",
+  "alias": null,
+  "name": "profile",
+  "storageKey": null,
+  "args": null,
+  "concreteType": "NamedProfile",
+  "plural": false,
+  "selections": v1
+},
+v3 = {
   "kind": "ScalarField",
   "alias": null,
   "name": "id",
@@ -183,16 +193,7 @@ return {
                     "args": null,
                     "storageKey": null
                   },
-                  {
-                    "kind": "LinkedField",
-                    "alias": null,
-                    "name": "profile",
-                    "storageKey": null,
-                    "args": null,
-                    "concreteType": "OwnUserProfile",
-                    "plural": false,
-                    "selections": v1
-                  },
+                  v2,
                   {
                     "kind": "LinkedField",
                     "alias": null,
@@ -269,13 +270,13 @@ return {
                               }
                             ]
                           },
-                          v2
+                          v3
                         ]
                       },
-                      v2
+                      v3
                     ]
                   },
-                  v2
+                  v3
                 ]
               },
               {
@@ -288,22 +289,13 @@ return {
                 "plural": true,
                 "selections": [
                   v0,
-                  {
-                    "kind": "LinkedField",
-                    "alias": null,
-                    "name": "profile",
-                    "storageKey": null,
-                    "args": null,
-                    "concreteType": "NamedProfile",
-                    "plural": false,
-                    "selections": v1
-                  },
-                  v2
+                  v2,
+                  v3
                 ]
               }
             ]
           },
-          v2
+          v3
         ]
       }
     ]

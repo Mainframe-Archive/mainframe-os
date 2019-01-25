@@ -339,12 +339,8 @@ type OwnUserIdentity implements Node {
   apps: [App]
   defaultEthAddress: String
   wallets: EthWallets!
-  profile: OwnUserProfile
+  profile: NamedProfile!
   pubKey: String!
-}
-
-type OwnUserProfile {
-  name: String!
 }
 
 type Peer {

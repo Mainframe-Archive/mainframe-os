@@ -14,7 +14,7 @@ export type IdentitiesView_identities = {|
   +ownUsers: ?$ReadOnlyArray<?{|
     +localID: string,
     +feedHash: string,
-    +profile: ?{|
+    +profile: {|
       +name: string
     |},
     +apps: ?$ReadOnlyArray<?{|
@@ -61,7 +61,17 @@ v1 = [
     "args": null,
     "storageKey": null
   }
-];
+],
+v2 = {
+  "kind": "LinkedField",
+  "alias": null,
+  "name": "profile",
+  "storageKey": null,
+  "args": null,
+  "concreteType": "NamedProfile",
+  "plural": false,
+  "selections": v1
+};
 return {
   "kind": "Fragment",
   "name": "IdentitiesView_identities",
@@ -86,16 +96,7 @@ return {
           "args": null,
           "storageKey": null
         },
-        {
-          "kind": "LinkedField",
-          "alias": null,
-          "name": "profile",
-          "storageKey": null,
-          "args": null,
-          "concreteType": "OwnUserProfile",
-          "plural": false,
-          "selections": v1
-        },
+        v2,
         {
           "kind": "LinkedField",
           "alias": null,
@@ -188,16 +189,7 @@ return {
       "plural": true,
       "selections": [
         v0,
-        {
-          "kind": "LinkedField",
-          "alias": null,
-          "name": "profile",
-          "storageKey": null,
-          "args": null,
-          "concreteType": "NamedProfile",
-          "plural": false,
-          "selections": v1
-        }
+        v2
       ]
     }
   ]

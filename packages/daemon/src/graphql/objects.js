@@ -407,16 +407,7 @@ export const ownUserIdentity = new GraphQLObjectType({
       },
     },
     profile: {
-      type: new GraphQLObjectType({
-        name: 'OwnUserProfile',
-        fields: () => ({
-          name: {
-            type: GraphQLNonNull(GraphQLString),
-            resolve: self => self.name,
-          },
-        }),
-      }),
-      resolve: self => self.profile,
+      type: new GraphQLNonNull(namedProfile),
     },
     pubKey: {
       type: new GraphQLNonNull(GraphQLString),
