@@ -11,8 +11,9 @@ import type { VaultsData } from '../../types'
 
 import rpc from './rpc'
 import { EnvironmentContext } from './RelayEnvironment'
-import OnboardView from './OnboardView'
+import OnboardView from './onboarding/OnboardView'
 import UnlockVaultView from './UnlockVaultView'
+import CreateVaultView from './CreateVaultView'
 import Launcher from './Launcher'
 
 const LoadingContainer = styled.View`
@@ -67,7 +68,7 @@ export default class App extends Component<{}, State> {
     }
 
     if (!this.state.vaultsData.defaultVault) {
-      return this.renderOnboarding()
+      return <CreateVaultView onVaultCreated={this.onOpenedVault} />
     }
 
     if (!this.state.vaultsData.vaultOpen) {
@@ -78,6 +79,7 @@ export default class App extends Component<{}, State> {
         />
       )
     }
+
     return <Launcher />
   }
 
