@@ -2,7 +2,7 @@
   "docs": {
     "Mainframe": ["introduction"],
     "Quick Start": ["quick-start"],
-    "Second Category": ["doc3"]
+    "Second Category": ["sdk"]
   },
   "docs-other": {
     "API": ["doc4", "doc5"]

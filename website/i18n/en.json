@@ -5,11 +5,8 @@
     "previous": "Previous",
     "tagline": "Get started using Mainframe.",
     "docs": {
-      "doc2": {
-        "title": "document number 2"
-      },
-      "doc3": {
-        "title": "This is document number 3"
+      "contributing": {
+        "title": "Contributing"
       },
       "doc4": {
         "title": "Other Document"
@@ -17,9 +14,24 @@
       "doc5": {
         "title": "Fifth Document"
       },
+      "installation": {
+        "title": "Installation"
+      },
       "introduction": {
         "title": "Mainframe Platform",
         "sidebar_label": "Introduction"
+      },
+      "quick-start": {
+        "title": "This is the Quick Start"
+      },
+      "sdk": {
+        "title": "SDK"
+      },
+      "unix-installation": {
+        "title": "unix-installation"
+      },
+      "windows-installation": {
+        "title": "windows-installation"
       }
     },
     "links": {
