@@ -80,7 +80,8 @@ This first environment should be created with the `development` type and set as 
 The newly created environment then needs to be configured using the CLI:
 
 ```
-packages/cli/bin/run daemon:setup --bin-path=./packages/daemon/bin/run
+packages/cli/bin/run daemon:set
+p --bin-path=./packages/daemon/bin/run
 ```
 
 Or on Windows
@@ -230,7 +231,7 @@ Once you're dapp is developed and ready for release follow the following steps t
 - Package and upload your dapp assets.
 - Generate and sign a dApp manifest with your developer identity.
 - Upload the signed dApp manifest and note the address hash.
-- Finally, send an email to [dapp-submissions@mainframe.com](mail-to:dapp-submissions@mainframe.com) with the following details, if you'd like it featured by mainframe: 
+- Finally, send an email to [dapp-submissions@mainframe.com](mailto:dapp-submissions@mainframe.com) with the following details, if you'd like it featured by mainframe: 
     - Description of the dApp.
     - Applicable art assets (logo, etc.)
     - Address hash of the dApp Manifest.
