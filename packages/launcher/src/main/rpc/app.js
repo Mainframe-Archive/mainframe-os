@@ -123,7 +123,7 @@ export const sandboxed = {
     },
   },
 
-  storage_requestUpload: {
+  storage_promptUpload: {
     params: {
       name: 'string',
     },
@@ -161,7 +161,7 @@ export const sandboxed = {
                 ctx.storage.feedHash = feedManifest
                 resolve(params.name)
               } catch (error) {
-                console.log(error, 'storage_requestUpload error')
+                console.log(error, 'storage_promptUpload error')
                 // TODO: use RPCError to provide a custom error code
                 reject(new Error('Upload failed'))
               }
