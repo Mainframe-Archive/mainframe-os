@@ -1,6 +1,7 @@
 ---
 id: installation
 title: Installation
+sidebar_label: Introduction
 ---
 
 This is a link to [another document.](doc3.md)  

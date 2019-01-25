@@ -15,23 +15,26 @@
         "title": "Fifth Document"
       },
       "installation": {
-        "title": "Installation"
+        "title": "Installation",
+        "sidebar_label": "Introduction"
       },
       "introduction": {
         "title": "Mainframe Platform",
         "sidebar_label": "Introduction"
       },
       "quick-start": {
-        "title": "This is the Quick Start"
+        "title": "Quick Start"
       },
       "sdk": {
         "title": "SDK"
       },
-      "unix-installation": {
-        "title": "unix-installation"
+      "unix": {
+        "title": "Unix Instructions",
+        "sidebar_label": "Unix Instructions"
       },
-      "windows-installation": {
-        "title": "windows-installation"
+      "windows": {
+        "title": "Windows Instructions",
+        "sidebar_label": "Windows Instructions"
       }
     },
     "links": {
@@ -40,9 +43,10 @@
       "Help": "Help"
     },
     "categories": {
-      "Mainframe": "Mainframe",
-      "Quick Start": "Quick Start",
-      "Second Category": "Second Category",
+      "Mainframe OS": "Mainframe OS",
+      "Development": "Development",
+      "Compile From Source": "Compile From Source",
+      "Guidelines": "Guidelines",
       "API": "API"
     }
   },

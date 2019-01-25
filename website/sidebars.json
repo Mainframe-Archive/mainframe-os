@@ -1,8 +1,9 @@
 {
   "docs": {
-    "Mainframe": ["introduction"],
-    "Quick Start": ["quick-start"],
-    "Second Category": ["sdk"]
+    "Mainframe OS": ["introduction"],
+    "Development": ["quick-start"],
+    "Compile From Source": ["unix", "windows"],
+    "Guidelines": ["contributing"]
   },
   "docs-other": {
     "API": ["doc4", "doc5"]
