@@ -1,16 +1,9 @@
 // @flow
 import {
   type WalletAddHDAccountParams,
-  type WalletAddLedgerResult,
-  type WalletCreateHDParams,
-  type WalletCreateHDResult,
   type WalletImportMnemonicParams,
-  type WalletImportResult,
   type WalletSignTxParams,
   type WalletSignTxResult,
-  type WalletTypes,
-  idType as toClientId,
-  type ID,
 } from '@mainframe/client'
 
 import { uniqueID } from '@mainframe/utils-id'
@@ -20,13 +13,16 @@ import HDWallet, { type HDWalletLabeledSerialized } from './HDWalletLabeled'
 import LedgerWallet, {
   type LedgerWalletLabeledSerialized,
 } from './LedgerWalletLabeled'
-import AbstractWallet from './AbstractSoftwareWallet'
 import { getAddressAtIndex } from './ledgerClient'
 
 const hdWalletsToJSON = mapObject(HDWallet.toJSON)
 const hdWalletsFromJSON = mapObject(HDWallet.fromJSON)
 const ledgerWalletsToJSON = mapObject(LedgerWallet.toJSON)
 const ledgerWalletsFromJSON = mapObject(LedgerWallet.fromJSON)
+
+export type WalletTypes = 'hd' | 'ledger'
+
+export type Blockchains = 'ethereum'
 
 export type WalletCollection = {
   hd: { [id: string]: HDWallet },
@@ -52,6 +48,11 @@ export type WalletsRepositorySerialized = {
       ledger: { [id: string]: LedgerWalletLabeledSerialized },
     },
   },
+}
+
+export type WalletAddLedgerResult = {
+  localID: string,
+  address: string,
 }
 
 export default class WalletsRepository {
@@ -104,7 +105,7 @@ export default class WalletsRepository {
     return this._wallets.ethereum
   }
 
-  getEthWalletByID(id: string): ?AbstractWallet {
+  getEthWalletByID(id: string): ?LedgerWallet | ?HDWallet {
     return this.ethWallets.hd[id] || this.ethWallets.ledger[id]
   }
 
@@ -116,7 +117,7 @@ export default class WalletsRepository {
     return this.ethWallets.ledger[id]
   }
 
-  getFirstEthWallet(): ?AbstractWallet | ?LedgerWallet {
+  getFirstEthWallet(): ?HDWallet | ?LedgerWallet {
     const priority = ['ledger', 'hd']
     let wallet
     priority.some(type => {
@@ -129,7 +130,7 @@ export default class WalletsRepository {
     return wallet
   }
 
-  getEthWalletByAccount(account: string): ?AbstractWallet {
+  getEthWalletByAccount(account: string): ?HDWallet | ?LedgerWallet {
     let wallet
     Object.keys(this.ethWallets).forEach(type => {
       Object.keys(this.ethWallets[type]).forEach(w => {
@@ -143,27 +144,21 @@ export default class WalletsRepository {
     return wallet
   }
 
-  createHDWallet(params: WalletCreateHDParams): WalletCreateHDResult {
-    switch (params.chain) {
+  createHDWallet(blockchain: Blockchains, name: string): HDWallet {
+    switch (blockchain) {
       case 'ethereum': {
-        const hdWallet = HDWallet.create(params.name)
-        const accounts = hdWallet.getNamedAccounts()
+        const hdWallet = HDWallet.create(name)
         this.ethWallets.hd[hdWallet.id] = hdWallet
-        return {
-          type: 'hd',
-          walletID: toClientId(hdWallet._localID),
-          mnemonic: hdWallet.mnemonic,
-          accounts,
-        }
+        return hdWallet
       }
       default: {
-        throw new Error(`Unsupported chain type: ${params.chain}`)
+        throw new Error(`Unsupported blockchain type: ${blockchain}`)
       }
     }
   }
 
-  importMnemonicWallet(params: WalletImportMnemonicParams): WalletImportResult {
-    switch (params.chain) {
+  importMnemonicWallet(params: WalletImportMnemonicParams): HDWallet {
+    switch (params.blockchain) {
       case 'ethereum': {
         const alreadyExists = Object.keys(this.ethWallets.hd).find(id => {
           return this.ethWallets.hd[id].mnemonic === params.mnemonic
@@ -173,19 +168,13 @@ export default class WalletsRepository {
         }
         const hdWallet = HDWallet.import({
           mnemonic: params.mnemonic,
-          firstAccountName: params.name,
+          firstAccountName: params.firstAccountName,
         })
-
         this.ethWallets.hd[hdWallet.id] = hdWallet
-
-        return {
-          type: 'hd',
-          walletID: toClientId(hdWallet.id),
-          accounts: hdWallet.getNamedAccounts(),
-        }
+        return hdWallet
       }
       default: {
-        throw new Error(`Unsupported chain type: ${params.chain}`)
+        throw new Error(`Unsupported blockchain type: ${params.blockchain}`)
       }
     }
   }
@@ -199,15 +188,13 @@ export default class WalletsRepository {
     return newAddress
   }
 
-  deleteWallet(params: { chain: string, type: WalletTypes, walletID: ID }) {
-    const { chain, type, walletID } = params
+  deleteWallet(chain: string, type: WalletTypes, walletID: string) {
     if (!this._wallets[chain]) {
       throw new Error(`Unsupported chain: ${chain}`)
     }
     if (!this._wallets[chain][type]) {
       throw new Error(`Invalid wallet type: ${type}`)
     }
-
     const wallet = this._wallets[chain][type][walletID]
     if (!wallet) {
       throw new Error('Wallet not found')
@@ -251,10 +238,10 @@ export default class WalletsRepository {
     }
   }
 
-  async addLedgerEthAccount(params: {
+  async addLedgerEthAccount(
     index: number,
     name: string,
-  }): Promise<WalletAddLedgerResult> {
+  ): Promise<WalletAddLedgerResult> {
     // Identify ledger wallets with first address
     const firstLedgerAddr = await getAddressAtIndex({ index: 0 })
     let ledgerWallet = this.getLedgerEthWalletByFirstAddr(firstLedgerAddr)
@@ -266,11 +253,11 @@ export default class WalletsRepository {
       this._wallets.ethereum.ledger[walletID] = ledgerWallet
     }
 
-    const addr = await ledgerWallet.addAccount(params.index, params.name)
-    ledgerWallet.accountNames[addr] = params.name
+    const addr = await ledgerWallet.addAccount(index, name)
+    ledgerWallet.accountNames[addr] = name
 
     return {
-      walletID: ledgerWallet.id,
+      localID: ledgerWallet.id,
       address: addr,
     }
   }

@@ -1,12 +1,20 @@
 // @flow
 
+import { type hexValue } from '@erebos/hex'
+
 import Identity from './Identity'
 
 type FeedHash = string
 
-export type ProfileData = {
+export type PeerUserProfile = {
   name?: ?string,
   avatar?: ?string,
+}
+
+export type PublicFeedSerialized = {
+  publicKey: string,
+  profile?: PeerUserProfile,
+  firstContactAddress: hexValue,
 }
 
 export type Feeds = { [type: string]: FeedHash }
@@ -14,52 +22,68 @@ export type Feeds = { [type: string]: FeedHash }
 export type PeerUserIdentitySerialized = {
   id: string,
   localID: string,
-  profile: ProfileData,
   publicFeed: FeedHash,
-  otherFeeds?: Feeds,
+  firstContactAddress: hexValue,
+  otherFeeds: Feeds,
+  profile: PeerUserProfile,
 }
 
 export type PeerUserIdentityParams = PeerUserIdentitySerialized
 
 export default class PeerUserIdentity extends Identity {
   static fromJSON = (params: PeerUserIdentitySerialized): PeerUserIdentity => {
-    return new PeerUserIdentity({
-      id: params.id,
-      localID: params.localID,
-      profile: params.profile,
-      publicFeed: params.publicFeed,
-      otherFeeds: params.otherFeeds,
-    })
+    return new PeerUserIdentity(
+      params.localID,
+      params.id,
+      params.profile,
+      params.publicFeed,
+      params.firstContactAddress,
+      params.otherFeeds,
+    )
   }
 
   static toJSON = (peer: PeerUserIdentity): PeerUserIdentitySerialized => ({
-    id: peer._id,
+    id: peer.id,
     localID: peer.localID,
-    profile: peer._profile,
-    publicFeed: peer._publicFeed,
-    otherFeeds: peer._otherFeeds,
+    publicFeed: peer.publicFeed,
+    firstContactAddress: peer.firstContactAddress,
+    otherFeeds: peer.otherFeeds,
+    profile: peer.profile,
   })
 
   _publicFeed: FeedHash
+  _firstContactAddress: hexValue
   _otherFeeds: Feeds
   _profile: {
     name?: ?string,
     avatar?: ?string,
   }
 
-  constructor(params: PeerUserIdentityParams) {
-    super(params.localID, 'user', params.id)
-    this._publicFeed = params.publicFeed
-    this._otherFeeds = params.otherFeeds || {}
-    this._profile = params.profile
+  constructor(
+    localID: string,
+    keyOrId: string | Buffer,
+    profile: PeerUserProfile,
+    publicFeed: FeedHash,
+    firstContactAddress: hexValue,
+    otherFeeds?: Feeds,
+  ) {
+    super(localID, 'user', keyOrId)
+    this._publicFeed = publicFeed
+    this._firstContactAddress = firstContactAddress
+    this._otherFeeds = otherFeeds || {}
+    this._profile = profile
   }
 
   get publicFeed(): FeedHash {
     return this._publicFeed
   }
 
-  get profile(): ProfileData {
+  get profile(): PeerUserProfile {
     return this._profile
+  }
+
+  get firstContactAddress(): hexValue {
+    return this._firstContactAddress
   }
 
   get otherFeeds(): Feeds {
@@ -72,5 +96,9 @@ export default class PeerUserIdentity extends Identity {
 
   get avatar(): ?string {
     return this._profile.avatar
+  }
+
+  set profile(profile: PeerUserProfile = {}) {
+    this._profile = profile
   }
 }

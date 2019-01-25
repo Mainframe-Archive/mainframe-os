@@ -13,7 +13,7 @@ body,
   left: 0px !important;
   right: 0px !important;
   bottom: 0px !important;
-  background-color: rgba(15, 32, 67, 0.9) !important;
+  background-color: #fff !important;
   display: flex !important;
   flex-direction: row !important;
   align-items: center !important;
@@ -22,6 +22,8 @@ body,
 }
 
 .ReactModal__Content {
+  width: 100%;
+  height: 100%;
   position: relative !important;
   top: initial !important;
   left: initial !important;
@@ -30,19 +32,19 @@ body,
   border: none !important;
   background: none !important;
   overflow: auto !important;
-  border-radius: 10px !important;
-  border-color: transparent !important;
   outline: none !important;
   padding: 0px !important;
-  margin: auto !important;
 }
 .no-skew {
+  transition: all 0.3s;
   transform: perspective(400px) rotateY(0deg);
 }
 .skew-left {
+  transition: all 0.3s;
   transform: perspective(400px) rotateY(-15deg);
 }
 
 .skew-right {
+  transition: all 0.3s;
   transform: perspective(400px) rotateY(15deg);
 }

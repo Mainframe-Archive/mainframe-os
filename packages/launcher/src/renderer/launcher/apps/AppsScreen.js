@@ -20,7 +20,7 @@ class AppsScreen extends Component<Props> {
 
 const AppsScreenRelayContainer = createFragmentContainer(AppsScreen, {
   apps: graphql`
-    fragment AppsScreen_apps on AppsQuery {
+    fragment AppsScreen_apps on Apps {
       ...AppsView_apps
     }
   `,

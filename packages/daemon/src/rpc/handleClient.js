@@ -11,22 +11,22 @@ import createHandler, {
 import { uniqueID } from '@mainframe/utils-id'
 import debug from 'debug'
 
+import ClientContext from '../context/ClientContext'
 import type { VaultRegistry } from '../vault'
 
 import methods from './methods'
-import RequestContext from './RequestContext'
 
 export type NotifyFunc = (method: string, params: Object) => void
 
 const handleMessage = createHandler({
   methods,
-  onHandlerError: (ctx: RequestContext, msg: IncomingMessage, err: Error) => {
+  onHandlerError: (ctx: ClientContext, msg: IncomingMessage, err: Error) => {
     ctx.log('handler error', msg, err.stack)
   },
-  onInvalidMessage: (ctx: RequestContext, msg: IncomingMessage) => {
+  onInvalidMessage: (ctx: ClientContext, msg: IncomingMessage) => {
     ctx.log('invalid message', msg)
   },
-  onNotification: (ctx: RequestContext, msg: IncomingMessage) => {
+  onNotification: (ctx: ClientContext, msg: IncomingMessage) => {
     ctx.log('notification received', msg)
   },
   validatorOptions: {
@@ -52,7 +52,7 @@ export default (socket: Socket, env: Environment, vaults: VaultRegistry) => {
     sendJSON({ jsonrpc: '2.0', method, params })
   }
 
-  const context = new RequestContext({
+  const context = new ClientContext({
     log,
     env,
     notify: sendNotification,

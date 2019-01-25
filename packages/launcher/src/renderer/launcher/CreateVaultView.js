@@ -14,9 +14,8 @@ import {
 
 import styled from 'styled-components/native'
 
-import OnboardContainer from '../UIComponents/OnboardContainer'
-
 import rpc from './rpc'
+import OnboardContainer from './onboarding/OnboardContainer'
 
 type Props = {
   onVaultCreated: () => void,
@@ -97,6 +96,7 @@ export default class CreateVaultView extends Component<Props, State> {
     )
     return (
       <OnboardContainer
+        step={1}
         title="Welcome"
         description="Let’s quickly secure your MainframeOS vault.">
         <FormContainer>

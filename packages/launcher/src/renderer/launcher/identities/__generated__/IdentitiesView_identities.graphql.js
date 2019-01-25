@@ -13,13 +13,10 @@ declare export opaque type IdentitiesView_identities$ref: FragmentReference;
 export type IdentitiesView_identities = {|
   +ownUsers: ?$ReadOnlyArray<?{|
     +localID: string,
-    +profile: ?{|
+    +feedHash: string,
+    +profile: {|
       +name: string
     |},
-    +wallets: ?$ReadOnlyArray<?{|
-      +localID: string,
-      +accounts: ?$ReadOnlyArray<?string>,
-    |}>,
     +apps: ?$ReadOnlyArray<?{|
       +localID: string,
       +manifest: {|
@@ -39,7 +36,7 @@ export type IdentitiesView_identities = {|
   |}>,
   +ownDevelopers: ?$ReadOnlyArray<?{|
     +localID: string,
-    +profile: ?{|
+    +profile: {|
       +name: string
     |},
   |}>,
@@ -64,11 +61,21 @@ v1 = [
     "args": null,
     "storageKey": null
   }
-];
+],
+v2 = {
+  "kind": "LinkedField",
+  "alias": null,
+  "name": "profile",
+  "storageKey": null,
+  "args": null,
+  "concreteType": "NamedProfile",
+  "plural": false,
+  "selections": v1
+};
 return {
   "kind": "Fragment",
   "name": "IdentitiesView_identities",
-  "type": "IdentitiesQuery",
+  "type": "Identities",
   "metadata": null,
   "argumentDefinitions": [],
   "selections": [
@@ -83,34 +90,13 @@ return {
       "selections": [
         v0,
         {
-          "kind": "LinkedField",
+          "kind": "ScalarField",
           "alias": null,
-          "name": "profile",
-          "storageKey": null,
+          "name": "feedHash",
           "args": null,
-          "concreteType": "OwnUserProfile",
-          "plural": false,
-          "selections": v1
+          "storageKey": null
         },
-        {
-          "kind": "LinkedField",
-          "alias": null,
-          "name": "wallets",
-          "storageKey": null,
-          "args": null,
-          "concreteType": "UserWalletType",
-          "plural": true,
-          "selections": [
-            v0,
-            {
-              "kind": "ScalarField",
-              "alias": null,
-              "name": "accounts",
-              "args": null,
-              "storageKey": null
-            }
-          ]
-        },
+        v2,
         {
           "kind": "LinkedField",
           "alias": null,
@@ -203,21 +189,12 @@ return {
       "plural": true,
       "selections": [
         v0,
-        {
-          "kind": "LinkedField",
-          "alias": null,
-          "name": "profile",
-          "storageKey": null,
-          "args": null,
-          "concreteType": "OwnDeveloperProfile",
-          "plural": false,
-          "selections": v1
-        }
+        v2
       ]
     }
   ]
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '3a588857335af2777dd4c7b0b3d7954b';
+(node/*: any*/).hash = '4e7318a7227ec8695f1b723901bc22ef';
 module.exports = node;

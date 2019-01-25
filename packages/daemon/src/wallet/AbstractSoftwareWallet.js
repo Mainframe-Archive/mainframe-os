@@ -25,6 +25,10 @@ export default class AbstractSoftwareWallet {
     return this._localID
   }
 
+  get localID(): string {
+    return this._localID
+  }
+
   getAccounts(): Array<string> {
     throw new Error('Must be implemented')
   }

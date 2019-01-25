@@ -218,10 +218,6 @@ export default class Vault {
     return this._data.identityWallets
   }
 
-  getWalletsForIdentity(id: string): { [walletID: string]: Array<string> } {
-    return this.identityWallets.walletsByIdentity[id] || {}
-  }
-
   // App lifecycle
 
   closeApp(sessID: ID): void {

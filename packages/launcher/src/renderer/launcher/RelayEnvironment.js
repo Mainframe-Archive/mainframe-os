@@ -6,12 +6,16 @@ import { Environment, Network, RecordSource, Store } from 'relay-runtime'
 import rpc from './rpc'
 
 const fetchQuery = (operation: Object, variables: ?Object) => {
-  return rpc.graphql(operation.text, variables)
+  return rpc.graphqlQuery(operation.text, variables)
+}
+
+const subscribeQuery = (operation: Object, variables: ?Object) => {
+  return rpc.graphqlSubscription(operation.text, variables)
 }
 
 export const createEnvironment = () => {
   return new Environment({
-    network: Network.create(fetchQuery),
+    network: Network.create(fetchQuery, subscribeQuery),
     store: new Store(new RecordSource()),
   })
 }

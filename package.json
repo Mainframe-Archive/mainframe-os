@@ -8,14 +8,16 @@
     "flow:install": "lerna exec --concurrency 1 -- flow-typed install --ignoreDeps=dev",
     "bootstrap": "lerna bootstrap && npm run flow:install",
     "bootstrap:ci": "lerna bootstrap --concurrency 1 && npm run flow:install",
+    "clean": "lerna clean -y && del-cli node_modules",
+    "upgrade": "npm run clean && npm install && lerna exec 'rm package-lock.json' && npm run bootstrap && npm run build",
     "lint": "eslint packages/*/src packages/*/__tests__",
-    "lint:fix": "npm run lint --fix",
+    "lint:fix": "npm run lint -- --fix",
     "test:unit": "BABEL_ENV=test jest --config jest.config.js",
     "test:ci": "BABEL_ENV=test jest --ci --config jest.config.ci.js --runInBand",
     "test:types": "flow check --merge-timeout 0",
     "test:types-ci": "flow check --max-workers 1 --merge-timeout 0",
     "test": "npm run lint && npm run test:types && npm run test:unit",
-    "build": "lerna run build && lerna run build:sdk && lerna run build:app",
+    "build": "lerna run build && lerna run build:sdk",
     "start": "npm run build && npm run test"
   },
   "devDependencies": {
@@ -39,7 +41,7 @@
     "flow-remove-types": "^1.2.3",
     "flow-typed": "^2.4.0",
     "jest": "^23.6.0",
-    "jest-junit": "^5.2.0",
+    "jest-junit": "^6.0.0",
     "lerna": "^3.5.1",
     "prettier": "^1.14.3"
   }

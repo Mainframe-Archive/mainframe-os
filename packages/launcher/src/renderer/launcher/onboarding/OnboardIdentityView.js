@@ -2,16 +2,14 @@
 
 import React, { Component } from 'react'
 import { ActivityIndicator } from 'react-native'
-
-import { Button, TextField, Row, Column, Text } from '@morpheus-ui/core'
+import { graphql, commitMutation } from 'react-relay'
+import { Button, TextField, Row, Column, Text, Switch } from '@morpheus-ui/core'
 import CircleArrowRight from '@morpheus-ui/icons/CircleArrowRight'
 import { Form, type FormSubmitPayload } from '@morpheus-ui/forms'
-
 import styled from 'styled-components/native'
 
-import OnboardContainer from '../UIComponents/OnboardContainer'
-
-import rpc from './rpc'
+import { EnvironmentContext } from '../RelayEnvironment'
+import OnboardContainer from './OnboardContainer'
 
 type Props = {
   onIdentityCreated: (id: string) => void,
@@ -26,7 +24,33 @@ const FormContainer = styled.View`
   max-width: 260px;
 `
 
+export const createUserMutation = graphql`
+  mutation OnboardIdentityViewCreateUserIdentityMutation(
+    $input: CreateUserIdentityInput!
+  ) {
+    createUserIdentity(input: $input) {
+      user {
+        localID
+        profile {
+          name
+        }
+      }
+      viewer {
+        identities {
+          ownUsers {
+            defaultEthAddress
+            localID
+          }
+          ...Launcher_identities
+        }
+      }
+    }
+  }
+`
+
 export default class OnboardIdentityView extends Component<Props, State> {
+  static contextType = EnvironmentContext
+
   state = {}
 
   onSubmit = (payload: FormSubmitPayload) => {
@@ -42,17 +66,34 @@ export default class OnboardIdentityView extends Component<Props, State> {
   }
 
   async createIdentity(name: string) {
-    try {
-      const res = await rpc.createUserIdentity({ name })
-      this.props.onIdentityCreated(res.id)
-    } catch (err) {
-      this.setState({
-        error: err.message,
-        awaitingResponse: false,
-      })
-      // eslint-disable-next-line no-console
-      console.warn(err)
+    const input = {
+      profile: {
+        name,
+      },
     }
+
+    commitMutation(this.context, {
+      mutation: createUserMutation,
+      variables: { input },
+      onCompleted: ({ createUserIdentity }, errors) => {
+        if (errors && errors.length) {
+          this.setState({
+            error: errors[0].message,
+            awaitingResponse: false,
+          })
+        } else {
+          this.props.onIdentityCreated(createUserIdentity.user.localID)
+        }
+      },
+      onError: err => {
+        const msg =
+          err.message || 'Sorry, there was a problem creating your identity.'
+        this.setState({
+          error: msg,
+          awaitingResponse: false,
+        })
+      },
+    })
   }
 
   render() {
@@ -76,8 +117,10 @@ export default class OnboardIdentityView extends Component<Props, State> {
     )
     return (
       <OnboardContainer
-        title="Welcome!"
-        description="Let’s quickly secure your MainframeOS vault.">
+        id
+        step={2}
+        title="Identity"
+        description="Create your first identity">
         <FormContainer>
           <Form onSubmit={this.onSubmit}>
             <Row size={1} top>
@@ -90,7 +133,11 @@ export default class OnboardIdentityView extends Component<Props, State> {
                   testID="onboard-create-identity-input-name"
                 />
               </Column>
+              <Column>
+                <Switch label="Make my name discoverable" name="discoverable" />
+              </Column>
             </Row>
+
             {errorMsg}
             <Row size={2} top>
               <Column styles="align-items:flex-end;" smOffset={1}>

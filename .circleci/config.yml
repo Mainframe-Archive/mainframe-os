@@ -12,10 +12,10 @@ jobs:
           keys:
             - v1-dependencies-{{ .Branch }}
       - run:
-          name: Install libudev-dev
+          name: Install system dependencies
           command: |
             sudo apt-get update
-            sudo apt-get install build-essential libudev-dev -y
+            sudo apt-get install build-essential libudev-dev libusb-1.0-0-dev -y
       - run:
           name: Setup
           command: npm install && npm run bootstrap:ci

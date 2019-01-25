@@ -1,5 +1,6 @@
 // @flow
 
+export { default as Contact } from './Contact'
 export { default as OwnAppIdentity } from './OwnAppIdentity'
 export { default as OwnDeveloperIdentity } from './OwnDeveloperIdentity'
 export { default as OwnUserIdentity } from './OwnUserIdentity'
