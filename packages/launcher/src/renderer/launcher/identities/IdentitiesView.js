@@ -9,18 +9,12 @@ import { Text } from '@morpheus-ui/core'
 
 import Avatar from '../../UIComponents/Avatar'
 
-type Wallet = {
-  localID: string,
-  accounts: Array<string>,
-}
-
 type User = {
   localID: string,
   profile: {
     name: string,
   },
   apps: Array<AppInstalledData>,
-  wallets: Array<Wallet>,
 }
 
 export type Identities = {
@@ -97,10 +91,6 @@ export default createFragmentContainer(IdentitiesView, {
         feedHash
         profile {
           name
-        }
-        wallets {
-          localID
-          accounts
         }
         apps {
           localID
