@@ -67,7 +67,7 @@
     "@mainframe/utils-id": "^0.1.0",
     "babel-loader": "^8.0.4",
     "babel-plugin-react-native-web": "^0.9.9",
-    "babel-plugin-relay": "^1.7.0",
+    "babel-plugin-relay": "^2.0.0",
     "css-loader": "^2.0.0",
     "electron": "^3.0.9",
     "electron-builder": "^20.38.2",
