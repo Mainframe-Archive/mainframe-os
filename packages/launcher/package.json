@@ -54,7 +54,7 @@
     "react-modal": "^3.6.1",
     "react-native-web": "^0.9.9",
     "react-relay": "^1.7.0",
-    "relay-runtime": "^1.7.0",
+    "relay-runtime": "^2.0.0",
     "rxjs": "^6.3.3",
     "source-map-support": "^0.5.9",
     "web3-eth-abi": "^1.0.0-beta.36",
