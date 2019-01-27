@@ -3,7 +3,6 @@
 import type { Observable, Subscription } from 'rxjs'
 import { debounceTime, filter } from 'rxjs/operators'
 import { idType } from '@mainframe/utils-id'
-import { getFeedTopic } from '@erebos/api-bzz-base'
 
 import { OwnFeed } from '../swarm/feed'
 
@@ -131,51 +130,6 @@ export default class ContextEvents {
             userID,
             change: 'requestSent',
           })
-        }),
-    )
-    this.addSubscription(
-      'contactRequestSent',
-      this._context
-        .pipe(
-          filter((e: ContextEvent) => {
-            return (
-              (e.type === 'contact_created' ||
-                (e.type === 'contact_changed' && e.change === 'requestSent')) &&
-              e.contact.connectionState === 'sent'
-            )
-          }),
-        )
-        .subscribe(async (e: ContactCreatedEvent | ContactChangedEvent) => {
-          const { contact, userID } = e
-          const user = this._context.openVault.identities.getOwnUser(
-            idType(userID),
-          )
-          const peer = this._context.openVault.identities.getPeerUser(
-            idType(contact.peerID),
-          )
-          if (!user || !peer) return
-
-          // Check if contact has created feed
-          try {
-            const topic = getFeedTopic({ name: user.base64PublicKey() })
-            const peerFeedRes = await this._context.io.bzz.getFeedValue(
-              peer.firstContactAddress,
-              { topic },
-              { mode: 'content-response' },
-            )
-            const data = await peerFeedRes.json()
-            contact.contactFeed = data.privateFeed
-
-            this._context.next({
-              type: 'contact_changed',
-              contact,
-              userID,
-              change: 'contactFeed',
-            })
-          } catch (_e) {
-            // Should always be due to contact feed not being ready
-            // TODO: Rethrow other errors
-          }
         }),
     )
   }

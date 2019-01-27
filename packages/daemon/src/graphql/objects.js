@@ -478,11 +478,12 @@ export const peer = new GraphQLObjectType({
   }),
 })
 
-export const contactConnection = new GraphQLEnumType({
-  name: 'ContactConnection',
+export const connectionState = new GraphQLEnumType({
+  name: 'ConnectionState',
   values: {
     CONNECTED: { value: 'connected' },
     SENT: { value: 'sent' },
+    SENDING: { value: 'sending' },
   },
 })
 
@@ -507,7 +508,7 @@ export const contact = new GraphQLObjectType({
       },
     },
     connectionState: {
-      type: new GraphQLNonNull(contactConnection),
+      type: new GraphQLNonNull(connectionState),
     },
   }),
 })
