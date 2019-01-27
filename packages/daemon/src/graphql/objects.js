@@ -401,15 +401,9 @@ export const ownUserIdentity = new GraphQLObjectType({
       },
     },
     wallets: {
-      type: new GraphQLList(userWallet),
+      type: new GraphQLNonNull(ethWallets),
       resolve: (self, args, ctx) => {
-        const wallets = ctx.queries.getUserEthWallets(self.localID)
-        return Object.keys(wallets).map(id => {
-          return {
-            localID: id,
-            accounts: wallets[id].getAccounts(),
-          }
-        })
+        return ctx.queries.getUserEthWallets(self.localID)
       },
     },
     profile: {
@@ -482,6 +476,7 @@ export const connectionState = new GraphQLEnumType({
   name: 'ConnectionState',
   values: {
     CONNECTED: { value: 'connected' },
+    SENDING: { value: 'sending' },
     SENT: { value: 'sent' },
     SENDING: { value: 'sending' },
   },
@@ -646,6 +641,9 @@ export const ethHdWallet = new GraphQLObjectType({
     id: idResolver,
     localID: {
       type: new GraphQLNonNull(GraphQLID),
+    },
+    mnemonic: {
+      type: new GraphQLNonNull(GraphQLString),
     },
     accounts: {
       type: new GraphQLList(namedWalletAccount),

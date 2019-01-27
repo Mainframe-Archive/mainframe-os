@@ -149,6 +149,7 @@ const createHDWalletMutation = mutationWithClientMutationId({
     )
     return {
       localID: wallet.localID,
+      mnemonic: wallet.mnemonic,
       accounts: wallet.getNamedAccounts(),
     }
   },
@@ -234,7 +235,7 @@ const createUserIdentityMutation = mutationWithClientMutationId({
     viewer: viewerOutput,
   },
   mutateAndGetPayload: async (args, ctx) => {
-    const user = await ctx.mutations.createOwnUserIdentity(args.profile)
+    const user = await ctx.mutations.createUser(args.profile)
     return { user }
   },
 })
