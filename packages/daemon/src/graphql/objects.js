@@ -478,7 +478,6 @@ export const connectionState = new GraphQLEnumType({
     CONNECTED: { value: 'connected' },
     SENDING: { value: 'sending' },
     SENT: { value: 'sent' },
-    SENDING: { value: 'sending' },
   },
 })
 
