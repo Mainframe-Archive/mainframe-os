@@ -111,11 +111,7 @@ export default class ContextMutations {
     })
   }
 
-  async createContactFromPeer(
-    userID: ID,
-    peerID: ID,
-    aliasName?: string,
-  ): Promise<Contact> {
+  createContactFromPeer(userID: ID, peerID: ID, aliasName?: string): Contact {
     const contact = this._context.openVault.identities.createContactFromPeer(
       userID,
       peerID,
@@ -142,6 +138,22 @@ export default class ContextMutations {
     }
     peer.profile = profile
     this._context.next({ type: 'peer_changed', peer })
+  }
+
+  setContactFeed(userID: ID | string, contactID: ID | string, feed: bzzHash) {
+    const contact = this._context.openVault.identities.getContact(
+      userID,
+      contactID,
+    )
+    if (!contact) throw new Error('User not found')
+
+    contact.contactFeed = feed
+    this._context.next({
+      type: 'contact_changed',
+      contact,
+      userID,
+      change: 'contactFeed',
+    })
   }
 
   // Identities

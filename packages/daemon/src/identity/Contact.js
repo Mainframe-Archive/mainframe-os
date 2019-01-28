@@ -29,7 +29,7 @@ export type FirstContactSerialized = {
   privateFeed: bzzHash,
 }
 
-export type ContactConnection = 'connected' | 'sent' | 'sending'
+export type ConnectionState = 'connected' | 'sent' | 'sending'
 
 export default class Contact {
   static create = (
@@ -127,7 +127,7 @@ export default class Contact {
     this._requestSent = requestSent
   }
 
-  get connectionState(): ContactConnection {
+  get connectionState(): ConnectionState {
     if (!this._requestSent) return 'sending'
     return this.contactFeed ? 'connected' : 'sent'
   }
