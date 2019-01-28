@@ -171,6 +171,7 @@ type Contact implements Node {
 
 enum ContactConnection {
   CONNECTED
+  SENDING
   SENT
 }
 
