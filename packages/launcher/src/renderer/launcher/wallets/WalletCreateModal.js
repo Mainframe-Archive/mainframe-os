@@ -256,11 +256,9 @@ export default class WalletCreateModal extends Component<Props, State> {
       <FormModalView
         full={this.props.full}
         title="Secret Backup Phrase"
-        dismissButton="BACK"
         confirmButton="CONFIRM"
         confirmTestID="wallet-create-confirm-backup-button"
-        onPressConfirm={this.onPressBackupComplete}
-        onRequestClose={this.props.onClose}>
+        onPressConfirm={this.onPressBackupComplete}>
         <Container>
           <Text
             size={12}
