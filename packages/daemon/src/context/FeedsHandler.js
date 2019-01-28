@@ -1,9 +1,10 @@
 // @flow
 
 import { type Observable, Subject, type Subscription } from 'rxjs'
-import { filter, multicast, refCount, tap } from 'rxjs/operators'
+import { filter, multicast, refCount, tap, flatMap } from 'rxjs/operators'
+import { getFeedTopic } from '@erebos/api-bzz-base'
 
-import type Contact from '../identity/Contact'
+import type Contact, { FirstContactSerialized } from '../identity/Contact'
 import type {
   default as PeerUserIdentity,
   PublicFeedSerialized,
@@ -14,6 +15,7 @@ import type ClientContext from './ClientContext'
 import type {
   ContextEvent,
   ContactChangedEvent,
+  ContactCreatedEvent,
   PeerDeletedEvent,
 } from './types'
 
@@ -27,16 +29,17 @@ const MINUTE = 60 * 1000
 class FeedsHandler {
   _context: ClientContext
   _observers: Set<Observable<any>> = new Set()
-  _subscriptions: { [localID: string]: Subscription } = {}
+  _subscriptions: { [ref: string]: Subscription } = {}
 
   constructor(context: ClientContext) {
     this._context = context
   }
 
-  remove(localID: string) {
-    const sub = this._subscriptions[localID]
+  remove(ref: string) {
+    const sub = this._subscriptions[ref]
     if (sub != null) {
       sub.unsubscribe()
+      delete this._subscriptions[ref]
     }
   }
 
@@ -69,9 +72,16 @@ type PeerFeed = {
   refCounted: Observable<PublicFeedSerialized>,
 }
 
+const peerSubscriptionRef = (contact: Contact): string =>
+  `${contact.localID}-peerFeed`
+
+const contactSubscriptionRef = (contact: Contact): string =>
+  `${contact.localID}-contactFeed`
+
 export class ContactsFeedsHandler extends FeedsHandler {
   _peerFeeds: { [localID: string]: PeerFeed } = {}
   _peerDeletedSubscription: ?Subscription
+  _contactCreatedSubscription: ?Subscription
 
   _getPeerFeed(peer: PeerUserIdentity): Observable<PublicFeedSerialized> {
     const existing = this._peerFeeds[peer.localID]
@@ -102,17 +112,35 @@ export class ContactsFeedsHandler extends FeedsHandler {
   }
 
   _subscribe(userID: string, contact: Contact) {
-    if (this._subscriptions[contact.localID] != null) {
-      return
+    if (this._subscribePeerFeed(userID, contact) != null) return
+    if (this._subscribeContactFeed(userID, contact) != null) return
+
+    // Delete subscription if contact gets deleted
+    const sub = this._context
+      .pipe(
+        filter((e: ContextEvent) => {
+          return e.type === 'contact_deleted' && e.contactID === contact.localID
+        }),
+      )
+      .subscribe(() => {
+        this._unsubscribe(contact)
+        sub.unsubscribe()
+      })
+  }
+
+  _subscribePeerFeed(userID: string, contact: Contact): boolean {
+    const peerSubRef = peerSubscriptionRef(contact)
+    if (this._subscriptions[peerSubRef] != null) {
+      return false
     }
 
     const peer = this._context.openVault.identities.getPeerUser(contact.peerID)
     if (peer == null) {
       this._context.log('No peer found for contact', contact)
-      return
+      return false
     }
 
-    this._subscriptions[contact.localID] = this._getPeerFeed(peer).subscribe({
+    this._subscriptions[peerSubRef] = this._getPeerFeed(peer).subscribe({
       next: () => {
         // Emit the `contact_changed` event so the profile mutation on the peer data can be observed by the subscription
         this._context.next({
@@ -123,23 +151,68 @@ export class ContactsFeedsHandler extends FeedsHandler {
         })
       },
       error: err => {
-        this._context.log('contact feed subscription error', err)
+        this._context.log('peer feed subscription error', err)
       },
       complete: () => {
-        delete this._subscriptions[contact.localID]
+        delete this._subscriptions[peerSubRef]
       },
     })
 
-    // Delete subscription if contact gets deleted
-    this._context
-      .pipe(
-        filter((e: ContextEvent) => {
-          return e.type === 'contact_deleted' && e.contactID === contact.localID
-        }),
+    return true
+  }
+
+  _subscribeContactFeed(userID: string, contact: Contact): boolean {
+    const contactSubRef = contactSubscriptionRef(contact)
+    if (this._subscriptions[contactSubRef] != null) {
+      return false
+    }
+
+    const user = this._context.openVault.identities.getOwnUser(userID)
+    const peer = this._context.openVault.identities.getPeerUser(contact.peerID)
+    if (user == null || peer == null) {
+      this._context.log(
+        `No ${user == null ? 'user' : 'peer'} found for contact`,
+        contact,
       )
-      .subscribe(() => {
-        this._subscriptions[contact.localID].unsubscribe()
+      return false
+    }
+
+    const topic = getFeedTopic({ name: user.base64PublicKey() })
+    this._subscriptions[contactSubRef] = this._context.io.bzz
+      .pollFeedValue(
+        peer.firstContactAddress,
+        {
+          mode: 'content-response',
+          whenEmpty: 'ignore',
+          contentChangedOnly: true,
+          immediate: true,
+          interval: 5 * MINUTE,
+        },
+        { topic },
+      )
+      .pipe(flatMap(res => res.json()))
+      .subscribe({
+        next: (data: FirstContactSerialized) => {
+          this._context.mutations.setContactFeed(
+            userID,
+            contact.localID,
+            data.privateFeed,
+          )
+        },
+        error: err => {
+          this._context.log('contact feed subscription error', err)
+        },
+        complete: () => {
+          delete this._subscriptions[contactSubRef]
+        },
       })
+
+    return true
+  }
+
+  _unsubscribe(contact: Contact) {
+    this.remove(peerSubscriptionRef(contact))
+    this.remove(contactSubscriptionRef(contact))
   }
 
   _setup() {
@@ -152,6 +225,13 @@ export class ContactsFeedsHandler extends FeedsHandler {
           feed.source.unsubscribe()
           delete this._peerFeeds[e.peerID]
         }
+      })
+
+    // Subscribe to contact created event to start polling new contacts
+    this._contactCreatedSubscription = this._context
+      .pipe(filter((e: ContextEvent) => e.type === 'contact_created'))
+      .subscribe((e: ContactCreatedEvent) => {
+        this.add(e.userID, e.contact)
       })
 
     // Subscribe to all contacts
@@ -194,6 +274,9 @@ export class ContactsFeedsHandler extends FeedsHandler {
     super.clear()
     if (this._peerDeletedSubscription != null) {
       this._peerDeletedSubscription.unsubscribe()
+    }
+    if (this._contactCreatedSubscription != null) {
+      this._contactCreatedSubscription.unsubscribe()
     }
   }
 }

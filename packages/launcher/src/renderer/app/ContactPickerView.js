@@ -22,7 +22,7 @@ type Props = {
 }
 
 type State = {
-  contacts: Array<Object>, // TODO: Define
+  contacts: Array<Contact>,
   selectedContacts: Set<string>,
 }
 
@@ -84,7 +84,7 @@ export default class ContactPickerView extends Component<Props, State> {
       const onPress = () => this.onSelectContact(c)
       const selected = this.state.selectedContacts.has(c.localID)
       return (
-        <TouchableOpacity key={c.id} onPress={onPress}>
+        <TouchableOpacity key={c.localID} onPress={onPress}>
           <ContactRow selected={selected}>
             <Text>{c.profile.name}</Text>
           </ContactRow>
