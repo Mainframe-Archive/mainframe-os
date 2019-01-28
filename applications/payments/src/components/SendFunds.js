@@ -79,13 +79,13 @@ class SendFunds extends Component<ContextProps, State> {
 
   async selectContacts() {
     try {
-      const { contacts } = await this.props.sdk.contacts.selectContacts()
-      if (contacts.length) {
-        if (contacts[0].data.profile.ethAddress) {
-          this.setState({
-            recipient: contacts[0].data.profile.ethAddress,
-          })
-        }
+      const { contacts } = await this.props.sdk.contacts.selectContacts({
+        multi: true,
+      })
+      if (contacts.length && contacts[0].data.profile.ethAddress) {
+        this.setState({
+          recipient: contacts[0].data.profile.ethAddress,
+        })
       }
     } catch (err) {
       console.log('select contacts err: ', err)

@@ -7,6 +7,7 @@ import { ipcRenderer } from 'electron'
 import React, { Component } from 'react'
 import { View, StyleSheet, Switch } from 'react-native-web'
 import type { Subscription } from 'rxjs'
+import type { WalletSignTxParams } from '@mainframe/client'
 
 import { APP_TRUSTED_REQUEST_CHANNEL } from '../../constants'
 
@@ -14,20 +15,32 @@ import colors from '../colors'
 import Text from '../UIComponents/Text'
 import Button from '../UIComponents/Button'
 import WalletTxRequestView from './WalletTxRequestView'
-import ContactPickerView from './ContactPickerView'
+import ContactPickerView, { type SelectedContactIDs } from './ContactPickerView'
 
 import rpc from './rpc'
 import type { AppSessionData } from './AppContainer'
 
+type ContactSelectParams = {
+  multi: boolean,
+}
+
+type GrantedData = {
+  selectedContactIDs?: SelectedContactIDs,
+}
+
 type PermissionGrantData = {
   key: string,
   domain?: string,
-  params?: Object,
+  params?: WalletSignTxParams | ContactSelectParams,
+  params: {
+    BLOCKCHAIN_SEND?: WalletSignTxParams,
+    CONTACTS_SELECT?: ContactSelectParams,
+  },
 }
 type PermissionGrantResult = {
   granted: boolean,
   persist: boolean,
-  data?: ?Object,
+  data?: GrantedData,
 }
 type PermissionDeniedNotif = {
   key: string,
@@ -58,7 +71,7 @@ const handleMessage = createHandler({ methods, validatorOptions })
 const permissionDescriptions = {
   BLOCKCHAIN_SEND: 'make an Ethereum blockchain transaction',
   CONTACTS_READ: 'access contacts',
-  CONTACTS_SELECT_CONTACTS: 'select contacts',
+  CONTACTS_SELECT: 'select contacts',
 }
 const getPermissionDescription = (key: string, input?: ?string): ?string => {
   if (key === 'WEB_REQUEST' && input) {
@@ -145,7 +158,7 @@ export default class PermissionsManagerView extends Component<Props, State> {
     ipcRenderer.on(APP_TRUSTED_REQUEST_CHANNEL, this._onRPCMessage)
   }
 
-  onSetPermissionGrant = (id: string, granted: boolean, data?: ?any) => {
+  onSetPermissionGrant = (id: string, granted: boolean, data?: GrantedData) => {
     const request = this.state.permissionRequests[id]
 
     if (request != null) {
@@ -175,8 +188,8 @@ export default class PermissionsManagerView extends Component<Props, State> {
     })
   }
 
-  onSelectedContacts = (id: string, contacts: Array<string>) => {
-    this.onSetPermissionGrant(id, true, contacts)
+  onSelectedContacts = (id: string, selectedContactIDs: SelectedContactIDs) => {
+    this.onSetPermissionGrant(id, true, { selectedContactIDs })
   }
 
   // RENDER
@@ -194,15 +207,18 @@ export default class PermissionsManagerView extends Component<Props, State> {
   }
 
   renderTxSignRequest(requestID: string, permissionData: PermissionGrantData) {
-    if (permissionData.params == null) {
-      // TODO display error
-      return null
-    }
+    const { params } = permissionData
+    const txView =
+      !params || !params.BLOCKCHAIN_SEND ? (
+        <Text>Invalid transaction data</Text>
+      ) : (
+        <WalletTxRequestView
+          transaction={params.BLOCKCHAIN_SEND.transactionData}
+        />
+      )
     return (
       <>
-        <WalletTxRequestView
-          transaction={permissionData.params.transactionData}
-        />
+        {txView}
         <View style={styles.buttonsContainer}>
           <Button
             title="ACCEPT"
@@ -220,8 +236,10 @@ export default class PermissionsManagerView extends Component<Props, State> {
   }
 
   renderContactPicker(requestID: string, permissionData: PermissionGrantData) {
+    const { params } = permissionData
     const { id } = this.props.appSession.user
-    const multi = permissionData.params ? permissionData.params.multi : false
+    const multi =
+      params && params.CONTACTS_SELECT ? params.CONTACTS_SELECT.multi : false
     return (
       <ContactPickerView
         userID={id}
@@ -305,7 +323,7 @@ export default class PermissionsManagerView extends Component<Props, State> {
       case 'BLOCKCHAIN_SEND':
         content = this.renderTxSignRequest(id, permissionData)
         break
-      case 'CONTACTS_SELECT_CONTACTS':
+      case 'CONTACTS_SELECT':
         content = this.renderContactPicker(id, permissionData)
         break
       default:

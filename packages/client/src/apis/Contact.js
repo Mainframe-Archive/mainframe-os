@@ -15,24 +15,24 @@ export default class ContactAPIs extends ClientAPIs {
   getUserContacts(
     params: ContactsGetUserContactsParams,
   ): Promise<ContactsGetUserContactsResult> {
-    return this._rpc.request('contacts_getUserContacts', params)
+    return this._rpc.request('contact_getUserContacts', params)
   }
 
   getAppUserContacts(
     params: ContactsGetAppUserContactsParams,
   ): Promise<ContactsGetAppUserContactsResult> {
-    return this._rpc.request('contacts_getAppUserContacts', params)
+    return this._rpc.request('contact_getAppUserContacts', params)
   }
 
   getAppApprovedContacts(
     params: ContactsGetAppApprovedContactsParams,
   ): Promise<ContactsGetAppUserContactsResult> {
-    return this._rpc.request('contacts_getAppApprovedContacts', params)
+    return this._rpc.request('contact_getAppApprovedContacts', params)
   }
 
   approveContactsForApp(
     params: ContactsApproveContactsForAppParams,
   ): Promise<ContactsApproveContactsForAppResult> {
-    return this._rpc.request('contacts_approveContacts', params)
+    return this._rpc.request('contact_approveContacts', params)
   }
 }

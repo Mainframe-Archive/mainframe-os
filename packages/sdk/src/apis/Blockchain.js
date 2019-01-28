@@ -11,7 +11,7 @@ export default class BlockchainAPIs extends ClientAPIs {
     const hookedWallet = new HookedProvider({
       getAccounts: async cb => {
         try {
-          const accounts = await this.rpc.request('wallet_getEthAccounts')
+          const accounts = await this._rpc.request('wallet_getEthAccounts')
           cb(null, accounts)
         } catch (err) {
           cb(err)
@@ -23,7 +23,7 @@ export default class BlockchainAPIs extends ClientAPIs {
           transactionData: params,
         }
         try {
-          const res = await this.rpc.request('wallet_signTx', txParams)
+          const res = await this._rpc.request('wallet_signTx', txParams)
           cb(null, res)
         } catch (err) {
           cb(err)
@@ -36,7 +36,7 @@ export default class BlockchainAPIs extends ClientAPIs {
       engine.emit('data', err, notif)
     })
     engine.addProvider(subsProvider)
-    const rpcProvider = new RPCProvider(this.rpc)
+    const rpcProvider = new RPCProvider(this._rpc)
     engine.addProvider(rpcProvider)
     engine.start()
     return engine

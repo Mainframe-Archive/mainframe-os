@@ -7,6 +7,8 @@ import { Text, Button } from '@morpheus-ui/core'
 
 import rpc from './rpc'
 
+export type SelectedContactIDs = Array<string>
+
 type Contact = {
   localID: string,
   profile: {
@@ -18,7 +20,7 @@ type Contact = {
 type Props = {
   userID: string,
   multiSelect?: ?boolean,
-  onSelectedContacts: (id: Array<string>) => void,
+  onSelectedContacts: (contactIDs: SelectedContactIDs) => void,
 }
 
 type State = {

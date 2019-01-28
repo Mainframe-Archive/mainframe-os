@@ -68,8 +68,8 @@ export const sandboxed = {
     'CONTACTS_READ',
     async (ctx: AppContext, params: { multi?: boolean }) => {
       const res = await ctx.trustedRPC.request('permission_ask', {
-        key: 'CONTACTS_SELECT_CONTACTS',
-        params,
+        key: 'CONTACTS_SELECT',
+        params: { CONTACTS_SELECT: params },
       })
       if (!res.granted || !res || !res.data) {
         return { contacts: [] }
@@ -79,7 +79,7 @@ export const sandboxed = {
       const contactIDs = res.data
       const contactsToApprove = contactIDs.map(id => ({
         localID: id,
-        publicDataOnly: false, // TODO allow user to set only public data
+        publicDataOnly: true, // TODO allow user to set only public data
       }))
       const {
         approvedContacts,

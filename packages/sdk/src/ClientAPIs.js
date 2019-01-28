@@ -8,8 +8,4 @@ export default class ClientAPIs {
   constructor(rpc: StreamRPC) {
     this._rpc = rpc
   }
-
-  get rpc(): StreamRPC {
-    return this._rpc
-  }
 }

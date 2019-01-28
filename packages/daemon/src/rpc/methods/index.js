@@ -37,10 +37,10 @@ export default {
 
   blockchain_web3Send: blockchain.web3Send,
 
-  contacts_approveContacts: contact.approveContactsForApp,
-  contacts_getAppApprovedContacts: contact.getAppApprovedContacts,
-  contacts_getAppUserContacts: contact.getAppUserContacts,
-  contacts_getUserContacts: contact.getUserContacts,
+  contact_approveContacts: contact.approveContactsForApp,
+  contact_getAppApprovedContacts: contact.getAppApprovedContacts,
+  contact_getAppUserContacts: contact.getAppUserContacts,
+  contact_getUserContacts: contact.getUserContacts,
 
   graphql_query: graphql.query,
   graphql_subscription: graphql.subscription,
