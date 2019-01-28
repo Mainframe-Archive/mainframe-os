@@ -55,7 +55,7 @@ export const importMnemonic = async (cmd: Command, client: Client) => {
 
   const res = await client.wallet.importWalletByMnemonic({
     mnemonic,
-    firstAccountName: name,
+    name,
     blockchain: 'ethereum',
   })
   client.close()

@@ -11,13 +11,13 @@ import WalletImportView from './WalletImportView'
 import WalletAddLedgerModal from './WalletAddLedgerModal'
 
 export type WalletAccounts = Array<{
-  name: string,
   address: string,
   balances: { mft: string, eth: string },
 }>
 
 export type Wallet = {
   localID: string,
+  name: ?string,
   accounts: WalletAccounts,
 }
 
@@ -64,7 +64,6 @@ const createWalletMutation = graphql`
     createHDWallet(input: $input) {
       hdWallet {
         accounts {
-          name
           address
         }
         localID
@@ -232,7 +231,6 @@ class WalletsView extends Component<Props, State> {
       )
       return (
         <WalletView key={a.address}>
-          <Text>{a.name}</Text>
           <Text>{a.address}</Text>
           <Text>ETH: {a.balances.eth}</Text>
           <Text>MFT: {a.balances.mft}</Text>
@@ -244,9 +242,14 @@ class WalletsView extends Component<Props, State> {
 
   renderSoftwareWallets() {
     const { ethWallets } = this.props.wallets
-    const wallets = ethWallets.hd.length
-      ? this.renderWalletAccounts(ethWallets.hd[0].accounts)
-      : null
+    const wallets = ethWallets.hd.map(w => {
+      return (
+        <>
+          <WalletTypeLabel>{w.name}</WalletTypeLabel>
+          {this.renderWalletAccounts(w.accounts)}
+        </>
+      )
+    })
     return (
       <>
         <WalletTypeLabel>{'Software Wallets'}</WalletTypeLabel>
@@ -265,7 +268,12 @@ class WalletsView extends Component<Props, State> {
   renderLedgerWallets() {
     const { ethWallets } = this.props.wallets
     const wallets = ethWallets.ledger.map(w => {
-      return this.renderWalletAccounts(w.accounts)
+      return (
+        <>
+          <WalletTypeLabel>{w.name}</WalletTypeLabel>
+          {this.renderWalletAccounts(w.accounts)}
+        </>
+      )
     })
     return (
       <>
@@ -297,9 +305,9 @@ export default createFragmentContainer(WalletsView, {
       @argumentDefinitions(userID: { type: "String!" }) {
       ethWallets(userID: $userID) {
         hd {
+          name
           localID
           accounts {
-            name
             address
             balances {
               eth
@@ -308,9 +316,9 @@ export default createFragmentContainer(WalletsView, {
           }
         }
         ledger {
+          name
           localID
           accounts {
-            name
             address
             balances {
               eth

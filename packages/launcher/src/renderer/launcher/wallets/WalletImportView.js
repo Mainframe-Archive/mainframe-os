@@ -33,7 +33,6 @@ const walletImportMutation = graphql`
     importHDWallet(input: $input) {
       hdWallet {
         accounts {
-          name
           address
         }
         localID

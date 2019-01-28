@@ -83,7 +83,6 @@ const createWalletMutation = graphql`
     createHDWallet(input: $input) {
       hdWallet {
         accounts {
-          name
           address
         }
         mnemonic

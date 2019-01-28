@@ -238,16 +238,18 @@ type DeleteWalletPayload {
 type EthHDWallet implements Node {
   """The ID of an object"""
   id: ID!
+  name: String
   localID: ID!
   mnemonic: String!
-  accounts: [NamedWalletAccountType]
+  accounts: [WalletAccount]
 }
 
 type EthLedgerWallet implements Node {
   """The ID of an object"""
   id: ID!
+  name: String
   localID: ID!
-  accounts: [NamedWalletAccountType]
+  accounts: [WalletAccount]
 }
 
 type EthWallets {
@@ -302,12 +304,6 @@ type Mutation {
 type NamedProfile {
   name: String!
   avatar: String
-}
-
-type NamedWalletAccountType {
-  name: String!
-  address: String!
-  balances: WalletBalances!
 }
 
 """An object with an ID"""
@@ -404,6 +400,11 @@ type Viewer {
   contacts: Contacts!
   identities: Identities!
   wallets: Wallets!
+}
+
+type WalletAccount {
+  address: String!
+  balances: WalletBalances!
 }
 
 type WalletBalances {
