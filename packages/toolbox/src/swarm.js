@@ -1,11 +1,10 @@
 // @flow
 
 import os from 'os'
-import crypto from 'crypto'
 import * as path from 'path'
-import keytar from 'keytar'
 import keythereum from 'keythereum'
 import * as fs from 'fs-extra'
+import execa from 'execa'
 
 export type KeyObject = {
   address: string,
@@ -28,27 +27,14 @@ export type KeyObject = {
   version: number,
 }
 
+let proc
+
 const homedir = os.homedir()
-const service = 'com.mainframe.services.swarm'
-const account = 'mainframe'
-const datadir = `${homedir}${path.sep}.mainframe${path.sep}swarm`
-const keystorePath = `${homedir}${path.sep}.mainframe${path.sep}swarm${
-  path.sep
-}keystore`
+const datadir = path.join(homedir, '.mainframe', 'swarm')
+const passwordFile = path.join(datadir, 'password')
+const keystorePath = path.join(datadir, 'keystore')
 
-export const getSwarmKeystorePassword = async (): Promise<string> => {
-  let password = await keytar.getPassword(service, account)
-  if (password == null) {
-    const buffer = crypto.randomBytes(48)
-    password = buffer.toString('hex')
-    await keytar.setPassword(service, account, password)
-    return password
-  } else {
-    return password
-  }
-}
-
-export const createKeyStore = async (): Promise<string> => {
+export const createKeyStore = async (password: string): Promise<string> => {
   const params = { keyBytes: 32, ivBytes: 16 }
   const dk = keythereum.create(params)
   const kdf = 'pbkdf2'
@@ -62,7 +48,6 @@ export const createKeyStore = async (): Promise<string> => {
       prf: 'hmac-sha256',
     },
   }
-  const password = await getSwarmKeystorePassword()
   const keyObject = keythereum.dump(
     password,
     dk.privateKey,
@@ -81,9 +66,9 @@ export const importKeyStore = async (address: string): Promise<KeyObject> => {
 
 export const getPrivateKey = async (
   address: string,
+  password: string,
   encoding?: string = 'hex',
 ): Promise<string> => {
-  const password = await getSwarmKeystorePassword()
   const keyObject = keythereum.importFromFile(address, datadir)
   const keyBuffer = await keythereum.recover(password, keyObject)
   return keyBuffer.toString(encoding)
@@ -103,4 +88,72 @@ export const listKeyStores = async (): Promise<KeyObject[]> => {
     }
   }
   return keyObjects
+}
+
+export const listKeyStorePaths = async (): Promise<KeyObject[]> => {
+  fs.ensureDir(datadir)
+  const keystores = await fs.readdir(keystorePath)
+  return keystores
+}
+
+export const startSwarm = async (swarmPath): Promise => {
+  const keystores = await listKeyStores()
+  const keystore = keystores[0]
+
+  proc = execa(swarmPath, [
+    '--datadir',
+    datadir,
+    '--password',
+    passwordFile,
+    '--bzzaccount',
+    keystore.address,
+    '--verbosity',
+    '4',
+    '--bootnodes',
+    'enode://ee9a5a571ea6c8a59f9a8bb2c569c865e922b41c91d09b942e8c1d4dd2e1725bd2c26149da14de1f6321a2c6fdf1e07c503c3e093fb61696daebf74d6acd916b@54.186.219.160:30399',
+    '--ws',
+    '--wsorigins',
+    '*',
+    '--ens-api',
+    'https://mainnet.infura.io/55HkPWVAJQjGH4ucvfW9',
+    '--nosync',
+  ])
+  fs.ensureDir(`${datadir}${path.sep}logs`)
+
+  proc.stderr.pipe(
+    fs.createWriteStream(`${datadir}${path.sep}logs${path.sep}swarm.log`),
+  )
+
+  proc.stdout.on('data', data => {
+    const dataStr = data.toString()
+    if (dataStr.toLowerCase().indexOf('fatal:') !== -1) {
+      const error = new Error(`Swarm error: ${dataStr}`)
+      // eslint-disable-next-line no-console
+      console.log(error)
+    }
+  })
+
+  proc.stderr.on('data', data => {
+    if (
+      data
+        .toString()
+        .toLowerCase()
+        .indexOf('websocket endpoint opened') !== -1
+    ) {
+      // eslint-disable-next-line no-console
+      console.log('Swarm node started')
+      SwarmConfig.setSwarmRunStatus('running')
+    }
+  })
+  return proc
+}
+
+export const stopSwarm = () => {
+  return proc
+    ? new Promise(resolve => {
+        proc.once('exit', resolve)
+        proc.kill()
+        proc = undefined
+      })
+    : Promise.resolve()
 }

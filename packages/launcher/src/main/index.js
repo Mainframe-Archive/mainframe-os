@@ -1,16 +1,26 @@
 // @flow
 
+import os from 'os'
 import path from 'path'
 import url from 'url'
+import crypto from 'crypto'
+import * as fs from 'fs-extra'
 // eslint-disable-next-line import/named
 import Client from '@mainframe/client'
-import { Environment, DaemonConfig, VaultConfig } from '@mainframe/config'
+import {
+  Environment,
+  DaemonConfig,
+  VaultConfig,
+  SwarmConfig,
+} from '@mainframe/config'
 import StreamRPC from '@mainframe/rpc-stream'
 import { setupDaemon, startDaemon } from '@mainframe/toolbox'
+import { createKeyStore, startSwarm } from '@mainframe/toolbox'
 // eslint-disable-next-line import/named
 import { app, BrowserWindow, ipcMain } from 'electron'
-import { is, isFirstAppLaunch } from 'electron-util'
+import { is } from 'electron-util'
 
+import keytar from 'keytar'
 import { APP_TRUSTED_REQUEST_CHANNEL } from '../constants'
 import type { AppSession } from '../types'
 
@@ -21,6 +31,13 @@ import createRPCChannels from './rpc/createChannels'
 
 const PORT = process.env.ELECTRON_WEBPACK_WDS_PORT || ''
 const binPath = './packages/daemon/bin/run'
+const homedir = os.homedir()
+const datadir = `${homedir}${path.sep}.mainframe${path.sep}swarm`
+const passwordFile = `${homedir}${path.sep}.mainframe${path.sep}swarm${
+  path.sep
+}password`
+const service = 'com.mainframe.services.swarm'
+const account = 'mainframe'
 
 const envType =
   process.env.NODE_ENV === 'production' ? 'production' : 'development'
@@ -34,6 +51,17 @@ console.log(`using environment "${env.name}" (${env.type})`)
 
 const daemonConfig = new DaemonConfig(env)
 const vaultConfig = new VaultConfig(env)
+const swarmConfig = new SwarmConfig(env)
+
+const platform = {
+  darwin: 'mac',
+  linux: 'linux',
+  win32: 'win',
+}[os.platform()]
+
+const getBinPath = is.development
+  ? name => path.join(app.getAppPath(), '..', 'bin', `${name}-${platform}`)
+  : name => path.join(process.resourcesPath, 'bin', name)
 
 let client
 let launcherWindow
@@ -120,14 +148,55 @@ const launchApp = async (appSession: AppSession) => {
   }
 }
 
+const getSwarmKeystorePassword = async (): Promise<string> => {
+  let password = await keytar.getPassword(service, account)
+  if (password == null) {
+    const buffer = crypto.randomBytes(48)
+    password = buffer.toString('hex')
+    fs.ensureDir(datadir)
+    await keytar.setPassword(service, account, password)
+    await fs.writeFile(passwordFile, password, function(err) {
+      if (err) {
+        // eslint-disable-next-line no-console
+        console.log(err)
+      }
+    })
+    return password
+  } else {
+    return password
+  }
+}
+
+const keystorePasswordExists = async (): Promise<string> => {
+  const password = await keytar.getPassword(service, account)
+  if (password == null) {
+    return false
+  }
+  return true
+}
+
 // TODO: proper setup, this is just temporary logic to simplify development flow
 const setupClient = async () => {
-  if (isFirstAppLaunch()) {
+  // change this to check for an environment config
+  const firstLaunch = await keystorePasswordExists()
+  if (!firstLaunch) {
     await setupDaemon(new DaemonConfig(env), {
       binPath: binPath,
       socketPath: undefined,
     })
+    const password = await getSwarmKeystorePassword()
+    await createKeyStore(password)
+    await swarmConfig.setSwarmBinPath(getBinPath)
+    await swarmConfig.setSocketPath('ws://localhost:8546')
   }
+
+  try {
+    await startSwarm(swarmConfig.getBinPath())
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.log(e)
+  }
+
   // /!\ Temporary only, should be handled by toolbox with installation flow
   if (daemonConfig.binPath == null) {
     daemonConfig.binPath = path.resolve(__dirname, '../../../daemon/bin/run')
