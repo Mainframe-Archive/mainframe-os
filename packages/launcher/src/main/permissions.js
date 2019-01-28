@@ -97,12 +97,12 @@ export const isGranted = async (
   // Always request permission for transaction signing
   if (granted === 'not_set' || key === 'BLOCKCHAIN_SEND') {
     const res = await ctx.trustedRPC.request('permission_ask', { key, params })
+
+    // Persist for session
+    permissions[key] = res.granted
+
     if (res.persist) {
-      if (key !== 'WEB_REQUEST') {
-        // To satisfy flow, will never be a
-        // WEB_REQUEST permission, they are handled separately
-        permissions[key] = res.granted
-      }
+      // Persist for future sessions
       await ctx.client.app.setPermission({
         sessID: ctx.appSession.session.sessID,
         key,

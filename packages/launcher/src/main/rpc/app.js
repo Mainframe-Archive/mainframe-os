@@ -3,6 +3,7 @@
 import {
   LOCAL_ID_SCHEMA,
   type BlockchainWeb3SendParams,
+  type ContactsGetUserContactsResult,
   type WalletGetEthWalletsResult,
 } from '@mainframe/client'
 import type { Subscription as RxSubscription } from 'rxjs'
@@ -63,11 +64,62 @@ export const sandboxed = {
 
   // Contacts
 
-  contacts_getContacts: withPermission(
-    'CONTACTS_FETCH_CONTACTS',
-    (ctx: AppContext, params: any) => {
+  contacts_select: withPermission(
+    'CONTACTS_READ',
+    async (ctx: AppContext, params: { multi?: boolean }) => {
+      const res = await ctx.trustedRPC.request('permission_ask', {
+        key: 'CONTACTS_SELECT_CONTACTS',
+        params,
+      })
+      if (!res.granted || !res || !res.data) {
+        return { contacts: [] }
+      }
       const userID = ctx.appSession.user.id
-      return ctx.client.identity.getUserContacts({ userID })
+      const appID = ctx.appSession.app.appID
+      const contactIDs = res.data
+      const contactsToApprove = contactIDs.map(id => ({
+        localID: id,
+        publicDataOnly: false, // TODO allow user to set only public data
+      }))
+      const {
+        approvedContacts,
+      } = await ctx.client.contacts.approveContactsForApp({
+        appID,
+        userID,
+        contactsToApprove,
+      })
+      const ids = approvedContacts.map(c => c.id)
+
+      return ctx.client.contacts.getAppUserContacts({
+        appID,
+        userID,
+        contactIDs: ids,
+      })
+    },
+  ),
+
+  contacts_getData: withPermission(
+    'CONTACTS_READ',
+    async (ctx: AppContext, params: { contactIDs: Array<string> }) => {
+      const userID = ctx.appSession.user.id
+      const appID = ctx.appSession.app.appID
+      return ctx.client.contacts.getAppUserContacts({
+        appID,
+        userID,
+        contactIDs: params.contactIDs,
+      })
+    },
+  ),
+
+  contacts_getApproved: withPermission(
+    'CONTACTS_READ',
+    async (ctx: AppContext) => {
+      const userID = ctx.appSession.user.id
+      const appID = ctx.appSession.app.appID
+      return ctx.client.contacts.getAppApprovedContacts({
+        appID,
+        userID,
+      })
     },
   ),
 
@@ -149,5 +201,12 @@ export const trusted = {
     return ctx.client.wallet.getUserEthWallets({
       userID: ctx.appSession.user.localID,
     })
+  },
+
+  contacts_getUserContacts: (
+    ctx: AppContext,
+    params: { userID: string },
+  ): Promise<ContactsGetUserContactsResult> => {
+    return ctx.client.contacts.getUserContacts(params)
   },
 }

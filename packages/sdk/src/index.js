@@ -6,7 +6,7 @@ import type StreamRPC from '@mainframe/rpc-stream'
 
 import BlockchainAPIs from './apis/Blockchain'
 import PssAPIs from './apis/Pss'
-import ContactsAPIs from "./apis/Contacts";
+import ContactsAPIs from './apis/Contacts'
 
 export default class MainframeSDK {
   _rpc: StreamRPC

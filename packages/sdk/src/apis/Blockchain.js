@@ -7,12 +7,11 @@ import ClientAPIs from '../ClientAPIs'
 
 export default class BlockchainAPIs extends ClientAPIs {
   getWeb3Provider() {
-    const rpc = this._rpc
     const engine = new ProviderEngine()
     const hookedWallet = new HookedProvider({
       getAccounts: async cb => {
         try {
-          const accounts = await rpc.request('wallet_getEthAccounts')
+          const accounts = await this.rpc.request('wallet_getEthAccounts')
           cb(null, accounts)
         } catch (err) {
           cb(err)
@@ -24,7 +23,7 @@ export default class BlockchainAPIs extends ClientAPIs {
           transactionData: params,
         }
         try {
-          const res = await rpc.request('wallet_signTx', txParams)
+          const res = await this.rpc.request('wallet_signTx', txParams)
           cb(null, res)
         } catch (err) {
           cb(err)
@@ -37,7 +36,7 @@ export default class BlockchainAPIs extends ClientAPIs {
       engine.emit('data', err, notif)
     })
     engine.addProvider(subsProvider)
-    const rpcProvider = new RPCProvider(this._rpc)
+    const rpcProvider = new RPCProvider(this.rpc)
     engine.addProvider(rpcProvider)
     engine.start()
     return engine

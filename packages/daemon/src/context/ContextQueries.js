@@ -1,5 +1,5 @@
 //@flow
-import { type ContactResult } from '@mainframe/client'
+import type { ContactResult, AppUserContact } from '@mainframe/client'
 import { idType } from '@mainframe/utils-id'
 
 import type ClientContext from './ClientContext'
@@ -43,6 +43,46 @@ export default class ContextQueries {
       })
     }
     return result
+  }
+
+  getAppApprovedContacts(appID: string, userID: string) {
+    const { apps } = this._context.openVault
+    const app = apps.getAnyByID(appID)
+    if (!app) {
+      throw new Error('App not found')
+    }
+    const contactIDs = app.listApprovedContacts(userID).map(c => c.id)
+    return this.getAppUserContacts(appID, userID, contactIDs)
+  }
+
+  getAppUserContacts(
+    appID: string,
+    userID: string,
+    contactIDs: Array<string>,
+  ): Array<AppUserContact> {
+    const { apps } = this._context.openVault
+    const app = apps.getAnyByID(appID)
+    if (!app) {
+      throw new Error('App not found')
+    }
+    const approvedContacts = app.listApprovedContacts(userID)
+    const contacts = this.getUserContacts(userID)
+    return contactIDs.map(id => {
+      const approvedContact = approvedContacts.find(c => c.id === id)
+      const contactData = {
+        id,
+        data: undefined,
+      }
+      if (approvedContact) {
+        const contact = contacts.find(
+          c => c.localID === approvedContact.localID,
+        )
+        if (contact) {
+          contactData.data = { profile: contact.profile }
+        }
+      }
+      return contactData
+    })
   }
 
   // Wallets

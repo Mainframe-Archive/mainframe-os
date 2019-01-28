@@ -73,6 +73,25 @@ class SendFunds extends Component<ContextProps, State> {
     })
   }
 
+  onFocusRecipient = () => {
+    this.selectContacts()
+  }
+
+  async selectContacts() {
+    try {
+      const { contacts } = await this.props.sdk.contacts.selectContacts()
+      if (contacts.length) {
+        if (contacts[0].data.profile.ethAddress) {
+          this.setState({
+            recipient: contacts[0].data.profile.ethAddress,
+          })
+        }
+      }
+    } catch (err) {
+      console.log('select contacts err: ', err)
+    }
+  }
+
   validateSend(): boolean {
     const { web3 } = this.props
     if (!web3.utils.isAddress(this.state.recipient)) {
@@ -186,6 +205,7 @@ class SendFunds extends Component<ContextProps, State> {
           style={styles.textInput}
           onChangeText={this.onChangeRecipient}
           value={this.state.recipient}
+          onFocus={this.onFocusRecipient}
         />
         <TextInput
           placeholder="Amount"
@@ -205,6 +225,7 @@ class SendFunds extends Component<ContextProps, State> {
           style={styles.textInput}
           onChangeText={this.onChangeRecipient}
           value={this.state.recipient}
+          onFocus={this.onFocusRecipient}
         />
         <TextInput
           placeholder="Amount"
