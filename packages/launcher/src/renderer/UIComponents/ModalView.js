@@ -10,6 +10,7 @@ type Props = {
   title?: string,
   onRequestClose?: () => void,
   children?: ?Node,
+  full?: boolean,
 }
 
 const ChildrenContainer = styled.View`
@@ -33,19 +34,21 @@ const ModalTitle = styled.View`
   border-bottom-width: 1px;
   border-bottom-style: solid;
   border-bottom-color: #f5f5f5;
-  height: 35px;
-  margin-top: 15px;
+  height: 75px;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
 `
 
 const CloseButton = styled.TouchableOpacity`
   position: absolute;
-  right: 0;
-  top: 0;
+  top: 50%;
+  margin-top: -12px;
+  right: 20px;
   width: 24px;
   height: 24px;
   z-index: 1;
+  align-items: center;
+  justify-content: center;
 `
 
 export default class ModalView extends Component<Props> {
@@ -56,7 +59,10 @@ export default class ModalView extends Component<Props> {
       </CloseButton>
     ) : null
     return (
-      <ReactModal isOpen={true} onRequestClose={this.props.onRequestClose}>
+      <ReactModal
+        overlayClassName={this.props.full ? 'full-modal' : 'inner-modal'}
+        isOpen={true}
+        onRequestClose={this.props.onRequestClose}>
         <InternalModal>
           <ModalTitle>
             <Text variant={['smallTitle', 'blue', 'noPadding', 'bold']}>

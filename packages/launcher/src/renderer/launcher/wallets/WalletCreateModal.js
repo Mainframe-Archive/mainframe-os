@@ -4,14 +4,13 @@ import React, { Component } from 'react'
 import { graphql, commitMutation } from 'react-relay'
 import { Button, TextField, Row, Column, Text } from '@morpheus-ui/core'
 import {
-  Form,
   type FormSubmitPayload,
   type FieldValidateFunctionParams,
 } from '@morpheus-ui/forms'
 import styled from 'styled-components/native'
 
 import { EnvironmentContext } from '../RelayEnvironment'
-import ModalView from '../../UIComponents/ModalView'
+import FormModalView from '../../UIComponents/FormModalView'
 
 type State = {
   errorMsg?: ?string,
@@ -28,6 +27,7 @@ type Props = {
   userID: string,
   onClose?: () => void,
   onSetupWallet: () => void,
+  full?: boolean,
 }
 
 const Container = styled.View`
@@ -37,16 +37,37 @@ const Container = styled.View`
 const ConfirmedWords = styled.View`
   flex-direction: row;
   padding: 10px;
-  height: 180px;
-  background-color: #f5f5f5;
+  margin-bottom: 10px;
+  background-color: #f9f9f9;
   flex-wrap: wrap;
 `
 
-const ConfirmedWord = styled.View`
-  margin: 8px;
-  border-radius: 3px;
-  padding: 10px;
-  background-color: ${props => props.theme.colors.DARK_BLUE};
+const HorizontalView = styled.View`
+  flex-direction: row;
+  padding: 10px 0;
+`
+
+const VerticalView = styled.View`
+  flex-direction: column;
+  padding: 0 10px;
+`
+
+const SeedPhraseContainer = styled.View`
+  background-color: #f9f9f9;
+  padding: 8px 0;
+  min-width: 280px;
+`
+
+const WordLabels = styled.View`
+  padding: 5px 0;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+`
+
+const LabelWrapper = styled.View`
+  padding: 0;
 `
 
 const createDescription = `Create a new Ethereum wallet by generating a 12 word seed phrase.
@@ -62,7 +83,6 @@ const createWalletMutation = graphql`
     createHDWallet(input: $input) {
       hdWallet {
         accounts {
-          name
           address
         }
         mnemonic
@@ -176,44 +196,40 @@ export default class WalletCreateModal extends Component<Props, State> {
     const errorMsg = this.state.errorMsg ? (
       <Text variant="error">{this.state.errorMsg}</Text>
     ) : null
+
     return (
-      <Container>
-        <Text styles="margin-bottom: 30px; text-align: center; font-size: 15;">
-          {createDescription}
-        </Text>
-        <Form onSubmit={this.onSubmit}>
+      <FormModalView
+        full={this.props.full}
+        title="New Software Wallet"
+        dismissButton="CANCEL"
+        confirmButton="CREATE"
+        onSubmitForm={this.onSubmit}
+        onRequestClose={this.props.onClose}
+        confirmTestID="wallet-create-submit-button">
+        <Container>
+          <Text
+            size={12}
+            variant={['greyMed', 'center']}
+            theme={{ marginBottom: '30px' }}>
+            {createDescription}
+          </Text>
           <TextField
-            styles="width: 100%;"
+            required
             label="Wallet name"
             name="walletName"
             testID="wallet-create-name-field"
             validation={this.walletNameValidation}
           />
           {errorMsg}
-          <Row size={1}>
-            <Column styles="align-items:center; justify-content: center; flex-direction: row;">
-              <Button
-                title="CANCEL"
-                variant={['no-border', 'grey', 'modalButton']}
-                onPress={this.props.onClose}
-              />
-              <Button
-                title="CREATE"
-                variant={['red', 'modalButton']}
-                testID="wallet-create-submit-button"
-                submit
-              />
-            </Column>
-          </Row>
-        </Form>
-      </Container>
+        </Container>
+      </FormModalView>
     )
   }
 
   renderDisplaySeed() {
     const { wallet } = this.state
     if (!wallet) {
-      return
+      return null
     }
     const seedWords = wallet.mnemonic.split(' ')
     const left = []
@@ -221,113 +237,161 @@ export default class WalletCreateModal extends Component<Props, State> {
     seedWords.forEach((w, i) => {
       const col = i < 6 ? left : right
       col.push(
-        <Text key={w} styles="padding:8px; color:#303030; font-size: 15;">
-          {`${i + 1}: ${w}`}
+        <Text size={13} color="#303030" key={w} theme={{ padding: '4px 0' }}>
+          <Text
+            size={11}
+            color="#C0C0C0"
+            theme={{
+              display: 'inline-block',
+              width: 20,
+              textAlign: 'right',
+              marginRight: '5px',
+            }}>{`${i + 1}.`}</Text>
+          {w}
         </Text>,
       )
     })
     return (
-      <Container>
-        <Text styles="margin-bottom: 30px; text-align: center; font-size: 15;">
-          {backupDescription}
-        </Text>
-        <Row size={2}>
-          <Column size={1}>
-            <Row size={2} styles="background-color:#f5f5f5; padding:20px;">
-              <Column>{left}</Column>
-              <Column>{right}</Column>
-            </Row>
-            <Text variant="error">
-              Never disclose your backup phrase. Anyone with this phrase can
-              take your Ether with no possibilty to retrieve it.
-            </Text>
-          </Column>
-          <Column>
-            <Text styles="margin-top:10px;">TIPS</Text>
-            <Text>
-              {`\nStore this phrase in a password manager like 1Password.\n\nWrite this phrase on a piece of paper and store in a secure location.`}
-            </Text>
-          </Column>
-        </Row>
-        <Row size={1}>
-          <Column styles="align-items:center; justify-content: center; flex-direction: row;">
-            <Button
-              title="NEXT"
-              testID="wallet-create-confirm-backup-button"
-              variant={['red', 'modalButton']}
-              onPress={this.onPressBackupComplete}
-            />
-          </Column>
-        </Row>
-      </Container>
+      <FormModalView
+        full={this.props.full}
+        title="Secret Backup Phrase"
+        confirmButton="CONFIRM"
+        confirmTestID="wallet-create-confirm-backup-button"
+        onPressConfirm={this.onPressBackupComplete}>
+        <Container>
+          <Text
+            size={12}
+            variant={['greyMed', 'center']}
+            theme={{ marginBottom: '30px' }}>
+            {backupDescription}
+          </Text>
+          <HorizontalView>
+            <VerticalView>
+              <Text variant="smallTitle" color="#232323" bold>
+                SEED PHRASE
+              </Text>
+              <SeedPhraseContainer>
+                <Row size={2} styles="background-color:#F9F9F9; padding:20px;">
+                  <Column>{left}</Column>
+                  <Column>{right}</Column>
+                </Row>
+              </SeedPhraseContainer>
+              <Text
+                size={10}
+                variant="error"
+                theme={{ maxWidth: '300px', marginTop: '10px' }}>
+                Never disclose your backup phrase. Anyone with this phrase can
+                take your Ether forever.
+              </Text>
+            </VerticalView>
+            <VerticalView>
+              <Text variant="smallTitle" color="#232323" bold>
+                TIPS
+              </Text>
+              <Text size={12} color="#585858" theme={{ maxWidth: '180' }}>
+                {`\nStore this phrase in a password manager like 1Password.\n\nWrite this phrase on a piece of paper and store in a secure location.`}
+              </Text>
+            </VerticalView>
+          </HorizontalView>
+        </Container>
+      </FormModalView>
     )
   }
 
   renderConfirmBackup() {
-    const { confirmedWords, seedWords } = this.state
-    const correctWords = confirmedWords.map(w => {
-      return (
-        <ConfirmedWord key={w}>
-          <Text styles="font-size: 15; color: #fff;">{w}</Text>
-        </ConfirmedWord>
+    const { confirmedWords, seedWords, wallet } = this.state
+    if (!wallet) {
+      return null
+    }
+
+    const one = []
+    const two = []
+    const three = []
+
+    const originalSeedWords = wallet.mnemonic.split(' ')
+
+    originalSeedWords.forEach((w, i) => {
+      const col = i < 4 ? one : i < 8 ? two : three
+      col.push(
+        <Text size={13} color="#303030" key={w} theme={{ padding: '4px 0' }}>
+          <Text
+            size={11}
+            color="#C0C0C0"
+            theme={{
+              display: 'inline-block',
+              width: 20,
+              textAlign: 'right',
+              marginRight: '5px',
+            }}>{`${i + 1}.`}</Text>
+          {confirmedWords.indexOf(w) >= 0 ? w : ''}
+        </Text>,
       )
     })
 
-    const wordLabels = seedWords.map(w => {
+    const rowOne = []
+    const rowTwo = []
+    seedWords.forEach((w, i) => {
+      const row = i < 6 ? rowOne : rowTwo
       const onPress = () => this.onPressConfirmWord(w.value, w.index)
-      return (
-        <Button
-          testID={`seed-word-${w.index}`}
-          key={w.value}
-          onPress={onPress}
-          title={w.value}
-        />
+
+      const button = (
+        <LabelWrapper key={w.value}>
+          <Button
+            testID={`seed-word-${w.index}`}
+            onPress={onPress}
+            title={w.value}
+            variant={
+              confirmedWords.indexOf(w.value) >= 0
+                ? 'selectedSeedWord'
+                : 'seedWord'
+            }
+          />
+        </LabelWrapper>
       )
+
+      row.push(button)
     })
+
     return (
-      <Container>
-        <Text styles="margin-bottom: 30px; text-align: center; font-size: 15;">
-          Please select each word in order to make sure your phrase is correct.
-        </Text>
-        <ConfirmedWords>{correctWords}</ConfirmedWords>
-        <Row>{wordLabels}</Row>
-        <Row size={1}>
-          <Column styles="align-items:center; justify-content: center; flex-direction: row;">
-            <Button
-              title="BACK"
-              variant={['no-border', 'grey', 'modalButton']}
-              onPress={this.onPressShowSeed}
-            />
-            <Button
-              title="CONFIRM"
-              testID="wallet-create-backup-test-submit"
-              variant={['red', 'modalButton']}
-              onPress={this.onPressConfirmBackup}
-            />
-          </Column>
-        </Row>
-      </Container>
+      <FormModalView
+        full={this.props.full}
+        title="confirm your Secret Backup Phrase"
+        dismissButton="BACK"
+        confirmButton="CONFIRM"
+        confirmTestID="wallet-create-backup-test-submit"
+        onPressConfirm={this.onPressConfirmBackup}
+        onPressDismiss={this.onPressShowSeed}>
+        <Container>
+          <Text
+            size={12}
+            variant={['greyMed', 'center']}
+            theme={{ marginBottom: '30px' }}>
+            Please select each word in order to make sure your phrase is
+            correct.
+          </Text>
+          <ConfirmedWords>
+            <Row size={3}>
+              <Column>{one}</Column>
+              <Column>{two}</Column>
+              <Column>{three}</Column>
+            </Row>
+          </ConfirmedWords>
+          <WordLabels>{rowOne}</WordLabels>
+          <WordLabels>{rowTwo}</WordLabels>
+        </Container>
+      </FormModalView>
     )
   }
 
   render() {
-    let content
     switch (this.state.step) {
       case 'backup':
-        content = this.renderDisplaySeed()
-        break
+        return this.renderDisplaySeed()
       case 'confirm_backup':
-        content = this.renderConfirmBackup()
-        break
+        return this.renderConfirmBackup()
       case 'create':
       default:
-        content = this.renderCreateForm()
-        break
+        return this.renderCreateForm()
     }
-    return (
-      <ModalView title="CREATE ETHEREUM WALLET" onSubmit={this.onSubmit}>
-        {content}
-      </ModalView>
-    )
   }
 }

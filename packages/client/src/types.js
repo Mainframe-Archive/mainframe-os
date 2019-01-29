@@ -21,11 +21,9 @@ export type WalletAccount = string
 
 export type WalletResult = {
   localID: string,
-  type: 'ledger' | 'hd',
-  accounts: Array<{
-    name: string,
-    address: string,
-  }>,
+  name: ?string,
+  type: string,
+  accounts: Array<string>,
 }
 
 export type IdentityOwnData = {
@@ -400,29 +398,24 @@ export type VaultSettingsParams = $Shape<VaultSettings>
 export type WalletImportMnemonicParams = {
   blockchain: WalletSupportedChains,
   mnemonic: string,
-  firstAccountName: string,
-  userID?: string,
-}
-
-export type WalletNamedAccount = {
   name: string,
-  address: string,
+  userID?: string,
 }
 
 export type WalletImportResult = {
   localID: ID,
-  accounts: Array<WalletNamedAccount>,
+  accounts: Array<string>,
 }
 
 export type WalletCreateHDParams = {
   blockchain: WalletSupportedChains,
-  firstAccountName: string,
+  name: string,
   userID?: string,
 }
 
 export type WalletCreateHDResult = {
   localID: ID,
-  accounts: Array<WalletNamedAccount>,
+  accounts: Array<string>,
   mnemonic: string,
 }
 
@@ -475,7 +468,6 @@ export type WalletAddLedgerEthAccountParams = {
 }
 
 export type WalletAddHDAccountParams = {
-  name: string,
   index: number,
   walletID: string,
   userID?: string,

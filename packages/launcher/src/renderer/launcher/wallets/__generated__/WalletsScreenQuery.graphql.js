@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 54c5059b93b0660447726cdeb4cc1372
+ * @relayHash 2ed95c104d2dd9533bd1b1229efe3289
  */
 
 /* eslint-disable */
@@ -46,9 +46,9 @@ fragment WalletsScreen_wallets_3iqrP on Wallets {
 fragment WalletsView_wallets_3iqrP on Wallets {
   ethWallets(userID: $userID) {
     hd {
+      name
       localID
       accounts {
-        name
         address
         balances {
           eth
@@ -58,9 +58,9 @@ fragment WalletsView_wallets_3iqrP on Wallets {
       id
     }
     ledger {
+      name
       localID
       accounts {
-        name
         address
         balances {
           eth
@@ -93,6 +93,13 @@ v2 = [
   {
     "kind": "ScalarField",
     "alias": null,
+    "name": "name",
+    "args": null,
+    "storageKey": null
+  },
+  {
+    "kind": "ScalarField",
+    "alias": null,
     "name": "localID",
     "args": null,
     "storageKey": null
@@ -103,16 +110,9 @@ v2 = [
     "name": "accounts",
     "storageKey": null,
     "args": null,
-    "concreteType": "NamedWalletAccountType",
+    "concreteType": "WalletAccount",
     "plural": true,
     "selections": [
-      {
-        "kind": "ScalarField",
-        "alias": null,
-        "name": "name",
-        "args": null,
-        "storageKey": null
-      },
       {
         "kind": "ScalarField",
         "alias": null,
@@ -154,7 +154,7 @@ return {
   "operationKind": "query",
   "name": "WalletsScreenQuery",
   "id": null,
-  "text": "query WalletsScreenQuery(\n  $userID: String!\n) {\n  viewer {\n    wallets {\n      ...WalletsScreen_wallets_3iqrP\n    }\n    id\n  }\n}\n\nfragment WalletsScreen_wallets_3iqrP on Wallets {\n  ...WalletsView_wallets_3iqrP\n}\n\nfragment WalletsView_wallets_3iqrP on Wallets {\n  ethWallets(userID: $userID) {\n    hd {\n      localID\n      accounts {\n        name\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n    ledger {\n      localID\n      accounts {\n        name\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n  }\n}\n",
+  "text": "query WalletsScreenQuery(\n  $userID: String!\n) {\n  viewer {\n    wallets {\n      ...WalletsScreen_wallets_3iqrP\n    }\n    id\n  }\n}\n\nfragment WalletsScreen_wallets_3iqrP on Wallets {\n  ...WalletsView_wallets_3iqrP\n}\n\nfragment WalletsView_wallets_3iqrP on Wallets {\n  ethWallets(userID: $userID) {\n    hd {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n    ledger {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",

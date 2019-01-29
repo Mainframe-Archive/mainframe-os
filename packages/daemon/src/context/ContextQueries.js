@@ -6,11 +6,9 @@ import type ClientContext from './ClientContext'
 
 export type Wallet = {
   localID: string,
-  type: 'ledger' | 'hd',
-  accounts: Array<{
-    name: string,
-    address: string,
-  }>,
+  name: ?string,
+  type: string,
+  accounts: Array<string>,
 }
 
 export default class ContextQueries {
@@ -96,8 +94,9 @@ export default class ContextQueries {
           if (wallet) {
             acc.push({
               localID: wallet.localID,
+              name: wallet.name,
               type: wallet.type,
-              accounts: wallet.getNamedAccounts(),
+              accounts: wallet.getAccounts(),
             })
           }
           return acc
@@ -111,7 +110,7 @@ export default class ContextQueries {
   getUserEthAccounts(userID: string) {
     return this.getUserEthWallets(userID).reduce((acc, w) => {
       // $FlowFixMe concat types
-      return acc.concat(w.accounts.map(a => a.address))
+      return acc.concat(w.accounts)
     }, [])
   }
 
@@ -124,7 +123,7 @@ export default class ContextQueries {
     // Use first account if no default
     const wallets = this.getUserEthWallets(userID)
     if (wallets.length && wallets[0].accounts.length) {
-      const addr = wallets[0].accounts[0].address
+      const addr = wallets[0].accounts[0]
       this._context.mutations.setUsersDefaultWallet(userID, addr)
       return addr
     }

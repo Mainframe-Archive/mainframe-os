@@ -64,9 +64,6 @@ const addHDWalletAccountMutation = mutationWithClientMutationId({
     index: {
       type: new GraphQLNonNull(GraphQLInt),
     },
-    name: {
-      type: new GraphQLNonNull(GraphQLString),
-    },
     userID: {
       type: GraphQLString,
     },
@@ -111,12 +108,12 @@ const importHDWalletMutation = mutationWithClientMutationId({
     const wallet = await ctx.mutations.importHDWallet({
       blockchain: args.blockchain,
       mnemonic: args.mnemonic,
-      firstAccountName: args.name,
+      name: args.name,
       userID: args.userID,
     })
     return {
       localID: wallet.localID,
-      accounts: wallet.getNamedAccounts(),
+      accounts: wallet.getAccounts(),
     }
   },
 })
@@ -150,7 +147,7 @@ const createHDWalletMutation = mutationWithClientMutationId({
     return {
       localID: wallet.localID,
       mnemonic: wallet.mnemonic,
-      accounts: wallet.getNamedAccounts(),
+      accounts: wallet.getAccounts(),
     }
   },
 })
