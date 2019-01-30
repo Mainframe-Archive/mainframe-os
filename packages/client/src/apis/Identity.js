@@ -15,8 +15,6 @@ import type {
   IdentityGetOwnDevelopersResult,
   IdentityGetOwnUsersResult,
   IdentityGetPeersResult,
-  IdentityGetUserContactsParams,
-  IdentityGetUserContactsResult,
   IdentityLinkEthWalletAccountParams,
   IdentityUnlinkEthWalletAccountParams,
   IdentityUpdateUserParams,
@@ -75,12 +73,6 @@ export default class IdentityAPIs extends ClientAPIs {
 
   deleteContact(params: IdentityDeleteContactParams): Promise<void> {
     return this._rpc.request('identity_deleteContact', params)
-  }
-
-  getUserContacts(
-    params: IdentityGetUserContactsParams,
-  ): Promise<IdentityGetUserContactsResult> {
-    return this._rpc.request('identity_getUserContacts', params)
   }
 
   // Wallets

@@ -45,6 +45,14 @@ export default {
       borderHoverColor: 'transparent',
       hoverShadow: true,
     },
+    walletOnboarding: {
+      iconHoverBackgroundColor: COLORS.PRIMARY_RED,
+      iconHoverColor: COLORS.WHITE,
+      iconWidth: 18,
+      iconHeight: 18,
+      iconPadding: '8px',
+      titlePadding: '8px',
+    },
     small: {
       titlePadding: '5px 10px',
       fontSize: 9,
@@ -79,6 +87,18 @@ export default {
     },
     noTitle: {
       titlePadding: '0',
+    },
+    seedWord: {
+      titlePadding: '5px 8px',
+    },
+    selectedSeedWord: {
+      titlePadding: '5px 8px',
+      borderColor: '#A9A9A9',
+      borderHoverColor: '#A9A9A9',
+      backgroundColor: '#A9A9A9',
+      backgroundHoverColor: '#A9A9A9',
+      titleHoverColor: COLORS.WHITE,
+      titleColor: COLORS.WHITE,
     },
   },
   Text: {
@@ -149,6 +169,9 @@ export default {
       textAlign: 'center',
       color: '#303030',
       fontSize: 13,
+    },
+    center: {
+      textAlign: 'center',
     },
   },
   TextField: {

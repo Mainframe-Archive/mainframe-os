@@ -103,10 +103,11 @@ type AppPermissionDefinitions {
 }
 
 input AppPermissionDefinitionsInput {
-  WEB_REQUEST: [String]
   BLOCKCHAIN_SEND: Boolean
+  CONTACTS_READ: Boolean
   SWARM_UPLOAD: Boolean
   SWARM_DOWNLOAD: Boolean
+  WEB_REQUEST: [String]
 }
 
 type AppPermissions {
@@ -238,16 +239,18 @@ type DeleteWalletPayload {
 type EthHDWallet implements Node {
   """The ID of an object"""
   id: ID!
+  name: String
   localID: ID!
   mnemonic: String!
-  accounts: [NamedWalletAccountType]
+  accounts: [WalletAccount]
 }
 
 type EthLedgerWallet implements Node {
   """The ID of an object"""
   id: ID!
+  name: String
   localID: ID!
-  accounts: [NamedWalletAccountType]
+  accounts: [WalletAccount]
 }
 
 type EthWallets {
@@ -304,12 +307,6 @@ type NamedProfile {
   avatar: String
 }
 
-type NamedWalletAccountType {
-  name: String!
-  address: String!
-  balances: WalletBalances!
-}
-
 """An object with an ID"""
 interface Node {
   """The id of the object."""
@@ -359,6 +356,7 @@ type Peers {
 
 input PermissionGrantsInput {
   BLOCKCHAIN_SEND: Boolean
+  CONTACTS_READ: Boolean
   SWARM_UPLOAD: Boolean
   SWARM_DOWNLOAD: Boolean
   WEB_REQUEST: WebRequestGrantInput!
@@ -404,6 +402,11 @@ type Viewer {
   contacts: Contacts!
   identities: Identities!
   wallets: Wallets!
+}
+
+type WalletAccount {
+  address: String!
+  balances: WalletBalances!
 }
 
 type WalletBalances {

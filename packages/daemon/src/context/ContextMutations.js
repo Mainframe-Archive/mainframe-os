@@ -3,8 +3,10 @@
 import { hexValueType } from '@erebos/hex'
 import type { StrictPermissionsRequirements } from '@mainframe/app-permissions'
 import { idType, type ID } from '@mainframe/utils-id'
+import type { AppUserContact } from '@mainframe/client'
 
 import type { OwnApp } from '../app'
+import type { ContactToApprove } from '../app/AbstractApp'
 import type {
   Contact,
   OwnDeveloperIdentity,
@@ -17,6 +19,8 @@ import type { PeerUserProfile } from '../identity/PeerUserIdentity'
 import type { bzzHash } from '../swarm/feed'
 
 import type {
+  AddHDWalletAccountParams,
+  ImportHDWalletParams,
   Blockchains,
   WalletTypes,
   WalletAddLedgerResult,
@@ -48,20 +52,6 @@ export type AddPeerParams = {
   otherFeeds: Feeds,
 }
 
-export type ImportHDWalletParams = {
-  blockchain: Blockchains,
-  mnemonic: string,
-  firstAccountName: string,
-  userID?: string,
-}
-
-export type AddHDWalletAccountParams = {
-  walletID: string,
-  index: number,
-  name: string,
-  userID?: string,
-}
-
 export default class ContextMutations {
   _context: ClientContext
 
@@ -82,6 +72,28 @@ export default class ContextMutations {
     await this._context.openVault.save()
     this._context.next({ type: 'app_created', app })
     return app
+  }
+
+  async appApproveContacts(
+    appID: string,
+    userID: string,
+    contactsToApprove: Array<ContactToApprove>,
+  ): Promise<Array<AppUserContact>> {
+    const { openVault } = this._context
+    const approvedContacts = openVault.apps.approveContacts(
+      appID,
+      userID,
+      contactsToApprove,
+    )
+    // $FlowFixMe map type
+    const contactsIDs = Object.values(approvedContacts).map(c => c.id)
+    const contacts = this._context.queries.getAppUserContacts(
+      appID,
+      userID,
+      contactsIDs,
+    )
+    await this._context.openVault.save()
+    return contacts
   }
 
   // Contacts
@@ -203,14 +215,11 @@ export default class ContextMutations {
 
   async createHDWallet(
     blockchain: Blockchains,
-    firstAccountName: string,
+    name: string,
     userID?: string,
   ): Promise<HDWallet> {
     const { openVault } = this._context
-    const wallet = openVault.wallets.createHDWallet(
-      blockchain,
-      firstAccountName,
-    )
+    const wallet = openVault.wallets.createHDWallet(blockchain, name)
     if (userID) {
       openVault.identityWallets.linkWalletToIdentity(
         userID,
