@@ -32,8 +32,7 @@ export default {
   app_create: app.create,
   app_getManifestData: app.getManifestData,
   app_setPermissionsRequirements: app.setPermissionsRequirements,
-  app_publishContents: app.publishContents,
-  app_writeManifest: app.writeManifest,
+  app_publish: app.publish,
 
   blockchain_web3Send: blockchain.web3Send,
 

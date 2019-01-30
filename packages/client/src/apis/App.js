@@ -14,14 +14,13 @@ import type {
   AppInstallResult,
   AppOpenParams,
   AppOpenResult,
-  AppPublishContentsParams,
-  AppPublishContentsResult,
+  AppPublishParams,
+  AppPublishResult,
   AppRemoveParams,
   AppSetPermissionParams,
   AppSetPermissionsRequirementsParams,
   AppSetUserPermissionsSettingsParams,
   AppSetUserSettingsParams,
-  AppWriteManifestParams,
 } from '../types'
 
 export default class AppAPIs extends ClientAPIs {
@@ -57,10 +56,8 @@ export default class AppAPIs extends ClientAPIs {
     return this._rpc.request('app_open', params)
   }
 
-  publishContents(
-    params: AppPublishContentsParams,
-  ): Promise<AppPublishContentsResult> {
-    return this._rpc.request('app_publishContents', params)
+  publish(params: AppPublishParams): Promise<AppPublishResult> {
+    return this._rpc.request('app_publish', params)
   }
 
   remove(params: AppRemoveParams): Promise<void> {
@@ -85,9 +82,5 @@ export default class AppAPIs extends ClientAPIs {
     params: AppSetPermissionsRequirementsParams,
   ): Promise<void> {
     return this._rpc.request('app_setPermissionsRequirements', params)
-  }
-
-  writeManifest(params: AppWriteManifestParams): Promise<void> {
-    return this._rpc.request('app_writeManifest', params)
   }
 }

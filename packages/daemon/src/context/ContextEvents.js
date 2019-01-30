@@ -41,7 +41,9 @@ export default class ContextEvents {
           e.type === 'peer_deleted' ||
           e.type === 'contact_created' ||
           e.type === 'contact_changed' ||
-          e.type === 'contact_deleted'
+          e.type === 'contact_deleted' ||
+          e.type === 'app_created' ||
+          e.type === 'app_changed'
         )
       }),
     )

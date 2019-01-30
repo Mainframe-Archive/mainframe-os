@@ -9,6 +9,8 @@ import {
 } from '@mainframe/app-permissions'
 import { uniqueID, type ID } from '@mainframe/utils-id'
 
+import { OwnFeed, type OwnFeedSerialized } from '../swarm/feed'
+
 import AbstractApp, {
   type AbstractAppParams,
   type SessionData,
@@ -29,36 +31,76 @@ export type OwnAppData = {
 }
 
 export type AppVersion = {
-  contentsURI?: ?string,
+  contentsHash?: ?string,
   permissions: StrictPermissionsRequirements,
   publicationState: AppVersionPublicationState,
 }
 
 export type OwnAppParams = AbstractAppParams & {
   data: OwnAppData,
+  updateFeed: OwnFeed,
   versions: { [version: string]: AppVersion },
 }
 
-export type OwnAppSerialized = OwnAppParams
+export type OwnAppSerialized = AbstractAppParams & {
+  data: OwnAppData,
+  updateFeed: OwnFeedSerialized,
+  versions: { [version: string]: AppVersion },
+}
+
+export type OwnAppCreationParams = {
+  contentsPath: string,
+  developerID: ID,
+  mfid: string,
+  name: string,
+  version: string,
+  permissions?: ?StrictPermissionsRequirements,
+}
 
 export default class OwnApp extends AbstractApp {
+  static create = (params: OwnAppCreationParams): OwnApp => {
+    return new OwnApp({
+      appID: uniqueID(),
+      data: {
+        contentsPath: params.contentsPath,
+        developerID: params.developerID,
+        mfid: params.mfid,
+        name: params.name || 'Untitled',
+        version: params.version,
+      },
+      updateFeed: OwnFeed.create(),
+      versions: {
+        [params.version]: {
+          permissions: params.permissions || createRequirements(),
+          publicationState: 'unpublished',
+        },
+      },
+    })
+  }
+
   // $FlowFixMe: extending params
-  static fromJSON = (params: OwnAppSerialized): OwnApp => new OwnApp(params)
+  static fromJSON = (params: OwnAppSerialized): OwnApp => {
+    const { updateFeed, ...others } = params
+    return new OwnApp({ ...others, updateFeed: OwnFeed.fromJSON(updateFeed) })
+  }
 
   // $FlowFixMe: extending App
   static toJSON = (app: OwnApp): OwnAppSerialized => ({
     appID: app._appID,
     data: app._data,
     settings: app._settings,
+    updateFeed: OwnFeed.toJSON(app.updateFeed),
     versions: app._versions,
   })
 
   _data: OwnAppData
+  _updateFeed: OwnFeed
   _versions: { [version: string]: AppVersion }
 
   constructor(params: OwnAppParams) {
     super(params)
     this._data = params.data
+    this._updateFeed = params.updateFeed
     this._versions = params.versions
   }
 
@@ -76,6 +118,10 @@ export default class OwnApp extends AbstractApp {
     return this._data.mfid
   }
 
+  get updateFeed(): OwnFeed {
+    return this._updateFeed
+  }
+
   get versions(): { [version: string]: AppVersion } {
     return this._versions
   }
@@ -86,7 +132,22 @@ export default class OwnApp extends AbstractApp {
 
   // Setters
 
-  setContentsURI(contentsURI: string, version?: ?string) {
+  createNextVersion(
+    version: string,
+    permissions?: ?StrictPermissionsRequirements,
+  ): void {
+    if (this._versions[version] != null) {
+      throw new Error('Version already exists')
+    }
+    const latestVersion = this._versions[this._data.version]
+    this._versions[version] = {
+      permissions: permissions || latestVersion.permissions,
+      publicationState: 'unpublished',
+    }
+    this._data.version = version
+  }
+
+  setContentsHash(hash: string, version?: ?string): void {
     const v = version || this._data.version
     const versionData = this._versions[v]
     if (versionData == null) {
@@ -95,7 +156,7 @@ export default class OwnApp extends AbstractApp {
     if (versionData.publicationState === 'manifest_published') {
       throw new Error('Manifest has already been published')
     }
-    versionData.contentsURI = contentsURI
+    versionData.contentsHash = hash
     versionData.publicationState = 'contents_published'
     this._versions[v] = versionData
   }
@@ -103,7 +164,7 @@ export default class OwnApp extends AbstractApp {
   setPermissionsRequirements(
     permissions: PermissionsRequirements,
     version?: ?string,
-  ) {
+  ): void {
     const v = version || this._data.version
     const versionData = this._versions[v]
     if (versionData == null) {

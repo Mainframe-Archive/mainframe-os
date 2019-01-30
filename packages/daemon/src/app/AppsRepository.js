@@ -1,20 +1,17 @@
 // @flow
 
-import {
-  parseContentsURI,
-  validateManifest,
-  type ManifestData,
-} from '@mainframe/app-manifest'
 import type BzzAPI from '@erebos/api-bzz-node'
-import { ensureDir } from 'fs-extra'
+import { validateManifest, type ManifestData } from '@mainframe/app-manifest'
 import {
   getRequirementsDifference,
   type PermissionKey,
   type PermissionGrant,
+  type StrictPermissionsRequirements,
 } from '@mainframe/app-permissions'
-import { MFID } from '@mainframe/data-types'
 import { getAppContentsPath, type Environment } from '@mainframe/config'
+import { MFID } from '@mainframe/data-types'
 import { uniqueID, idType, type ID } from '@mainframe/utils-id'
+import { ensureDir } from 'fs-extra'
 
 import { mapObject } from '../utils'
 
@@ -80,21 +77,13 @@ export const downloadAppContents = async (
   contentsPath: string,
 ): Promise<App> => {
   if (app.installationState !== 'ready') {
-    const contentsURI = parseContentsURI(app.manifest.contentsURI)
-    if (contentsURI.nid !== 'bzz' || contentsURI.nss == null) {
-      // Unsupported contentsURI
+    try {
+      app.installationState = 'downloading'
+      await ensureDir(contentsPath)
+      await bzz.downloadDirectoryTo(app.manifest.contentsHash, contentsPath)
+      app.installationState = 'ready'
+    } catch (err) {
       app.installationState = 'download_error'
-    } else {
-      try {
-        app.installationState = 'downloading'
-        await ensureDir(contentsPath)
-        // contentsURI.nss is expected to be the bzz hash
-        // TODO?: bzz hash validation?
-        await bzz.downloadDirectoryTo(contentsURI.nss, contentsPath)
-        app.installationState = 'ready'
-      } catch (err) {
-        app.installationState = 'download_error'
-      }
     }
   }
   return app
@@ -124,30 +113,32 @@ export default class AppsRepository {
   _apps: Apps
   _updates: AppUpdates
   _ownApps: OwnApps
-  _byMFID: { [mfid: string]: ID }
-  _appsByUser: { [uid: ID]: Array<ID> }
+  _byHash: { [hash: string]: ID } = {}
+  _byMFID: { [mfid: string]: ID } = {}
+  _appsByUser: { [uid: ID]: Array<ID> } = {}
 
   constructor(params: AppsRepositoryParams = {}) {
     this._apps = params.apps || {}
-    this._byMFID = {}
-    this._appsByUser = {}
+    this._updates = params.updates || {}
+    this._ownApps = params.ownApps || {}
+
+    // Fill references for apps
     Object.keys(this._apps).forEach(appID => {
       const id = idType(appID)
       const app = this._apps[id]
+      this._byHash[app.manifest.updateHash] = id
       const mfid = MFID.canonical(app.manifest.id)
       this._byMFID[mfid] = id
 
       Object.keys(app.settings).forEach(uid => {
         const userID = idType(uid)
         if (this._appsByUser[userID]) {
-          this._appsByUser[userID].push(idType(appID))
+          this._appsByUser[userID].push(id)
         } else {
-          this._appsByUser[userID] = [idType(appID)]
+          this._appsByUser[userID] = [id]
         }
       })
     })
-    this._updates = params.updates || {}
-    this._ownApps = params.ownApps || {}
   }
 
   // Getters
@@ -217,6 +208,7 @@ export default class AppsRepository {
     if (validateManifest(manifest) === 'valid') {
       throw new Error('Invalid manifest')
     }
+
     const appID = uniqueID()
     const app = new App({
       appID,
@@ -228,7 +220,9 @@ export default class AppsRepository {
         },
       },
     })
+
     this._apps[appID] = app
+    this._byHash[manifest.updateHash] = appID
     this._byMFID[MFID.canonical(manifest.id)] = appID
 
     return app
@@ -284,6 +278,7 @@ export default class AppsRepository {
         delete this._ownApps[id]
       } else {
         // TODO: handle "clean" option to remove the app contents
+        delete this._byHash[app.manifest.updateHash]
         delete this._byMFID[app.manifest.id]
         delete this._apps[id]
       }
@@ -355,5 +350,17 @@ export default class AppsRepository {
     this._byMFID[MFID.canonical(params.data.mfid)] = params.appID
     this._ownApps[params.appID] = app
     return app
+  }
+
+  createNextVersion(
+    id: ID,
+    version: string,
+    permissions?: StrictPermissionsRequirements,
+  ): void {
+    const app = this.getOwnByID(id)
+    if (app == null) {
+      throw new Error('App not found')
+    }
+    app.createNextVersion(version, permissions)
   }
 }

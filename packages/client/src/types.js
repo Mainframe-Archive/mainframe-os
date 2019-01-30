@@ -138,13 +138,13 @@ export type AppOpenResult = {
   defaultEthAccount: ?string,
 }
 
-export type AppPublishContentsParams = {
+export type AppPublishParams = {
   appID: ID,
   version?: ?string,
 }
 
-export type AppPublishContentsResult = {
-  contentsURI: string,
+export type AppPublishResult = {
+  hash: string,
 }
 
 export type AppRemoveParams = { appID: ID }
@@ -170,12 +170,6 @@ export type AppSetPermissionParams = {
 export type AppSetPermissionsRequirementsParams = {
   appID: ID,
   permissions: PermissionsRequirements,
-  version?: ?string,
-}
-
-export type AppWriteManifestParams = {
-  appID: ID,
-  path: string,
   version?: ?string,
 }
 

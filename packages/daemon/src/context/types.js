@@ -7,6 +7,11 @@ export type AppCreatedEvent = {|
   type: 'app_created',
   app: OwnApp,
 |}
+export type AppChangedEvent = {|
+  type: 'app_changed',
+  app: OwnApp,
+  change: 'versionCreated' | 'versionPublished',
+|}
 
 export type ContactCreatedEvent = {|
   type: 'contact_created',
@@ -61,6 +66,7 @@ export type VaultOpenedEvent = {|
 
 export type ContextEvent =
   | AppCreatedEvent
+  | AppChangedEvent
   | ContactCreatedEvent
   | ContactChangedEvent
   | ContactDeletedEvent

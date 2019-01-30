@@ -1,6 +1,8 @@
 //@flow
+
+import { type PartialManifestData } from '@mainframe/app-manifest'
 import { type ContactResult } from '@mainframe/client'
-import { idType } from '@mainframe/utils-id'
+import { idType, type ID } from '@mainframe/utils-id'
 
 import type ClientContext from './ClientContext'
 
@@ -18,6 +20,40 @@ export default class ContextQueries {
 
   constructor(context: ClientContext) {
     this._context = context
+  }
+
+  // Apps
+
+  getAppManifestData(appID: ID, version?: ?string): PartialManifestData {
+    const { openVault } = this._context
+
+    const app = openVault.apps.getOwnByID(appID)
+    if (app == null) {
+      throw new Error('App not found')
+    }
+    const devIdentity = openVault.identities.getOwnDeveloper(
+      app.data.developerID,
+    )
+    if (devIdentity == null) {
+      throw new Error('Developer identity not found')
+    }
+    const versionData = app.getVersionData(version)
+    if (versionData == null) {
+      throw new Error('Invalid app version')
+    }
+
+    return {
+      id: app.mfid,
+      author: {
+        id: devIdentity.id,
+        name: devIdentity.profile.name,
+      },
+      name: app.data.name,
+      version: app.data.version,
+      contentsHash: versionData.contentsHash,
+      updateHash: app.updateFeed.feedHash,
+      permissions: versionData.permissions,
+    }
   }
 
   // Contacts

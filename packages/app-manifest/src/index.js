@@ -2,6 +2,7 @@
 
 import {
   readSignedFile,
+  signContents,
   verifyContents,
   writeSignedFile,
   type SignedContents, // eslint-disable-line import/named
@@ -13,8 +14,6 @@ import Validator from 'fastest-validator'
 
 import { MANIFEST_SCHEMA_MESSAGES, MANIFEST_SCHEMA_PROPS } from './schema'
 import type { ManifestData, ManifestValidationResult } from './types'
-
-export { parse as parseContentsURI } from 'uri-js'
 
 export * from './schema'
 export * from './types'
@@ -35,6 +34,21 @@ export const validateManifest = (
   manifest: ManifestData,
 ): ManifestValidationResult => {
   return check(manifest)
+}
+
+export const encodeManifest = (data: ManifestData): Buffer => {
+  const result = validateManifest(data)
+  if (result === true) {
+    return Buffer.from(JSON.stringify(data))
+  }
+  throw new ManifestError('Invalid manifest data', result)
+}
+
+export const createSignedManifest = (
+  data: ManifestData,
+  keyPairs: Array<KeyPair>,
+): SignedContents => {
+  return signContents(encodeManifest(data), keyPairs)
 }
 
 export const parseManifestData = (input: ?Buffer): ManifestData => {
@@ -81,9 +95,5 @@ export const writeManifestFile = async (
   data: ManifestData,
   keyPairs: Array<KeyPair>,
 ): Promise<void> => {
-  const result = validateManifest(data)
-  if (result !== true) {
-    throw new ManifestError('Invalid manifest data', result)
-  }
-  await writeSignedFile(path, Buffer.from(JSON.stringify(data)), keyPairs)
+  await writeSignedFile(path, encodeManifest(data), keyPairs)
 }

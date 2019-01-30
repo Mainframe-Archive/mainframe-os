@@ -1,22 +1,12 @@
 // @flow
 
-// eslint-disable-next-line import/named
-import {
-  isValidSemver,
-  writeManifestFile,
-  type ManifestData, // eslint-disable-line import/named
-  type PartialManifestData, // eslint-disable-line import/named
-} from '@mainframe/app-manifest'
-import {
-  createRequirements,
-  type PermissionsRequirements, // eslint-disable-line import/named
-  type StrictPermissionsRequirements,
-} from '@mainframe/app-permissions'
+import { type ManifestData } from '@mainframe/app-manifest'
+import { type PermissionsRequirements } from '@mainframe/app-permissions'
 import { readEncryptedFile, writeEncryptedFile } from '@mainframe/secure-file'
 import {
   decodeBase64,
   encodeBase64,
-  type base64, // eslint-disable-line import/named
+  type base64,
 } from '@mainframe/utils-base64'
 import {
   PASSWORDHASH_ALG_ARGON2ID13,
@@ -25,8 +15,7 @@ import {
   createPasswordHashSalt,
   createSecretBoxKeyFromPassword,
 } from '@mainframe/utils-crypto'
-// eslint-disable-next-line import/named
-import { uniqueID, type ID } from '@mainframe/utils-id'
+import { type ID } from '@mainframe/utils-id'
 
 import type {
   AppUserSettings,
@@ -37,7 +26,6 @@ import type App from '../app/App'
 import AppsRepository, {
   type AppsRepositorySerialized,
 } from '../app/AppsRepository'
-import type OwnApp from '../app/OwnApp'
 import type Session from '../app/Session'
 import IdentitiesRepository, {
   type IdentitiesRepositorySerialized,
@@ -256,56 +244,6 @@ export default class Vault {
 
   // App creation and management
 
-  createApp(params: {
-    contentsPath: string,
-    developerID: ID,
-    name?: ?string,
-    version?: ?string,
-    permissionsRequirements?: ?StrictPermissionsRequirements,
-  }): OwnApp {
-    const appIdentity = this.identities.getOwnApp(
-      this.identities.createOwnApp(),
-    )
-    if (appIdentity == null) {
-      throw new Error('Failed to create app identity')
-    }
-
-    const devIdentity = this.identities.getOwnDeveloper(params.developerID)
-    if (devIdentity == null) {
-      throw new Error('Developer identity not found')
-    }
-
-    const version =
-      params.version == null || !isValidSemver(params.version)
-        ? '1.0.0'
-        : params.version
-
-    return this.apps.create({
-      appID: uniqueID(),
-      data: {
-        contentsPath: params.contentsPath,
-        developerID: params.developerID,
-        mfid: appIdentity.id,
-        name: params.name || 'Untitled',
-        version,
-      },
-      versions: {
-        [version]: {
-          permissions: params.permissionsRequirements || createRequirements(),
-          publicationState: 'unpublished',
-        },
-      },
-    })
-  }
-
-  setAppContentsURI(appID: ID, contentsURI: string, version?: ?string): void {
-    const app = this.apps.getOwnByID(appID)
-    if (app == null) {
-      throw new Error('App not found')
-    }
-    app.setContentsURI(contentsURI, version)
-  }
-
   setAppPermissionsRequirements(
     appID: ID,
     permissions: PermissionsRequirements,
@@ -328,95 +266,6 @@ export default class Vault {
     settings: PermissionsSettings,
   ): void {
     this.apps.setUserPermissionsSettings(appID, userID, settings)
-  }
-
-  getAppManifestData(appID: ID, version?: ?string): PartialManifestData {
-    const app = this.apps.getOwnByID(appID)
-    if (app == null) {
-      throw new Error('App not found')
-    }
-    const devIdentity = this.identities.getOwnDeveloper(app.data.developerID)
-    if (devIdentity == null) {
-      throw new Error('Developer identity not found')
-    }
-    const versionData = app.getVersionData(version)
-    if (versionData == null) {
-      throw new Error('Invalid app version')
-    }
-
-    return {
-      id: app.mfid,
-      author: {
-        id: devIdentity.id,
-        name: devIdentity.profile.name,
-      },
-      name: app.data.name,
-      version: app.data.version,
-      contentsURI: versionData.contentsURI,
-      permissions: versionData.permissions,
-    }
-  }
-
-  async writeAppManifest(
-    appID: ID,
-    toPath: string,
-    version?: ?string,
-  ): Promise<void> {
-    const app = this.apps.getOwnByID(appID)
-    if (app == null) {
-      throw new Error('App not found')
-    }
-
-    const appIdentityID = this.identities.getID(app.mfid)
-    if (appIdentityID == null) {
-      throw new Error('App identity not found')
-    }
-    const appIdentity = this.identities.getOwnApp(appIdentityID)
-    if (appIdentity == null) {
-      throw new Error('App identity not found')
-    }
-
-    const devIdentity = this.identities.getOwnDeveloper(app.data.developerID)
-    if (devIdentity == null) {
-      throw new Error('Developer identity not found')
-    }
-
-    const versionData = app.getVersionData(version)
-    if (versionData == null) {
-      throw new Error('Invalid app version')
-    }
-
-    if (versionData.publicationState === 'unpublished') {
-      throw new Error(
-        'App contents must be published before manifest can be created',
-      )
-    }
-    if (versionData.publicationState === 'manifest_published') {
-      throw new Error('Manifest has already been published for this version')
-    }
-
-    if (versionData.contentsURI == null) {
-      throw new Error(
-        'App contents URI must be set before manifest can be created',
-      )
-    }
-
-    const manifestData = {
-      id: app.mfid,
-      author: {
-        id: devIdentity.id,
-        name: devIdentity.profile.name,
-      },
-      name: app.data.name,
-      version: app.data.version,
-      contentsURI: versionData.contentsURI,
-      permissions: versionData.permissions,
-    }
-
-    await writeManifestFile(toPath, manifestData, [
-      appIdentity.keyPair,
-      devIdentity.keyPair,
-    ])
   }
 
   // Settings
