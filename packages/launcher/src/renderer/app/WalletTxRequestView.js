@@ -10,7 +10,7 @@ import {
   decodeTransactionData,
   type ERC20DataResult,
   type DecodedTxResult,
-} from '@mainframe/contract-utils'
+} from '@mainframe/eth'
 
 import globalStyles from '../styles'
 import Text from '../UIComponents/Text'

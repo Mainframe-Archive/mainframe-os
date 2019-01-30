@@ -10,7 +10,7 @@ import ContactsAPIs from './apis/Contacts'
 
 export default class MainframeSDK {
   _rpc: StreamRPC
-  blockchain: BlockchainAPIs
+  _blockchain: BlockchainAPIs
   pss: PssAPIs
   contacts: ContactsAPIs
 
@@ -21,9 +21,15 @@ export default class MainframeSDK {
       throw new Error('Cannot find expected mainframe client instance')
     }
 
-    this.blockchain = new BlockchainAPIs(this._rpc)
     this.pss = new PssAPIs(this._rpc)
     this.contacts = new ContactsAPIs(this._rpc)
+  }
+
+  get blockchain() {
+    if (this._blockchain) {
+      return this._blockchain
+    }
+    return new BlockchainAPIs(this._rpc)
   }
 
   apiVersion = () => {

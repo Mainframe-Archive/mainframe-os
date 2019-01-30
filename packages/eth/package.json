@@ -1,6 +1,6 @@
 {
-  "name": "@mainframe/contract-utils",
-  "description": "Mainframe Contract Utils",
+  "name": "@mainframe/eth",
+  "description": "Mainframe Ethereum API and utilities",
   "version": "0.1.0",
   "author": "Mainframe",
   "license": "MIT",

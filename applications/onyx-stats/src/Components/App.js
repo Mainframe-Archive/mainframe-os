@@ -29,7 +29,7 @@ export default class App extends Component<null, State> {
   constructor() {
     super()
     this.sdk = new MainframeSDK()
-    this.web3 = new Web3(this.sdk.blockchain.getWeb3Provider())
+    this.web3 = new Web3(this.sdk.blockchain.web3Provider)
     this.state = {}
   }
 

@@ -12,7 +12,7 @@ import {
 } from 'react-native-web'
 
 import applyContext, { type ContextProps } from './Context'
-import { ABI } from '@mainframe/contract-utils'
+import { ABI } from '@mainframe/eth'
 
 type State = {
   recipient: string,
@@ -20,7 +20,10 @@ type State = {
   amount: string,
   data: string,
   errorMsg?: ?string,
-  txReceipt?: ?string,
+  currentTX: ?{
+    hash?: ?string,
+    state: 'broadcast' | 'mined' | 'confirmed',
+  },
   processingTransaction?: ?boolean,
   sendType: 'tokens' | 'ether',
 }
@@ -32,6 +35,7 @@ class SendFunds extends Component<ContextProps, State> {
     data: '',
     tokenAddress: '',
     sendType: 'ether',
+    currentTX: undefined,
   }
 
   // HANDLERS
@@ -117,76 +121,72 @@ class SendFunds extends Component<ContextProps, State> {
   }
 
   onPressSendToken = async () => {
-    const { web3 } = this.props
-    if (!this.validateSend()) {
-      return
-    }
-    const tokenContract = new web3.eth.Contract(
-      ABI.ERC20,
-      this.state.tokenAddress,
-    )
-    const accounts = await web3.eth.getAccounts()
-    // TODO: fetch decimal
-    const amount = web3.utils.toWei(this.state.amount)
-    try {
-      this.sendTransaction(() => {
-        return tokenContract.methods
-          .transfer(this.state.recipient, amount)
-          .send({
-            from: accounts[0],
-          })
-      })
-    } catch (err) {
-      this.setState({
-        processingTransaction: false,
-        errorMsg: err.message || 'Error processing transaction',
-      })
-    }
+    const { sdk } = this.props
+    this.sendTransaction(true)
   }
 
   onPressSendEth = async () => {
-    const { web3 } = this.props
-    const accounts = await web3.eth.getAccounts()
-    const amount = web3.utils.toWei(this.state.amount || '0')
-
-    try {
-      this.sendTransaction(() => {
-        return this.props.web3.eth.sendTransaction({
-          data: this.state.data,
-          to: this.state.recipient,
-          from: accounts[0],
-          value: amount,
-        })
-      })
-    } catch (err) {
-      this.setState({
-        processingTransaction: false,
-        errorMsg: err.message || 'Error processing transaction',
-      })
-    }
+    const { sdk } = this.props
+    this.sendTransaction()
   }
 
-  sendTransaction = txFunc => {
+  sendTransaction = async (mft?: boolean) => {
+    const { web3, sdk } = this.props
+    if (!this.validateSend()) {
+      return
+    }
+    const accounts = await web3.eth.getAccounts()
     this.setState({
       processingTransaction: true,
-      txReceipt: undefined,
+      currentTX: undefined,
       errorMsg: undefined,
     })
-    txFunc()
-      .on('error', err => {
-        console.warn(err)
+    const params = {
+      from: accounts[0],
+      to: this.state.recipient,
+      value: this.state.amount,
+    }
+    const sub = mft
+      ? sdk.blockchain.sendMFT(params)
+      : sdk.blockchain.sendETH(params)
+
+    sub.subscribe(
+      event => {
+        switch (event.name) {
+          case 'hash':
+            this.setState({
+              currentTX: {
+                hash: event.data,
+                state: 'broadcast',
+              },
+            })
+            break
+          case 'mined':
+            this.setState({
+              processingTransaction: false,
+              currentTX: {
+                ...this.state.currentTX,
+                state: 'mined',
+              },
+            })
+            break
+        }
+      },
+      error => {
         this.setState({
           processingTransaction: false,
-          errorMsg: err.message || 'Error processing transaction',
+          errorMsg: error.message || 'Error sending transaction',
         })
-      })
-      .on('receipt', receipt => {
-        console.log(receipt)
+      },
+      () => {
         this.setState({
-          processingTransaction: false,
-          txReceipt: receipt.transactionHash,
+          currentTX: {
+            ...this.state.currentTX,
+            state: 'confirmed',
+          },
         })
-      })
+      },
+    )
   }
 
   // RENDER
@@ -268,10 +268,22 @@ class SendFunds extends Component<ContextProps, State> {
   }
 
   renderResult() {
-    if (this.state.txReceipt) {
+    const { currentTX } = this.state
+    if (currentTX) {
+      const style =
+        currentTX.state === 'broadcast'
+          ? styles.broadcastContainer
+          : styles.receiptContainer
+      const label =
+        currentTX.state === 'broadcast'
+          ? 'Waiting to be mined: '
+          : 'Transaction confirmed: '
       return (
-        <View style={[styles.feedbackContainer, styles.receiptContainer]}>
-          <Text>{this.state.txReceipt}</Text>
+        <View style={[styles.feedbackContainer, style]}>
+          <Text>
+            {label}
+            {currentTX.hash}
+          </Text>
         </View>
       )
     }
@@ -369,6 +381,10 @@ const styles = StyleSheet.create({
     color: '#535748',
     backgroundColor: '#e6f2bf',
     borderColor: '#d3e2a7',
+  },
+  broadcastContainer: {
+    backgroundColor: '#F8F2E2',
+    borderColor: '#E7E2D2',
   },
   errorContainer: {
     color: '#473f3e',

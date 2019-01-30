@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@mainframe/contract-utils": "0.1.0",
+    "@mainframe/eth": "*",
     "@mainframe/sdk": "*",
     "react": "^16.5.2",
     "react-art": "^16.5.2",
