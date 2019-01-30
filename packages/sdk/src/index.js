@@ -29,7 +29,7 @@ export default class MainframeSDK {
     if (this._blockchain) {
       return this._blockchain
     }
-    return new BlockchainAPIs(this._rpc)
+    return new BlockchainAPIs(this)
   }
 
   apiVersion = () => {

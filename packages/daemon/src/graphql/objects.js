@@ -317,6 +317,9 @@ export const genericProfile = new GraphQLObjectType({
     avatar: {
       type: GraphQLString,
     },
+    ethAddress: {
+      type: GraphQLString,
+    },
   }),
 })
 
@@ -327,6 +330,9 @@ export const namedProfile = new GraphQLObjectType({
       type: GraphQLNonNull(GraphQLString),
     },
     avatar: {
+      type: GraphQLString,
+    },
+    ethAddress: {
       type: GraphQLString,
     },
   }),

@@ -108,7 +108,8 @@ export const getUserEthAccounts = {
     ctx: ClientContext,
     params: WalletGetUserEthAccountsParams,
   ): Promise<WalletGetEthAccountsResult> => {
-    return ctx.queries.getUserEthAccounts(params.userID)
+    const accounts = ctx.queries.getUserEthAccounts(params.userID)
+    return accounts
   },
 }
 

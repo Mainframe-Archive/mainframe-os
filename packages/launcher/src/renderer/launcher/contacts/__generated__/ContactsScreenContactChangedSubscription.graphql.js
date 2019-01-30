@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 7c90960bd40e7f0555509336624655bf
+ * @relayHash 8c6462c5b7836a0ff057e6fcdff39e88
  */
 
 /* eslint-disable */
@@ -9,11 +9,11 @@
 
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
-export type ContactConnection = "CONNECTED" | "SENT" | "%future added value";
+export type ConnectionState = "CONNECTED" | "SENDING" | "SENT" | "%future added value";
 export type ContactsScreenContactChangedSubscriptionVariables = {||};
 export type ContactsScreenContactChangedSubscriptionResponse = {|
   +contactChanged: {|
-    +connectionState: ContactConnection,
+    +connectionState: ConnectionState,
     +profile: {|
       +name: ?string,
       +avatar: ?string,

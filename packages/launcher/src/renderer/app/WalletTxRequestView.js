@@ -67,6 +67,7 @@ export default class WalletTxRequestView extends Component<Props, State> {
         const txInfo = await decodeTransactionData(txData)
         let tokenInfo
         if (txInfo.contractType === 'ERC20') {
+          // TODO - FIX
           const contract = new Web3Contract(ABI.ERC20, transaction.to)
           tokenInfo = await getERC20Data(contract, transaction.from)
         }

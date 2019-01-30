@@ -258,6 +258,40 @@ const createDeveloperIdentityMutation = mutationWithClientMutationId({
   },
 })
 
+const updateProfileInput = new GraphQLInputObjectType({
+  name: 'UpdateUserProfileInput',
+  fields: () => ({
+    name: {
+      type: GraphQLString,
+    },
+    avatar: {
+      type: GraphQLString,
+    },
+    ethAddress: {
+      type: GraphQLString,
+    },
+  }),
+})
+
+const updateProfileMutation = mutationWithClientMutationId({
+  name: 'UpdateProfile',
+  inputFields: {
+    userID: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    profile: {
+      type: new GraphQLNonNull(updateProfileInput),
+    },
+  },
+  outputFields: {
+    viewer: viewerOutput,
+  },
+  mutateAndGetPayload: async (args, ctx) => {
+    await ctx.mutations.updateUser(args.userID, args.profile)
+    return {}
+  },
+})
+
 const addContactMutation = mutationWithClientMutationId({
   name: 'AddContact',
   inputFields: {
@@ -486,5 +520,6 @@ export default new GraphQLObjectType({
     addContact: addContactMutation,
     deleteContact: deleteContactMutation,
     setDefaultWallet: setDefaultWalletMutation,
+    updateProfile: updateProfileMutation,
   }),
 })

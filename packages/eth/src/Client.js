@@ -5,14 +5,7 @@ import { Observable } from 'rxjs'
 
 import RequestManager from './RequestManager'
 import ABI from './abi'
-
-export type SendParams = {
-  to?: string,
-  from: string,
-  recipent: string,
-  value: number,
-  confirmations?: number,
-}
+import type { SendParams, TXObservable } from './types'
 
 export const TOKEN_ADDRESS = {
   ropsten: '0xa46f1563984209fe47f8236f8b01a03f03f957e4',
@@ -26,6 +19,11 @@ const MFT_TOKEN_ADDRESSES = {
 
 export default class EthClient extends RequestManager {
   // Reading blockchain data
+
+  async getAccounts(): Promise<Array<string>> {
+    const accountsReq = this.createRequest('eth_accounts', [])
+    return this.sendRequest(accountsReq)
+  }
 
   async getTokenBalance(
     tokenAddress: string,
@@ -58,14 +56,23 @@ export default class EthClient extends RequestManager {
     return web3Utils.fromWei(res, 'ether')
   }
 
+  // async getTokenDecimals(tokenAddr: string) {
+  //   const abi = ABI.ERC20.find(a => a.name === 'decimals')
+  //   const data = Web3EthAbi.encodeFunctionCall(abi)
+  //   const req = this.createRequest('eth_call', [{ data, to: tokenAddr }])
+  //   const res = await this.sendRequest(req)
+  //   return web3Utils.hexToNumber(res)
+  // }
+
   // Sending transactions
 
   sendETH(params: SendParams) {
-    const weiAmount = web3Utils.toHex(web3Utils.toWei(params.value))
+    const valueWei = web3Utils.toWei(String(params.value))
+    const valueHex = web3Utils.toHex(valueWei)
     const reqParams = {
       to: params.to,
       from: params.from,
-      value: weiAmount,
+      value: valueHex,
     }
     const request = {
       method: 'eth_sendTransaction',
@@ -75,12 +82,9 @@ export default class EthClient extends RequestManager {
   }
 
   sendMFT(params: SendParams) {
-    const weiAmount = web3Utils.toWei(params.value)
+    const valueWei = web3Utils.toWei(String(params.value))
     const abi = ABI.ERC20.find(a => a.name === 'transfer')
-    const data = Web3EthAbi.encodeFunctionCall(abi, [
-      params.recipent,
-      weiAmount,
-    ])
+    const data = Web3EthAbi.encodeFunctionCall(abi, [params.to, valueWei])
     const to = MFT_TOKEN_ADDRESSES[this.network]
     const reqParams = { from: params.from, to, data }
     const request = {
@@ -128,24 +132,39 @@ export default class EthClient extends RequestManager {
     })
   }
 
-  sendTX(requestData: Object, confirmations: ?number = 10) {
-    return Observable.create(async observer => {
-      try {
-        const req = this.createRequest(requestData.method, requestData.params)
-        const res = await this.sendRequest(req)
-        observer.next({
-          name: 'hash',
-          data: res,
+  sendTX(requestData: Object, confirmations: ?number = 10): TXObservable {
+    return Observable.create(observer => {
+      let unsubscribe = false
+      const req = this.createRequest(requestData.method, requestData.params)
+      this.sendRequest(req)
+        .then(res => {
+          if (unsubscribe) {
+            return
+          }
+          observer.next({
+            name: 'hash',
+            data: res,
+          })
+          return this.confirmTransaction(res, req.id, 0).then(() => {
+            if (unsubscribe) {
+              return
+            }
+            observer.next({
+              name: 'mined',
+            })
+            return this.confirmTransaction(res, req.id, confirmations)
+          })
         })
-        await this.confirmTransaction(res, req.id, 0)
-        observer.next({
-          name: 'mined',
+        .then(() => {
+          if (unsubscribe) {
+            return
+          }
+          observer.complete()
         })
-        await this.confirmTransaction(res, req.id, confirmations)
-        observer.complete()
-      } catch (err) {
-        observer.error(err)
-      }
+        .catch(err => {
+          observer.error(err)
+        })
+      return () => (unsubscribe = true)
     })
   }
 }

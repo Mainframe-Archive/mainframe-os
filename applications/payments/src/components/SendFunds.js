@@ -16,7 +16,6 @@ import { ABI } from '@mainframe/eth'
 
 type State = {
   recipient: string,
-  tokenAddress: string,
   amount: string,
   data: string,
   errorMsg?: ?string,
@@ -25,7 +24,7 @@ type State = {
     state: 'broadcast' | 'mined' | 'confirmed',
   },
   processingTransaction?: ?boolean,
-  sendType: 'tokens' | 'ether',
+  sendType: 'tokens' | 'ether' | 'contact',
 }
 
 class SendFunds extends Component<ContextProps, State> {
@@ -33,7 +32,6 @@ class SendFunds extends Component<ContextProps, State> {
     recipient: '',
     amount: '',
     data: '',
-    tokenAddress: '',
     sendType: 'ether',
     currentTX: undefined,
   }
@@ -50,12 +48,6 @@ class SendFunds extends Component<ContextProps, State> {
   onChangeAmount = (value: string) => {
     this.setState({
       amount: value,
-    })
-  }
-
-  onChangeTokenAddress = (value: string) => {
-    this.setState({
-      tokenAddress: value,
     })
   }
 
@@ -77,22 +69,27 @@ class SendFunds extends Component<ContextProps, State> {
     })
   }
 
-  onFocusRecipient = () => {
-    this.selectContacts()
+  onPressShowPayContact = () => {
+    this.setState({
+      sendType: 'contact',
+    })
   }
 
-  async selectContacts() {
+  onFocusContactRecipient = () => {
+    this.selectContact()
+  }
+
+  async selectContact() {
+    const { sdk } = this.props
     try {
-      const { contacts } = await this.props.sdk.contacts.selectContacts({
-        multi: true,
-      })
-      if (contacts.length && contacts[0].data.profile.ethAddress) {
+      const contact = await sdk.contacts.selectContact()
+      if (contact && contact.data.profile.ethAddress) {
         this.setState({
-          recipient: contacts[0].data.profile.ethAddress,
+          recipient: contact.data.profile.ethAddress,
         })
       }
     } catch (err) {
-      console.log('select contacts err: ', err)
+      console.log('contacts err: ', err)
     }
   }
 
@@ -109,17 +106,6 @@ class SendFunds extends Component<ContextProps, State> {
     return true
   }
 
-  validateSendTokens() {
-    const { web3 } = this.props
-    if (this.validateSend()) {
-      if (!web3.utils.isAddress(this.state.tokenAddress)) {
-        this.setState({ errorMsg: 'Please provide a valid token address' })
-        return false
-      }
-    }
-    return true
-  }
-
   onPressSendToken = async () => {
     const { sdk } = this.props
     this.sendTransaction(true)
@@ -128,6 +114,27 @@ class SendFunds extends Component<ContextProps, State> {
   onPressSendEth = async () => {
     const { sdk } = this.props
     this.sendTransaction()
+  }
+
+  onPressPayContact = async () => {
+    const { sdk } = this.props
+    const params = {
+      currency: 'ETH',
+      contactID: this.state.recipient,
+      value: this.state.amount,
+    }
+    this.setState({
+      currentTX: undefined,
+      errorMsg: undefined,
+    })
+    try {
+      const sub = await sdk.blockchain.payContact(params)
+      this.subscibeTX(sub)
+    } catch (err) {
+      this.setState({
+        errorMsg: err.message || 'Error sending transaction',
+      })
+    }
   }
 
   sendTransaction = async (mft?: boolean) => {
@@ -146,11 +153,15 @@ class SendFunds extends Component<ContextProps, State> {
       to: this.state.recipient,
       value: this.state.amount,
     }
-    const sub = mft
+    const txSub = mft
       ? sdk.blockchain.sendMFT(params)
       : sdk.blockchain.sendETH(params)
 
-    sub.subscribe(
+    this.subscibeTX(txSub)
+  }
+
+  subscibeTX(tx) {
+    tx.subscribe(
       event => {
         switch (event.name) {
           case 'hash':
@@ -195,17 +206,10 @@ class SendFunds extends Component<ContextProps, State> {
     return (
       <View>
         <TextInput
-          placeholder="Token address"
-          style={styles.textInput}
-          onChangeText={this.onChangeTokenAddress}
-          value={this.state.tokenAddress}
-        />
-        <TextInput
           placeholder="Recipient address"
           style={styles.textInput}
           onChangeText={this.onChangeRecipient}
           value={this.state.recipient}
-          onFocus={this.onFocusRecipient}
         />
         <TextInput
           placeholder="Amount"
@@ -225,7 +229,6 @@ class SendFunds extends Component<ContextProps, State> {
           style={styles.textInput}
           onChangeText={this.onChangeRecipient}
           value={this.state.recipient}
-          onFocus={this.onFocusRecipient}
         />
         <TextInput
           placeholder="Amount"
@@ -244,24 +247,45 @@ class SendFunds extends Component<ContextProps, State> {
     )
   }
 
+  renderPayContact() {
+    return (
+      <View>
+        <TextInput
+          placeholder="Amount"
+          style={styles.textInput}
+          onChangeText={this.onChangeAmount}
+          value={this.state.amount}
+        />
+      </View>
+    )
+  }
+
   renderTabs() {
     const ethStyles = [styles.tab]
     const tokenStyles = [styles.tab]
-    if (this.state.sendType === 'ether') {
-      ethStyles.push(styles.tabSelected)
-    } else {
-      tokenStyles.push(styles.tabSelected)
+    const tabStyles = {
+      ether: [styles.tab],
+      tokens: [styles.tab],
+      contact: [styles.tab],
     }
+    tabStyles[this.state.sendType].push(styles.tabSelected)
 
     return (
       <View style={styles.tabs}>
-        <TouchableOpacity onPress={this.onPressShowEthSend} style={ethStyles}>
+        <TouchableOpacity
+          onPress={this.onPressShowEthSend}
+          style={tabStyles.ether}>
           <Text style={styles.tabLabel}>ETHER</Text>
         </TouchableOpacity>
         <TouchableOpacity
           onPress={this.onPressShowTokenSend}
-          style={tokenStyles}>
-          <Text style={styles.tabLabel}>TOKENS</Text>
+          style={tabStyles.tokens}>
+          <Text style={styles.tabLabel}>MFT</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={this.onPressShowPayContact}
+          style={tabStyles.contact}>
+          <Text style={styles.tabLabel}>PAY CONTACT</Text>
         </TouchableOpacity>
       </View>
     )
@@ -300,15 +324,22 @@ class SendFunds extends Component<ContextProps, State> {
   }
 
   render() {
-    const content =
-      this.state.sendType === 'ether'
-        ? this.renderEthSend()
-        : this.renderTokenSend()
-
-    const onPress =
-      this.state.sendType === 'ether'
-        ? this.onPressSendEth
-        : this.onPressSendToken
+    let content, onPress
+    switch (this.state.sendType) {
+      case 'tokens':
+        content = this.renderTokenSend()
+        onPress = this.onPressSendToken
+        break
+      case 'contact':
+        content = this.renderPayContact()
+        onPress = this.onPressPayContact
+        break
+      case 'ether':
+      default:
+        content = this.renderEthSend()
+        onPress = this.onPressSendEth
+        break
+    }
 
     const button = this.state.processingTransaction ? (
       <ActivityIndicator />

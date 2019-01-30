@@ -14,7 +14,6 @@ type AddContactPayload {
 input AddHDWalletAccountInput {
   walletID: String!
   index: Int!
-  name: String!
   userID: String
   clientMutationId: String
 }
@@ -160,6 +159,12 @@ type AppVersionData {
   publicationState: String!
 }
 
+enum ConnectionState {
+  CONNECTED
+  SENDING
+  SENT
+}
+
 type Contact implements Node {
   """The ID of an object"""
   id: ID!
@@ -167,13 +172,7 @@ type Contact implements Node {
   peerID: ID!
   pubKey: String!
   profile: GenericProfile!
-  connectionState: ContactConnection!
-}
-
-enum ContactConnection {
-  CONNECTED
-  SENDING
-  SENT
+  connectionState: ConnectionState!
 }
 
 type Contacts {
@@ -261,6 +260,7 @@ type EthWallets {
 type GenericProfile {
   name: String
   avatar: String
+  ethAddress: String
 }
 
 type Identities {
@@ -300,11 +300,13 @@ type Mutation {
   addContact(input: AddContactInput!): AddContactPayload
   deleteContact(input: DeletContactInput!): DeletContactPayload
   setDefaultWallet(input: SetDefaultWalletInput!): SetDefaultWalletPayload
+  updateProfile(input: UpdateProfileInput!): UpdateProfilePayload
 }
 
 type NamedProfile {
   name: String!
   avatar: String
+  ethAddress: String
 }
 
 """An object with an ID"""
@@ -389,6 +391,23 @@ type Subscription {
 
 enum SupportedWallets {
   ETHEREUM
+}
+
+input UpdateProfileInput {
+  userID: String!
+  profile: UpdateUserProfileInput!
+  clientMutationId: String
+}
+
+type UpdateProfilePayload {
+  viewer: Viewer!
+  clientMutationId: String
+}
+
+input UpdateUserProfileInput {
+  name: String
+  avatar: String
+  ethAddress: String
 }
 
 input UserProfileInput {
