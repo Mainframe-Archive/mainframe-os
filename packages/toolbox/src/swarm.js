@@ -5,6 +5,7 @@ import * as path from 'path'
 import keythereum from 'keythereum'
 import * as fs from 'fs-extra'
 import execa from 'execa'
+import { SwarmConfig } from '@mainframe/config'
 
 export type KeyObject = {
   address: string,
@@ -96,7 +97,10 @@ export const listKeyStorePaths = async (): Promise<KeyObject[]> => {
   return keystores
 }
 
-export const startSwarm = async (swarmPath): Promise => {
+export const startSwarm = async (
+  swarmPath: string,
+  swarmConfig: SwarmConfig,
+): Promise => {
   const keystores = await listKeyStores()
   const keystore = keystores[0]
 
@@ -116,13 +120,17 @@ export const startSwarm = async (swarmPath): Promise => {
     '*',
     '--ens-api',
     'https://mainnet.infura.io/55HkPWVAJQjGH4ucvfW9',
-    '--nosync',
   ])
-  fs.ensureDir(`${datadir}${path.sep}logs`)
+
+  await fs.ensureDir(`${datadir}${path.sep}logs`)
+
+  console.log('execa swarm and ensure log dir')
 
   proc.stderr.pipe(
     fs.createWriteStream(`${datadir}${path.sep}logs${path.sep}swarm.log`),
   )
+
+  console.log('redirected stderr')
 
   proc.stdout.on('data', data => {
     const dataStr = data.toString()
@@ -142,10 +150,10 @@ export const startSwarm = async (swarmPath): Promise => {
     ) {
       // eslint-disable-next-line no-console
       console.log('Swarm node started')
-      SwarmConfig.setSwarmRunStatus('running')
+      swarmConfig.runStatus = 'running'
     }
+    return proc
   })
-  return proc
 }
 
 export const stopSwarm = () => {

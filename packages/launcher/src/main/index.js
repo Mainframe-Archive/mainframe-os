@@ -60,7 +60,7 @@ const platform = {
 }[os.platform()]
 
 const getBinPath = is.development
-  ? name => path.join(app.getAppPath(), '..', 'bin', `${name}-${platform}`)
+  ? path.join('swarm')
   : name => path.join(process.resourcesPath, 'bin', name)
 
 let client
@@ -167,9 +167,8 @@ const getSwarmKeystorePassword = async (): Promise<string> => {
   }
 }
 
-const keystorePasswordExists = async (): Promise<string> => {
-  const password = await keytar.getPassword(service, account)
-  if (password == null) {
+const envExists = async (): Promise<string> => {
+  if (swarmConfig.binPath == null) {
     return false
   }
   return true
@@ -177,21 +176,23 @@ const keystorePasswordExists = async (): Promise<string> => {
 
 // TODO: proper setup, this is just temporary logic to simplify development flow
 const setupClient = async () => {
-  // change this to check for an environment config
-  const firstLaunch = await keystorePasswordExists()
+  const firstLaunch = await envExists()
   if (!firstLaunch) {
+    console.log('detected first launch')
     await setupDaemon(new DaemonConfig(env), {
       binPath: binPath,
       socketPath: undefined,
     })
     const password = await getSwarmKeystorePassword()
     await createKeyStore(password)
-    await swarmConfig.setSwarmBinPath(getBinPath)
-    await swarmConfig.setSocketPath('ws://localhost:8546')
+    swarmConfig.binPath = getBinPath
+    swarmConfig.socketPath = 'ws://localhost:8546'
   }
 
+  console.log('not first launch, starting swarm')
+
   try {
-    await startSwarm(swarmConfig.getBinPath())
+    await startSwarm(getBinPath, swarmConfig)
   } catch (e) {
     // eslint-disable-next-line no-console
     console.log(e)
@@ -199,14 +200,18 @@ const setupClient = async () => {
 
   // /!\ Temporary only, should be handled by toolbox with installation flow
   if (daemonConfig.binPath == null) {
+    console.log('no daemon config, setting binPath')
     daemonConfig.binPath = path.resolve(__dirname, '../../../daemon/bin/run')
   }
   if (daemonConfig.runStatus !== 'running') {
     daemonConfig.runStatus = 'stopped'
+    console.log('set daemon status to stopped')
   }
 
+  console.log('starting daemon')
   await startDaemon(daemonConfig, true)
   daemonConfig.runStatus = 'running'
+  console.log('deamon started, connecting client to daemon')
   client = new Client(daemonConfig.socketPath)
 
   // Simple check for API call, not proper versioning logic

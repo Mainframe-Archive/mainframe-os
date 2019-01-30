@@ -16,13 +16,18 @@ export default class ServerHandler {
 
   constructor(env: Environment) {
     this._path = getDaemonSocketPath(env)
+    console.log(`set daemon socket path to ${this._path}`)
     this._server = createServer((socket: Socket) => {
+      console.log(`in daemon create server`)
       this._clients.add(socket)
+      console.log(`in daemon client add socket`)
       socket.on('close', async () => {
+        console.log(`closed daemon socket server`)
         await this._vaults.close(socket)
         this._clients.delete(socket)
       })
       handleClient(socket, env, this._vaults)
+      console.log(`daemon handling client`)
     })
 
     this._server.on('close', () => {
