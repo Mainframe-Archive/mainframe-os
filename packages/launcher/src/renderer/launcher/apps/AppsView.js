@@ -77,7 +77,7 @@ class AppsView extends Component<Props, State> {
   static contextType = LauncherContext
   state = {
     showModal: null,
-    showOnboarding: true,
+    showOnboarding: false,
   }
 
   onSkipOnboarding = () => {
