@@ -128,6 +128,7 @@ export const sandboxed = {
       name: 'string',
     },
     handler: (ctx: AppContext, params: { name: string }): Promise<?string> => {
+      console.log('storage_promptUpload called')
       return new Promise((resolve, reject) => {
         dialog.showOpenDialog(
           ctx.window,
@@ -159,6 +160,8 @@ export const sandboxed = {
                 await ctx.bzz.postFeedValue(feedMetadata, `0x${dataHash}`)
                 // TODO: persist to the vault, atm feedHash is lost with the current session
                 ctx.storage.feedHash = feedManifest
+                console.log(ctx.client.app, 'ctx.client.app')
+                await ctx.client.app.setFeedHash({ sessID: ctx.appSession.session.sessID, feedHash: feedManifest })
                 resolve(params.name)
               } catch (error) {
                 console.log(error, 'storage_promptUpload error')

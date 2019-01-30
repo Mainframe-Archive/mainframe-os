@@ -53,6 +53,7 @@ export type PermissionsSettings = {
 export type AppUserSettings = {
   permissionsSettings: PermissionsSettings,
   walletSettings: WalletSettings,
+  storage: AppStorage,
 }
 
 export type AbstractAppParams = {
@@ -86,11 +87,6 @@ export default class AbstractApp {
   constructor(params: AbstractAppParams) {
     this._appID = params.appID
     this._settings = params.settings == null ? {} : params.settings
-    if (params.storage == null) {
-      this._storage = createAppStorage()
-    } else {
-      this._storage = params.storage
-    }
   }
 
   // Accessors
@@ -113,8 +109,15 @@ export default class AbstractApp {
 
   // Settings
 
+  getDefaultSettings(): AppUserSettings {
+    console.log('setFeedHash in packages/daemon/src/app/AbstractApp.js')
+    console.log(DEFAULT_SETTINGS, 'DEFAULT_SETTINGS')
+    console.log({ ...DEFAULT_SETTINGS, storage: createAppStorage() }, '{ ...DEFAULT_SETTINGS, storage: createAppStorage() }')
+    return { ...DEFAULT_SETTINGS, storage: createAppStorage() }
+  }
+
   getSettings(userID: ID): AppUserSettings {
-    return this._settings[userID] || { ...DEFAULT_SETTINGS }
+    return this._settings[userID] || this.getDefaultSettings()
   }
 
   setSettings(userID: ID, settings: AppUserSettings): void {
@@ -175,6 +178,14 @@ export default class AbstractApp {
     const settings = this.getSettings(userID)
     settings.permissionsSettings.permissionsChecked = checked
     this._settings[userID] = settings
+  }
+
+  setFeedHash(userID: ID, feedHash: string): void {
+    console.log('setFeedHash in packages/daemon/src/app/AbstractApp.js')
+    const settings = this.getSettings(userID)
+    console.log(settings, 'settings')
+    console.log('\n')
+    this.setFeedHash(userID, feedHash)
   }
 
   setDefaultEthAccount(userID: ID, walletID: ID, account: string) {

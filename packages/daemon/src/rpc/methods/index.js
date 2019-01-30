@@ -23,6 +23,7 @@ export default {
   app_setPermission: app.setPermission,
   app_setUserPermissionsSettings: app.setUserPermissionsSettings,
   app_setUserSettings: app.setUserSettings,
+  app_setFeedHash: app.setFeedHash,
   // TODO: remove app for given user only
   // Options:
   // - "clear": removes app contents, only possible if there is no user left for app

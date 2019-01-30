@@ -181,6 +181,11 @@ export type AppSetPermissionsRequirementsParams = {
   version?: ?string,
 }
 
+export type AppSetFeedHashParams = {
+  sessID: ID,
+  feedHash: feedHash,
+}
+
 export type AppWriteManifestParams = {
   appID: ID,
   path: string,

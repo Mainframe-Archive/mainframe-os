@@ -34,6 +34,8 @@ import {
   type AppSetUserSettingsParams,
   APP_SET_USER_PERMISSIONS_SETTINGS_SCHEMA,
   type AppSetUserPermissionsSettingsParams,
+  APP_SET_FEED_HASH_SCHEMA,
+  type AppSetFeedHashParams,
   APP_WRITE_MANIFEST_SCHEMA,
   type AppWriteManifestParams,
 } from '@mainframe/client'
@@ -302,6 +304,28 @@ export const setPermissionsRequirements = {
       throw new Error('App not found')
     }
     app.setPermissionsRequirements(params.permissions, params.version)
+    await ctx.openVault.save()
+  },
+}
+
+export const setFeedHash = {
+  params: APP_SET_FEED_HASH_SCHEMA,
+  handler: async (
+    ctx: ClientContext,
+    params: AppSetFeedHashParams,
+  ): Promise<void> => {
+    console.log('setFeedHash in packages/daemon/src/rpc/methods/app.js')
+    const session = ctx.openVault.getSession(fromClientID(params.sessID))
+    if (session == null) {
+      throw clientError('Invalid session')
+    }
+
+    const app = ctx.openVault.apps.getByID(session.appID)
+    if (app == null) {
+      throw sessionError('Invalid app')
+    }
+    console.log(params, 'params')
+    app.setFeedHash(session.userID, params.feedHash)
     await ctx.openVault.save()
   },
 }

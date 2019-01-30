@@ -21,6 +21,7 @@ import type {
   AppSetPermissionsRequirementsParams,
   AppSetUserPermissionsSettingsParams,
   AppSetUserSettingsParams,
+  AppSetFeedHashParams,
   AppWriteManifestParams,
 } from '../types'
 
@@ -85,6 +86,10 @@ export default class AppAPIs extends ClientAPIs {
     params: AppSetPermissionsRequirementsParams,
   ): Promise<void> {
     return this._rpc.request('app_setPermissionsRequirements', params)
+  }
+
+  setFeedHash(params: AppSetFeedHashParams): Promise<void> {
+    return this._rpc.request('app_setFeedHash', params)
   }
 
   writeManifest(params: AppWriteManifestParams): Promise<void> {
