@@ -199,30 +199,30 @@ const setDefaultWalletMutation = graphql`
   }
 `
 
+const getWalletsArray = (props: Props): Array<Wallet> => {
+  const { ethWallets } = props.wallets
+  const wallets: Array<Wallet> = sortBy(
+    [
+      ...ethWallets.hd.map(w => ({ ...w, type: 'hd' })),
+      ...ethWallets.ledger.map(w => ({ ...w, type: 'ledger' })),
+    ],
+    'name',
+  )
+  return wallets
+}
+
 class WalletsView extends Component<Props, State> {
   static contextType = EnvironmentContext
 
   constructor(props: Props) {
     super(props)
-    this.state = { wallets: this.getWalletsArray(props) }
+    this.state = { wallets: getWalletsArray(props) }
   }
 
   componentDidUpdate(prevProps: Props) {
     if (this.props.wallets !== prevProps.wallets) {
-      this.setState({ wallets: this.getWalletsArray(this.props) })
+      this.setState({ wallets: getWalletsArray(this.props) })
     }
-  }
-
-  getWalletsArray = (props: Props): Array<Wallet> => {
-    const { ethWallets } = props.wallets
-    const wallets: Array<Wallet> = sortBy(
-      [
-        ...ethWallets.hd.map(w => ({ ...w, type: 'hd' })),
-        ...ethWallets.ledger.map(w => ({ ...w, type: 'ledger' })),
-      ],
-      'name',
-    )
-    return wallets
   }
 
   onPressCreateHDWallet = () => {
@@ -366,7 +366,7 @@ class WalletsView extends Component<Props, State> {
           className="transition">
           <Address>
             <Text
-              variant={['mono', 'elipsis', hover ? 'red' : 'greyMed']}
+              variant={['mono', 'ellipsis', hover ? 'red' : 'greyMed']}
               size={11}>
               {a.address}
             </Text>
@@ -375,7 +375,7 @@ class WalletsView extends Component<Props, State> {
           <Ballance>
             <EthCircledIcon width={14} height={14} color="#C0C0C0" />
             <Text
-              variant={['elipsis', hover ? 'red' : 'greyMed']}
+              variant={['ellipsis', hover ? 'red' : 'greyMed']}
               size={11}
               theme={{
                 marginLeft: 10,
@@ -387,7 +387,7 @@ class WalletsView extends Component<Props, State> {
           <Ballance>
             <MftCircledIcon width={14} height={14} color="#C0C0C0" />
             <Text
-              variant={['elipsis', hover ? 'red' : 'greyMed']}
+              variant={['ellipsis', hover ? 'red' : 'greyMed']}
               size={11}
               theme={{
                 marginLeft: 10,

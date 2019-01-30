@@ -9,15 +9,12 @@ import UploadSmIcon from '@morpheus-ui/icons/UploadSm'
 
 import FormModalView from '../../UIComponents/FormModalView'
 
-type State = {}
-
 type Props = {
   address: string,
   onClose?: () => void,
   onDeleteWallet: () => void,
   onCheckDefault: () => void,
   default?: boolean,
-
   full?: boolean,
 }
 
@@ -57,7 +54,7 @@ const Buttons = styled.View`
   justify-content: center;
 `
 
-export default class WalletCreateModal extends Component<Props, State> {
+export default class WalletCreateModal extends Component<Props> {
   render() {
     return (
       <FormModalView

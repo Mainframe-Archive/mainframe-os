@@ -183,7 +183,7 @@ export default {
       width: '72px',
       overflow: 'hidden',
       whiteSpace: 'nowrap',
-      textOverflow: 'elipsis',
+      textOverflow: 'ellipsis',
     },
     grey: {
       color: COLORS.GREY_A9,
@@ -209,7 +209,7 @@ export default {
     small: {
       fontSize: 11,
     },
-    elipsis: {
+    ellipsis: {
       whiteSpace: 'nowrap',
       overflow: 'hidden',
       textOverflow: 'ellipsis',
