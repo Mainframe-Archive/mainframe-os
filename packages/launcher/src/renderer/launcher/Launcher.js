@@ -1,7 +1,6 @@
 //@flow
 
 import React, { Component } from 'react'
-import { ScrollView } from 'react-native'
 import styled from 'styled-components/native'
 import { graphql, QueryRenderer, createFragmentContainer } from 'react-relay'
 
@@ -17,12 +16,14 @@ import ContactsScreen from './contacts/ContactsScreen'
 
 const Container = styled.View`
   flex-direction: row;
-  height: '100vh';
-  flex: 1;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
 `
 
 const ContentContainer = styled.View`
   padding: 40px 50px 20px 50px;
+  min-width: 600px;
   flex: 1;
 `
 
@@ -113,9 +114,7 @@ class Launcher extends Component<Props, State> {
             selected={this.state.openScreen}
             onSelectMenuItem={this.setOpenScreen}
           />
-          <ContentContainer>
-            <ScrollView>{this.renderScreen()}</ScrollView>
-          </ContentContainer>
+          <ContentContainer>{this.renderScreen()}</ContentContainer>
         </Container>
       </LauncherContext.Provider>
     )

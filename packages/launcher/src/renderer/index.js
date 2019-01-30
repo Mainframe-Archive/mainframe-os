@@ -6,6 +6,7 @@ import { AppRegistry } from 'react-native'
 import { ipcRenderer } from 'electron'
 
 import '@morpheus-ui/fonts'
+import 'typeface-ibm-plex-mono'
 import './styles.css'
 
 import Launcher from './launcher/App.js'
