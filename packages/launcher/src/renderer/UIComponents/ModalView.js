@@ -14,6 +14,7 @@ type Props = {
 }
 
 const ChildrenContainer = styled.View`
+  width: 100%;
   min-width: 500px;
   min-height: 400px;
   justify-content: center;

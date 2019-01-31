@@ -221,13 +221,25 @@ class ContactsViewComponent extends Component<Props, State> {
   }
 
   componentDidUpdate(prevProps: Props) {
-    if (
-      !prevProps.contacts.userContacts.length &&
-      this.props.contacts.userContacts.length
-    ) {
-      this.setState({
-        selectedContact: this.props.contacts.userContacts[0],
-      })
+    if (this.props.contacts.userContacts.length) {
+      if (!prevProps.contacts.userContacts.length) {
+        this.setState({
+          selectedContact: this.props.contacts.userContacts[0],
+        })
+      } else if (
+        this.state.selectedContact != null &&
+        !this.props.contacts.userContacts.includes(this.state.selectedContact)
+      ) {
+        const { localID } = this.state.selectedContact
+        const updatedContact = this.props.contacts.userContacts.find(
+          contact => contact.localID === localID,
+        )
+        this.setState({
+          selectedContact: updatedContact
+            ? updatedContact
+            : this.props.contacts.userContacts[0],
+        })
+      }
     }
   }
 
@@ -395,7 +407,7 @@ class ContactsViewComponent extends Component<Props, State> {
                   onPress={() => this.selectContact(contact)}
                   selected={selected}>
                   <ContactCardText>
-                    <Text variant={['greyMed', 'elipsis']} bold size={13}>
+                    <Text variant={['greyMed', 'ellipsis']} bold size={13}>
                       {contact.profile.name || contact.localID}
                     </Text>
                     {contact.connectionState === 'SENT' ||

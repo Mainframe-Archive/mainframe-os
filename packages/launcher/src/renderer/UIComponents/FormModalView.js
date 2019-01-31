@@ -28,6 +28,7 @@ type Props = {
 }
 
 const ChildrenContainer = styled.View`
+  width: 100%;
   justify-content: center;
   align-items: center;
   flex: 1;
