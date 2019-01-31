@@ -1,6 +1,5 @@
 // @flow
 
-import type BzzAPI from '@erebos/api-bzz-node'
 import { validateManifest, type ManifestData } from '@mainframe/app-manifest'
 import {
   getRequirementsDifference,
@@ -11,7 +10,6 @@ import {
 import { getAppContentsPath, type Environment } from '@mainframe/config'
 import { MFID } from '@mainframe/data-types'
 import { uniqueID, idType, type ID } from '@mainframe/utils-id'
-import { ensureDir } from 'fs-extra'
 
 import { mapObject } from '../utils'
 
@@ -69,24 +67,6 @@ export const getContentsPath = (
   manifest: ManifestData,
 ): string => {
   return getAppContentsPath(env, manifest.id, manifest.version)
-}
-
-export const downloadAppContents = async (
-  bzz: BzzAPI,
-  app: App,
-  contentsPath: string,
-): Promise<App> => {
-  if (app.installationState !== 'ready') {
-    try {
-      app.installationState = 'downloading'
-      await ensureDir(contentsPath)
-      await bzz.downloadDirectoryTo(app.manifest.contentsHash, contentsPath)
-      app.installationState = 'ready'
-    } catch (err) {
-      app.installationState = 'download_error'
-    }
-  }
-  return app
 }
 
 export default class AppsRepository {

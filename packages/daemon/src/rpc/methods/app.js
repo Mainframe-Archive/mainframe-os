@@ -39,7 +39,7 @@ import { idType as fromClientID, type ID } from '@mainframe/utils-id'
 /* eslint-enable import/named */
 
 import type { SessionData } from '../../app/AbstractApp'
-import { downloadAppContents, getContentsPath } from '../../app/AppsRepository'
+import { getContentsPath } from '../../app/AppsRepository'
 import OwnApp from '../../app/OwnApp'
 import type ClientContext from '../../context/ClientContext'
 
@@ -189,15 +189,15 @@ export const install = {
     ctx: ClientContext,
     params: AppInstallParams,
   ): Promise<AppInstallResult> => {
-    const app = ctx.openVault.installApp(
-      params.manifest,
-      fromClientID(params.userID),
-      params.permissionsSettings,
-    )
-    const contentsPath = getContentsPath(ctx.env, params.manifest)
-    await downloadAppContents(ctx.io.bzz, app, contentsPath)
-    await ctx.openVault.save()
-    return { appID: toClientID(app.id) }
+    const app = ctx.mutations.installApp({
+      manifest: params.manifest,
+      userID: fromClientID(params.userID),
+      permissionsSettings: params.permissionsSettings,
+    })
+    return {
+      appID: toClientID(app.id),
+      installationState: app.installationState,
+    }
   },
 }
 

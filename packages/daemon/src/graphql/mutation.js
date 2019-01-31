@@ -12,8 +12,6 @@ import {
 } from 'graphql'
 import { mutationWithClientMutationId } from 'graphql-relay'
 
-import { downloadAppContents, getContentsPath } from '../app/AppsRepository'
-
 import {
   app,
   contact,
@@ -458,14 +456,11 @@ const appInstallMutation = mutationWithClientMutationId({
     { userID, manifest, permissionsSettings },
     ctx,
   ) => {
-    const app = await ctx.openVault.installApp(
-      manifest,
+    const app = await ctx.mutations.installApp({
       userID,
+      manifest,
       permissionsSettings,
-    )
-    const contentsPath = getContentsPath(ctx.env, manifest)
-    await downloadAppContents(ctx.io.bzz, app, contentsPath)
-    await ctx.openVault.save()
+    })
     return { app }
   },
 })

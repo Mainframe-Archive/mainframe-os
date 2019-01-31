@@ -1,6 +1,6 @@
 // @flow
 
-import type { OwnApp } from '../app'
+import type { App, OwnApp } from '../app'
 import type { Contact, OwnUserIdentity, PeerUserIdentity } from '../identity'
 
 export type AppCreatedEvent = {|
@@ -11,6 +11,11 @@ export type AppChangedEvent = {|
   type: 'app_changed',
   app: OwnApp,
   change: 'versionCreated' | 'versionPublished',
+|}
+export type AppInstalledEvent = {|
+  type: 'app_installed',
+  app: App,
+  userID: string,
 |}
 
 export type ContactCreatedEvent = {|
@@ -67,6 +72,7 @@ export type VaultOpenedEvent = {|
 export type ContextEvent =
   | AppCreatedEvent
   | AppChangedEvent
+  | AppInstalledEvent
   | ContactCreatedEvent
   | ContactChangedEvent
   | ContactDeletedEvent

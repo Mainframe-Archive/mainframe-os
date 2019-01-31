@@ -220,7 +220,7 @@ export default class Vault {
 
   installApp(
     manifest: ManifestData,
-    userID: ID,
+    userID: string,
     settings: PermissionsSettings,
   ): App {
     let app = this.apps.getByMFID(manifest.id)

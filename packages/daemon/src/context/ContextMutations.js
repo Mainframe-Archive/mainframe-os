@@ -1,11 +1,18 @@
 // @flow
 
 import { hexValueType } from '@erebos/hex'
-import { createSignedManifest, isValidSemver } from '@mainframe/app-manifest'
+import {
+  createSignedManifest,
+  isValidSemver,
+  type ManifestData,
+} from '@mainframe/app-manifest'
 import { type StrictPermissionsRequirements } from '@mainframe/app-permissions'
 import { idType, type ID } from '@mainframe/utils-id'
+import { ensureDir } from 'fs-extra'
 
-import { OwnApp } from '../app'
+import { type App, OwnApp } from '../app'
+import type { PermissionsSettings } from '../app/AbstractApp'
+import { getContentsPath } from '../app/AppsRepository'
 import type {
   Contact,
   OwnDeveloperIdentity,
@@ -28,6 +35,12 @@ import type ClientContext from './ClientContext'
 
 export type Feeds = {
   [type: string]: bzzHash,
+}
+
+export type InstallAppParams = {
+  manifest: ManifestData,
+  userID: ID,
+  settings: PermissionsSettings,
 }
 
 export type CreateAppParams = {
@@ -76,6 +89,34 @@ export default class ContextMutations {
   }
 
   // Apps
+
+  async installApp(params: InstallAppParams): Promise<App> {
+    const { env, io, openVault } = this._context
+
+    const app = openVault.installApp(
+      params.manifest,
+      params.userID,
+      params.permissionsSettings,
+    )
+
+    if (app.installationState !== 'ready') {
+      const contentsPath = getContentsPath(env, params.manifest)
+      try {
+        app.installationState = 'downloading'
+        await ensureDir(contentsPath)
+        await io.bzz.downloadDirectoryTo(
+          app.manifest.contentsHash,
+          contentsPath,
+        )
+        app.installationState = 'ready'
+      } catch (err) {
+        app.installationState = 'download_error'
+      }
+    }
+
+    this._context.next({ type: 'app_installed', app, userID: params.userID })
+    return app
+  }
 
   async createApp(params: CreateAppParams): Promise<OwnApp> {
     const { openVault } = this._context

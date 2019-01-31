@@ -113,7 +113,18 @@ export type AppInstallParams = {
   permissionsSettings: AppUserPermissionsSettings,
 }
 
-export type AppInstallResult = { appID: ID }
+export type AppInstallationState =
+  | 'pending'
+  | 'hash_lookup'
+  | 'hash_not_found'
+  | 'downloading'
+  | 'download_error'
+  | 'ready'
+
+export type AppInstallResult = {
+  appID: ID,
+  installationState: AppInstallationState,
+}
 
 export type AppOpenParams = {
   appID: ID,
