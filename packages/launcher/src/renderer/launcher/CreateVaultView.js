@@ -1,7 +1,7 @@
 //@flow
 
 import React, { Component } from 'react'
-import { ActivityIndicator } from 'react-native'
+
 import { uniqueID } from '@mainframe/utils-id'
 
 import { Button, TextField, Row, Column, Text } from '@morpheus-ui/core'
@@ -14,6 +14,7 @@ import {
 
 import styled from 'styled-components/native'
 
+import Loader from '../UIComponents/Loader'
 import rpc from './rpc'
 import OnboardContainer from './onboarding/OnboardContainer'
 
@@ -29,6 +30,22 @@ type State = {
 const FormContainer = styled.View`
   max-width: 260px;
 `
+
+const passwordValidation = ({ value }: FieldValidateFunctionParams) => {
+  if (value && typeof value === 'string' && value.length < 8) {
+    return 'Password must be at least 8 characters'
+  }
+}
+
+const confirmPasswordValidation = ({
+  value,
+  values,
+}: FieldValidateFunctionParams) => {
+  if (values && value !== values.password) {
+    return 'Passwords do not match'
+  }
+  return ''
+}
 
 export default class CreateVaultView extends Component<Props, State> {
   state = {}
@@ -59,22 +76,6 @@ export default class CreateVaultView extends Component<Props, State> {
     }
   }
 
-  passwordValidation = ({ value }: FieldValidateFunctionParams) => {
-    if (value && typeof value === 'string' && value.length < 8) {
-      return 'Password must be at least 8 characters'
-    }
-  }
-
-  confirmPasswordValidation = ({
-    value,
-    values,
-  }: FieldValidateFunctionParams) => {
-    if (values && value !== values.password) {
-      return 'Passwords do not match'
-    }
-    return ''
-  }
-
   render() {
     const errorMsg = this.state.error ? (
       <Row size={1}>
@@ -84,7 +85,7 @@ export default class CreateVaultView extends Component<Props, State> {
       </Row>
     ) : null
     const action = this.state.awaitingResponse ? (
-      <ActivityIndicator />
+      <Loader />
     ) : (
       <Button
         title="CONTINUE"
@@ -109,7 +110,7 @@ export default class CreateVaultView extends Component<Props, State> {
                   name="password"
                   type="password"
                   testID="create-vault-input-password"
-                  validation={this.passwordValidation}
+                  validation={passwordValidation}
                   required
                 />
               </Column>
@@ -119,7 +120,7 @@ export default class CreateVaultView extends Component<Props, State> {
                   name="confirmPassword"
                   type="password"
                   testID="create-vault-input-confirm-password"
-                  validation={this.confirmPasswordValidation}
+                  validation={confirmPasswordValidation}
                 />
               </Column>
             </Row>

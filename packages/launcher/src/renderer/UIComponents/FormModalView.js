@@ -14,7 +14,6 @@ import ModalView from './ModalView'
 
 type Props = {
   title?: string,
-  onRequestClose?: () => void,
   children?: ?Node,
   full?: boolean,
   noButtons?: boolean,
@@ -23,6 +22,9 @@ type Props = {
   onPressConfirm?: ?() => any,
   onPressDismiss?: ?() => any,
   confirmTestID?: ?string,
+  dismissButtonDisabled?: boolean,
+  confirmButtonDisabled?: boolean,
+  onRequestClose?: () => void,
   onSubmitForm?: (payload: FormSubmitPayload) => any,
   onChangeForm?: (payload: FormChangePayload) => any,
 }
@@ -53,6 +55,7 @@ export default class FormModalView extends Component<Props> {
                   (this.props.onPressDismiss || this.props.onRequestClose) && (
                     <Button
                       title={this.props.dismissButton}
+                      disabled={this.props.dismissButtonDisabled}
                       variant={['no-border', 'grey', 'modalButton']}
                       onPress={
                         this.props.onPressDismiss || this.props.onRequestClose
@@ -62,6 +65,7 @@ export default class FormModalView extends Component<Props> {
                 {this.props.confirmButton &&
                   (this.props.onPressConfirm || this.props.onSubmitForm) && (
                     <Button
+                      disabled={this.props.confirmButtonDisabled}
                       title={this.props.confirmButton}
                       variant={['red', 'modalButton']}
                       onPress={this.props.onPressConfirm}

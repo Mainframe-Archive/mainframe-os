@@ -4,7 +4,6 @@ import React, { Component } from 'react'
 import styled from 'styled-components/native'
 import { graphql, commitMutation, createFragmentContainer } from 'react-relay'
 import { fetchQuery } from 'relay-runtime'
-import { ActivityIndicator } from 'react-native'
 import { debounce } from 'lodash'
 import { Text, Button, Row, Column, TextField } from '@morpheus-ui/core'
 import { Form, type FormSubmitPayload } from '@morpheus-ui/forms'
@@ -19,6 +18,7 @@ import Avatar from '../../UIComponents/Avatar'
 import SvgSelectedPointer from '../../UIComponents/SVGSelectedPointer'
 
 import FormModalView from '../../UIComponents/FormModalView'
+import Loader from '../../UIComponents/Loader'
 
 const SvgSmallClose = props => (
   <svg width="10" height="10" viewBox="0 0 10 10" {...props}>
@@ -442,7 +442,7 @@ class ContactsViewComponent extends Component<Props, State> {
   renderPeerLookup() {
     const { foundPeer, queryInProgress } = this.state
     return queryInProgress ? (
-      <ActivityIndicator />
+      <Loader />
     ) : (
       foundPeer && (
         <Column>
@@ -496,26 +496,21 @@ class ContactsViewComponent extends Component<Props, State> {
       return innerContent
     }
 
-    const addButton = addingContact ? (
-      <ActivityIndicator />
-    ) : (
-      <Row size={2} top>
-        <Column styles="align-items:flex-end;" smOffset={1}>
-          <Button
-            title="ADD"
-            variant="onboarding"
-            Icon={CircleArrowRight}
-            submit
-          />
-        </Column>
-      </Row>
-    )
-
     return (
       <FormContainer modal={modal}>
         <Form onChange={this.onFormChange} onSubmit={this.submitNewContact}>
           {innerContent}
-          {addButton}
+          <Row size={2} top>
+            <Column styles="align-items:flex-end;" smOffset={1}>
+              <Button
+                disabled={addingContact}
+                title="ADD"
+                variant="onboarding"
+                Icon={CircleArrowRight}
+                submit
+              />
+            </Column>
+          </Row>
         </Form>
       </FormContainer>
     )

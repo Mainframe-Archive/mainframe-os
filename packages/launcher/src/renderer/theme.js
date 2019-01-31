@@ -1,5 +1,44 @@
 import COLORS from './colors'
 
+const MARGINS = {
+  marginLeft10: {
+    margin: '0 0 0 10px',
+  },
+  marginLeft20: {
+    margin: '0 0 0 20px',
+  },
+  marginRight10: {
+    margin: '0 10px 0 0',
+  },
+  marginRight20: {
+    margin: '0 20px 0 0',
+  },
+  marginTop10: {
+    margin: '10px 0 0 0',
+  },
+  marginTop20: {
+    margin: '20px 0 0 0',
+  },
+  marginBottom10: {
+    margin: '0 0 10px 0',
+  },
+  marginBottom20: {
+    margin: '0 0 20px 0',
+  },
+  marginVertical10: {
+    margin: '10px 0',
+  },
+  marginVertical20: {
+    margin: '20px 0',
+  },
+  marginHorizontal10: {
+    margin: '0 10px',
+  },
+  marginHorizontal20: {
+    margin: '0 20px',
+  },
+}
+
 export default {
   Button: {
     default: {
@@ -109,45 +148,10 @@ export default {
       titleHoverColor: COLORS.WHITE,
       titleColor: COLORS.WHITE,
     },
-    marginLeft10: {
-      margin: '0 0 0 10px',
-    },
-    marginLeft20: {
-      margin: '0 0 0 20px',
-    },
-    marginRight10: {
-      margin: '0 10px 0 0',
-    },
-    marginRight20: {
-      margin: '0 20px 0 0',
-    },
-    marginTop10: {
-      margin: '10px 0 0 0',
-    },
-    marginTop20: {
-      margin: '20px 0 0 0',
-    },
-    marginBottom10: {
-      margin: '0 0 10px 0',
-    },
-    marginBottom20: {
-      margin: '0 0 20px 0',
-    },
-    marginVertical10: {
-      margin: '10px 0',
-    },
-    marginVertical20: {
-      margin: '20px 0',
-    },
-    marginHorizontal10: {
-      margin: '0 10px',
-    },
-    marginHorizontal20: {
-      margin: '0 20px',
-    },
     full: {
       minWidth: '100%',
     },
+    ...MARGINS,
   },
   Text: {
     default: {
@@ -224,6 +228,10 @@ export default {
     center: {
       textAlign: 'center',
     },
+    modalText: {
+      fontSize: 12,
+      color: '#585858',
+    },
     padding10: {
       padding: '10px',
     },
@@ -233,6 +241,7 @@ export default {
       backgroundColor: COLORS.PRIMARY_RED,
       fontWeight: 'bold',
     },
+    ...MARGINS,
   },
   TextField: {
     search: {
@@ -240,6 +249,11 @@ export default {
       fontSize: 13,
       iconWidth: 14,
       iconHeight: 14,
+    },
+  },
+  Checkbox: {
+    mono: {
+      fontFamily: 'IBM Plex Mono',
     },
   },
   styled: {

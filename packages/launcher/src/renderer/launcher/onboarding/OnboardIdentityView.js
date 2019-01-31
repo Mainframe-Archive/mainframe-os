@@ -1,7 +1,6 @@
 //@flow
 
 import React, { Component } from 'react'
-import { ActivityIndicator } from 'react-native'
 import { graphql, commitMutation } from 'react-relay'
 import { Button, TextField, Row, Column, Text, Switch } from '@morpheus-ui/core'
 import CircleArrowRight from '@morpheus-ui/icons/CircleArrowRight'
@@ -9,6 +8,7 @@ import { Form, type FormSubmitPayload } from '@morpheus-ui/forms'
 import styled from 'styled-components/native'
 
 import { EnvironmentContext } from '../RelayEnvironment'
+import Loader from '../../UIComponents/Loader'
 import OnboardContainer from './OnboardContainer'
 
 type Props = {
@@ -105,7 +105,7 @@ export default class OnboardIdentityView extends Component<Props, State> {
       </Row>
     ) : null
     const action = this.state.awaitingResponse ? (
-      <ActivityIndicator />
+      <Loader />
     ) : (
       <Button
         variant="onboarding"

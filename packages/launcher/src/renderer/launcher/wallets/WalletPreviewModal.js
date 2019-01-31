@@ -1,7 +1,7 @@
 // @flow
 
 import React, { Component } from 'react'
-import { Text, Button, Checkbox } from '@morpheus-ui/core'
+import { Text, Button, Checkbox, Row, Column } from '@morpheus-ui/core'
 import styled from 'styled-components/native'
 import QRCode from 'qrcode-react'
 import EtherscanIcon from '@morpheus-ui/icons/Etherscan'
@@ -18,10 +18,17 @@ type Props = {
   full?: boolean,
 }
 
+type State = {
+  alert?: boolean,
+}
+
 const Container = styled.View`
   width: 100%;
   max-width: 450px;
   min-width: 300px;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
 `
 
 const Address = styled.View`
@@ -54,7 +61,51 @@ const Buttons = styled.View`
   justify-content: center;
 `
 
-export default class WalletCreateModal extends Component<Props> {
+const AlertBackdrop = styled.TouchableOpacity`
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+`
+
+const Alert = styled.View`
+  position: absolute;
+  bottom: -10px;
+  width: 350px;
+  left: 50%;
+  margin-left: -175px;
+  min-height: 100px;
+  background-color: #FFF;
+  shadow-color: #000;
+  shadow-offset: {width: 0, height: 0};
+  shadow-opacity: 0.1;
+  shadow-radius: 30;
+`
+
+const AlertContent = styled.View`
+  padding: 20px;
+`
+
+const ArrowDownCSS = styled.View`
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  margin-left: -10px;
+  width: 0;
+  height: 0;
+  border-left-color: transparent;
+  border-top-color: #fff;
+  border-right-color: transparent;
+  border-width: 10px;
+  border-bottom-width: 0;
+`
+
+export default class WalletCreateModal extends Component<Props, State> {
+  state = {}
+
+  toggleAlert = () => this.setState({ alert: !this.state.alert })
+
   render() {
     return (
       <FormModalView
@@ -62,7 +113,8 @@ export default class WalletCreateModal extends Component<Props> {
         onRequestClose={this.props.onClose}
         title="Address Details"
         dismissButton="DELETE"
-        onPressDismiss={this.props.onDeleteWallet}>
+        onPressDismiss={this.toggleAlert}
+        dismissButtonDisabled={this.state.alert}>
         <Container>
           <Address>
             <QRContainer>
@@ -101,6 +153,38 @@ export default class WalletCreateModal extends Component<Props> {
             />
           </CheckBoxContainer>
         </Container>
+        {this.state.alert && (
+          <>
+            <AlertBackdrop onPress={this.toggleAlert} />
+            <Alert>
+              <AlertContent>
+                <Text size={11} theme={{ marginBottom: 10 }} variant="red">
+                  Do you really want to delete this address?
+                </Text>
+                <Text size={11} theme={{ marginBottom: 10 }}>
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin
+                  consectetur mi in malesuada porttitor.
+                </Text>
+                <Row size={1}>
+                  <Column styles="align-items:center; justify-content: center; flex-direction: row;">
+                    <Button
+                      title="NO"
+                      variant={['no-border', 'grey', 'modalButton']}
+                      onPress={this.toggleAlert}
+                    />
+
+                    <Button
+                      title="YES"
+                      variant={['red', 'modalButton']}
+                      onPress={this.props.onDeleteWallet}
+                    />
+                  </Column>
+                </Row>
+              </AlertContent>
+              <ArrowDownCSS />
+            </Alert>
+          </>
+        )}
       </FormModalView>
     )
   }
