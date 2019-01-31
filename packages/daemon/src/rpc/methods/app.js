@@ -30,8 +30,6 @@ import {
   type AppSetPermissionParams,
   APP_SET_PERMISSIONS_REQUIREMENTS_SCHEMA,
   type AppSetPermissionsRequirementsParams,
-  APP_SET_USER_SETTINGS_SCHEMA,
-  type AppSetUserSettingsParams,
   APP_SET_USER_PERMISSIONS_SETTINGS_SCHEMA,
   type AppSetUserPermissionsSettingsParams,
   APP_SET_FEED_HASH_SCHEMA,
@@ -243,18 +241,6 @@ export const remove = {
     params: AppRemoveParams,
   ): Promise<void> => {
     ctx.openVault.removeApp(fromClientID(params.appID))
-    await ctx.openVault.save()
-  },
-}
-export const setUserSettings = {
-  params: APP_SET_USER_SETTINGS_SCHEMA,
-  handler: async (
-    ctx: ClientContext,
-    params: AppSetUserSettingsParams,
-  ): Promise<void> => {
-    const appID = fromClientID(params.appID)
-    const userID = fromClientID(params.userID)
-    ctx.openVault.setAppUserSettings(appID, userID, params.settings)
     await ctx.openVault.save()
   },
 }

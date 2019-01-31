@@ -57,12 +57,21 @@ export default {
       titlePadding: '5px 10px',
       fontSize: 9,
     },
-    xSmall: {
+    medium: {
       iconWidth: 14,
       iconHeight: 14,
-      padding: 5,
+      fontSize: 12,
+      borderRadius: 3,
+      iconPadding: '7px 5px',
+      titlePadding: '3px 5px',
+    },
+    xSmall: {
+      iconWidth: 10,
+      iconHeight: 10,
       fontSize: 9,
       borderRadius: 3,
+      iconPadding: '3px 5px',
+      titlePadding: '3px 5px',
     },
     xSmallIconOnly: {
       iconWidth: 14,
@@ -100,10 +109,52 @@ export default {
       titleHoverColor: COLORS.WHITE,
       titleColor: COLORS.WHITE,
     },
+    marginLeft10: {
+      margin: '0 0 0 10px',
+    },
+    marginLeft20: {
+      margin: '0 0 0 20px',
+    },
+    marginRight10: {
+      margin: '0 10px 0 0',
+    },
+    marginRight20: {
+      margin: '0 20px 0 0',
+    },
+    marginTop10: {
+      margin: '10px 0 0 0',
+    },
+    marginTop20: {
+      margin: '20px 0 0 0',
+    },
+    marginBottom10: {
+      margin: '0 0 10px 0',
+    },
+    marginBottom20: {
+      margin: '0 0 20px 0',
+    },
+    marginVertical10: {
+      margin: '10px 0',
+    },
+    marginVertical20: {
+      margin: '20px 0',
+    },
+    marginHorizontal10: {
+      margin: '0 10px',
+    },
+    marginHorizontal20: {
+      margin: '0 20px',
+    },
+    full: {
+      minWidth: '100%',
+    },
   },
   Text: {
     default: {
       fontWeight: '300',
+    },
+    mono: {
+      fontFamily: 'IBM Plex Mono',
     },
     regular: {
       fontWeight: '400',
@@ -132,7 +183,7 @@ export default {
       width: '72px',
       overflow: 'hidden',
       whiteSpace: 'nowrap',
-      textOverflow: 'elipsis',
+      textOverflow: 'ellipsis',
     },
     grey: {
       color: COLORS.GREY_A9,
@@ -158,7 +209,7 @@ export default {
     small: {
       fontSize: 11,
     },
-    elipsis: {
+    ellipsis: {
       whiteSpace: 'nowrap',
       overflow: 'hidden',
       textOverflow: 'ellipsis',
@@ -172,6 +223,15 @@ export default {
     },
     center: {
       textAlign: 'center',
+    },
+    padding10: {
+      padding: '10px',
+    },
+    redButton: {
+      borderRadius: '3px',
+      padding: '5px',
+      backgroundColor: COLORS.PRIMARY_RED,
+      fontWeight: 'bold',
     },
   },
   TextField: {

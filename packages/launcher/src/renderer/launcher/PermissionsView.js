@@ -35,6 +35,15 @@ export type PermissionsSettings = {
 }
 
 const PERMISSION_NAMES = {
+  BLOCKCHAIN_SEND: {
+    name: 'Write to the Blockchain',
+    description:
+      'Allow this app to make transactional calls to the blockchain, e.g. send tokens',
+  },
+  CONTACTS_READ: {
+    name: 'Request to fetch contacts',
+    description: 'Allows the app to read data on approved contacts.',
+  },
   SWARM_DOWNLOAD: {
     name: 'Download From Swarm',
     description: 'Allow the app to download files from swarm',
@@ -42,11 +51,6 @@ const PERMISSION_NAMES = {
   SWARM_UPLOAD: {
     name: 'Upload To Swarm',
     description: 'Allow this app to upload files from swarm',
-  },
-  BLOCKCHAIN_SEND: {
-    name: 'Write to the Blockchain',
-    description:
-      'Allow this app to make transactional calls to the blockchain, e.g. send tokens',
   },
   WEB_REQUEST: {
     name: 'Make Web requests',

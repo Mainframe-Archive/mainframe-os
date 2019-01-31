@@ -20,7 +20,6 @@ import type {
   AppSetPermissionParams,
   AppSetPermissionsRequirementsParams,
   AppSetUserPermissionsSettingsParams,
-  AppSetUserSettingsParams,
   AppSetFeedHashParams,
   AppWriteManifestParams,
 } from '../types'
@@ -66,10 +65,6 @@ export default class AppAPIs extends ClientAPIs {
 
   remove(params: AppRemoveParams): Promise<void> {
     return this._rpc.request('app_remove', params)
-  }
-
-  setUserSettings(params: AppSetUserSettingsParams): Promise<void> {
-    return this._rpc.request('app_setUserSettings', params)
   }
 
   setUserPermissionsSettings(

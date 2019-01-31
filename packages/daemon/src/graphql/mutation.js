@@ -306,10 +306,10 @@ const deleteContactMutation = mutationWithClientMutationId({
 const appPermissionDefinitionsInput = new GraphQLInputObjectType({
   name: 'AppPermissionDefinitionsInput',
   fields: () => ({
-    WEB_REQUEST: {
-      type: new GraphQLList(GraphQLString),
-    },
     BLOCKCHAIN_SEND: {
+      type: GraphQLBoolean,
+    },
+    CONTACTS_READ: {
       type: GraphQLBoolean,
     },
     SWARM_UPLOAD: {
@@ -317,6 +317,9 @@ const appPermissionDefinitionsInput = new GraphQLInputObjectType({
     },
     SWARM_DOWNLOAD: {
       type: GraphQLBoolean,
+    },
+    WEB_REQUEST: {
+      type: new GraphQLList(GraphQLString),
     },
   }),
 })
@@ -413,6 +416,7 @@ const permissionGrantsInput = new GraphQLInputObjectType({
   name: 'PermissionGrantsInput',
   fields: () => ({
     BLOCKCHAIN_SEND: { type: GraphQLBoolean },
+    CONTACTS_READ: { type: GraphQLBoolean },
     SWARM_UPLOAD: { type: GraphQLBoolean },
     SWARM_DOWNLOAD: { type: GraphQLBoolean },
     WEB_REQUEST: { type: new GraphQLNonNull(webRequestGrantInput) },

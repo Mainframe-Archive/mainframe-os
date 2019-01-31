@@ -14,8 +14,6 @@ import {
   type AppOpenParams,
   APP_REMOVE_SCHEMA,
   type AppRemoveParams,
-  type AppSetUserSettingsParams,
-  APP_SET_USER_SETTINGS_SCHEMA,
   type AppSetUserPermissionsSettingsParams,
   APP_SET_USER_PERMISSIONS_SETTINGS_SCHEMA,
   type BlockchainWeb3SendParams,
@@ -110,12 +108,6 @@ export default {
         // TODO: lookup keys to check if they match know identities in vault
         keys: manifest.keys,
       }
-    },
-  },
-  app_setUserSettings: {
-    params: APP_SET_USER_SETTINGS_SCHEMA,
-    handler: (ctx: LauncherContext, params: AppSetUserSettingsParams) => {
-      return ctx.client.app.setUserSettings(params)
     },
   },
 

@@ -3,7 +3,6 @@
 import type {
   ID,
   AppCreateParams,
-  AppUserSettings,
   AppUserPermissionsSettings,
   GraphQLQueryResult,
 } from '@mainframe/client'
@@ -31,9 +30,6 @@ export default {
     return rpc.request('app_launch', { appID, userID })
   },
   readManifest: (path: string) => rpc.request('app_readManifest', { path }),
-  setAppUserSettings: (appID: ID, userID: ID, settings: AppUserSettings) => {
-    return rpc.request('app_setUserSettings', { appID, userID, settings })
-  },
   setAppUserPermissionsSettings: (
     appID: ID,
     userID: ID,
