@@ -37,7 +37,7 @@ export const setVaultLabel = (
   path: string,
   label?: ?string,
 ): void => {
-  const labels = env.config.get(VAULT_LABELS_KEY)
+  const labels = getVaultsLabels(env)
   if (label == null) {
     delete labels[path]
   } else {
