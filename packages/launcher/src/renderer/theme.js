@@ -31,6 +31,7 @@ export default {
       fontSize: 13,
       iconPadding: '5px',
       iconMargin: 0,
+      titlePadding: 0,
     },
     leftNavActive: {
       fontWeight: 'bold',
@@ -43,6 +44,18 @@ export default {
       fontWeight: 'normal',
       borderHoverColor: 'transparent',
       hoverShadow: true,
+    },
+    walletOnboarding: {
+      iconHoverBackgroundColor: COLORS.PRIMARY_RED,
+      iconHoverColor: COLORS.WHITE,
+      iconWidth: 18,
+      iconHeight: 18,
+      iconPadding: '8px',
+      titlePadding: '8px',
+    },
+    small: {
+      titlePadding: '5px 10px',
+      fontSize: 9,
     },
     xSmall: {
       iconWidth: 14,
@@ -74,6 +87,18 @@ export default {
     },
     noTitle: {
       titlePadding: '0',
+    },
+    seedWord: {
+      titlePadding: '5px 8px',
+    },
+    selectedSeedWord: {
+      titlePadding: '5px 8px',
+      borderColor: '#A9A9A9',
+      borderHoverColor: '#A9A9A9',
+      backgroundColor: '#A9A9A9',
+      backgroundHoverColor: '#A9A9A9',
+      titleHoverColor: COLORS.WHITE,
+      titleColor: COLORS.WHITE,
     },
   },
   Text: {
@@ -137,6 +162,24 @@ export default {
       whiteSpace: 'nowrap',
       overflow: 'hidden',
       textOverflow: 'ellipsis',
+    },
+    addressLarge: {
+      backgroundColor: '#F9F9F9',
+      padding: '30px 20px',
+      textAlign: 'center',
+      color: '#303030',
+      fontSize: 13,
+    },
+    center: {
+      textAlign: 'center',
+    },
+  },
+  TextField: {
+    search: {
+      padding: '5px',
+      fontSize: 13,
+      iconWidth: 14,
+      iconHeight: 14,
     },
   },
   styled: {

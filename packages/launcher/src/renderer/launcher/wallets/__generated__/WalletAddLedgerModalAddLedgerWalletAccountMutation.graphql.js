@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 4d07bda1318a50edd01388b8a6402143
+ * @relayHash 167aff56d8ecb1b2b67988f7d66435a4
  */
 
 /* eslint-disable */
@@ -51,12 +51,12 @@ mutation WalletAddLedgerModalAddLedgerWalletAccountMutation(
   }
 }
 
-fragment WalletsView_wallets_3iqrP on WalletsQuery {
+fragment WalletsView_wallets_3iqrP on Wallets {
   ethWallets(userID: $userID) {
     hd {
+      name
       localID
       accounts {
-        name
         address
         balances {
           eth
@@ -66,9 +66,9 @@ fragment WalletsView_wallets_3iqrP on WalletsQuery {
       id
     }
     ledger {
+      name
       localID
       accounts {
-        name
         address
         balances {
           eth
@@ -115,6 +115,13 @@ v3 = [
   {
     "kind": "ScalarField",
     "alias": null,
+    "name": "name",
+    "args": null,
+    "storageKey": null
+  },
+  {
+    "kind": "ScalarField",
+    "alias": null,
     "name": "localID",
     "args": null,
     "storageKey": null
@@ -125,16 +132,9 @@ v3 = [
     "name": "accounts",
     "storageKey": null,
     "args": null,
-    "concreteType": "NamedWalletAccountType",
+    "concreteType": "WalletAccount",
     "plural": true,
     "selections": [
-      {
-        "kind": "ScalarField",
-        "alias": null,
-        "name": "name",
-        "args": null,
-        "storageKey": null
-      },
       {
         "kind": "ScalarField",
         "alias": null,
@@ -148,7 +148,7 @@ v3 = [
         "name": "balances",
         "storageKey": null,
         "args": null,
-        "concreteType": "WalletBalancesType",
+        "concreteType": "WalletBalances",
         "plural": false,
         "selections": [
           {
@@ -176,7 +176,7 @@ return {
   "operationKind": "mutation",
   "name": "WalletAddLedgerModalAddLedgerWalletAccountMutation",
   "id": null,
-  "text": "mutation WalletAddLedgerModalAddLedgerWalletAccountMutation(\n  $input: AddLedgerWalletAccountInput!\n  $userID: String!\n) {\n  addLedgerWalletAccount(input: $input) {\n    viewer {\n      wallets {\n        ...WalletsView_wallets_3iqrP\n      }\n      id\n    }\n  }\n}\n\nfragment WalletsView_wallets_3iqrP on WalletsQuery {\n  ethWallets(userID: $userID) {\n    hd {\n      localID\n      accounts {\n        name\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n    ledger {\n      localID\n      accounts {\n        name\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n  }\n}\n",
+  "text": "mutation WalletAddLedgerModalAddLedgerWalletAccountMutation(\n  $input: AddLedgerWalletAccountInput!\n  $userID: String!\n) {\n  addLedgerWalletAccount(input: $input) {\n    viewer {\n      wallets {\n        ...WalletsView_wallets_3iqrP\n      }\n      id\n    }\n  }\n}\n\nfragment WalletsView_wallets_3iqrP on Wallets {\n  ethWallets(userID: $userID) {\n    hd {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n    ledger {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -209,7 +209,7 @@ return {
                 "name": "wallets",
                 "storageKey": null,
                 "args": null,
-                "concreteType": "WalletsQuery",
+                "concreteType": "Wallets",
                 "plural": false,
                 "selections": [
                   {
@@ -261,7 +261,7 @@ return {
                 "name": "wallets",
                 "storageKey": null,
                 "args": null,
-                "concreteType": "WalletsQuery",
+                "concreteType": "Wallets",
                 "plural": false,
                 "selections": [
                   {

@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 335e521e0253a76793f4bbbe651478cf
+ * @relayHash bda2062981bc52b76c8d8e60d37d47e3
  */
 
 /* eslint-disable */
@@ -26,8 +26,7 @@ export type WalletsViewCreateHDWalletMutationResponse = {|
   +createHDWallet: ?{|
     +hdWallet: ?{|
       +accounts: ?$ReadOnlyArray<?{|
-        +name: string,
-        +address: string,
+        +address: string
       |}>,
       +localID: string,
     |},
@@ -56,7 +55,6 @@ mutation WalletsViewCreateHDWalletMutation(
   createHDWallet(input: $input) {
     hdWallet {
       accounts {
-        name
         address
       }
       localID
@@ -74,20 +72,30 @@ mutation WalletsViewCreateHDWalletMutation(
   }
 }
 
-fragment Launcher_identities on IdentitiesQuery {
+fragment Launcher_identities on Identities {
   ownUsers {
     defaultEthAddress
     localID
+    wallets {
+      hd {
+        localID
+        id
+      }
+      ledger {
+        localID
+        id
+      }
+    }
     id
   }
 }
 
-fragment WalletsView_wallets_3iqrP on WalletsQuery {
+fragment WalletsView_wallets_3iqrP on Wallets {
   ethWallets(userID: $userID) {
     hd {
+      name
       localID
       accounts {
-        name
         address
         balances {
           eth
@@ -97,9 +105,9 @@ fragment WalletsView_wallets_3iqrP on WalletsQuery {
       id
     }
     ledger {
+      name
       localID
       accounts {
-        name
         address
         balances {
           eth
@@ -138,64 +146,66 @@ v1 = [
 v2 = {
   "kind": "ScalarField",
   "alias": null,
-  "name": "name",
-  "args": null,
-  "storageKey": null
-},
-v3 = {
-  "kind": "ScalarField",
-  "alias": null,
   "name": "address",
   "args": null,
   "storageKey": null
 },
-v4 = {
+v3 = {
   "kind": "LinkedField",
   "alias": null,
   "name": "accounts",
   "storageKey": null,
   "args": null,
-  "concreteType": "NamedWalletAccountType",
+  "concreteType": "WalletAccount",
   "plural": true,
   "selections": [
-    v2,
-    v3
+    v2
   ]
 },
-v5 = {
+v4 = {
   "kind": "ScalarField",
   "alias": null,
   "name": "localID",
   "args": null,
   "storageKey": null
 },
-v6 = {
+v5 = {
   "kind": "ScalarField",
   "alias": null,
   "name": "id",
   "args": null,
   "storageKey": null
 },
+v6 = [
+  v4,
+  v5
+],
 v7 = [
-  v5,
+  {
+    "kind": "ScalarField",
+    "alias": null,
+    "name": "name",
+    "args": null,
+    "storageKey": null
+  },
+  v4,
   {
     "kind": "LinkedField",
     "alias": null,
     "name": "accounts",
     "storageKey": null,
     "args": null,
-    "concreteType": "NamedWalletAccountType",
+    "concreteType": "WalletAccount",
     "plural": true,
     "selections": [
       v2,
-      v3,
       {
         "kind": "LinkedField",
         "alias": null,
         "name": "balances",
         "storageKey": null,
         "args": null,
-        "concreteType": "WalletBalancesType",
+        "concreteType": "WalletBalances",
         "plural": false,
         "selections": [
           {
@@ -216,14 +226,14 @@ v7 = [
       }
     ]
   },
-  v6
+  v5
 ];
 return {
   "kind": "Request",
   "operationKind": "mutation",
   "name": "WalletsViewCreateHDWalletMutation",
   "id": null,
-  "text": "mutation WalletsViewCreateHDWalletMutation(\n  $input: CreateHDWalletInput!\n  $userID: String!\n) {\n  createHDWallet(input: $input) {\n    hdWallet {\n      accounts {\n        name\n        address\n      }\n      localID\n      id\n    }\n    viewer {\n      identities {\n        ...Launcher_identities\n      }\n      wallets {\n        ...WalletsView_wallets_3iqrP\n      }\n      id\n    }\n  }\n}\n\nfragment Launcher_identities on IdentitiesQuery {\n  ownUsers {\n    defaultEthAddress\n    localID\n    id\n  }\n}\n\nfragment WalletsView_wallets_3iqrP on WalletsQuery {\n  ethWallets(userID: $userID) {\n    hd {\n      localID\n      accounts {\n        name\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n    ledger {\n      localID\n      accounts {\n        name\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n  }\n}\n",
+  "text": "mutation WalletsViewCreateHDWalletMutation(\n  $input: CreateHDWalletInput!\n  $userID: String!\n) {\n  createHDWallet(input: $input) {\n    hdWallet {\n      accounts {\n        address\n      }\n      localID\n      id\n    }\n    viewer {\n      identities {\n        ...Launcher_identities\n      }\n      wallets {\n        ...WalletsView_wallets_3iqrP\n      }\n      id\n    }\n  }\n}\n\nfragment Launcher_identities on Identities {\n  ownUsers {\n    defaultEthAddress\n    localID\n    wallets {\n      hd {\n        localID\n        id\n      }\n      ledger {\n        localID\n        id\n      }\n    }\n    id\n  }\n}\n\nfragment WalletsView_wallets_3iqrP on Wallets {\n  ethWallets(userID: $userID) {\n    hd {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n    ledger {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -250,8 +260,8 @@ return {
             "concreteType": "EthHDWallet",
             "plural": false,
             "selections": [
-              v4,
-              v5
+              v3,
+              v4
             ]
           },
           {
@@ -269,7 +279,7 @@ return {
                 "name": "identities",
                 "storageKey": null,
                 "args": null,
-                "concreteType": "IdentitiesQuery",
+                "concreteType": "Identities",
                 "plural": false,
                 "selections": [
                   {
@@ -285,7 +295,7 @@ return {
                 "name": "wallets",
                 "storageKey": null,
                 "args": null,
-                "concreteType": "WalletsQuery",
+                "concreteType": "Wallets",
                 "plural": false,
                 "selections": [
                   {
@@ -331,9 +341,9 @@ return {
             "concreteType": "EthHDWallet",
             "plural": false,
             "selections": [
+              v3,
               v4,
-              v5,
-              v6
+              v5
             ]
           },
           {
@@ -351,7 +361,7 @@ return {
                 "name": "identities",
                 "storageKey": null,
                 "args": null,
-                "concreteType": "IdentitiesQuery",
+                "concreteType": "Identities",
                 "plural": false,
                 "selections": [
                   {
@@ -370,8 +380,39 @@ return {
                         "args": null,
                         "storageKey": null
                       },
-                      v5,
-                      v6
+                      v4,
+                      {
+                        "kind": "LinkedField",
+                        "alias": null,
+                        "name": "wallets",
+                        "storageKey": null,
+                        "args": null,
+                        "concreteType": "EthWallets",
+                        "plural": false,
+                        "selections": [
+                          {
+                            "kind": "LinkedField",
+                            "alias": null,
+                            "name": "hd",
+                            "storageKey": null,
+                            "args": null,
+                            "concreteType": "EthHDWallet",
+                            "plural": true,
+                            "selections": v6
+                          },
+                          {
+                            "kind": "LinkedField",
+                            "alias": null,
+                            "name": "ledger",
+                            "storageKey": null,
+                            "args": null,
+                            "concreteType": "EthLedgerWallet",
+                            "plural": true,
+                            "selections": v6
+                          }
+                        ]
+                      },
+                      v5
                     ]
                   }
                 ]
@@ -382,7 +423,7 @@ return {
                 "name": "wallets",
                 "storageKey": null,
                 "args": null,
-                "concreteType": "WalletsQuery",
+                "concreteType": "Wallets",
                 "plural": false,
                 "selections": [
                   {
@@ -425,7 +466,7 @@ return {
                   }
                 ]
               },
-              v6
+              v5
             ]
           }
         ]
@@ -435,5 +476,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '9b9a60c2946c5afd70421f9708de67bb';
+(node/*: any*/).hash = '2c6bfc397b59c6161746ad1722c2233f';
 module.exports = node;

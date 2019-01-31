@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash b4ef967f9d9ce111978b1c7d1eb70417
+ * @relayHash 0d4e257289c089d750b70ab4e2fe65ab
  */
 
 /* eslint-disable */
@@ -24,19 +24,19 @@ export type IdentitySelectorViewCreateUserIdentityMutationResponse = {|
   +createUserIdentity: ?{|
     +user: ?{|
       +localID: string,
-      +profile: ?{|
+      +profile: {|
         +name: string
       |},
     |},
     +viewer: {|
       +identities: {|
         +ownUsers: ?$ReadOnlyArray<?{|
-          +profile: ?{|
+          +profile: {|
             +name: string
           |}
         |}>,
         +ownDevelopers: ?$ReadOnlyArray<?{|
-          +profile: ?{|
+          +profile: {|
             +name: string
           |}
         |}>,
@@ -108,42 +108,38 @@ v2 = {
   "args": null,
   "storageKey": null
 },
-v3 = [
-  {
-    "kind": "ScalarField",
-    "alias": null,
-    "name": "name",
-    "args": null,
-    "storageKey": null
-  }
+v3 = {
+  "kind": "LinkedField",
+  "alias": null,
+  "name": "profile",
+  "storageKey": null,
+  "args": null,
+  "concreteType": "NamedProfile",
+  "plural": false,
+  "selections": [
+    {
+      "kind": "ScalarField",
+      "alias": null,
+      "name": "name",
+      "args": null,
+      "storageKey": null
+    }
+  ]
+},
+v4 = [
+  v3
 ],
-v4 = {
-  "kind": "LinkedField",
-  "alias": null,
-  "name": "profile",
-  "storageKey": null,
-  "args": null,
-  "concreteType": "OwnUserProfile",
-  "plural": false,
-  "selections": v3
-},
 v5 = {
-  "kind": "LinkedField",
-  "alias": null,
-  "name": "profile",
-  "storageKey": null,
-  "args": null,
-  "concreteType": "OwnDeveloperProfile",
-  "plural": false,
-  "selections": v3
-},
-v6 = {
   "kind": "ScalarField",
   "alias": null,
   "name": "id",
   "args": null,
   "storageKey": null
-};
+},
+v6 = [
+  v3,
+  v5
+];
 return {
   "kind": "Request",
   "operationKind": "mutation",
@@ -177,7 +173,7 @@ return {
             "plural": false,
             "selections": [
               v2,
-              v4
+              v3
             ]
           },
           {
@@ -195,7 +191,7 @@ return {
                 "name": "identities",
                 "storageKey": null,
                 "args": null,
-                "concreteType": "IdentitiesQuery",
+                "concreteType": "Identities",
                 "plural": false,
                 "selections": [
                   {
@@ -206,9 +202,7 @@ return {
                     "args": null,
                     "concreteType": "OwnUserIdentity",
                     "plural": true,
-                    "selections": [
-                      v4
-                    ]
+                    "selections": v4
                   },
                   {
                     "kind": "LinkedField",
@@ -218,9 +212,7 @@ return {
                     "args": null,
                     "concreteType": "OwnDeveloperIdentity",
                     "plural": true,
-                    "selections": [
-                      v5
-                    ]
+                    "selections": v4
                   }
                 ]
               }
@@ -254,8 +246,8 @@ return {
             "plural": false,
             "selections": [
               v2,
-              v4,
-              v6
+              v3,
+              v5
             ]
           },
           {
@@ -273,7 +265,7 @@ return {
                 "name": "identities",
                 "storageKey": null,
                 "args": null,
-                "concreteType": "IdentitiesQuery",
+                "concreteType": "Identities",
                 "plural": false,
                 "selections": [
                   {
@@ -284,10 +276,7 @@ return {
                     "args": null,
                     "concreteType": "OwnUserIdentity",
                     "plural": true,
-                    "selections": [
-                      v4,
-                      v6
-                    ]
+                    "selections": v6
                   },
                   {
                     "kind": "LinkedField",
@@ -297,14 +286,11 @@ return {
                     "args": null,
                     "concreteType": "OwnDeveloperIdentity",
                     "plural": true,
-                    "selections": [
-                      v5,
-                      v6
-                    ]
+                    "selections": v6
                   }
                 ]
               },
-              v6
+              v5
             ]
           }
         ]

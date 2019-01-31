@@ -11,13 +11,27 @@ import type { VaultsData } from '../../types'
 
 import rpc from './rpc'
 import { EnvironmentContext } from './RelayEnvironment'
-import OnboardView from './OnboardView'
+import OnboardView from './onboarding/OnboardView'
 import UnlockVaultView from './UnlockVaultView'
+import CreateVaultView from './CreateVaultView'
 import Launcher from './Launcher'
 
 const LoadingContainer = styled.View`
   flex: 1;
   justify-content: center;
+`
+
+const Container = styled.View`
+  flex: 1;
+`
+
+const TitleBar = styled.View`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 20px;
+  background-color: transparent;
 `
 
 type State = {
@@ -67,7 +81,7 @@ export default class App extends Component<{}, State> {
     }
 
     if (!this.state.vaultsData.defaultVault) {
-      return this.renderOnboarding()
+      return <CreateVaultView onVaultCreated={this.onOpenedVault} />
     }
 
     if (!this.state.vaultsData.vaultOpen) {
@@ -78,12 +92,18 @@ export default class App extends Component<{}, State> {
         />
       )
     }
+
     return <Launcher />
   }
 
   render() {
     return (
-      <MFThemeProvider theme={THEME}>{this.renderContent()}</MFThemeProvider>
+      <MFThemeProvider theme={THEME}>
+        <Container>
+          <TitleBar className="draggable" />
+          {this.renderContent()}
+        </Container>
+      </MFThemeProvider>
     )
   }
 }

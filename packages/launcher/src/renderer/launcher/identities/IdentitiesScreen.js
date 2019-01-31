@@ -22,7 +22,7 @@ const IdentitiesScreenRelayContainer = createFragmentContainer(
   IdentitiesScreen,
   {
     identities: graphql`
-      fragment IdentitiesScreen_identities on IdentitiesQuery {
+      fragment IdentitiesScreen_identities on Identities {
         ...IdentitiesView_identities
       }
     `,

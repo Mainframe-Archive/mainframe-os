@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 510cee9ecaba6a5a7a24afc4fcbb54ff
+ * @relayHash 467f90235f267f06c71eafe424fca7b0
  */
 
 /* eslint-disable */
@@ -15,13 +15,13 @@ export type IdentitySelectorViewQueryResponse = {|
     +identities: {|
       +ownUsers: ?$ReadOnlyArray<?{|
         +localID: string,
-        +profile: ?{|
+        +profile: {|
           +name: string
         |},
       |}>,
       +ownDevelopers: ?$ReadOnlyArray<?{|
         +localID: string,
-        +profile: ?{|
+        +profile: {|
           +name: string
         |},
       |}>,
@@ -67,42 +67,40 @@ var v0 = {
   "args": null,
   "storageKey": null
 },
-v1 = [
-  {
-    "kind": "ScalarField",
-    "alias": null,
-    "name": "name",
-    "args": null,
-    "storageKey": null
-  }
+v1 = {
+  "kind": "LinkedField",
+  "alias": null,
+  "name": "profile",
+  "storageKey": null,
+  "args": null,
+  "concreteType": "NamedProfile",
+  "plural": false,
+  "selections": [
+    {
+      "kind": "ScalarField",
+      "alias": null,
+      "name": "name",
+      "args": null,
+      "storageKey": null
+    }
+  ]
+},
+v2 = [
+  v0,
+  v1
 ],
-v2 = {
-  "kind": "LinkedField",
-  "alias": null,
-  "name": "profile",
-  "storageKey": null,
-  "args": null,
-  "concreteType": "OwnUserProfile",
-  "plural": false,
-  "selections": v1
-},
 v3 = {
-  "kind": "LinkedField",
-  "alias": null,
-  "name": "profile",
-  "storageKey": null,
-  "args": null,
-  "concreteType": "OwnDeveloperProfile",
-  "plural": false,
-  "selections": v1
-},
-v4 = {
   "kind": "ScalarField",
   "alias": null,
   "name": "id",
   "args": null,
   "storageKey": null
-};
+},
+v4 = [
+  v0,
+  v1,
+  v3
+];
 return {
   "kind": "Request",
   "operationKind": "query",
@@ -132,7 +130,7 @@ return {
             "name": "identities",
             "storageKey": null,
             "args": null,
-            "concreteType": "IdentitiesQuery",
+            "concreteType": "Identities",
             "plural": false,
             "selections": [
               {
@@ -143,10 +141,7 @@ return {
                 "args": null,
                 "concreteType": "OwnUserIdentity",
                 "plural": true,
-                "selections": [
-                  v0,
-                  v2
-                ]
+                "selections": v2
               },
               {
                 "kind": "LinkedField",
@@ -156,10 +151,7 @@ return {
                 "args": null,
                 "concreteType": "OwnDeveloperIdentity",
                 "plural": true,
-                "selections": [
-                  v0,
-                  v3
-                ]
+                "selections": v2
               }
             ]
           }
@@ -187,7 +179,7 @@ return {
             "name": "identities",
             "storageKey": null,
             "args": null,
-            "concreteType": "IdentitiesQuery",
+            "concreteType": "Identities",
             "plural": false,
             "selections": [
               {
@@ -198,11 +190,7 @@ return {
                 "args": null,
                 "concreteType": "OwnUserIdentity",
                 "plural": true,
-                "selections": [
-                  v0,
-                  v2,
-                  v4
-                ]
+                "selections": v4
               },
               {
                 "kind": "LinkedField",
@@ -212,15 +200,11 @@ return {
                 "args": null,
                 "concreteType": "OwnDeveloperIdentity",
                 "plural": true,
-                "selections": [
-                  v0,
-                  v3,
-                  v4
-                ]
+                "selections": v4
               }
             ]
           },
-          v4
+          v3
         ]
       }
     ]

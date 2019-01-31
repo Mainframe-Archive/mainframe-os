@@ -19,9 +19,9 @@ export default class REPLCommand extends Command {
       if (client == null) {
         throw new Error('No client')
       }
-      const path = vaultConfig.defaultVault
+      const path = this.flags.vault || vaultConfig.defaultVault
       if (path == null) {
-        throw new Error('No default vault path')
+        throw new Error('No vault path')
       }
       await client.vault.open({ path, password })
       this.log('Vault open!')

@@ -14,16 +14,35 @@ export type Launcher_identities = {|
   +ownUsers: ?$ReadOnlyArray<?{|
     +defaultEthAddress: ?string,
     +localID: string,
+    +wallets: {|
+      +hd: ?$ReadOnlyArray<?{|
+        +localID: string
+      |}>,
+      +ledger: ?$ReadOnlyArray<?{|
+        +localID: string
+      |}>,
+    |},
   |}>,
   +$refType: Launcher_identities$ref,
 |};
 */
 
 
-const node/*: ConcreteFragment*/ = {
+const node/*: ConcreteFragment*/ = (function(){
+var v0 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "localID",
+  "args": null,
+  "storageKey": null
+},
+v1 = [
+  v0
+];
+return {
   "kind": "Fragment",
   "name": "Launcher_identities",
-  "type": "IdentitiesQuery",
+  "type": "Identities",
   "metadata": null,
   "argumentDefinitions": [],
   "selections": [
@@ -43,17 +62,43 @@ const node/*: ConcreteFragment*/ = {
           "args": null,
           "storageKey": null
         },
+        v0,
         {
-          "kind": "ScalarField",
+          "kind": "LinkedField",
           "alias": null,
-          "name": "localID",
+          "name": "wallets",
+          "storageKey": null,
           "args": null,
-          "storageKey": null
+          "concreteType": "EthWallets",
+          "plural": false,
+          "selections": [
+            {
+              "kind": "LinkedField",
+              "alias": null,
+              "name": "hd",
+              "storageKey": null,
+              "args": null,
+              "concreteType": "EthHDWallet",
+              "plural": true,
+              "selections": v1
+            },
+            {
+              "kind": "LinkedField",
+              "alias": null,
+              "name": "ledger",
+              "storageKey": null,
+              "args": null,
+              "concreteType": "EthLedgerWallet",
+              "plural": true,
+              "selections": v1
+            }
+          ]
         }
       ]
     }
   ]
 };
+})();
 // prettier-ignore
-(node/*: any*/).hash = 'e3592432b2cb0532d9f4feffdebd94b0';
+(node/*: any*/).hash = '82938eb56aaddef4d1a16c90b79c2828';
 module.exports = node;

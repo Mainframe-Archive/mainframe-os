@@ -5,6 +5,7 @@ import { ScrollView } from 'react-native'
 import styled from 'styled-components/native'
 import { graphql, QueryRenderer, createFragmentContainer } from 'react-relay'
 
+import OnboardView from './onboarding/OnboardView'
 import { EnvironmentContext } from './RelayEnvironment'
 import LauncherContext from './LauncherContext'
 import RelayLoaderView from './RelayLoaderView'
@@ -21,28 +22,58 @@ const Container = styled.View`
 `
 
 const ContentContainer = styled.View`
-  padding: 20px 50px;
+  padding: 40px 50px 20px 50px;
   flex: 1;
 `
 
 type Props = {
   identities: {
-    ownUsers: Array<{ localID: string, defaultEthAddress: ?string }>,
+    ownUsers: Array<{
+      localID: string,
+      defaultEthAddress: ?string,
+      wallets: {
+        hd: Array<{ localID: string }>,
+        ledger: Array<{ localID: string }>,
+      },
+    }>,
   },
 }
 
+type OnboardSteps = 'identity' | 'wallet'
+
 type State = {
   openScreen: ScreenNames,
+  onboardRequired?: ?OnboardSteps,
 }
 
 class Launcher extends Component<Props, State> {
-  state = {
-    openScreen: 'apps',
+  constructor(props: Props) {
+    super(props)
+    const { ownUsers } = props.identities
+    let onboardRequired
+    if (!ownUsers || !ownUsers.length) {
+      onboardRequired = 'identity'
+    } else if (
+      !ownUsers[0].wallets.hd.length &&
+      !ownUsers[0].wallets.ledger.length
+    ) {
+      onboardRequired = 'wallet'
+    }
+    this.state = {
+      onboardRequired,
+      openScreen: 'apps',
+    }
   }
 
   setOpenScreen = (name: ScreenNames) => {
     this.setState({
       openScreen: name,
+    })
+  }
+
+  onboardComplete = () => {
+    this.setState({
+      onboardRequired: null,
     })
   }
 
@@ -63,14 +94,20 @@ class Launcher extends Component<Props, State> {
 
   render() {
     const { ownUsers } = this.props.identities
-    if (!ownUsers || !ownUsers.length) {
-      return <Container /> //TODO: error view
+    const { onboardRequired } = this.state
+
+    if (onboardRequired) {
+      return (
+        <OnboardView
+          startState={onboardRequired}
+          onboardComplete={this.onboardComplete}
+          userID={ownUsers && ownUsers.length ? ownUsers[0].localID : null}
+        />
+      )
     }
 
-    const user = ownUsers[0]
-
     return (
-      <LauncherContext.Provider value={{ user }}>
+      <LauncherContext.Provider value={{ user: ownUsers[0] }}>
         <Container testID="launcher-view">
           <SideMenu
             selected={this.state.openScreen}
@@ -85,12 +122,20 @@ class Launcher extends Component<Props, State> {
   }
 }
 
-const LauncherRelayContaier = createFragmentContainer(Launcher, {
+const LauncherRelayContainer = createFragmentContainer(Launcher, {
   identities: graphql`
-    fragment Launcher_identities on IdentitiesQuery {
+    fragment Launcher_identities on Identities {
       ownUsers {
         defaultEthAddress
         localID
+        wallets {
+          hd {
+            localID
+          }
+          ledger {
+            localID
+          }
+        }
       }
     }
   `,
@@ -117,7 +162,7 @@ export default class LauncherQueryRenderer extends Component<{}> {
           if (error || !props) {
             return <RelayLoaderView error={error ? error.message : undefined} />
           } else {
-            return <LauncherRelayContaier {...props.viewer} {...this.props} />
+            return <LauncherRelayContainer {...props.viewer} {...this.props} />
           }
         }}
       />

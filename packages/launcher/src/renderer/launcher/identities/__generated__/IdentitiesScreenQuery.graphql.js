@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 5032360b7555f28e0574140a38789532
+ * @relayHash 38a723a75aa54f5521363340c8fe08cd
  */
 
 /* eslint-disable */
@@ -35,20 +35,16 @@ query IdentitiesScreenQuery {
   }
 }
 
-fragment IdentitiesScreen_identities on IdentitiesQuery {
+fragment IdentitiesScreen_identities on Identities {
   ...IdentitiesView_identities
 }
 
-fragment IdentitiesView_identities on IdentitiesQuery {
+fragment IdentitiesView_identities on Identities {
   ownUsers {
     localID
     feedHash
     profile {
       name
-    }
-    wallets {
-      localID
-      accounts
     }
     apps {
       localID
@@ -98,6 +94,16 @@ v1 = [
   }
 ],
 v2 = {
+  "kind": "LinkedField",
+  "alias": null,
+  "name": "profile",
+  "storageKey": null,
+  "args": null,
+  "concreteType": "NamedProfile",
+  "plural": false,
+  "selections": v1
+},
+v3 = {
   "kind": "ScalarField",
   "alias": null,
   "name": "id",
@@ -109,7 +115,7 @@ return {
   "operationKind": "query",
   "name": "IdentitiesScreenQuery",
   "id": null,
-  "text": "query IdentitiesScreenQuery {\n  viewer {\n    identities {\n      ...IdentitiesScreen_identities\n    }\n    id\n  }\n}\n\nfragment IdentitiesScreen_identities on IdentitiesQuery {\n  ...IdentitiesView_identities\n}\n\nfragment IdentitiesView_identities on IdentitiesQuery {\n  ownUsers {\n    localID\n    feedHash\n    profile {\n      name\n    }\n    wallets {\n      localID\n      accounts\n    }\n    apps {\n      localID\n      manifest {\n        name\n      }\n      users {\n        settings {\n          permissionsSettings {\n            permissionsChecked\n            grants {\n              BLOCKCHAIN_SEND\n            }\n          }\n        }\n        id\n      }\n      id\n    }\n    id\n  }\n  ownDevelopers {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n}\n",
+  "text": "query IdentitiesScreenQuery {\n  viewer {\n    identities {\n      ...IdentitiesScreen_identities\n    }\n    id\n  }\n}\n\nfragment IdentitiesScreen_identities on Identities {\n  ...IdentitiesView_identities\n}\n\nfragment IdentitiesView_identities on Identities {\n  ownUsers {\n    localID\n    feedHash\n    profile {\n      name\n    }\n    apps {\n      localID\n      manifest {\n        name\n      }\n      users {\n        settings {\n          permissionsSettings {\n            permissionsChecked\n            grants {\n              BLOCKCHAIN_SEND\n            }\n          }\n        }\n        id\n      }\n      id\n    }\n    id\n  }\n  ownDevelopers {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -133,7 +139,7 @@ return {
             "name": "identities",
             "storageKey": null,
             "args": null,
-            "concreteType": "IdentitiesQuery",
+            "concreteType": "Identities",
             "plural": false,
             "selections": [
               {
@@ -167,7 +173,7 @@ return {
             "name": "identities",
             "storageKey": null,
             "args": null,
-            "concreteType": "IdentitiesQuery",
+            "concreteType": "Identities",
             "plural": false,
             "selections": [
               {
@@ -187,35 +193,7 @@ return {
                     "args": null,
                     "storageKey": null
                   },
-                  {
-                    "kind": "LinkedField",
-                    "alias": null,
-                    "name": "profile",
-                    "storageKey": null,
-                    "args": null,
-                    "concreteType": "OwnUserProfile",
-                    "plural": false,
-                    "selections": v1
-                  },
-                  {
-                    "kind": "LinkedField",
-                    "alias": null,
-                    "name": "wallets",
-                    "storageKey": null,
-                    "args": null,
-                    "concreteType": "UserWalletType",
-                    "plural": true,
-                    "selections": [
-                      v0,
-                      {
-                        "kind": "ScalarField",
-                        "alias": null,
-                        "name": "accounts",
-                        "args": null,
-                        "storageKey": null
-                      }
-                    ]
-                  },
+                  v2,
                   {
                     "kind": "LinkedField",
                     "alias": null,
@@ -292,13 +270,13 @@ return {
                               }
                             ]
                           },
-                          v2
+                          v3
                         ]
                       },
-                      v2
+                      v3
                     ]
                   },
-                  v2
+                  v3
                 ]
               },
               {
@@ -311,22 +289,13 @@ return {
                 "plural": true,
                 "selections": [
                   v0,
-                  {
-                    "kind": "LinkedField",
-                    "alias": null,
-                    "name": "profile",
-                    "storageKey": null,
-                    "args": null,
-                    "concreteType": "OwnDeveloperProfile",
-                    "plural": false,
-                    "selections": v1
-                  },
-                  v2
+                  v2,
+                  v3
                 ]
               }
             ]
           },
-          v2
+          v3
         ]
       }
     ]

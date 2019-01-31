@@ -55,7 +55,7 @@ type State = {
   errorMsg?: string,
 }
 
-export class CreateAppModal extends Component<Props, State> {
+class CreateAppModal extends Component<Props, State> {
   static contextType = EnvironmentContext
 
   state = {

@@ -72,6 +72,30 @@ describe('Application launch', function() {
     await this.app.client.element(createIdButton).click()
   })
 
+  it('completes wallet onboarding', async function() {
+    const createWalletButton = '[data-testid="onboard-create-wallet-button"]'
+    await this.app.client.waitForExist(createWalletButton, 10000)
+    await this.app.client.element(createWalletButton).click()
+    await this.app.client
+      .element('[data-testid="wallet-create-name-field"]')
+      .setValue('test wallet')
+    const submitWalletButton = '[data-testid="wallet-create-submit-button"]'
+    await this.app.client.waitForExist(submitWalletButton, 10000)
+    await this.app.client.element(submitWalletButton).click()
+    const confirmBackupButton =
+      '[data-testid="wallet-create-confirm-backup-button"]'
+    await this.app.client.waitForExist(confirmBackupButton, 10000)
+    await this.app.client.element(confirmBackupButton).click()
+
+    for (let i = 0; i < 12; i++) {
+      const wordElement = `[data-testid="seed-word-${i}"]`
+      await this.app.client.element(wordElement).click()
+    }
+
+    const walletTestSubmit = '[data-testid="wallet-create-backup-test-submit"]'
+    await this.app.client.element(walletTestSubmit).click()
+  })
+
   it('creates an app', async function() {
     const createAppSelector = '[data-testid="launcher-create-app-button"]'
     await this.app.client.waitForExist(createAppSelector, 20000)
