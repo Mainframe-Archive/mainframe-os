@@ -200,11 +200,9 @@ export default class AbstractApp {
   }
 
   setFeedHash(userID: ID, feedHash: string): void {
-    console.log('setFeedHash in packages/daemon/src/app/AbstractApp.js')
     const settings = this.getSettings(userID)
-    console.log(settings, 'settings')
-    console.log('\n')
-    this.setFeedHash(userID, feedHash)
+    settings.storage.feedHash = feedHash
+    this._settings[userID] = settings
   }
 
   setDefaultEthAccount(userID: ID, walletID: ID, account: string) {
