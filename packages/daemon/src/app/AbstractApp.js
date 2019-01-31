@@ -8,7 +8,10 @@ import {
   type PermissionsGrants,
   type StrictPermissionsGrants,
 } from '@mainframe/app-permissions'
-// eslint-disable-next-line import/named
+import type {
+  AppUserPermissionsSettings,
+  AppUserSettings,
+} from '@mainframe/client'
 import { idType, type ID } from '@mainframe/utils-id'
 
 import type Session from './Session'
@@ -34,16 +37,6 @@ export type SessionData = {
   session: Session,
   permissions: PermissionsDetails,
   isDev?: ?boolean,
-}
-
-export type PermissionsSettings = {
-  grants: StrictPermissionsGrants,
-  permissionsChecked: boolean,
-}
-
-export type AppUserSettings = {
-  permissionsSettings: PermissionsSettings,
-  walletSettings: WalletSettings,
 }
 
 export type AbstractAppParams = {
@@ -112,7 +105,10 @@ export default class AbstractApp {
     this._settings[userID] = settings
   }
 
-  setPermissionsSettings(userID: ID, settings: PermissionsSettings): void {
+  setPermissionsSettings(
+    userID: ID,
+    settings: AppUserPermissionsSettings,
+  ): void {
     const appSettings = this.getSettings(userID)
     appSettings.permissionsSettings.grants = createStrictPermissionGrants(
       settings.grants,

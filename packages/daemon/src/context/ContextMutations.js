@@ -7,11 +7,11 @@ import {
   type ManifestData,
 } from '@mainframe/app-manifest'
 import { type StrictPermissionsRequirements } from '@mainframe/app-permissions'
+import type { AppUserPermissionsSettings } from '@mainframe/client'
 import { idType, type ID } from '@mainframe/utils-id'
 import { ensureDir } from 'fs-extra'
 
 import { type App, OwnApp } from '../app'
-import type { PermissionsSettings } from '../app/AbstractApp'
 import { getContentsPath } from '../app/AppsRepository'
 import type {
   Contact,
@@ -40,7 +40,7 @@ export type Feeds = {
 export type InstallAppParams = {
   manifest: ManifestData,
   userID: ID,
-  settings: PermissionsSettings,
+  permissionsSettings: AppUserPermissionsSettings,
 }
 
 export type CreateAppParams = {

@@ -2,6 +2,10 @@
 
 import { type ManifestData } from '@mainframe/app-manifest'
 import { type PermissionsRequirements } from '@mainframe/app-permissions'
+import type {
+  AppUserPermissionsSettings,
+  AppUserSettings,
+} from '@mainframe/client'
 import { readEncryptedFile, writeEncryptedFile } from '@mainframe/secure-file'
 import {
   decodeBase64,
@@ -17,11 +21,7 @@ import {
 } from '@mainframe/utils-crypto'
 import { type ID } from '@mainframe/utils-id'
 
-import type {
-  AppUserSettings,
-  PermissionsSettings,
-  SessionData,
-} from '../app/AbstractApp'
+import type { SessionData } from '../app/AbstractApp'
 import type App from '../app/App'
 import AppsRepository, {
   type AppsRepositorySerialized,
@@ -220,8 +220,8 @@ export default class Vault {
 
   installApp(
     manifest: ManifestData,
-    userID: string,
-    settings: PermissionsSettings,
+    userID: ID,
+    settings: AppUserPermissionsSettings,
   ): App {
     let app = this.apps.getByMFID(manifest.id)
     if (app == null) {
@@ -263,7 +263,7 @@ export default class Vault {
   setAppUserPermissionsSettings(
     appID: ID,
     userID: ID,
-    settings: PermissionsSettings,
+    settings: AppUserPermissionsSettings,
   ): void {
     this.apps.setUserPermissionsSettings(appID, userID, settings)
   }

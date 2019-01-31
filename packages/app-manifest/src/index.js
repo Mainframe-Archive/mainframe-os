@@ -5,7 +5,7 @@ import {
   signContents,
   verifyContents,
   writeSignedFile,
-  type SignedContents, // eslint-disable-line import/named
+  type SignedContents,
 } from '@mainframe/secure-file'
 import { decodeBase64 } from '@mainframe/utils-base64'
 import type { KeyPair } from '@mainframe/utils-crypto'

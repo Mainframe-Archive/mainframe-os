@@ -1,10 +1,6 @@
 // @flow
 
-import {
-  getSignature,
-  sign,
-  type KeyPair, // eslint-disable-line import/named
-} from '@mainframe/utils-crypto'
+import { getSignature, sign, type KeyPair } from '@mainframe/utils-crypto'
 import multibase from 'multibase'
 
 import Identity from './Identity'

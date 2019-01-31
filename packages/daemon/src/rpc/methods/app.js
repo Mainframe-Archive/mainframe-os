@@ -1,6 +1,5 @@
 // @flow
 
-/* eslint-disable import/named */
 import {
   idType as toClientID,
   APP_CHECK_PERMISSION_SCHEMA,
@@ -36,7 +35,6 @@ import {
   type AppSetUserPermissionsSettingsParams,
 } from '@mainframe/client'
 import { idType as fromClientID, type ID } from '@mainframe/utils-id'
-/* eslint-enable import/named */
 
 import type { SessionData } from '../../app/AbstractApp'
 import { getContentsPath } from '../../app/AppsRepository'
@@ -189,7 +187,7 @@ export const install = {
     ctx: ClientContext,
     params: AppInstallParams,
   ): Promise<AppInstallResult> => {
-    const app = ctx.mutations.installApp({
+    const app = await ctx.mutations.installApp({
       manifest: params.manifest,
       userID: fromClientID(params.userID),
       permissionsSettings: params.permissionsSettings,

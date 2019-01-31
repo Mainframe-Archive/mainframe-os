@@ -7,17 +7,17 @@ import {
   type PermissionGrant,
   type StrictPermissionsRequirements,
 } from '@mainframe/app-permissions'
+import type {
+  AppUserPermissionsSettings,
+  AppUserSettings,
+} from '@mainframe/client'
 import { getAppContentsPath, type Environment } from '@mainframe/config'
 import { MFID } from '@mainframe/data-types'
 import { uniqueID, idType, type ID } from '@mainframe/utils-id'
 
 import { mapObject } from '../utils'
 
-import type {
-  AppUserSettings,
-  SessionData,
-  PermissionsSettings,
-} from './AbstractApp'
+import type { SessionData } from './AbstractApp'
 import App, { type AppSerialized } from './App'
 import OwnApp, { type OwnAppParams, type OwnAppSerialized } from './OwnApp'
 
@@ -183,7 +183,7 @@ export default class AppsRepository {
   add(
     manifest: ManifestData,
     userID: ID,
-    permissionsSettings: PermissionsSettings,
+    permissionsSettings: AppUserPermissionsSettings,
   ): App {
     if (validateManifest(manifest) === 'valid') {
       throw new Error('Invalid manifest')
@@ -219,7 +219,7 @@ export default class AppsRepository {
   setUserPermissionsSettings(
     appID: ID,
     userID: ID,
-    settings: PermissionsSettings,
+    settings: AppUserPermissionsSettings,
   ): void {
     const app = this.getAnyByID(appID)
     if (app == null) {
