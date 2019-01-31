@@ -71,12 +71,12 @@ export const sandboxed = {
         key: 'CONTACTS_SELECT',
         params: { CONTACTS_SELECT: params },
       })
-      if (!res.granted || !res || !res.data) {
+      if (!res.granted || !res || !res.data || !res.data.selectedContactIDs) {
         return { contacts: [] }
       }
       const userID = ctx.appSession.user.id
       const appID = ctx.appSession.app.appID
-      const contactIDs = res.data
+      const contactIDs = res.data.selectedContactIDs
       const contactsToApprove = contactIDs.map(id => ({
         localID: id,
         publicDataOnly: true, // TODO allow user to set only public data
