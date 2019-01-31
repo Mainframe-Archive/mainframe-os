@@ -16,6 +16,7 @@ import type {
 import type { OwnDeveloperProfile } from '../identity/OwnDeveloperIdentity'
 import type { OwnUserProfile } from '../identity/OwnUserIdentity'
 import type { PeerUserProfile } from '../identity/PeerUserIdentity'
+import type { ContactProfile } from '../identity/Contact'
 import type { bzzHash } from '../swarm/feed'
 
 import type {
@@ -165,6 +166,27 @@ export default class ContextMutations {
       contact,
       userID,
       change: 'contactFeed',
+    })
+  }
+
+  updateContactProfile(
+    userID: ID | string,
+    contactID: ID | string,
+    profile: ContactProfile,
+  ) {
+    const contact = this._context.openVault.identities.getContact(
+      userID,
+      contactID,
+    )
+    if (contact == null) {
+      throw new Error('Peer not found')
+    }
+    contact.profile = profile
+    this._context.next({
+      type: 'contact_changed',
+      contact,
+      userID,
+      change: 'profile',
     })
   }
 
