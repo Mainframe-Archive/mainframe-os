@@ -23,24 +23,27 @@ export const setDefaultVault = (env: Environment, path?: ?string): void => {
 }
 
 export const getVaultsLabels = (env: Environment): VaultsLabels => {
-  return env.config.get(VAULT_LABELS_KEY) || {}
+  return env.config.get(VAULT_LABELS_KEY, {})
 }
 
+// /!\ path can contain a dot, so it should not be used as key
 export const getVaultLabel = (env: Environment, path: string): ?string => {
-  return env.config.get(`${VAULT_LABELS_KEY}.${path}`)
+  return getVaultsLabels(env)[path]
 }
 
+// /!\ path can contain a dot, so it should not be used as key as it would create a nested object
 export const setVaultLabel = (
   env: Environment,
   path: string,
   label?: ?string,
 ): void => {
-  const key = `${VAULT_LABELS_KEY}.${path}`
+  const labels = getVaultsLabels(env)
   if (label == null) {
-    env.config.delete(key)
+    delete labels[path]
   } else {
-    env.config.set(key, label)
+    labels[path] = label
   }
+  env.config.set(VAULT_LABELS_KEY, labels)
 }
 
 export const createVaultPath = (env: Environment): string => {
