@@ -407,7 +407,7 @@ class ContactsViewComponent extends Component<Props, State> {
                   onPress={() => this.selectContact(contact)}
                   selected={selected}>
                   <ContactCardText>
-                    <Text variant={['greyMed', 'elipsis']} bold size={13}>
+                    <Text variant={['greyMed', 'ellipsis']} bold size={13}>
                       {contact.profile.name || contact.localID}
                     </Text>
                     {contact.connectionState === 'SENT' ||

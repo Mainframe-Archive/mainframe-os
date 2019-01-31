@@ -78,23 +78,6 @@ export const APP_REMOVE_SCHEMA = {
   appID: LOCAL_ID_SCHEMA,
 }
 
-export const APP_SET_USER_SETTINGS_SCHEMA = {
-  appID: LOCAL_ID_SCHEMA,
-  userID: LOCAL_ID_SCHEMA,
-  settings: {
-    type: 'object',
-    props: {
-      permissionsSettings: APP_PERMISSIONS_SETTINGS_SCHEMA,
-      walletSettings: {
-        type: 'object',
-        props: {
-          defaultEthAccount: 'string',
-        },
-      },
-    },
-  },
-}
-
 export const APP_SET_PERMISSION_SCHEMA = {
   sessID: LOCAL_ID_SCHEMA,
   key: PERMISSION_KEY_SCHEMA,
@@ -118,6 +101,32 @@ export const APP_WRITE_MANIFEST_SCHEMA = {
   appID: LOCAL_ID_SCHEMA,
   path: 'string',
   version: OPTIONAL_SEMVER_SCHEMA,
+}
+
+export const CONTACT_GET_APP_USER_CONTACTS_SCHEMA = {
+  contactIDs: {
+    type: 'array',
+    items: 'string',
+  },
+}
+
+export const CONTACT_GET_APP_APPROVED_CONTACTS_SCHEMA = {
+  appID: 'string',
+}
+
+export const CONTACT_APPROVE_CONTACTS_FOR_APP_SCHEMA = {
+  contactsToApprove: {
+    type: 'array',
+    items: {
+      type: 'object',
+      props: {
+        publicDataOnly: {
+          type: 'boolean',
+        },
+        localID: 'string',
+      },
+    },
+  },
 }
 
 export const GRAPHQL_QUERY_SCHEMA = {
@@ -188,7 +197,7 @@ export const IDENTITY_DELETE_CONTACT_SCHEMA = {
   contactID: LOCAL_ID_SCHEMA,
 }
 
-export const IDENTITY_GET_USER_CONTACTS_SCHEMA = {
+export const CONTACT_GET_USER_CONTACTS_SCHEMA = {
   userID: LOCAL_ID_SCHEMA,
 }
 

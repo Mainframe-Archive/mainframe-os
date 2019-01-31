@@ -3,8 +3,10 @@
 import { hexValueType } from '@erebos/hex'
 import type { StrictPermissionsRequirements } from '@mainframe/app-permissions'
 import { idType, type ID } from '@mainframe/utils-id'
+import type { AppUserContact } from '@mainframe/client'
 
 import type { OwnApp } from '../app'
+import type { ContactToApprove } from '../app/AbstractApp'
 import type {
   Contact,
   OwnDeveloperIdentity,
@@ -71,6 +73,28 @@ export default class ContextMutations {
     await this._context.openVault.save()
     this._context.next({ type: 'app_created', app })
     return app
+  }
+
+  async appApproveContacts(
+    appID: string,
+    userID: string,
+    contactsToApprove: Array<ContactToApprove>,
+  ): Promise<Array<AppUserContact>> {
+    const { openVault } = this._context
+    const approvedContacts = openVault.apps.approveContacts(
+      appID,
+      userID,
+      contactsToApprove,
+    )
+    // $FlowFixMe map type
+    const contactsIDs = Object.values(approvedContacts).map(c => c.id)
+    const contacts = this._context.queries.getAppUserContacts(
+      appID,
+      userID,
+      contactsIDs,
+    )
+    await this._context.openVault.save()
+    return contacts
   }
 
   // Contacts

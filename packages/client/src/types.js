@@ -43,6 +43,11 @@ export type AppCheckPermissionResult = {
   result: PermissionCheckResult,
 }
 
+export type ApprovedContact = {
+  publicDataOnly: boolean,
+  id: string,
+}
+
 export type AppUserPermissionsSettings = {
   grants: StrictPermissionsGrants,
   permissionsChecked: boolean,
@@ -146,12 +151,6 @@ export type AppPublishContentsResult = {
 }
 
 export type AppRemoveParams = { appID: ID }
-
-export type AppSetUserSettingsParams = {
-  appID: ID,
-  userID: ID,
-  settings: AppUserSettings,
-}
 
 export type AppSetUserPermissionsSettingsParams = {
   appID: ID,
@@ -301,21 +300,60 @@ export type IdentityDeleteContactParams = {
   contactID: ID,
 }
 
-export type IdentityGetUserContactsParams = {
-  userID: ID,
+export type ContactsGetAppApprovedContactsParams = {
+  appID: string,
+  userID: string,
+}
+
+export type ContactsGetAppUserContactsParams = {
+  appID: string,
+  userID: string,
+  contactIDs: Array<string>,
+}
+
+export type ContactsApproveContactsForAppParams = {
+  appID: string,
+  userID: string,
+  contactsToApprove: Array<{
+    publicDataOnly: boolean,
+    localID: string,
+  }>,
+}
+
+export type ContactProfile = {
+  name?: ?string,
+  aliasName?: ?string,
+  avatar?: ?string,
+  ethAddress?: ?string,
+}
+
+export type AppUserContact = {
+  id: string,
+  data: ?{
+    profile: ContactProfile,
+  },
+}
+
+export type ContactsApproveContactsForAppResult = {
+  approvedContacts: Array<AppUserContact>,
+}
+
+export type ContactsGetAppUserContactsResult = {
+  contacts: Array<AppUserContact>,
 }
 
 export type ContactResult = {
   localID: string,
   peerID: string,
   connectionState: 'connected' | 'sent' | 'sending',
-  profile: {
-    name?: ?string,
-    avatar?: ?string,
-  },
+  profile: ContactProfile,
 }
 
-export type IdentityGetUserContactsResult = {
+export type ContactsGetUserContactsParams = {
+  userID: string,
+}
+
+export type ContactsGetUserContactsResult = {
   contacts: Array<ContactResult>,
 }
 

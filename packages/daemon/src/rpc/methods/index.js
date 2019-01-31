@@ -2,6 +2,7 @@
 
 import * as app from './app'
 import * as blockchain from './blockchain'
+import * as contact from './contact'
 import * as graphql from './graphql'
 import * as identity from './identity'
 import * as pss from './pss'
@@ -22,7 +23,6 @@ export default {
   app_getAll: app.getAll,
   app_setPermission: app.setPermission,
   app_setUserPermissionsSettings: app.setUserPermissionsSettings,
-  app_setUserSettings: app.setUserSettings,
   // TODO: remove app for given user only
   // Options:
   // - "clear": removes app contents, only possible if there is no user left for app
@@ -36,6 +36,11 @@ export default {
   app_writeManifest: app.writeManifest,
 
   blockchain_web3Send: blockchain.web3Send,
+
+  contact_approveContacts: contact.approveContactsForApp,
+  contact_getAppApprovedContacts: contact.getAppApprovedContacts,
+  contact_getAppUserContacts: contact.getAppUserContacts,
+  contact_getUserContacts: contact.getUserContacts,
 
   graphql_query: graphql.query,
   graphql_subscription: graphql.subscription,
@@ -53,7 +58,6 @@ export default {
   identity_updateUser: identity.updateUser,
   identity_linkEthWallet: identity.linkEthWallet,
   identity_unlinkEthWallet: identity.unlinkEthWallet,
-  identity_getUserContacts: identity.getUserContacts,
 
   // Temporary PSS APIs - should be removed when communication APIs are settled
   pss_baseAddr: pss.baseAddr,
