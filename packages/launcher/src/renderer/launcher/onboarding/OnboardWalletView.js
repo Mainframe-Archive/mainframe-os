@@ -145,7 +145,8 @@ export default class OnboardWalletView extends Component<Props, State> {
       <OnboardContainer
         title="Wallet"
         description="Create or import your Ethereum wallet."
-        step={3}>
+        step={3}
+        wallet>
         {this.renderContent()}
       </OnboardContainer>
     )
