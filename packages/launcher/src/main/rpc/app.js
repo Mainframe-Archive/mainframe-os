@@ -90,11 +90,12 @@ export const sandboxed = {
       })
       const ids = approvedContacts.map(c => c.id)
 
-      return ctx.client.contacts.getAppUserContacts({
+      const contactsRes = await ctx.client.contacts.getAppUserContacts({
         appID,
         userID,
         contactIDs: ids,
       })
+      return contactsRes.contacts
     },
   ),
 
@@ -103,11 +104,12 @@ export const sandboxed = {
     async (ctx: AppContext, params: { contactIDs: Array<string> }) => {
       const userID = ctx.appSession.user.id
       const appID = ctx.appSession.app.appID
-      return ctx.client.contacts.getAppUserContacts({
+      const contactsRes = await ctx.client.contacts.getAppUserContacts({
         appID,
         userID,
         contactIDs: params.contactIDs,
       })
+      return contactsRes.contacts
     },
   ),
 
@@ -116,10 +118,11 @@ export const sandboxed = {
     async (ctx: AppContext) => {
       const userID = ctx.appSession.user.id
       const appID = ctx.appSession.app.appID
-      return ctx.client.contacts.getAppApprovedContacts({
+      const contactsRes = await ctx.client.contacts.getAppApprovedContacts({
         appID,
         userID,
       })
+      return contactsRes.contacts
     },
   ),
 

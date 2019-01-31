@@ -128,7 +128,7 @@ class SendFunds extends Component<ContextProps, State> {
       errorMsg: undefined,
     })
     try {
-      const sub = await sdk.blockchain.payContact(params)
+      const sub = await sdk.payments.payContact(params)
       this.subscibeTX(sub)
     } catch (err) {
       this.setState({

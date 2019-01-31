@@ -220,6 +220,7 @@ export type IdentityAddPeerParams = {
   profile: {
     name?: ?string,
     avatar?: ?string,
+    ethAddress?: ?string,
   },
   publicFeed: string,
   firstContactAddress: string,
@@ -236,6 +237,7 @@ export type IdentityPeerResult = {
   profile: {
     name?: ?string,
     avatar?: ?string,
+    ethAddress?: ?string,
   },
 }
 
@@ -252,6 +254,7 @@ export type IdentityCreateUserParams = {
   profile: {
     name: string,
     avatar?: ?string,
+    ethAddress?: ?string,
   },
 }
 
@@ -362,6 +365,7 @@ export type IdentityUpdateUserParams = {
   profile: {
     name?: string,
     avatar?: ?string,
+    ethAddress?: ?string,
   },
 }
 

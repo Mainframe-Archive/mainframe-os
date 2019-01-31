@@ -69,7 +69,7 @@ export default class ContextQueries {
       const approvedContact = approvedContacts.find(c => c.id === id)
       const contactData = {
         id,
-        data: undefined,
+        data: null,
       }
       if (approvedContact) {
         const contact = contacts.find(

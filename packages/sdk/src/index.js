@@ -5,14 +5,18 @@
 import type StreamRPC from '@mainframe/rpc-stream'
 
 import BlockchainAPIs from './apis/Blockchain'
-import PssAPIs from './apis/Pss'
 import ContactsAPIs from './apis/Contacts'
+import PaymentAPIs from './apis/Payments'
+import PssAPIs from './apis/Pss'
+
+export * from './types'
 
 export default class MainframeSDK {
   _rpc: StreamRPC
   _blockchain: BlockchainAPIs
   pss: PssAPIs
   contacts: ContactsAPIs
+  payments: PaymentAPIs
 
   constructor() {
     if (window.mainframe) {
@@ -23,9 +27,12 @@ export default class MainframeSDK {
 
     this.pss = new PssAPIs(this._rpc)
     this.contacts = new ContactsAPIs(this._rpc)
+    this.payments = new PaymentAPIs(this)
   }
 
   get blockchain() {
+    // Lazy load blockchain API's as provider
+    // engine will start fetching blocks
     if (this._blockchain) {
       return this._blockchain
     }

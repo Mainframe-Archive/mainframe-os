@@ -17,7 +17,7 @@ type Wallet = {
 }
 
 type Props = {
-  onSetupWallet: Wallet => void,
+  onSetupWallet: (wallet: Wallet) => void,
   userID: string,
 }
 
@@ -72,7 +72,7 @@ export default class OnboardWalletView extends Component<Props, State> {
             error: errors[0].message,
           })
         } else {
-          this.props.onSetupWallet()
+          this.props.onSetupWallet(wallet)
         }
       },
       onError: err => {

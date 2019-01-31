@@ -9,13 +9,6 @@ import RPCProvider from '../RPCProvider'
 import ClientAPIs from '../ClientAPIs'
 import type MainrameSDK from '../index'
 
-type PayContactParams = {
-  contactID?: string,
-  currency: 'ETH' | 'MFT',
-  value: number,
-  from?: ?string,
-}
-
 const createHookedWallet = (rpc: StreamRPC) => {
   return new HookedProvider({
     getAccounts: async cb => {
@@ -68,40 +61,6 @@ export default class BlockchainAPIs extends ClientAPIs {
 
   get web3Provider() {
     return this._web3Provider
-  }
-
-  async payContact(params: PayContactParams): Promise<TXObservable> {
-    const { contactID, currency, value } = params
-    let contact
-    if (!contactID) {
-      contact = await this._sdk.contacts.selectContact()
-    } else {
-      contact = await this._sdk.contacts.getDataForContact(contactID)
-    }
-    if (!contact) {
-      throw new Error('No contact selected')
-    }
-    if (!contact.data || !contact.data.profile.ethAddress) {
-      throw new Error(`No eth address found for contact: ${contactID}`)
-    }
-    // TODO: Fetch 'from' address from trusted UI if none provided
-    const accounts = await this.getAccounts()
-    if (!accounts || !accounts.length) {
-      throw new Error(`No wallets found`)
-    }
-    const sendParams = {
-      from: accounts[0],
-      to: contact.data.profile.ethAddress,
-      value,
-    }
-    switch (currency) {
-      case 'MFT':
-        return this.sendMFT(sendParams)
-      case 'ETH':
-        return this.sendETH(sendParams)
-      default:
-        throw new Error(`Unsupported currency type: ${currency}`)
-    }
   }
 
   sendETH(params: SendParams): TXObservable {
