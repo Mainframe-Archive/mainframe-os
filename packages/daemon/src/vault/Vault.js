@@ -28,11 +28,7 @@ import {
 // eslint-disable-next-line import/named
 import { uniqueID, type ID } from '@mainframe/utils-id'
 
-import type {
-  AppUserSettings,
-  PermissionsSettings,
-  SessionData,
-} from '../app/AbstractApp'
+import type { PermissionsSettings, SessionData } from '../app/AbstractApp'
 import type App from '../app/App'
 import AppsRepository, {
   type AppsRepositorySerialized,
@@ -316,10 +312,6 @@ export default class Vault {
       throw new Error('App not found')
     }
     app.setPermissionsRequirements(permissions, version)
-  }
-
-  setAppUserSettings(appID: ID, userID: ID, settings: AppUserSettings): void {
-    this.apps.setUserSettings(appID, userID, settings)
   }
 
   setAppUserPermissionsSettings(

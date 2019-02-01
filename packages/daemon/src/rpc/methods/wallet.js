@@ -42,13 +42,13 @@ export const createHDWallet = {
     // $FlowFixMe Issue with promise type
     const hdWallet = await ctx.mutations.createHDWallet(
       params.blockchain,
-      params.firstAccountName,
+      params.name,
       params.userID,
     )
     return {
       localID: hdWallet.localID,
       mnemonic: hdWallet.mnemonic,
-      accounts: hdWallet.getNamedAccounts(),
+      accounts: hdWallet.getAccounts(),
     }
   },
 }
@@ -63,7 +63,7 @@ export const importMnemonic = {
     const hdWallet = await ctx.mutations.importHDWallet(params)
     return {
       localID: hdWallet.localID,
-      accounts: hdWallet.getNamedAccounts(),
+      accounts: hdWallet.getAccounts(),
     }
   },
 }
@@ -121,7 +121,10 @@ export const signTransaction = {
     if (params.chain === 'ethereum') {
       params.transactionData.chainId = ctx.openVault.settings.ethChainID
     }
-    return ctx.openVault.wallets.signTransaction(params)
+    return ctx.openVault.wallets.signTransaction(
+      params.chain,
+      params.transactionData,
+    )
   },
 }
 
@@ -142,7 +145,7 @@ export const addLedgerEthAccount = {
     params: WalletAddLedgerEthAccountParams,
   ): Promise<WalletAddLedgerResult> => {
     return ctx.mutations.addLedgerWalletAccount(
-      params.index,
+      params.indexes,
       params.name,
       params.userID,
     )

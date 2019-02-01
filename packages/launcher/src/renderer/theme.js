@@ -1,5 +1,44 @@
 import COLORS from './colors'
 
+const MARGINS = {
+  marginLeft10: {
+    margin: '0 0 0 10px',
+  },
+  marginLeft20: {
+    margin: '0 0 0 20px',
+  },
+  marginRight10: {
+    margin: '0 10px 0 0',
+  },
+  marginRight20: {
+    margin: '0 20px 0 0',
+  },
+  marginTop10: {
+    margin: '10px 0 0 0',
+  },
+  marginTop20: {
+    margin: '20px 0 0 0',
+  },
+  marginBottom10: {
+    margin: '0 0 10px 0',
+  },
+  marginBottom20: {
+    margin: '0 0 20px 0',
+  },
+  marginVertical10: {
+    margin: '10px 0',
+  },
+  marginVertical20: {
+    margin: '20px 0',
+  },
+  marginHorizontal10: {
+    margin: '0 10px',
+  },
+  marginHorizontal20: {
+    margin: '0 20px',
+  },
+}
+
 export default {
   Button: {
     default: {
@@ -45,16 +84,33 @@ export default {
       borderHoverColor: 'transparent',
       hoverShadow: true,
     },
+    walletOnboarding: {
+      iconHoverBackgroundColor: COLORS.PRIMARY_RED,
+      iconHoverColor: COLORS.WHITE,
+      iconWidth: 18,
+      iconHeight: 18,
+      iconPadding: '8px',
+      titlePadding: '8px',
+    },
     small: {
       titlePadding: '5px 10px',
       fontSize: 9,
     },
-    xSmall: {
+    medium: {
       iconWidth: 14,
       iconHeight: 14,
-      padding: 5,
+      fontSize: 12,
+      borderRadius: 3,
+      iconPadding: '7px 5px',
+      titlePadding: '3px 5px',
+    },
+    xSmall: {
+      iconWidth: 10,
+      iconHeight: 10,
       fontSize: 9,
       borderRadius: 3,
+      iconPadding: '3px 5px',
+      titlePadding: '3px 5px',
     },
     xSmallIconOnly: {
       iconWidth: 14,
@@ -80,10 +136,29 @@ export default {
     noTitle: {
       titlePadding: '0',
     },
+    seedWord: {
+      titlePadding: '5px 8px',
+    },
+    selectedSeedWord: {
+      titlePadding: '5px 8px',
+      borderColor: '#A9A9A9',
+      borderHoverColor: '#A9A9A9',
+      backgroundColor: '#A9A9A9',
+      backgroundHoverColor: '#A9A9A9',
+      titleHoverColor: COLORS.WHITE,
+      titleColor: COLORS.WHITE,
+    },
+    full: {
+      minWidth: '100%',
+    },
+    ...MARGINS,
   },
   Text: {
     default: {
       fontWeight: '300',
+    },
+    mono: {
+      fontFamily: 'IBM Plex Mono',
     },
     regular: {
       fontWeight: '400',
@@ -112,7 +187,7 @@ export default {
       width: '72px',
       overflow: 'hidden',
       whiteSpace: 'nowrap',
-      textOverflow: 'elipsis',
+      textOverflow: 'ellipsis',
     },
     grey: {
       color: COLORS.GREY_A9,
@@ -138,7 +213,7 @@ export default {
     small: {
       fontSize: 11,
     },
-    elipsis: {
+    ellipsis: {
       whiteSpace: 'nowrap',
       overflow: 'hidden',
       textOverflow: 'ellipsis',
@@ -150,6 +225,23 @@ export default {
       color: '#303030',
       fontSize: 13,
     },
+    center: {
+      textAlign: 'center',
+    },
+    modalText: {
+      fontSize: 12,
+      color: '#585858',
+    },
+    padding10: {
+      padding: '10px',
+    },
+    redButton: {
+      borderRadius: '3px',
+      padding: '5px',
+      backgroundColor: COLORS.PRIMARY_RED,
+      fontWeight: 'bold',
+    },
+    ...MARGINS,
   },
   TextField: {
     search: {
@@ -157,6 +249,11 @@ export default {
       fontSize: 13,
       iconWidth: 14,
       iconHeight: 14,
+    },
+  },
+  Checkbox: {
+    mono: {
+      fontFamily: 'IBM Plex Mono',
     },
   },
   styled: {

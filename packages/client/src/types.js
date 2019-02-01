@@ -21,11 +21,9 @@ export type WalletAccount = string
 
 export type WalletResult = {
   localID: string,
-  type: 'ledger' | 'hd',
-  accounts: Array<{
-    name: string,
-    address: string,
-  }>,
+  name: ?string,
+  type: string,
+  accounts: Array<string>,
 }
 
 export type IdentityOwnData = {
@@ -43,6 +41,11 @@ export type AppCheckPermissionParams = {
 
 export type AppCheckPermissionResult = {
   result: PermissionCheckResult,
+}
+
+export type ApprovedContact = {
+  publicDataOnly: boolean,
+  id: string,
 }
 
 export type AppUserPermissionsSettings = {
@@ -148,12 +151,6 @@ export type AppPublishContentsResult = {
 }
 
 export type AppRemoveParams = { appID: ID }
-
-export type AppSetUserSettingsParams = {
-  appID: ID,
-  userID: ID,
-  settings: AppUserSettings,
-}
 
 export type AppSetUserPermissionsSettingsParams = {
   appID: ID,
@@ -303,21 +300,60 @@ export type IdentityDeleteContactParams = {
   contactID: ID,
 }
 
-export type IdentityGetUserContactsParams = {
-  userID: ID,
+export type ContactsGetAppApprovedContactsParams = {
+  appID: string,
+  userID: string,
+}
+
+export type ContactsGetAppUserContactsParams = {
+  appID: string,
+  userID: string,
+  contactIDs: Array<string>,
+}
+
+export type ContactsApproveContactsForAppParams = {
+  appID: string,
+  userID: string,
+  contactsToApprove: Array<{
+    publicDataOnly: boolean,
+    localID: string,
+  }>,
+}
+
+export type ContactProfile = {
+  name?: ?string,
+  aliasName?: ?string,
+  avatar?: ?string,
+  ethAddress?: ?string,
+}
+
+export type AppUserContact = {
+  id: string,
+  data: ?{
+    profile: ContactProfile,
+  },
+}
+
+export type ContactsApproveContactsForAppResult = {
+  approvedContacts: Array<AppUserContact>,
+}
+
+export type ContactsGetAppUserContactsResult = {
+  contacts: Array<AppUserContact>,
 }
 
 export type ContactResult = {
   localID: string,
   peerID: string,
   connectionState: 'connected' | 'sent' | 'sending',
-  profile: {
-    name?: ?string,
-    avatar?: ?string,
-  },
+  profile: ContactProfile,
 }
 
-export type IdentityGetUserContactsResult = {
+export type ContactsGetUserContactsParams = {
+  userID: string,
+}
+
+export type ContactsGetUserContactsResult = {
   contacts: Array<ContactResult>,
 }
 
@@ -362,29 +398,24 @@ export type VaultSettingsParams = $Shape<VaultSettings>
 export type WalletImportMnemonicParams = {
   blockchain: WalletSupportedChains,
   mnemonic: string,
-  firstAccountName: string,
-  userID?: string,
-}
-
-export type WalletNamedAccount = {
   name: string,
-  address: string,
+  userID?: string,
 }
 
 export type WalletImportResult = {
   localID: ID,
-  accounts: Array<WalletNamedAccount>,
+  accounts: Array<string>,
 }
 
 export type WalletCreateHDParams = {
   blockchain: WalletSupportedChains,
-  firstAccountName: string,
+  name: string,
   userID?: string,
 }
 
 export type WalletCreateHDResult = {
   localID: ID,
-  accounts: Array<WalletNamedAccount>,
+  accounts: Array<string>,
   mnemonic: string,
 }
 
@@ -431,13 +462,12 @@ export type WalletGetLedgerEthAccountsResult = Array<string>
 export type WalletGetEthAccountsResult = Array<string>
 
 export type WalletAddLedgerEthAccountParams = {
-  index: number,
+  indexes: Array<number>,
   name: string,
   userID?: string,
 }
 
 export type WalletAddHDAccountParams = {
-  name: string,
   index: number,
   walletID: string,
   userID?: string,

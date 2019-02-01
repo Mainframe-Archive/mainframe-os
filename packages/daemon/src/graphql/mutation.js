@@ -64,9 +64,6 @@ const addHDWalletAccountMutation = mutationWithClientMutationId({
     index: {
       type: new GraphQLNonNull(GraphQLInt),
     },
-    name: {
-      type: new GraphQLNonNull(GraphQLString),
-    },
     userID: {
       type: GraphQLString,
     },
@@ -111,12 +108,12 @@ const importHDWalletMutation = mutationWithClientMutationId({
     const wallet = await ctx.mutations.importHDWallet({
       blockchain: args.blockchain,
       mnemonic: args.mnemonic,
-      firstAccountName: args.name,
+      name: args.name,
       userID: args.userID,
     })
     return {
       localID: wallet.localID,
-      accounts: wallet.getNamedAccounts(),
+      accounts: wallet.getAccounts(),
     }
   },
 })
@@ -150,7 +147,7 @@ const createHDWalletMutation = mutationWithClientMutationId({
     return {
       localID: wallet.localID,
       mnemonic: wallet.mnemonic,
-      accounts: wallet.getNamedAccounts(),
+      accounts: wallet.getAccounts(),
     }
   },
 })
@@ -158,8 +155,8 @@ const createHDWalletMutation = mutationWithClientMutationId({
 const addLedgerWalletAccountMutation = mutationWithClientMutationId({
   name: 'AddLedgerWalletAccount',
   inputFields: {
-    index: {
-      type: new GraphQLNonNull(GraphQLInt),
+    indexes: {
+      type: new GraphQLList(GraphQLInt),
     },
     name: {
       type: new GraphQLNonNull(GraphQLString),
@@ -181,7 +178,7 @@ const addLedgerWalletAccountMutation = mutationWithClientMutationId({
   },
   mutateAndGetPayload: async (args, ctx) => {
     const res = await ctx.mutations.addLedgerWalletAccount(
-      args.index,
+      args.indexes,
       args.name,
       args.userID,
     )
@@ -309,10 +306,10 @@ const deleteContactMutation = mutationWithClientMutationId({
 const appPermissionDefinitionsInput = new GraphQLInputObjectType({
   name: 'AppPermissionDefinitionsInput',
   fields: () => ({
-    WEB_REQUEST: {
-      type: new GraphQLList(GraphQLString),
-    },
     BLOCKCHAIN_SEND: {
+      type: GraphQLBoolean,
+    },
+    CONTACTS_READ: {
       type: GraphQLBoolean,
     },
     SWARM_UPLOAD: {
@@ -320,6 +317,9 @@ const appPermissionDefinitionsInput = new GraphQLInputObjectType({
     },
     SWARM_DOWNLOAD: {
       type: GraphQLBoolean,
+    },
+    WEB_REQUEST: {
+      type: new GraphQLList(GraphQLString),
     },
   }),
 })
@@ -416,6 +416,7 @@ const permissionGrantsInput = new GraphQLInputObjectType({
   name: 'PermissionGrantsInput',
   fields: () => ({
     BLOCKCHAIN_SEND: { type: GraphQLBoolean },
+    CONTACTS_READ: { type: GraphQLBoolean },
     SWARM_UPLOAD: { type: GraphQLBoolean },
     SWARM_DOWNLOAD: { type: GraphQLBoolean },
     WEB_REQUEST: { type: new GraphQLNonNull(webRequestGrantInput) },

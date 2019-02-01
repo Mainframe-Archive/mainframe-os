@@ -10,7 +10,6 @@ import {
 } from '../swarm/feed'
 
 export type ContactProfile = {
-  aliasName?: ?string,
   name?: ?string,
   avatar?: ?string,
   ethAddress?: ?string,
@@ -20,6 +19,7 @@ export type ContactSerialized = {
   localID: string,
   peerID: string,
   profile: ContactProfile,
+  aliasName: ?string,
   ownFeed: OwnFeedSerialized,
   requestSent: boolean,
   contactFeed?: ?string,
@@ -29,22 +29,26 @@ export type FirstContactSerialized = {
   privateFeed: bzzHash,
 }
 
-export type ContactConnection = 'connected' | 'sent' | 'sending'
+export type ConnectionState = 'connected' | 'sent' | 'sending'
 
 export default class Contact {
   static create = (
     peerID: string,
-    profile: ContactProfile,
-    contactFeed?: ?string,
-    localID?: string,
+    optional: {
+      aliasName?: string,
+      profile?: ContactProfile,
+      contactFeed?: string,
+      localID?: string,
+    },
   ): Contact => {
     return new Contact(
-      localID || uniqueID(),
+      optional.localID || uniqueID(),
       peerID,
-      profile,
+      optional.profile || {},
+      optional.aliasName,
       OwnFeed.create(undefined, randomTopic()),
       false,
-      contactFeed,
+      optional.contactFeed,
     )
   }
 
@@ -53,6 +57,7 @@ export default class Contact {
       contactSerialized.localID,
       contactSerialized.peerID,
       contactSerialized.profile,
+      contactSerialized.aliasName,
       OwnFeed.fromJSON(contactSerialized.ownFeed),
       contactSerialized.requestSent,
       contactSerialized.contactFeed,
@@ -62,6 +67,7 @@ export default class Contact {
     localID: contact.localID,
     peerID: contact.peerID,
     profile: contact.profile,
+    aliasName: contact._aliasName,
     ownFeed: OwnFeed.toJSON(contact.ownFeed),
     requestSent: contact._requestSent,
     contactFeed: contact.contactFeed,
@@ -72,8 +78,8 @@ export default class Contact {
   _ownFeed: OwnFeed
   _requestSent: boolean
   _contactFeed: ?string
+  _aliasName: ?string
   _profile: {
-    aliasName: ?string,
     name: ?string,
     avatar: ?string,
     ethAddress: ?string,
@@ -83,6 +89,7 @@ export default class Contact {
     localID: string,
     peerID: string,
     profile: ContactProfile,
+    aliasName: ?string,
     ownFeed: OwnFeed,
     requestSent?: boolean,
     contactFeed?: ?string,
@@ -90,6 +97,7 @@ export default class Contact {
     this._localID = localID
     this._peerID = peerID
     this._profile = profile
+    this._aliasName = aliasName
     this._ownFeed = ownFeed
     this._requestSent = !!requestSent
     this._contactFeed = contactFeed
@@ -119,15 +127,23 @@ export default class Contact {
     return this._profile
   }
 
+  set profile(profile: ContactProfile) {
+    this._profile = profile
+  }
+
   get name(): ?string {
-    return this._profile.aliasName || this._profile.name
+    return this._aliasName || this._profile.name
+  }
+
+  set aliasName(aliasName: ?string): void {
+    this._aliasName = aliasName
   }
 
   set requestSent(requestSent: boolean): void {
     this._requestSent = requestSent
   }
 
-  get connectionState(): ContactConnection {
+  get connectionState(): ConnectionState {
     if (!this._requestSent) return 'sending'
     return this.contactFeed ? 'connected' : 'sent'
   }

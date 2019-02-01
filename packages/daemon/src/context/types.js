@@ -17,12 +17,7 @@ export type ContactChangedEvent = {|
   type: 'contact_changed',
   contact: Contact,
   userID: string,
-  change: 'peerChanged' | 'requestSent',
-|}
-export type ContactLoadedEvent = {|
-  type: 'contact_loaded',
-  contact: Contact,
-  userID: string,
+  change: 'peerChanged' | 'requestSent' | 'contactFeed' | 'profile',
 |}
 export type ContactDeletedEvent = {|
   type: 'contact_deleted',
@@ -68,7 +63,6 @@ export type ContextEvent =
   | AppCreatedEvent
   | ContactCreatedEvent
   | ContactChangedEvent
-  | ContactLoadedEvent
   | ContactDeletedEvent
   | PeerCreatedEvent
   | PeerChangedEvent

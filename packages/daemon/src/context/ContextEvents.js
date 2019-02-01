@@ -2,6 +2,7 @@
 
 import type { Observable, Subscription } from 'rxjs'
 import { debounceTime, filter } from 'rxjs/operators'
+import { idType } from '@mainframe/utils-id'
 
 import { OwnFeed } from '../swarm/feed'
 
@@ -9,7 +10,7 @@ import type ClientContext from './ClientContext'
 import type {
   ContextEvent,
   ContactCreatedEvent,
-  ContactLoadedEvent,
+  ContactChangedEvent,
   UserCreatedEvent,
   UserChangedEvent,
 } from './types'
@@ -86,27 +87,29 @@ export default class ContextEvents {
         }),
     )
     this.addSubscription(
-      'contactRequestPending',
+      'contactRequestSending',
       this._context
         .pipe(
           filter((e: ContextEvent) => {
             return (
-              (e.type === 'contact_created' || e.type === 'contact_loaded') &&
+              (e.type === 'contact_created' || e.type === 'contact_changed') &&
               e.contact.connectionState === 'sending'
             )
           }),
         )
-        .subscribe(async (e: ContactCreatedEvent | ContactLoadedEvent) => {
+        .subscribe(async (e: ContactCreatedEvent | ContactChangedEvent) => {
           const { contact, userID } = e
-          const user = this._context.openVault.identities.getOwnUser(userID)
+          const user = this._context.openVault.identities.getOwnUser(
+            idType(userID),
+          )
           const peer = this._context.openVault.identities.getPeerUser(
-            contact.peerID,
+            idType(contact.peerID),
           )
           if (!user || !peer) return
 
           // TODO: Actual data
           await contact.ownFeed.publishJSON(this._context.io.bzz, {
-            message: 'connected',
+            profile: {},
           })
           await contact.ownFeed.syncManifest(this._context.io.bzz)
 
@@ -127,22 +130,6 @@ export default class ContextEvents {
             userID,
             change: 'requestSent',
           })
-
-          // // Check if other user created feed
-          // try {
-          //   const topic = getFeedTopic({ name: user.base64PublicKey() })
-          //   const peerFeedRes = await this._context.io.bzz.getFeedValue(
-          //     peer.firstContactAddress,
-          //     { topic },
-          //     { mode: 'content-response' },
-          //   )
-          //   const data = await peerFeedRes.json()
-          //   contact.contactFeed = data.privateFeed
-          //   await this._context.openVault.save()
-          // } catch (_e) {
-          //   // Should always be due to contact feed not being ready
-          //   // TODO: Rethrow other errors
-          // }
         }),
     )
   }

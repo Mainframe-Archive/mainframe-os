@@ -16,8 +16,6 @@ import {
   type IdentityGetOwnDevelopersResult,
   type IdentityGetOwnUsersResult,
   type IdentityGetPeersResult,
-  type IdentityGetUserContactsParams,
-  type IdentityGetUserContactsResult,
   type IdentityLinkEthWalletAccountParams,
   type IdentityUnlinkEthWalletAccountParams,
   type IdentityUpdateUserParams,
@@ -28,7 +26,6 @@ import {
   IDENTITY_CREATE_OWN_USER_SCHEMA,
   IDENTITY_CREATE_OWN_DEVELOPER_SCHEMA,
   IDENTITY_DELETE_CONTACT_SCHEMA,
-  IDENTITY_GET_USER_CONTACTS_SCHEMA,
   IDENTITY_LINK_ETH_WALLET_SCHEMA,
   IDENTITY_UNLINK_ETH_WALLET_SCHEMA,
   IDENTITY_UPDATE_USER_SCHEMA,
@@ -214,16 +211,5 @@ export const deleteContact = {
       fromClientID(params.userID),
       fromClientID(params.contactID),
     )
-  },
-}
-
-export const getUserContacts = {
-  params: IDENTITY_GET_USER_CONTACTS_SCHEMA,
-  handler: async (
-    ctx: ClientContext,
-    params: IdentityGetUserContactsParams,
-  ): Promise<IdentityGetUserContactsResult> => {
-    const contacts = ctx.queries.getUserContacts(params.userID)
-    return { contacts }
   },
 }

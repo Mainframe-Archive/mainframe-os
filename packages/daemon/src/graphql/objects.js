@@ -472,8 +472,8 @@ export const peer = new GraphQLObjectType({
   }),
 })
 
-export const contactConnection = new GraphQLEnumType({
-  name: 'ContactConnection',
+export const connectionState = new GraphQLEnumType({
+  name: 'ConnectionState',
   values: {
     CONNECTED: { value: 'connected' },
     SENDING: { value: 'sending' },
@@ -502,7 +502,7 @@ export const contact = new GraphQLObjectType({
       },
     },
     connectionState: {
-      type: new GraphQLNonNull(contactConnection),
+      type: new GraphQLNonNull(connectionState),
     },
   }),
 })
@@ -603,18 +603,16 @@ export const walletBalances = new GraphQLObjectType({
   }),
 })
 
-export const namedWalletAccount = new GraphQLObjectType({
-  name: 'NamedWalletAccountType',
+export const walletAccount = new GraphQLObjectType({
+  name: 'WalletAccount',
   fields: () => ({
-    name: {
-      type: new GraphQLNonNull(GraphQLString),
-    },
     address: {
       type: new GraphQLNonNull(GraphQLString),
+      resolve: self => self,
     },
     balances: {
       type: new GraphQLNonNull(walletBalances),
-      resolve: self => self.address,
+      resolve: self => self,
     },
   }),
 })
@@ -624,11 +622,14 @@ export const ethLedgerWallet = new GraphQLObjectType({
   interfaces: () => [nodeInterface],
   fields: () => ({
     id: idResolver,
+    name: {
+      type: GraphQLString,
+    },
     localID: {
       type: new GraphQLNonNull(GraphQLID),
     },
     accounts: {
-      type: new GraphQLList(namedWalletAccount),
+      type: new GraphQLList(walletAccount),
     },
   }),
 })
@@ -638,6 +639,9 @@ export const ethHdWallet = new GraphQLObjectType({
   interfaces: () => [nodeInterface],
   fields: () => ({
     id: idResolver,
+    name: {
+      type: GraphQLString,
+    },
     localID: {
       type: new GraphQLNonNull(GraphQLID),
     },
@@ -645,7 +649,7 @@ export const ethHdWallet = new GraphQLObjectType({
       type: new GraphQLNonNull(GraphQLString),
     },
     accounts: {
-      type: new GraphQLList(namedWalletAccount),
+      type: new GraphQLList(walletAccount),
     },
   }),
 })

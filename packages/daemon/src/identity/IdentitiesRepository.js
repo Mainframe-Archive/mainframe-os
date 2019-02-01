@@ -308,8 +308,12 @@ export default class IdentitiesRepository {
     return this._identities.contacts
   }
 
-  getContactsForUser(userID: string): { [id: string]: Contact } {
+  getContactsForUser(userID: ID | string): { [id: string]: Contact } {
     return this._identities.contacts[userID]
+  }
+
+  getContact(userID: ID | string, contactID: ID | string): ?Contact {
+    return this._identities.contacts[userID][contactID]
   }
 
   getOwnApp(id: ID | string): ?OwnAppIdentity {

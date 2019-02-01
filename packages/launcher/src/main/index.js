@@ -47,6 +47,7 @@ const newWindow = (params: Object = {}) => {
     width: params.width || 800,
     height: params.height || 600,
     show: false,
+    titleBarStyle: 'hidden',
   })
 
   if (is.development) {

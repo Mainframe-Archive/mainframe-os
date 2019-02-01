@@ -47,11 +47,19 @@ export default {
     })
   },
 
+  // Wallets
+
   getUserEthWallets: async () => {
     return rpc.request('wallet_getUserEthWallets')
   },
 
   web3Send: async (params: Object) => {
     return rpc.request('blockchain_web3Send', params)
+  },
+
+  // Contacts
+
+  getUserContacts: async (userID: string) => {
+    return rpc.request('contacts_getUserContacts', { userID })
   },
 }

@@ -84,6 +84,7 @@ const BUTTONS: Object = {
 
 const Container = styled.View`
   width: 126px;
+  padding-top: 20px;
   background-color: ${props => props.theme.colors.LIGHT_GREY_F5};
 `
 
