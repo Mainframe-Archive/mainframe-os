@@ -93,6 +93,10 @@ export default class WalletAddLedgerModal extends Component<Props, State> {
     this.fetchAccounts()
   }
 
+  onChangePage = (pageNumber: number) => {
+    this.fetchAccounts(pageNumber)
+  }
+
   fetchAccounts = async (pageNumber: number = 1) => {
     this.setState({ fetchingAccounts: true })
     try {
@@ -142,7 +146,6 @@ export default class WalletAddLedgerModal extends Component<Props, State> {
       variables: { input, userID: this.props.userID },
       onCompleted: (response, errors) => {
         if (errors || !response) {
-          // console.log(errors)
           const error =
             errors && errors.length ? errors[0] : new Error(MUTATION_ERR_MSG)
 
@@ -152,7 +155,6 @@ export default class WalletAddLedgerModal extends Component<Props, State> {
         }
       },
       onError: err => {
-        // console.log(err)
         this.displayError(err)
       },
     })
@@ -241,8 +243,7 @@ export default class WalletAddLedgerModal extends Component<Props, State> {
             maxDisplay={10}
             defaultPage={this.state.currentPage}
             label="Page"
-            // $FlowFixMe
-            onSelectPage={this.fetchAccounts}
+            onSelectPage={this.onChangePage}
           />
         </>
       )
