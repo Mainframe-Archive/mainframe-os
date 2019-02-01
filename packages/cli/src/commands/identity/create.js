@@ -6,7 +6,7 @@ import { prompt } from 'inquirer'
 import Command from '../../OpenVaultCommand'
 
 export default class IdentityCreateCommand extends Command {
-  static description = 'Create identitiy'
+  static description = 'Create identity'
   static flags = Command.flags
 
   async run() {

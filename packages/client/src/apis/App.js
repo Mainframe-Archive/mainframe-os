@@ -12,6 +12,8 @@ import type {
   AppGetManifestDataResult,
   AppInstallParams,
   AppInstallResult,
+  AppLoadManifestParams,
+  AppLoadManifestResult,
   AppOpenParams,
   AppOpenResult,
   AppPublishParams,
@@ -50,6 +52,10 @@ export default class AppAPIs extends ClientAPIs {
 
   install(params: AppInstallParams): Promise<AppInstallResult> {
     return this._rpc.request('app_install', params)
+  }
+
+  loadManifest(params: AppLoadManifestParams): Promise<AppLoadManifestResult> {
+    return this._rpc.request('app_loadManifest', params)
   }
 
   open(params: AppOpenParams): Promise<AppOpenResult> {

@@ -60,6 +60,10 @@ export const APP_INSTALL_SCHEMA = {
   permissionsSettings: APP_PERMISSIONS_SETTINGS_SCHEMA,
 }
 
+export const APP_LOAD_MANIFEST_SCHEMA = {
+  hash: 'string',
+}
+
 export const APP_OPEN_SCHEMA = {
   appID: LOCAL_ID_SCHEMA,
   userID: LOCAL_ID_SCHEMA,

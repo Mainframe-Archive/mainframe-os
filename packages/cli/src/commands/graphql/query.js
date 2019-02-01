@@ -1,7 +1,5 @@
 // @flow
 
-import { inspect } from 'util'
-
 import Command from '../../OpenVaultCommand'
 
 export default class GraphQLQueryCommand extends Command {
@@ -22,6 +20,6 @@ export default class GraphQLQueryCommand extends Command {
     }
 
     const res = await client.graphql.query({ query: this.args.query })
-    this.log(inspect(res, { colors: true, depth: null }))
+    this.logObject(res)
   }
 }

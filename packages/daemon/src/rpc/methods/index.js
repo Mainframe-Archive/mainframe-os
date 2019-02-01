@@ -16,11 +16,16 @@ export default {
 
   app_checkPermission: app.checkPermission,
   app_close: app.close,
-  app_install: app.install,
-  app_remove: app.remove,
-  app_open: app.open,
+  app_create: app.create,
   app_getAll: app.getAll,
+  app_getManifestData: app.getManifestData,
+  app_install: app.install,
+  app_loadManifest: app.loadManifest,
+  app_open: app.open,
+  app_publish: app.publish,
+  app_remove: app.remove,
   app_setPermission: app.setPermission,
+  app_setPermissionsRequirements: app.setPermissionsRequirements,
   app_setUserPermissionsSettings: app.setUserPermissionsSettings,
   app_setUserSettings: app.setUserSettings,
   // TODO: remove app for given user only
@@ -29,10 +34,6 @@ export default {
   // - "remove": clear + also removes manifest, no more knowledge about this app in vault
   app_uninstall: noop,
   app_update: noop, // TODO: similar to install
-  app_create: app.create,
-  app_getManifestData: app.getManifestData,
-  app_setPermissionsRequirements: app.setPermissionsRequirements,
-  app_publish: app.publish,
 
   blockchain_web3Send: blockchain.web3Send,
 

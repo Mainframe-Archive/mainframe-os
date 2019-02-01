@@ -17,11 +17,6 @@ import AbstractApp, {
 } from './AbstractApp'
 import Session from './Session'
 
-export type AppVersionPublicationState =
-  | 'unpublished'
-  | 'contents_published'
-  | 'manifest_published'
-
 export type OwnAppData = {
   contentsPath: string,
   developerID: ID,
@@ -31,9 +26,9 @@ export type OwnAppData = {
 }
 
 export type AppVersion = {
-  contentsHash?: ?string,
   permissions: StrictPermissionsRequirements,
-  publicationState: AppVersionPublicationState,
+  contentsHash?: ?string,
+  versionHash?: string,
 }
 
 export type OwnAppParams = AbstractAppParams & {
@@ -72,7 +67,6 @@ export default class OwnApp extends AbstractApp {
       versions: {
         [params.version]: {
           permissions: params.permissions || createRequirements(),
-          publicationState: 'unpublished',
         },
       },
     })
@@ -142,7 +136,6 @@ export default class OwnApp extends AbstractApp {
     const latestVersion = this._versions[this._data.version]
     this._versions[version] = {
       permissions: permissions || latestVersion.permissions,
-      publicationState: 'unpublished',
     }
     this._data.version = version
   }
@@ -153,11 +146,23 @@ export default class OwnApp extends AbstractApp {
     if (versionData == null) {
       throw new Error('Invalid version')
     }
-    if (versionData.publicationState === 'manifest_published') {
+    if (versionData.versionHash != null) {
       throw new Error('Manifest has already been published')
     }
     versionData.contentsHash = hash
-    versionData.publicationState = 'contents_published'
+    this._versions[v] = versionData
+  }
+
+  setVersionHash(hash: string, version?: ?string): void {
+    const v = version || this._data.version
+    const versionData = this._versions[v]
+    if (versionData == null) {
+      throw new Error('Invalid version')
+    }
+    if (versionData.contentsHash == null) {
+      throw new Error('Contents have not yet been published')
+    }
+    versionData.versionHash = hash
     this._versions[v] = versionData
   }
 

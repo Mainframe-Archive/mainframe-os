@@ -62,13 +62,13 @@ export type AppCreateParams = {
 
 export type AppCreateResult = { appID: ID }
 
-export type WalletSettings = {
+export type AppUserWalletSettings = {
   defaultEthAccount: ?string,
 }
 
 export type AppUserSettings = {
   permissionsSettings: AppUserPermissionsSettings,
-  walletSettings: WalletSettings,
+  walletSettings: AppUserWalletSettings,
 }
 
 export type AppUser = IdentityOwnData & {
@@ -124,6 +124,15 @@ export type AppInstallationState =
 export type AppInstallResult = {
   appID: ID,
   installationState: AppInstallationState,
+}
+
+export type AppLoadManifestParams = {
+  hash: string,
+}
+
+export type AppLoadManifestResult = {
+  appID?: ID,
+  manifest: ManifestData,
 }
 
 export type AppOpenParams = {

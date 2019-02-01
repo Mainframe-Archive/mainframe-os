@@ -133,7 +133,7 @@ export default class ContextMutations {
       throw new Error('Developer identity not found')
     }
 
-    const app = OwnApp.create({
+    const app = openVault.apps.create({
       contentsPath: params.contentsPath,
       developerID: params.developerID,
       mfid: appIdentity.id,
@@ -176,11 +176,11 @@ export default class ContextMutations {
       throw new Error('Invalid app version')
     }
 
-    if (versionData.publicationState === 'manifest_published') {
+    if (versionData.versionHash != null) {
       throw new Error('Manifest has already been published for this version')
     }
 
-    if (versionData.publicationState === 'unpublished') {
+    if (versionData.contentsHash == null) {
       const hash = await io.bzz.uploadDirectoryFrom(app.contentsPath)
       app.setContentsHash(hash, params.version)
     }
@@ -207,11 +207,12 @@ export default class ContextMutations {
     }
 
     // $FlowFixMe: doesn't seem to detect sanity checks for hashes
-    const manifestPayload = createSignedManifest(manifestData, [
+    const signedManifest = createSignedManifest(manifestData, [
       appIdentity.keyPair,
       devIdentity.keyPair,
     ])
-    await app.updateFeed.publishJSON(io.bzz, manifestPayload)
+    const versionHash = await app.updateFeed.publishJSON(io.bzz, signedManifest)
+    app.setVersionHash(versionHash, params.version)
 
     this._context.next({ type: 'app_changed', app, change: 'versionPublished' })
     // $FlowFixMe: weird issue with return type not detected as Promise

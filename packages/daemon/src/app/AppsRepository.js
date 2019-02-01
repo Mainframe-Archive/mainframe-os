@@ -19,7 +19,10 @@ import { mapObject } from '../utils'
 
 import type { SessionData } from './AbstractApp'
 import App, { type AppSerialized } from './App'
-import OwnApp, { type OwnAppParams, type OwnAppSerialized } from './OwnApp'
+import OwnApp, {
+  type OwnAppCreationParams,
+  type OwnAppSerialized,
+} from './OwnApp'
 
 export type AppUpdate = {
   app: App,
@@ -325,10 +328,10 @@ export default class AppsRepository {
 
   // Own apps
 
-  create(params: OwnAppParams): OwnApp {
-    const app = new OwnApp(params)
-    this._byMFID[MFID.canonical(params.data.mfid)] = params.appID
-    this._ownApps[params.appID] = app
+  create(params: OwnAppCreationParams): OwnApp {
+    const app = OwnApp.create(params)
+    this._byMFID[MFID.canonical(app.mfid)] = app.id
+    this._ownApps[app.id] = app
     return app
   }
 

@@ -1,5 +1,6 @@
 // @flow
 
+import { verifyManifest } from '@mainframe/app-manifest'
 import {
   idType as toClientID,
   APP_CHECK_PERMISSION_SCHEMA,
@@ -17,6 +18,9 @@ import {
   APP_INSTALL_SCHEMA,
   type AppInstallParams,
   type AppInstallResult,
+  APP_LOAD_MANIFEST_SCHEMA,
+  type AppLoadManifestParams,
+  type AppLoadManifestResult,
   APP_OPEN_SCHEMA,
   type AppOpenParams,
   type AppOpenResult,
@@ -196,6 +200,20 @@ export const install = {
       appID: toClientID(app.id),
       installationState: app.installationState,
     }
+  },
+}
+
+export const loadManifest = {
+  params: APP_LOAD_MANIFEST_SCHEMA,
+  handler: async (
+    ctx: ClientContext,
+    params: AppLoadManifestParams,
+  ): Promise<AppLoadManifestResult> => {
+    const res = await ctx.io.bzz.download(params.hash)
+    const payload = await res.json()
+    const manifest = verifyManifest(payload)
+    const appID = ctx.openVault.apps.getID(manifest.id)
+    return { manifest, appID: appID ? toClientID(appID) : undefined }
   },
 }
 
