@@ -31,7 +31,7 @@ type State = {
 type Props = {
   userID: string,
   onClose?: () => void,
-  onSetupWallet: (wallet: Wallet) => void,
+  onSetupWallet: (address: string) => void,
   full?: boolean,
 }
 
@@ -193,7 +193,7 @@ export default class WalletCreateModal extends Component<Props, State> {
 
   onPressConfirmBackup = () => {
     if (this.state.wallet && this.state.confirmedWords.length === 12) {
-      this.props.onSetupWallet(this.state.wallet)
+      this.props.onSetupWallet(this.state.wallet.accounts[0].address)
     }
   }
 

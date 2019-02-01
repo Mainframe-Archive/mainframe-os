@@ -152,8 +152,8 @@ const createHDWalletMutation = mutationWithClientMutationId({
   },
 })
 
-const addLedgerWalletAccountMutation = mutationWithClientMutationId({
-  name: 'AddLedgerWalletAccount',
+const addLedgerWalletAccountsMutation = mutationWithClientMutationId({
+  name: 'AddLedgerWalletAccounts',
   inputFields: {
     indexes: {
       type: new GraphQLList(GraphQLInt),
@@ -166,9 +166,9 @@ const addLedgerWalletAccountMutation = mutationWithClientMutationId({
     },
   },
   outputFields: {
-    address: {
-      type: new GraphQLNonNull(GraphQLString),
-      resolve: payload => payload.address,
+    addresses: {
+      type: new GraphQLList(GraphQLString),
+      resolve: payload => payload.addresses,
     },
     localID: {
       type: new GraphQLNonNull(GraphQLString),
@@ -177,7 +177,7 @@ const addLedgerWalletAccountMutation = mutationWithClientMutationId({
     viewer: viewerOutput,
   },
   mutateAndGetPayload: async (args, ctx) => {
-    const res = await ctx.mutations.addLedgerWalletAccount(
+    const res = await ctx.mutations.addLedgerWalletAccounts(
       args.indexes,
       args.name,
       args.userID,
@@ -515,7 +515,7 @@ export default new GraphQLObjectType({
     createHDWallet: createHDWalletMutation,
     importHDWallet: importHDWalletMutation,
     addHDWalletAccount: addHDWalletAccountMutation,
-    addLedgerWalletAccount: addLedgerWalletAccountMutation,
+    addLedgerWalletAccounts: addLedgerWalletAccountsMutation,
     deleteWallet: deleteWalletMutation,
     addContact: addContactMutation,
     deleteContact: deleteContactMutation,

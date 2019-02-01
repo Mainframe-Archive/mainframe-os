@@ -465,7 +465,7 @@ export type WalletGetLedgerEthAccountsResult = Array<string>
 
 export type WalletGetEthAccountsResult = Array<string>
 
-export type WalletAddLedgerEthAccountParams = {
+export type WalletAddLedgerEthAccountsParams = {
   indexes: Array<number>,
   name: string,
   userID?: string,
@@ -481,7 +481,7 @@ export type WalletAddHDAccountResult = string
 
 export type WalletAddLedgerResult = {
   localID: string,
-  address: string,
+  addresses: Array<string>,
 }
 
 export type WalletSetUserDefaulParams = {

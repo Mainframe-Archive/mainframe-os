@@ -43,7 +43,7 @@ export type WalletsRepositorySerialized = {
 
 export type WalletAddLedgerResult = {
   localID: string,
-  address: string,
+  addresses: Array<string>,
 }
 
 export type ImportHDWalletParams = {
@@ -241,7 +241,7 @@ export default class WalletsRepository {
     }
   }
 
-  async addLedgerEthAccount(
+  async addLedgerEthAccounts(
     indexes: Array<number>,
     name: string,
   ): Promise<WalletAddLedgerResult> {
@@ -263,7 +263,7 @@ export default class WalletsRepository {
 
     return {
       localID: ledgerWallet.id,
-      address: addresses[0],
+      addresses: addresses,
     }
   }
 }

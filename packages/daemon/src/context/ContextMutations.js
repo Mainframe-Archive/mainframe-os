@@ -285,19 +285,18 @@ export default class ContextMutations {
     return address
   }
 
-  async addLedgerWalletAccount(
+  async addLedgerWalletAccounts(
     indexes: Array<number>,
     name: string,
     userID?: string,
   ): Promise<WalletAddLedgerResult> {
     const { openVault } = this._context
-    const res = await openVault.wallets.addLedgerEthAccount(indexes, name)
+    const res = await openVault.wallets.addLedgerEthAccounts(indexes, name)
     if (userID) {
-      openVault.identityWallets.linkWalletToIdentity(
-        userID,
-        res.localID,
-        res.address,
-      )
+      res.addresses.forEach(a => {
+        // $FlowFixMe userID already checked
+        openVault.identityWallets.linkWalletToIdentity(userID, res.localID, a)
+      })
     }
     await openVault.save()
     return res

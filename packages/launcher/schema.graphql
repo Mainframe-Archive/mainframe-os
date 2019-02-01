@@ -24,15 +24,15 @@ type AddHDWalletAccountPayload {
   clientMutationId: String
 }
 
-input AddLedgerWalletAccountInput {
+input AddLedgerWalletAccountsInput {
   indexes: [Int]
   name: String!
   userID: String
   clientMutationId: String
 }
 
-type AddLedgerWalletAccountPayload {
-  address: String!
+type AddLedgerWalletAccountsPayload {
+  addresses: [String]
   localID: String!
   viewer: Viewer!
   clientMutationId: String
@@ -295,7 +295,7 @@ type Mutation {
   createHDWallet(input: CreateHDWalletInput!): CreateHDWalletPayload
   importHDWallet(input: ImportHDWalletInput!): ImportHDWalletPayload
   addHDWalletAccount(input: AddHDWalletAccountInput!): AddHDWalletAccountPayload
-  addLedgerWalletAccount(input: AddLedgerWalletAccountInput!): AddLedgerWalletAccountPayload
+  addLedgerWalletAccounts(input: AddLedgerWalletAccountsInput!): AddLedgerWalletAccountsPayload
   deleteWallet(input: DeleteWalletInput!): DeleteWalletPayload
   addContact(input: AddContactInput!): AddContactPayload
   deleteContact(input: DeletContactInput!): DeletContactPayload

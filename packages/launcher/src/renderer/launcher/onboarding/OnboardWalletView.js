@@ -12,19 +12,16 @@ import WalletCreateModal from '../wallets/WalletCreateModal'
 import WalletImportView from '../wallets/WalletImportView'
 import WalletAddLedgerModal from '../wallets/WalletAddLedgerModal'
 import { EnvironmentContext } from '../RelayEnvironment'
+import Loader from '../../UIComponents/Loader'
 import OnboardContainer from './OnboardContainer'
 
-type Wallet = {
-  accounts: Array<{ address: string }>,
-}
-
 type Props = {
-  onSetupWallet: (wallet: Wallet) => void,
+  onSetupWallet: () => void,
   userID: string,
 }
 
 type State = {
-  view: 'start' | 'create' | 'import' | 'ledger',
+  view: 'start' | 'create' | 'import' | 'ledger' | 'saving',
   error?: string,
 }
 
@@ -69,13 +66,17 @@ export default class OnboardWalletView extends Component<Props, State> {
     })
   }
 
-  onSetupWallet = (wallet: Wallet) => {
+  onSetupWallet = (address: string) => {
     const input = {
       userID: this.props.userID,
       profile: {
-        ethAddress: wallet.accounts[0].address,
+        ethAddress: address,
       },
     }
+
+    this.setState({
+      view: 'saving',
+    })
 
     commitMutation(this.context, {
       mutation: updateProfileMutation,
@@ -86,7 +87,7 @@ export default class OnboardWalletView extends Component<Props, State> {
             error: errors[0].message,
           })
         } else {
-          this.props.onSetupWallet(wallet)
+          this.props.onSetupWallet()
         }
       },
       onError: err => {
@@ -98,7 +99,7 @@ export default class OnboardWalletView extends Component<Props, State> {
   }
 
   renderStart() {
-    return (
+    return this.state.view === 'start' ? (
       <Row inner>
         <ButtonWrapper>
           <Button
@@ -126,6 +127,8 @@ export default class OnboardWalletView extends Component<Props, State> {
           />
         </ButtonWrapper>
       </Row>
+    ) : (
+      <Loader />
     )
   }
 
@@ -172,6 +175,7 @@ export default class OnboardWalletView extends Component<Props, State> {
   renderContent() {
     switch (this.state.view) {
       case 'start':
+      case 'saving':
         return this.renderStart()
       case 'import':
         return this.renderImport()
