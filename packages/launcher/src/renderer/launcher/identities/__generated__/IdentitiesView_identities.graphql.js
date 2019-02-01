@@ -15,8 +15,7 @@ export type IdentitiesView_identities = {|
     +localID: string,
     +feedHash: string,
     +profile: {|
-      +name: string,
-      +ethAddress: ?string,
+      +name: string
     |},
     +apps: ?$ReadOnlyArray<?{|
       +localID: string,
@@ -54,16 +53,25 @@ var v0 = {
   "args": null,
   "storageKey": null
 },
-v1 = {
-  "kind": "ScalarField",
+v1 = [
+  {
+    "kind": "ScalarField",
+    "alias": null,
+    "name": "name",
+    "args": null,
+    "storageKey": null
+  }
+],
+v2 = {
+  "kind": "LinkedField",
   "alias": null,
-  "name": "name",
+  "name": "profile",
+  "storageKey": null,
   "args": null,
-  "storageKey": null
-},
-v2 = [
-  v1
-];
+  "concreteType": "NamedProfile",
+  "plural": false,
+  "selections": v1
+};
 return {
   "kind": "Fragment",
   "name": "IdentitiesView_identities",
@@ -88,25 +96,7 @@ return {
           "args": null,
           "storageKey": null
         },
-        {
-          "kind": "LinkedField",
-          "alias": null,
-          "name": "profile",
-          "storageKey": null,
-          "args": null,
-          "concreteType": "NamedProfile",
-          "plural": false,
-          "selections": [
-            v1,
-            {
-              "kind": "ScalarField",
-              "alias": null,
-              "name": "ethAddress",
-              "args": null,
-              "storageKey": null
-            }
-          ]
-        },
+        v2,
         {
           "kind": "LinkedField",
           "alias": null,
@@ -125,7 +115,7 @@ return {
               "args": null,
               "concreteType": "AppManifestData",
               "plural": false,
-              "selections": v2
+              "selections": v1
             },
             {
               "kind": "LinkedField",
@@ -199,21 +189,12 @@ return {
       "plural": true,
       "selections": [
         v0,
-        {
-          "kind": "LinkedField",
-          "alias": null,
-          "name": "profile",
-          "storageKey": null,
-          "args": null,
-          "concreteType": "NamedProfile",
-          "plural": false,
-          "selections": v2
-        }
+        v2
       ]
     }
   ]
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '4318f8555bc37e0f36bb18b62f557109';
+(node/*: any*/).hash = '4e7318a7227ec8695f1b723901bc22ef';
 module.exports = node;

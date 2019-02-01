@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 167aff56d8ecb1b2b67988f7d66435a4
+ * @relayHash e1ffae1b7d92929c93aaf21659b7e0bd
  */
 
 /* eslint-disable */
@@ -11,7 +11,7 @@
 import type { ConcreteRequest } from 'relay-runtime';
 type WalletsView_wallets$ref = any;
 export type AddLedgerWalletAccountInput = {
-  index: number,
+  indexes: Array<number>,
   name: string,
   userID?: ?string,
   clientMutationId?: ?string,

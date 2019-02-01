@@ -242,7 +242,7 @@ export default class WalletsRepository {
   }
 
   async addLedgerEthAccount(
-    index: number,
+    indexes: Array<number>,
     name: string,
   ): Promise<WalletAddLedgerResult> {
     // Identify ledger wallets with first address
@@ -259,7 +259,7 @@ export default class WalletsRepository {
       this._wallets.ethereum.ledger[walletID] = ledgerWallet
     }
 
-    const addresses = await ledgerWallet.addAccounts([index])
+    const addresses = await ledgerWallet.addAccounts(indexes)
 
     return {
       localID: ledgerWallet.id,

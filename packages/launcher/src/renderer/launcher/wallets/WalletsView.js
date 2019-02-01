@@ -19,6 +19,7 @@ import { sortBy } from 'lodash'
 import { EnvironmentContext } from '../RelayEnvironment'
 import type { CurrentUser } from '../LauncherContext'
 import WalletImportView from './WalletImportView'
+import WalletCreateModal from './WalletCreateModal'
 import WalletAddLedgerModal from './WalletAddLedgerModal'
 import WallePreviewModal from './WalletPreviewModal'
 
@@ -96,6 +97,7 @@ const EditContainer = styled.View`
 `
 
 const WalletTitle = styled.TouchableOpacity`
+  max-width: 200px;
   flex-direction: row;
   align-items: center;
   padding: 10px;
@@ -136,30 +138,6 @@ const Ballance = styled.View`
   margin-left: 40px;
   flex-direction: row;
   align-items: center;
-`
-
-const createWalletMutation = graphql`
-  mutation WalletsViewCreateHDWalletMutation(
-    $input: CreateHDWalletInput!
-    $userID: String!
-  ) {
-    createHDWallet(input: $input) {
-      hdWallet {
-        accounts {
-          address
-        }
-        localID
-      }
-      viewer {
-        identities {
-          ...Launcher_identities
-        }
-        wallets {
-          ...WalletsView_wallets @arguments(userID: $userID)
-        }
-      }
-    }
-  }
 `
 
 const addWalletMutation = graphql`
@@ -216,7 +194,9 @@ class WalletsView extends Component<Props, State> {
 
   constructor(props: Props) {
     super(props)
-    this.state = { wallets: getWalletsArray(props) }
+    this.state = {
+      wallets: getWalletsArray(props),
+    }
   }
 
   componentDidUpdate(prevProps: Props) {
@@ -225,28 +205,16 @@ class WalletsView extends Component<Props, State> {
     }
   }
 
-  onPressCreateHDWallet = () => {
-    const { ethWallets } = this.props.wallets
-    let input, walletMutation
-    if (ethWallets.hd.length) {
-      const newIndex = ethWallets.hd[0].accounts.length
-      walletMutation = addWalletMutation
-      input = {
-        walletID: ethWallets.hd[0].localID,
-        userID: this.props.user.localID,
-        index: newIndex,
-      }
-    } else {
-      walletMutation = createWalletMutation
-      input = {
-        blockchain: 'ETHEREUM',
-        name: 'Account 1',
-        userID: this.props.user.localID,
-      }
+  onPressAddAddress = (wallet: Wallet) => {
+    const newIndex = wallet.accounts.length
+    const input = {
+      walletID: wallet.localID,
+      userID: this.props.user.localID,
+      index: newIndex,
     }
 
     commitMutation(this.context, {
-      mutation: walletMutation,
+      mutation: addWalletMutation,
       // $FlowFixMe: Relay type
       variables: { input, userID: this.props.user.localID },
       onError: err => {
@@ -295,6 +263,12 @@ class WalletsView extends Component<Props, State> {
 
   closeAddressModal = () => this.setState({ selectedAddress: '' })
 
+  onPressCreate = () => {
+    this.setState({
+      showModal: 'create_wallet',
+    })
+  }
+
   onPressImport = () => {
     this.setState({
       showModal: 'import_wallet',
@@ -316,12 +290,9 @@ class WalletsView extends Component<Props, State> {
   // RENDER
 
   renderImportView() {
-    const { ethWallets } = this.props.wallets
-    const currentWallet = ethWallets.hd.length ? ethWallets.hd[0].localID : null
     return this.state.showModal === 'import_wallet' ? (
       <WalletImportView
         onClose={this.onCloseModal}
-        currentWalletID={currentWallet}
         userID={this.props.user.localID}
       />
     ) : null
@@ -330,6 +301,7 @@ class WalletsView extends Component<Props, State> {
   renderConnectLedgerView() {
     return this.state.showModal === 'connect_ledger' ? (
       <WalletAddLedgerModal
+        wallets={this.state.wallets.filter(w => w.type === 'ledger')}
         userID={this.props.user.localID}
         onClose={this.onCloseModal}
       />
@@ -446,7 +418,7 @@ class WalletsView extends Component<Props, State> {
                       <LedgerIcon width={13} height={13} />
                     </IconWrapper>
                   )}
-                  <Text variant={['greyDark23']} bold size={14}>
+                  <Text variant={['greyDark23', 'ellipsis']} bold size={14}>
                     {w.name}
                   </Text>
                   <Text
@@ -465,7 +437,7 @@ class WalletsView extends Component<Props, State> {
                   <Button
                     variant={['xSmall', 'marginVertical10']}
                     Icon={PlusSymbolSmIcon}
-                    onPress={this.onPressCreateHDWallet}
+                    onPress={() => this.onPressAddAddress(w)}
                     title="ADD"
                   />
                 </AddWrapper>
@@ -493,6 +465,16 @@ class WalletsView extends Component<Props, State> {
     )
   }
 
+  renderCreateModal() {
+    return this.state.showModal === 'create_wallet' ? (
+      <WalletCreateModal
+        onClose={this.onCloseModal}
+        userID={this.props.user.localID}
+        onSetupWallet={this.onCloseModal}
+      />
+    ) : null
+  }
+
   render() {
     return (
       <Container>
@@ -504,6 +486,8 @@ class WalletsView extends Component<Props, State> {
         <WalletsContainer>
           <ScrollView>
             {this.renderWallets()}
+            {this.renderPreviewModal()}
+            {this.renderCreateModal()}
             {this.renderImportView()}
             {this.renderConnectLedgerView()}
           </ScrollView>
@@ -512,7 +496,7 @@ class WalletsView extends Component<Props, State> {
           <Button
             variant={['completeOnboarding', 'walletOnboarding', 'marginLeft20']}
             title="Create"
-            onPress={this.onPressCreateHDWallet}
+            onPress={this.onPressCreate}
             testID="onboard-create-wallet-button"
             Icon={PlusSymbolMdIcon}
           />
@@ -531,7 +515,6 @@ class WalletsView extends Component<Props, State> {
             Icon={LedgerIcon}
           />
         </Buttons>
-        {this.renderPreviewModal()}
       </Container>
     )
   }

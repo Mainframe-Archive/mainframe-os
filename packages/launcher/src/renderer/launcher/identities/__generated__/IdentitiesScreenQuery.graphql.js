@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 9f25399e9ac7a723e64c0ce2a9ce6a92
+ * @relayHash 38a723a75aa54f5521363340c8fe08cd
  */
 
 /* eslint-disable */
@@ -45,7 +45,6 @@ fragment IdentitiesView_identities on Identities {
     feedHash
     profile {
       name
-      ethAddress
     }
     apps {
       localID
@@ -85,16 +84,25 @@ var v0 = {
   "args": null,
   "storageKey": null
 },
-v1 = {
-  "kind": "ScalarField",
-  "alias": null,
-  "name": "name",
-  "args": null,
-  "storageKey": null
-},
-v2 = [
-  v1
+v1 = [
+  {
+    "kind": "ScalarField",
+    "alias": null,
+    "name": "name",
+    "args": null,
+    "storageKey": null
+  }
 ],
+v2 = {
+  "kind": "LinkedField",
+  "alias": null,
+  "name": "profile",
+  "storageKey": null,
+  "args": null,
+  "concreteType": "NamedProfile",
+  "plural": false,
+  "selections": v1
+},
 v3 = {
   "kind": "ScalarField",
   "alias": null,
@@ -107,7 +115,7 @@ return {
   "operationKind": "query",
   "name": "IdentitiesScreenQuery",
   "id": null,
-  "text": "query IdentitiesScreenQuery {\n  viewer {\n    identities {\n      ...IdentitiesScreen_identities\n    }\n    id\n  }\n}\n\nfragment IdentitiesScreen_identities on Identities {\n  ...IdentitiesView_identities\n}\n\nfragment IdentitiesView_identities on Identities {\n  ownUsers {\n    localID\n    feedHash\n    profile {\n      name\n      ethAddress\n    }\n    apps {\n      localID\n      manifest {\n        name\n      }\n      users {\n        settings {\n          permissionsSettings {\n            permissionsChecked\n            grants {\n              BLOCKCHAIN_SEND\n            }\n          }\n        }\n        id\n      }\n      id\n    }\n    id\n  }\n  ownDevelopers {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n}\n",
+  "text": "query IdentitiesScreenQuery {\n  viewer {\n    identities {\n      ...IdentitiesScreen_identities\n    }\n    id\n  }\n}\n\nfragment IdentitiesScreen_identities on Identities {\n  ...IdentitiesView_identities\n}\n\nfragment IdentitiesView_identities on Identities {\n  ownUsers {\n    localID\n    feedHash\n    profile {\n      name\n    }\n    apps {\n      localID\n      manifest {\n        name\n      }\n      users {\n        settings {\n          permissionsSettings {\n            permissionsChecked\n            grants {\n              BLOCKCHAIN_SEND\n            }\n          }\n        }\n        id\n      }\n      id\n    }\n    id\n  }\n  ownDevelopers {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -185,25 +193,7 @@ return {
                     "args": null,
                     "storageKey": null
                   },
-                  {
-                    "kind": "LinkedField",
-                    "alias": null,
-                    "name": "profile",
-                    "storageKey": null,
-                    "args": null,
-                    "concreteType": "NamedProfile",
-                    "plural": false,
-                    "selections": [
-                      v1,
-                      {
-                        "kind": "ScalarField",
-                        "alias": null,
-                        "name": "ethAddress",
-                        "args": null,
-                        "storageKey": null
-                      }
-                    ]
-                  },
+                  v2,
                   {
                     "kind": "LinkedField",
                     "alias": null,
@@ -222,7 +212,7 @@ return {
                         "args": null,
                         "concreteType": "AppManifestData",
                         "plural": false,
-                        "selections": v2
+                        "selections": v1
                       },
                       {
                         "kind": "LinkedField",
@@ -299,16 +289,7 @@ return {
                 "plural": true,
                 "selections": [
                   v0,
-                  {
-                    "kind": "LinkedField",
-                    "alias": null,
-                    "name": "profile",
-                    "storageKey": null,
-                    "args": null,
-                    "concreteType": "NamedProfile",
-                    "plural": false,
-                    "selections": v2
-                  },
+                  v2,
                   v3
                 ]
               }
