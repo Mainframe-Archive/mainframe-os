@@ -11,7 +11,7 @@ export const NETWORKS = {
   '42': 'kovan',
 }
 
-export default class EthClient {
+export default class EthRequestManager {
   _web3Provider: ?Web3HTTPProvider | ?MFWeb3Provider
   _network: ?string
   _httpUrl: string

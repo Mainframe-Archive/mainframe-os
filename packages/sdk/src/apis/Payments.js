@@ -1,5 +1,5 @@
 // @flow
-import { type TXObservable } from '@mainframe/eth'
+import { type TXEventEmitter } from '@mainframe/eth'
 
 import ClientAPIs from '../ClientAPIs'
 import type MainrameSDK from '../index'
@@ -13,7 +13,7 @@ export default class PaymentAPIs extends ClientAPIs {
     this._sdk = sdk
   }
 
-  async payContact(params: PayContactParams): Promise<TXObservable> {
+  async payContact(params: PayContactParams): Promise<TXEventEmitter> {
     const { contactID, currency, value } = params
     let contact
     if (!contactID) {

@@ -1,11 +1,11 @@
 // @flow
+import EventEmitter from 'events'
 import web3Utils from 'web3-utils'
 import Web3EthAbi from 'web3-eth-abi'
-import { Observable } from 'rxjs'
 
 import RequestManager from './RequestManager'
 import ABI from './abi'
-import type { SendParams, TXObservable } from './types'
+import type { SendParams, TXEventEmitter } from './types'
 
 export const TOKEN_ADDRESS = {
   ropsten: '0xa46f1563984209fe47f8236f8b01a03f03f957e4',
@@ -132,39 +132,23 @@ export default class EthClient extends RequestManager {
     })
   }
 
-  sendTX(requestData: Object, confirmations: ?number = 10): TXObservable {
-    return Observable.create(observer => {
-      let unsubscribe = false
-      const req = this.createRequest(requestData.method, requestData.params)
-      this.sendRequest(req)
-        .then(res => {
-          if (unsubscribe) {
-            return
-          }
-          observer.next({
-            name: 'hash',
-            data: res,
-          })
-          return this.confirmTransaction(res, req.id, 0).then(() => {
-            if (unsubscribe) {
-              return
-            }
-            observer.next({
-              name: 'mined',
-            })
-            return this.confirmTransaction(res, req.id, confirmations)
-          })
+  sendTX(requestData: Object, confirmations: ?number = 10): TXEventEmitter {
+    const eventEmitter = new EventEmitter()
+    const req = this.createRequest(requestData.method, requestData.params)
+    this.sendRequest(req)
+      .then(res => {
+        eventEmitter.emit('hash', res)
+        return this.confirmTransaction(res, req.id, 0).then(() => {
+          eventEmitter.emit('mined', res)
+          return this.confirmTransaction(res, req.id, confirmations)
         })
-        .then(() => {
-          if (unsubscribe) {
-            return
-          }
-          observer.complete()
-        })
-        .catch(err => {
-          observer.error(err)
-        })
-      return () => (unsubscribe = true)
-    })
+      })
+      .then(res => {
+        eventEmitter.emit('confirmed', res)
+      })
+      .catch(err => {
+        eventEmitter.emit('error', err)
+      })
+    return eventEmitter
   }
 }

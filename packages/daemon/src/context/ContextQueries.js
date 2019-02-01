@@ -67,7 +67,7 @@ export default class ContextQueries {
     const contacts = this.getUserContacts(userID)
     return contactIDs.map(id => {
       const approvedContact = approvedContacts.find(c => c.id === id)
-      const contactData = {
+      const contactData: AppUserContact = {
         id,
         data: null,
       }

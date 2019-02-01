@@ -120,7 +120,6 @@ class SendFunds extends Component<ContextProps, State> {
     const { sdk } = this.props
     const params = {
       currency: 'ETH',
-      contactID: this.state.recipient,
       value: this.state.amount,
     }
     this.setState({
@@ -128,8 +127,8 @@ class SendFunds extends Component<ContextProps, State> {
       errorMsg: undefined,
     })
     try {
-      const sub = await sdk.payments.payContact(params)
-      this.subscibeTX(sub)
+      const tx = await sdk.payments.payContact(params)
+      this.listenTX(tx)
     } catch (err) {
       this.setState({
         errorMsg: err.message || 'Error sending transaction',
@@ -157,47 +156,41 @@ class SendFunds extends Component<ContextProps, State> {
       ? sdk.blockchain.sendMFT(params)
       : sdk.blockchain.sendETH(params)
 
-    this.subscibeTX(txSub)
+    this.listenTX(txSub)
   }
 
-  subscibeTX(tx) {
-    tx.subscribe(
-      event => {
-        switch (event.name) {
-          case 'hash':
-            this.setState({
-              currentTX: {
-                hash: event.data,
-                state: 'broadcast',
-              },
-            })
-            break
-          case 'mined':
-            this.setState({
-              processingTransaction: false,
-              currentTX: {
-                ...this.state.currentTX,
-                state: 'mined',
-              },
-            })
-            break
-        }
-      },
-      error => {
+  listenTX(tx) {
+    tx.on('hash', hash => {
+      this.setState({
+        currentTX: {
+          hash,
+          state: 'broadcast',
+        },
+      })
+    })
+      .on('mined', () => {
         this.setState({
           processingTransaction: false,
-          errorMsg: error.message || 'Error sending transaction',
+          currentTX: {
+            ...this.state.currentTX,
+            state: 'mined',
+          },
         })
-      },
-      () => {
+      })
+      .on('confirmed', () => {
         this.setState({
           currentTX: {
             ...this.state.currentTX,
             state: 'confirmed',
           },
         })
-      },
-    )
+      })
+      .on('error', error => {
+        this.setState({
+          processingTransaction: false,
+          errorMsg: error.message || 'Error sending transaction',
+        })
+      })
   }
 
   // RENDER

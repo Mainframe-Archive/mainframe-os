@@ -2,7 +2,7 @@
 import HookedProvider from 'web3-provider-engine/subproviders/hooked-wallet.js'
 import ProviderEngine from 'web3-provider-engine'
 import SubscriptionsProvider from 'web3-provider-engine/subproviders/subscriptions.js'
-import { EthClient, type SendParams, type TXObservable } from '@mainframe/eth'
+import { EthClient, type SendParams, type TXEventEmitter } from '@mainframe/eth'
 import type StreamRPC from '@mainframe/rpc-stream'
 
 import RPCProvider from '../RPCProvider'
@@ -63,11 +63,11 @@ export default class BlockchainAPIs extends ClientAPIs {
     return this._web3Provider
   }
 
-  sendETH(params: SendParams): TXObservable {
+  sendETH(params: SendParams): TXEventEmitter {
     return this._ethClient.sendETH(params)
   }
 
-  sendMFT(params: SendParams): TXObservable {
+  sendMFT(params: SendParams): TXEventEmitter {
     return this._ethClient.sendMFT(params)
   }
 

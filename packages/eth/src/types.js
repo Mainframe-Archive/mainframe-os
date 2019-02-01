@@ -1,5 +1,5 @@
 // @flow
-import { type Observable } from 'rxjs'
+import type EventEmitter from 'events'
 
 export type ERC20DataResult = {
   symbol: string,
@@ -26,4 +26,4 @@ export type TransactionEvent = {
   data?: string,
 }
 
-export type TXObservable = Observable<TransactionEvent>
+export type TXEventEmitter = EventEmitter
