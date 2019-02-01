@@ -33,10 +33,10 @@ export default class MainframeSDK {
   get blockchain() {
     // Lazy load blockchain API's as provider
     // engine will start fetching blocks
-    if (this._blockchain) {
-      return this._blockchain
+    if (!this._blockchain) {
+      this._blockchain = new BlockchainAPIs(this)
     }
-    return new BlockchainAPIs(this)
+    return this._blockchain
   }
 
   apiVersion = () => {

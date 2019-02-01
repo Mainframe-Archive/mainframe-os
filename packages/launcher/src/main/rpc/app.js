@@ -198,6 +198,13 @@ export const trusted = {
     },
   },
 
+  blockchain_web3Send: async (
+    ctx: AppContext,
+    params: BlockchainWeb3SendParams,
+  ): Promise<Object> => {
+    return ctx.client.blockchain.web3Send(params)
+  },
+
   wallet_getUserEthWallets: async (
     ctx: AppContext,
   ): Promise<WalletGetEthWalletsResult> => {

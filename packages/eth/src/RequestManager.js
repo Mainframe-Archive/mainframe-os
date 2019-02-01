@@ -35,7 +35,7 @@ export default class EthRequestManager {
   }
 
   get network(): string {
-    return this._network || 'mainnet'
+    return this._network || 'ropsten'
   }
 
   get ethURL(): string {
