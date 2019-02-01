@@ -145,7 +145,7 @@ export const addLedgerEthAccount = {
     params: WalletAddLedgerEthAccountParams,
   ): Promise<WalletAddLedgerResult> => {
     return ctx.mutations.addLedgerWalletAccount(
-      params.index,
+      params.indexes,
       params.name,
       params.userID,
     )

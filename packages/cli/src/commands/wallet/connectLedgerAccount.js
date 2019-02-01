@@ -34,7 +34,7 @@ export default class ConnectLedgerWalletCommand extends Command {
 
     if (this.client) {
       const res = await this.client.wallet.addLedgerEthAccount({
-        index: Number(answers.index),
+        indexes: [Number(answers.index)],
         name: answers.name,
       })
 

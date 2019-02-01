@@ -26,7 +26,7 @@ type AddHDWalletAccountPayload {
 }
 
 input AddLedgerWalletAccountInput {
-  index: Int!
+  indexes: [Int]
   name: String!
   userID: String
   clientMutationId: String

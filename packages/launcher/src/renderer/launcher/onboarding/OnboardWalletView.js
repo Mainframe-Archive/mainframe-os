@@ -9,6 +9,8 @@ import LedgerIcon from '@morpheus-ui/icons/Ledger'
 import PlusSymbolMdIcon from '@morpheus-ui/icons/PlusSymbolMd'
 import DownloadMdIcon from '@morpheus-ui/icons/DownloadMd'
 import WalletCreateModal from '../wallets/WalletCreateModal'
+import WalletImportView from '../wallets/WalletImportView'
+import WalletAddLedgerModal from '../wallets/WalletAddLedgerModal'
 import OnboardContainer from './OnboardContainer'
 
 type Props = {
@@ -35,6 +37,18 @@ export default class OnboardWalletView extends Component<Props, State> {
     })
   }
 
+  onPressImport = () => {
+    this.setState({
+      view: 'import',
+    })
+  }
+
+  onPressLedger = () => {
+    this.setState({
+      view: 'ledger',
+    })
+  }
+
   onSetupWallet = () => {
     this.props.onSetupWallet()
   }
@@ -54,6 +68,7 @@ export default class OnboardWalletView extends Component<Props, State> {
         <ButtonWrapper>
           <Button
             variant={['completeOnboarding', 'walletOnboarding']}
+            onPress={this.onPressImport}
             title="Import"
             Icon={DownloadMdIcon}
           />
@@ -61,6 +76,7 @@ export default class OnboardWalletView extends Component<Props, State> {
         <ButtonWrapper>
           <Button
             variant={['completeOnboarding', 'walletOnboarding']}
+            onPress={this.onPressLedger}
             title="Ledger"
             Icon={LedgerIcon}
           />
@@ -86,13 +102,41 @@ export default class OnboardWalletView extends Component<Props, State> {
     )
   }
 
+  renderLedger() {
+    return (
+      <WalletAddLedgerModal
+        full
+        wallets={[]}
+        onSuccess={this.onSetupWallet}
+        onClose={this.closeModal}
+        userID={this.props.userID}
+      />
+    )
+  }
+
+  renderImport() {
+    return (
+      <WalletImportView
+        full
+        onSuccess={this.onSetupWallet}
+        onClose={this.closeModal}
+        userID={this.props.userID}
+      />
+    )
+  }
+
   renderContent() {
     switch (this.state.view) {
       case 'start':
         return this.renderStart()
+      case 'import':
+        return this.renderImport()
+      case 'ledger':
+        return this.renderLedger()
       case 'create':
-      default:
         return this.renderCreate()
+      default:
+        return null
     }
   }
 
@@ -101,7 +145,8 @@ export default class OnboardWalletView extends Component<Props, State> {
       <OnboardContainer
         title="Wallet"
         description="Create or import your Ethereum wallet."
-        step={3}>
+        step={3}
+        wallet>
         {this.renderContent()}
       </OnboardContainer>
     )

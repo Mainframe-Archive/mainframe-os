@@ -285,12 +285,12 @@ export default class ContextMutations {
   }
 
   async addLedgerWalletAccount(
-    index: number,
+    indexes: Array<number>,
     name: string,
     userID?: string,
   ): Promise<WalletAddLedgerResult> {
     const { openVault } = this._context
-    const res = await openVault.wallets.addLedgerEthAccount(index, name)
+    const res = await openVault.wallets.addLedgerEthAccount(indexes, name)
     if (userID) {
       openVault.identityWallets.linkWalletToIdentity(
         userID,
