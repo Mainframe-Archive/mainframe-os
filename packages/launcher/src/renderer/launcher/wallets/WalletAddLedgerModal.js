@@ -23,6 +23,7 @@ type Props = {
 }
 
 type State = {
+  saving: boolean,
   connected?: boolean,
   selectedItems: Array<number>,
   currentPage: number,
@@ -78,27 +79,6 @@ const addLedgerWalletMutation = graphql`
     }
   }
 `
-
-const promiseMutation = (environment: Object, options: Object) => {
-  return new Promise((resolve, reject) => {
-    commitMutation(environment, {
-      ...options,
-      onError: errors => {
-        reject({ errors })
-      },
-      onCompleted: (response, errors) => {
-        if (errors || !response) {
-          const error =
-            errors && errors.length ? errors[0] : new Error(MUTATION_ERR_MSG)
-          reject(error)
-        } else {
-          resolve(response)
-        }
-      },
-    })
-  })
-}
-
 export default class WalletAddLedgerModal extends Component<Props, State> {
   static contextType = EnvironmentContext
 
@@ -106,6 +86,7 @@ export default class WalletAddLedgerModal extends Component<Props, State> {
     currentPage: 1,
     selectedItems: [],
     ledgerName: '',
+    saving: false,
   }
 
   componentDidMount() {
@@ -149,31 +130,37 @@ export default class WalletAddLedgerModal extends Component<Props, State> {
   }
 
   onCreate = () => {
-    const mutations = this.state.selectedItems.map(index => {
-      // TODO input name
-      const input = {
-        index,
-        name: this.state.ledgerName,
-        userID: this.props.userID,
-      }
+    this.setState({ saving: true })
+    const input = {
+      indexes: [...this.state.selectedItems],
+      name: this.state.ledgerName,
+      userID: this.props.userID,
+    }
 
-      return promiseMutation(this.context, {
-        mutation: addLedgerWalletMutation,
-        variables: { input, userID: this.props.userID },
-      })
-    })
+    commitMutation(this.context, {
+      mutation: addLedgerWalletMutation,
+      variables: { input, userID: this.props.userID },
+      onCompleted: (response, errors) => {
+        if (errors || !response) {
+          // console.log(errors)
+          const error =
+            errors && errors.length ? errors[0] : new Error(MUTATION_ERR_MSG)
 
-    Promise.all(mutations)
-      .then(() => {
-        this.props.onSuccess ? this.props.onSuccess() : this.props.onClose()
-      })
-      .catch(err => {
+          this.displayError(error)
+        } else {
+          this.props.onSuccess ? this.props.onSuccess() : this.props.onClose()
+        }
+      },
+      onError: err => {
+        // console.log(err)
         this.displayError(err)
-      })
+      },
+    })
   }
 
   displayError(error: Error | PayloadError) {
     this.setState({
+      saving: false,
       errorMsg: error.message,
     })
   }
@@ -198,6 +185,18 @@ export default class WalletAddLedgerModal extends Component<Props, State> {
         </ActivityContainer>
       )
     }
+
+    if (this.state.saving) {
+      return (
+        <ActivityContainer>
+          <Text variant={['center', 'modalText', 'marginBottom20']}>
+            Saving your accounts...
+          </Text>
+          <Loader />
+        </ActivityContainer>
+      )
+    }
+
     if (this.state.fetchingAccounts) {
       return (
         <ActivityContainer>
@@ -265,10 +264,13 @@ export default class WalletAddLedgerModal extends Component<Props, State> {
       <FormModalView
         title="Connect with a ledger wallet"
         full={this.props.full}
-        onRequestClose={this.props.onClose}
+        onRequestClose={this.state.saving ? undefined : this.props.onClose}
+        dismissButtonDisabled={this.state.saving}
         dismissButton="CANCEL"
         confirmButton="IMPORT"
-        confirmButtonDisabled={!this.state.selectedItems.length}
+        confirmButtonDisabled={
+          !this.state.selectedItems.length || this.state.saving
+        }
         onSubmitForm={this.onCreate}>
         <Container>
           {this.renderAccounts()}

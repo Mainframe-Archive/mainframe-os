@@ -155,8 +155,8 @@ const createHDWalletMutation = mutationWithClientMutationId({
 const addLedgerWalletAccountMutation = mutationWithClientMutationId({
   name: 'AddLedgerWalletAccount',
   inputFields: {
-    index: {
-      type: new GraphQLNonNull(GraphQLInt),
+    indexes: {
+      type: new GraphQLList(GraphQLInt),
     },
     name: {
       type: new GraphQLNonNull(GraphQLString),
@@ -178,7 +178,7 @@ const addLedgerWalletAccountMutation = mutationWithClientMutationId({
   },
   mutateAndGetPayload: async (args, ctx) => {
     const res = await ctx.mutations.addLedgerWalletAccount(
-      args.index,
+      args.indexes,
       args.name,
       args.userID,
     )

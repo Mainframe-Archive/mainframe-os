@@ -8,7 +8,7 @@
 
 /*::
 import type { ConcreteFragment } from 'relay-runtime';
-export type ContactConnection = "CONNECTED" | "SENT" | "%future added value";
+export type ContactConnection = "CONNECTED" | "SENDING" | "SENT" | "%future added value";
 import type { FragmentReference } from "relay-runtime";
 declare export opaque type ContactsView_contacts$ref: FragmentReference;
 export type ContactsView_contacts = {|

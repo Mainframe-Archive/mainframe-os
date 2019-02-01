@@ -462,7 +462,7 @@ export type WalletGetLedgerEthAccountsResult = Array<string>
 export type WalletGetEthAccountsResult = Array<string>
 
 export type WalletAddLedgerEthAccountParams = {
-  index: number,
+  indexes: Array<number>,
   name: string,
   userID?: string,
 }
