@@ -28,7 +28,7 @@ type GrantedData = {
   selectedContactIDs?: SelectedContactIDs,
 }
 
-type PermissionGrantData = {
+type Request = {
   key: string,
   domain?: string,
   params?: WalletSignTxParams | ContactSelectParams,
@@ -47,17 +47,30 @@ type PermissionDeniedNotif = {
   domain?: string,
 }
 
+type Props = {
+  appSession: AppSessionData,
+}
+
+type State = {
+  permissionDeniedNotifs: Array<PermissionDeniedNotif>,
+  permissionRequests: {
+    [id: string]: {
+      data: Request,
+      responseRequired?: boolean,
+      resolve: (result: PermissionGrantResult) => void,
+    },
+  },
+  persistGrant: boolean,
+}
+
 const methods = {
-  permission_ask: (
-    ctx,
-    params: PermissionGrantData,
-  ): Promise<PermissionGrantResult> => {
+  user_request: (ctx, request: Request): Promise<PermissionGrantResult> => {
     return new Promise(resolve => {
       ctx.setState(({ permissionRequests }) => ({
         permissionRequests: {
           ...permissionRequests,
           [uniqueID()]: {
-            data: params,
+            data: request,
             resolve,
           },
         },
@@ -65,6 +78,7 @@ const methods = {
     })
   },
 }
+
 const validatorOptions = { messages: MANIFEST_SCHEMA_MESSAGES }
 const handleMessage = createHandler({ methods, validatorOptions })
 
@@ -83,22 +97,7 @@ const getPermissionDescription = (key: string, input?: ?string): ?string => {
   return null
 }
 
-type Props = {
-  appSession: AppSessionData,
-}
-
-type State = {
-  permissionDeniedNotifs: Array<PermissionDeniedNotif>,
-  permissionRequests: {
-    [id: string]: {
-      data: PermissionGrantData,
-      resolve: (result: PermissionGrantResult) => void,
-    },
-  },
-  persistGrant: boolean,
-}
-
-export default class PermissionsManagerView extends Component<Props, State> {
+export default class PermissionRequestView extends Component<Props, State> {
   state = {
     permissionDeniedNotifs: [],
     permissionRequests: {},
@@ -206,8 +205,8 @@ export default class PermissionsManagerView extends Component<Props, State> {
     ) : null
   }
 
-  renderTxSignRequest(requestID: string, permissionData: PermissionGrantData) {
-    const { params } = permissionData
+  renderTxSignRequest(requestID: string, request: Request) {
+    const { params } = request
     const txView =
       !params || !params.BLOCKCHAIN_SEND ? (
         <Text>Invalid transaction data</Text>
@@ -235,8 +234,8 @@ export default class PermissionsManagerView extends Component<Props, State> {
     )
   }
 
-  renderContactPicker(requestID: string, permissionData: PermissionGrantData) {
-    const { params } = permissionData
+  renderContactPicker(requestID: string, request: Request) {
+    const { params } = request
     const { id } = this.props.appSession.user
     const multi =
       params && params.CONTACTS_SELECT ? params.CONTACTS_SELECT.multi : false
@@ -283,7 +282,7 @@ export default class PermissionsManagerView extends Component<Props, State> {
     )
   }
 
-  renderPermissionRequest = () => {
+  renderContent = () => {
     const { persistGrant, permissionRequests } = this.state
     const keys = Object.keys(permissionRequests)
 
@@ -340,7 +339,7 @@ export default class PermissionsManagerView extends Component<Props, State> {
 
   render() {
     const deniedNotifs = this.renderDeniedNotifs()
-    const permissionRequest = this.renderPermissionRequest()
+    const permissionRequest = this.renderContent()
     return (
       <View>
         {permissionRequest}
@@ -352,29 +351,37 @@ export default class PermissionsManagerView extends Component<Props, State> {
 
 const styles = StyleSheet.create({
   container: {
-    top: 25,
+    top: 60,
     left: 0,
     right: 0,
     bottom: 0,
     position: 'fixed',
-    backgroundColor: colors.TRANSPARENT_BLUE_BG,
+    backgroundColor: colors.TRANSPARENT_BLACK_50,
     height: '100%',
   },
   requestContainer: {
-    backgroundColor: colors.LIGHT_GREY_F7,
-    maxWidth: 300,
-    padding: 15,
+    backgroundColor: colors.GREY_DARK_3C,
+    position: 'absolute',
+    top: -30,
+    right: 20,
+    maxWidth: 360,
+    minWidth: 280,
+    padding: 20,
     marginLeft: 40,
+    borderRadius: 3,
+    shadowColor: colors.BLACK,
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
   },
   headerText: {
     fontWeight: 'bold',
-    color: colors.PRIMARY_BLUE,
+    color: colors.LIGHT_GREY_CC,
     fontSize: 15,
   },
   descriptionText: {
     marginVertical: 6,
     fontSize: 13,
-    color: colors.GREY_DARK_54,
+    color: colors.WHITE,
   },
   persistOption: {
     flexDirection: 'row',
@@ -382,6 +389,7 @@ const styles = StyleSheet.create({
   },
   persistLabel: {
     marginRight: 15,
+    color: colors.LIGHT_GREY_CC,
   },
   buttonsContainer: {
     marginTop: 10,

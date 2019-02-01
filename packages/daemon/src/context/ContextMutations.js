@@ -224,13 +224,11 @@ export default class ContextMutations {
 
   async createVault(path: string, password: Buffer): Promise<void> {
     await this._context.vaults.create(this._context.socket, path, password)
-    // await this._context.io.eth.setup()
     this._context.next({ type: 'vault_created' })
   }
 
   async openVault(path: string, password: Buffer): Promise<void> {
     await this._context.vaults.open(this._context.socket, path, password)
-    // await this._context.io.eth.setup()
     this._context.next({ type: 'vault_opened' })
   }
 

@@ -185,15 +185,6 @@ export default class AppContainer extends Component<Props, State> {
             </View>
           </TitleBar>
           {urlBar}
-          <View style={styles.identity}>
-            <Text style={styles.headerLabel}>
-              User:{' '}
-              <Text style={styles.boldLabel}>
-                {' '}
-                {appSession.user.profile.name}
-              </Text>
-            </Text>
-          </View>
         </View>
         <PermissionRequestView appSession={this.props.appSession} />
         <webview
@@ -217,17 +208,11 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     height: 60,
     flexDirection: 'row',
-    backgroundColor: colors.GREY_DARK_54,
+    backgroundColor: colors.GREY_DARK_23,
     alignItems: 'center',
   },
   appInfo: {
     paddingLeft: 10,
-    flex: 1,
-  },
-  identity: {
-    paddingHorizontal: 10,
-    justifyContent: 'center',
-    alignItems: 'flex-end',
     flex: 1,
   },
   headerLabel: {

@@ -20,6 +20,16 @@ const MFT_TOKEN_ADDRESSES = {
 export default class EthClient extends RequestManager {
   // Reading blockchain data
 
+  // async startCheckingAccounts() {
+  //   const accounts = await this.getAccounts
+  //   const accountInterval = setInterval(function() {
+  //     if (web3.eth.accounts[0] !== account) {
+  //       account = web3.eth.accounts[0]
+  //       updateInterface()
+  //     }
+  //   }, 100)
+  // }
+
   async getAccounts(): Promise<Array<string>> {
     const accountsReq = this.createRequest('eth_accounts', [])
     return this.sendRequest(accountsReq)

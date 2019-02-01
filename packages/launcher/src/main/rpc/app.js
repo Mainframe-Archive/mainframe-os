@@ -67,7 +67,7 @@ export const sandboxed = {
   contacts_select: withPermission(
     'CONTACTS_READ',
     async (ctx: AppContext, params: { multi?: boolean }) => {
-      const res = await ctx.trustedRPC.request('permission_ask', {
+      const res = await ctx.trustedRPC.request('user_request', {
         key: 'CONTACTS_SELECT',
         params: { CONTACTS_SELECT: params },
       })

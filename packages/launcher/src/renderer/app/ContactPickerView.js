@@ -2,9 +2,11 @@
 
 import React, { Component } from 'react'
 import { TouchableOpacity } from 'react-native-web'
+import ContactsIcon from '@morpheus-ui/icons/ContactsMd'
 import styled from 'styled-components/native'
 import { Text, Button } from '@morpheus-ui/core'
 
+import colors from '../colors'
 import rpc from './rpc'
 
 export type SelectedContactIDs = Array<string>
@@ -28,11 +30,17 @@ type State = {
   selectedContacts: Set<string>,
 }
 
+const Header = styled.View`
+  padding-vertical: 12px;
+  flex-direction: row;
+`
+
 const ContactRow = styled.View`
   padding: 10px;
-  border-color: #eee;
+  border-color: ${colors.GREY_DARK_48};
   border-bottom-width: 1px;
-  background-color: ${props => (props.selected ? '#eee' : '#fff')};
+  background-color: ${props =>
+    props.selected ? colors.GREY_DARK_48 : colors.GREY_DARK_3C};
 `
 
 const ScrollViewStyled = styled.ScrollView`
@@ -88,7 +96,7 @@ export default class ContactPickerView extends Component<Props, State> {
       return (
         <TouchableOpacity key={c.localID} onPress={onPress}>
           <ContactRow selected={selected}>
-            <Text>{c.profile.name}</Text>
+            <Text styles="color:#eee">{c.profile.name}</Text>
           </ContactRow>
         </TouchableOpacity>
       )
@@ -96,8 +104,16 @@ export default class ContactPickerView extends Component<Props, State> {
     const submitButton = this.props.multiSelect ? (
       <Button title="DONE" onPress={() => this.onSubmit()} />
     ) : null
+
+    const title = this.props.multiSelect ? 'Select Contacts' : 'Select Contact'
     return (
       <>
+        <Header>
+          <ContactsIcon width={25} height={25} color="#ccc" />
+          <Text styles="padding-left: 15px; color:#ccc; font-size:13px; font-weight: bold;">
+            {title}
+          </Text>
+        </Header>
         <ScrollViewStyled>{rows}</ScrollViewStyled>
         <ButtonsContainer>
           {submitButton}
