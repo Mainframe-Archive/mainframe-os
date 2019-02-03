@@ -45,4 +45,5 @@ export default {
   TRANSPARENT_BLUE_BG: 'rgba(14, 18, 28, 0.85)',
   TRANSPARENT_BLACK_30: 'rgba(0, 0, 0, 0.30)',
   TRANSPARENT_BLACK_50: 'rgba(0, 0, 0, 0.50)',
+  TRANSPARENT_BLACK_80: 'rgba(0, 0, 0, 0.50)',
 }

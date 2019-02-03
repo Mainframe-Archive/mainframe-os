@@ -31,6 +31,7 @@ export default {
   app_update: noop, // TODO: similar to install
   app_create: app.create,
   app_getManifestData: app.getManifestData,
+  app_setUserDefaultWallet: app.setUserDefaultWallet,
   app_setPermissionsRequirements: app.setPermissionsRequirements,
   app_publishContents: app.publishContents,
   app_writeManifest: app.writeManifest,

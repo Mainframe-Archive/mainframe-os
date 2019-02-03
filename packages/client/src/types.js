@@ -152,6 +152,12 @@ export type AppPublishContentsResult = {
 
 export type AppRemoveParams = { appID: ID }
 
+export type AppSetUserDefaultWalletParams = {
+  appID: string,
+  userID: string,
+  address: string,
+}
+
 export type AppSetUserPermissionsSettingsParams = {
   appID: ID,
   userID: ID,

@@ -16,6 +16,7 @@ import Text from '../UIComponents/Text'
 import Button from '../UIComponents/Button'
 import WalletTxRequestView from './WalletTxRequestView'
 import ContactPickerView, { type SelectedContactIDs } from './ContactPickerView'
+import WalletPickerView from './WalletPickerView'
 
 import rpc from './rpc'
 import type { AppSessionData } from './AppContainer'
@@ -53,7 +54,7 @@ type Props = {
 
 type State = {
   permissionDeniedNotifs: Array<PermissionDeniedNotif>,
-  permissionRequests: {
+  requests: {
     [id: string]: {
       data: Request,
       responseRequired?: boolean,
@@ -66,9 +67,9 @@ type State = {
 const methods = {
   user_request: (ctx, request: Request): Promise<PermissionGrantResult> => {
     return new Promise(resolve => {
-      ctx.setState(({ permissionRequests }) => ({
-        permissionRequests: {
-          ...permissionRequests,
+      ctx.setState(({ requests }) => ({
+        requests: {
+          ...requests,
           [uniqueID()]: {
             data: request,
             resolve,
@@ -86,6 +87,7 @@ const permissionDescriptions = {
   BLOCKCHAIN_SEND: 'make an Ethereum blockchain transaction',
   CONTACTS_READ: 'access contacts',
   CONTACTS_SELECT: 'select contacts',
+  WALLET_ACCOUNT_SELECT: 'select wallets',
 }
 const getPermissionDescription = (key: string, input?: ?string): ?string => {
   if (key === 'WEB_REQUEST' && input) {
@@ -97,10 +99,10 @@ const getPermissionDescription = (key: string, input?: ?string): ?string => {
   return null
 }
 
-export default class PermissionRequestView extends Component<Props, State> {
+export default class UserAlertView extends Component<Props, State> {
   state = {
     permissionDeniedNotifs: [],
-    permissionRequests: {},
+    requests: {},
     persistGrant: false,
   }
 
@@ -158,7 +160,7 @@ export default class PermissionRequestView extends Component<Props, State> {
   }
 
   onSetPermissionGrant = (id: string, granted: boolean, data?: GrantedData) => {
-    const request = this.state.permissionRequests[id]
+    const request = this.state.requests[id]
 
     if (request != null) {
       request.resolve({
@@ -166,9 +168,21 @@ export default class PermissionRequestView extends Component<Props, State> {
         data,
         persist: this.state.persistGrant,
       })
-      this.setState(({ permissionRequests }) => {
-        const { [id]: _ignore, ...requests } = permissionRequests
-        return { permissionRequests: requests, persistGrant: false }
+      this.setState(({ requests }) => {
+        const { [id]: _ignore, ...nextRequests } = requests
+        return { requests: nextRequests, persistGrant: false }
+      })
+    }
+  }
+
+  resolveRequest(id: string, response: Object) {
+    const request = this.state.requests[id]
+
+    if (request != null) {
+      request.resolve(response)
+      this.setState(({ requests }) => {
+        const { [id]: _ignore, ...nextRequests } = requests
+        return { requests: nextRequests, persistGrant: false }
       })
     }
   }
@@ -189,6 +203,19 @@ export default class PermissionRequestView extends Component<Props, State> {
 
   onSelectedContacts = (id: string, selectedContactIDs: SelectedContactIDs) => {
     this.onSetPermissionGrant(id, true, { selectedContactIDs })
+  }
+
+  onSelectedWalletAccount = (id: string, address: string) => {
+    this.resolveRequest(id, {
+      data: { address },
+      persist: this.state.persistGrant,
+    })
+  }
+
+  onPressBG = () => {
+    Object.keys(this.state.requests).forEach(id => {
+      this.resolveRequest(id, {})
+    })
   }
 
   // RENDER
@@ -250,6 +277,16 @@ export default class PermissionRequestView extends Component<Props, State> {
     )
   }
 
+  renderWalletPicker(requestID: string) {
+    return (
+      <WalletPickerView
+        onSelectedWalletAccount={address =>
+          this.onSelectedWalletAccount(requestID, address)
+        }
+      />
+    )
+  }
+
   renderPermission(
     requestID: string,
     persistGrant: boolean,
@@ -283,18 +320,18 @@ export default class PermissionRequestView extends Component<Props, State> {
   }
 
   renderContent = () => {
-    const { persistGrant, permissionRequests } = this.state
-    const keys = Object.keys(permissionRequests)
+    const { persistGrant, requests } = this.state
+    const keys = Object.keys(requests)
 
     if (keys.length === 0) {
       return null
     }
 
     const id = keys[0]
-    const permissionData = permissionRequests[id].data
+    const requestData = requests[id].data
     const permissionLabel = getPermissionDescription(
-      permissionData.key,
-      permissionData.domain,
+      requestData.key,
+      requestData.domain,
     )
 
     if (permissionLabel == null) {
@@ -318,12 +355,15 @@ export default class PermissionRequestView extends Component<Props, State> {
     }
 
     let content
-    switch (permissionData.key) {
+    switch (requestData.key) {
       case 'BLOCKCHAIN_SEND':
-        content = this.renderTxSignRequest(id, permissionData)
+        content = this.renderTxSignRequest(id, requestData)
         break
       case 'CONTACTS_SELECT':
-        content = this.renderContactPicker(id, permissionData)
+        content = this.renderContactPicker(id, requestData)
+        break
+      case 'WALLET_ACCOUNT_SELECT':
+        content = this.renderWalletPicker(id)
         break
       default:
         content = this.renderPermission(id, persistGrant, permissionLabel)
@@ -331,7 +371,7 @@ export default class PermissionRequestView extends Component<Props, State> {
     }
 
     return (
-      <View style={styles.container}>
+      <View style={styles.container} onClick={this.onPressBG}>
         <View style={styles.requestContainer}>{content}</View>
       </View>
     )
@@ -362,8 +402,8 @@ const styles = StyleSheet.create({
   requestContainer: {
     backgroundColor: colors.GREY_DARK_3C,
     position: 'absolute',
-    top: -30,
-    right: 20,
+    top: -35,
+    right: 5,
     maxWidth: 360,
     minWidth: 280,
     padding: 20,
@@ -409,11 +449,12 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     position: 'absolute',
+    maxWidth: 300,
   },
   permissionDeniedLabel: {
     fontSize: 11,
-    backgroundColor: colors.TRANSPARENT_BLUE_BG,
-    color: colors.LIGHT_GREY_BLUE,
+    backgroundColor: colors.TRANSPARENT_BLACK_80,
+    color: colors.LIGHT_GREY_E5,
     paddingVertical: 4,
     paddingHorizontal: 6,
   },

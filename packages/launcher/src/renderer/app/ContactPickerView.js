@@ -8,6 +8,7 @@ import { Text, Button } from '@morpheus-ui/core'
 
 import colors from '../colors'
 import rpc from './rpc'
+import AlertHeader from './AlertHeader'
 
 export type SelectedContactIDs = Array<string>
 
@@ -30,13 +31,8 @@ type State = {
   selectedContacts: Set<string>,
 }
 
-const Header = styled.View`
-  padding-vertical: 12px;
-  flex-direction: row;
-`
-
 const ContactRow = styled.View`
-  padding: 10px;
+  padding-vertical: 10px;
   border-color: ${colors.GREY_DARK_48};
   border-bottom-width: 1px;
   background-color: ${props =>
@@ -85,10 +81,6 @@ export default class ContactPickerView extends Component<Props, State> {
     this.props.onSelectedContacts(Array.from(this.state.selectedContacts))
   }
 
-  onPressCancel = () => {
-    this.props.onSelectedContacts([])
-  }
-
   render() {
     const rows = this.state.contacts.map(c => {
       const onPress = () => this.onSelectContact(c)
@@ -108,17 +100,9 @@ export default class ContactPickerView extends Component<Props, State> {
     const title = this.props.multiSelect ? 'Select Contacts' : 'Select Contact'
     return (
       <>
-        <Header>
-          <ContactsIcon width={25} height={25} color="#ccc" />
-          <Text styles="padding-left: 15px; color:#ccc; font-size:13px; font-weight: bold;">
-            {title}
-          </Text>
-        </Header>
+        <AlertHeader Icon={ContactsIcon} title={title} />
         <ScrollViewStyled>{rows}</ScrollViewStyled>
-        <ButtonsContainer>
-          {submitButton}
-          <Button title="CANCEL" onPress={() => this.onPressCancel()} />
-        </ButtonsContainer>
+        <ButtonsContainer>{submitButton}</ButtonsContainer>
       </>
     )
   }

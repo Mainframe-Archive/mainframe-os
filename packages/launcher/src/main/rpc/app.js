@@ -186,6 +186,8 @@ export const sandboxed = {
 }
 
 export const trusted = {
+  ...sandboxed,
+
   sub_createPermissionDenied: (ctx: AppContext): { id: string } => ({
     id: ctx.createPermissionDeniedSubscription(),
   }),
@@ -211,6 +213,28 @@ export const trusted = {
     return ctx.client.wallet.getUserEthWallets({
       userID: ctx.appSession.user.localID,
     })
+  },
+
+  wallet_selectDefault: async (
+    ctx: AppContext,
+  ): Promise<{ address: ?string }> => {
+    const res = await ctx.trustedRPC.request('user_request', {
+      key: 'WALLET_ACCOUNT_SELECT',
+      params: {},
+    })
+    let address
+    if (res.data && res.data.address) {
+      address = res.data.address
+      ctx.appSession.defaultEthAccount = res.data.address
+      const userID = ctx.appSession.user.id
+      const appID = ctx.appSession.app.appID
+      await ctx.client.app.setUserDefaultWallet({
+        userID,
+        appID,
+        address,
+      })
+    }
+    return { address }
   },
 
   contacts_getUserContacts: (

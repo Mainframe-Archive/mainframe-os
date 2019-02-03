@@ -94,8 +94,26 @@ export default class ContextMutations {
       userID,
       contactsIDs,
     )
-    await this._context.openVault.save()
+    await openVault.save()
     return contacts
+  }
+
+  async setAppUserDefaultWallet(
+    appID: string,
+    userID: string,
+    address: string,
+  ) {
+    const { openVault, queries } = this._context
+    const app = openVault.apps.getAnyByID(appID)
+    if (!app) {
+      throw new Error('App not found')
+    }
+    const wallet = queries.getUserEthWalletForAccount(userID, address)
+    if (!wallet) {
+      throw new Error('Wallet not found')
+    }
+    app.setDefaultEthAccount(idType(userID), idType(wallet.localID), address)
+    await openVault.save()
   }
 
   // Contacts
