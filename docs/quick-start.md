@@ -18,8 +18,30 @@ This project contains a react based example dApp. It is configured for developme
 
 Next, __launch Mainframe OS__ and follow the onboarding prompts.
 
-Once you are setup, select 
+Once you are setup, with the "Application" window active, select __"Create New"__
 
+In the prompts:
+ * use "test" for the name.
+ * 0.0.1 for the version.
+ * run `yarn build` from the create-mainframe-dapp directory.
+ * select the generated `build` folder for the contents path.
+
+
+Create a developer identity:
+ * choose a name for the identity that you will use to publish dapps under.
+ * select "create."
+  
+App Permissions: 
+ * For our purposes here select "required" for Make transactions to Ethereum Blockchain.
+ * And add mainframe.com as a required web request host.
+ * Select "save."
+ 
+Review the app summary, select "create application." Then, launch the app by double clicking it from the "Applications" window.
+
+Host locally:
+ * In a terminal window run `yarn start` 
+ * With the application being hosted at `http://localhost:3000/`, replace the contents path of your active application window with `http://localhost:3000/`.
+ * You should now see the `create-mainframe-dapp` render within the active application window.
 ### Building Mainframe Apps
 
 You can build a Mainframe app using any Web technology supported by Electron v2 (Chromium v61).
