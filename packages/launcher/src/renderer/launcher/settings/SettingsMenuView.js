@@ -5,25 +5,27 @@ import styled from 'styled-components/native'
 
 import SettingsItem from './SettingsItem'
 
+import { type MenuKey } from './SettingsScreen'
+
 type Props = {
-  onSelectMenuItem: (key: string) => void,
+  onSelectMenuItem: (key: MenuKey) => void,
 }
 
 const Container = styled.View`
   flex: 1;
+  padding: 0 5px;
 `
 const ScrollView = styled.ScrollView``
 
 const List = styled.View`
-  padding: 0 5px;
   margin-bottom: 50px;
 `
 
-export default class SettingsView extends Component<Props> {
+export default class SettingsMenuView extends Component<Props> {
   render() {
     return (
-      <Container>
-        <ScrollView>
+      <ScrollView>
+        <Container>
           <Text variant={['smallTitle', 'blue', 'bold']}>Developers</Text>
           <List>
             <SettingsItem
@@ -54,6 +56,7 @@ export default class SettingsView extends Component<Props> {
           <Text variant={['smallTitle', 'blue', 'bold']}>About</Text>
           <List>
             <SettingsItem
+              firsr
               onPress={() => this.props.onSelectMenuItem('feedback')}
               title="Feedback"
             />
@@ -67,8 +70,8 @@ export default class SettingsView extends Component<Props> {
               )}
             />
           </List>
-        </ScrollView>
-      </Container>
+        </Container>
+      </ScrollView>
     )
   }
 }

@@ -92,6 +92,7 @@ class IdentitiesView extends Component<Props, State> {
   }
 
   render() {
+    console.log(this.props)
     return (
       <Container>
         <Text variant="smallTitle">Personal</Text>

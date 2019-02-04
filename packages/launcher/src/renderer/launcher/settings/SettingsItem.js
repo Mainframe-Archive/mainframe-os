@@ -21,7 +21,7 @@ const TitleArea = styled.View`
 `
 
 const Container = styled.TouchableOpacity`
-  padding: 10px 0;
+  padding: 10px;
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
@@ -34,13 +34,13 @@ const Container = styled.TouchableOpacity`
      shadow-color: #000;
      shadow-offset: {width: 0, height: 0};
      shadow-opacity: 0.1;
-     shadow-radius: 8;
+     shadow-radius: 8; 
   `}
   ${props => props.first && 'border-top-width: 1px;'}
 `
 
 const ContainerView = styled.View`
-  padding: 10px 0;
+  padding: 10px;
   flex-direction: row;
   align-items: center;
   justify-content: space-between;

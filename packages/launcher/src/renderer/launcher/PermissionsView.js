@@ -108,7 +108,7 @@ const PermissionRow = styled.View`
   margin-bottom: 10px;
   flex-direction: row;
   justify-content: center;
-  alignitems: center;
+  align-items: center;
   border-top-width: 1px;
   border-top-color: #f9f9f9;
 
