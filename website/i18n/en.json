@@ -32,6 +32,10 @@
         "title": "Unix Instructions",
         "sidebar_label": "Unix Instructions"
       },
+      "web3": {
+        "title": "Web3 Notes",
+        "sidebar_label": "Web3 Notes"
+      },
       "windows": {
         "title": "Windows Instructions",
         "sidebar_label": "Windows Instructions"

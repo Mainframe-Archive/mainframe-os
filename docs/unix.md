@@ -10,9 +10,6 @@ sidebar_label: Unix Instructions
 - Installed git and added to PATH environment variable
 
 #### Dependencies
-
-##### Linux
-
 ```
 sudo apt install -y libudev-dev libtool libusb-1.0-0-dev build-essential
 ```

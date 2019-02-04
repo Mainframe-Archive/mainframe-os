@@ -2,9 +2,23 @@
 id: quick-start
 title: Quick Start
 ---
+> This guide is intended for dapp developers with some familiarity with React development.  
 ## Getting Started
-Fork the [create-mainframe-dapp](https://github.com/MainframeHQ/create-mainframe-dapp) repo. This project contains a react based example dApp that is properly configured for development within our electron environment and is integrated with the mainframe SDK right out of the box. As you follow the README instructions it will send you back here to install a local copy of js-mainframe. Jump down to the [Setup](https://github.com/MainframeHQ/js-mainframe#setup) section when you get to this point in the setup process.
+### Dev Environment
+Download [Mainframe OS]() and install the package on your local machine.
+Alternatively, jump to the respective [Unix Instructions](unix.md) or [Windows Instructions](windows.md) to compile it from source.
 
+* Fork the [create-mainframe-dapp](https://github.com/MainframeHQ/create-mainframe-dapp) repo.
+* `git clone https://github.com/<YOUR_USERNAME>/create-mainframe-dapp.git` 
+* `cd create-mainframe-dapp`
+* `yarn`
+* `yarn start`
+
+This project contains a react based example dApp. It is configured for development within our electron environment and integrated with the Mainframe SDK out of the box. 
+
+Next, __launch Mainframe OS__ and follow the onboarding prompts.
+
+Once you are setup, select 
 
 ### Building Mainframe Apps
 

@@ -145,16 +145,16 @@ class Index extends React.Component {
       <Block layout="fourColumn">
         {[
           {
-            content: 'This is the content of my feature',
+            content: 'Managed decentralized infrastructure.',
             image: `${baseUrl}img/doug3.JPG`,
             imageAlign: 'top',
-            title: 'Feature One',
+            title: 'Unstoppable Dapps',
           },
           {
-            content: 'The content of my second feature',
+            content: 'Privacy built in.',
             image: `${baseUrl}img/doug.JPG`,
             imageAlign: 'top',
-            title: 'Feature Two',
+            title: 'Control Your Data',
           },
         ]}
       </Block>
