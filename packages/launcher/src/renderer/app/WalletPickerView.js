@@ -3,7 +3,6 @@
 import React, { Component, type Node } from 'react'
 import { TouchableOpacity } from 'react-native-web'
 import styled from 'styled-components/native'
-import { Text } from '@morpheus-ui/core'
 
 import colors from '../colors'
 import rpc from './rpc'
@@ -45,6 +44,12 @@ const AccountLabel = styled.Text`
   font-weight: ${props => (props.selected ? 'bold' : 'normal')};
 `
 
+const WalletName = styled.Text`
+  color: #eee;
+  font-weight: bold;
+  margin-top: 10px;
+`
+
 export default class WalletPickerView extends Component<Props, State> {
   state = {}
 
@@ -80,9 +85,7 @@ export default class WalletPickerView extends Component<Props, State> {
       })
       return (
         <>
-          <Text styles="color:#eee; font-weight:bold; margin-top:10px">
-            {w.name}
-          </Text>
+          <WalletName>{w.name}</WalletName>
           {accounts}
         </>
       )

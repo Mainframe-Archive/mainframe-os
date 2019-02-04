@@ -4,7 +4,7 @@ import React, { Component } from 'react'
 import { TouchableOpacity } from 'react-native-web'
 import ContactsIcon from '@morpheus-ui/icons/ContactsMd'
 import styled from 'styled-components/native'
-import { Text, Button } from '@morpheus-ui/core'
+import { Button } from '@morpheus-ui/core'
 
 import colors from '../colors'
 import rpc from './rpc'
@@ -48,6 +48,10 @@ const ButtonsContainer = styled.View`
   margin-top: 10px;
 `
 
+const NameLabel = styled.Text`
+  color: ${colors.LIGHT_GREY_EE};
+`
+
 export default class ContactPickerView extends Component<Props, State> {
   state = {
     contacts: [],
@@ -88,7 +92,7 @@ export default class ContactPickerView extends Component<Props, State> {
       return (
         <TouchableOpacity key={c.localID} onPress={onPress}>
           <ContactRow selected={selected}>
-            <Text styles="color:#eee">{c.profile.name}</Text>
+            <NameLabel>{c.profile.name}</NameLabel>
           </ContactRow>
         </TouchableOpacity>
       )

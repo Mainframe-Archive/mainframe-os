@@ -241,7 +241,7 @@ const styles = StyleSheet.create({
   },
   headerLabel: {
     textAlign: 'left',
-    color: colors.LIGHT_GREY_F7,
+    color: colors.LIGHT_GREY_CC,
     fontSize: 12,
   },
   boldLabel: {

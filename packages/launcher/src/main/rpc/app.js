@@ -25,7 +25,28 @@ class TopicSubscription extends ContextSubscription<RxSubscription> {
   }
 }
 
+const sharedMethods = {
+  wallet_getEthAccounts: async (ctx: AppContext): Promise<Array<string>> => {
+    // $FlowFixMe indexer property
+    const accounts = await ctx.client.wallet.getUserEthAccounts({
+      userID: ctx.appSession.user.localID,
+    })
+    if (
+      ctx.appSession.defaultEthAccount &&
+      accounts.includes(ctx.appSession.defaultEthAccount)
+    ) {
+      // Move default account to top
+      const defaultAccount = ctx.appSession.defaultEthAccount
+      accounts.splice(accounts.indexOf(defaultAccount), 1)
+      accounts.unshift(defaultAccount)
+    }
+    return accounts
+  },
+}
+
 export const sandboxed = {
+  ...sharedMethods,
+
   api_version: (ctx: AppContext) => ctx.client.apiVersion(),
 
   // Blockchain
@@ -44,23 +65,6 @@ export const sandboxed = {
     (ctx: AppContext, params: any) => ctx.client.wallet.signTransaction(params),
     // TODO notify app if using ledger to feedback awaiting sign
   ),
-
-  wallet_getEthAccounts: async (ctx: AppContext): Promise<Array<string>> => {
-    // $FlowFixMe indexer property
-    const accounts = await ctx.client.wallet.getUserEthAccounts({
-      userID: ctx.appSession.user.localID,
-    })
-    if (
-      ctx.appSession.defaultEthAccount &&
-      accounts.includes(ctx.appSession.defaultEthAccount)
-    ) {
-      // Move default account to top
-      const defaultAccount = ctx.appSession.defaultEthAccount
-      accounts.splice(accounts.indexOf(defaultAccount), 1)
-      accounts.unshift(defaultAccount)
-    }
-    return accounts
-  },
 
   // Contacts
 
@@ -186,7 +190,7 @@ export const sandboxed = {
 }
 
 export const trusted = {
-  ...sandboxed,
+  ...sharedMethods,
 
   sub_createPermissionDenied: (ctx: AppContext): { id: string } => ({
     id: ctx.createPermissionDeniedSubscription(),

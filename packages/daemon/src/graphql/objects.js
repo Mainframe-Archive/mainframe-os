@@ -596,8 +596,7 @@ export const walletBalances = new GraphQLObjectType({
       type: new GraphQLNonNull(GraphQLString),
       resolve: async (self, args, ctx) => {
         try {
-          const balance = await ctx.io.eth.getETHBalance(self)
-          return balance
+          return await ctx.io.eth.getETHBalance(self)
         } catch (err) {
           ctx.log(err)
           return 0
@@ -608,8 +607,7 @@ export const walletBalances = new GraphQLObjectType({
       type: new GraphQLNonNull(GraphQLString),
       resolve: async (self, args, ctx) => {
         try {
-          const balance = await ctx.io.eth.getMFTBalance(self)
-          return balance
+          return await ctx.io.eth.getMFTBalance(self)
         } catch (err) {
           ctx.log(err)
           return 0

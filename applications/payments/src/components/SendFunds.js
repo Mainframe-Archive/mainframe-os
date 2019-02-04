@@ -107,12 +107,10 @@ class SendFunds extends Component<ContextProps, State> {
   }
 
   onPressSendToken = async () => {
-    const { sdk } = this.props
     this.sendTransaction(true)
   }
 
   onPressSendEth = async () => {
-    const { sdk } = this.props
     this.sendTransaction()
   }
 
