@@ -390,7 +390,10 @@ const appManifestInput = new GraphQLInputObjectType({
     version: {
       type: new GraphQLNonNull(GraphQLString),
     },
-    contentsURI: {
+    contentsHash: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    updateHash: {
       type: new GraphQLNonNull(GraphQLString),
     },
     permissions: {

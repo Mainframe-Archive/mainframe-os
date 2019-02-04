@@ -92,7 +92,8 @@ input AppManifestInput {
   id: String!
   name: String!
   version: String!
-  contentsURI: String!
+  contentsHash: String!
+  updateHash: String!
   permissions: AppPermissionsRequirementsInput!
   author: ManifestAuthorInput!
 }
@@ -159,6 +160,12 @@ type AppVersionData {
   publicationState: String!
 }
 
+enum ConnectionState {
+  CONNECTED
+  SENDING
+  SENT
+}
+
 type Contact implements Node {
   """The ID of an object"""
   id: ID!
@@ -166,13 +173,7 @@ type Contact implements Node {
   peerID: ID!
   pubKey: String!
   profile: GenericProfile!
-  connectionState: ContactConnection!
-}
-
-enum ContactConnection {
-  CONNECTED
-  SENDING
-  SENT
+  connectionState: ConnectionState!
 }
 
 type Contacts {

@@ -61,10 +61,11 @@ class AppInstallModal extends Component<ViewProps, State> {
     this.handleSelectedFiles([...this.fileInput.current.files])
   }
 
+  // TODO: Remove once replaced by hash input
   handleSelectedFiles = async (files: Array<Object>) => {
     if (files.length) {
       try {
-        const manifest = await rpc.readManifest(files[0].path)
+        const manifest = {} //await rpc.readManifest(files[0].path)
         if (
           typeof manifest.data.name === 'string' &&
           typeof manifest.data.permissions === 'object'
@@ -89,6 +90,33 @@ class AppInstallModal extends Component<ViewProps, State> {
         // eslint-disable-next-line no-console
         console.log('error parsing manifest: ', err)
       }
+    }
+  }
+
+  onSubmitHash = async (hash: string) => {
+    try {
+      const { manifest, appID } = await rpc.loadManifest(hash)
+      // If appID is returned it means the app is already installed.
+      // If we only support a single user in the launcher, the app must have been already installed by this user.
+      if (appID != null) {
+        return this.props.onInstallComplete()
+      }
+
+      if (havePermissionsToGrant(manifest.permissions)) {
+        this.setState({ installStep: 'permissions', manifest })
+      } else {
+        this.setState(
+          {
+            installStep: 'download',
+            manifest,
+            userPermissions: createStrictPermissionGrants({}),
+          },
+          this.saveApp,
+        )
+      }
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.log('error loading manifest:', err)
     }
   }
 
