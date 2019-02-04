@@ -71,7 +71,7 @@ const BUTTONS: Object = {
     activeIcon: WalletsFilledIcon,
   },
   settings: {
-    title: 'Settings',
+    title: 'More',
     icon: SettingsIcon,
     activeIcon: SettingsFilledIcon,
   },
