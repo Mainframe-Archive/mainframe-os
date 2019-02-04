@@ -13,6 +13,7 @@ import AppsScreen from './apps/AppsScreen'
 import IdentitiesScreen from './identities/IdentitiesScreen'
 import WalletsScreen from './wallets/WalletsScreen'
 import ContactsScreen from './contacts/ContactsScreen'
+import SettingsScreen from './settings/SettingsScreen'
 
 const Container = styled.View`
   flex-direction: row;
@@ -88,6 +89,8 @@ class Launcher extends Component<Props, State> {
         return <WalletsScreen />
       case 'contacts':
         return <ContactsScreen />
+      case 'settings':
+        return <SettingsScreen />
       default:
         return null
     }

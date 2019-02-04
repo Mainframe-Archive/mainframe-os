@@ -27,7 +27,7 @@ const Header = styled.View`
   height: 50px;
 `
 
-const AppsGrid = styled.View`
+export const AppsGrid = styled.View`
   flex-direction: row;
   flex-wrap: wrap;
 `
@@ -50,6 +50,32 @@ const InstallIcon = styled.View`
   justify-content: center;
   border: 1px solid #a9a9a9;
 `
+
+export const renderNewAppButton = (
+  title: string,
+  onPress: () => void,
+  testID: string,
+) => {
+  return (
+    <AppInstallContainer onPress={onPress} testID={testID}>
+      <InstallIcon>
+        <PlusIcon color="#808080" />
+      </InstallIcon>
+      <Text
+        theme={{
+          width: '72px',
+          fontSize: '11px',
+          padding: '5px 0',
+          color: '#808080',
+          border: '1px solid #a9a9a9',
+          borderRadius: '3px',
+          textAlign: 'center',
+        }}>
+        {title}
+      </Text>
+    </AppInstallContainer>
+  )
+}
 
 type AppData = AppOwnData | AppInstalledData
 
@@ -196,12 +222,12 @@ class AppsView extends Component<Props, State> {
         <AppsGrid>
           {apps.map(app => this.renderApp(app, own))}
           {own
-            ? this.renderButton(
+            ? renderNewAppButton(
                 'Create new',
                 this.onPressCreateApp,
                 'launcher-create-app-button',
               )
-            : this.renderButton(
+            : renderNewAppButton(
                 'Install',
                 this.onPressInstall,
                 'launcher-install-app-button',
