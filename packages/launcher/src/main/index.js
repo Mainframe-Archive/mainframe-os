@@ -80,7 +80,7 @@ const launchApp = async (appSession: AppSession) => {
   }
 
   const appWindow = newWindow()
-  if (is.development) {
+  if (appSession.isDev) {
     appWindow.webContents.on('did-attach-webview', () => {
       // Open a separate developer tools window for the app
       appWindow.webContents.executeJavaScript(
@@ -107,7 +107,9 @@ const launchApp = async (appSession: AppSession) => {
     window: appWindow,
   })
   contextsByWindow.set(appWindow, appContext)
-  interceptWebRequests(appContext)
+  appWindow.webContents.on('did-attach-webview', (event, webContents) => {
+    interceptWebRequests(appContext, webContents.session)
+  })
 
   if (appContexts[appID]) {
     appContexts[appID][userID] = appContext

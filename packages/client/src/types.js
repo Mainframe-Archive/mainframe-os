@@ -138,6 +138,7 @@ export type AppOpenResult = {
   app: AppData,
   session: AppSession,
   user: IdentityOwnData,
+  isDev?: ?boolean,
   defaultEthAccount: ?string,
 }
 

@@ -38,9 +38,12 @@ type Request = {
     CONTACTS_SELECT?: ContactSelectParams,
   },
 }
+
+type PersistOption = 'always' | 'session'
+
 type PermissionGrantResult = {
   granted: boolean,
-  persist: boolean,
+  persist: ?PersistOption,
   data?: GrantedData,
 }
 type PermissionDeniedNotif = {
@@ -112,7 +115,7 @@ export default class UserAlertView extends Component<Props, State> {
   constructor(props: Props) {
     super(props)
     this.handleNotifications()
-    this.handlePermissionRequest()
+    this.handleRequest()
   }
 
   componentWillUnmount() {
@@ -148,7 +151,7 @@ export default class UserAlertView extends Component<Props, State> {
     )
   }
 
-  handlePermissionRequest() {
+  handleRequest() {
     const context = { setState: this.setState.bind(this) }
     this._onRPCMessage = async (event: Object, incoming: Object) => {
       const outgoing = await handleMessage(context, incoming)
@@ -166,7 +169,7 @@ export default class UserAlertView extends Component<Props, State> {
       request.resolve({
         granted,
         data,
-        persist: this.state.persistGrant,
+        persist: this.state.persistGrant ? 'always' : 'session',
       })
       this.setState(({ requests }) => {
         const { [id]: _ignore, ...nextRequests } = requests
@@ -208,7 +211,6 @@ export default class UserAlertView extends Component<Props, State> {
   onSelectedWalletAccount = (id: string, address: string) => {
     this.resolveRequest(id, {
       data: { address },
-      persist: this.state.persistGrant,
     })
   }
 
@@ -371,9 +373,10 @@ export default class UserAlertView extends Component<Props, State> {
     }
 
     return (
-      <View style={styles.container} onClick={this.onPressBG}>
+      <>
+        <View style={styles.container} onClick={this.onPressBG} />
         <View style={styles.requestContainer}>{content}</View>
-      </View>
+      </>
     )
   }
 
