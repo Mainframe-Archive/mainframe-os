@@ -2,10 +2,19 @@
 import EventEmitter from 'events'
 import web3Utils from 'web3-utils'
 import Web3EthAbi from 'web3-eth-abi'
+import type Web3HTTPProvider from 'web3-providers-http'
 
 import RequestManager from './RequestManager'
 import ABI from './abi'
 import type { SendParams, TXEventEmitter } from './types'
+
+export const NETWORKS = {
+  '1': 'mainnet',
+  '2': 'morden',
+  '3': 'ropsten',
+  '4': 'rinkeby',
+  '42': 'kovan',
+}
 
 export const TOKEN_ADDRESS = {
   ropsten: '0xa46f1563984209fe47f8236f8b01a03f03f957e4',
@@ -20,15 +29,65 @@ const MFT_TOKEN_ADDRESSES = {
 export default class EthClient extends RequestManager {
   // Reading blockchain data
 
-  // async startCheckingAccounts() {
-  //   const accounts = await this.getAccounts
-  //   const accountInterval = setInterval(function() {
-  //     if (web3.eth.accounts[0] !== account) {
-  //       account = web3.eth.accounts[0]
-  //       updateInterface()
-  //     }
-  //   }, 100)
-  // }
+  _polling = false
+  _defaultAccount: ?string
+  _networkName: ?string
+  _networkID: ?string
+
+  constructor(provider: Web3HTTPProvider | string, trackChanges?: boolean) {
+    super(provider)
+
+    this.setup()
+    if (trackChanges) {
+      this.beginTrackingChanges()
+    }
+  }
+
+  get networkName(): string {
+    return this._networkName || 'ropsten'
+  }
+
+  get networkID(): ?string {
+    return this._networkID
+  }
+
+  get defaultAccount(): ?string {
+    return this._defaultAccount
+  }
+
+  async setup() {
+    this._networkID = await this.fetchNetwork()
+    this._networkName = NETWORKS[this._networkID]
+  }
+
+  async beginTrackingChanges() {
+    if (!this._polling) {
+      this._polling = setInterval(async () => {
+        const network = await this.fetchNetwork()
+        if (network !== this._networkID) {
+          this._networkID = network
+          this._networkName = NETWORKS[network]
+          this.emit('networkChanged', network)
+        }
+        const accounts = await this.getAccounts()
+        if (accounts[0] !== this._defaultAccount) {
+          this._defaultAccount = accounts[0]
+          this.emit('accountsChange', accounts)
+        }
+      }, 1500)
+    }
+  }
+
+  stopTrackChanges() {
+    if (this._polling) {
+      clearInterval(this._polling)
+    }
+  }
+
+  async fetchNetwork(): Promise<string> {
+    const req = this.createRequest('net_version', [])
+    return this.sendRequest(req)
+  }
 
   async getAccounts(): Promise<Array<string>> {
     const accountsReq = this.createRequest('eth_accounts', [])
@@ -50,10 +109,12 @@ export default class EthClient extends RequestManager {
   }
 
   async getMFTBalance(accountAddress: string): Promise<Object> {
-    const tokenAddress = TOKEN_ADDRESS[this.network]
-    if (!tokenAddress) {
-      throw new Error(`Unsupported Ethereum network: ${this.network}`)
+    if (!this._networkName || !TOKEN_ADDRESS[this._networkName]) {
+      throw new Error(
+        `Unsupported Ethereum network: ${this._networkID || 'Undefined'}`,
+      )
     }
+    const tokenAddress = TOKEN_ADDRESS[this._networkName]
     return this.getTokenBalance(tokenAddress, accountAddress)
   }
 
@@ -95,7 +156,12 @@ export default class EthClient extends RequestManager {
     const valueWei = web3Utils.toWei(String(params.value))
     const abi = ABI.ERC20.find(a => a.name === 'transfer')
     const data = Web3EthAbi.encodeFunctionCall(abi, [params.to, valueWei])
-    const to = MFT_TOKEN_ADDRESSES[this.network]
+    if (!this._networkName || !MFT_TOKEN_ADDRESSES[this._networkName]) {
+      throw new Error(
+        `Unsupported Ethereum network: ${this._networkID || 'Undefined'}`,
+      )
+    }
+    const to = MFT_TOKEN_ADDRESSES[this._networkName]
     const reqParams = { from: params.from, to, data }
     const request = {
       method: 'eth_sendTransaction',

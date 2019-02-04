@@ -4,7 +4,7 @@
 
 import type StreamRPC from '@mainframe/rpc-stream'
 
-import BlockchainAPIs from './apis/Blockchain'
+import EthAPIs from './apis/Eth'
 import ContactsAPIs from './apis/Contacts'
 import PaymentAPIs from './apis/Payments'
 import PssAPIs from './apis/Pss'
@@ -13,7 +13,7 @@ export * from './types'
 
 export default class MainframeSDK {
   _rpc: StreamRPC
-  _blockchain: BlockchainAPIs
+  _ethereum: EthAPIs
   pss: PssAPIs
   contacts: ContactsAPIs
   payments: PaymentAPIs
@@ -30,13 +30,13 @@ export default class MainframeSDK {
     this.payments = new PaymentAPIs(this)
   }
 
-  get blockchain() {
-    // Lazy load blockchain API's as provider
+  get ethereum() {
+    // Lazy load Eth API's as provider
     // engine will start fetching blocks
-    if (!this._blockchain) {
-      this._blockchain = new BlockchainAPIs(this)
+    if (!this._ethereum) {
+      this._ethereum = new EthAPIs(this)
     }
-    return this._blockchain
+    return this._ethereum
   }
 
   apiVersion = () => {

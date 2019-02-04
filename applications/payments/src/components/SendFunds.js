@@ -153,8 +153,8 @@ class SendFunds extends Component<ContextProps, State> {
       value: this.state.amount,
     }
     const txSub = mft
-      ? sdk.blockchain.sendMFT(params)
-      : sdk.blockchain.sendETH(params)
+      ? sdk.ethereum.sendMFT(params)
+      : sdk.ethereum.sendETH(params)
 
     this.listenTX(txSub)
   }
@@ -402,7 +402,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   receiptContainer: {
-    color: '#535748',
     backgroundColor: '#e6f2bf',
     borderColor: '#d3e2a7',
   },
