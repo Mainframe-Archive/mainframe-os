@@ -250,6 +250,9 @@ export default {
       backgroundColor: COLORS.PRIMARY_RED,
       fontWeight: 'bold',
     },
+    flex1: {
+      flex: 1,
+    },
     ...MARGINS,
   },
   TextField: {
@@ -263,6 +266,12 @@ export default {
   Checkbox: {
     mono: {
       fontFamily: 'IBM Plex Mono',
+    },
+  },
+  DropDown: {
+    default: {
+      padding: '5px 10px',
+      menuItemPadding: '5px 10px',
     },
   },
   styled: {
