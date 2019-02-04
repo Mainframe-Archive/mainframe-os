@@ -107,6 +107,11 @@ export default class ContextQueries {
     return []
   }
 
+  getUserEthWalletForAccount(userID: string, address: string): ?Wallet {
+    const wallets = this.getUserEthWallets(userID)
+    return wallets.find(w => w.accounts.includes(address))
+  }
+
   getUserEthAccounts(userID: string) {
     return this.getUserEthWallets(userID).reduce((acc, w) => {
       // $FlowFixMe concat types

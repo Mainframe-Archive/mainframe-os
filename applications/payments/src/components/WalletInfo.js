@@ -18,6 +18,12 @@ class WalletInfo extends Component<ContextProps, State> {
   }
   componentDidMount() {
     this.fetchState()
+    this.props.sdk.ethereum.on('accountsChange', accounts => {
+      this.fetchState()
+    })
+    this.props.sdk.ethereum.on('networkChanged', () => {
+      this.fetchState()
+    })
   }
 
   async fetchState() {

@@ -29,7 +29,7 @@ export default class PaymentAPIs extends ClientAPIs {
       throw new Error(`No eth address found for contact: ${contact.id}`)
     }
     // TODO: Fetch 'from' address from trusted UI if none provided
-    const accounts = await this._sdk.blockchain.getAccounts()
+    const accounts = await this._sdk.ethereum.getAccounts()
     if (!accounts || !accounts.length) {
       throw new Error(`No wallets found`)
     }
@@ -40,9 +40,9 @@ export default class PaymentAPIs extends ClientAPIs {
     }
     switch (currency) {
       case 'MFT':
-        return this._sdk.blockchain.sendMFT(sendParams)
+        return this._sdk.ethereum.sendMFT(sendParams)
       case 'ETH':
-        return this._sdk.blockchain.sendETH(sendParams)
+        return this._sdk.ethereum.sendETH(sendParams)
       default:
         throw new Error(`Unsupported currency type: ${currency}`)
     }

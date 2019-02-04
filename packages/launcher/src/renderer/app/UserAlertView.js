@@ -16,6 +16,7 @@ import Text from '../UIComponents/Text'
 import Button from '../UIComponents/Button'
 import WalletTxRequestView from './WalletTxRequestView'
 import ContactPickerView, { type SelectedContactIDs } from './ContactPickerView'
+import WalletPickerView from './WalletPickerView'
 
 import rpc from './rpc'
 import type { AppSessionData } from './AppContainer'
@@ -28,7 +29,7 @@ type GrantedData = {
   selectedContactIDs?: SelectedContactIDs,
 }
 
-type PermissionGrantData = {
+type Request = {
   key: string,
   domain?: string,
   params?: WalletSignTxParams | ContactSelectParams,
@@ -47,17 +48,30 @@ type PermissionDeniedNotif = {
   domain?: string,
 }
 
+type Props = {
+  appSession: AppSessionData,
+}
+
+type State = {
+  permissionDeniedNotifs: Array<PermissionDeniedNotif>,
+  requests: {
+    [id: string]: {
+      data: Request,
+      responseRequired?: boolean,
+      resolve: (result: PermissionGrantResult) => void,
+    },
+  },
+  persistGrant: boolean,
+}
+
 const methods = {
-  permission_ask: (
-    ctx,
-    params: PermissionGrantData,
-  ): Promise<PermissionGrantResult> => {
+  user_request: (ctx, request: Request): Promise<PermissionGrantResult> => {
     return new Promise(resolve => {
-      ctx.setState(({ permissionRequests }) => ({
-        permissionRequests: {
-          ...permissionRequests,
+      ctx.setState(({ requests }) => ({
+        requests: {
+          ...requests,
           [uniqueID()]: {
-            data: params,
+            data: request,
             resolve,
           },
         },
@@ -65,6 +79,7 @@ const methods = {
     })
   },
 }
+
 const validatorOptions = { messages: MANIFEST_SCHEMA_MESSAGES }
 const handleMessage = createHandler({ methods, validatorOptions })
 
@@ -72,6 +87,7 @@ const permissionDescriptions = {
   BLOCKCHAIN_SEND: 'make an Ethereum blockchain transaction',
   CONTACTS_READ: 'access contacts',
   CONTACTS_SELECT: 'select contacts',
+  WALLET_ACCOUNT_SELECT: 'select wallets',
 }
 const getPermissionDescription = (key: string, input?: ?string): ?string => {
   if (key === 'WEB_REQUEST' && input) {
@@ -83,25 +99,10 @@ const getPermissionDescription = (key: string, input?: ?string): ?string => {
   return null
 }
 
-type Props = {
-  appSession: AppSessionData,
-}
-
-type State = {
-  permissionDeniedNotifs: Array<PermissionDeniedNotif>,
-  permissionRequests: {
-    [id: string]: {
-      data: PermissionGrantData,
-      resolve: (result: PermissionGrantResult) => void,
-    },
-  },
-  persistGrant: boolean,
-}
-
-export default class PermissionsManagerView extends Component<Props, State> {
+export default class UserAlertView extends Component<Props, State> {
   state = {
     permissionDeniedNotifs: [],
-    permissionRequests: {},
+    requests: {},
     persistGrant: false,
   }
 
@@ -159,7 +160,7 @@ export default class PermissionsManagerView extends Component<Props, State> {
   }
 
   onSetPermissionGrant = (id: string, granted: boolean, data?: GrantedData) => {
-    const request = this.state.permissionRequests[id]
+    const request = this.state.requests[id]
 
     if (request != null) {
       request.resolve({
@@ -167,9 +168,21 @@ export default class PermissionsManagerView extends Component<Props, State> {
         data,
         persist: this.state.persistGrant,
       })
-      this.setState(({ permissionRequests }) => {
-        const { [id]: _ignore, ...requests } = permissionRequests
-        return { permissionRequests: requests, persistGrant: false }
+      this.setState(({ requests }) => {
+        const { [id]: _ignore, ...nextRequests } = requests
+        return { requests: nextRequests, persistGrant: false }
+      })
+    }
+  }
+
+  resolveRequest(id: string, response: Object) {
+    const request = this.state.requests[id]
+
+    if (request != null) {
+      request.resolve(response)
+      this.setState(({ requests }) => {
+        const { [id]: _ignore, ...nextRequests } = requests
+        return { requests: nextRequests, persistGrant: false }
       })
     }
   }
@@ -192,6 +205,19 @@ export default class PermissionsManagerView extends Component<Props, State> {
     this.onSetPermissionGrant(id, true, { selectedContactIDs })
   }
 
+  onSelectedWalletAccount = (id: string, address: string) => {
+    this.resolveRequest(id, {
+      data: { address },
+      persist: this.state.persistGrant,
+    })
+  }
+
+  onPressBG = () => {
+    Object.keys(this.state.requests).forEach(id => {
+      this.resolveRequest(id, {})
+    })
+  }
+
   // RENDER
 
   renderDeniedNotifs() {
@@ -206,8 +232,8 @@ export default class PermissionsManagerView extends Component<Props, State> {
     ) : null
   }
 
-  renderTxSignRequest(requestID: string, permissionData: PermissionGrantData) {
-    const { params } = permissionData
+  renderTxSignRequest(requestID: string, request: Request) {
+    const { params } = request
     const txView =
       !params || !params.BLOCKCHAIN_SEND ? (
         <Text>Invalid transaction data</Text>
@@ -235,8 +261,8 @@ export default class PermissionsManagerView extends Component<Props, State> {
     )
   }
 
-  renderContactPicker(requestID: string, permissionData: PermissionGrantData) {
-    const { params } = permissionData
+  renderContactPicker(requestID: string, request: Request) {
+    const { params } = request
     const { id } = this.props.appSession.user
     const multi =
       params && params.CONTACTS_SELECT ? params.CONTACTS_SELECT.multi : false
@@ -246,6 +272,16 @@ export default class PermissionsManagerView extends Component<Props, State> {
         multiSelect={multi}
         onSelectedContacts={contacts =>
           this.onSelectedContacts(requestID, contacts)
+        }
+      />
+    )
+  }
+
+  renderWalletPicker(requestID: string) {
+    return (
+      <WalletPickerView
+        onSelectedWalletAccount={address =>
+          this.onSelectedWalletAccount(requestID, address)
         }
       />
     )
@@ -283,19 +319,19 @@ export default class PermissionsManagerView extends Component<Props, State> {
     )
   }
 
-  renderPermissionRequest = () => {
-    const { persistGrant, permissionRequests } = this.state
-    const keys = Object.keys(permissionRequests)
+  renderContent = () => {
+    const { persistGrant, requests } = this.state
+    const keys = Object.keys(requests)
 
     if (keys.length === 0) {
       return null
     }
 
     const id = keys[0]
-    const permissionData = permissionRequests[id].data
+    const requestData = requests[id].data
     const permissionLabel = getPermissionDescription(
-      permissionData.key,
-      permissionData.domain,
+      requestData.key,
+      requestData.domain,
     )
 
     if (permissionLabel == null) {
@@ -319,12 +355,15 @@ export default class PermissionsManagerView extends Component<Props, State> {
     }
 
     let content
-    switch (permissionData.key) {
+    switch (requestData.key) {
       case 'BLOCKCHAIN_SEND':
-        content = this.renderTxSignRequest(id, permissionData)
+        content = this.renderTxSignRequest(id, requestData)
         break
       case 'CONTACTS_SELECT':
-        content = this.renderContactPicker(id, permissionData)
+        content = this.renderContactPicker(id, requestData)
+        break
+      case 'WALLET_ACCOUNT_SELECT':
+        content = this.renderWalletPicker(id)
         break
       default:
         content = this.renderPermission(id, persistGrant, permissionLabel)
@@ -332,7 +371,7 @@ export default class PermissionsManagerView extends Component<Props, State> {
     }
 
     return (
-      <View style={styles.container}>
+      <View style={styles.container} onClick={this.onPressBG}>
         <View style={styles.requestContainer}>{content}</View>
       </View>
     )
@@ -340,7 +379,7 @@ export default class PermissionsManagerView extends Component<Props, State> {
 
   render() {
     const deniedNotifs = this.renderDeniedNotifs()
-    const permissionRequest = this.renderPermissionRequest()
+    const permissionRequest = this.renderContent()
     return (
       <View>
         {permissionRequest}
@@ -352,29 +391,37 @@ export default class PermissionsManagerView extends Component<Props, State> {
 
 const styles = StyleSheet.create({
   container: {
-    top: 25,
+    top: 60,
     left: 0,
     right: 0,
     bottom: 0,
     position: 'fixed',
-    backgroundColor: colors.TRANSPARENT_BLUE_BG,
+    backgroundColor: colors.TRANSPARENT_BLACK_50,
     height: '100%',
   },
   requestContainer: {
-    backgroundColor: colors.LIGHT_GREY_F7,
-    maxWidth: 300,
-    padding: 15,
+    backgroundColor: colors.GREY_DARK_3C,
+    position: 'absolute',
+    top: -35,
+    right: 5,
+    maxWidth: 360,
+    minWidth: 280,
+    padding: 20,
     marginLeft: 40,
+    borderRadius: 3,
+    shadowColor: colors.BLACK,
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
   },
   headerText: {
     fontWeight: 'bold',
-    color: colors.PRIMARY_BLUE,
+    color: colors.LIGHT_GREY_CC,
     fontSize: 15,
   },
   descriptionText: {
     marginVertical: 6,
     fontSize: 13,
-    color: colors.GREY_DARK_54,
+    color: colors.WHITE,
   },
   persistOption: {
     flexDirection: 'row',
@@ -382,6 +429,7 @@ const styles = StyleSheet.create({
   },
   persistLabel: {
     marginRight: 15,
+    color: colors.LIGHT_GREY_CC,
   },
   buttonsContainer: {
     marginTop: 10,
@@ -401,11 +449,12 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     position: 'absolute',
+    maxWidth: 300,
   },
   permissionDeniedLabel: {
     fontSize: 11,
-    backgroundColor: colors.TRANSPARENT_BLUE_BG,
-    color: colors.LIGHT_GREY_BLUE,
+    backgroundColor: colors.TRANSPARENT_BLACK_80,
+    color: colors.LIGHT_GREY_E5,
     paddingVertical: 4,
     paddingHorizontal: 6,
   },

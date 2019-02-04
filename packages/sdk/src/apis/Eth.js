@@ -34,7 +34,7 @@ const createHookedWallet = (rpc: StreamRPC) => {
   })
 }
 
-export default class BlockchainAPIs extends ClientAPIs {
+export default class EthAPIs extends ClientAPIs {
   _web3Provider: ProviderEngine
   _ethClient: EthClient
   _sdk: MainrameSDK
@@ -51,16 +51,30 @@ export default class BlockchainAPIs extends ClientAPIs {
     engine.addProvider(hookedWallet)
     engine.addProvider(subsProvider)
     engine.addProvider(rpcProvider)
+    engine.start()
+    this._web3Provider = engine
+    this._ethClient = new EthClient(engine, true)
     subsProvider.on('data', (err, notif) => {
       engine.emit('data', err, notif)
     })
-    engine.start()
-    this._web3Provider = engine
-    this._ethClient = new EthClient(engine)
+    this._ethClient.on('accountsChange', value => {
+      this.emit('accountsChange', value)
+    })
+    this._ethClient.on('networkChanged', value => {
+      this.emit('networkChanged', value)
+    })
   }
 
   get web3Provider() {
     return this._web3Provider
+  }
+
+  get selectedAccount(): ?string {
+    return this._ethClient.defaultAccount
+  }
+
+  get networkVersion(): ?string {
+    return this._ethClient.networkID
   }
 
   sendETH(params: SendParams): TXEventEmitter {

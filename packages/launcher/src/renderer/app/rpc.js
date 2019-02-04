@@ -53,6 +53,15 @@ export default {
     return rpc.request('wallet_getUserEthWallets')
   },
 
+  getUserDefaultWallet: async () => {
+    const accounts = await rpc.request('wallet_getEthAccounts')
+    return accounts[0]
+  },
+
+  selectDefaultWallet: async () => {
+    return rpc.request('wallet_selectDefault')
+  },
+
   web3Send: async (params: Object) => {
     return rpc.request('blockchain_web3Send', params)
   },

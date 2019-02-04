@@ -6,14 +6,16 @@ import Store from 'electron-store'
 import type { ID } from '@mainframe/utils-id'
 import React, { Component } from 'react'
 import { View, StyleSheet } from 'react-native-web'
-
+import { ThemeProvider as MFThemeProvider, Button } from '@morpheus-ui/core'
+import WalletsFilledIcon from '@morpheus-ui/icons/WalletsFilledMd'
 import styled from 'styled-components/native'
 
+import THEME from '../theme'
 import colors from '../colors'
 import Text from '../UIComponents/Text'
-import Button from '../UIComponents/Button'
 import TextInput from '../UIComponents/TextInput'
-import PermissionRequestView from './PermissionRequestView'
+import rpc from './rpc'
+import UserAlertView from './UserAlertView'
 
 declare var __static: string
 
@@ -63,6 +65,13 @@ const TitleBar = styled.View`
   background-color: transparent;
   align-items: center;
   justify-content: center;
+`
+
+const HeaderButtons = styled.View`
+  flex-direction: row;
+  justify-content: flex-end;
+  padding-right: 6px;
+  flex: 1;
 `
 
 export default class AppContainer extends Component<Props, State> {
@@ -127,6 +136,12 @@ export default class AppContainer extends Component<Props, State> {
     })
   }
 
+  onPressSelectWallet = async () => {
+    await rpc.selectDefaultWallet()
+  }
+
+  // RENDER
+
   render() {
     const { appSession } = this.props
     if (!appSession) {
@@ -173,38 +188,38 @@ export default class AppContainer extends Component<Props, State> {
     ) : null
 
     return (
-      <View style={styles.outerContainer}>
-        <View style={styles.header}>
-          <TitleBar className="draggable">
-            <View style={styles.appInfo}>
-              <Text style={styles.headerLabel}>
-                <Text style={styles.boldLabel}>
-                  {appSession.app.manifest.name}
+      <MFThemeProvider theme={THEME}>
+        <View style={styles.outerContainer}>
+          <View style={styles.header}>
+            <TitleBar className="draggable">
+              <View style={styles.appInfo}>
+                <Text style={styles.headerLabel}>
+                  <Text style={styles.boldLabel}>
+                    {appSession.app.manifest.name}
+                  </Text>
                 </Text>
-              </Text>
-            </View>
-          </TitleBar>
-          {urlBar}
-          <View style={styles.identity}>
-            <Text style={styles.headerLabel}>
-              User:{' '}
-              <Text style={styles.boldLabel}>
-                {' '}
-                {appSession.user.profile.name}
-              </Text>
-            </Text>
+              </View>
+            </TitleBar>
+            {urlBar}
+            <HeaderButtons>
+              <Button
+                variant={['appHeader']}
+                Icon={WalletsFilledIcon}
+                onPress={this.onPressSelectWallet}
+              />
+            </HeaderButtons>
           </View>
+          <UserAlertView appSession={this.props.appSession} />
+          <webview
+            id="sandbox-webview"
+            src={appUrl}
+            preload={preloadPath}
+            style={{ flex: 1 }} // eslint-disable-line react-native/no-inline-styles
+            sandboxed="true"
+            partition={this.props.partition}
+          />
         </View>
-        <PermissionRequestView appSession={this.props.appSession} />
-        <webview
-          id="sandbox-webview"
-          src={appUrl}
-          preload={preloadPath}
-          style={{ flex: 1 }} // eslint-disable-line react-native/no-inline-styles
-          sandboxed="true"
-          partition={this.props.partition}
-        />
-      </View>
+      </MFThemeProvider>
     )
   }
 }
@@ -217,17 +232,11 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     height: 60,
     flexDirection: 'row',
-    backgroundColor: colors.GREY_DARK_54,
+    backgroundColor: colors.GREY_DARK_23,
     alignItems: 'center',
   },
   appInfo: {
     paddingLeft: 10,
-    flex: 1,
-  },
-  identity: {
-    paddingHorizontal: 10,
-    justifyContent: 'center',
-    alignItems: 'flex-end',
     flex: 1,
   },
   headerLabel: {
@@ -239,10 +248,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   urlInput: {
-    height: 30,
+    height: 28,
     fontSize: 12,
-    marginRight: 8,
+    marginHorizontal: 8,
     minWidth: 250,
+    borderColor: colors.GREY_DARK_48,
+    backgroundColor: colors.GREY_DARK_38,
     color: colors.LIGHT_GREY_F7,
   },
   rowContainer: {

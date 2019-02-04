@@ -67,7 +67,6 @@ export default class WalletTxRequestView extends Component<Props, State> {
         const txInfo = await decodeTransactionData(txData)
         let tokenInfo
         if (txInfo.contractType === 'ERC20') {
-          // TODO - FIX
           const contract = new Web3Contract(ABI.ERC20, transaction.to)
           tokenInfo = await getERC20Data(contract, transaction.from)
         }
@@ -193,32 +192,32 @@ const styles = StyleSheet.create({
   header: {
     fontWeight: 'bold',
     paddingBottom: 6,
-    color: colors.GREY_DARK_48,
+    color: colors.LIGHT_GREY_DE,
     fontSize: 16,
   },
   amountContainer: {
     textAlign: 'center',
     paddingVertical: 12,
-    borderColor: colors.LIGHT_GREY_DE,
+    borderColor: colors.GREY_DARK_48,
     borderWidth: 1,
     borderRadius: 5,
   },
   amountLabel: {
     fontSize: 28,
-    color: colors.GREY_DARK_48,
+    color: colors.LIGHT_GREY_AE,
   },
   methodTypeLabel: {
     color: colors.BRIGHT_BLUE,
     fontSize: 15,
   },
   transactionInfo: {
-    borderColor: colors.LIGHT_GREY_DE,
+    borderColor: colors.GREY_DARK_48,
     borderBottomWidth: 1,
     paddingVertical: 10,
   },
   paramLabel: {
     paddingVertical: 3,
-    color: colors.GREY_MED_75,
+    color: colors.LIGHT_GREY_AE,
   },
   gasInfo: {
     flexDirection: 'row',
@@ -230,11 +229,11 @@ const styles = StyleSheet.create({
   dataConatiner: {
     padding: 10,
     maxHeight: 80,
-    backgroundColor: colors.LIGHT_GREY_EE,
+    backgroundColor: colors.GREY_DARK_48,
     borderRadius: 5,
   },
   dataText: {
     fontSize: 12,
-    color: colors.GREY_DARK_48,
+    color: colors.LIGHT_GREY_AE,
   },
 })
