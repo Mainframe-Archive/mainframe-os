@@ -8,14 +8,16 @@ import {
 import type { IdentityOwnData } from '@mainframe/client'
 import type { ManifestData } from '@mainframe/app-manifest'
 import React, { createRef, Component, type ElementRef } from 'react'
-import { View, StyleSheet } from 'react-native-web'
+import { Text } from '@morpheus-ui/core'
 import { commitMutation } from 'react-relay'
+import styled from 'styled-components/native'
+// import Dropzone from 'react-dropzone'
+
 import { EnvironmentContext } from '../RelayEnvironment'
 
 import LauncherContext from '../LauncherContext'
 import Button from '../../UIComponents/Button'
-import Text from '../../UIComponents/Text'
-import ModalView from '../../UIComponents/ModalView'
+import FormModalView from '../../UIComponents/FormModalView'
 import rpc from '../rpc'
 import PermissionsView from '../PermissionsView'
 import { appInstallMutation } from './appMutations'
@@ -38,6 +40,13 @@ type State = {
   errorMsg?: string,
 }
 
+const View = styled.View``
+
+const DragView = styled.View`
+  background-color: red;
+  padding: 50px;
+`
+
 class AppInstallModal extends Component<ViewProps, State> {
   static contextType = EnvironmentContext
 
@@ -50,8 +59,45 @@ class AppInstallModal extends Component<ViewProps, State> {
 
   // $FlowFixMe: React Ref
   fileInput: ElementRef<'input'> = createRef()
+  // $FlowFixMe: React Ref
+  dropArea: ElementRef<'div'> = createRef()
+
+  componentDidMount() {
+    console.log(this.dropArea)
+    console.log(this.fileInput)
+    // this.dropArea.current.addEventListener('drop', this.onDrop)
+    // this.dropArea.current.addEventListener('dragover', this.onDragOver)
+  }
+
+  componentDidUpdate() {
+    console.log(this.dropArea)
+    console.log(this.fileInput)
+  }
+
+  componentWillUnmount() {
+    // this.dropArea.current.removeEventListener('drop', this.onDrop)
+    // this.dropArea.current.removeEventListener('dragover', this.onDragOver)
+  }
 
   // HANDLERS
+
+  onDragOver = (event: SyntheticDragEvent<HTMLHeadingElement>) => {
+    event.preventDefault()
+    event.stopPropagation()
+    event.dataTransfer.dropEffect = 'copy'
+  }
+
+  onDrop = (event: SyntheticDragEvent<HTMLHeadingElement>) => {
+    console.log(event.dataTransfer.files)
+
+    event.preventDefault()
+    event.stopPropagation()
+    // // Only handle a single file for now
+    // const file = event.dataTransfer.files[0]
+    // if (file) {
+    //   this.sendFile(file)
+    // }
+  }
 
   onPressImportManifest = () => {
     this.fileInput.current.click()
@@ -144,9 +190,13 @@ class AppInstallModal extends Component<ViewProps, State> {
 
   renderManifestImport() {
     return (
-      <View>
-        <Text style={styles.header}>Install New App</Text>
-        <Text style={styles.description}>Import an app manifest file</Text>
+      <>
+        <DragView ref={this.dropArea}>
+          <Text variant="modalText">
+            Lorem ipsum dolor amet sitim opsos calibri dos ipsum dolor amet
+            sitimus.
+          </Text>
+        </DragView>
         <Button
           title="Import App Manifest"
           onPress={this.onPressImportManifest}
@@ -160,7 +210,7 @@ class AppInstallModal extends Component<ViewProps, State> {
           hidden
           value={this.state.inputValue}
         />
-      </View>
+      </>
     )
   }
 
@@ -169,9 +219,7 @@ class AppInstallModal extends Component<ViewProps, State> {
 
     return manifest ? (
       <View>
-        <Text style={styles.header}>{`Manage permissions for ${
-          manifest.name
-        }`}</Text>
+        <Text variant="h2">{`Manage permissions for ${manifest.name}`}</Text>
         <PermissionsView
           permissions={manifest.permissions}
           onSubmit={this.onSubmitPermissions}
@@ -185,7 +233,7 @@ class AppInstallModal extends Component<ViewProps, State> {
 
     return manifest ? (
       <View>
-        <Text style={styles.header}>{`Downloading ${manifest.name}`}</Text>
+        <Text variant="h2">{`Downloading ${manifest.name}`}</Text>
         <Text>Downloading from swarm...</Text>
       </View>
     ) : null
@@ -206,9 +254,12 @@ class AppInstallModal extends Component<ViewProps, State> {
 
   render() {
     return (
-      <ModalView isOpen={true} onRequestClose={this.props.onRequestClose}>
+      <FormModalView
+        dismissButton="CANCEL"
+        title="Install an app"
+        onRequestClose={this.props.onRequestClose}>
         {this.renderContent()}
-      </ModalView>
+      </FormModalView>
     )
   }
 }
@@ -221,13 +272,3 @@ export default class AppInstallContextWrapper extends Component<Props> {
     )
   }
 }
-
-const styles = StyleSheet.create({
-  header: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  description: {
-    paddingVertical: 15,
-  },
-})
