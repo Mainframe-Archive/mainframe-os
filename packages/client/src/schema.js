@@ -85,6 +85,12 @@ export const APP_SET_PERMISSION_SCHEMA = {
   persist: { type: 'boolean', optional: true },
 }
 
+export const APP_SET_USER_DEFAULT_WALLET_SCHEMA = {
+  appID: 'string',
+  userID: 'string',
+  address: 'string',
+}
+
 export const APP_SET_USER_PERMISSIONS_SETTINGS_SCHEMA = {
   appID: LOCAL_ID_SCHEMA,
   userID: LOCAL_ID_SCHEMA,

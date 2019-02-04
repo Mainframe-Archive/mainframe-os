@@ -29,6 +29,8 @@ import {
   APP_SET_PERMISSION_SCHEMA,
   type AppSetPermissionParams,
   APP_SET_PERMISSIONS_REQUIREMENTS_SCHEMA,
+  type AppSetUserDefaultWalletParams,
+  APP_SET_USER_DEFAULT_WALLET_SCHEMA,
   type AppSetPermissionsRequirementsParams,
   APP_SET_USER_PERMISSIONS_SETTINGS_SCHEMA,
   type AppSetUserPermissionsSettingsParams,
@@ -239,6 +241,18 @@ export const remove = {
   ): Promise<void> => {
     ctx.openVault.removeApp(fromClientID(params.appID))
     await ctx.openVault.save()
+  },
+}
+
+export const setUserDefaultWallet = {
+  params: APP_SET_USER_DEFAULT_WALLET_SCHEMA,
+  handler: async (
+    ctx: ClientContext,
+    params: AppSetUserDefaultWalletParams,
+  ): Promise<void> => {
+    const appID = fromClientID(params.appID)
+    const userID = fromClientID(params.userID)
+    await ctx.mutations.setAppUserDefaultWallet(appID, userID, params.address)
   },
 }
 

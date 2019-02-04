@@ -695,6 +695,7 @@ const ContactsView = createFragmentContainer(ContactsViewComponent, {
         connectionState
         profile {
           name
+          ethAddress
         }
       }
     }

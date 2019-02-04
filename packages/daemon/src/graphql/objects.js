@@ -317,6 +317,9 @@ export const genericProfile = new GraphQLObjectType({
     avatar: {
       type: GraphQLString,
     },
+    ethAddress: {
+      type: GraphQLString,
+    },
   }),
 })
 
@@ -327,6 +330,9 @@ export const namedProfile = new GraphQLObjectType({
       type: GraphQLNonNull(GraphQLString),
     },
     avatar: {
+      type: GraphQLString,
+    },
+    ethAddress: {
       type: GraphQLString,
     },
   }),
@@ -589,15 +595,23 @@ export const walletBalances = new GraphQLObjectType({
     eth: {
       type: new GraphQLNonNull(GraphQLString),
       resolve: async (self, args, ctx) => {
-        const balance = await ctx.io.eth.getETHBalance(self)
-        return balance || 0
+        try {
+          return await ctx.io.eth.getETHBalance(self)
+        } catch (err) {
+          ctx.log(err)
+          return 0
+        }
       },
     },
     mft: {
       type: new GraphQLNonNull(GraphQLString),
       resolve: async (self, args, ctx) => {
-        const balance = await ctx.io.eth.getMFTBalance(self)
-        return balance || 0
+        try {
+          return await ctx.io.eth.getMFTBalance(self)
+        } catch (err) {
+          ctx.log(err)
+          return 0
+        }
       },
     },
   }),

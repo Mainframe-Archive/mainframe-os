@@ -72,7 +72,7 @@ class AppInstallModal extends Component<ViewProps, State> {
           this.setState({
             manifest: manifest.data,
           })
-          if (havePermissionsToGrant(manifest.permissions)) {
+          if (havePermissionsToGrant(manifest.data.permissions)) {
             this.setState({
               installStep: 'permissions',
             })
