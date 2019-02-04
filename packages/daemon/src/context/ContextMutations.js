@@ -160,12 +160,12 @@ export default class ContextMutations {
     )
     if (!contact) throw new Error('User not found')
 
-    contact.contactFeed = feed
+    contact.sharedFeed.remoteFeed = feed
     this._context.next({
       type: 'contact_changed',
       contact,
       userID,
-      change: 'contactFeed',
+      change: 'sharedFeed',
     })
   }
 

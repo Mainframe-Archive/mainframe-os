@@ -108,10 +108,10 @@ export default class ContextEvents {
           if (!user || !peer) return
 
           // TODO: Actual data
-          await contact.ownFeed.publishJSON(this._context.io.bzz, {
-            profile: {},
-          })
-          await contact.ownFeed.syncManifest(this._context.io.bzz)
+          await Promise.all([
+            await contact.sharedFeed.publishLocalData(this._context.io.bzz),
+            await contact.sharedFeed.syncManifest(this._context.io.bzz),
+          ])
 
           // Create ephemeral one-use feed from the first-contact keypair and peer-specific topic
           const firstContactFeed = OwnFeed.create(
