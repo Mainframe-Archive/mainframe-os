@@ -595,15 +595,25 @@ export const walletBalances = new GraphQLObjectType({
     eth: {
       type: new GraphQLNonNull(GraphQLString),
       resolve: async (self, args, ctx) => {
-        const balance = await ctx.io.eth.getETHBalance(self)
-        return balance || 0
+        try {
+          const balance = await ctx.io.eth.getETHBalance(self)
+          return balance
+        } catch (err) {
+          ctx.log(err)
+          return 0
+        }
       },
     },
     mft: {
       type: new GraphQLNonNull(GraphQLString),
       resolve: async (self, args, ctx) => {
-        const balance = await ctx.io.eth.getMFTBalance(self)
-        return balance || 0
+        try {
+          const balance = await ctx.io.eth.getMFTBalance(self)
+          return balance
+        } catch (err) {
+          ctx.log(err)
+          return 0
+        }
       },
     },
   }),
