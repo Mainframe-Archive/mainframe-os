@@ -59,9 +59,14 @@ const platform = {
   win32: 'win',
 }[os.platform()]
 
-const getBinPath = is.development
-  ? path.join('swarm')
-  : name => path.join(process.resourcesPath, 'bin', name)
+console.log(`Platform: ${platform}`)
+const getBinPath = async (): Promise<string> => {
+  if (is.development) {
+    return 'swarm'
+  } else {
+    return `${process.resourcesPath}/bin/swarm`
+  }
+}
 
 let client
 let launcherWindow
@@ -168,7 +173,7 @@ const getSwarmKeystorePassword = async (): Promise<string> => {
 }
 
 const envExists = async (): Promise<string> => {
-  if (swarmConfig.binPath == null) {
+  if (daemonConfig.binPath == null) {
     return false
   }
   return true
@@ -179,20 +184,22 @@ const setupClient = async () => {
   const firstLaunch = await envExists()
   if (!firstLaunch) {
     console.log('detected first launch')
-    await setupDaemon(new DaemonConfig(env), {
-      binPath: binPath,
-      socketPath: undefined,
-    })
     const password = await getSwarmKeystorePassword()
     await createKeyStore(password)
     swarmConfig.binPath = getBinPath
     swarmConfig.socketPath = 'ws://localhost:8546'
   }
 
-  console.log('not first launch, starting swarm')
+  console.log(`couldn't find daemon socket path in the env config`)
+  await setupDaemon(new DaemonConfig(env), {
+    binPath: binPath,
+    socketPath: await env.createSocketPath('mainframe.ipc'),
+  })
+
+  const swarmPath = await getBinPath()
 
   try {
-    await startSwarm(getBinPath, swarmConfig)
+    await startSwarm(swarmPath, swarmConfig)
   } catch (e) {
     // eslint-disable-next-line no-console
     console.log(e)

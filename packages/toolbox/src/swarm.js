@@ -5,7 +5,6 @@ import * as path from 'path'
 import keythereum from 'keythereum'
 import * as fs from 'fs-extra'
 import execa from 'execa'
-import { SwarmConfig } from '@mainframe/config'
 
 export type KeyObject = {
   address: string,
@@ -97,10 +96,7 @@ export const listKeyStorePaths = async (): Promise<KeyObject[]> => {
   return keystores
 }
 
-export const startSwarm = async (
-  swarmPath: string,
-  swarmConfig: SwarmConfig,
-): Promise => {
+export const startSwarm = async (swarmPath, swarmConfig): Promise => {
   const keystores = await listKeyStores()
   const keystore = keystores[0]
 
@@ -124,13 +120,9 @@ export const startSwarm = async (
 
   await fs.ensureDir(`${datadir}${path.sep}logs`)
 
-  console.log('execa swarm and ensure log dir')
-
   proc.stderr.pipe(
     fs.createWriteStream(`${datadir}${path.sep}logs${path.sep}swarm.log`),
   )
-
-  console.log('redirected stderr')
 
   proc.stdout.on('data', data => {
     const dataStr = data.toString()

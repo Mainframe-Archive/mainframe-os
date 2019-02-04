@@ -48,8 +48,10 @@ export default class ServerHandler {
     await remove(this._path)
     return new Promise((resolve, reject) => {
       this._server.listen(this._path, err => {
-        if (err) reject(err)
-        else resolve()
+        if (err) {
+          console.log(err)
+          reject(err)
+        } else resolve()
       })
     })
   }
