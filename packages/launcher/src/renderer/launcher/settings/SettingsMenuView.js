@@ -1,107 +1,74 @@
 // @flow
 import React, { Component } from 'react'
-import { TouchableOpacity } from 'react-native'
+import { Text, Button, DropDown } from '@morpheus-ui/core'
 import styled from 'styled-components/native'
-import { Text } from '@morpheus-ui/core'
 
-import colors from '../../colors'
-
-const Container = styled.View`
-  padding: 20px;
-`
-
-const SectionContainer = styled.View`
-  margin-bottom: 20px;
-`
-
-const SectionHeader = styled.View`
-  border-bottom-width: 1px;
-  border-color: ${colors.LIGHT_GREY_EE};
-  padding-vertical: 15px;
-`
-
-const MenuItem = styled.View`
-  padding-vertical: 15px;
-  border-bottom-width: 1px;
-  border-color: ${colors.LIGHT_GREY_EE};
-`
-
-export const MENU_SECTIONS = [
-  {
-    title: 'DEVELOPERS',
-    items: [
-      {
-        key: 'developer',
-        icon: 'icon',
-        title: 'Development Tools',
-      },
-      {
-        key: 'docs',
-        icon: 'icon',
-        title: 'API Documentation',
-      },
-      {
-        key: 'help',
-        icon: 'icon',
-        title: 'Community / Help',
-      },
-      {
-        key: 'eth_network',
-        icon: 'icon',
-        title: 'Ethereum Network',
-      },
-    ],
-  },
-  {
-    title: 'ABOUT',
-    items: [
-      {
-        key: 'feedback',
-        icon: 'icon',
-        title: 'Feedback',
-      },
-      {
-        key: 'version',
-        icon: 'icon',
-        title: 'Version',
-      },
-    ],
-  },
-]
+import SettingsItem from './SettingsItem'
 
 type Props = {
   onSelectMenuItem: (key: string) => void,
 }
 
-export default class SettingsMenuView extends Component<Props> {
-  renderSections() {
-    return MENU_SECTIONS.map(s => {
-      const items = s.items.map(i => {
-        const onPress = () => this.props.onSelectMenuItem(i.key)
-        return (
-          <TouchableOpacity onPress={onPress}>
-            <MenuItem>
-              <Text bold size={13} variant={'greyDark'}>
-                {i.title}
-              </Text>
-            </MenuItem>
-          </TouchableOpacity>
-        )
-      })
-      return (
-        <SectionContainer>
-          <SectionHeader>
-            <Text bold size={11} styles="letter-spacing: 2px;">
-              {s.title}
-            </Text>
-          </SectionHeader>
-          {items}
-        </SectionContainer>
-      )
-    })
-  }
+const Container = styled.View`
+  flex: 1;
+`
+const ScrollView = styled.ScrollView``
 
+const List = styled.View`
+  padding: 0 5px;
+  margin-bottom: 50px;
+`
+
+export default class SettingsView extends Component<Props> {
   render() {
-    return <Container>{this.renderSections()}</Container>
+    return (
+      <Container>
+        <ScrollView>
+          <Text variant={['smallTitle', 'blue', 'bold']}>Developers</Text>
+          <List>
+            <SettingsItem
+              onPress={() => this.props.onSelectMenuItem('developer')}
+              first
+              title="App develoment tool"
+            />
+            <SettingsItem
+              onPress={() => this.props.onSelectMenuItem('docs')}
+              title="API documentation"
+            />
+            <SettingsItem
+              onPress={() => this.props.onSelectMenuItem('help')}
+              title="Community/Help"
+            />
+            <SettingsItem
+              title="Ethereum Network"
+              RightElement={() => (
+                <DropDown
+                  theme={{ minWidth: 150 }}
+                  label="Select"
+                  options={['TestNet (Ropsten)', 'MainNet']}
+                  defaultValue={'TestNet (Ropsten)'}
+                />
+              )}
+            />
+          </List>
+          <Text variant={['smallTitle', 'blue', 'bold']}>About</Text>
+          <List>
+            <SettingsItem
+              onPress={() => this.props.onSelectMenuItem('feedback')}
+              title="Feedback"
+            />
+            <SettingsItem
+              title="Version"
+              RightElement={() => (
+                <Button
+                  title="UPDATE AVAILABLE"
+                  variant={['completeOnboarding', 'small']}
+                />
+              )}
+            />
+          </List>
+        </ScrollView>
+      </Container>
+    )
   }
 }
