@@ -107,7 +107,9 @@ const launchApp = async (appSession: AppSession) => {
     window: appWindow,
   })
   contextsByWindow.set(appWindow, appContext)
-  interceptWebRequests(appContext)
+  appWindow.webContents.on('did-attach-webview', (event, webContents) => {
+    interceptWebRequests(appContext, webContents.session)
+  })
 
   if (appContexts[appID]) {
     appContexts[appID][userID] = appContext
