@@ -214,8 +214,8 @@ const params = {
   currency: 'MFT',
 }
 
-await sdk.payments.payContact(params)
-  .on('hash', hash => ... )
+const tx = await sdk.payments.payContact(params)
+tx.on('hash', hash => ... )
   .on('mined', () => ... )
   .on('confirmed', () => ... )
   .on('error', error => ... )
