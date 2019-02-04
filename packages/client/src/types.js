@@ -152,6 +152,12 @@ export type AppPublishContentsResult = {
 
 export type AppRemoveParams = { appID: ID }
 
+export type AppSetUserDefaultWalletParams = {
+  appID: string,
+  userID: string,
+  address: string,
+}
+
 export type AppSetUserPermissionsSettingsParams = {
   appID: ID,
   userID: ID,
@@ -220,6 +226,7 @@ export type IdentityAddPeerParams = {
   profile: {
     name?: ?string,
     avatar?: ?string,
+    ethAddress?: ?string,
   },
   publicFeed: string,
   firstContactAddress: string,
@@ -236,6 +243,7 @@ export type IdentityPeerResult = {
   profile: {
     name?: ?string,
     avatar?: ?string,
+    ethAddress?: ?string,
   },
 }
 
@@ -252,6 +260,7 @@ export type IdentityCreateUserParams = {
   profile: {
     name: string,
     avatar?: ?string,
+    ethAddress?: ?string,
   },
 }
 
@@ -362,6 +371,7 @@ export type IdentityUpdateUserParams = {
   profile: {
     name?: string,
     avatar?: ?string,
+    ethAddress?: ?string,
   },
 }
 
@@ -461,7 +471,7 @@ export type WalletGetLedgerEthAccountsResult = Array<string>
 
 export type WalletGetEthAccountsResult = Array<string>
 
-export type WalletAddLedgerEthAccountParams = {
+export type WalletAddLedgerEthAccountsParams = {
   indexes: Array<number>,
   name: string,
   userID?: string,
@@ -477,7 +487,7 @@ export type WalletAddHDAccountResult = string
 
 export type WalletAddLedgerResult = {
   localID: string,
-  address: string,
+  addresses: Array<string>,
 }
 
 export type WalletSetUserDefaulParams = {

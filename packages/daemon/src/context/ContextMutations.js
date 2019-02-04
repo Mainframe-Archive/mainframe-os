@@ -47,6 +47,7 @@ export type AddPeerParams = {
   profile: {
     name?: ?string,
     avatar?: ?string,
+    ethAddress?: ?string,
   },
   publicFeed: string,
   firstContactAddress: string,
@@ -93,8 +94,26 @@ export default class ContextMutations {
       userID,
       contactsIDs,
     )
-    await this._context.openVault.save()
+    await openVault.save()
     return contacts
+  }
+
+  async setAppUserDefaultWallet(
+    appID: string,
+    userID: string,
+    address: string,
+  ) {
+    const { openVault, queries } = this._context
+    const app = openVault.apps.getAnyByID(appID)
+    if (!app) {
+      throw new Error('App not found')
+    }
+    const wallet = queries.getUserEthWalletForAccount(userID, address)
+    if (!wallet) {
+      throw new Error('Wallet not found')
+    }
+    app.setDefaultEthAccount(idType(userID), idType(wallet.localID), address)
+    await openVault.save()
   }
 
   // Contacts
@@ -284,19 +303,18 @@ export default class ContextMutations {
     return address
   }
 
-  async addLedgerWalletAccount(
+  async addLedgerWalletAccounts(
     indexes: Array<number>,
     name: string,
     userID?: string,
   ): Promise<WalletAddLedgerResult> {
     const { openVault } = this._context
-    const res = await openVault.wallets.addLedgerEthAccount(indexes, name)
+    const res = await openVault.wallets.addLedgerEthAccounts(indexes, name)
     if (userID) {
-      openVault.identityWallets.linkWalletToIdentity(
-        userID,
-        res.localID,
-        res.address,
-      )
+      res.addresses.forEach(a => {
+        // $FlowFixMe userID already checked
+        openVault.identityWallets.linkWalletToIdentity(userID, res.localID, a)
+      })
     }
     await openVault.save()
     return res

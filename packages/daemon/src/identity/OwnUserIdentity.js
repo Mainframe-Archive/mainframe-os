@@ -15,6 +15,7 @@ import { type PublicFeedSerialized } from './PeerUserIdentity'
 export type OwnUserProfile = {
   name: string,
   avatar?: ?string,
+  ethAddress?: ?string,
 }
 
 export type OwnUserIdentitySerialized = {
@@ -91,11 +92,11 @@ export default class OwnUserIdentity extends OwnIdentity {
   }
 
   publicFeedData(): PublicFeedSerialized {
-    const { name, avatar } = this.profile
+    const { name, avatar, ethAddress } = this.profile
 
     return {
       publicKey: this.base64PublicKey(),
-      profile: { name, avatar },
+      profile: { name, avatar, ethAddress },
       firstContactAddress: this.firstContactFeed.address,
     }
   }

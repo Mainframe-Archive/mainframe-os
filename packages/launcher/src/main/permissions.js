@@ -59,7 +59,7 @@ export const interceptWebRequests = (context: AppContext) => {
             break
           case 'not_set':
           default: {
-            const res = await context.trustedRPC.request('permission_ask', {
+            const res = await context.trustedRPC.request('user_request', {
               key,
               domain,
             })
@@ -97,7 +97,7 @@ export const isGranted = async (
   // Always request permission for transaction signing
   if (granted === 'not_set' || key === 'BLOCKCHAIN_SEND') {
     const askParams = { [key]: params }
-    const res = await ctx.trustedRPC.request('permission_ask', {
+    const res = await ctx.trustedRPC.request('user_request', {
       key,
       params: askParams,
     })

@@ -67,9 +67,9 @@ export default class ContextQueries {
     const contacts = this.getUserContacts(userID)
     return contactIDs.map(id => {
       const approvedContact = approvedContacts.find(c => c.id === id)
-      const contactData = {
+      const contactData: AppUserContact = {
         id,
-        data: undefined,
+        data: null,
       }
       if (approvedContact) {
         const contact = contacts.find(
@@ -105,6 +105,11 @@ export default class ContextQueries {
       )
     }
     return []
+  }
+
+  getUserEthWalletForAccount(userID: string, address: string): ?Wallet {
+    const wallets = this.getUserEthWallets(userID)
+    return wallets.find(w => w.accounts.includes(address))
   }
 
   getUserEthAccounts(userID: string) {
