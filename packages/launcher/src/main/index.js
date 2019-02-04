@@ -80,7 +80,7 @@ const launchApp = async (appSession: AppSession) => {
   }
 
   const appWindow = newWindow()
-  if (is.development) {
+  if (appSession.isDev) {
     appWindow.webContents.on('did-attach-webview', () => {
       // Open a separate developer tools window for the app
       appWindow.webContents.executeJavaScript(
