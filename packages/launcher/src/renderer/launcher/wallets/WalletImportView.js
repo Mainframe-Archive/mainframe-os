@@ -15,7 +15,7 @@ import { EnvironmentContext } from '../RelayEnvironment'
 type Props = {
   currentWalletID?: ?string,
   onClose: () => void,
-  onSuccess?: () => void,
+  onSuccess?: (address: string) => void,
   userID: string,
   full?: boolean,
 }
@@ -126,13 +126,15 @@ export default class WalletImportView extends Component<Props, State> {
     commitMutation(this.context, {
       mutation: walletImportMutation,
       variables: { input: importInput, userID: this.props.userID },
-      onCompleted: (response, errors) => {
-        if (errors || !response) {
+      onCompleted: ({ importHDWallet }, errors) => {
+        if (errors || !importHDWallet) {
           const error =
             errors && errors.length ? errors[0] : new Error(IMPORT_ERR_MSG)
           this.displayError(error)
         } else {
-          this.props.onSuccess ? this.props.onSuccess() : this.props.onClose()
+          this.props.onSuccess
+            ? this.props.onSuccess(importHDWallet.hdWallet.accounts[0].address)
+            : this.props.onClose()
         }
       },
       onError: err => {

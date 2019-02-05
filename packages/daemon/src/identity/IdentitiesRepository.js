@@ -522,7 +522,6 @@ export default class IdentitiesRepository {
     }
     const peer = this._identities.peers.users[contact.peerID]
     const peerProfile = peer ? peer.profile : {}
-
     return {
       name: contact.name || peerProfile.name,
       avatar: contact.profile.avatar || peerProfile.avatar,

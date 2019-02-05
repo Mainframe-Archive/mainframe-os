@@ -19,7 +19,7 @@ type Props = {
   wallets: Array<Wallet>,
   full?: boolean,
   onClose: () => void,
-  onSuccess?: () => void,
+  onSuccess?: (address: string) => void,
 }
 
 type State = {
@@ -66,11 +66,12 @@ const ACCOUNT_FETCH_ERR_MSG =
   'Sorry, there was a problem connecting your ledger wallet, please check you have it unlocked and the Ethereum app open.'
 
 const addLedgerWalletMutation = graphql`
-  mutation WalletAddLedgerModalAddLedgerWalletAccountMutation(
-    $input: AddLedgerWalletAccountInput!
+  mutation WalletAddLedgerModalAddLedgerWalletAccountsMutation(
+    $input: AddLedgerWalletAccountsInput!
     $userID: String!
   ) {
-    addLedgerWalletAccount(input: $input) {
+    addLedgerWalletAccounts(input: $input) {
+      addresses
       viewer {
         wallets {
           ...WalletsView_wallets @arguments(userID: $userID)
@@ -144,14 +145,16 @@ export default class WalletAddLedgerModal extends Component<Props, State> {
     commitMutation(this.context, {
       mutation: addLedgerWalletMutation,
       variables: { input, userID: this.props.userID },
-      onCompleted: (response, errors) => {
-        if (errors || !response) {
+      onCompleted: ({ addLedgerWalletAccounts }, errors) => {
+        if (errors || !addLedgerWalletAccounts) {
           const error =
             errors && errors.length ? errors[0] : new Error(MUTATION_ERR_MSG)
 
           this.displayError(error)
         } else {
-          this.props.onSuccess ? this.props.onSuccess() : this.props.onClose()
+          this.props.onSuccess
+            ? this.props.onSuccess(addLedgerWalletAccounts.addresses[0])
+            : this.props.onClose()
         }
       },
       onError: err => {

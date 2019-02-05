@@ -31,6 +31,7 @@ export default {
   app_update: noop, // TODO: similar to install
   app_create: app.create,
   app_getManifestData: app.getManifestData,
+  app_setUserDefaultWallet: app.setUserDefaultWallet,
   app_setPermissionsRequirements: app.setPermissionsRequirements,
   app_publishContents: app.publishContents,
   app_writeManifest: app.writeManifest,
@@ -81,7 +82,7 @@ export default {
   wallet_getUserEthWallets: wallet.getUserEthWallets,
   wallet_getUserEthAccounts: wallet.getUserEthAccounts,
   wallet_ledgerGetEthAccounts: wallet.getLedgerEthAccounts,
-  wallet_ledgerAddEthAccount: wallet.addLedgerEthAccount,
+  wallet_ledgerAddEthAccounts: wallet.addLedgerEthAccounts,
   wallet_setUserDefault: wallet.setUsersDefaultWallet,
   wallet_signTx: wallet.signTransaction,
 }

@@ -1,6 +1,6 @@
 {
-  "name": "@mainframe/contract-utils",
-  "description": "Mainframe Contract Utils",
+  "name": "@mainframe/eth",
+  "description": "Mainframe Ethereum API and utilities",
   "version": "0.1.0",
   "author": "Mainframe",
   "license": "MIT",
@@ -17,9 +17,9 @@
   "dependencies": {
     "@babel/runtime": "^7.0.0",
     "@mainframe/rpc-stream": "^0.2.4",
-    "web3-eth-abi": "^1.0.0-beta.36",
-    "web3-provider-engine": "^14.1.0",
-    "web3-utils": "^1.0.0-beta.36"
+    "web3-eth-abi": "1.0.0-beta.36",
+    "web3-providers-http": "1.0.0-beta.36",
+    "web3-utils": "1.0.0-beta.36"
   },
   "devDependencies": {
     "babel-loader": "^8.0.0",

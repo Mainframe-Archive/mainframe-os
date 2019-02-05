@@ -49,6 +49,15 @@ export default {
       iconHoverBackgroundColor: 'transparent',
       iconHoverColor: COLORS.PRIMARY_RED,
     },
+    appHeader: {
+      backgroundColor: COLORS.GREY_DARK_3C,
+      borderWidth: 0,
+      iconHeight: 18,
+      padding: 5,
+      iconPadding: '5px',
+      iconColor: COLORS.LIGHT_GREY_E5,
+      iconHoverColor: COLORS.WHITE,
+    },
     onboarding: {
       padding: 0,
       titleColor: COLORS.PRIMARY_RED,

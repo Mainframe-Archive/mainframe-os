@@ -13,7 +13,7 @@ export default class App extends Component<{}> {
   constructor() {
     super()
     this.sdk = new MainframeSDK()
-    this.web3 = new Web3(this.sdk.blockchain.getWeb3Provider())
+    this.web3 = new Web3(this.sdk.ethereum.web3Provider)
   }
 
   render() {

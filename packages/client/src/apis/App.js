@@ -19,6 +19,7 @@ import type {
   AppRemoveParams,
   AppSetPermissionParams,
   AppSetPermissionsRequirementsParams,
+  AppSetUserDefaultWalletParams,
   AppSetUserPermissionsSettingsParams,
   AppWriteManifestParams,
 } from '../types'
@@ -84,5 +85,9 @@ export default class AppAPIs extends ClientAPIs {
 
   writeManifest(params: AppWriteManifestParams): Promise<void> {
     return this._rpc.request('app_writeManifest', params)
+  }
+
+  setUserDefaultWallet(params: AppSetUserDefaultWalletParams): Promise<void> {
+    return this._rpc.request('app_setUserDefaultWallet', params)
   }
 }

@@ -1,22 +1,10 @@
 // @flow
 import web3Utils from 'web3-utils'
 import Web3EthAbi from 'web3-eth-abi'
+import type { ERC20DataResult, DecodedTxResult } from './types'
 
 type Web3Contract = {
   methods: any,
-}
-
-export type ERC20DataResult = {
-  symbol: string,
-  decimals: number,
-  balance: string,
-}
-
-export type DecodedTxResult = {
-  contractType: 'ERC20',
-  signatureHex: string,
-  signatureName: string,
-  params: Object,
 }
 
 const TRANSFER_SIG = 'a9059cbb'
