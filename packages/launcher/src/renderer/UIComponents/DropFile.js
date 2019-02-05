@@ -22,20 +22,6 @@ export default class DropFile extends Component<Props, State> {
 
   // $FlowFixMe: React Ref
   fileInput: ElementRef<'input'> = createRef()
-  // $FlowFixMe: React Ref
-  dropArea: ElementRef<'div'> = createRef()
-
-  componentDidMount() {
-    this.dropArea.current.addEventListener('drop', this.onDrop)
-    this.dropArea.current.addEventListener('dragover', this.onDragOver)
-    this.dropArea.current.addEventListener('dragleave', this.onDragOut)
-  }
-
-  componentWillUnmount() {
-    this.dropArea.current.removeEventListener('drop', this.onDrop)
-    this.dropArea.current.removeEventListener('dragover', this.onDragOver)
-    this.dropArea.current.removeEventListener('dragleave', this.onDragOut)
-  }
 
   // HANDLERS
 
@@ -53,12 +39,14 @@ export default class DropFile extends Component<Props, State> {
   onDrop = (event: SyntheticDragEvent<HTMLHeadingElement>) => {
     event.preventDefault()
     event.stopPropagation()
+
     let files = [...event.dataTransfer.files]
-    if (this.props.accept && this.props.accept.length) {
-      files = files.filter(
-        file => this.props.accept && this.props.accept.indexOf(file.type) >= 0,
-      )
+
+    const { accept } = this.props
+    if (accept && accept.length) {
+      files = files.filter(file => accept.includes(file.type))
     }
+
     this.props.onDrop && this.props.onDrop(files)
     this.setState({ onDrag: false })
   }
@@ -83,7 +71,9 @@ export default class DropFile extends Component<Props, State> {
       <>
         <div
           className={className}
-          ref={this.dropArea}
+          onDrop={this.onDrop}
+          onDragOver={this.onDragOver}
+          onDragLeave={this.onDragOut}
           onClick={!this.props.noClick ? this.onPress : null}>
           {this.props.children}
         </div>
