@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 1150065df3d8b5f549e07e408a01a7e3
+ * @relayHash 77e14bf9f83c2e184152e357b6ba1c35
  */
 
 /* eslint-disable */
@@ -40,6 +40,7 @@ fragment OwnAppsView_apps on Apps {
     localID
     name
     ...AppItem_ownApp
+    ...OwnAppDetailView_ownApp
     id
   }
 }
@@ -53,6 +54,41 @@ fragment AppItem_ownApp on OwnApp {
   }
   versions {
     version
+    permissions {
+      optional {
+        WEB_REQUEST
+        BLOCKCHAIN_SEND
+      }
+      required {
+        WEB_REQUEST
+        BLOCKCHAIN_SEND
+      }
+    }
+  }
+  users {
+    localID
+    identity {
+      profile {
+        name
+      }
+      id
+    }
+    id
+  }
+}
+
+fragment OwnAppDetailView_ownApp on OwnApp {
+  localID
+  name
+  contentsPath
+  developer {
+    id
+    name
+  }
+  versions {
+    version
+    publicationState
+    contentsURI
     permissions {
       optional {
         WEB_REQUEST
@@ -120,7 +156,7 @@ return {
   "operationKind": "query",
   "name": "OwnAppsViewQuery",
   "id": null,
-  "text": "query OwnAppsViewQuery {\n  viewer {\n    apps {\n      ...OwnAppsView_apps\n    }\n    id\n  }\n}\n\nfragment OwnAppsView_apps on Apps {\n  own {\n    localID\n    name\n    ...AppItem_ownApp\n    id\n  }\n}\n\nfragment AppItem_ownApp on OwnApp {\n  localID\n  name\n  developer {\n    id\n    name\n  }\n  versions {\n    version\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n    }\n  }\n  users {\n    localID\n    identity {\n      profile {\n        name\n      }\n      id\n    }\n    id\n  }\n}\n",
+  "text": "query OwnAppsViewQuery {\n  viewer {\n    apps {\n      ...OwnAppsView_apps\n    }\n    id\n  }\n}\n\nfragment OwnAppsView_apps on Apps {\n  own {\n    localID\n    name\n    ...AppItem_ownApp\n    ...OwnAppDetailView_ownApp\n    id\n  }\n}\n\nfragment AppItem_ownApp on OwnApp {\n  localID\n  name\n  developer {\n    id\n    name\n  }\n  versions {\n    version\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n    }\n  }\n  users {\n    localID\n    identity {\n      profile {\n        name\n      }\n      id\n    }\n    id\n  }\n}\n\nfragment OwnAppDetailView_ownApp on OwnApp {\n  localID\n  name\n  contentsPath\n  developer {\n    id\n    name\n  }\n  versions {\n    version\n    publicationState\n    contentsURI\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n    }\n  }\n  users {\n    localID\n    identity {\n      profile {\n        name\n      }\n      id\n    }\n    id\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -251,6 +287,20 @@ return {
                             "selections": v3
                           }
                         ]
+                      },
+                      {
+                        "kind": "ScalarField",
+                        "alias": null,
+                        "name": "publicationState",
+                        "args": null,
+                        "storageKey": null
+                      },
+                      {
+                        "kind": "ScalarField",
+                        "alias": null,
+                        "name": "contentsURI",
+                        "args": null,
+                        "storageKey": null
                       }
                     ]
                   },
@@ -290,6 +340,13 @@ return {
                       },
                       v2
                     ]
+                  },
+                  {
+                    "kind": "ScalarField",
+                    "alias": null,
+                    "name": "contentsPath",
+                    "args": null,
+                    "storageKey": null
                   },
                   v2
                 ]

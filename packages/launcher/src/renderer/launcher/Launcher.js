@@ -6,7 +6,7 @@ import { graphql, QueryRenderer, createFragmentContainer } from 'react-relay'
 
 import OnboardView from './onboarding/OnboardView'
 import { EnvironmentContext } from './RelayEnvironment'
-import LauncherContext from './LauncherContext'
+import { Provider } from './LauncherContext'
 import RelayLoaderView from './RelayLoaderView'
 import SideMenu, { type ScreenNames } from './SideMenu'
 import AppsScreen from './apps/AppsScreen'
@@ -111,7 +111,7 @@ class Launcher extends Component<Props, State> {
     }
 
     return (
-      <LauncherContext.Provider value={{ user: ownUsers[0] }}>
+      <Provider value={{ user: ownUsers[0] }}>
         <Container testID="launcher-view">
           <SideMenu
             selected={this.state.openScreen}
@@ -119,7 +119,7 @@ class Launcher extends Component<Props, State> {
           />
           <ContentContainer>{this.renderScreen()}</ContentContainer>
         </Container>
-      </LauncherContext.Provider>
+      </Provider>
     )
   }
 }

@@ -219,16 +219,10 @@ export const publishContents = {
     ctx: ClientContext,
     params: AppPublishContentsParams,
   ): Promise<AppPublishContentsResult> => {
-    const app = ctx.openVault.apps.getOwnByID(fromClientID(params.appID))
-    if (app == null) {
-      throw new Error('App not found')
-    }
-
-    const hash = await ctx.io.bzz.uploadDirectoryFrom(app.contentsPath)
-    const contentsURI = `urn:bzz:${hash}`
-    app.setContentsURI(contentsURI, params.version)
-    await ctx.openVault.save()
-
+    const contentsURI = await ctx.mutations.publishContents(
+      params.appID,
+      params.version,
+    )
     return { contentsURI }
   },
 }

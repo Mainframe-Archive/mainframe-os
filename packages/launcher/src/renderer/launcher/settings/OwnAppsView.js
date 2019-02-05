@@ -1,37 +1,52 @@
 // @flow
 
 import React, { Component } from 'react'
-import { TouchableOpacity } from 'react-native'
-import styled from 'styled-components/native'
-import { Text } from '@morpheus-ui/core'
 import { graphql, createFragmentContainer, QueryRenderer } from 'react-relay'
-import type { AppOwnData } from '@mainframe/client'
 
 import { EnvironmentContext } from '../RelayEnvironment'
 import RelayLoaderView from '../RelayLoaderView'
 import { AppsGrid, renderNewAppButton } from '../apps/AppsView'
 import { OwnAppItem } from '../apps/AppItem'
+import OwnAppDetailView from './OwnAppDetailView'
+import type { OwnAppDetailView_ownApp as OwnApp } from './__generated__/OwnAppDetailView_ownApp.graphql.js'
 
 type Props = {
   apps: {
-    own: Array<AppOwnData>,
+    own: Array<OwnApp>,
   },
 }
 
-const Container = styled.View`
-  padding: 10px;
-`
+type State = {
+  selectedApp?: ?OwnApp,
+}
 
-class OwnAppsView extends Component<Props> {
-  onPressCreateApp = () => {
-    console.log('create app')
-  }
+class OwnAppsView extends Component<Props, State> {
+  state = {}
+
+  onPressCreateApp = () => {}
 
   onOpenApp = app => {
-    console.log('open app')
+    this.setState({
+      selectedApp: app,
+    })
+  }
+
+  onCloseAppDetail = () => {
+    this.setState({
+      selectedApp: undefined,
+    })
   }
 
   render() {
+    const { selectedApp } = this.state
+    if (selectedApp) {
+      return (
+        <OwnAppDetailView
+          ownApp={selectedApp}
+          onClose={this.onCloseAppDetail}
+        />
+      )
+    }
     const apps = this.props.apps.own.map(a => {
       const onOpen = () => this.onOpenApp(a)
       return <OwnAppItem key={a.localID} ownApp={a} onOpenApp={onOpen} />
@@ -57,6 +72,7 @@ const OwnAppsViewRelayContainer = createFragmentContainer(OwnAppsView, {
         localID
         name
         ...AppItem_ownApp
+        ...OwnAppDetailView_ownApp
       }
     }
   `,

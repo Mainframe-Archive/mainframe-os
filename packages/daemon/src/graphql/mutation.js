@@ -505,11 +505,35 @@ const appInstallMutation = mutationWithClientMutationId({
   },
 })
 
+const publishAppVersionMutation = mutationWithClientMutationId({
+  name: 'PublishAppVersion',
+  inputFields: {
+    appID: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    version: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+  },
+  outputFields: {
+    contentsURI: {
+      type: GraphQLNonNull(GraphQLString),
+    },
+    viewer: viewerOutput,
+  },
+  mutateAndGetPayload: async ({ appID, version }, ctx) => {
+    const contentsURI = await ctx.mutations.publishContents(appID, version)
+    // TODO: Upload app manifest
+    return { contentsURI }
+  },
+})
+
 export default new GraphQLObjectType({
   name: 'Mutation',
   fields: () => ({
     createApp: appCreateMutation,
     installApp: appInstallMutation,
+    publishAppVersion: publishAppVersionMutation,
     createUserIdentity: createUserIdentityMutation,
     createDeveloperIdentity: createDeveloperIdentityMutation,
     createHDWallet: createHDWalletMutation,

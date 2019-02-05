@@ -207,17 +207,29 @@ export const appManifestData = new GraphQLObjectType({
   }),
 })
 
+export const appVersionState = new GraphQLEnumType({
+  name: 'AppVesionState',
+  values: {
+    UNPUBLISHED: { value: 'unpublished' },
+    CONTENTS_PUBLISHED: { value: 'contents_published' },
+    MANIFEST_PUBLISHED: { value: 'manifest_published' },
+  },
+})
+
 export const appVersionData = new GraphQLObjectType({
   name: 'AppVersionData',
   fields: () => ({
     version: {
       type: new GraphQLNonNull(GraphQLString),
     },
+    publicationState: {
+      type: new GraphQLNonNull(appVersionState),
+    },
+    contentsURI: {
+      type: GraphQLString,
+    },
     permissions: {
       type: new GraphQLNonNull(appPermissionsRequirements),
-    },
-    publicationState: {
-      type: new GraphQLNonNull(GraphQLString),
     },
   }),
 })
@@ -263,8 +275,14 @@ export const ownApp = new GraphQLObjectType({
       type: new GraphQLNonNull(GraphQLString),
       resolve: self => self.data.name,
     },
+    contentsPath: {
+      type: new GraphQLNonNull(GraphQLString),
+      resolve: self => self.data.contentsPath,
+    },
     versions: {
-      type: new GraphQLList(appVersionData),
+      type: new GraphQLNonNull(
+        new GraphQLList(new GraphQLNonNull(appVersionData)),
+      ),
       resolve: ({ versions }) => {
         return Object.keys(versions).map(version => ({
           version: version,

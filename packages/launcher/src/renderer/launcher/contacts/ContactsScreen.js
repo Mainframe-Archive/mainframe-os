@@ -11,7 +11,7 @@ import {
 } from 'react-relay'
 
 import { EnvironmentContext } from '../RelayEnvironment'
-import LauncherContext, { type CurrentUser } from '../LauncherContext'
+import applyContext, { type CurrentUser } from '../LauncherContext'
 import RelayLoaderView from '../RelayLoaderView'
 import ContactsView, { type Contact } from './ContactsView'
 
@@ -121,9 +121,4 @@ export class ContactsScreenRenderer extends Component<QueryProps> {
   }
 }
 
-export default class ContactScreen extends Component<{}> {
-  static contextType = LauncherContext
-  render() {
-    return <ContactsScreenRenderer user={this.context.user} {...this.props} />
-  }
-}
+export default applyContext(ContactsScreenRenderer)

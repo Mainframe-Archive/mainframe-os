@@ -26,13 +26,13 @@ export default {
   createApp: (appInfo: AppCreateParams) => rpc.request('app_create', appInfo),
   removeApp: (appID: ID) => rpc.request('app_remove', { appID }),
   removeOwnApp: (appID: ID) => rpc.request('app_removeOwn', { appID }),
-  launchApp: (appID: ID, userID: ID) => {
+  launchApp: (appID: ID | string, userID: ID | string) => {
     return rpc.request('app_launch', { appID, userID })
   },
   readManifest: (path: string) => rpc.request('app_readManifest', { path }),
   setAppUserPermissionsSettings: (
-    appID: ID,
-    userID: ID,
+    appID: string,
+    userID: string,
     settings: AppUserPermissionsSettings,
   ) => {
     return rpc.request('app_setUserPermissionsSettings', {

@@ -16,7 +16,7 @@ import styled from 'styled-components/native'
 
 import { EnvironmentContext } from '../RelayEnvironment'
 
-import LauncherContext from '../LauncherContext'
+import applyContext, { type CurrentUser } from '../LauncherContext'
 import FormModalView from '../../UIComponents/FormModalView'
 import DropFile from '../../UIComponents/DropFile'
 import Loader from '../../UIComponents/Loader'
@@ -30,7 +30,7 @@ type Props = {
 }
 
 type ViewProps = Props & {
-  userID: string,
+  user: CurrentUser,
 }
 
 type State = {
@@ -141,7 +141,7 @@ class AppInstallModal extends Component<ViewProps, State> {
     }
 
     const params = {
-      userID: this.props.userID,
+      userID: this.props.user.localID,
       manifest,
       permissionsSettings,
     }
@@ -241,11 +241,4 @@ class AppInstallModal extends Component<ViewProps, State> {
   }
 }
 
-export default class AppInstallContextWrapper extends Component<Props> {
-  static contextType = LauncherContext
-  render() {
-    return (
-      <AppInstallModal userID={this.context.user.localID} {...this.props} />
-    )
-  }
-}
+export default applyContext(AppInstallModal)

@@ -8,17 +8,21 @@
 
 /*::
 import type { ConcreteFragment } from 'relay-runtime';
+export type AppVesionState = "CONTENTS_PUBLISHED" | "MANIFEST_PUBLISHED" | "UNPUBLISHED" | "%future added value";
 import type { FragmentReference } from "relay-runtime";
-declare export opaque type AppItem_ownApp$ref: FragmentReference;
-export type AppItem_ownApp = {|
+declare export opaque type OwnAppDetailView_ownApp$ref: FragmentReference;
+export type OwnAppDetailView_ownApp = {|
   +localID: string,
   +name: string,
+  +contentsPath: string,
   +developer: {|
     +id: ?string,
     +name: ?string,
   |},
   +versions: $ReadOnlyArray<{|
     +version: string,
+    +publicationState: AppVesionState,
+    +contentsURI: ?string,
     +permissions: {|
       +optional: {|
         +WEB_REQUEST: ?$ReadOnlyArray<?string>,
@@ -38,7 +42,7 @@ export type AppItem_ownApp = {|
       |}
     |},
   |}>,
-  +$refType: AppItem_ownApp$ref,
+  +$refType: OwnAppDetailView_ownApp$ref,
 |};
 */
 
@@ -76,13 +80,20 @@ v2 = [
 ];
 return {
   "kind": "Fragment",
-  "name": "AppItem_ownApp",
+  "name": "OwnAppDetailView_ownApp",
   "type": "OwnApp",
   "metadata": null,
   "argumentDefinitions": [],
   "selections": [
     v0,
     v1,
+    {
+      "kind": "ScalarField",
+      "alias": null,
+      "name": "contentsPath",
+      "args": null,
+      "storageKey": null
+    },
     {
       "kind": "LinkedField",
       "alias": null,
@@ -115,6 +126,20 @@ return {
           "kind": "ScalarField",
           "alias": null,
           "name": "version",
+          "args": null,
+          "storageKey": null
+        },
+        {
+          "kind": "ScalarField",
+          "alias": null,
+          "name": "publicationState",
+          "args": null,
+          "storageKey": null
+        },
+        {
+          "kind": "ScalarField",
+          "alias": null,
+          "name": "contentsURI",
           "args": null,
           "storageKey": null
         },
@@ -190,5 +215,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '3e87a9a898d1db36f5d70ac9c1c51605';
+(node/*: any*/).hash = 'eb9936a823ed54be5dfecc89b4722585';
 module.exports = node;

@@ -9,7 +9,6 @@
 /*::
 import type { ConcreteFragment } from 'relay-runtime';
 type AppItem_installedApp$ref = any;
-type AppItem_ownApp$ref = any;
 import type { FragmentReference } from "relay-runtime";
 declare export opaque type AppsView_apps$ref: FragmentReference;
 export type AppsView_apps = {|
@@ -17,24 +16,12 @@ export type AppsView_apps = {|
     +localID: string,
     +$fragmentRefs: AppItem_installedApp$ref,
   |}>,
-  +own: ?$ReadOnlyArray<?{|
-    +localID: string,
-    +$fragmentRefs: AppItem_ownApp$ref,
-  |}>,
   +$refType: AppsView_apps$ref,
 |};
 */
 
 
-const node/*: ConcreteFragment*/ = (function(){
-var v0 = {
-  "kind": "ScalarField",
-  "alias": null,
-  "name": "localID",
-  "args": null,
-  "storageKey": null
-};
-return {
+const node/*: ConcreteFragment*/ = {
   "kind": "Fragment",
   "name": "AppsView_apps",
   "type": "Apps",
@@ -50,34 +37,22 @@ return {
       "concreteType": "App",
       "plural": true,
       "selections": [
-        v0,
+        {
+          "kind": "ScalarField",
+          "alias": null,
+          "name": "localID",
+          "args": null,
+          "storageKey": null
+        },
         {
           "kind": "FragmentSpread",
           "name": "AppItem_installedApp",
           "args": null
         }
       ]
-    },
-    {
-      "kind": "LinkedField",
-      "alias": null,
-      "name": "own",
-      "storageKey": null,
-      "args": null,
-      "concreteType": "OwnApp",
-      "plural": true,
-      "selections": [
-        v0,
-        {
-          "kind": "FragmentSpread",
-          "name": "AppItem_ownApp",
-          "args": null
-        }
-      ]
     }
   ]
 };
-})();
 // prettier-ignore
-(node/*: any*/).hash = 'd976de76cf532fdf122180f431635174';
+(node/*: any*/).hash = '4dbdd4cea318032ed805878c5d991fb2';
 module.exports = node;

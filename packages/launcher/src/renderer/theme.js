@@ -108,10 +108,18 @@ export default {
     medium: {
       iconWidth: 14,
       iconHeight: 14,
-      fontSize: 12,
+      fontSize: 11,
       borderRadius: 3,
       iconPadding: '7px 5px',
       titlePadding: '3px 5px',
+    },
+    mediumUppercase: {
+      textTransform: 'uppercase',
+      iconWidth: 14,
+      iconHeight: 14,
+      fontSize: 10,
+      iconPadding: '7px 5px',
+      titlePadding: '6px 12px',
     },
     xSmall: {
       iconWidth: 10,
@@ -183,6 +191,19 @@ export default {
       letterSpacing: '1.5px',
       padding: '20px 0',
     },
+    mediumTitle: {
+      textTransform: 'uppercase',
+      fontSize: 12,
+      fontWeight: 'bold',
+      letterSpacing: '1.5px',
+    },
+    smallLabel: {
+      textTransform: 'uppercase',
+      fontWeight: 'bold',
+      color: COLORS.LIGHT_GREY_C0,
+      fontSize: 10,
+      letterSpacing: '1.5px',
+    },
     appButtonName: {
       fontSize: '12px',
       color: '#303030',
@@ -216,11 +237,17 @@ export default {
     red: {
       color: COLORS.PRIMARY_RED,
     },
+    italic: {
+      fontStyle: 'italic',
+    },
     noPadding: {
       padding: 0,
     },
     small: {
       fontSize: 11,
+    },
+    size13: {
+      fontSize: 13,
     },
     ellipsis: {
       whiteSpace: 'nowrap',

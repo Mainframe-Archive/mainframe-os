@@ -11,6 +11,9 @@ export default class AppPublishContentsCommand extends Command {
     id: flags.string({
       description: 'app local ID',
     }),
+    version: flags.string({
+      description: 'app version',
+    }),
   }
 
   async run() {
@@ -21,6 +24,7 @@ export default class AppPublishContentsCommand extends Command {
 
     const res = await client.app.publishContents({
       appID: this.flags.id,
+      version: this.flags.version,
     })
     this.log(`App contents published with URI ${res.contentsURI}`)
   }
