@@ -70,6 +70,9 @@ export type AppUserWalletSettings = {
 }
 
 export type AppUserSettings = {
+  approvedContacts: {
+    [localID: string]: ApprovedContact,
+  },
   permissionsSettings: AppUserPermissionsSettings,
   walletSettings: AppUserWalletSettings,
 }
