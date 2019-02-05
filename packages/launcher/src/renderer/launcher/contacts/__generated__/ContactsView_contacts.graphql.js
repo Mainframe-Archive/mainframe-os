@@ -17,7 +17,8 @@ export type ContactsView_contacts = {|
     +localID: string,
     +connectionState: ConnectionState,
     +profile: {|
-      +name: ?string
+      +name: ?string,
+      +ethAddress: ?string,
     |},
   |}>,
   +$refType: ContactsView_contacts$ref,
@@ -91,6 +92,13 @@ const node/*: ConcreteFragment*/ = {
               "name": "name",
               "args": null,
               "storageKey": null
+            },
+            {
+              "kind": "ScalarField",
+              "alias": null,
+              "name": "ethAddress",
+              "args": null,
+              "storageKey": null
             }
           ]
         }
@@ -99,5 +107,5 @@ const node/*: ConcreteFragment*/ = {
   ]
 };
 // prettier-ignore
-(node/*: any*/).hash = '5e88177880bca9d7531c1e599636bfc4';
+(node/*: any*/).hash = 'f4ef4a8552d0befd6313d9967610776d';
 module.exports = node;

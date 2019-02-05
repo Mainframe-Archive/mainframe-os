@@ -2,55 +2,49 @@
 import EthereumTx from 'ethereumjs-tx'
 import ethUtil from 'ethereumjs-util'
 import { toChecksumAddress } from 'web3-utils'
-import type {
-  EthTransactionParams,
-  WalletEthSignDataParams,
-} from '@mainframe/client'
-import { uniqueID } from '@mainframe/utils-id'
 
 import { getAddressAtIndex, signTransaction } from './ledgerClient'
-import { type AbstractWalletParams } from './AbstractSoftwareWallet'
+import AbstractWallet, {
+  type WalletSignTXParams,
+  type WalletSignDataParams,
+} from './AbstractWallet'
 
 type AccountAddress = string
 
 type ActiveAccounts = { [index: string]: AccountAddress }
 
-export type LedgerWalletParams = AbstractWalletParams & {
+export type LedgerWalletParams = {
+  localID: string,
+  name: ?string,
   activeAccounts: { [index: string]: AccountAddress },
   firstAddress: string,
-  localID: string,
 }
 
-export default class LedgerWallet {
+export type LedgerWalletSerialized = LedgerWalletParams
+
+export default class LedgerWallet extends AbstractWallet {
+  static fromJSON = (params: LedgerWalletSerialized): LedgerWallet =>
+    new LedgerWallet(params)
+
+  // $FlowFixMe: Wallet type
+  static toJSON = (wallet: LedgerWallet): LedgerWalletSerialized => ({
+    activeAccounts: wallet.activeAccounts,
+    localID: wallet.localID,
+    firstAddress: wallet.firstAddress,
+    name: wallet.name,
+  })
+
   // Store address at 0 to identify ledger
-  _type: 'ledger'
-  _localID: string
   _firstAddress: string
   _activeAccounts: ActiveAccounts
 
-  constructor(params?: LedgerWalletParams) {
-    this._type = 'ledger'
-    if (params) {
-      this._activeAccounts = params.activeAccounts
-      this._localID = params.localID
-      this._firstAddress = params.firstAddress
-    } else {
-      this._activeAccounts = {}
-      this._localID = uniqueID()
-    }
+  constructor(params: LedgerWalletParams) {
+    super({ ...params, type: 'ledger' })
+    this._activeAccounts = params.activeAccounts
+    this._firstAddress = params.firstAddress
   }
 
-  get id(): string {
-    return this._localID
-  }
-
-  get localID(): string {
-    return this._localID
-  }
-
-  get type(): 'ledger' {
-    return this._type
-  }
+  // Getters
 
   get firstAddress(): string {
     return this._firstAddress
@@ -93,7 +87,7 @@ export default class LedgerWallet {
     return newAddresses
   }
 
-  async signTransaction(params: EthTransactionParams): Promise<string> {
+  async signTransaction(params: WalletSignTXParams): Promise<string> {
     if (!params.chainId) {
       throw new Error('ethereum chain id not set in tx params')
     }
@@ -121,7 +115,7 @@ export default class LedgerWallet {
     }
   }
 
-  sign(params: WalletEthSignDataParams) {
+  sign(params: WalletSignDataParams) {
     params
     // TODO: Needs implementing
   }

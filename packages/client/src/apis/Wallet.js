@@ -63,8 +63,8 @@ export default class WalletAPIs extends ClientAPIs {
     return this._rpc.request('wallet_ledgerGetEthAccounts', params)
   }
 
-  async addLedgerEthAccount(params: { index: number }) {
-    return this._rpc.request('wallet_ledgerAddEthAccount', params)
+  async addLedgerEthAccounts(params: { indexes: Array<number> }) {
+    return this._rpc.request('wallet_ledgerAddEthAccounts', params)
   }
 
   async setUsersDefaultWallet(params: WalletSetUserDefaulParams) {

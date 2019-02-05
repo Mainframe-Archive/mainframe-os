@@ -14,7 +14,8 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.1.2",
-    "ethereumjs-abi": "^0.6.5",
+    "@mainframe/eth": "*",
+    "ethereumjs-abi": "^0.6.6",
     "web3-provider-engine": "^14.1.0"
   },
   "devDependencies": {

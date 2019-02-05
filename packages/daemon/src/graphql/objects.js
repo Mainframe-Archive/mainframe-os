@@ -317,6 +317,9 @@ export const genericProfile = new GraphQLObjectType({
     avatar: {
       type: GraphQLString,
     },
+    ethAddress: {
+      type: GraphQLString,
+    },
   }),
 })
 
@@ -327,6 +330,9 @@ export const namedProfile = new GraphQLObjectType({
       type: GraphQLNonNull(GraphQLString),
     },
     avatar: {
+      type: GraphQLString,
+    },
+    ethAddress: {
       type: GraphQLString,
     },
   }),
@@ -589,32 +595,38 @@ export const walletBalances = new GraphQLObjectType({
     eth: {
       type: new GraphQLNonNull(GraphQLString),
       resolve: async (self, args, ctx) => {
-        const balance = await ctx.io.eth.getETHBalance(self)
-        return balance || 0
+        try {
+          return await ctx.io.eth.getETHBalance(self)
+        } catch (err) {
+          ctx.log(err)
+          return 0
+        }
       },
     },
     mft: {
       type: new GraphQLNonNull(GraphQLString),
       resolve: async (self, args, ctx) => {
-        const balance = await ctx.io.eth.getMFTBalance(self)
-        return balance || 0
+        try {
+          return await ctx.io.eth.getMFTBalance(self)
+        } catch (err) {
+          ctx.log(err)
+          return 0
+        }
       },
     },
   }),
 })
 
-export const namedWalletAccount = new GraphQLObjectType({
-  name: 'NamedWalletAccountType',
+export const walletAccount = new GraphQLObjectType({
+  name: 'WalletAccount',
   fields: () => ({
-    name: {
-      type: new GraphQLNonNull(GraphQLString),
-    },
     address: {
       type: new GraphQLNonNull(GraphQLString),
+      resolve: self => self,
     },
     balances: {
       type: new GraphQLNonNull(walletBalances),
-      resolve: self => self.address,
+      resolve: self => self,
     },
   }),
 })
@@ -624,11 +636,14 @@ export const ethLedgerWallet = new GraphQLObjectType({
   interfaces: () => [nodeInterface],
   fields: () => ({
     id: idResolver,
+    name: {
+      type: GraphQLString,
+    },
     localID: {
       type: new GraphQLNonNull(GraphQLID),
     },
     accounts: {
-      type: new GraphQLList(namedWalletAccount),
+      type: new GraphQLList(walletAccount),
     },
   }),
 })
@@ -638,6 +653,9 @@ export const ethHdWallet = new GraphQLObjectType({
   interfaces: () => [nodeInterface],
   fields: () => ({
     id: idResolver,
+    name: {
+      type: GraphQLString,
+    },
     localID: {
       type: new GraphQLNonNull(GraphQLID),
     },
@@ -645,7 +663,7 @@ export const ethHdWallet = new GraphQLObjectType({
       type: new GraphQLNonNull(GraphQLString),
     },
     accounts: {
-      type: new GraphQLList(namedWalletAccount),
+      type: new GraphQLList(walletAccount),
     },
   }),
 })

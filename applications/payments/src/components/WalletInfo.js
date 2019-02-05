@@ -18,20 +18,30 @@ class WalletInfo extends Component<ContextProps, State> {
   }
   componentDidMount() {
     this.fetchState()
+    this.props.sdk.ethereum.on('accountsChange', accounts => {
+      this.fetchState()
+    })
+    this.props.sdk.ethereum.on('networkChanged', () => {
+      this.fetchState()
+    })
   }
 
   async fetchState() {
     const { web3 } = this.props
     if (web3) {
-      const accounts = await web3.eth.getAccounts()
-      if (accounts.length) {
-        const account = accounts[0]
-        const weiBalance = await web3.eth.getBalance(account)
-        const ethBalance = web3.utils.fromWei(weiBalance)
-        this.setState({
-          account,
-          ethBalance,
-        })
+      try {
+        const accounts = await web3.eth.getAccounts()
+        if (accounts.length) {
+          const account = accounts[0]
+          const weiBalance = await web3.eth.getBalance(account)
+          const ethBalance = web3.utils.fromWei(weiBalance)
+          this.setState({
+            account,
+            ethBalance,
+          })
+        }
+      } catch (err) {
+        console.log('err: ', err)
       }
     }
   }

@@ -7,17 +7,18 @@ import {
   type PermissionGrant,
   type StrictPermissionsRequirements,
 } from '@mainframe/app-permissions'
-import type {
-  AppUserPermissionsSettings,
-  AppUserSettings,
-} from '@mainframe/client'
+import type { AppUserPermissionsSettings } from '@mainframe/client'
 import { getAppContentsPath, type Environment } from '@mainframe/config'
 import { MFID } from '@mainframe/data-types'
 import { uniqueID, idType, type ID } from '@mainframe/utils-id'
 
 import { mapObject } from '../utils'
 
-import type { SessionData } from './AbstractApp'
+import type {
+  ApprovedContact,
+  ContactToApprove,
+  SessionData,
+} from './AbstractApp'
 import App, { type AppSerialized } from './App'
 import OwnApp, {
   type OwnAppCreationParams,
@@ -164,8 +165,8 @@ export default class AppsRepository {
     }
   }
 
-  getAnyByID(id: ID): ?(App | OwnApp) {
-    return this.getByID(id) || this.getOwnByID(id)
+  getAnyByID(id: ID | string): ?(App | OwnApp) {
+    return this.getByID(idType(id)) || this.getOwnByID(idType(id))
   }
 
   getAppsForUser(id: ID): ?Array<App> {
@@ -211,14 +212,6 @@ export default class AppsRepository {
     return app
   }
 
-  setUserSettings(appID: ID, userID: ID, settings: AppUserSettings): void {
-    const app = this.getAnyByID(appID)
-    if (app == null) {
-      throw new Error('Invalid app')
-    }
-    app.setSettings(userID, settings)
-  }
-
   setUserPermissionsSettings(
     appID: ID,
     userID: ID,
@@ -242,6 +235,18 @@ export default class AppsRepository {
       throw new Error('Invalid app')
     }
     app.setPermission(userID, key, value)
+  }
+
+  approveContacts(
+    appID: ID | string,
+    userID: ID | string,
+    contactsToApprove: Array<ContactToApprove>,
+  ): { [localID: string]: ApprovedContact } {
+    const app = this.getAnyByID(appID)
+    if (app == null) {
+      throw new Error('Invalid app')
+    }
+    return app.approveContacts(idType(userID), contactsToApprove)
   }
 
   removeUser(appID: ID, userID: ID): void {

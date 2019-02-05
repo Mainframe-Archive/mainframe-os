@@ -27,7 +27,7 @@ export type ContactChangedEvent = {|
   type: 'contact_changed',
   contact: Contact,
   userID: string,
-  change: 'peerChanged' | 'requestSent' | 'contactFeed',
+  change: 'peerChanged' | 'requestSent' | 'contactFeed' | 'profile',
 |}
 export type ContactDeletedEvent = {|
   type: 'contact_deleted',

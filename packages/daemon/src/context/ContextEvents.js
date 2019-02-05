@@ -112,7 +112,7 @@ export default class ContextEvents {
 
           // TODO: Actual data
           await contact.ownFeed.publishJSON(this._context.io.bzz, {
-            message: 'connected',
+            profile: {},
           })
           await contact.ownFeed.syncManifest(this._context.io.bzz)
 

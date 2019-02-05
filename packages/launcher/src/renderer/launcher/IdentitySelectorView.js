@@ -2,17 +2,13 @@
 
 import type { ID } from '@mainframe/client'
 import React, { Component } from 'react'
-import {
-  View,
-  StyleSheet,
-  TextInput,
-  ActivityIndicator,
-} from 'react-native-web'
+import { View, StyleSheet, TextInput } from 'react-native-web'
 import { QueryRenderer, graphql, commitMutation } from 'react-relay'
 
 import { Button } from '@morpheus-ui/core'
 import Text from '../UIComponents/Text'
 import colors from '../colors'
+import Loader from '../UIComponents/Loader'
 import { EnvironmentContext } from './RelayEnvironment'
 
 type ContainerProps = {
@@ -222,7 +218,7 @@ export default class IdentitySelectorQueryContainer extends Component<ContainerP
           } else {
             return (
               <View>
-                <ActivityIndicator />
+                <Loader />
               </View>
             )
           }

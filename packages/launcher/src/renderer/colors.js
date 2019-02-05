@@ -25,6 +25,7 @@ export default {
   LIGHT_GREY_E8: '#e8e8e8',
   LIGHT_GREY_E5: '#e5e5e5',
   LIGHT_GREY_DE: '#dedede',
+  LIGHT_GREY_CC: '#CCCCCC',
   LIGHT_GREY_AE: '#AEAEAE',
   LIGHT_GREY_BLUE: '#9ba3b5',
   LIGHT_GREY_F5: '#F5F5F5',
@@ -34,6 +35,7 @@ export default {
   GREY_DARK_54: '#545556',
   GREY_DARK_48: '#484848',
   GREY_DARK_30: '#303030',
+  GREY_DARK_3C: '#3C3C3C',
   GREY_DARK_38: '#383838',
   GREY_DARK_2A: '#2A2A2A',
   GREY_DARK_23: '#232323',
@@ -42,4 +44,6 @@ export default {
   WHITE: '#FFFFFF',
   TRANSPARENT_BLUE_BG: 'rgba(14, 18, 28, 0.85)',
   TRANSPARENT_BLACK_30: 'rgba(0, 0, 0, 0.30)',
+  TRANSPARENT_BLACK_50: 'rgba(0, 0, 0, 0.50)',
+  TRANSPARENT_BLACK_80: 'rgba(0, 0, 0, 0.50)',
 }

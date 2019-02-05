@@ -7,11 +7,15 @@ import {
   type ManifestData,
 } from '@mainframe/app-manifest'
 import { type StrictPermissionsRequirements } from '@mainframe/app-permissions'
-import type { AppUserPermissionsSettings } from '@mainframe/client'
+import type {
+  AppUserContact,
+  AppUserPermissionsSettings,
+} from '@mainframe/client'
 import { idType, type ID } from '@mainframe/utils-id'
 import { ensureDir } from 'fs-extra'
 
 import { type App, OwnApp } from '../app'
+import type { ContactToApprove } from '../app/AbstractApp'
 import { getContentsPath } from '../app/AppsRepository'
 import type {
   Contact,
@@ -22,9 +26,12 @@ import type {
 import type { OwnDeveloperProfile } from '../identity/OwnDeveloperIdentity'
 import type { OwnUserProfile } from '../identity/OwnUserIdentity'
 import type { PeerUserProfile } from '../identity/PeerUserIdentity'
+import type { ContactProfile } from '../identity/Contact'
 import type { bzzHash } from '../swarm/feed'
 
 import type {
+  AddHDWalletAccountParams,
+  ImportHDWalletParams,
   Blockchains,
   WalletTypes,
   WalletAddLedgerResult,
@@ -61,24 +68,11 @@ export type AddPeerParams = {
   profile: {
     name?: ?string,
     avatar?: ?string,
+    ethAddress?: ?string,
   },
   publicFeed: string,
   firstContactAddress: string,
   otherFeeds: Feeds,
-}
-
-export type ImportHDWalletParams = {
-  blockchain: Blockchains,
-  mnemonic: string,
-  firstAccountName: string,
-  userID?: string,
-}
-
-export type AddHDWalletAccountParams = {
-  walletID: string,
-  index: number,
-  name: string,
-  userID?: string,
 }
 
 export default class ContextMutations {
@@ -219,6 +213,46 @@ export default class ContextMutations {
     return manifestData.updateHash
   }
 
+  async appApproveContacts(
+    appID: string,
+    userID: string,
+    contactsToApprove: Array<ContactToApprove>,
+  ): Promise<Array<AppUserContact>> {
+    const { openVault } = this._context
+    const approvedContacts = openVault.apps.approveContacts(
+      appID,
+      userID,
+      contactsToApprove,
+    )
+    // $FlowFixMe map type
+    const contactsIDs = Object.values(approvedContacts).map(c => c.id)
+    const contacts = this._context.queries.getAppUserContacts(
+      appID,
+      userID,
+      contactsIDs,
+    )
+    await openVault.save()
+    return contacts
+  }
+
+  async setAppUserDefaultWallet(
+    appID: string,
+    userID: string,
+    address: string,
+  ) {
+    const { openVault, queries } = this._context
+    const app = openVault.apps.getAnyByID(appID)
+    if (!app) {
+      throw new Error('App not found')
+    }
+    const wallet = queries.getUserEthWalletForAccount(userID, address)
+    if (!wallet) {
+      throw new Error('Wallet not found')
+    }
+    app.setDefaultEthAccount(idType(userID), idType(wallet.localID), address)
+    await openVault.save()
+  }
+
   // Contacts
 
   async addPeer(params: AddPeerParams): Promise<PeerUserIdentity> {
@@ -291,6 +325,27 @@ export default class ContextMutations {
     })
   }
 
+  updateContactProfile(
+    userID: ID | string,
+    contactID: ID | string,
+    profile: ContactProfile,
+  ) {
+    const contact = this._context.openVault.identities.getContact(
+      userID,
+      contactID,
+    )
+    if (contact == null) {
+      throw new Error('Peer not found')
+    }
+    contact.profile = profile
+    this._context.next({
+      type: 'contact_changed',
+      contact,
+      userID,
+      change: 'profile',
+    })
+  }
+
   // Identities
 
   async createDeveloper(
@@ -338,14 +393,11 @@ export default class ContextMutations {
 
   async createHDWallet(
     blockchain: Blockchains,
-    firstAccountName: string,
+    name: string,
     userID?: string,
   ): Promise<HDWallet> {
     const { openVault } = this._context
-    const wallet = openVault.wallets.createHDWallet(
-      blockchain,
-      firstAccountName,
-    )
+    const wallet = openVault.wallets.createHDWallet(blockchain, name)
     if (userID) {
       openVault.identityWallets.linkWalletToIdentity(
         userID,
@@ -388,19 +440,18 @@ export default class ContextMutations {
     return address
   }
 
-  async addLedgerWalletAccount(
-    index: number,
+  async addLedgerWalletAccounts(
+    indexes: Array<number>,
     name: string,
     userID?: string,
   ): Promise<WalletAddLedgerResult> {
     const { openVault } = this._context
-    const res = await openVault.wallets.addLedgerEthAccount(index, name)
+    const res = await openVault.wallets.addLedgerEthAccounts(indexes, name)
     if (userID) {
-      openVault.identityWallets.linkWalletToIdentity(
-        userID,
-        res.localID,
-        res.address,
-      )
+      res.addresses.forEach(a => {
+        // $FlowFixMe userID already checked
+        openVault.identityWallets.linkWalletToIdentity(userID, res.localID, a)
+      })
     }
     await openVault.save()
     return res

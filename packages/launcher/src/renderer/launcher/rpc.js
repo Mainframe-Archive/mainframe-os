@@ -3,7 +3,6 @@
 import type {
   ID,
   AppCreateParams,
-  AppUserSettings,
   AppUserPermissionsSettings,
   GraphQLQueryResult,
 } from '@mainframe/client'
@@ -33,9 +32,6 @@ export default {
   },
   removeApp: (appID: ID) => rpc.request('app_remove', { appID }),
   removeOwnApp: (appID: ID) => rpc.request('app_removeOwn', { appID }),
-  setAppUserSettings: (appID: ID, userID: ID, settings: AppUserSettings) => {
-    return rpc.request('app_setUserSettings', { appID, userID, settings })
-  },
   setAppUserPermissionsSettings: (
     appID: ID,
     userID: ID,

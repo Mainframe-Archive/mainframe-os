@@ -12,20 +12,24 @@ import type {
   AppUserPermissionsSettings,
   AppUserSettings,
 } from '@mainframe/client'
-import { idType, type ID } from '@mainframe/utils-id'
+import { idType, type ID, uniqueID } from '@mainframe/utils-id'
 
 import type Session from './Session'
 
 const DEFAULT_SETTINGS = {
   permissionsSettings: {
     grants: {
-      WEB_REQUEST: [],
+      WEB_REQUEST: {
+        denied: [],
+        granted: [],
+      },
     },
     permissionsChecked: false,
   },
   walletSettings: {
     defaultEthAccount: null,
   },
+  approvedContacts: {},
 }
 
 export type WalletSettings = {
@@ -37,6 +41,16 @@ export type SessionData = {
   session: Session,
   permissions: PermissionsDetails,
   isDev?: ?boolean,
+}
+
+export type ContactToApprove = {
+  localID: string,
+  publicDataOnly: boolean,
+}
+
+export type ApprovedContact = {
+  id: string,
+  publicDataOnly: boolean,
 }
 
 export type AbstractAppParams = {
@@ -74,10 +88,14 @@ export default class AbstractApp {
     return Object.keys(this._settings).map(idType)
   }
 
+  removeUser(userID: ID) {
+    delete this._settings[userID]
+  }
+
   // Settings
 
-  getSettings(userID: ID): AppUserSettings {
-    return this._settings[userID] || { ...DEFAULT_SETTINGS }
+  getSettings(userID: ID | string): AppUserSettings {
+    return this._settings[idType(userID)] || { ...DEFAULT_SETTINGS }
   }
 
   setSettings(userID: ID, settings: AppUserSettings): void {
@@ -156,8 +174,31 @@ export default class AbstractApp {
     }
   }
 
-  removeUser(userID: ID) {
-    delete this._settings[userID]
+  listApprovedContacts(userID: ID | string) {
+    const settings = this.getSettings(userID)
+    const approvedContacts = settings.approvedContacts
+    // $FlowFixMe map type
+    return Object.keys(approvedContacts).map(localID => ({
+      ...approvedContacts[localID],
+      localID,
+    }))
+  }
+
+  approveContacts(userID: ID, contacts: Array<ContactToApprove>) {
+    const settings = this.getSettings(userID)
+    const approvedContacts = settings.approvedContacts
+    const contactsAdded = {}
+    contacts.forEach(c => {
+      if (!approvedContacts[c.localID]) {
+        approvedContacts[c.localID] = {
+          id: uniqueID(),
+          publicDataOnly: c.publicDataOnly,
+        }
+      }
+      contactsAdded[c.localID] = approvedContacts[c.localID]
+    })
+    this._settings[userID] = settings
+    return contactsAdded
   }
 
   // Session

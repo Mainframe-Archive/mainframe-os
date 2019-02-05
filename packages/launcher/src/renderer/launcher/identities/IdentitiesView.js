@@ -1,16 +1,19 @@
 // @flow
 
-import React, { Component, type ElementRef } from 'react'
+import React, { Component } from 'react'
 import { createFragmentContainer, graphql } from 'react-relay'
 import styled from 'styled-components/native'
 import type { AppInstalledData } from '@mainframe/client'
 
-import { Text } from '@morpheus-ui/core'
+import { Text, Button } from '@morpheus-ui/core'
 
 import Avatar from '../../UIComponents/Avatar'
+import IdentityEditModal from './IdentityEditModal'
 
-type User = {
+export type User = {
   localID: string,
+  feedHash: string,
+  discoverable?: boolean,
   profile: {
     name: string,
   },
@@ -26,8 +29,16 @@ type Props = {
   identities: Identities,
 }
 
+type State = {
+  editUser?: ?User,
+}
+
+const Container = styled.View`
+  flex: 1;
+`
+
 const UserItem = styled.View`
-  margin: 10px 0;
+  margin-bottom: 10px;
   padding: 30px 25px;
   background-color: ${props => props.theme.colors.LIGHT_GREY_F9};
   border-left-width: 5px;
@@ -43,42 +54,56 @@ const Profile = styled.View`
   margin-left: 15px;
 `
 
-class IdentitiesView extends Component<Props> {
-  renderUsers(): Array<ElementRef<any>> {
-    const identities = [
-      ...this.props.identities.ownUsers.map((user: User) => ({
-        ...user,
-        type: 'user',
-      })),
-      ...this.props.identities.ownDevelopers.map((user: User) => ({
-        ...user,
-        type: 'developer',
-      })),
-    ]
+class IdentitiesView extends Component<Props, State> {
+  state = {}
 
-    return identities.map((user: Object) => {
-      return (
-        <UserItem key={user.localID}>
-          <Avatar size="medium" id={user.localID} />
-          <Profile>
-            <Text variant="bold">{user.profile.name}</Text>
-            <Text theme={{ color: '#585858', fontSize: '11px' }}>
-              {user.feedHash}
-            </Text>
-          </Profile>
-          <Text theme={{ color: '#585858', fontSize: '11px' }}>
-            {user.type}
-          </Text>
-        </UserItem>
-      )
+  openEditModal = (user: User) => {
+    this.setState({
+      editUser: user,
     })
   }
+
+  closeModal = () => this.setState({ editUser: null })
+
+  renderUser(user: User) {
+    const onPress = () => this.openEditModal(user)
+    return (
+      <UserItem key={user.localID}>
+        <Avatar size="medium" id={user.localID} />
+        <Profile>
+          <Text variant="bold">{user.profile.name}</Text>
+          <Text theme={{ color: '#585858', fontSize: '11px' }}>
+            {user.feedHash}
+          </Text>
+        </Profile>
+        <Button
+          onPress={onPress}
+          variant={['small', 'completeOnboarding']}
+          title="EDIT"
+        />
+      </UserItem>
+    )
+  }
+
+  renderModal() {
+    return this.state.editUser ? (
+      <IdentityEditModal onClose={this.closeModal} user={this.state.editUser} />
+    ) : null
+  }
+
   render() {
     return (
-      <>
-        <Text variant="smallTitle">Indentities</Text>
-        {this.renderUsers()}
-      </>
+      <Container>
+        <Text variant="smallTitle">Personal</Text>
+        {this.renderUser(this.props.identities.ownUsers[0])}
+        {this.props.identities.ownDevelopers.length > 0 && (
+          <>
+            <Text variant="smallTitle">Developer</Text>
+            {this.renderUser(this.props.identities.ownDevelopers[0])}
+          </>
+        )}
+        {this.renderModal()}
+      </Container>
     )
   }
 }

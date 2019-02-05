@@ -2,10 +2,7 @@
 
 import { type ManifestData } from '@mainframe/app-manifest'
 import { type PermissionsRequirements } from '@mainframe/app-permissions'
-import type {
-  AppUserPermissionsSettings,
-  AppUserSettings,
-} from '@mainframe/client'
+import type { AppUserPermissionsSettings } from '@mainframe/client'
 import { readEncryptedFile, writeEncryptedFile } from '@mainframe/secure-file'
 import {
   decodeBase64,
@@ -254,10 +251,6 @@ export default class Vault {
       throw new Error('App not found')
     }
     app.setPermissionsRequirements(permissions, version)
-  }
-
-  setAppUserSettings(appID: ID, userID: ID, settings: AppUserSettings): void {
-    this.apps.setUserSettings(appID, userID, settings)
   }
 
   setAppUserPermissionsSettings(

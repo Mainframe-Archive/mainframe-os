@@ -21,8 +21,8 @@ import type {
   AppRemoveParams,
   AppSetPermissionParams,
   AppSetPermissionsRequirementsParams,
+  AppSetUserDefaultWalletParams,
   AppSetUserPermissionsSettingsParams,
-  AppSetUserSettingsParams,
 } from '../types'
 
 export default class AppAPIs extends ClientAPIs {
@@ -70,10 +70,6 @@ export default class AppAPIs extends ClientAPIs {
     return this._rpc.request('app_remove', params)
   }
 
-  setUserSettings(params: AppSetUserSettingsParams): Promise<void> {
-    return this._rpc.request('app_setUserSettings', params)
-  }
-
   setUserPermissionsSettings(
     params: AppSetUserPermissionsSettingsParams,
   ): Promise<void> {
@@ -88,5 +84,9 @@ export default class AppAPIs extends ClientAPIs {
     params: AppSetPermissionsRequirementsParams,
   ): Promise<void> {
     return this._rpc.request('app_setPermissionsRequirements', params)
+  }
+
+  setUserDefaultWallet(params: AppSetUserDefaultWalletParams): Promise<void> {
+    return this._rpc.request('app_setUserDefaultWallet', params)
   }
 }

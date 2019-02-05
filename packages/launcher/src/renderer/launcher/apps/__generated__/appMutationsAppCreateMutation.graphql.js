@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash fe9d6356ec229b9fe11eb811e6c3dc24
+ * @relayHash 4bab4b0d763fa23bf6d1b4e77003e899
  */
 
 /* eslint-disable */
@@ -23,10 +23,11 @@ export type AppPermissionsRequirementsInput = {
   required: AppPermissionDefinitionsInput,
 };
 export type AppPermissionDefinitionsInput = {
-  WEB_REQUEST?: ?$ReadOnlyArray<?string>,
   BLOCKCHAIN_SEND?: ?boolean,
+  CONTACTS_READ?: ?boolean,
   SWARM_UPLOAD?: ?boolean,
   SWARM_DOWNLOAD?: ?boolean,
+  WEB_REQUEST?: ?$ReadOnlyArray<?string>,
 };
 export type appMutationsAppCreateMutationVariables = {|
   input: AppCreateMutationInput

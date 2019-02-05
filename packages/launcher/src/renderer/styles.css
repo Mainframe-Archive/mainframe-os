@@ -7,18 +7,36 @@ body,
   font-family: 'Poppins', sans-serif;
 }
 
-.ReactModal__Overlay {
+.inner-modal {
   position: fixed !important;
-  top: 0px !important;
-  left: 0px !important;
-  right: 0px !important;
-  bottom: 0px !important;
+  top: 0 !important;
+  left: 130px !important;
+  right: 0 !important;
+  bottom: 0 !important;
   background-color: #fff !important;
   display: flex !important;
   flex-direction: row !important;
   align-items: center !important;
   z-index: 999 !important;
   border: none !important;
+}
+
+.full-modal {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  background-color: #fff !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  z-index: 999 !important;
+  border: none !important;
+}
+
+.transition {
+  transition: all 0.3s;
 }
 
 .ReactModal__Content {
@@ -51,4 +69,10 @@ body,
 
 .draggable {
   -webkit-app-region: drag
+}
+
+.white-shadow {
+  -webkit-box-shadow: -2px -30px 98px 34px rgba(255,255,255,1);
+  -moz-box-shadow: -2px -30px 98px 34px rgba(255,255,255,1);
+  box-shadow: -2px -30px 98px 34px rgba(255,255,255,1);
 }

@@ -164,6 +164,6 @@ describe('Application launch', function() {
     await this.app.client.element(appItemSelector).click()
 
     const count = await this.app.client.getWindowCount()
-    assert.equal(count, 3)
+    assert.equal(count, 5)
   })
 })

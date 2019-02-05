@@ -4,7 +4,6 @@ import React, { Component } from 'react'
 import styled from 'styled-components/native'
 import { graphql, commitMutation, createFragmentContainer } from 'react-relay'
 import { fetchQuery } from 'relay-runtime'
-import { ActivityIndicator } from 'react-native'
 import { debounce } from 'lodash'
 import { Text, Button, Row, Column, TextField } from '@morpheus-ui/core'
 import { Form, type FormSubmitPayload } from '@morpheus-ui/forms'
@@ -12,12 +11,14 @@ import { Form, type FormSubmitPayload } from '@morpheus-ui/forms'
 import PlusIcon from '@morpheus-ui/icons/PlusSymbolSm'
 import SearchIcon from '@morpheus-ui/icons/SearchSm'
 import CircleArrowRight from '@morpheus-ui/icons/CircleArrowRight'
-import CloseIcon from '@morpheus-ui/icons/Close'
 
 import { type CurrentUser } from '../LauncherContext'
 import { EnvironmentContext } from '../RelayEnvironment'
 import Avatar from '../../UIComponents/Avatar'
 import SvgSelectedPointer from '../../UIComponents/SVGSelectedPointer'
+
+import FormModalView from '../../UIComponents/FormModalView'
+import Loader from '../../UIComponents/Loader'
 
 const SvgSmallClose = props => (
   <svg width="10" height="10" viewBox="0 0 10 10" {...props}>
@@ -136,34 +137,6 @@ const Blocky = styled.View`
   margin-right: 15px;
 `
 
-const InternalModal = styled.View`
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #fff;
-`
-
-const CloseButton = styled.TouchableOpacity`
-  position: absolute;
-  right: 0;
-  top: 0;
-  width: 24px;
-  height: 24px;
-  z-index: 1;
-`
-
-const ModalTitle = styled.View`
-  border-bottom-width: 1px;
-  border-bottom-style: solid;
-  border-bottom-color: #f5f5f5;
-  height: 35px;
-  margin-top: 5px;
-  align-items: center;
-  justify-content: flex-start;
-`
-
 export type Contact = {
   localID: string,
   peerID: string,
@@ -247,6 +220,29 @@ class ContactsViewComponent extends Component<Props, State> {
     }
   }
 
+  componentDidUpdate(prevProps: Props) {
+    if (this.props.contacts.userContacts.length) {
+      if (!prevProps.contacts.userContacts.length) {
+        this.setState({
+          selectedContact: this.props.contacts.userContacts[0],
+        })
+      } else if (
+        this.state.selectedContact != null &&
+        !this.props.contacts.userContacts.includes(this.state.selectedContact)
+      ) {
+        const { localID } = this.state.selectedContact
+        const updatedContact = this.props.contacts.userContacts.find(
+          contact => contact.localID === localID,
+        )
+        this.setState({
+          selectedContact: updatedContact
+            ? updatedContact
+            : this.props.contacts.userContacts[0],
+        })
+      }
+    }
+  }
+
   startSearching = () => {
     this.setState({ searching: true })
   }
@@ -312,6 +308,7 @@ class ContactsViewComponent extends Component<Props, State> {
         this.setState({
           error,
           addingContact: false,
+          foundPeer: undefined,
         })
       }
 
@@ -390,13 +387,13 @@ class ContactsViewComponent extends Component<Props, State> {
             />
           </ButtonContainer>
         </ContactsListHeader>
-        {list.length === 0 ? (
-          <NoContacts>
-            <Text variant={['grey', 'small']}>No Matching</Text>
-          </NoContacts>
-        ) : userContacts.length === 0 ? (
+        {userContacts.length === 0 ? (
           <NoContacts>
             <Text variant={['grey', 'small']}>No Contacts</Text>
+          </NoContacts>
+        ) : list.length === 0 ? (
+          <NoContacts>
+            <Text variant={['grey', 'small']}>No Matching</Text>
           </NoContacts>
         ) : (
           <ScrollView>
@@ -410,7 +407,7 @@ class ContactsViewComponent extends Component<Props, State> {
                   onPress={() => this.selectContact(contact)}
                   selected={selected}>
                   <ContactCardText>
-                    <Text variant={['greyMed', 'elipsis']} bold size={13}>
+                    <Text variant={['greyMed', 'ellipsis']} bold size={13}>
                       {contact.profile.name || contact.localID}
                     </Text>
                     {contact.connectionState === 'SENT' ||
@@ -457,7 +454,7 @@ class ContactsViewComponent extends Component<Props, State> {
   renderPeerLookup() {
     const { foundPeer, queryInProgress } = this.state
     return queryInProgress ? (
-      <ActivityIndicator />
+      <Loader />
     ) : (
       foundPeer && (
         <Column>
@@ -483,55 +480,50 @@ class ContactsViewComponent extends Component<Props, State> {
         </Column>
       </Row>
     ) : null
-    const addButton = addingContact ? (
-      <ActivityIndicator />
-    ) : modal ? (
-      <Row size={1}>
-        <Column styles="align-items:center; justify-content: center; flex-direction: row;">
-          <Button
-            title="CANCEL"
-            variant={['no-border', 'grey', 'modalButton']}
-            onPress={this.closeModal}
-          />
-          <Button title="ADD" variant={['red', 'modalButton']} submit />
-        </Column>
-      </Row>
-    ) : (
-      <Row size={2} top>
-        <Column styles="align-items:flex-end;" smOffset={1}>
-          <Button
-            title="ADD"
-            variant="onboarding"
-            Icon={CircleArrowRight}
-            submit
-          />
-        </Column>
-      </Row>
+
+    const innerContent = (
+      <>
+        <Row size={1}>
+          {modal && (
+            <Column>
+              <Text
+                variant="greyMid"
+                size={12}
+                theme={{ textAlign: 'center', marginBottom: 50 }}>
+                You have no contacts in your address book. Add someone to join
+                you by entering their Mainframe ID or scanning their QR code.
+              </Text>
+            </Column>
+          )}
+          <Column>
+            <TextField name="peerLookupHash" required label="Mainframe ID" />
+          </Column>
+          {this.renderPeerLookup()}
+        </Row>
+        <Row>{errorMsg}</Row>
+      </>
     )
+
+    if (modal) {
+      return innerContent
+    }
 
     return (
       <FormContainer modal={modal}>
         <Form onChange={this.onFormChange} onSubmit={this.submitNewContact}>
-          <Row size={1}>
-            {modal && (
-              <Column>
-                <Text
-                  variant="greyMid"
-                  size={12}
-                  theme={{ textAlign: 'center', marginBottom: 50 }}>
-                  You have no contacts in your address book. Add someone to join
-                  you by entering their Mainframe ID or scanning their QR code.
-                </Text>
-              </Column>
-            )}
-            <Column>
-              <TextField name="peerLookupHash" required label="Mainframe ID" />
+          {innerContent}
+          <Row size={2} top>
+            <Column styles="align-items:flex-end;" smOffset={1}>
+              <Button
+                disabled={addingContact}
+                title="ADD"
+                variant="onboarding"
+                Icon={CircleArrowRight}
+                submit
+              />
             </Column>
-            {this.renderPeerLookup()}
           </Row>
-          {addButton}
         </Form>
-        {errorMsg}
       </FormContainer>
     )
   }
@@ -616,18 +608,17 @@ class ContactsViewComponent extends Component<Props, State> {
   renderAddModal() {
     return (
       this.state.addModalOpen && (
-        <InternalModal>
-          <ModalTitle>
-            <Text variant={['smallTitle', 'blue', 'noPadding', 'bold']}>
-              INVITE A NEW CONTACT
-            </Text>
-            <CloseButton onPress={this.closeModal}>
-              <CloseIcon color="#808080" width={12} height={12} />
-            </CloseButton>
-          </ModalTitle>
-
-          {this.renderAddNewContactForm(true)}
-        </InternalModal>
+        <FormModalView
+          title="INVITE A NEW CONTACT"
+          confirmButton="ADD"
+          dismissButton="CANCEL"
+          onRequestClose={this.closeModal}
+          onChangeForm={this.onFormChange}
+          onSubmitForm={this.submitNewContact}>
+          <FormContainer modal>
+            {this.renderAddNewContactForm(true)}
+          </FormContainer>
+        </FormModalView>
       )
     )
   }
@@ -647,54 +638,38 @@ class ContactsViewComponent extends Component<Props, State> {
     ) : null
 
     return (
-      <InternalModal>
-        <ModalTitle>
-          <Text variant={['smallTitle', 'blue', 'noPadding', 'bold']}>
-            EDIT CONTACT
-          </Text>
-          <CloseButton onPress={this.closeModal}>
-            <CloseIcon color="#808080" width={12} height={12} />
-          </CloseButton>
-        </ModalTitle>
-
+      <FormModalView
+        title="EDIT CONTACT"
+        confirmButton="SAVE"
+        dismissButton="CANCEL"
+        onRequestClose={this.closeModal}
+        onSubmitForm={this.submitEditContact}>
         <FormContainer modal={true}>
-          <Form onSubmit={this.submitEditContact}>
-            <Row size={1}>
-              <Column styles="align-items:center; justify-content: center; flex-direction: row; margin-bottom: 30px;">
-                <Avatar id={this.state.selectedContact.localID} size="large" />
-              </Column>
-              <Column>
-                <TextField
-                  name="name"
-                  defaultValue={this.state.selectedContact.profile.name}
-                  required
-                  label="Name"
-                />
-              </Column>
-              <Column>
-                <RevertNameButton>
-                  <SvgSmallClose />
-                  <Text size={11} theme={{ marginLeft: '5px' }}>
-                    Reset to the original name “
-                    {this.state.selectedContact.profile.name}”
-                  </Text>
-                </RevertNameButton>
-              </Column>
-            </Row>
-            <Row size={1}>
-              <Column styles="align-items:center; justify-content: center; flex-direction: row;">
-                <Button
-                  title="CANCEL"
-                  variant={['no-border', 'grey', 'modalButton']}
-                  onPress={this.closeModal}
-                />
-                <Button title="SAVE" variant={['red', 'modalButton']} submit />
-              </Column>
-            </Row>
-            {errorMsg}
-          </Form>
+          <Row size={1}>
+            <Column styles="align-items:center; justify-content: center; flex-direction: row; margin-bottom: 30px;">
+              <Avatar id={this.state.selectedContact.localID} size="large" />
+            </Column>
+            <Column>
+              <TextField
+                name="name"
+                defaultValue={this.state.selectedContact.profile.name}
+                required
+                label="Name"
+              />
+            </Column>
+            <Column>
+              <RevertNameButton>
+                <SvgSmallClose />
+                <Text size={11} theme={{ marginLeft: '5px' }}>
+                  Reset to the original name “
+                  {this.state.selectedContact.profile.name}”
+                </Text>
+              </RevertNameButton>
+            </Column>
+          </Row>
+          {errorMsg}
         </FormContainer>
-      </InternalModal>
+      </FormModalView>
     )
   }
 
@@ -720,6 +695,7 @@ const ContactsView = createFragmentContainer(ContactsViewComponent, {
         connectionState
         profile {
           name
+          ethAddress
         }
       }
     }

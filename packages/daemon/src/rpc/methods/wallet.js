@@ -23,7 +23,7 @@ import {
   type WalletGetEthAccountsResult,
   type WalletGetLedgerEthAccountsParams,
   type WalletGetLedgerEthAccountsResult,
-  type WalletAddLedgerEthAccountParams,
+  type WalletAddLedgerEthAccountsParams,
   type WalletAddLedgerResult,
   type WalletSetUserDefaulParams,
   type WalletSignTxParams,
@@ -42,13 +42,13 @@ export const createHDWallet = {
     // $FlowFixMe Issue with promise type
     const hdWallet = await ctx.mutations.createHDWallet(
       params.blockchain,
-      params.firstAccountName,
+      params.name,
       params.userID,
     )
     return {
       localID: hdWallet.localID,
       mnemonic: hdWallet.mnemonic,
-      accounts: hdWallet.getNamedAccounts(),
+      accounts: hdWallet.getAccounts(),
     }
   },
 }
@@ -63,7 +63,7 @@ export const importMnemonic = {
     const hdWallet = await ctx.mutations.importHDWallet(params)
     return {
       localID: hdWallet.localID,
-      accounts: hdWallet.getNamedAccounts(),
+      accounts: hdWallet.getAccounts(),
     }
   },
 }
@@ -108,7 +108,8 @@ export const getUserEthAccounts = {
     ctx: ClientContext,
     params: WalletGetUserEthAccountsParams,
   ): Promise<WalletGetEthAccountsResult> => {
-    return ctx.queries.getUserEthAccounts(params.userID)
+    const accounts = ctx.queries.getUserEthAccounts(params.userID)
+    return accounts
   },
 }
 
@@ -121,7 +122,10 @@ export const signTransaction = {
     if (params.chain === 'ethereum') {
       params.transactionData.chainId = ctx.openVault.settings.ethChainID
     }
-    return ctx.openVault.wallets.signTransaction(params)
+    return ctx.openVault.wallets.signTransaction(
+      params.chain,
+      params.transactionData,
+    )
   },
 }
 
@@ -135,14 +139,14 @@ export const getLedgerEthAccounts = {
   },
 }
 
-export const addLedgerEthAccount = {
+export const addLedgerEthAccounts = {
   params: WALLET_ADD_LEDGER_ETH_ACCOUNT_SCHEMA,
   handler: async (
     ctx: ClientContext,
-    params: WalletAddLedgerEthAccountParams,
+    params: WalletAddLedgerEthAccountsParams,
   ): Promise<WalletAddLedgerResult> => {
-    return ctx.mutations.addLedgerWalletAccount(
-      params.index,
+    return ctx.mutations.addLedgerWalletAccounts(
+      params.indexes,
       params.name,
       params.userID,
     )
