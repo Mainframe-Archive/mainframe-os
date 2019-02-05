@@ -1,15 +1,14 @@
 // @flow
 import React, { Component } from 'react'
-import { TouchableOpacity } from 'react-native'
 import styled from 'styled-components/native'
 import { Text } from '@morpheus-ui/core'
 
-import colors from '../../colors'
 import OwnAppsView from './OwnAppsView'
-import SettingsMenuView, { MENU_SECTIONS } from './SettingsMenuView'
+import SettingsMenuView from './SettingsMenuView'
 
 const Container = styled.View`
-  padding: 20px;
+  flex: 1;
+  padding: 5px;
 `
 const Nav = styled.View`
   padding-vertical: 10px;
@@ -18,8 +17,10 @@ const Nav = styled.View`
 
 const navLabelStyle = `margin-right: 20px;`
 
+export type MenuKey = 'menu' | 'developer' | 'docs' | 'help' | 'feedback'
+
 type State = {
-  openView: 'menu' | 'developer',
+  openView: MenuKey,
 }
 
 export default class SettingsScreen extends Component<{}, State> {
@@ -27,7 +28,7 @@ export default class SettingsScreen extends Component<{}, State> {
     openView: 'menu',
   }
 
-  onSelectMenuItem = (key: string) => {
+  onSelectMenuItem = (key: MenuKey) => {
     this.setState({
       openView: key,
     })
