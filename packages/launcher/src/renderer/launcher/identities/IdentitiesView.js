@@ -96,7 +96,7 @@ class IdentitiesView extends Component<Props, State> {
       <Container>
         <Text variant="smallTitle">Personal</Text>
         {this.renderUser(this.props.identities.ownUsers[0])}
-        {this.props.identities.ownDevelopers.length && (
+        {this.props.identities.ownDevelopers.length > 0 && (
           <>
             <Text variant="smallTitle">Developer</Text>
             {this.renderUser(this.props.identities.ownDevelopers[0])}
