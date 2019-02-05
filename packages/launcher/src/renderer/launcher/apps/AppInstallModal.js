@@ -7,15 +7,19 @@ import {
 } from '@mainframe/app-permissions'
 import type { IdentityOwnData } from '@mainframe/client'
 import type { ManifestData } from '@mainframe/app-manifest'
-import React, { createRef, Component, type ElementRef } from 'react'
-import { View, StyleSheet } from 'react-native-web'
+import React, { Component } from 'react'
+import { Text, TextField } from '@morpheus-ui/core'
+import { type FormSubmitPayload } from '@morpheus-ui/forms'
+
 import { commitMutation } from 'react-relay'
+import styled from 'styled-components/native'
+
 import { EnvironmentContext } from '../RelayEnvironment'
 
 import LauncherContext from '../LauncherContext'
-import Button from '../../UIComponents/Button'
-import Text from '../../UIComponents/Text'
-import ModalView from '../../UIComponents/ModalView'
+import FormModalView from '../../UIComponents/FormModalView'
+import DropFile from '../../UIComponents/DropFile'
+import Loader from '../../UIComponents/Loader'
 import rpc from '../rpc'
 import PermissionsView from '../PermissionsView'
 import { appInstallMutation } from './appMutations'
@@ -30,7 +34,6 @@ type ViewProps = Props & {
 }
 
 type State = {
-  inputValue: string,
   installStep: 'manifest' | 'permissions' | 'download',
   manifest: ?ManifestData,
   userPermissions?: StrictPermissionsGrants,
@@ -38,27 +41,41 @@ type State = {
   errorMsg?: string,
 }
 
+const Container = styled.View`
+  flex: 1;
+  width: 100%;
+  max-width: 550px;
+  padding: 20px;
+  justify-content: center;
+  overflow-y: auto;
+`
+
+const TextContainer = styled.View`
+  padding: 20px;
+`
+
+const View = styled.View``
+
+const DragView = styled.TouchableOpacity`
+  border-style: dashed;
+  border-width: 1px;
+  border-color: #d3d3d3;
+  padding: 50px;
+`
+
 class AppInstallModal extends Component<ViewProps, State> {
   static contextType = EnvironmentContext
 
   state = {
-    inputValue: '',
     installStep: 'manifest',
     manifest: null,
     ownUsers: [],
   }
 
-  // $FlowFixMe: React Ref
-  fileInput: ElementRef<'input'> = createRef()
-
   // HANDLERS
 
-  onPressImportManifest = () => {
-    this.fileInput.current.click()
-  }
-
-  onFileInputChange = () => {
-    this.handleSelectedFiles([...this.fileInput.current.files])
+  onDrop = (files: Array<File>) => {
+    this.handleSelectedFiles(files)
   }
 
   handleSelectedFiles = async (files: Array<Object>) => {
@@ -89,6 +106,12 @@ class AppInstallModal extends Component<ViewProps, State> {
         // eslint-disable-next-line no-console
         console.log('error parsing manifest: ', err)
       }
+    }
+  }
+
+  onSubmitManifest = (payload: FormSubmitPayload) => {
+    if (payload.valid) {
+      // TODO: Implement the mainframe ID
     }
   }
 
@@ -144,23 +167,34 @@ class AppInstallModal extends Component<ViewProps, State> {
 
   renderManifestImport() {
     return (
-      <View>
-        <Text style={styles.header}>Install New App</Text>
-        <Text style={styles.description}>Import an app manifest file</Text>
-        <Button
-          title="Import App Manifest"
-          onPress={this.onPressImportManifest}
-        />
-        <input
-          multiple
-          id="installer-file-selector"
-          onChange={this.onFileInputChange}
-          ref={this.fileInput}
-          type="file"
-          hidden
-          value={this.state.inputValue}
-        />
-      </View>
+      <FormModalView
+        dismissButton="CANCEL"
+        confirmButton="OK"
+        title="Install an app"
+        onRequestClose={this.props.onRequestClose}
+        onSubmitForm={this.onSubmitManifest}>
+        <Container>
+          <TextContainer>
+            <Text variant={['modalText', 'center']}>
+              Lorem ipsum dolor amet sitim opsos calibri <br />
+              dos ipsum dolor amet sitimus.
+            </Text>
+          </TextContainer>
+          <View>
+            <TextField name="appid" required label="Mainframe App ID" />
+            <DropFile
+              onDrop={this.onDrop}
+              inputTestID="installer-file-selector"
+              accept={['application/json']}>
+              <DragView>
+                <Text variant={['modalText', 'center']}>
+                  Or drag and drop a manifest file here.
+                </Text>
+              </DragView>
+            </DropFile>
+          </View>
+        </Container>
+      </FormModalView>
     )
   }
 
@@ -168,15 +202,12 @@ class AppInstallModal extends Component<ViewProps, State> {
     const { manifest } = this.state
 
     return manifest ? (
-      <View>
-        <Text style={styles.header}>{`Manage permissions for ${
-          manifest.name
-        }`}</Text>
-        <PermissionsView
-          permissions={manifest.permissions}
-          onSubmit={this.onSubmitPermissions}
-        />
-      </View>
+      <PermissionsView
+        name={manifest.name}
+        permissions={manifest.permissions}
+        onSubmit={this.onSubmitPermissions}
+        onCancel={this.props.onRequestClose}
+      />
     ) : null
   }
 
@@ -184,14 +215,19 @@ class AppInstallModal extends Component<ViewProps, State> {
     const { manifest } = this.state
 
     return manifest ? (
-      <View>
-        <Text style={styles.header}>{`Downloading ${manifest.name}`}</Text>
-        <Text>Downloading from swarm...</Text>
-      </View>
+      <FormModalView title={`Downloading ${manifest.name}`}>
+        <Container>
+          <TextContainer>
+            <Text variant={['modalText', 'center']}>
+              <Loader />
+            </Text>
+          </TextContainer>
+        </Container>
+      </FormModalView>
     ) : null
   }
 
-  renderContent() {
+  render() {
     switch (this.state.installStep) {
       case 'manifest':
         return this.renderManifestImport()
@@ -203,14 +239,6 @@ class AppInstallModal extends Component<ViewProps, State> {
         return null
     }
   }
-
-  render() {
-    return (
-      <ModalView isOpen={true} onRequestClose={this.props.onRequestClose}>
-        {this.renderContent()}
-      </ModalView>
-    )
-  }
 }
 
 export default class AppInstallContextWrapper extends Component<Props> {
@@ -221,13 +249,3 @@ export default class AppInstallContextWrapper extends Component<Props> {
     )
   }
 }
-
-const styles = StyleSheet.create({
-  header: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  description: {
-    paddingVertical: 15,
-  },
-})

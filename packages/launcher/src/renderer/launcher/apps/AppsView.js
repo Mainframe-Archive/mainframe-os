@@ -12,8 +12,6 @@ import { Text } from '@morpheus-ui/core'
 import PlusIcon from '@morpheus-ui/icons/PlusSymbolCircled'
 
 import rpc from '../rpc'
-import globalStyles from '../../styles'
-import ModalView from '../../UIComponents/ModalView'
 import CreateAppModal from '../developer/CreateAppModal'
 import PermissionsView from '../PermissionsView'
 import OSLogo from '../../UIComponents/MainframeOSLogo'
@@ -49,6 +47,7 @@ const InstallIcon = styled.View`
   align-items: center;
   justify-content: center;
   border: 1px solid #a9a9a9;
+  ${props => props.hover && 'border: 1px solid #DA1157;'}
 `
 
 type AppData = AppOwnData | AppInstalledData
@@ -70,12 +69,14 @@ type State = {
       own: boolean,
     },
   },
+  hover: ?string,
   showOnboarding: boolean,
 }
 
 class AppsView extends Component<Props, State> {
   static contextType = LauncherContext
   state = {
+    hover: null,
     showModal: null,
     showOnboarding: false,
   }
@@ -220,18 +221,23 @@ class AppsView extends Component<Props, State> {
   }
 
   renderButton(title: string, onPress: () => void, testID: string) {
+    const hover = this.state.hover === title
     return (
-      <AppInstallContainer onPress={onPress} testID={testID}>
-        <InstallIcon>
-          <PlusIcon color="#808080" />
+      <AppInstallContainer
+        onMouseOver={() => this.setState({ hover: title })}
+        onMouseOut={() => this.setState({ hover: '' })}
+        onPress={onPress}
+        testID={testID}>
+        <InstallIcon hover={hover}>
+          <PlusIcon color={hover ? '#DA1157' : '#808080'} />
         </InstallIcon>
         <Text
           theme={{
             width: '72px',
             fontSize: '11px',
             padding: '5px 0',
-            color: '#808080',
-            border: '1px solid #a9a9a9',
+            color: hover ? '#DA1157' : '#808080',
+            border: hover ? '1px solid #DA1157' : '1px solid #a9a9a9',
             borderRadius: '3px',
             textAlign: 'center',
           }}>
@@ -257,15 +263,12 @@ class AppsView extends Component<Props, State> {
           // $FlowFixMe ignore undefined warning
           const { app } = this.state.showModal.data
           modal = (
-            <ModalView isOpen={true} onRequestClose={this.onCloseModal}>
-              <Text style={globalStyles.header}>
-                Permission Requested by {app.manifest.name}
-              </Text>
-              <PermissionsView
-                permissions={app.manifest.permissions}
-                onSubmit={this.onSubmitPermissions}
-              />
-            </ModalView>
+            <PermissionsView
+              name={app.manifest.name}
+              permissions={app.manifest.permissions}
+              onCancel={this.onCloseModal}
+              onSubmit={this.onSubmitPermissions}
+            />
           )
           break
         }
