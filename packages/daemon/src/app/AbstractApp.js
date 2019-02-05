@@ -68,7 +68,6 @@ export type PermissionsSettings = {
 export type AppUserSettings = {
   permissionsSettings: PermissionsSettings,
   walletSettings: WalletSettings,
-  storage: AppStorage,
   approvedContacts: {
     [localID: string]: ApprovedContact,
   },
@@ -95,12 +94,10 @@ export default class AbstractApp {
   static toJSON = (app: AbstractApp): AbstractAppSerialized => ({
     appID: app._appID,
     settings: app._settings,
-    storage: app._storage,
   })
 
   _appID: ID
   _settings: { [ID]: AppUserSettings }
-  _storage: AppStorage
 
   constructor(params: AbstractAppParams) {
     this._appID = params.appID
@@ -115,10 +112,6 @@ export default class AbstractApp {
 
   get settings(): { [ID]: AppUserSettings } {
     return this._settings
-  }
-
-  get storage(): AppStorage {
-    return this._storage
   }
 
   get userIDs(): Array<ID> {
