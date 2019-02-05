@@ -136,7 +136,10 @@ export default class AbstractApp {
   }
 
   getSettings(userID: ID | string): AppUserSettings {
-    return this._settings[idType(userID)] || this.getDefaultSettings()
+    if (!this._settings[idType(userID)]) {
+      this._settings[idType(userID)] = this.getDefaultSettings()
+    }
+    return this._settings[idType(userID)]
   }
 
   setSettings(userID: ID, settings: AppUserSettings): void {
