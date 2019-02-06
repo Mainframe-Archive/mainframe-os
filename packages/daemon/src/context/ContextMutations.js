@@ -1,12 +1,22 @@
 // @flow
 
 import { hexValueType } from '@erebos/hex'
-import type { StrictPermissionsRequirements } from '@mainframe/app-permissions'
+import {
+  createSignedManifest,
+  isValidSemver,
+  type ManifestData,
+} from '@mainframe/app-manifest'
+import { type StrictPermissionsRequirements } from '@mainframe/app-permissions'
+import type {
+  AppUserContact,
+  AppUserPermissionsSettings,
+} from '@mainframe/client'
 import { idType, type ID } from '@mainframe/utils-id'
-import type { AppUserContact } from '@mainframe/client'
+import { ensureDir } from 'fs-extra'
 
-import type { OwnApp } from '../app'
+import { type App, OwnApp } from '../app'
 import type { ContactToApprove } from '../app/AbstractApp'
+import { getContentsPath } from '../app/AppsRepository'
 import type {
   Contact,
   OwnDeveloperIdentity,
@@ -34,12 +44,23 @@ export type Feeds = {
   [type: string]: bzzHash,
 }
 
+export type InstallAppParams = {
+  manifest: ManifestData,
+  userID: ID,
+  permissionsSettings: AppUserPermissionsSettings,
+}
+
 export type CreateAppParams = {
   contentsPath: string,
   developerID: ID,
   name?: ?string,
   version?: ?string,
   permissionsRequirements?: ?StrictPermissionsRequirements,
+}
+
+export type PublishAppParams = {
+  appID: ID,
+  version?: ?string,
 }
 
 export type AddPeerParams = {
@@ -63,17 +84,133 @@ export default class ContextMutations {
 
   // Apps
 
+  async installApp(params: InstallAppParams): Promise<App> {
+    const { env, io, openVault } = this._context
+
+    const app = openVault.installApp(
+      params.manifest,
+      params.userID,
+      params.permissionsSettings,
+    )
+
+    if (app.installationState !== 'ready') {
+      const contentsPath = getContentsPath(env, params.manifest)
+      try {
+        app.installationState = 'downloading'
+        await ensureDir(contentsPath)
+        await io.bzz.downloadDirectoryTo(
+          app.manifest.contentsHash,
+          contentsPath,
+        )
+        app.installationState = 'ready'
+      } catch (err) {
+        app.installationState = 'download_error'
+      }
+    }
+
+    this._context.next({ type: 'app_installed', app, userID: params.userID })
+    return app
+  }
+
   async createApp(params: CreateAppParams): Promise<OwnApp> {
-    const app = this._context.openVault.createApp({
+    const { openVault } = this._context
+
+    const appIdentity = openVault.identities.getOwnApp(
+      openVault.identities.createOwnApp(),
+    )
+    if (appIdentity == null) {
+      throw new Error('Failed to create app identity')
+    }
+
+    const devIdentity = openVault.identities.getOwnDeveloper(params.developerID)
+    if (devIdentity == null) {
+      throw new Error('Developer identity not found')
+    }
+
+    const app = openVault.apps.create({
       contentsPath: params.contentsPath,
       developerID: params.developerID,
-      name: params.name,
-      version: params.version,
-      permissionsRequirements: params.permissionsRequirements,
+      mfid: appIdentity.id,
+      name: params.name || 'Untitled',
+      permissions: params.permissionsRequirements,
+      version:
+        params.version == null || !isValidSemver(params.version)
+          ? '1.0.0'
+          : params.version,
     })
-    await this._context.openVault.save()
+
     this._context.next({ type: 'app_created', app })
     return app
+  }
+
+  async publishApp(params: PublishAppParams): Promise<string> {
+    const { io, openVault } = this._context
+
+    const app = openVault.apps.getOwnByID(params.appID)
+    if (app == null) {
+      throw new Error('App not found')
+    }
+    const appIdentityID = openVault.identities.getID(app.mfid)
+    if (appIdentityID == null) {
+      throw new Error('App identity not found')
+    }
+    const appIdentity = openVault.identities.getOwnApp(appIdentityID)
+    if (appIdentity == null) {
+      throw new Error('App identity not found')
+    }
+    const devIdentity = openVault.identities.getOwnDeveloper(
+      app.data.developerID,
+    )
+    if (devIdentity == null) {
+      throw new Error('Developer identity not found')
+    }
+
+    const versionData = app.getVersionData(params.version)
+    if (versionData == null) {
+      throw new Error('Invalid app version')
+    }
+
+    if (versionData.versionHash != null) {
+      throw new Error('Manifest has already been published for this version')
+    }
+
+    if (versionData.contentsHash == null) {
+      const hash = await io.bzz.uploadDirectoryFrom(app.contentsPath)
+      app.setContentsHash(hash, params.version)
+    }
+    await app.updateFeed.syncManifest(io.bzz)
+
+    const manifestData = {
+      id: app.mfid,
+      author: {
+        id: devIdentity.id,
+        name: devIdentity.profile.name,
+      },
+      name: app.data.name,
+      version: app.data.version,
+      contentsHash: versionData.contentsHash,
+      updateHash: app.updateFeed.feedHash,
+      permissions: versionData.permissions,
+    }
+    // Sanity checks
+    if (manifestData.contentsHash == null) {
+      throw new Error('Missing contents hash')
+    }
+    if (manifestData.updateHash == null) {
+      throw new Error('Missing update hash')
+    }
+
+    // $FlowFixMe: doesn't seem to detect sanity checks for hashes
+    const signedManifest = createSignedManifest(manifestData, [
+      appIdentity.keyPair,
+      devIdentity.keyPair,
+    ])
+    const versionHash = await app.updateFeed.publishJSON(io.bzz, signedManifest)
+    app.setVersionHash(versionHash, params.version)
+
+    this._context.next({ type: 'app_changed', app, change: 'versionPublished' })
+    // $FlowFixMe: weird issue with return type not detected as Promise
+    return manifestData.updateHash
   }
 
   async appApproveContacts(

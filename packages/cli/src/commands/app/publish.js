@@ -4,15 +4,15 @@ import { flags } from '@oclif/command'
 
 import Command from '../../OpenVaultCommand'
 
-export default class AppPublishContentsCommand extends Command {
-  static description = 'Publish app contents'
+export default class AppPublishCommand extends Command {
+  static description = 'Publish app'
   static flags = {
     ...Command.flags,
     id: flags.string({
       description: 'app local ID',
     }),
     version: flags.string({
-      description: 'app version',
+      description: 'version to publish',
     }),
   }
 
@@ -22,10 +22,10 @@ export default class AppPublishContentsCommand extends Command {
       return
     }
 
-    const res = await client.app.publishContents({
+    const res = await client.app.publish({
       appID: this.flags.id,
       version: this.flags.version,
     })
-    this.log(`App contents published with URI ${res.contentsURI}`)
+    this.log(`App published with Swarm hash ${res.hash}`)
   }
 }

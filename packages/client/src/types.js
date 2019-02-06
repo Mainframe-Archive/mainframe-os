@@ -65,13 +65,16 @@ export type AppCreateParams = {
 
 export type AppCreateResult = { appID: ID }
 
-export type WalletSettings = {
+export type AppUserWalletSettings = {
   defaultEthAccount: ?string,
 }
 
 export type AppUserSettings = {
+  approvedContacts: {
+    [localID: string]: ApprovedContact,
+  },
   permissionsSettings: AppUserPermissionsSettings,
-  walletSettings: WalletSettings,
+  walletSettings: AppUserWalletSettings,
 }
 
 export type AppUser = IdentityOwnData & {
@@ -116,7 +119,27 @@ export type AppInstallParams = {
   permissionsSettings: AppUserPermissionsSettings,
 }
 
-export type AppInstallResult = { appID: ID }
+export type AppInstallationState =
+  | 'pending'
+  | 'hash_lookup'
+  | 'hash_not_found'
+  | 'downloading'
+  | 'download_error'
+  | 'ready'
+
+export type AppInstallResult = {
+  appID: ID,
+  installationState: AppInstallationState,
+}
+
+export type AppLoadManifestParams = {
+  hash: string,
+}
+
+export type AppLoadManifestResult = {
+  appID?: ID,
+  manifest: ManifestData,
+}
 
 export type AppOpenParams = {
   appID: ID,
@@ -142,13 +165,13 @@ export type AppOpenResult = {
   defaultEthAccount: ?string,
 }
 
-export type AppPublishContentsParams = {
+export type AppPublishParams = {
   appID: ID,
   version: string,
 }
 
-export type AppPublishContentsResult = {
-  contentsURI: string,
+export type AppPublishResult = {
+  hash: string,
 }
 
 export type AppRemoveParams = { appID: ID }
@@ -174,12 +197,6 @@ export type AppSetPermissionParams = {
 export type AppSetPermissionsRequirementsParams = {
   appID: ID,
   permissions: PermissionsRequirements,
-  version?: ?string,
-}
-
-export type AppWriteManifestParams = {
-  appID: ID,
-  path: string,
   version?: ?string,
 }
 

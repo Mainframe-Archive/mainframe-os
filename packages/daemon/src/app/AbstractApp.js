@@ -8,7 +8,10 @@ import {
   type PermissionsGrants,
   type StrictPermissionsGrants,
 } from '@mainframe/app-permissions'
-// eslint-disable-next-line import/named
+import type {
+  AppUserPermissionsSettings,
+  AppUserSettings,
+} from '@mainframe/client'
 import { idType, type ID, uniqueID } from '@mainframe/utils-id'
 
 import type Session from './Session'
@@ -48,19 +51,6 @@ export type ContactToApprove = {
 export type ApprovedContact = {
   id: string,
   publicDataOnly: boolean,
-}
-
-export type PermissionsSettings = {
-  grants: StrictPermissionsGrants,
-  permissionsChecked: boolean,
-}
-
-export type AppUserSettings = {
-  permissionsSettings: PermissionsSettings,
-  walletSettings: WalletSettings,
-  approvedContacts: {
-    [localID: string]: ApprovedContact,
-  },
 }
 
 export type AbstractAppParams = {
@@ -133,7 +123,10 @@ export default class AbstractApp {
     this._settings[userID] = settings
   }
 
-  setPermissionsSettings(userID: ID, settings: PermissionsSettings): void {
+  setPermissionsSettings(
+    userID: ID,
+    settings: AppUserPermissionsSettings,
+  ): void {
     const appSettings = this.getSettings(userID)
     appSettings.permissionsSettings.grants = createStrictPermissionGrants(
       settings.grants,
@@ -194,7 +187,7 @@ export default class AbstractApp {
   approveContacts(userID: ID, contacts: Array<ContactToApprove>) {
     const settings = this.getSettings(userID)
     const approvedContacts = settings.approvedContacts
-    const contactsAddedd = {}
+    const contactsAdded = {}
     contacts.forEach(c => {
       if (!approvedContacts[c.localID]) {
         approvedContacts[c.localID] = {
@@ -202,10 +195,10 @@ export default class AbstractApp {
           publicDataOnly: c.publicDataOnly,
         }
       }
-      contactsAddedd[c.localID] = approvedContacts[c.localID]
+      contactsAdded[c.localID] = approvedContacts[c.localID]
     })
     this._settings[userID] = settings
-    return contactsAddedd
+    return contactsAdded
   }
 
   // Session
