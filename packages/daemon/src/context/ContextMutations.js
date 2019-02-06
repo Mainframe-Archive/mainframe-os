@@ -97,6 +97,73 @@ export default class ContextMutations {
     return contacts
   }
 
+  // Comms
+
+  async publishAppData(
+    appID: ID,
+    contactID: ID,
+    key: string,
+    value: Object,
+  ): Promise<void> {
+    const { openVault, io } = this._context
+    const res = openVault.identities.getContactByID(contactID) || {}
+    if (!res) {
+      throw new Error('Contact not found')
+    }
+    const { userID, contact } = res
+
+    const app = openVault.identities.getApp(appID)
+    if (!app) {
+      throw new Error('App not found')
+    }
+
+    const existingSharedData = openVault.contactAppData.getSharedData(
+      app.base64PublicKey(),
+      contactID,
+    )
+    const sharedData = existingSharedData
+      ? existingSharedData
+      : openVault.contactAppData.createSharedData(
+          app.base64PublicKey(),
+          contactID,
+        )
+
+    const existingAppFeed = sharedData.getAppFeed(key)
+    const appFeed = existingAppFeed
+      ? existingAppFeed
+      : sharedData.createAppFeed('json', key)
+
+    if (appFeed.type !== 'json') {
+      throw new Error(`Incorrect feed type '${appFeed.type}' expected 'json'`)
+    }
+
+    await appFeed.feed.publishJSON(io.bzz, value)
+
+    if (!existingAppFeed) {
+      await appFeed.feed.syncManifest(io.bzz)
+      await sharedData.publish(io.bzz)
+      this._context.next({
+        type: 'app_data_changed',
+        sharedData,
+        appID,
+        contactID,
+      })
+    }
+
+    if (!existingSharedData || existingSharedData.feedHash == null) {
+      await sharedData.syncManifest(io.bzz)
+      const { apps } = contact.sharedFeed.localFeedData
+      apps[app.base64PublicKey()] = sharedData.feedHash
+      await contact.sharedFeed.publishLocalData(io.bzz)
+      this._context.next({
+        type: 'contact_changed',
+        contact,
+        userID,
+        change: 'localFeed',
+      })
+    }
+  }
+
   // Contacts
 
   async addPeer(params: AddPeerParams): Promise<PeerUserIdentity> {
@@ -165,7 +232,7 @@ export default class ContextMutations {
       type: 'contact_changed',
       contact,
       userID,
-      change: 'sharedFeed',
+      change: 'remoteFeed',
     })
   }
 

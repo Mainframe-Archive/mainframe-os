@@ -528,4 +528,17 @@ export default class IdentitiesRepository {
       avatar: contact.profile.avatar || peerProfile.avatar,
     }
   }
+
+  // TODO: Refactor contacts storage to lookup by ID, store userID in contact
+  getContactByID(
+    contactID: ID | string,
+  ): ?{| contact: Contact, userID: string |} {
+    const userID = this._userByContact[contactID]
+    if (userID == null) return
+
+    const contact = this._identities.contacts[userID][contactID]
+    if (contact == null) return
+
+    return { userID, contact }
+  }
 }

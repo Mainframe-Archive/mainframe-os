@@ -103,6 +103,13 @@ export const APP_WRITE_MANIFEST_SCHEMA = {
   version: OPTIONAL_SEMVER_SCHEMA,
 }
 
+export const COMMS_PUBLISH_SCHEMA = {
+  appID: LOCAL_ID_SCHEMA,
+  contactID: LOCAL_ID_SCHEMA,
+  key: 'string',
+  value: 'object',
+}
+
 export const CONTACT_GET_APP_USER_CONTACTS_SCHEMA = {
   contactIDs: {
     type: 'array',

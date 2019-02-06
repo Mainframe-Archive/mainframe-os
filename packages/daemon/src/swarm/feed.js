@@ -188,8 +188,12 @@ export class BidirectionalFeed {
     return this.localFeed.syncManifest(bzz)
   }
 
-  async publishLocalData(bzz: BzzAPI, data?: Object): Promise<string> {
-    return this.localFeed.publishJSON(bzz, data || this.localFeedData)
+  async publish(bzz: BzzAPI, data: Object): Promise<string> {
+    return this.localFeed.publishJSON(bzz, data)
+  }
+
+  async publishLocalData(bzz: BzzAPI): Promise<string> {
+    return this.publish(bzz, this.localFeedData)
   }
 
   pollRemoteData<T: Object>(bzz: BzzAPI, options: PollOptions): Observable<T> {

@@ -4,7 +4,10 @@ import { type Observable, Subject, type Subscription } from 'rxjs'
 import { filter, multicast, refCount, tap, flatMap } from 'rxjs/operators'
 import { getFeedTopic } from '@erebos/api-bzz-base'
 
-import type Contact, { FirstContactSerialized } from '../identity/Contact'
+import type Contact, {
+  FirstContactPayload,
+  ContactPayload,
+} from '../identity/Contact'
 import type {
   default as PeerUserIdentity,
   PublicFeedSerialized,
@@ -190,7 +193,7 @@ export class ContactsFeedsHandler extends FeedsHandler {
             return (
               e.type === 'contact_changed' &&
               e.contact.localID === contact.localID &&
-              e.change === 'sharedFeed'
+              e.change === 'remoteFeed'
             )
           }),
         )
@@ -217,7 +220,8 @@ export class ContactsFeedsHandler extends FeedsHandler {
         )
         .pipe(flatMap(res => res.json()))
         .subscribe({
-          next: (data: FirstContactSerialized) => {
+          next: (data: FirstContactPayload) => {
+            // TODO: validate payload version
             this._context.mutations.setContactFeed(
               userID,
               contact.localID,
@@ -237,7 +241,8 @@ export class ContactsFeedsHandler extends FeedsHandler {
           interval: DEFAULT_POLL_INTERVAL,
         })
         .subscribe({
-          next: (data: Object) => {
+          next: (data: ContactPayload) => {
+            // TODO: validate payload version
             if (data.profile != null) {
               this._context.mutations.updateContactProfile(
                 userID,

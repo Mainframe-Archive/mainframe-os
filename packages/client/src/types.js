@@ -198,6 +198,15 @@ export type BlockchainWeb3SendParams = {
 
 export type BlockchainWeb3SendResult = any
 
+// Comms
+
+export type CommsPublishParams = {
+  appID: ID,
+  contactID: ID,
+  key: string,
+  value: Object,
+}
+
 // GraphQL
 
 export type GraphQLQueryParams = {

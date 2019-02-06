@@ -44,6 +44,9 @@ import WalletsRepository, {
 import IdentityWallets, {
   type IdentityWalletsSerialized,
 } from '../identity/IdentityWallets'
+import ContactAppData, {
+  type ContactAppDataSerialized,
+} from '../contact/ContactAppData'
 
 type VaultKDF = {
   algorithm: number,
@@ -136,6 +139,7 @@ export type VaultData = {
   settings: UserSettings,
   wallets: WalletsRepository,
   identityWallets: IdentityWallets,
+  contactAppData: ContactAppData,
 }
 
 export type VaultSerialized = {
@@ -144,6 +148,7 @@ export type VaultSerialized = {
   settings?: UserSettings,
   wallets?: WalletsRepositorySerialized,
   identityWallets?: IdentityWalletsSerialized,
+  contactAppData?: ContactAppDataSerialized,
 }
 
 export default class Vault {
@@ -161,6 +166,7 @@ export default class Vault {
       identities: IdentitiesRepository.fromJSON(data.identities),
       wallets: WalletsRepository.fromJSON(data.wallets),
       identityWallets: IdentityWallets.fromJSON(data.identityWallets),
+      contactAppData: ContactAppData.fromJSON(data.contactAppData),
       settings: data.settings,
     })
   }
@@ -183,6 +189,7 @@ export default class Vault {
         ethChainID: 3, // Mainnet 1, Ropsten 3, Rinkeby 4, Kovan 42, Local (ganache) 1977
       },
       identityWallets: new IdentityWallets(),
+      contactAppData: new ContactAppData(),
       wallets: new WalletsRepository(),
     }
     this._data = data ? Object.assign(vaultData, data) : vaultData
@@ -212,6 +219,10 @@ export default class Vault {
 
   get identityWallets(): IdentityWallets {
     return this._data.identityWallets
+  }
+
+  get contactAppData(): ContactAppData {
+    return this._data.contactAppData
   }
 
   // App lifecycle
@@ -451,6 +462,7 @@ export default class Vault {
           identities: IdentitiesRepository.toJSON(this._data.identities),
           wallets: WalletsRepository.toJSON(this._data.wallets),
           identityWallets: IdentityWallets.toJSON(this._data.identityWallets),
+          contactAppData: ContactAppData.toJSON(this._data.contactAppData),
           settings: this._data.settings,
         }
       : {}

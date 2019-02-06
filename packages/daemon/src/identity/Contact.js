@@ -14,6 +14,17 @@ export type ContactProfile = {
   ethAddress?: ?string,
 }
 
+export type FirstContactPayload = {
+  version: string,
+  privateFeed: bzzHash,
+}
+
+export type ContactPayload = {
+  version: string,
+  profile?: ContactProfile,
+  apps?: { [appPubKey: string]: bzzHash },
+}
+
 export type ContactSerialized = {
   localID: string,
   peerID: string,
@@ -21,10 +32,6 @@ export type ContactSerialized = {
   aliasName: ?string,
   sharedFeed: BidirectionalFeedSerialized,
   requestSent: boolean,
-}
-
-export type FirstContactSerialized = {
-  privateFeed: bzzHash,
 }
 
 export type ConnectionState = 'connected' | 'sent' | 'sending'
@@ -39,16 +46,25 @@ export default class Contact {
       localID?: string,
     },
   ): Contact => {
+    const sharedFeed = BidirectionalFeed.create({
+      remoteFeed: optional && optional.contactFeed,
+    })
+    sharedFeed.localFeedData = Contact._generateContactPayload()
     return new Contact(
       (optional && optional.localID) || uniqueID(),
       peerID,
       (optional && optional.profile) || {},
       optional && optional.aliasName,
-      BidirectionalFeed.create({
-        remoteFeed: optional && optional.contactFeed,
-      }),
+      sharedFeed,
       false,
     )
+  }
+
+  static _generateContactPayload(): ContactPayload {
+    return {
+      version: '1.0.0',
+      apps: {},
+    }
   }
 
   static fromJSON = (contactSerialized: ContactSerialized): Contact =>
@@ -134,11 +150,12 @@ export default class Contact {
     return this.sharedFeed.remoteFeed ? 'connected' : 'sent'
   }
 
-  firstContactData(): FirstContactSerialized {
+  generatefirstContactPayload(): FirstContactPayload {
     if (!this.sharedFeed.localFeed.feedHash) {
       throw new Error('Contact feed manifest has not been synced')
     }
     return {
+      version: '1.0.0',
       privateFeed: this.sharedFeed.localFeed.feedHash,
     }
   }

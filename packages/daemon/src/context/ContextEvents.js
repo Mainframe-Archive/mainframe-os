@@ -120,7 +120,7 @@ export default class ContextEvents {
           )
           await firstContactFeed.publishJSON(
             this._context.io.bzz,
-            contact.firstContactData(),
+            contact.generatefirstContactPayload(),
           )
           contact.requestSent = true
 

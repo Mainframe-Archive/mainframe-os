@@ -2,6 +2,7 @@
 
 import * as app from './app'
 import * as blockchain from './blockchain'
+import * as comms from './comms'
 import * as contact from './contact'
 import * as graphql from './graphql'
 import * as identity from './identity'
@@ -36,6 +37,8 @@ export default {
   app_writeManifest: app.writeManifest,
 
   blockchain_web3Send: blockchain.web3Send,
+
+  comms_publish: comms.publish,
 
   contact_approveContacts: contact.approveContactsForApp,
   contact_getAppApprovedContacts: contact.getAppApprovedContacts,
