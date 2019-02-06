@@ -10,7 +10,6 @@ import type { ManifestData } from '@mainframe/app-manifest'
 import React, { Component } from 'react'
 import { Text, TextField } from '@morpheus-ui/core'
 import { type FormSubmitPayload } from '@morpheus-ui/forms'
-
 import { commitMutation } from 'react-relay'
 import styled from 'styled-components/native'
 
@@ -78,10 +77,11 @@ class AppInstallModal extends Component<ViewProps, State> {
     this.handleSelectedFiles(files)
   }
 
+  // TODO: Remove once replaced by hash input
   handleSelectedFiles = async (files: Array<Object>) => {
     if (files.length) {
       try {
-        const manifest = await rpc.readManifest(files[0].path)
+        const manifest = {} //await rpc.readManifest(files[0].path)
         if (
           typeof manifest.data.name === 'string' &&
           typeof manifest.data.permissions === 'object'
@@ -109,9 +109,32 @@ class AppInstallModal extends Component<ViewProps, State> {
     }
   }
 
-  onSubmitManifest = (payload: FormSubmitPayload) => {
+  onSubmitManifest = async (payload: FormSubmitPayload) => {
     if (payload.valid) {
-      // TODO: Implement the mainframe ID
+      try {
+        const { manifest, appID } = await rpc.loadManifest(payload.fields.appid)
+        // If appID is returned it means the app is already installed.
+        // If we only support a single user in the launcher, the app must have been already installed by this user.
+        if (appID != null) {
+          return this.props.onInstallComplete()
+        }
+
+        if (havePermissionsToGrant(manifest.permissions)) {
+          this.setState({ installStep: 'permissions', manifest })
+        } else {
+          this.setState(
+            {
+              installStep: 'download',
+              manifest,
+              userPermissions: createStrictPermissionGrants({}),
+            },
+            this.saveApp,
+          )
+        }
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.log('error loading manifest:', err)
+      }
     }
   }
 
