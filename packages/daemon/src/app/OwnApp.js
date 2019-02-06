@@ -126,6 +126,18 @@ export default class OwnApp extends AbstractApp {
 
   // Setters
 
+  set name(name: string) {
+    this._data.name = name
+  }
+
+  set version(version: string) {
+    this._data.version = version
+  }
+
+  set contentsPath(path: string) {
+    this._data.contentsPath = path
+  }
+
   createNextVersion(
     version: string,
     permissions?: ?StrictPermissionsRequirements,

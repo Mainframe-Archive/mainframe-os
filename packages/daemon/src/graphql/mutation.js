@@ -503,6 +503,31 @@ const appInstallMutation = mutationWithClientMutationId({
   },
 })
 
+export const updateAppDetailsMutation = mutationWithClientMutationId({
+  name: 'UpdateAppDetails',
+  inputFields: {
+    appID: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    name: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    contentsPath: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    version: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+  },
+  outputFields: {
+    viewer: viewerOutput,
+  },
+  mutateAndGetPayload: async (params, ctx) => {
+    await ctx.mutations.updateAppDetails(params)
+    return {}
+  },
+})
+
 const publishAppVersionMutation = mutationWithClientMutationId({
   name: 'PublishAppVersion',
   inputFields: {
@@ -528,19 +553,23 @@ const publishAppVersionMutation = mutationWithClientMutationId({
 export default new GraphQLObjectType({
   name: 'Mutation',
   fields: () => ({
+    // Apps
     createApp: appCreateMutation,
     installApp: appInstallMutation,
     publishAppVersion: publishAppVersionMutation,
+    updateAppDetails: updateAppDetailsMutation,
+    // Users
+    addContact: addContactMutation,
     createUserIdentity: createUserIdentityMutation,
     createDeveloperIdentity: createDeveloperIdentityMutation,
-    createHDWallet: createHDWalletMutation,
-    importHDWallet: importHDWalletMutation,
-    addHDWalletAccount: addHDWalletAccountMutation,
-    addLedgerWalletAccounts: addLedgerWalletAccountsMutation,
-    deleteWallet: deleteWalletMutation,
-    addContact: addContactMutation,
     deleteContact: deleteContactMutation,
     setDefaultWallet: setDefaultWalletMutation,
     updateProfile: updateProfileMutation,
+    // Wallets
+    addHDWalletAccount: addHDWalletAccountMutation,
+    addLedgerWalletAccounts: addLedgerWalletAccountsMutation,
+    createHDWallet: createHDWalletMutation,
+    deleteWallet: deleteWalletMutation,
+    importHDWallet: importHDWalletMutation,
   }),
 })

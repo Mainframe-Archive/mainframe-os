@@ -96,6 +96,20 @@ const publishVersionMutation = graphql`
   }
 `
 
+const updateAppDetailsMutation = graphql`
+  mutation OwnAppDetailViewUpdateAppDetailsMutation(
+    $input: UpdateAppDetailsInput!
+  ) {
+    updateAppDetails(input: $input) {
+      viewer {
+        apps {
+          ...OwnAppsView_apps
+        }
+      }
+    }
+  }
+`
+
 export class OwnAppDetailView extends Component<Props, State> {
   static contextType = EnvironmentContext
 
@@ -109,6 +123,41 @@ export class OwnAppDetailView extends Component<Props, State> {
   }
 
   // HANDLERS
+
+  onPressSave = () => {
+    const { ownApp } = this.props
+    const input = {
+      version: '0.0.3',
+      name: 'new name',
+      contentsPath: './folder/otherFile/',
+      appID: ownApp.localID,
+    }
+
+    this.setState({
+      publishing: true,
+    })
+
+    commitMutation(this.context, {
+      mutation: updateAppDetailsMutation,
+      variables: { input },
+      onCompleted: (res, errors) => {
+        let errorMsg
+        if (errors) {
+          errorMsg = errors.length ? errors[0].message : 'Error Updating app.'
+        }
+        this.setState({
+          publishing: false,
+          errorMsg,
+        })
+      },
+      onError: err => {
+        this.setState({
+          publishing: false,
+          errorMsg: err.message,
+        })
+      },
+    })
+  }
 
   onPressPublishVersion = (version: string) => {
     const { ownApp } = this.props
@@ -147,7 +196,10 @@ export class OwnAppDetailView extends Component<Props, State> {
     // TODO: Needs implementing in daemon
   }
 
-  onPressSubmitFoReview = () => {}
+  onPressSubmitFoReview = () => {
+    // TODO REVERT!
+    this.onPressSave()
+  }
 
   onPressOpenApp = async () => {
     const { user, ownApp } = this.props

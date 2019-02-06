@@ -66,6 +66,13 @@ export type AppsRepositorySerialized = {
   ownApps: { [string]: OwnAppSerialized },
 }
 
+export type UpdateAppDetailsParams = {
+  appID: string,
+  contentsPath: string,
+  name: string,
+  version: string,
+}
+
 export const getContentsPath = (
   env: Environment,
   manifest: ManifestData,
@@ -210,6 +217,16 @@ export default class AppsRepository {
     this._byMFID[MFID.canonical(manifest.id)] = appID
 
     return app
+  }
+
+  updateAppDetails(params: UpdateAppDetailsParams): void {
+    const app = this.getOwnByID(params.appID)
+    if (app == null) {
+      throw new Error('Invalid app')
+    }
+    app.name = params.name
+    app.version = params.version
+    app.contentsPath = params.contentsPath
   }
 
   setUserPermissionsSettings(
