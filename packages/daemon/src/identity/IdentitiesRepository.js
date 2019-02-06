@@ -2,7 +2,6 @@
 
 import { MFID } from '@mainframe/data-types'
 import type { KeyPair } from '@mainframe/utils-crypto'
-// eslint-disable-next-line import/named
 import { uniqueID, idType, type ID } from '@mainframe/utils-id'
 import multibase from 'multibase'
 import { type hexValue } from '@erebos/hex'
@@ -538,7 +537,7 @@ export default class IdentitiesRepository {
     const peer = this._identities.peers.users[contact.peerID]
     const peerProfile = peer ? peer.profile : {}
     return {
-      name: contact.name || peerProfile.name || truncateString(peer.publicFeed), // TODO Trim length
+      name: contact.name || peerProfile.name || truncateString(peer.publicFeed),
       avatar: contact.profile.avatar || peerProfile.avatar,
     }
   }

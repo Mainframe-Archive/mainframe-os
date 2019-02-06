@@ -29,8 +29,7 @@
 - `identity:create`: create an identity
 - `identity:list`: list identities
 - `app:create`: create an app
-- `app:publishContents`: publish the app contents to Swarm
-- `app:writeManifest`: writes the app manifest
+- `app:publish`: publish the app to Swarm
 - `wallet:createEth`: create a new Ethereum wallet
 - `wallet:connectLedgerAccount`: connect an account from ledger hardware wallet
 - `wallet:delete`: delete a wallet

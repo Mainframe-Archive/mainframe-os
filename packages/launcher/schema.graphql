@@ -91,7 +91,8 @@ input AppManifestInput {
   id: String!
   name: String!
   version: String!
-  contentsURI: String!
+  contentsHash: String!
+  updateHash: String!
   permissions: AppPermissionsRequirementsInput!
   author: ManifestAuthorInput!
 }

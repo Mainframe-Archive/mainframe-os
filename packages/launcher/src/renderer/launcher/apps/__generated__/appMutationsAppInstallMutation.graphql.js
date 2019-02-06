@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash b21565c12af792b416cc3c4f9d3a48a4
+ * @relayHash 9c85b80a0e5f9e57c342bf7ca4938f25
  */
 
 /* eslint-disable */
@@ -20,7 +20,8 @@ export type AppManifestInput = {
   id: string,
   name: string,
   version: string,
-  contentsURI: string,
+  contentsHash: string,
+  updateHash: string,
   permissions: AppPermissionsRequirementsInput,
   author: ManifestAuthorInput,
 };

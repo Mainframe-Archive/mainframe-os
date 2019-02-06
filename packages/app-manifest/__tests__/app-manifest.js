@@ -6,10 +6,12 @@ import { createSignKeyPair } from '@mainframe/utils-crypto'
 
 import {
   ManifestError,
+  createSignedManifest,
+  encodeManifest,
   validateManifest,
   parseManifestData,
-  verifyManifest,
   readManifestFile,
+  verifyManifest,
   writeManifestFile,
 } from '..'
 
@@ -26,7 +28,10 @@ describe('app-manifest', () => {
     },
     name: 'app',
     version: '0.2.0',
-    contentsURI: 'urn:bzz:1234',
+    contentsHash:
+      'fa612b038ce485ee5d35a8b416569c374e960a64fac333ccaff5031f0505e04d',
+    updateHash:
+      'fa612b038ce485ee5d35a8b416569c374e960a64fac333ccaff5031f0505e04d',
     permissions: {
       required: {},
       optional: {},
@@ -72,8 +77,15 @@ describe('app-manifest', () => {
       {
         actual: undefined,
         expected: undefined,
-        field: 'contentsURI',
-        message: "The 'contentsURI' field is required!",
+        field: 'contentsHash',
+        message: "The 'contentsHash' field is required!",
+        type: 'required',
+      },
+      {
+        actual: undefined,
+        expected: undefined,
+        field: 'updateHash',
+        message: "The 'updateHash' field is required!",
         type: 'required',
       },
       {
@@ -96,7 +108,8 @@ describe('app-manifest', () => {
         },
         name: 'no',
         version: 2,
-        contentsURI: 'urn:invalid',
+        contentsHash: 'test',
+        updateHash: 'test',
         permissions: {
           required: {
             WEB_REQUEST: true,
@@ -143,11 +156,19 @@ describe('app-manifest', () => {
         type: 'semver',
       },
       {
-        actual: 'urn:invalid',
-        expected: null,
-        field: 'contentsURI',
-        message: "The value 'urn:invalid' is not a valid URN!",
-        type: 'urn',
+        actual: undefined,
+        expected: /^[0-9a-f]{64}$/,
+        field: 'contentsHash',
+        message:
+          "The 'contentsHash' field fails to match the required pattern!",
+        type: 'stringPattern',
+      },
+      {
+        actual: undefined,
+        expected: /^[0-9a-f]{64}$/,
+        field: 'updateHash',
+        message: "The 'updateHash' field fails to match the required pattern!",
+        type: 'stringPattern',
       },
       {
         actual: undefined,
@@ -162,6 +183,79 @@ describe('app-manifest', () => {
 
   it('validateManifest() returns true if the manifest is valid', () => {
     expect(validateManifest(validManifest)).toBe(true)
+  })
+
+  it('encodeManifest() throws a ManifestError if the provided manifest data is invalid', () => {
+    try {
+      encodeManifest({ id: 'test', author: {} })
+    } catch (err) {
+      expect(err instanceof ManifestError).toBe(true)
+      expect(err.message).toBe('Invalid manifest data')
+      expect(err.errors).toEqual([
+        {
+          actual: 'test',
+          expected: null,
+          field: 'id',
+          message: "The value 'test' is not a valid Mainframe ID!",
+          type: 'id',
+        },
+        {
+          actual: undefined,
+          expected: undefined,
+          field: 'author.id',
+          message: "The 'author.id' field is required!",
+          type: 'required',
+        },
+        {
+          actual: undefined,
+          expected: undefined,
+          field: 'author.name',
+          message: "The 'author.name' field is required!",
+          type: 'required',
+        },
+        {
+          actual: undefined,
+          expected: undefined,
+          field: 'name',
+          message: "The 'name' field is required!",
+          type: 'required',
+        },
+        {
+          actual: undefined,
+          expected: undefined,
+          field: 'version',
+          message: "The 'version' field is required!",
+          type: 'required',
+        },
+        {
+          actual: undefined,
+          expected: undefined,
+          field: 'contentsHash',
+          message: "The 'contentsHash' field is required!",
+          type: 'required',
+        },
+        {
+          actual: undefined,
+          expected: undefined,
+          field: 'updateHash',
+          message: "The 'updateHash' field is required!",
+          type: 'required',
+        },
+        {
+          actual: undefined,
+          expected: undefined,
+          field: 'permissions',
+          message: "The 'permissions' field is required!",
+          type: 'required',
+        },
+      ])
+    }
+  })
+
+  it('encodeManifest() returns true if the manifest is valid', () => {
+    const encoded = encodeManifest(validManifest)
+    const decoded = JSON.parse(encoded.toString())
+    expect(decoded).toEqual(validManifest)
   })
 
   it('parseManifestData() throws an "Invalid input" ManifestError if the data is not provided', () => {
@@ -228,8 +322,15 @@ describe('app-manifest', () => {
         {
           actual: undefined,
           expected: undefined,
-          field: 'contentsURI',
-          message: "The 'contentsURI' field is required!",
+          field: 'contentsHash',
+          message: "The 'contentsHash' field is required!",
+          type: 'required',
+        },
+        {
+          actual: undefined,
+          expected: undefined,
+          field: 'updateHash',
+          message: "The 'updateHash' field is required!",
           type: 'required',
         },
         {
@@ -273,6 +374,81 @@ describe('app-manifest', () => {
     const data = Buffer.from(JSON.stringify(validManifest))
     const contents = signContents(data, [kp1, kp2])
     const manifest = verifyManifest(contents, [kp1.publicKey, kp2.publicKey])
+    expect(manifest).toEqual(validManifest)
+  })
+
+  it('createSignedManifest() throws an error if the provided manifest data is invalid', () => {
+    try {
+      createSignedManifest({ id: 'test', author: {} })
+    } catch (err) {
+      expect(err instanceof ManifestError).toBe(true)
+      expect(err.message).toBe('Invalid manifest data')
+      expect(err.errors).toEqual([
+        {
+          actual: 'test',
+          expected: null,
+          field: 'id',
+          message: "The value 'test' is not a valid Mainframe ID!",
+          type: 'id',
+        },
+        {
+          actual: undefined,
+          expected: undefined,
+          field: 'author.id',
+          message: "The 'author.id' field is required!",
+          type: 'required',
+        },
+        {
+          actual: undefined,
+          expected: undefined,
+          field: 'author.name',
+          message: "The 'author.name' field is required!",
+          type: 'required',
+        },
+        {
+          actual: undefined,
+          expected: undefined,
+          field: 'name',
+          message: "The 'name' field is required!",
+          type: 'required',
+        },
+        {
+          actual: undefined,
+          expected: undefined,
+          field: 'version',
+          message: "The 'version' field is required!",
+          type: 'required',
+        },
+        {
+          actual: undefined,
+          expected: undefined,
+          field: 'contentsHash',
+          message: "The 'contentsHash' field is required!",
+          type: 'required',
+        },
+        {
+          actual: undefined,
+          expected: undefined,
+          field: 'updateHash',
+          message: "The 'updateHash' field is required!",
+          type: 'required',
+        },
+        {
+          actual: undefined,
+          expected: undefined,
+          field: 'permissions',
+          message: "The 'permissions' field is required!",
+          type: 'required',
+        },
+      ])
+    }
+  })
+
+  it('createSignedManifest() creates a valid signed manifest', () => {
+    const kp1 = createSignKeyPair()
+    const kp2 = createSignKeyPair()
+    const signed = createSignedManifest(validManifest, [kp1, kp2])
+    const manifest = verifyManifest(signed, [kp1.publicKey, kp2.publicKey])
     expect(manifest).toEqual(validManifest)
   })
 
