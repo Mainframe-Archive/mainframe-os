@@ -381,11 +381,7 @@ export default class ContextMutations {
     if (privateProfile != null && user.privateProfile !== privateProfile) {
       user.privateProfile = privateProfile
     }
-    await this._context.openVault.save()
-    await user.publicFeed.publishJSON(
-      this._context.io.bzz,
-      user.publicFeedData(),
-    )
+    this._context.next({ type: 'user_changed', change: 'profile', user })
   }
 
   async setUserProfileVisibility(
@@ -396,11 +392,7 @@ export default class ContextMutations {
     if (!user) throw new Error('User not found')
     if (user.privateProfile !== visibile) {
       user.privateProfile = visibile
-      await this._context.openVault.save()
-      await user.publicFeed.publishJSON(
-        this._context.io.bzz,
-        user.publicFeedData(),
-      )
+      this._context.next({ type: 'user_changed', change: 'profile', user })
     }
   }
 

@@ -8,7 +8,7 @@ import { createFragmentContainer, graphql, commitMutation } from 'react-relay'
 
 import { EnvironmentContext } from '../RelayEnvironment'
 import FormModalView from '../../UIComponents/FormModalView'
-import OwnUserIdentity from './__generated__/IdentityEditModal_ownUserIdentity.graphql.js'
+import { type OwnUserIdentity } from './__generated__/IdentityEditModal_ownUserIdentity.graphql.js'
 
 type Props = {
   ownUserIdentity: OwnUserIdentity,
