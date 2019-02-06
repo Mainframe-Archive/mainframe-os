@@ -20,34 +20,47 @@ export type OwnUserProfile = {
 export type OwnUserIdentitySerialized = {
   localID: string,
   keyPair: KeyPairSerialized,
-  profile?: OwnUserProfile,
+  profile: OwnUserProfile,
   publicFeed: OwnFeedSerialized,
   firstContactFeed: OwnFeedSerialized,
+  privateProfile: boolean,
+}
+
+export type OwnUserIdentityParams = {
+  localID: string,
+  keyPair: KeyPair,
+  profile: OwnUserProfile,
+  publicFeed: OwnFeed,
+  firstContactFeed: OwnFeed,
+  privateProfile: boolean,
 }
 
 export default class OwnUserIdentity extends OwnIdentity {
   static create = (
     profile: OwnUserProfile,
+    privateProfile?: boolean,
     keyPair?: KeyPair,
     localID?: string,
   ): OwnUserIdentity => {
-    return new OwnUserIdentity(
-      localID || uniqueID(),
-      keyPair || createSignKeyPair(),
+    return new OwnUserIdentity({
+      localID: localID || uniqueID(),
+      keyPair: keyPair || createSignKeyPair(),
       profile,
-      OwnFeed.create(undefined, 'mf-identity-public-feed'),
-      OwnFeed.create(),
-    )
+      publicFeed: OwnFeed.create(undefined, 'mf-identity-public-feed'),
+      firstContactFeed: OwnFeed.create(),
+      privateProfile: !!privateProfile,
+    })
   }
 
   static fromJSON = (serialized: OwnUserIdentitySerialized): OwnUserIdentity =>
-    new OwnUserIdentity(
-      serialized.localID,
-      parseKeyPair(serialized.keyPair),
-      serialized.profile,
-      OwnFeed.fromJSON(serialized.publicFeed),
-      OwnFeed.fromJSON(serialized.firstContactFeed),
-    )
+    new OwnUserIdentity({
+      localID: serialized.localID,
+      keyPair: parseKeyPair(serialized.keyPair),
+      profile: serialized.profile,
+      publicFeed: OwnFeed.fromJSON(serialized.publicFeed),
+      firstContactFeed: OwnFeed.fromJSON(serialized.firstContactFeed),
+      privateProfile: serialized.privateProfile,
+    })
 
   static toJSON = (identity: OwnUserIdentity): OwnUserIdentitySerialized => ({
     localID: identity.localID,
@@ -55,23 +68,20 @@ export default class OwnUserIdentity extends OwnIdentity {
     profile: identity.profile,
     publicFeed: OwnFeed.toJSON(identity.publicFeed),
     firstContactFeed: OwnFeed.toJSON(identity.firstContactFeed),
+    privateProfile: identity._privateProfile,
   })
 
-  _profile: Object
+  _profile: OwnUserProfile
   _publicFeed: OwnFeed
   _firstContactFeed: OwnFeed
+  _privateProfile: boolean
 
-  constructor(
-    localID: string,
-    keyPair: KeyPair,
-    profile: Object = {},
-    publicFeed: OwnFeed,
-    firstContactFeed: OwnFeed,
-  ) {
-    super(localID, 'user', keyPair)
-    this._profile = profile
-    this._publicFeed = publicFeed
-    this._firstContactFeed = firstContactFeed
+  constructor(params: OwnUserIdentityParams) {
+    super(params.localID, 'user', params.keyPair)
+    this._profile = params.profile
+    this._publicFeed = params.publicFeed
+    this._firstContactFeed = params.firstContactFeed
+    this._privateProfile = params.privateProfile
   }
 
   get profile(): OwnUserProfile {
@@ -90,12 +100,20 @@ export default class OwnUserIdentity extends OwnIdentity {
     return this._firstContactFeed
   }
 
+  get privateProfile(): boolean {
+    return this._privateProfile
+  }
+
+  set privateProfile(setPrivate: boolean) {
+    this._privateProfile = setPrivate
+  }
+
   publicFeedData(): PublicFeedSerialized {
     const { name, avatar, ethAddress } = this.profile
 
     return {
       publicKey: this.base64PublicKey(),
-      profile: { name, avatar, ethAddress },
+      profile: this.privateProfile ? {} : { name, avatar, ethAddress },
       firstContactAddress: this.firstContactFeed.address,
     }
   }

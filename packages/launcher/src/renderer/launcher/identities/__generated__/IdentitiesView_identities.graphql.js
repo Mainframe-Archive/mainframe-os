@@ -8,6 +8,7 @@
 
 /*::
 import type { ConcreteFragment } from 'relay-runtime';
+type IdentityEditModal_ownUserIdentity$ref = any;
 import type { FragmentReference } from "relay-runtime";
 declare export opaque type IdentitiesView_identities$ref: FragmentReference;
 export type IdentitiesView_identities = {|
@@ -33,6 +34,7 @@ export type IdentitiesView_identities = {|
         |}
       |}>,
     |}>,
+    +$fragmentRefs: IdentityEditModal_ownUserIdentity$ref,
   |}>,
   +ownDevelopers: ?$ReadOnlyArray<?{|
     +localID: string,
@@ -88,6 +90,11 @@ return {
       "concreteType": "OwnUserIdentity",
       "plural": true,
       "selections": [
+        {
+          "kind": "FragmentSpread",
+          "name": "IdentityEditModal_ownUserIdentity",
+          "args": null
+        },
         v0,
         {
           "kind": "ScalarField",
@@ -196,5 +203,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '4e7318a7227ec8695f1b723901bc22ef';
+(node/*: any*/).hash = '0f74049c86a42c875369196ede1862dc';
 module.exports = node;

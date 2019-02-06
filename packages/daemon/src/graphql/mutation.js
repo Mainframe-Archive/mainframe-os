@@ -221,6 +221,9 @@ const createUserIdentityMutation = mutationWithClientMutationId({
     profile: {
       type: new GraphQLNonNull(userProfileInput),
     },
+    private: {
+      type: GraphQLBoolean,
+    },
   },
   outputFields: {
     user: {
@@ -230,7 +233,7 @@ const createUserIdentityMutation = mutationWithClientMutationId({
     viewer: viewerOutput,
   },
   mutateAndGetPayload: async (args, ctx) => {
-    const user = await ctx.mutations.createUser(args.profile)
+    const user = await ctx.mutations.createUser(args.profile, args.private)
     return { user }
   },
 })
@@ -280,12 +283,38 @@ const updateProfileMutation = mutationWithClientMutationId({
     profile: {
       type: new GraphQLNonNull(updateProfileInput),
     },
+    privateProfile: {
+      type: GraphQLBoolean,
+    },
   },
   outputFields: {
     viewer: viewerOutput,
   },
   mutateAndGetPayload: async (args, ctx) => {
-    await ctx.mutations.updateUser(args.userID, args.profile)
+    await ctx.mutations.updateUser(
+      args.userID,
+      args.profile,
+      args.privateProfile,
+    )
+    return {}
+  },
+})
+
+const setUserProfileVisibilityMutation = mutationWithClientMutationId({
+  name: 'SetUserProfileVisibility',
+  inputFields: {
+    userID: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    visibile: {
+      type: GraphQLBoolean,
+    },
+  },
+  outputFields: {
+    viewer: viewerOutput,
+  },
+  mutateAndGetPayload: async (args, ctx) => {
+    await ctx.mutations.setUserProfileVisibility(args.userID, args.visibile)
     return {}
   },
 })
@@ -519,5 +548,6 @@ export default new GraphQLObjectType({
     deleteContact: deleteContactMutation,
     setDefaultWallet: setDefaultWalletMutation,
     updateProfile: updateProfileMutation,
+    setUserProfileVisibility: setUserProfileVisibilityMutation,
   }),
 })

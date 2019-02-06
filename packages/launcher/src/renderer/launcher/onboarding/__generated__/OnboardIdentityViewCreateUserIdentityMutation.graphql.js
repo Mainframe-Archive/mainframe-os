@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 8b9ad5223b33f9748c614ab3f42a4d46
+ * @relayHash d8b1ac25de6dd962a74d9622396f32aa
  */
 
 /* eslint-disable */
@@ -12,6 +12,7 @@ import type { ConcreteRequest } from 'relay-runtime';
 type Launcher_identities$ref = any;
 export type CreateUserIdentityInput = {
   profile: UserProfileInput,
+  private?: ?boolean,
   clientMutationId?: ?string,
 };
 export type UserProfileInput = {
