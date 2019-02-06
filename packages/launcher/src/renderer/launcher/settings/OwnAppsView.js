@@ -2,15 +2,24 @@
 
 import React, { Component } from 'react'
 import { graphql, createFragmentContainer, QueryRenderer } from 'react-relay'
+import { Text } from '@morpheus-ui/core'
+import styled from 'styled-components/native'
 
 import { EnvironmentContext } from '../RelayEnvironment'
 import RelayLoaderView from '../RelayLoaderView'
 import { AppsGrid, renderNewAppButton } from '../apps/AppsView'
 import { OwnAppItem } from '../apps/AppItem'
+import CreateAppModal from './CreateAppModal'
+import CreateDevIdentityView from './CreateDevIdentityView'
 import OwnAppDetailView from './OwnAppDetailView'
 import type { OwnAppDetailView_ownApp as OwnApp } from './__generated__/OwnAppDetailView_ownApp.graphql.js'
 
 type Props = {
+  identities: {
+    ownDevelopers: Array<{
+      localID: string,
+    }>,
+  },
   apps: {
     own: Array<OwnApp>,
   },
@@ -18,12 +27,25 @@ type Props = {
 
 type State = {
   selectedApp?: ?OwnApp,
+  createModal?: boolean,
 }
+
+const Container = styled.View`
+  flex: 1;
+  padding: 0 5px;
+`
+const ScrollView = styled.ScrollView``
 
 class OwnAppsView extends Component<Props, State> {
   state = {}
 
-  onPressCreateApp = () => {}
+  onPressCreateApp = () => {
+    this.setState({ createModal: true })
+  }
+
+  onCloseModal = () => {
+    this.setState({ createModal: false })
+  }
 
   onOpenApp = app => {
     this.setState({
@@ -38,34 +60,59 @@ class OwnAppsView extends Component<Props, State> {
   }
 
   render() {
-    const { selectedApp } = this.state
-    if (selectedApp) {
+    if (!this.props.identities.ownDevelopers.length) {
+      return <CreateDevIdentityView />
+    }
+
+    if (this.state.createModal) {
+      return (
+        <CreateAppModal
+          onAppCreated={this.onCloseModal}
+          onRequestClose={this.onCloseModal}
+        />
+      )
+    }
+
+    if (this.state.selectedApp) {
       return (
         <OwnAppDetailView
-          ownApp={selectedApp}
+          ownApp={this.state.selectedApp}
           onClose={this.onCloseAppDetail}
         />
       )
     }
+
     const apps = this.props.apps.own.map(a => {
       const onOpen = () => this.onOpenApp(a)
       return <OwnAppItem key={a.localID} ownApp={a} onOpenApp={onOpen} />
     })
     const createButton = renderNewAppButton(
-      'NEW APP',
+      'ADD',
       this.onPressCreateApp,
       'launcher-create-app-button',
     )
     return (
-      <AppsGrid>
-        {apps}
-        {createButton}
-      </AppsGrid>
+      <Container>
+        <Text variant={['smallTitle', 'blue', 'bold']}>My Apps</Text>
+        <ScrollView>
+          <AppsGrid>
+            {apps}
+            {createButton}
+          </AppsGrid>
+        </ScrollView>
+      </Container>
     )
   }
 }
 
 const OwnAppsViewRelayContainer = createFragmentContainer(OwnAppsView, {
+  identities: graphql`
+    fragment OwnAppsView_identities on Identities {
+      ownDevelopers {
+        localID
+      }
+    }
+  `,
   apps: graphql`
     fragment OwnAppsView_apps on Apps {
       own {
@@ -88,6 +135,9 @@ export default class OwnAppsViewRenderer extends Component<{}> {
         query={graphql`
           query OwnAppsViewQuery {
             viewer {
+              identities {
+                ...OwnAppsView_identities
+              }
               apps {
                 ...OwnAppsView_apps
               }

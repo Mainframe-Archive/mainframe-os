@@ -3,6 +3,9 @@ import React, { Component } from 'react'
 import styled from 'styled-components/native'
 import { Text } from '@morpheus-ui/core'
 
+import SettingsIcon from '@morpheus-ui/icons/SettingsXSm'
+import GreaterIcon from '@morpheus-ui/icons/GreaterXSm'
+
 import OwnAppsView from './OwnAppsView'
 import SettingsMenuView from './SettingsMenuView'
 
@@ -14,8 +17,10 @@ const Nav = styled.View`
   padding-vertical: 10px;
   flex-direction: row;
 `
-
-const navLabelStyle = `margin-right: 20px;`
+const NavItem = styled.TouchableOpacity`
+  flex-direction: row;
+  align-items: center;
+`
 
 export type MenuKey = 'menu' | 'developer' | 'docs' | 'help' | 'feedback'
 
@@ -34,6 +39,12 @@ export default class SettingsScreen extends Component<{}, State> {
     })
   }
 
+  goBack = () => {
+    this.setState({
+      openView: 'menu',
+    })
+  }
+
   renderView() {
     switch (this.state.openView) {
       case 'menu':
@@ -49,8 +60,18 @@ export default class SettingsScreen extends Component<{}, State> {
     const nav =
       this.state.openView !== 'menu' ? (
         <Nav>
-          <Text styles={navLabelStyle}>More</Text>
-          <Text styles={navLabelStyle}>Developer Tools</Text>
+          <NavItem onPress={this.goBack}>
+            <SettingsIcon color="#A9A9A9" width={10} height={10} />
+            <Text size={9} color="#A9A9A9" variant="marginHorizontal5" bold>
+              More
+            </Text>
+          </NavItem>
+          <Text size={9} color="#A9A9A9" variant="marginHorizontal5">
+            <GreaterIcon color="#A9A9A9" width={6} height={6} />
+          </Text>
+          <Text size={9} color="#A9A9A9" variant="marginHorizontal5" bold>
+            App Development Tool
+          </Text>
         </Nav>
       ) : null
     return (

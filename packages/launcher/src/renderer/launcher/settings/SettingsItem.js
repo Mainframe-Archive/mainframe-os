@@ -18,6 +18,8 @@ type State = {
 
 const TitleArea = styled.View`
   flex: 1;
+  flex-direction: row;
+  align-items: center;
 `
 
 const Container = styled.TouchableOpacity`
@@ -62,12 +64,24 @@ export default class SettingsItem extends Component<Props, State> {
     return (
       <>
         <TitleArea>
-          {Icon && <Icon />}
-          <Text variant="greyDark23" bold size={11}>
+          {Icon && (
+            <Icon
+              color={this.state.hover ? '#DA1157' : '#808080'}
+              width={14}
+              height={14}
+            />
+          )}
+          <Text variant={['greyDark23', 'marginLeft20']} bold size={11}>
             {title}
           </Text>
         </TitleArea>
-        {RightElement && <RightElement />}
+        {RightElement && (
+          <RightElement
+            color={this.state.hover ? '#DA1157' : '#585858'}
+            width={10}
+            height={10}
+          />
+        )}
       </>
     )
   }
