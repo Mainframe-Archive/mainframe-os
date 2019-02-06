@@ -18,7 +18,7 @@ type Props = {
 type State = {
   error?: ?string,
   awaitingResponse?: boolean,
-  privateProfile?: ?boolean,
+  discoverable?: ?boolean,
 }
 
 const FormContainer = styled.View`
@@ -52,7 +52,9 @@ export const createUserMutation = graphql`
 export default class OnboardIdentityView extends Component<Props, State> {
   static contextType = EnvironmentContext
 
-  state = {}
+  state = {
+    discoverable: true,
+  }
 
   onSubmit = (payload: FormSubmitPayload) => {
     const { valid, fields } = payload
@@ -68,7 +70,7 @@ export default class OnboardIdentityView extends Component<Props, State> {
 
   onTogglePrivate = (value: boolean) => {
     this.setState({
-      privateProfile: value,
+      discoverable: value,
     })
   }
 
@@ -77,9 +79,8 @@ export default class OnboardIdentityView extends Component<Props, State> {
       profile: {
         name,
       },
-      private: this.state.privateProfile,
+      private: !this.state.discoverable,
     }
-
     commitMutation(this.context, {
       mutation: createUserMutation,
       variables: { input },
@@ -143,10 +144,10 @@ export default class OnboardIdentityView extends Component<Props, State> {
               </Column>
               <Column>
                 <Switch
+                  defaultValue={true}
                   label="Make my name discoverable"
                   name="discoverable"
                   onChange={this.onTogglePrivate}
-                  value={this.state.privateProfile}
                 />
               </Column>
             </Row>
