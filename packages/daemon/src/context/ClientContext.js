@@ -67,5 +67,10 @@ export default class ClientContext extends Subject<ContextEvent> {
     this.events.clear()
     this.io.clear()
     await this.subscriptions.clear()
+
+    const openVault = this.vaults.getVault(this.socket)
+    if (openVault != null) {
+      await openVault.save()
+    }
   }
 }

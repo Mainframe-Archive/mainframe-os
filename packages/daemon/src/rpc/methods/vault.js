@@ -1,6 +1,5 @@
 // @flow
 
-// eslint-disable-next-line import/named
 import {
   VAULT_SCHEMA,
   VAULT_SETTINGS_SCHEMA,

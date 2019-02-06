@@ -5,9 +5,7 @@ import { inspect } from 'util'
 import { MANIFEST_SCHEMA_MESSAGES } from '@mainframe/app-manifest'
 import type { Environment } from '@mainframe/config'
 import { parseError } from '@mainframe/rpc-error'
-import createHandler, {
-  type IncomingMessage, // eslint-disable-line import/named
-} from '@mainframe/rpc-handler'
+import createHandler, { type IncomingMessage } from '@mainframe/rpc-handler'
 import { uniqueID } from '@mainframe/utils-id'
 import debug from 'debug'
 import oboe from 'oboe'
