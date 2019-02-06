@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 5e9778339ec4f58acccb7acada43457b
+ * @relayHash 21a23dcb74df51ecfe6774f8e7158a8f
  */
 
 /* eslint-disable */
@@ -20,7 +20,7 @@ export type OwnAppDetailViewPublishAppVersionMutationVariables = {|
 |};
 export type OwnAppDetailViewPublishAppVersionMutationResponse = {|
   +publishAppVersion: ?{|
-    +contentsURI: string,
+    +versionHash: string,
     +viewer: {|
       +apps: {|
         +$fragmentRefs: OwnAppsView_apps$ref
@@ -40,7 +40,7 @@ mutation OwnAppDetailViewPublishAppVersionMutation(
   $input: PublishAppVersionInput!
 ) {
   publishAppVersion(input: $input) {
-    contentsURI
+    versionHash
     viewer {
       apps {
         ...OwnAppsView_apps
@@ -102,7 +102,7 @@ fragment OwnAppDetailView_ownApp on OwnApp {
   }
   versions {
     version
-    publicationState
+    versionHash
     contentsURI
     permissions {
       optional {
@@ -148,7 +148,7 @@ v1 = [
 v2 = {
   "kind": "ScalarField",
   "alias": null,
-  "name": "contentsURI",
+  "name": "versionHash",
   "args": null,
   "storageKey": null
 },
@@ -194,7 +194,7 @@ return {
   "operationKind": "mutation",
   "name": "OwnAppDetailViewPublishAppVersionMutation",
   "id": null,
-  "text": "mutation OwnAppDetailViewPublishAppVersionMutation(\n  $input: PublishAppVersionInput!\n) {\n  publishAppVersion(input: $input) {\n    contentsURI\n    viewer {\n      apps {\n        ...OwnAppsView_apps\n      }\n      id\n    }\n  }\n}\n\nfragment OwnAppsView_apps on Apps {\n  own {\n    localID\n    name\n    ...AppItem_ownApp\n    ...OwnAppDetailView_ownApp\n    id\n  }\n}\n\nfragment AppItem_ownApp on OwnApp {\n  localID\n  name\n  developer {\n    id\n    name\n  }\n  versions {\n    version\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n    }\n  }\n  users {\n    localID\n    identity {\n      profile {\n        name\n      }\n      id\n    }\n    id\n  }\n}\n\nfragment OwnAppDetailView_ownApp on OwnApp {\n  localID\n  name\n  contentsPath\n  developer {\n    id\n    name\n  }\n  versions {\n    version\n    publicationState\n    contentsURI\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n    }\n  }\n  users {\n    localID\n    identity {\n      profile {\n        name\n      }\n      id\n    }\n    id\n  }\n}\n",
+  "text": "mutation OwnAppDetailViewPublishAppVersionMutation(\n  $input: PublishAppVersionInput!\n) {\n  publishAppVersion(input: $input) {\n    versionHash\n    viewer {\n      apps {\n        ...OwnAppsView_apps\n      }\n      id\n    }\n  }\n}\n\nfragment OwnAppsView_apps on Apps {\n  own {\n    localID\n    name\n    ...AppItem_ownApp\n    ...OwnAppDetailView_ownApp\n    id\n  }\n}\n\nfragment AppItem_ownApp on OwnApp {\n  localID\n  name\n  developer {\n    id\n    name\n  }\n  versions {\n    version\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n    }\n  }\n  users {\n    localID\n    identity {\n      profile {\n        name\n      }\n      id\n    }\n    id\n  }\n}\n\nfragment OwnAppDetailView_ownApp on OwnApp {\n  localID\n  name\n  contentsPath\n  developer {\n    id\n    name\n  }\n  versions {\n    version\n    versionHash\n    contentsURI\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n    }\n  }\n  users {\n    localID\n    identity {\n      profile {\n        name\n      }\n      id\n    }\n    id\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -348,14 +348,14 @@ return {
                               }
                             ]
                           },
+                          v2,
                           {
                             "kind": "ScalarField",
                             "alias": null,
-                            "name": "publicationState",
+                            "name": "contentsURI",
                             "args": null,
                             "storageKey": null
-                          },
-                          v2
+                          }
                         ]
                       },
                       {
@@ -417,5 +417,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '2d52a378331ed1fbec523ca2f42d67fa';
+(node/*: any*/).hash = '349d6f1d0b688615875efa231efc7889';
 module.exports = node;

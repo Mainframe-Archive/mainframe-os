@@ -514,15 +514,14 @@ const publishAppVersionMutation = mutationWithClientMutationId({
     },
   },
   outputFields: {
-    contentsURI: {
+    versionHash: {
       type: GraphQLNonNull(GraphQLString),
     },
     viewer: viewerOutput,
   },
-  mutateAndGetPayload: async ({ appID, version }, ctx) => {
-    const contentsURI = await ctx.mutations.publishContents(appID, version)
-    // TODO: Upload app manifest
-    return { contentsURI }
+  mutateAndGetPayload: async (params, ctx) => {
+    const versionHash = await ctx.mutations.publishApp(params)
+    return { versionHash }
   },
 })
 

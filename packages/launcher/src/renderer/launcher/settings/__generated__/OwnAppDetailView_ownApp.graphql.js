@@ -8,7 +8,6 @@
 
 /*::
 import type { ConcreteFragment } from 'relay-runtime';
-export type AppVesionState = "CONTENTS_PUBLISHED" | "MANIFEST_PUBLISHED" | "UNPUBLISHED" | "%future added value";
 import type { FragmentReference } from "relay-runtime";
 declare export opaque type OwnAppDetailView_ownApp$ref: FragmentReference;
 export type OwnAppDetailView_ownApp = {|
@@ -21,7 +20,7 @@ export type OwnAppDetailView_ownApp = {|
   |},
   +versions: $ReadOnlyArray<{|
     +version: string,
-    +publicationState: AppVesionState,
+    +versionHash: ?string,
     +contentsURI: ?string,
     +permissions: {|
       +optional: {|
@@ -132,7 +131,7 @@ return {
         {
           "kind": "ScalarField",
           "alias": null,
-          "name": "publicationState",
+          "name": "versionHash",
           "args": null,
           "storageKey": null
         },
@@ -215,5 +214,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = 'eb9936a823ed54be5dfecc89b4722585';
+(node/*: any*/).hash = '64223c3191c14526c6d38b0c021aa829';
 module.exports = node;

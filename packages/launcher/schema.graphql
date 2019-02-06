@@ -156,15 +156,9 @@ type AppUserSettings {
 
 type AppVersionData {
   version: String!
-  publicationState: AppVesionState!
+  versionHash: String
   contentsURI: String
   permissions: AppPermissionsRequirements!
-}
-
-enum AppVesionState {
-  UNPUBLISHED
-  CONTENTS_PUBLISHED
-  MANIFEST_PUBLISHED
 }
 
 enum ConnectionState {
@@ -381,7 +375,7 @@ input PublishAppVersionInput {
 }
 
 type PublishAppVersionPayload {
-  contentsURI: String!
+  versionHash: String!
   viewer: Viewer!
   clientMutationId: String
 }

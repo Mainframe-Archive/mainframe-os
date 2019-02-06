@@ -207,23 +207,14 @@ export const appManifestData = new GraphQLObjectType({
   }),
 })
 
-export const appVersionState = new GraphQLEnumType({
-  name: 'AppVesionState',
-  values: {
-    UNPUBLISHED: { value: 'unpublished' },
-    CONTENTS_PUBLISHED: { value: 'contents_published' },
-    MANIFEST_PUBLISHED: { value: 'manifest_published' },
-  },
-})
-
 export const appVersionData = new GraphQLObjectType({
   name: 'AppVersionData',
   fields: () => ({
     version: {
       type: new GraphQLNonNull(GraphQLString),
     },
-    publicationState: {
-      type: new GraphQLNonNull(appVersionState),
+    versionHash: {
+      type: GraphQLString,
     },
     contentsURI: {
       type: GraphQLString,

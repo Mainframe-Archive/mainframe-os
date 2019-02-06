@@ -86,7 +86,7 @@ const publishVersionMutation = graphql`
     $input: PublishAppVersionInput!
   ) {
     publishAppVersion(input: $input) {
-      contentsURI
+      versionHash
       viewer {
         apps {
           ...OwnAppsView_apps
@@ -193,91 +193,56 @@ export class OwnAppDetailView extends Component<Props, State> {
         </>
       )
       let publishedState
-      switch (version.publicationState) {
-        case 'UNPUBLISHED': {
-          const publishVersion = () =>
-            this.onPressPublishVersion(version.version)
-          const actions = this.state.publishing ? (
-            <ActivityIndicator />
-          ) : (
+      if (!version.versionHash) {
+        const publishVersion = () => this.onPressPublishVersion(version.version)
+        const actions = this.state.publishing ? (
+          <ActivityIndicator />
+        ) : (
+          <ButtonsContainer>
+            <Button
+              title="OPEN"
+              variant={['mediumUppercase', 'marginRight10']}
+              onPress={this.onPressOpenApp}
+            />
+            <Button
+              title="EDIT"
+              variant={['mediumUppercase', 'marginRight10']}
+            />
+            <Button
+              variant={['mediumUppercase', 'red']}
+              title="PUBLISH APP"
+              onPress={publishVersion}
+            />
+          </ButtonsContainer>
+        )
+        publishedState = (
+          <>
+            <VersionDetailRow>
+              <Text variant="smallLabel">CONTENT PATH</Text>
+              <Text theme={detailTextStyle}>{ownApp.contentsPath}</Text>
+            </VersionDetailRow>
+            {actions}
+          </>
+        )
+      } else {
+        publishedState = (
+          <>
+            <VersionDetailRow>
+              <Text variant="smallLabel">CONTENTS URI</Text>
+              <Text theme={detailTextStyle}>{version.versionHash}</Text>
+            </VersionDetailRow>
+
             <ButtonsContainer>
               <Button
-                title="OPEN"
-                variant={['mediumUppercase', 'marginRight10']}
-                onPress={this.onPressOpenApp}
-              />
-              <Button
-                title="EDIT"
-                variant={['mediumUppercase', 'marginRight10']}
-              />
-              <Button
                 variant={['mediumUppercase', 'red']}
-                title="PUBLISH APP"
-                onPress={publishVersion}
+                title="SUBMIT TO MAINRAME APP STORE"
+                onPress={this.onPressSubmitFoReview}
               />
             </ButtonsContainer>
-          )
-          publishedState = (
-            <>
-              <VersionDetailRow>
-                <Text variant="smallLabel">CONTENT PATH</Text>
-                <Text theme={detailTextStyle}>{ownApp.contentsPath}</Text>
-              </VersionDetailRow>
-              {actions}
-            </>
-          )
-          break
-        }
-
-        case 'CONTENTS_PUBLISHED': {
-          const actions = this.state.publishing ? (
-            <ActivityIndicator />
-          ) : (
-            <ButtonsContainer>
-              <Button
-                variant={['mediumUppercase', 'red']}
-                title="UPLOAD MANIFEST"
-                onPress={this.onPressPublishManifest}
-              />
-            </ButtonsContainer>
-          )
-          publishedState = (
-            <>
-              <VersionDetailRow>
-                <Text variant="smallLabel">CONTENTSS URI</Text>
-                <Text theme={detailTextStyle}>{version.contentsURI}</Text>
-              </VersionDetailRow>
-              <Text variant={['italic', 'greyMed', 'size13', 'marginBottom10']}>
-                Your app contents have been uploaded but you still need to
-                publish an app manifest file to enable people to download your
-                app.
-              </Text>
-              {actions}
-            </>
-          )
-          break
-        }
-
-        case 'MANIFEST_PUBLISHED':
-          publishedState = (
-            <>
-              <VersionDetailRow>
-                <Text variant="smallLabel">CONTENTS URI</Text>
-                <Text theme={detailTextStyle}>{version.contentsURI}</Text>
-              </VersionDetailRow>
-
-              <ButtonsContainer>
-                <Button
-                  variant={['mediumUppercase', 'red']}
-                  title="SUBMIT TO MAINRAME APP STORE"
-                  onPress={this.onPressSubmitFoReview}
-                />
-              </ButtonsContainer>
-            </>
-          )
-          break
-        default:
+          </>
+        )
       }
+
       const errorView = this.state.errorMsg ? (
         <ErrorView>
           <Text variant="error">{this.state.errorMsg}</Text>
@@ -330,7 +295,7 @@ export default createFragmentContainer(OwnAppDetailViewWithContext, {
       }
       versions {
         version
-        publicationState
+        versionHash
         contentsURI
         permissions {
           optional {

@@ -253,23 +253,6 @@ export default class ContextMutations {
     await openVault.save()
   }
 
-  async publishContents(appID: string, version: string): Promise<string> {
-    const { openVault } = this._context
-    const app = openVault.apps.getOwnByID(idType(appID))
-    if (app == null) {
-      throw new Error('App not found')
-    }
-
-    const hash = await this._context.io.bzz.uploadDirectoryFrom(
-      app.contentsPath,
-    )
-    const contentsURI = `urn:bzz:${hash}`
-    app.setContentsURI(contentsURI, version)
-    await openVault.save()
-
-    return contentsURI
-  }
-
   // Contacts
 
   async addPeer(params: AddPeerParams): Promise<PeerUserIdentity> {
