@@ -87,7 +87,10 @@ class IdentitiesView extends Component<Props, State> {
 
   renderModal() {
     return this.state.editUser ? (
-      <IdentityEditModal onClose={this.closeModal} user={this.state.editUser} />
+      <IdentityEditModal
+        onClose={this.closeModal}
+        ownUserIdentity={this.state.editUser}
+      />
     ) : null
   }
 
@@ -112,6 +115,7 @@ export default createFragmentContainer(IdentitiesView, {
   identities: graphql`
     fragment IdentitiesView_identities on Identities {
       ownUsers {
+        ...IdentityEditModal_ownUserIdentity
         localID
         feedHash
         profile {

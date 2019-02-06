@@ -18,6 +18,7 @@ type Props = {
 type State = {
   error?: ?string,
   awaitingResponse?: boolean,
+  privateProfile?: ?boolean,
 }
 
 const FormContainer = styled.View`
@@ -65,11 +66,18 @@ export default class OnboardIdentityView extends Component<Props, State> {
     }
   }
 
+  onTogglePrivate = (value: boolean) => {
+    this.setState({
+      privateProfile: value,
+    })
+  }
+
   async createIdentity(name: string) {
     const input = {
       profile: {
         name,
       },
+      private: this.state.privateProfile,
     }
 
     commitMutation(this.context, {
@@ -134,7 +142,12 @@ export default class OnboardIdentityView extends Component<Props, State> {
                 />
               </Column>
               <Column>
-                <Switch label="Make my name discoverable" name="discoverable" />
+                <Switch
+                  label="Make my name discoverable"
+                  name="discoverable"
+                  onChange={this.onTogglePrivate}
+                  value={this.state.privateProfile}
+                />
               </Column>
             </Row>
 

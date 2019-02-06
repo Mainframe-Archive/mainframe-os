@@ -418,6 +418,9 @@ export const ownUserIdentity = new GraphQLObjectType({
     pubKey: {
       type: new GraphQLNonNull(GraphQLString),
     },
+    privateProfile: {
+      type: GraphQLBoolean,
+    },
   }),
 })
 

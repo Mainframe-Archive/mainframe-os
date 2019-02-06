@@ -219,23 +219,52 @@ export default class ContextMutations {
     return dev
   }
 
-  async createUser(profile: OwnUserProfile): Promise<OwnUserIdentity> {
-    const user = this._context.openVault.identities.createOwnUser(profile)
+  async createUser(
+    profile: OwnUserProfile,
+    privateProfile?: boolean,
+  ): Promise<OwnUserIdentity> {
+    const user = this._context.openVault.identities.createOwnUser(
+      profile,
+      privateProfile,
+    )
     await this._context.openVault.save()
     this._context.next({ type: 'user_created', user })
     return user
   }
 
-  async updateUser(userID: ID, profile: $Shape<OwnUserProfile>): Promise<void> {
+  async updateUser(
+    userID: ID,
+    profile: $Shape<OwnUserProfile>,
+    privateProfile?: boolean,
+  ): Promise<void> {
     const user = this._context.openVault.identities.getOwnUser(userID)
     if (!user) throw new Error('User not found')
 
     user.profile = { ...user.profile, ...profile }
+    if (privateProfile != null && user.privateProfile !== privateProfile) {
+      user.privateProfile = privateProfile
+    }
     await this._context.openVault.save()
     await user.publicFeed.publishJSON(
       this._context.io.bzz,
       user.publicFeedData(),
     )
+  }
+
+  async setUserProfileVisibility(
+    userID: string,
+    visibile: boolean,
+  ): Promise<void> {
+    const user = this._context.openVault.identities.getOwnUser(userID)
+    if (!user) throw new Error('User not found')
+    if (user.privateProfile !== visibile) {
+      user.privateProfile = visibile
+      await this._context.openVault.save()
+      await user.publicFeed.publishJSON(
+        this._context.io.bzz,
+        user.publicFeedData(),
+      )
+    }
   }
 
   // Vault
