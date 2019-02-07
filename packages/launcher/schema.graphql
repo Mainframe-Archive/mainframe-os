@@ -208,6 +208,7 @@ type CreateHDWalletPayload {
 
 input CreateUserIdentityInput {
   profile: UserProfileInput!
+  private: Boolean
   clientMutationId: String
 }
 
@@ -306,6 +307,7 @@ type Mutation {
   deleteContact(input: DeletContactInput!): DeletContactPayload
   setDefaultWallet(input: SetDefaultWalletInput!): SetDefaultWalletPayload
   updateProfile(input: UpdateProfileInput!): UpdateProfilePayload
+  setUserProfileVisibility(input: SetUserProfileVisibilityInput!): SetUserProfileVisibilityPayload
 }
 
 type NamedProfile {
@@ -351,6 +353,7 @@ type OwnUserIdentity implements Node {
   wallets: EthWallets!
   profile: NamedProfile!
   pubKey: String!
+  privateProfile: Boolean
 }
 
 type Peer {
@@ -414,6 +417,17 @@ type SetDefaultWalletPayload {
   clientMutationId: String
 }
 
+input SetUserProfileVisibilityInput {
+  userID: String!
+  visibile: Boolean
+  clientMutationId: String
+}
+
+type SetUserProfileVisibilityPayload {
+  viewer: Viewer!
+  clientMutationId: String
+}
+
 type Subscription {
   contactChanged: Contact!
 }
@@ -425,6 +439,7 @@ enum SupportedWallets {
 input UpdateProfileInput {
   userID: String!
   profile: UpdateUserProfileInput!
+  privateProfile: Boolean
   clientMutationId: String
 }
 

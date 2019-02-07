@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash e4c652ceed8c61f3bf8ad5570b877b6c
+ * @relayHash c5220cc02fd1b0d1a4f22bc3169d35f1
  */
 
 /* eslint-disable */
@@ -13,6 +13,7 @@ type Launcher_identities$ref = any;
 export type UpdateProfileInput = {
   userID: string,
   profile: UpdateUserProfileInput,
+  privateProfile?: ?boolean,
   clientMutationId?: ?string,
 };
 export type UpdateUserProfileInput = {

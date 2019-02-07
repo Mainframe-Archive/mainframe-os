@@ -349,7 +349,6 @@ export type ContactsApproveContactsForAppParams = {
 
 export type ContactProfile = {
   name?: ?string,
-  aliasName?: ?string,
   avatar?: ?string,
   ethAddress?: ?string,
 }
