@@ -250,6 +250,12 @@ export class ContactsFeedsHandler extends FeedsHandler {
                 data.profile,
               )
             }
+            if (data.apps != null) {
+              this._context.mutations.updateContactApps(
+                contact.localID,
+                data.apps,
+              )
+            }
           },
           error: err => {
             this._context.log('contact feed subscription error', err)

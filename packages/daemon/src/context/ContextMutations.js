@@ -16,7 +16,7 @@ import type {
 import type { OwnDeveloperProfile } from '../identity/OwnDeveloperIdentity'
 import type { OwnUserProfile } from '../identity/OwnUserIdentity'
 import type { PeerUserProfile } from '../identity/PeerUserIdentity'
-import type { ContactProfile } from '../identity/Contact'
+import type { ContactProfile, ContactAppsPayload } from '../identity/Contact'
 import type { bzzHash } from '../swarm/feed'
 
 import type {
@@ -116,17 +116,15 @@ export default class ContextMutations {
     if (!app) {
       throw new Error('App not found')
     }
+    const sharedAppID = app.id
 
     const existingSharedData = openVault.contactAppData.getSharedData(
-      app.base64PublicKey(),
+      sharedAppID,
       contactID,
     )
     const sharedData = existingSharedData
       ? existingSharedData
-      : openVault.contactAppData.createSharedData(
-          app.base64PublicKey(),
-          contactID,
-        )
+      : openVault.contactAppData.createSharedData(sharedAppID, contactID)
 
     const existingAppFeed = sharedData.getAppFeed(key)
     const appFeed = existingAppFeed
@@ -150,10 +148,10 @@ export default class ContextMutations {
       })
     }
 
-    if (!existingSharedData || existingSharedData.feedHash == null) {
+    if (!existingSharedData || sharedData.feedHash == null) {
       await sharedData.syncManifest(io.bzz)
       const { apps } = contact.sharedFeed.localFeedData
-      apps[app.base64PublicKey()] = sharedData.feedHash
+      apps[sharedAppID] = sharedData.feedHash
       await contact.sharedFeed.publishLocalData(io.bzz)
       this._context.next({
         type: 'contact_changed',
@@ -162,6 +160,41 @@ export default class ContextMutations {
         change: 'localFeed',
       })
     }
+  }
+
+  updateContactApps(contactID: ID | string, apps: ContactAppsPayload) {
+    const { openVault } = this._context
+    Object.keys(apps)
+      .filter(sharedAppID => openVault.identities.getID(sharedAppID))
+      .forEach(sharedAppID => {
+        const existingSharedData = openVault.contactAppData.getSharedData(
+          sharedAppID,
+          contactID,
+        )
+        const sharedData = existingSharedData
+          ? existingSharedData
+          : openVault.contactAppData.createSharedData(sharedAppID, contactID, {
+              remoteFeed: apps[sharedAppID],
+            })
+        let changed = false
+        if (!existingSharedData) {
+          changed = true
+        } else if (sharedData.remoteFeed !== apps[sharedAppID]) {
+          sharedData.remoteFeed = apps[sharedAppID]
+          changed = true
+        }
+
+        if (changed) {
+          this._context.next({
+            type: 'app_data_changed',
+            sharedData,
+            // $FlowFixMe: filter guarantees non-null
+            // appID: openVault.identities.getID(sharedAppID),
+            appID: contactID,
+            contactID,
+          })
+        }
+      })
   }
 
   // Contacts

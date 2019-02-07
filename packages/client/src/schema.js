@@ -110,6 +110,11 @@ export const COMMS_PUBLISH_SCHEMA = {
   value: 'object',
 }
 
+export const COMMS_GET_SUBSCRIBABLE_SCHEMA = {
+  appID: LOCAL_ID_SCHEMA,
+  contactID: LOCAL_ID_SCHEMA,
+}
+
 export const CONTACT_GET_APP_USER_CONTACTS_SCHEMA = {
   contactIDs: {
     type: 'array',

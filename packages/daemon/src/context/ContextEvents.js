@@ -33,6 +33,7 @@ export default class ContextEvents {
     this.vaultModified = this._context.pipe(
       filter((e: ContextEvent) => {
         return (
+          e.type === 'app_data_changed' ||
           e.type === 'user_created' ||
           e.type === 'user_changed' ||
           e.type === 'user_deleted' ||

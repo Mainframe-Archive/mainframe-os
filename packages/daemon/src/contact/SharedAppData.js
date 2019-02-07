@@ -43,9 +43,13 @@ const toAppFeeds = mapObject(
   }),
 )
 
+export type AppFeedsPayload = {
+  [string]: { type: FeedType, feedHash: bzzHash },
+}
+
 export type SharedAppDataPayload = {
   version: string,
-  feeds: { [string]: { type: FeedType, feed: bzzHash } },
+  feeds: AppFeedsPayload,
 }
 
 export type SharedAppDataSerialized = {
@@ -126,10 +130,14 @@ export default class SharedAppData {
   }
 
   _generateFeedPayload(): SharedAppDataPayload {
+    const toPayload = mapObject(af => ({
+      type: af.type,
+      feedHash: af.feed.feedHash,
+    }))
     return {
       version: '1.0.0',
       // $FlowFixMe: mapping type
-      feeds: mapObject(af => af.feed.feedHash)(this._appFeeds),
+      feeds: toPayload(this._appFeeds),
     }
   }
 }

@@ -1,7 +1,12 @@
 //@flow
 import type { ContactResult, AppUserContact } from '@mainframe/client'
-import { idType } from '@mainframe/utils-id'
+import { idType, type ID } from '@mainframe/utils-id'
 
+import { fetchJSON } from '../swarm/feed'
+import type {
+  AppFeedsPayload,
+  SharedAppDataPayload,
+} from '../contact/SharedAppData'
 import type ClientContext from './ClientContext'
 
 export type Wallet = {
@@ -81,6 +86,31 @@ export default class ContextQueries {
       }
       return contactData
     })
+  }
+
+  async getContactAppFeeds(appID: ID, contactID: ID): AppFeedsPayload {
+    const { openVault, io } = this._context
+
+    const app = openVault.identities.getApp(appID)
+    if (!app) {
+      throw new Error('App not found')
+    }
+    const sharedAppID = app.id
+
+    const sharedData = openVault.contactAppData.getSharedData(
+      sharedAppID,
+      contactID,
+    )
+    if (!sharedData || !sharedData.remoteFeed) {
+      return {}
+    }
+
+    const remoteData = (await fetchJSON(
+      io.bzz,
+      sharedData.remoteFeed,
+    ): SharedAppDataPayload)
+    // TODO: validate payload version
+    return remoteData.feeds || {}
   }
 
   // Wallets

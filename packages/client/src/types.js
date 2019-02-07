@@ -207,6 +207,13 @@ export type CommsPublishParams = {
   value: Object,
 }
 
+export type CommsGetSubscribableParams = {
+  appID: ID,
+  contactID: ID,
+}
+
+export type CommsGetSubscribableResult = Array<string>
+
 // GraphQL
 
 export type GraphQLQueryParams = {

@@ -1,7 +1,10 @@
 // @flow
 
 import crypto from 'crypto'
-import BzzAPI, { type PollOptions } from '@erebos/api-bzz-node'
+import BzzAPI, {
+  type DownloadOptions,
+  type PollOptions,
+} from '@erebos/api-bzz-node'
 import { getFeedTopic } from '@erebos/api-bzz-base'
 import { isHexValue, hexValueType, type hexValue } from '@erebos/hex'
 import { createKeyPair, type KeyPair as EthKeyPair } from '@erebos/secp256k1'
@@ -99,9 +102,17 @@ export class OwnFeed {
   }
 }
 
+export const fetchJSON = <T: Object>(
+  bzz: BzzAPI,
+  hash: bzzHash,
+  options?: DownloadOptions,
+): Promise<T> => {
+  return bzz.download(hash, options).then(res => res.json())
+}
+
 export const pollFeedJSON = <T: Object>(
   bzz: BzzAPI,
-  hash: string,
+  hash: bzzHash,
   options: PollOptions,
 ): Observable<T> => {
   return bzz

@@ -19,10 +19,12 @@ export type FirstContactPayload = {
   privateFeed: bzzHash,
 }
 
+export type ContactAppsPayload = { [sharedAppID: string]: bzzHash }
+
 export type ContactPayload = {
   version: string,
   profile?: ContactProfile,
-  apps?: { [appPubKey: string]: bzzHash },
+  apps?: ContactAppsPayload,
 }
 
 export type ContactSerialized = {
