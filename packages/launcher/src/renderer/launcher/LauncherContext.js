@@ -1,12 +1,16 @@
 // @flow
 
-import { createContext } from 'react'
+import React, { createContext, type ElementRef } from 'react'
 
 export type CurrentUser = {
   localID: string,
   defaultEthAddress: ?string,
 }
 
-const LauncherContext = createContext<{ user?: CurrentUser }>({})
+export const { Consumer, Provider } = createContext<{ user?: CurrentUser }>({})
 
-export default LauncherContext
+export default (Component: ElementRef<any>) => {
+  return function WrappedComponent(props: any) {
+    return <Consumer>{value => <Component {...props} {...value} />}</Consumer>
+  }
+}

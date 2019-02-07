@@ -65,7 +65,8 @@ export default class ContextQueries {
         const contact = contacts[id]
         const peer = identities.getPeerUser(idType(contact.peerID))
         if (peer) {
-          const profile = { ...peer.profile, ...contact.profile }
+          const contactProfile = identities.getContactProfile(contact.localID)
+          const profile = { ...peer.profile, ...contactProfile }
           const contactRes = {
             profile,
             localID: id,
@@ -94,7 +95,7 @@ export default class ContextQueries {
     userID: string,
     contactIDs: Array<string>,
   ): Array<AppUserContact> {
-    const { apps } = this._context.openVault
+    const { apps, identities } = this._context.openVault
     const app = apps.getAnyByID(appID)
     if (!app) {
       throw new Error('App not found')
@@ -112,7 +113,9 @@ export default class ContextQueries {
           c => c.localID === approvedContact.localID,
         )
         if (contact) {
-          contactData.data = { profile: contact.profile }
+          contactData.data = {
+            profile: identities.getContactProfile(contact.localID),
+          }
         }
       }
       return contactData

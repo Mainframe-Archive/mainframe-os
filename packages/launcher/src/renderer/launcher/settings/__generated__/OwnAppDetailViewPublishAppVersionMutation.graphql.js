@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 2a7a0212aa40c9c3ff80672f183b4d11
+ * @relayHash 0fbb1844abdeb111cfcc4b39d2b98c03
  */
 
 /* eslint-disable */
@@ -10,35 +10,17 @@
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
 type OwnAppsView_apps$ref = any;
-export type AppCreateMutationInput = {
-  name: string,
-  contentsPath: string,
+export type PublishAppVersionInput = {
+  appID: string,
   version: string,
-  developerID: string,
-  permissionsRequirements: AppPermissionsRequirementsInput,
   clientMutationId?: ?string,
 };
-export type AppPermissionsRequirementsInput = {
-  optional: AppPermissionDefinitionsInput,
-  required: AppPermissionDefinitionsInput,
-};
-export type AppPermissionDefinitionsInput = {
-  BLOCKCHAIN_SEND?: ?boolean,
-  CONTACTS_READ?: ?boolean,
-  SWARM_UPLOAD?: ?boolean,
-  SWARM_DOWNLOAD?: ?boolean,
-  WEB_REQUEST?: ?$ReadOnlyArray<?string>,
-};
-export type appMutationsAppCreateMutationVariables = {|
-  input: AppCreateMutationInput
+export type OwnAppDetailViewPublishAppVersionMutationVariables = {|
+  input: PublishAppVersionInput
 |};
-export type appMutationsAppCreateMutationResponse = {|
-  +createApp: ?{|
-    +app: ?{|
-      +id: string,
-      +localID: string,
-      +name: string,
-    |},
+export type OwnAppDetailViewPublishAppVersionMutationResponse = {|
+  +publishAppVersion: ?{|
+    +versionHash: string,
     +viewer: {|
       +apps: {|
         +$fragmentRefs: OwnAppsView_apps$ref
@@ -46,23 +28,19 @@ export type appMutationsAppCreateMutationResponse = {|
     |},
   |}
 |};
-export type appMutationsAppCreateMutation = {|
-  variables: appMutationsAppCreateMutationVariables,
-  response: appMutationsAppCreateMutationResponse,
+export type OwnAppDetailViewPublishAppVersionMutation = {|
+  variables: OwnAppDetailViewPublishAppVersionMutationVariables,
+  response: OwnAppDetailViewPublishAppVersionMutationResponse,
 |};
 */
 
 
 /*
-mutation appMutationsAppCreateMutation(
-  $input: AppCreateMutationInput!
+mutation OwnAppDetailViewPublishAppVersionMutation(
+  $input: PublishAppVersionInput!
 ) {
-  createApp(input: $input) {
-    app {
-      id
-      localID
-      name
-    }
+  publishAppVersion(input: $input) {
+    versionHash
     viewer {
       apps {
         ...OwnAppsView_apps
@@ -146,7 +124,7 @@ var v0 = [
   {
     "kind": "LocalArgument",
     "name": "input",
-    "type": "AppCreateMutationInput!",
+    "type": "PublishAppVersionInput!",
     "defaultValue": null
   }
 ],
@@ -155,13 +133,13 @@ v1 = [
     "kind": "Variable",
     "name": "input",
     "variableName": "input",
-    "type": "AppCreateMutationInput!"
+    "type": "PublishAppVersionInput!"
   }
 ],
 v2 = {
   "kind": "ScalarField",
   "alias": null,
-  "name": "id",
+  "name": "versionHash",
   "args": null,
   "storageKey": null
 },
@@ -180,18 +158,11 @@ v4 = {
   "storageKey": null
 },
 v5 = {
-  "kind": "LinkedField",
+  "kind": "ScalarField",
   "alias": null,
-  "name": "app",
-  "storageKey": null,
+  "name": "id",
   "args": null,
-  "concreteType": "OwnApp",
-  "plural": false,
-  "selections": [
-    v2,
-    v3,
-    v4
-  ]
+  "storageKey": null
 },
 v6 = [
   {
@@ -219,13 +190,13 @@ v6 = [
 return {
   "kind": "Request",
   "operationKind": "mutation",
-  "name": "appMutationsAppCreateMutation",
+  "name": "OwnAppDetailViewPublishAppVersionMutation",
   "id": null,
-  "text": "mutation appMutationsAppCreateMutation(\n  $input: AppCreateMutationInput!\n) {\n  createApp(input: $input) {\n    app {\n      id\n      localID\n      name\n    }\n    viewer {\n      apps {\n        ...OwnAppsView_apps\n      }\n      id\n    }\n  }\n}\n\nfragment OwnAppsView_apps on Apps {\n  own {\n    localID\n    name\n    ...AppItem_ownApp\n    ...OwnAppDetailView_ownApp\n    id\n  }\n}\n\nfragment AppItem_ownApp on OwnApp {\n  localID\n  name\n  developer {\n    id\n    name\n  }\n  versions {\n    version\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n    }\n  }\n  users {\n    localID\n    identity {\n      profile {\n        name\n      }\n      id\n    }\n    id\n  }\n}\n\nfragment OwnAppDetailView_ownApp on OwnApp {\n  localID\n  name\n  contentsPath\n  developer {\n    id\n    name\n  }\n  versions {\n    version\n    versionHash\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        CONTACTS_READ\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        CONTACTS_READ\n      }\n    }\n  }\n}\n",
+  "text": "mutation OwnAppDetailViewPublishAppVersionMutation(\n  $input: PublishAppVersionInput!\n) {\n  publishAppVersion(input: $input) {\n    versionHash\n    viewer {\n      apps {\n        ...OwnAppsView_apps\n      }\n      id\n    }\n  }\n}\n\nfragment OwnAppsView_apps on Apps {\n  own {\n    localID\n    name\n    ...AppItem_ownApp\n    ...OwnAppDetailView_ownApp\n    id\n  }\n}\n\nfragment AppItem_ownApp on OwnApp {\n  localID\n  name\n  developer {\n    id\n    name\n  }\n  versions {\n    version\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n    }\n  }\n  users {\n    localID\n    identity {\n      profile {\n        name\n      }\n      id\n    }\n    id\n  }\n}\n\nfragment OwnAppDetailView_ownApp on OwnApp {\n  localID\n  name\n  contentsPath\n  developer {\n    id\n    name\n  }\n  versions {\n    version\n    versionHash\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        CONTACTS_READ\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        CONTACTS_READ\n      }\n    }\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
-    "name": "appMutationsAppCreateMutation",
+    "name": "OwnAppDetailViewPublishAppVersionMutation",
     "type": "Mutation",
     "metadata": null,
     "argumentDefinitions": v0,
@@ -233,13 +204,13 @@ return {
       {
         "kind": "LinkedField",
         "alias": null,
-        "name": "createApp",
+        "name": "publishAppVersion",
         "storageKey": null,
         "args": v1,
-        "concreteType": "AppCreateMutationPayload",
+        "concreteType": "PublishAppVersionPayload",
         "plural": false,
         "selections": [
-          v5,
+          v2,
           {
             "kind": "LinkedField",
             "alias": null,
@@ -273,19 +244,19 @@ return {
   },
   "operation": {
     "kind": "Operation",
-    "name": "appMutationsAppCreateMutation",
+    "name": "OwnAppDetailViewPublishAppVersionMutation",
     "argumentDefinitions": v0,
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
-        "name": "createApp",
+        "name": "publishAppVersion",
         "storageKey": null,
         "args": v1,
-        "concreteType": "AppCreateMutationPayload",
+        "concreteType": "PublishAppVersionPayload",
         "plural": false,
         "selections": [
-          v5,
+          v2,
           {
             "kind": "LinkedField",
             "alias": null,
@@ -324,7 +295,7 @@ return {
                         "concreteType": "AppAuthor",
                         "plural": false,
                         "selections": [
-                          v2,
+                          v5,
                           v4
                         ]
                       },
@@ -375,13 +346,7 @@ return {
                               }
                             ]
                           },
-                          {
-                            "kind": "ScalarField",
-                            "alias": null,
-                            "name": "versionHash",
-                            "args": null,
-                            "storageKey": null
-                          }
+                          v2
                         ]
                       },
                       {
@@ -415,10 +380,10 @@ return {
                                   v4
                                 ]
                               },
-                              v2
+                              v5
                             ]
                           },
-                          v2
+                          v5
                         ]
                       },
                       {
@@ -428,12 +393,12 @@ return {
                         "args": null,
                         "storageKey": null
                       },
-                      v2
+                      v5
                     ]
                   }
                 ]
               },
-              v2
+              v5
             ]
           }
         ]
@@ -443,5 +408,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '954c5f8b516fc2de93670403fecc6b96';
+(node/*: any*/).hash = '349d6f1d0b688615875efa231efc7889';
 module.exports = node;

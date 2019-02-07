@@ -100,6 +100,7 @@ input AppManifestInput {
 type AppPermissionDefinitions {
   WEB_REQUEST: [String]
   BLOCKCHAIN_SEND: Boolean
+  CONTACTS_READ: Boolean
 }
 
 input AppPermissionDefinitionsInput {
@@ -156,8 +157,9 @@ type AppUserSettings {
 
 type AppVersionData {
   version: String!
+  versionHash: String
+  contentsURI: String
   permissions: AppPermissionsRequirements!
-  publicationState: String!
 }
 
 enum ConnectionState {
@@ -206,6 +208,7 @@ type CreateHDWalletPayload {
 
 input CreateUserIdentityInput {
   profile: UserProfileInput!
+  private: Boolean
   clientMutationId: String
 }
 
@@ -291,6 +294,8 @@ input ManifestAuthorInput {
 type Mutation {
   createApp(input: AppCreateMutationInput!): AppCreateMutationPayload
   installApp(input: AppInstallMutationInput!): AppInstallMutationPayload
+  setAppPermissionsRequirements(input: SetAppPermissionsRequirementsInput!): SetAppPermissionsRequirementsPayload
+  publishAppVersion(input: PublishAppVersionInput!): PublishAppVersionPayload
   createUserIdentity(input: CreateUserIdentityInput!): CreateUserIdentityPayload
   createDeveloperIdentity(input: CreateDeveloperIdentityInput!): CreateDeveloperIdentityPayload
   createHDWallet(input: CreateHDWalletInput!): CreateHDWalletPayload
@@ -302,6 +307,7 @@ type Mutation {
   deleteContact(input: DeletContactInput!): DeletContactPayload
   setDefaultWallet(input: SetDefaultWalletInput!): SetDefaultWalletPayload
   updateProfile(input: UpdateProfileInput!): UpdateProfilePayload
+  setUserProfileVisibility(input: SetUserProfileVisibilityInput!): SetUserProfileVisibilityPayload
 }
 
 type NamedProfile {
@@ -321,7 +327,8 @@ type OwnApp implements Node {
   id: ID!
   localID: ID!
   name: String!
-  versions: [AppVersionData]
+  contentsPath: String!
+  versions: [AppVersionData!]!
   developer: AppAuthor!
   users: [AppUser]
 }
@@ -346,6 +353,7 @@ type OwnUserIdentity implements Node {
   wallets: EthWallets!
   profile: NamedProfile!
   pubKey: String!
+  privateProfile: Boolean
 }
 
 type Peer {
@@ -365,6 +373,18 @@ input PermissionGrantsInput {
   WEB_REQUEST: WebRequestGrantInput!
 }
 
+input PublishAppVersionInput {
+  appID: String!
+  version: String!
+  clientMutationId: String
+}
+
+type PublishAppVersionPayload {
+  versionHash: String!
+  viewer: Viewer!
+  clientMutationId: String
+}
+
 type Query {
   """Fetches an object given its ID"""
   node(
@@ -375,6 +395,17 @@ type Query {
   peers: Peers!
 }
 
+input SetAppPermissionsRequirementsInput {
+  appID: String!
+  permissionsRequirements: AppPermissionsRequirementsInput!
+  clientMutationId: String
+}
+
+type SetAppPermissionsRequirementsPayload {
+  viewer: Viewer!
+  clientMutationId: String
+}
+
 input SetDefaultWalletInput {
   userID: String!
   address: String!
@@ -382,6 +413,17 @@ input SetDefaultWalletInput {
 }
 
 type SetDefaultWalletPayload {
+  viewer: Viewer!
+  clientMutationId: String
+}
+
+input SetUserProfileVisibilityInput {
+  userID: String!
+  visibile: Boolean
+  clientMutationId: String
+}
+
+type SetUserProfileVisibilityPayload {
   viewer: Viewer!
   clientMutationId: String
 }
@@ -397,6 +439,7 @@ enum SupportedWallets {
 input UpdateProfileInput {
   userID: String!
   profile: UpdateUserProfileInput!
+  privateProfile: Boolean
   clientMutationId: String
 }
 

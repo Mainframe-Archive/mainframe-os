@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash f8d655a144258a66f8a4b914b2430948
+ * @relayHash 60de3998107083b9ead2a25fcc6e258f
  */
 
 /* eslint-disable */
@@ -9,69 +9,44 @@
 
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
-export type CreateUserIdentityInput = {
+export type CreateDeveloperIdentityInput = {
   profile: UserProfileInput,
-  private?: ?boolean,
   clientMutationId?: ?string,
 };
 export type UserProfileInput = {
   name: string,
   avatar?: ?string,
 };
-export type IdentitySelectorViewCreateUserIdentityMutationVariables = {|
-  input: CreateUserIdentityInput
+export type CreateDevIdentityViewCreateDeveloperIdentityMutationVariables = {|
+  input: CreateDeveloperIdentityInput
 |};
-export type IdentitySelectorViewCreateUserIdentityMutationResponse = {|
-  +createUserIdentity: ?{|
-    +user: ?{|
-      +localID: string,
-      +profile: {|
-        +name: string
-      |},
-    |},
+export type CreateDevIdentityViewCreateDeveloperIdentityMutationResponse = {|
+  +createDeveloperIdentity: ?{|
     +viewer: {|
       +identities: {|
-        +ownUsers: ?$ReadOnlyArray<?{|
-          +profile: {|
-            +name: string
-          |}
-        |}>,
         +ownDevelopers: ?$ReadOnlyArray<?{|
           +profile: {|
             +name: string
           |}
-        |}>,
+        |}>
       |}
-    |},
+    |}
   |}
 |};
-export type IdentitySelectorViewCreateUserIdentityMutation = {|
-  variables: IdentitySelectorViewCreateUserIdentityMutationVariables,
-  response: IdentitySelectorViewCreateUserIdentityMutationResponse,
+export type CreateDevIdentityViewCreateDeveloperIdentityMutation = {|
+  variables: CreateDevIdentityViewCreateDeveloperIdentityMutationVariables,
+  response: CreateDevIdentityViewCreateDeveloperIdentityMutationResponse,
 |};
 */
 
 
 /*
-mutation IdentitySelectorViewCreateUserIdentityMutation(
-  $input: CreateUserIdentityInput!
+mutation CreateDevIdentityViewCreateDeveloperIdentityMutation(
+  $input: CreateDeveloperIdentityInput!
 ) {
-  createUserIdentity(input: $input) {
-    user {
-      localID
-      profile {
-        name
-      }
-      id
-    }
+  createDeveloperIdentity(input: $input) {
     viewer {
       identities {
-        ownUsers {
-          profile {
-            name
-          }
-          id
-        }
         ownDevelopers {
           profile {
             name
@@ -90,7 +65,7 @@ var v0 = [
   {
     "kind": "LocalArgument",
     "name": "input",
-    "type": "CreateUserIdentityInput!",
+    "type": "CreateDeveloperIdentityInput!",
     "defaultValue": null
   }
 ],
@@ -99,17 +74,10 @@ v1 = [
     "kind": "Variable",
     "name": "input",
     "variableName": "input",
-    "type": "CreateUserIdentityInput!"
+    "type": "CreateDeveloperIdentityInput!"
   }
 ],
 v2 = {
-  "kind": "ScalarField",
-  "alias": null,
-  "name": "localID",
-  "args": null,
-  "storageKey": null
-},
-v3 = {
   "kind": "LinkedField",
   "alias": null,
   "name": "profile",
@@ -127,30 +95,23 @@ v3 = {
     }
   ]
 },
-v4 = [
-  v3
-],
-v5 = {
+v3 = {
   "kind": "ScalarField",
   "alias": null,
   "name": "id",
   "args": null,
   "storageKey": null
-},
-v6 = [
-  v3,
-  v5
-];
+};
 return {
   "kind": "Request",
   "operationKind": "mutation",
-  "name": "IdentitySelectorViewCreateUserIdentityMutation",
+  "name": "CreateDevIdentityViewCreateDeveloperIdentityMutation",
   "id": null,
-  "text": "mutation IdentitySelectorViewCreateUserIdentityMutation(\n  $input: CreateUserIdentityInput!\n) {\n  createUserIdentity(input: $input) {\n    user {\n      localID\n      profile {\n        name\n      }\n      id\n    }\n    viewer {\n      identities {\n        ownUsers {\n          profile {\n            name\n          }\n          id\n        }\n        ownDevelopers {\n          profile {\n            name\n          }\n          id\n        }\n      }\n      id\n    }\n  }\n}\n",
+  "text": "mutation CreateDevIdentityViewCreateDeveloperIdentityMutation(\n  $input: CreateDeveloperIdentityInput!\n) {\n  createDeveloperIdentity(input: $input) {\n    viewer {\n      identities {\n        ownDevelopers {\n          profile {\n            name\n          }\n          id\n        }\n      }\n      id\n    }\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
-    "name": "IdentitySelectorViewCreateUserIdentityMutation",
+    "name": "CreateDevIdentityViewCreateDeveloperIdentityMutation",
     "type": "Mutation",
     "metadata": null,
     "argumentDefinitions": v0,
@@ -158,25 +119,12 @@ return {
       {
         "kind": "LinkedField",
         "alias": null,
-        "name": "createUserIdentity",
+        "name": "createDeveloperIdentity",
         "storageKey": null,
         "args": v1,
-        "concreteType": "CreateUserIdentityPayload",
+        "concreteType": "CreateDeveloperIdentityPayload",
         "plural": false,
         "selections": [
-          {
-            "kind": "LinkedField",
-            "alias": null,
-            "name": "user",
-            "storageKey": null,
-            "args": null,
-            "concreteType": "OwnUserIdentity",
-            "plural": false,
-            "selections": [
-              v2,
-              v3
-            ]
-          },
           {
             "kind": "LinkedField",
             "alias": null,
@@ -198,22 +146,14 @@ return {
                   {
                     "kind": "LinkedField",
                     "alias": null,
-                    "name": "ownUsers",
-                    "storageKey": null,
-                    "args": null,
-                    "concreteType": "OwnUserIdentity",
-                    "plural": true,
-                    "selections": v4
-                  },
-                  {
-                    "kind": "LinkedField",
-                    "alias": null,
                     "name": "ownDevelopers",
                     "storageKey": null,
                     "args": null,
                     "concreteType": "OwnDeveloperIdentity",
                     "plural": true,
-                    "selections": v4
+                    "selections": [
+                      v2
+                    ]
                   }
                 ]
               }
@@ -225,32 +165,18 @@ return {
   },
   "operation": {
     "kind": "Operation",
-    "name": "IdentitySelectorViewCreateUserIdentityMutation",
+    "name": "CreateDevIdentityViewCreateDeveloperIdentityMutation",
     "argumentDefinitions": v0,
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
-        "name": "createUserIdentity",
+        "name": "createDeveloperIdentity",
         "storageKey": null,
         "args": v1,
-        "concreteType": "CreateUserIdentityPayload",
+        "concreteType": "CreateDeveloperIdentityPayload",
         "plural": false,
         "selections": [
-          {
-            "kind": "LinkedField",
-            "alias": null,
-            "name": "user",
-            "storageKey": null,
-            "args": null,
-            "concreteType": "OwnUserIdentity",
-            "plural": false,
-            "selections": [
-              v2,
-              v3,
-              v5
-            ]
-          },
           {
             "kind": "LinkedField",
             "alias": null,
@@ -272,26 +198,19 @@ return {
                   {
                     "kind": "LinkedField",
                     "alias": null,
-                    "name": "ownUsers",
-                    "storageKey": null,
-                    "args": null,
-                    "concreteType": "OwnUserIdentity",
-                    "plural": true,
-                    "selections": v6
-                  },
-                  {
-                    "kind": "LinkedField",
-                    "alias": null,
                     "name": "ownDevelopers",
                     "storageKey": null,
                     "args": null,
                     "concreteType": "OwnDeveloperIdentity",
                     "plural": true,
-                    "selections": v6
+                    "selections": [
+                      v2,
+                      v3
+                    ]
                   }
                 ]
               },
-              v5
+              v3
             ]
           }
         ]
@@ -301,5 +220,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '032729d00eeafaf532be34f9bf56f9d4';
+(node/*: any*/).hash = 'e95f4d0abbfc546f0377959e44c19bac';
 module.exports = node;
