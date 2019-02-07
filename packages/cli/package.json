@@ -21,7 +21,7 @@
   },
   "scripts": {
     "clean": "del-cli lib",
-    "build:js": "cross-env BABEL_ENV=browser-cjs babel src --out-dir lib",
+    "build:js": "babel src --out-dir lib",
     "build:flow": "flow-copy-source src lib",
     "build": "npm run clean && npm run build:js && npm run build:flow",
     "test:types": "flow check"
