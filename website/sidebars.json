@@ -3,7 +3,7 @@
     "Mainframe OS": ["introduction"],
     "Development": ["quick-start"],
     "Compile From Source": ["unix", "windows"],
-    "Guidelines": ["contributing", "web3"]
+    "Guidelines": ["web3"]
   },
   "docs-other": {
     "API": ["doc4", "doc5"]
