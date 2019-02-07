@@ -11,8 +11,7 @@ import { AppsGrid, renderNewAppButton } from '../apps/AppsView'
 import { OwnAppItem } from '../apps/AppItem'
 import CreateAppModal from './CreateAppModal'
 import CreateDevIdentityView from './CreateDevIdentityView'
-import OwnAppDetailView from './OwnAppDetailView'
-import type { OwnAppDetailView_ownApp as OwnApp } from './__generated__/OwnAppDetailView_ownApp.graphql.js'
+import OwnAppDetailView, { type OwnApp } from './OwnAppDetailView'
 
 type Props = {
   identities: {

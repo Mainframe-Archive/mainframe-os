@@ -12,7 +12,13 @@ import { Text } from '@morpheus-ui/core'
 
 import FormModalView from '../../UIComponents/FormModalView'
 import { PERMISSIONS_DESCRIPTIONS } from './PermissionsRequirements'
-import { type AppData } from './CreateAppModal'
+
+export type AppData = {
+  name?: string,
+  version?: string,
+  contentsPath?: ?string,
+  developerID?: ?string,
+}
 
 type Props = {
   onRequestClose?: () => any,
@@ -70,13 +76,15 @@ export default class AppSummary extends Component<Props> {
           })
         }
       } else {
-        acc.push(
-          <PermissionRow first={acc.length === 0} key={key}>
-            <Text variant={['greyDark23']} size={12}>
-              {PERMISSIONS_DESCRIPTIONS[key]}
-            </Text>
-          </PermissionRow>,
-        )
+        if (permission === true) {
+          acc.push(
+            <PermissionRow first={acc.length === 0} key={key}>
+              <Text variant={['greyDark23']} size={12}>
+                {PERMISSIONS_DESCRIPTIONS[key]}
+              </Text>
+            </PermissionRow>,
+          )
+        }
       }
       return acc
     }, [])

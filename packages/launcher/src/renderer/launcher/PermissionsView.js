@@ -39,14 +39,6 @@ const PERMISSION_NAMES = {
     name: 'Request to fetch contacts',
     description: 'Allows the app to read data on approved contacts.',
   },
-  SWARM_DOWNLOAD: {
-    name: 'Download From Swarm',
-    description: 'Allow the app to download files from swarm',
-  },
-  SWARM_UPLOAD: {
-    name: 'Upload To Swarm',
-    description: 'Allow this app to upload files from swarm',
-  },
   WEB_REQUEST: {
     name: 'Make Web requests',
     description: 'Allow this app to make Web requests to specified domains',

@@ -18,7 +18,7 @@ import FormModalView from '../../UIComponents/FormModalView'
 import { EnvironmentContext } from '../RelayEnvironment'
 import { appCreateMutation } from '../apps/appMutations'
 import PermissionsRequirementsView from './PermissionsRequirements'
-import AppSummary from './AppSumary'
+import AppSummary, { type AppData } from './AppSummary'
 
 type RendererProps = {
   onPressBack?: () => any,
@@ -28,13 +28,6 @@ type RendererProps = {
 
 type Props = RendererProps & {
   ownDevelopers: Array<IdentityOwnData>,
-}
-
-export type AppData = {
-  name?: string,
-  version?: string,
-  contentsPath?: string,
-  developerID?: string,
 }
 
 type State = {
@@ -106,6 +99,7 @@ class CreateAppModal extends Component<Props, State> {
       appData.contentsPath &&
       appData.developerID
     ) {
+      // $FlowFixMe: null checks
       return {
         ...appData,
         permissionsRequirements: permissions,

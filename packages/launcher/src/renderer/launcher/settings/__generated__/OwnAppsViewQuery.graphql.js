@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 89d88db5e8577de5a062187541e38a92
+ * @relayHash 7c4203d20b2575fc2f63cae5e8f48bcc
  */
 
 /* eslint-disable */
@@ -107,22 +107,14 @@ fragment OwnAppDetailView_ownApp on OwnApp {
       optional {
         WEB_REQUEST
         BLOCKCHAIN_SEND
+        CONTACTS_READ
       }
       required {
         WEB_REQUEST
         BLOCKCHAIN_SEND
+        CONTACTS_READ
       }
     }
-  }
-  users {
-    localID
-    identity {
-      profile {
-        name
-      }
-      id
-    }
-    id
   }
 }
 */
@@ -163,6 +155,13 @@ v3 = [
     "name": "BLOCKCHAIN_SEND",
     "args": null,
     "storageKey": null
+  },
+  {
+    "kind": "ScalarField",
+    "alias": null,
+    "name": "CONTACTS_READ",
+    "args": null,
+    "storageKey": null
   }
 ];
 return {
@@ -170,7 +169,7 @@ return {
   "operationKind": "query",
   "name": "OwnAppsViewQuery",
   "id": null,
-  "text": "query OwnAppsViewQuery {\n  viewer {\n    identities {\n      ...OwnAppsView_identities\n    }\n    apps {\n      ...OwnAppsView_apps\n    }\n    id\n  }\n}\n\nfragment OwnAppsView_identities on Identities {\n  ownDevelopers {\n    localID\n    id\n  }\n}\n\nfragment OwnAppsView_apps on Apps {\n  own {\n    localID\n    name\n    ...AppItem_ownApp\n    ...OwnAppDetailView_ownApp\n    id\n  }\n}\n\nfragment AppItem_ownApp on OwnApp {\n  localID\n  name\n  developer {\n    id\n    name\n  }\n  versions {\n    version\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n    }\n  }\n  users {\n    localID\n    identity {\n      profile {\n        name\n      }\n      id\n    }\n    id\n  }\n}\n\nfragment OwnAppDetailView_ownApp on OwnApp {\n  localID\n  name\n  contentsPath\n  developer {\n    id\n    name\n  }\n  versions {\n    version\n    versionHash\n    contentsURI\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n    }\n  }\n  users {\n    localID\n    identity {\n      profile {\n        name\n      }\n      id\n    }\n    id\n  }\n}\n",
+  "text": "query OwnAppsViewQuery {\n  viewer {\n    identities {\n      ...OwnAppsView_identities\n    }\n    apps {\n      ...OwnAppsView_apps\n    }\n    id\n  }\n}\n\nfragment OwnAppsView_identities on Identities {\n  ownDevelopers {\n    localID\n    id\n  }\n}\n\nfragment OwnAppsView_apps on Apps {\n  own {\n    localID\n    name\n    ...AppItem_ownApp\n    ...OwnAppDetailView_ownApp\n    id\n  }\n}\n\nfragment AppItem_ownApp on OwnApp {\n  localID\n  name\n  developer {\n    id\n    name\n  }\n  versions {\n    version\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n    }\n  }\n  users {\n    localID\n    identity {\n      profile {\n        name\n      }\n      id\n    }\n    id\n  }\n}\n\nfragment OwnAppDetailView_ownApp on OwnApp {\n  localID\n  name\n  contentsPath\n  developer {\n    id\n    name\n  }\n  versions {\n    version\n    versionHash\n    contentsURI\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        CONTACTS_READ\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        CONTACTS_READ\n      }\n    }\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",

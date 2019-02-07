@@ -38,10 +38,8 @@ type State = {
 }
 
 export const PERMISSIONS_DESCRIPTIONS = {
-  BLOCKCHAIN_SEND: 'Make transactions to Ethereum Blockchain',
-  CONTACTS_READ: 'Access contact data',
-  SWARM_UPLOAD: 'Upload files to Swarm',
-  SWARM_DOWNLOAD: 'Download files from Swarm',
+  BLOCKCHAIN_SEND: 'Make transactions to Ethereum blockchain',
+  CONTACTS_READ: 'Read data from users contacts',
   WEB_REQUEST: 'Set required web request hosts',
 }
 
@@ -110,14 +108,16 @@ export default class PermissionsRequirementsView extends Component<
         Object.keys(requirements[requirement]).forEach(key => {
           if (
             key === 'WEB_REQUEST' &&
-            Array.isArray(requirements.optional[key])
+            Array.isArray(requirements[requirement][key])
           ) {
-            requirements.optional[key].forEach(host => {
-              permissionSettings[host] = requirement
+            requirements[requirement][key].forEach(host => {
+              permissionSettings[key][host] = requirement
             })
           } else {
-            // @$FlowFixMe missing keys
-            permissionSettings[key] = requirement
+            if (requirements[requirement][key]) {
+              // @$FlowFixMe missing keys
+              permissionSettings[key] = requirement
+            }
           }
         })
       })

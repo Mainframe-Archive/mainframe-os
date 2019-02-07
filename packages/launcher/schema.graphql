@@ -100,6 +100,7 @@ input AppManifestInput {
 type AppPermissionDefinitions {
   WEB_REQUEST: [String]
   BLOCKCHAIN_SEND: Boolean
+  CONTACTS_READ: Boolean
 }
 
 input AppPermissionDefinitionsInput {
@@ -292,6 +293,7 @@ input ManifestAuthorInput {
 type Mutation {
   createApp(input: AppCreateMutationInput!): AppCreateMutationPayload
   installApp(input: AppInstallMutationInput!): AppInstallMutationPayload
+  setAppPermissionsRequirements(input: SetAppPermissionsRequirementsInput!): SetAppPermissionsRequirementsPayload
   publishAppVersion(input: PublishAppVersionInput!): PublishAppVersionPayload
   createUserIdentity(input: CreateUserIdentityInput!): CreateUserIdentityPayload
   createDeveloperIdentity(input: CreateDeveloperIdentityInput!): CreateDeveloperIdentityPayload
@@ -388,6 +390,17 @@ type Query {
   ): Node
   viewer: Viewer!
   peers: Peers!
+}
+
+input SetAppPermissionsRequirementsInput {
+  appID: String!
+  permissionsRequirements: AppPermissionsRequirementsInput!
+  clientMutationId: String
+}
+
+type SetAppPermissionsRequirementsPayload {
+  viewer: Viewer!
+  clientMutationId: String
 }
 
 input SetDefaultWalletInput {

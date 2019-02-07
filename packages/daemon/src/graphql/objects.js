@@ -107,8 +107,7 @@ export const appPermissionGrants = new GraphQLObjectType({
   name: 'AppPermissions',
   fields: () => ({
     BLOCKCHAIN_SEND: { type: GraphQLBoolean },
-    SWARM_UPLOAD: { type: GraphQLBoolean },
-    SWARM_DOWNLOAD: { type: GraphQLBoolean },
+    CONTACS_READ: { type: GraphQLBoolean },
     WEB_REQUEST: { type: new GraphQLNonNull(webRequestGrants) },
   }),
 })
@@ -160,6 +159,9 @@ export const appPermissionDefinitions = new GraphQLObjectType({
       type: new GraphQLList(GraphQLString),
     },
     BLOCKCHAIN_SEND: {
+      type: GraphQLBoolean,
+    },
+    CONTACTS_READ: {
       type: GraphQLBoolean,
     },
   }),

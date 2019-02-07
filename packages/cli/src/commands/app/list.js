@@ -23,7 +23,7 @@ export default class AppListCommand extends Command {
           developerId = app.manifest.developerID
           mainframeID = app.manifest.mfid
         } else {
-          contentsPath = app.manifest.contentsURI
+          contentsPath = app.manifest.contentsHash
           developerId = app.manifest.author.id
           mainframeID = ''
         }
