@@ -112,9 +112,12 @@ class AppInstallModal extends Component<ViewProps, State> {
   onSubmitManifest = async (payload: FormSubmitPayload) => {
     if (payload.valid) {
       try {
+        this.setState({ installStep: 'download' })
+
         const { manifest, appID } = await rpc.loadManifest(payload.fields.appid)
         // If appID is returned it means the app is already installed.
         // If we only support a single user in the launcher, the app must have been already installed by this user.
+
         if (appID != null) {
           return this.props.onInstallComplete()
         }
@@ -237,8 +240,9 @@ class AppInstallModal extends Component<ViewProps, State> {
   renderDownload() {
     const { manifest } = this.state
 
-    return manifest ? (
-      <FormModalView title={`Downloading ${manifest.name}`}>
+    return (
+      <FormModalView
+        title={`Downloading ${manifest ? manifest.name : 'App Manifest'}`}>
         <Container>
           <TextContainer>
             <Text variant={['modalText', 'center']}>
@@ -247,7 +251,7 @@ class AppInstallModal extends Component<ViewProps, State> {
           </TextContainer>
         </Container>
       </FormModalView>
-    ) : null
+    )
   }
 
   render() {
