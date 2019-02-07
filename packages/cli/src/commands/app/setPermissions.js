@@ -7,8 +7,6 @@ import Command from '../../OpenVaultCommand'
 
 const permissionOptions = {
   WEB_REQUEST: 'Web Request',
-  SWARM_DOWNLOAD: 'Download from Swarm',
-  SWARM_UPLOAD: 'Upload to Swarm',
   BLOCKCHAIN_SEND: 'Make Blockchain Transactions',
   COMMS_CONTACT: 'Communication between contacts',
   CONTACTS_READ: 'Access Contacts',

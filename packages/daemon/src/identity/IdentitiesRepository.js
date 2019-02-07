@@ -2,7 +2,6 @@
 
 import { MFID } from '@mainframe/data-types'
 import type { KeyPair } from '@mainframe/utils-crypto'
-// eslint-disable-next-line import/named
 import { uniqueID, idType, type ID } from '@mainframe/utils-id'
 import multibase from 'multibase'
 import { type hexValue } from '@erebos/hex'
@@ -29,7 +28,7 @@ import PeerUserIdentity, {
   type PeerUserProfile,
   type Feeds,
 } from './PeerUserIdentity'
-import Contact, { type ContactSerialized } from './Contact'
+import Contact, { type ContactSerialized, type ContactProfile } from './Contact'
 
 type PeerIdentitiesRepositoryGroupSerialized = {
   apps?: { [id: string]: AppIdentitySerialized },
@@ -207,6 +206,15 @@ const fromContacts = (contacts: ContactsRepository) => {
     acc[ownID] = contactsToJSON(contacts[ownID])
     return acc
   }, {})
+}
+
+const truncateString = (string: string) => {
+  if (string.length < 20) {
+    return string
+  }
+  const start = string.substr(0, 7)
+  const end = string.substr(string.length - 7, string.length)
+  return `${start}...${end}`
 }
 
 export default class IdentitiesRepository {
@@ -420,8 +428,14 @@ export default class IdentitiesRepository {
     else throw new Error('Error creating developer')
   }
 
-  createOwnUser(profile: OwnUserProfile, keyPair?: KeyPair): OwnUserIdentity {
-    const id = this.addIdentity(OwnUserIdentity.create(profile, keyPair))
+  createOwnUser(
+    profile: OwnUserProfile,
+    privateProfile?: boolean,
+    keyPair?: KeyPair,
+  ): OwnUserIdentity {
+    const id = this.addIdentity(
+      OwnUserIdentity.create(profile, privateProfile, keyPair),
+    )
     const user = this.getOwnUser(id)
     if (user) return user
     else throw new Error('Error creating user')
@@ -505,7 +519,7 @@ export default class IdentitiesRepository {
     }
   }
 
-  getContactProfile(contactID: ID): PeerUserProfile {
+  getContactProfile(contactID: ID | string): ContactProfile {
     const userID = this._userByContact[contactID]
     if (userID == null) {
       return {}
@@ -522,9 +536,8 @@ export default class IdentitiesRepository {
     }
     const peer = this._identities.peers.users[contact.peerID]
     const peerProfile = peer ? peer.profile : {}
-
     return {
-      name: contact.name || peerProfile.name,
+      name: contact.name || peerProfile.name || truncateString(peer.publicFeed),
       avatar: contact.profile.avatar || peerProfile.avatar,
     }
   }

@@ -65,13 +65,16 @@ export type AppCreateParams = {
 
 export type AppCreateResult = { appID: ID }
 
-export type WalletSettings = {
+export type AppUserWalletSettings = {
   defaultEthAccount: ?string,
 }
 
 export type AppUserSettings = {
+  approvedContacts: {
+    [localID: string]: ApprovedContact,
+  },
   permissionsSettings: AppUserPermissionsSettings,
-  walletSettings: WalletSettings,
+  walletSettings: AppUserWalletSettings,
 }
 
 export type AppUser = IdentityOwnData & {
@@ -116,7 +119,27 @@ export type AppInstallParams = {
   permissionsSettings: AppUserPermissionsSettings,
 }
 
-export type AppInstallResult = { appID: ID }
+export type AppInstallationState =
+  | 'pending'
+  | 'hash_lookup'
+  | 'hash_not_found'
+  | 'downloading'
+  | 'download_error'
+  | 'ready'
+
+export type AppInstallResult = {
+  appID: ID,
+  installationState: AppInstallationState,
+}
+
+export type AppLoadManifestParams = {
+  hash: string,
+}
+
+export type AppLoadManifestResult = {
+  appID?: ID,
+  manifest: ManifestData,
+}
 
 export type AppOpenParams = {
   appID: ID,
@@ -138,19 +161,26 @@ export type AppOpenResult = {
   app: AppData,
   session: AppSession,
   user: IdentityOwnData,
+  isDev?: ?boolean,
   defaultEthAccount: ?string,
 }
 
-export type AppPublishContentsParams = {
+export type AppPublishParams = {
   appID: ID,
   version?: ?string,
 }
 
-export type AppPublishContentsResult = {
-  contentsURI: string,
+export type AppPublishResult = {
+  hash: string,
 }
 
 export type AppRemoveParams = { appID: ID }
+
+export type AppSetUserDefaultWalletParams = {
+  appID: string,
+  userID: string,
+  address: string,
+}
 
 export type AppSetUserPermissionsSettingsParams = {
   appID: ID,
@@ -167,12 +197,6 @@ export type AppSetPermissionParams = {
 export type AppSetPermissionsRequirementsParams = {
   appID: ID,
   permissions: PermissionsRequirements,
-  version?: ?string,
-}
-
-export type AppWriteManifestParams = {
-  appID: ID,
-  path: string,
   version?: ?string,
 }
 
@@ -242,6 +266,7 @@ export type IdentityAddPeerParams = {
   profile: {
     name?: ?string,
     avatar?: ?string,
+    ethAddress?: ?string,
   },
   publicFeed: string,
   firstContactAddress: string,
@@ -258,6 +283,7 @@ export type IdentityPeerResult = {
   profile: {
     name?: ?string,
     avatar?: ?string,
+    ethAddress?: ?string,
   },
 }
 
@@ -274,6 +300,7 @@ export type IdentityCreateUserParams = {
   profile: {
     name: string,
     avatar?: ?string,
+    ethAddress?: ?string,
   },
 }
 
@@ -344,7 +371,6 @@ export type ContactsApproveContactsForAppParams = {
 
 export type ContactProfile = {
   name?: ?string,
-  aliasName?: ?string,
   avatar?: ?string,
   ethAddress?: ?string,
 }
@@ -384,6 +410,7 @@ export type IdentityUpdateUserParams = {
   profile: {
     name?: string,
     avatar?: ?string,
+    ethAddress?: ?string,
   },
 }
 
@@ -483,8 +510,8 @@ export type WalletGetLedgerEthAccountsResult = Array<string>
 
 export type WalletGetEthAccountsResult = Array<string>
 
-export type WalletAddLedgerEthAccountParams = {
-  index: number,
+export type WalletAddLedgerEthAccountsParams = {
+  indexes: Array<number>,
   name: string,
   userID?: string,
 }
@@ -499,7 +526,7 @@ export type WalletAddHDAccountResult = string
 
 export type WalletAddLedgerResult = {
   localID: string,
-  address: string,
+  addresses: Array<string>,
 }
 
 export type WalletSetUserDefaulParams = {

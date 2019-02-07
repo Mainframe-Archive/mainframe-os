@@ -17,7 +17,7 @@ export type AppItem_ownApp = {|
     +id: ?string,
     +name: ?string,
   |},
-  +versions: ?$ReadOnlyArray<?{|
+  +versions: $ReadOnlyArray<{|
     +version: string,
     +permissions: {|
       +optional: {|

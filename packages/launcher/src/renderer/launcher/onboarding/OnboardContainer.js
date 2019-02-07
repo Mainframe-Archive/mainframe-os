@@ -7,12 +7,14 @@ import styled from 'styled-components/native'
 import { Text } from '@morpheus-ui/core'
 import bgGraphic from '../../../assets/images/onboard-background.png'
 import bgIDGraphic from '../../../assets/images/identity-onboard-background.png'
+import bgWalletGraphic from '../../../assets/images/wallet-onboard-background.png'
 
 type Props = {
   children: any,
   title: string,
   description?: string,
   id?: boolean,
+  wallet?: boolean,
   step?: 1 | 2 | 3,
 }
 
@@ -94,7 +96,13 @@ export default class OnboardContainerView extends Component<Props> {
         )}
         <BgGraphicContainer>
           <BgImage
-            source={this.props.id ? bgIDGraphic : bgGraphic}
+            source={
+              this.props.id
+                ? bgIDGraphic
+                : this.props.wallet
+                ? bgWalletGraphic
+                : bgGraphic
+            }
             resizeMode="contain"
           />
         </BgGraphicContainer>

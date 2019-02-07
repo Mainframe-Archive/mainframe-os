@@ -8,15 +8,10 @@ import {
   type StrictPermissionsGrants, // eslint-disable-line import/named
 } from '@mainframe/app-permissions'
 import React, { Component } from 'react'
-import {
-  View,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-} from 'react-native-web'
+import { Text, DropDown } from '@morpheus-ui/core'
+import styled from 'styled-components/native'
 
-import Button from '../UIComponents/Button'
-import Text from '../UIComponents/Text'
+import FormModalView from '../UIComponents/FormModalView'
 
 type Domain = string
 type PermissionGranted = boolean
@@ -48,19 +43,13 @@ const PERMISSION_NAMES = {
     name: 'Request to fetch contacts',
     description: 'Allows the app to read data on approved contacts.',
   },
-  SWARM_DOWNLOAD: {
-    name: 'Download From Swarm',
-    description: 'Allow the app to download files from swarm',
-  },
-  SWARM_UPLOAD: {
-    name: 'Upload To Swarm',
-    description: 'Allow this app to upload files from swarm',
-  },
   WEB_REQUEST: {
     name: 'Make Web requests',
     description: 'Allow this app to make Web requests to specified domains',
   },
 }
+
+const DROP_DOWN_OPTIONS = ['Ask', 'Always', 'Never']
 
 const formatSettings = (
   settings: $Shape<PermissionsSettings>,
@@ -78,7 +67,9 @@ const formatSettings = (
 }
 
 type Props = {
+  name: string,
   permissions: StrictPermissionsRequirements,
+  onCancel: () => any,
   onSubmit: (permissions: StrictPermissionsGrants) => any,
 }
 
@@ -86,6 +77,52 @@ type State = {
   failedValidation: boolean,
   permissionsSettings: PermissionsSettings,
 }
+
+const Container = styled.View`
+  flex: 1;
+  width: 100%;
+  max-width: 600px;
+  padding: 40px;
+  justify-content: center;
+`
+
+const ScrollView = styled.ScrollView`
+  margin-bottom: 10;
+  flex: 1;
+`
+
+const Title = styled.View`
+  padding: 20px 0;
+  margin-bottom: 20px;
+  border-bottom-width: 1px;
+  border-bottom-color: #f9f9f9;
+`
+
+const PermissionRow = styled.View`
+  padding: 10px 0;
+  margin: 0 10px;
+  margin-bottom: 10px;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  border-top-width: 1px;
+  border-top-color: #f9f9f9;
+
+  ${props => props.option && 'flex-direction: column;'}
+  ${props => props.first && 'border-top-width: 0;'}
+`
+
+const PermissionInfo = styled.View`
+  flex: 1;
+`
+const Domains = styled.View`
+  padding-top: 5px;
+`
+const DomainRow = styled.View`
+  padding-top: 5px;
+  flex-direction: row;
+  padding: 7px 0;
+`
 
 export default class PermissionsView extends Component<Props, State> {
   state = {
@@ -138,48 +175,34 @@ export default class PermissionsView extends Component<Props, State> {
 
   renderRequired() {
     return (
-      <View style={[styles.toggleItem, styles.selectedToggle]}>
-        <Text style={styles.toggleLabel}>Always</Text>
-      </View>
+      <DropDown
+        variant="small"
+        disabled
+        label="Required"
+        defaultValue="Always"
+        options={['Always']}
+      />
     )
   }
 
   renderToggle(key: PermissionKey, value: ?boolean, option?: string) {
-    const options = [
-      {
-        label: 'Ask',
-        grant: undefined,
-      },
-      {
-        label: 'Always',
-        grant: true,
-      },
-      {
-        label: 'Never',
-        grant: false,
-      },
-    ]
-    let selectedIndex = 0
-    if (value) {
-      selectedIndex = 1
-    } else if (value === false) {
-      selectedIndex = 2
-    }
+    const defaultValue = value == null ? 'Ask' : value ? 'Always' : 'Never'
+
+    const onPress = sel =>
+      this.onSetPermissionGrant(
+        key,
+        sel === 'Ask' ? undefined : sel === 'Always',
+        option,
+      )
+
     return (
-      <View style={styles.toggle}>
-        {options.map((o, i) => {
-          const toggleStyles = [styles.toggleItem]
-          if (i === selectedIndex) {
-            toggleStyles.push(styles.selectedToggle)
-          }
-          const onPress = () => this.onSetPermissionGrant(key, o.grant, option)
-          return (
-            <TouchableOpacity key={i} onPress={onPress} style={toggleStyles}>
-              <Text style={styles.toggleLabel}>{o.label}</Text>
-            </TouchableOpacity>
-          )
-        })}
-      </View>
+      <DropDown
+        variant="small"
+        label="Ask"
+        options={DROP_DOWN_OPTIONS}
+        onChange={onPress}
+        defaultValue={defaultValue}
+      />
     )
   }
 
@@ -187,20 +210,21 @@ export default class PermissionsView extends Component<Props, State> {
     key: PermissionKey,
     value: PermissionOptionValue,
     required: boolean,
+    first: boolean,
   ) => {
     const permissionData = PERMISSION_NAMES[key]
     if (permissionData == null) {
       return (
-        <View style={styles.permissionRow} key={key}>
-          <Text style={styles.permissionName}>
+        <PermissionRow first={first} key={key}>
+          <Text variant="greyDark23" bold size={12}>
             {`This app is asking for permission to an unknown permission key: ${key}`}
           </Text>
-        </View>
+        </PermissionRow>
       )
     }
 
     const { permissionsSettings } = this.state
-    let options, rowStyle
+    let options, hasOptions
 
     if (key === 'WEB_REQUEST') {
       if (Array.isArray(value)) {
@@ -208,52 +232,49 @@ export default class PermissionsView extends Component<Props, State> {
           return null
         }
         options = (
-          <View key={key} style={styles.domains}>
+          <Domains key={key}>
             {value.map(domain => (
-              <View style={styles.domainRow} key={domain}>
-                <Text key={domain} style={styles.domainLabel}>
+              <DomainRow key={domain}>
+                <Text key={domain} variant="flex1">
                   {domain}
                 </Text>
-                <View style={styles.switches}>
-                  {required
-                    ? this.renderRequired()
-                    : this.renderToggle(
-                        'WEB_REQUEST',
-                        permissionsSettings.WEB_REQUEST[domain],
-                        domain,
-                      )}
-                </View>
-              </View>
+
+                {required
+                  ? this.renderRequired()
+                  : this.renderToggle(
+                      'WEB_REQUEST',
+                      permissionsSettings.WEB_REQUEST[domain],
+                      domain,
+                    )}
+              </DomainRow>
             ))}
-          </View>
+          </Domains>
         )
       } else {
         // Bad data provided
         options = null
       }
-      rowStyle = styles.permissionRowWithOptions
+      hasOptions = true
     } else {
-      options = (
-        <View style={styles.switches}>
-          {required
-            ? this.renderRequired()
-            : // $FlowFixMe
-              this.renderToggle(key, permissionsSettings[key])}
-        </View>
-      )
-      rowStyle = styles.permissionRow
+      options = required
+        ? this.renderRequired()
+        : // $FlowFixMe
+          this.renderToggle(key, permissionsSettings[key])
+      hasOptions = false
     }
 
     return (
-      <View style={rowStyle} key={key}>
-        <View style={styles.permissionInfo}>
-          <Text style={styles.permissionName}>{permissionData.name}</Text>
-          <Text style={styles.permissionDescription}>
+      <PermissionRow first={first} option={hasOptions} key={key}>
+        <PermissionInfo>
+          <Text variant="greyDark23" bold size={12}>
+            {permissionData.name}
+          </Text>
+          <Text variant="greyDark23" size={11}>
             {permissionData.description}
           </Text>
-        </View>
+        </PermissionInfo>
         {options}
-      </View>
+      </PermissionRow>
     )
   }
 
@@ -261,137 +282,76 @@ export default class PermissionsView extends Component<Props, State> {
     const { permissions } = this.props
 
     const required = definitionsExist(permissions.required)
-      ? Object.keys(permissions.required).map(key => {
-          return this.renderPermission(key, permissions.required[key], true)
+      ? Object.keys(permissions.required).map((key, index) => {
+          return this.renderPermission(
+            key,
+            permissions.required[key],
+            true,
+            index === 0,
+          )
         })
       : null
     const optional = definitionsExist(permissions.optional)
-      ? Object.keys(permissions.optional).map(key => {
-          return this.renderPermission(key, permissions.optional[key], false)
+      ? Object.keys(permissions.optional).map((key, index) => {
+          return this.renderPermission(
+            key,
+            permissions.optional[key],
+            false,
+            index === 0,
+          )
         })
       : null
 
     return required || optional ? (
-      <ScrollView style={styles.scrollView}>
-        <Text style={styles.header}>Required Permissions</Text>
-        {required || <Text>No required permission</Text>}
-        <Text style={styles.header}>Optional Permissions</Text>
-        {optional || <Text>No additional permission</Text>}
+      <ScrollView>
+        <Title>
+          <Text variant="greyDark23" bold size={14}>
+            Required Permissions
+          </Text>
+        </Title>
+        {required || (
+          <Text variant={['modalText', 'center']}>No required permission</Text>
+        )}
+        <Title>
+          <Text variant="greyDark23" bold size={14}>
+            Optional Permissions
+          </Text>
+        </Title>
+        {optional || (
+          <Text variant={['modalText', 'center']}>
+            No additional permission
+          </Text>
+        )}
       </ScrollView>
     ) : (
-      <View>
-        <Text style={styles.header}>No permission needed</Text>
-      </View>
+      <Title>
+        <Text variant="greyDark23" bold size={14}>
+          No permission needed
+        </Text>
+      </Title>
     )
   }
 
   render() {
     const failedValidation = this.state.failedValidation ? (
-      <Text style={styles.errorMessage}>
+      <Text variant="error">
         You have to accept all required permissions to continue.
       </Text>
     ) : null
 
     return (
-      <View style={styles.container}>
-        {this.renderPermissionsOptions()}
-        {failedValidation}
-        <Button
-          title="Save Preferences"
-          testID="installer-save-permissions"
-          onPress={this.onPressDone}
-        />
-      </View>
+      <FormModalView
+        dismissButton="CANCEL"
+        onRequestClose={this.props.onCancel}
+        confirmTestID="installer-save-permissions"
+        onPressConfirm={this.onPressDone}
+        confirmButton="SAVE"
+        title={`${this.props.name}: Manage permissions`}>
+        <Container>
+          {this.renderPermissionsOptions()}
+          {failedValidation}
+        </Container>
+      </FormModalView>
     )
   }
 }
-
-const COLOR_WHITE = '#ffffff'
-const COLOR_LIGHTEST_GREY = '#f0f0f0'
-const COLOR_LIGHT_GREY = '#e5e5e5'
-const COLOR_MF_RED = '#db0b56'
-const COLOR_MF_BLUE = '#102043'
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: COLOR_WHITE,
-    flex: 1,
-    maxHeight: 400,
-  },
-  header: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    paddingVertical: 10,
-  },
-  permissionRow: {
-    backgroundColor: COLOR_LIGHTEST_GREY,
-    padding: 8,
-    marginBottom: 6,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  permissionRowWithOptions: {
-    backgroundColor: COLOR_LIGHTEST_GREY,
-    padding: 8,
-    marginBottom: 6,
-    flexDirection: 'column',
-  },
-  permissionInfo: {
-    flex: 1,
-  },
-  permissionName: {
-    paddingBottom: 6,
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  permissionDescription: {
-    fontSize: 12,
-    paddingRight: 20,
-  },
-  scrollView: {
-    marginBottom: 10,
-    flex: 1,
-  },
-  domains: {
-    paddingTop: 5,
-  },
-  domainRow: {
-    flexDirection: 'row',
-    padding: 7,
-    backgroundColor: COLOR_WHITE,
-  },
-  // domainOption: {
-  //   borderRadius: 30,
-  //   padding: 8,
-  //   backgroundColor: COLOR_WHITE,
-  //   textAlign: 'center',
-  //   margin: 4,
-  // },
-  domainLabel: {
-    flex: 1,
-  },
-  switches: {
-    flexDirection: 'row',
-  },
-  errorMessage: {
-    paddingBottom: 10,
-    paddingTop: 5,
-    color: COLOR_MF_RED,
-  },
-  toggle: {
-    flexDirection: 'row',
-  },
-  toggleItem: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    backgroundColor: COLOR_LIGHT_GREY,
-  },
-  selectedToggle: {
-    color: COLOR_WHITE,
-    backgroundColor: COLOR_MF_BLUE,
-  },
-  toggleLabel: {
-    fontSize: 11,
-  },
-})

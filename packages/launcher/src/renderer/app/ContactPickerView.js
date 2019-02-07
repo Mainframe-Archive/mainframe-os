@@ -2,10 +2,13 @@
 
 import React, { Component } from 'react'
 import { TouchableOpacity } from 'react-native-web'
+import ContactsIcon from '@morpheus-ui/icons/ContactsMd'
 import styled from 'styled-components/native'
-import { Text, Button } from '@morpheus-ui/core'
+import { Button } from '@morpheus-ui/core'
 
+import colors from '../colors'
 import rpc from './rpc'
+import AlertHeader from './AlertHeader'
 
 export type SelectedContactIDs = Array<string>
 
@@ -29,10 +32,11 @@ type State = {
 }
 
 const ContactRow = styled.View`
-  padding: 10px;
-  border-color: #eee;
+  padding-vertical: 10px;
+  border-color: ${colors.GREY_DARK_48};
   border-bottom-width: 1px;
-  background-color: ${props => (props.selected ? '#eee' : '#fff')};
+  background-color: ${props =>
+    props.selected ? colors.GREY_DARK_48 : colors.GREY_DARK_3C};
 `
 
 const ScrollViewStyled = styled.ScrollView`
@@ -42,6 +46,10 @@ const ScrollViewStyled = styled.ScrollView`
 const ButtonsContainer = styled.View`
   flex-direction: row;
   margin-top: 10px;
+`
+
+const NameLabel = styled.Text`
+  color: ${colors.LIGHT_GREY_EE};
 `
 
 export default class ContactPickerView extends Component<Props, State> {
@@ -77,10 +85,6 @@ export default class ContactPickerView extends Component<Props, State> {
     this.props.onSelectedContacts(Array.from(this.state.selectedContacts))
   }
 
-  onPressCancel = () => {
-    this.props.onSelectedContacts([])
-  }
-
   render() {
     const rows = this.state.contacts.map(c => {
       const onPress = () => this.onSelectContact(c)
@@ -88,7 +92,7 @@ export default class ContactPickerView extends Component<Props, State> {
       return (
         <TouchableOpacity key={c.localID} onPress={onPress}>
           <ContactRow selected={selected}>
-            <Text>{c.profile.name}</Text>
+            <NameLabel>{c.profile.name}</NameLabel>
           </ContactRow>
         </TouchableOpacity>
       )
@@ -96,13 +100,13 @@ export default class ContactPickerView extends Component<Props, State> {
     const submitButton = this.props.multiSelect ? (
       <Button title="DONE" onPress={() => this.onSubmit()} />
     ) : null
+
+    const title = this.props.multiSelect ? 'Select Contacts' : 'Select Contact'
     return (
       <>
+        <AlertHeader Icon={ContactsIcon} title={title} />
         <ScrollViewStyled>{rows}</ScrollViewStyled>
-        <ButtonsContainer>
-          {submitButton}
-          <Button title="CANCEL" onPress={() => this.onPressCancel()} />
-        </ButtonsContainer>
+        <ButtonsContainer>{submitButton}</ButtonsContainer>
       </>
     )
   }

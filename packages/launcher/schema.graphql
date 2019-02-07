@@ -14,7 +14,6 @@ type AddContactPayload {
 input AddHDWalletAccountInput {
   walletID: String!
   index: Int!
-  name: String!
   userID: String
   clientMutationId: String
 }
@@ -25,15 +24,15 @@ type AddHDWalletAccountPayload {
   clientMutationId: String
 }
 
-input AddLedgerWalletAccountInput {
-  index: Int!
+input AddLedgerWalletAccountsInput {
+  indexes: [Int]
   name: String!
   userID: String
   clientMutationId: String
 }
 
-type AddLedgerWalletAccountPayload {
-  address: String!
+type AddLedgerWalletAccountsPayload {
+  addresses: [String]
   localID: String!
   viewer: Viewer!
   clientMutationId: String
@@ -92,7 +91,8 @@ input AppManifestInput {
   id: String!
   name: String!
   version: String!
-  contentsURI: String!
+  contentsHash: String!
+  updateHash: String!
   permissions: AppPermissionsRequirementsInput!
   author: ManifestAuthorInput!
 }
@@ -100,6 +100,7 @@ input AppManifestInput {
 type AppPermissionDefinitions {
   WEB_REQUEST: [String]
   BLOCKCHAIN_SEND: Boolean
+  CONTACTS_READ: Boolean
 }
 
 input AppPermissionDefinitionsInput {
@@ -157,8 +158,15 @@ type AppUserSettings {
 
 type AppVersionData {
   version: String!
+  versionHash: String
+  contentsURI: String
   permissions: AppPermissionsRequirements!
-  publicationState: String!
+}
+
+enum ConnectionState {
+  CONNECTED
+  SENDING
+  SENT
 }
 
 type Contact implements Node {
@@ -168,13 +176,7 @@ type Contact implements Node {
   peerID: ID!
   pubKey: String!
   profile: GenericProfile!
-  connectionState: ContactConnection!
-}
-
-enum ContactConnection {
-  CONNECTED
-  SENDING
-  SENT
+  connectionState: ConnectionState!
 }
 
 type Contacts {
@@ -207,6 +209,7 @@ type CreateHDWalletPayload {
 
 input CreateUserIdentityInput {
   profile: UserProfileInput!
+  private: Boolean
   clientMutationId: String
 }
 
@@ -262,6 +265,7 @@ type EthWallets {
 type GenericProfile {
   name: String
   avatar: String
+  ethAddress: String
 }
 
 type Identities {
@@ -291,21 +295,26 @@ input ManifestAuthorInput {
 type Mutation {
   createApp(input: AppCreateMutationInput!): AppCreateMutationPayload
   installApp(input: AppInstallMutationInput!): AppInstallMutationPayload
+  setAppPermissionsRequirements(input: SetAppPermissionsRequirementsInput!): SetAppPermissionsRequirementsPayload
+  publishAppVersion(input: PublishAppVersionInput!): PublishAppVersionPayload
   createUserIdentity(input: CreateUserIdentityInput!): CreateUserIdentityPayload
   createDeveloperIdentity(input: CreateDeveloperIdentityInput!): CreateDeveloperIdentityPayload
   createHDWallet(input: CreateHDWalletInput!): CreateHDWalletPayload
   importHDWallet(input: ImportHDWalletInput!): ImportHDWalletPayload
   addHDWalletAccount(input: AddHDWalletAccountInput!): AddHDWalletAccountPayload
-  addLedgerWalletAccount(input: AddLedgerWalletAccountInput!): AddLedgerWalletAccountPayload
+  addLedgerWalletAccounts(input: AddLedgerWalletAccountsInput!): AddLedgerWalletAccountsPayload
   deleteWallet(input: DeleteWalletInput!): DeleteWalletPayload
   addContact(input: AddContactInput!): AddContactPayload
   deleteContact(input: DeletContactInput!): DeletContactPayload
   setDefaultWallet(input: SetDefaultWalletInput!): SetDefaultWalletPayload
+  updateProfile(input: UpdateProfileInput!): UpdateProfilePayload
+  setUserProfileVisibility(input: SetUserProfileVisibilityInput!): SetUserProfileVisibilityPayload
 }
 
 type NamedProfile {
   name: String!
   avatar: String
+  ethAddress: String
 }
 
 """An object with an ID"""
@@ -319,7 +328,8 @@ type OwnApp implements Node {
   id: ID!
   localID: ID!
   name: String!
-  versions: [AppVersionData]
+  contentsPath: String!
+  versions: [AppVersionData!]!
   developer: AppAuthor!
   users: [AppUser]
 }
@@ -344,6 +354,7 @@ type OwnUserIdentity implements Node {
   wallets: EthWallets!
   profile: NamedProfile!
   pubKey: String!
+  privateProfile: Boolean
 }
 
 type Peer {
@@ -364,6 +375,18 @@ input PermissionGrantsInput {
   WEB_REQUEST: WebRequestGrantInput!
 }
 
+input PublishAppVersionInput {
+  appID: String!
+  version: String!
+  clientMutationId: String
+}
+
+type PublishAppVersionPayload {
+  versionHash: String!
+  viewer: Viewer!
+  clientMutationId: String
+}
+
 type Query {
   """Fetches an object given its ID"""
   node(
@@ -372,6 +395,17 @@ type Query {
   ): Node
   viewer: Viewer!
   peers: Peers!
+}
+
+input SetAppPermissionsRequirementsInput {
+  appID: String!
+  permissionsRequirements: AppPermissionsRequirementsInput!
+  clientMutationId: String
+}
+
+type SetAppPermissionsRequirementsPayload {
+  viewer: Viewer!
+  clientMutationId: String
 }
 
 input SetDefaultWalletInput {
@@ -385,12 +419,41 @@ type SetDefaultWalletPayload {
   clientMutationId: String
 }
 
+input SetUserProfileVisibilityInput {
+  userID: String!
+  visibile: Boolean
+  clientMutationId: String
+}
+
+type SetUserProfileVisibilityPayload {
+  viewer: Viewer!
+  clientMutationId: String
+}
+
 type Subscription {
   contactChanged: Contact!
 }
 
 enum SupportedWallets {
   ETHEREUM
+}
+
+input UpdateProfileInput {
+  userID: String!
+  profile: UpdateUserProfileInput!
+  privateProfile: Boolean
+  clientMutationId: String
+}
+
+type UpdateProfilePayload {
+  viewer: Viewer!
+  clientMutationId: String
+}
+
+input UpdateUserProfileInput {
+  name: String
+  avatar: String
+  ethAddress: String
 }
 
 input UserProfileInput {

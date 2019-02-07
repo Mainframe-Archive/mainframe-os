@@ -107,8 +107,7 @@ export const appPermissionGrants = new GraphQLObjectType({
   name: 'AppPermissions',
   fields: () => ({
     BLOCKCHAIN_SEND: { type: GraphQLBoolean },
-    SWARM_UPLOAD: { type: GraphQLBoolean },
-    SWARM_DOWNLOAD: { type: GraphQLBoolean },
+    CONTACS_READ: { type: GraphQLBoolean },
     WEB_REQUEST: { type: new GraphQLNonNull(webRequestGrants) },
   }),
 })
@@ -162,6 +161,9 @@ export const appPermissionDefinitions = new GraphQLObjectType({
     BLOCKCHAIN_SEND: {
       type: GraphQLBoolean,
     },
+    CONTACTS_READ: {
+      type: GraphQLBoolean,
+    },
   }),
 })
 
@@ -213,11 +215,11 @@ export const appVersionData = new GraphQLObjectType({
     version: {
       type: new GraphQLNonNull(GraphQLString),
     },
+    versionHash: {
+      type: GraphQLString,
+    },
     permissions: {
       type: new GraphQLNonNull(appPermissionsRequirements),
-    },
-    publicationState: {
-      type: new GraphQLNonNull(GraphQLString),
     },
   }),
 })
@@ -263,8 +265,14 @@ export const ownApp = new GraphQLObjectType({
       type: new GraphQLNonNull(GraphQLString),
       resolve: self => self.data.name,
     },
+    contentsPath: {
+      type: new GraphQLNonNull(GraphQLString),
+      resolve: self => self.data.contentsPath,
+    },
     versions: {
-      type: new GraphQLList(appVersionData),
+      type: new GraphQLNonNull(
+        new GraphQLList(new GraphQLNonNull(appVersionData)),
+      ),
       resolve: ({ versions }) => {
         return Object.keys(versions).map(version => ({
           version: version,
@@ -317,6 +325,9 @@ export const genericProfile = new GraphQLObjectType({
     avatar: {
       type: GraphQLString,
     },
+    ethAddress: {
+      type: GraphQLString,
+    },
   }),
 })
 
@@ -327,6 +338,9 @@ export const namedProfile = new GraphQLObjectType({
       type: GraphQLNonNull(GraphQLString),
     },
     avatar: {
+      type: GraphQLString,
+    },
+    ethAddress: {
       type: GraphQLString,
     },
   }),
@@ -411,6 +425,9 @@ export const ownUserIdentity = new GraphQLObjectType({
     },
     pubKey: {
       type: new GraphQLNonNull(GraphQLString),
+    },
+    privateProfile: {
+      type: GraphQLBoolean,
     },
   }),
 })
@@ -589,15 +606,23 @@ export const walletBalances = new GraphQLObjectType({
     eth: {
       type: new GraphQLNonNull(GraphQLString),
       resolve: async (self, args, ctx) => {
-        const balance = await ctx.io.eth.getETHBalance(self)
-        return balance || 0
+        try {
+          return await ctx.io.eth.getETHBalance(self)
+        } catch (err) {
+          ctx.log(err)
+          return 0
+        }
       },
     },
     mft: {
       type: new GraphQLNonNull(GraphQLString),
       resolve: async (self, args, ctx) => {
-        const balance = await ctx.io.eth.getMFTBalance(self)
-        return balance || 0
+        try {
+          return await ctx.io.eth.getMFTBalance(self)
+        } catch (err) {
+          ctx.log(err)
+          return 0
+        }
       },
     },
   }),

@@ -1,7 +1,6 @@
 //@flow
 
 import React, { Component } from 'react'
-import { ActivityIndicator } from 'react-native'
 import { graphql, commitMutation } from 'react-relay'
 import { Button, TextField, Row, Column, Text, Switch } from '@morpheus-ui/core'
 import CircleArrowRight from '@morpheus-ui/icons/CircleArrowRight'
@@ -9,6 +8,7 @@ import { Form, type FormSubmitPayload } from '@morpheus-ui/forms'
 import styled from 'styled-components/native'
 
 import { EnvironmentContext } from '../RelayEnvironment'
+import Loader from '../../UIComponents/Loader'
 import OnboardContainer from './OnboardContainer'
 
 type Props = {
@@ -18,6 +18,7 @@ type Props = {
 type State = {
   error?: ?string,
   awaitingResponse?: boolean,
+  discoverable?: ?boolean,
 }
 
 const FormContainer = styled.View`
@@ -51,7 +52,9 @@ export const createUserMutation = graphql`
 export default class OnboardIdentityView extends Component<Props, State> {
   static contextType = EnvironmentContext
 
-  state = {}
+  state = {
+    discoverable: true,
+  }
 
   onSubmit = (payload: FormSubmitPayload) => {
     const { valid, fields } = payload
@@ -65,13 +68,19 @@ export default class OnboardIdentityView extends Component<Props, State> {
     }
   }
 
+  onTogglePrivate = (value: boolean) => {
+    this.setState({
+      discoverable: value,
+    })
+  }
+
   async createIdentity(name: string) {
     const input = {
       profile: {
         name,
       },
+      private: !this.state.discoverable,
     }
-
     commitMutation(this.context, {
       mutation: createUserMutation,
       variables: { input },
@@ -105,7 +114,7 @@ export default class OnboardIdentityView extends Component<Props, State> {
       </Row>
     ) : null
     const action = this.state.awaitingResponse ? (
-      <ActivityIndicator />
+      <Loader />
     ) : (
       <Button
         variant="onboarding"
@@ -134,7 +143,12 @@ export default class OnboardIdentityView extends Component<Props, State> {
                 />
               </Column>
               <Column>
-                <Switch label="Make my name discoverable" name="discoverable" />
+                <Switch
+                  defaultValue={true}
+                  label="Make my name discoverable"
+                  name="discoverable"
+                  onChange={this.onTogglePrivate}
+                />
               </Column>
             </Row>
 

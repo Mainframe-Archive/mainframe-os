@@ -3,7 +3,7 @@
 import { Observable } from 'rxjs'
 
 import ClientAPIs from '../ClientAPIs'
-import type { ContactID } from './Contacts'
+import type { ContactID } from '../types'
 
 export default class CommsAPIs extends ClientAPIs {
   async publish(

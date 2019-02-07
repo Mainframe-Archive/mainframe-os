@@ -1,6 +1,5 @@
 // @flow
 
-// eslint-disable-next-line import/named
 import { createSignKeyPair, type KeyPair } from '@mainframe/utils-crypto'
 import { uniqueID } from '@mainframe/utils-id'
 

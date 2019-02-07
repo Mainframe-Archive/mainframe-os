@@ -3,7 +3,7 @@ import React, { Component } from 'react'
 import { graphql, createFragmentContainer, QueryRenderer } from 'react-relay'
 
 import { EnvironmentContext } from '../RelayEnvironment'
-import LauncherContext, { type CurrentUser } from '../LauncherContext'
+import applyContext, { type CurrentUser } from '../LauncherContext'
 import RelayLoaderView from '../RelayLoaderView'
 import WalletsView, { type Wallets } from './WalletsView'
 
@@ -61,9 +61,4 @@ export class WalletsScreenRenderer extends Component<RendererProps> {
   }
 }
 
-export default class WalletsScreenContextWrapper extends Component<{}> {
-  static contextType = LauncherContext
-  render() {
-    return <WalletsScreenRenderer user={this.context.user} />
-  }
-}
+export default applyContext(WalletsScreenRenderer)

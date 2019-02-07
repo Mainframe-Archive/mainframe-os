@@ -23,7 +23,7 @@ import {
   type WalletGetEthAccountsResult,
   type WalletGetLedgerEthAccountsParams,
   type WalletGetLedgerEthAccountsResult,
-  type WalletAddLedgerEthAccountParams,
+  type WalletAddLedgerEthAccountsParams,
   type WalletAddLedgerResult,
   type WalletSetUserDefaulParams,
   type WalletSignTxParams,
@@ -108,7 +108,8 @@ export const getUserEthAccounts = {
     ctx: ClientContext,
     params: WalletGetUserEthAccountsParams,
   ): Promise<WalletGetEthAccountsResult> => {
-    return ctx.queries.getUserEthAccounts(params.userID)
+    const accounts = ctx.queries.getUserEthAccounts(params.userID)
+    return accounts
   },
 }
 
@@ -138,14 +139,14 @@ export const getLedgerEthAccounts = {
   },
 }
 
-export const addLedgerEthAccount = {
+export const addLedgerEthAccounts = {
   params: WALLET_ADD_LEDGER_ETH_ACCOUNT_SCHEMA,
   handler: async (
     ctx: ClientContext,
-    params: WalletAddLedgerEthAccountParams,
+    params: WalletAddLedgerEthAccountsParams,
   ): Promise<WalletAddLedgerResult> => {
-    return ctx.mutations.addLedgerWalletAccount(
-      params.index,
+    return ctx.mutations.addLedgerWalletAccounts(
+      params.indexes,
       params.name,
       params.userID,
     )

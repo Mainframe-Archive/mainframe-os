@@ -1,6 +1,7 @@
 // @flow
 
 import { resolve } from 'path'
+import { inspect } from 'util'
 
 import Client from '@mainframe/client'
 import {
@@ -44,6 +45,10 @@ export default class Command extends Cmd {
       return new Client(getDaemonSocketPath(this.env))
     }
     this.error('Daemon is not running, use `daemon:start` first')
+  }
+
+  logObject(value: Object) {
+    this.log(inspect(value, { colors: true, depth: null }))
   }
 
   resolvePath(path: string): string {

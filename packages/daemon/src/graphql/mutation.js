@@ -12,8 +12,6 @@ import {
 } from 'graphql'
 import { mutationWithClientMutationId } from 'graphql-relay'
 
-import { downloadAppContents, getContentsPath } from '../app/AppsRepository'
-
 import {
   app,
   contact,
@@ -152,11 +150,11 @@ const createHDWalletMutation = mutationWithClientMutationId({
   },
 })
 
-const addLedgerWalletAccountMutation = mutationWithClientMutationId({
-  name: 'AddLedgerWalletAccount',
+const addLedgerWalletAccountsMutation = mutationWithClientMutationId({
+  name: 'AddLedgerWalletAccounts',
   inputFields: {
-    index: {
-      type: new GraphQLNonNull(GraphQLInt),
+    indexes: {
+      type: new GraphQLList(GraphQLInt),
     },
     name: {
       type: new GraphQLNonNull(GraphQLString),
@@ -166,9 +164,9 @@ const addLedgerWalletAccountMutation = mutationWithClientMutationId({
     },
   },
   outputFields: {
-    address: {
-      type: new GraphQLNonNull(GraphQLString),
-      resolve: payload => payload.address,
+    addresses: {
+      type: new GraphQLList(GraphQLString),
+      resolve: payload => payload.addresses,
     },
     localID: {
       type: new GraphQLNonNull(GraphQLString),
@@ -177,8 +175,8 @@ const addLedgerWalletAccountMutation = mutationWithClientMutationId({
     viewer: viewerOutput,
   },
   mutateAndGetPayload: async (args, ctx) => {
-    const res = await ctx.mutations.addLedgerWalletAccount(
-      args.index,
+    const res = await ctx.mutations.addLedgerWalletAccounts(
+      args.indexes,
       args.name,
       args.userID,
     )
@@ -223,6 +221,9 @@ const createUserIdentityMutation = mutationWithClientMutationId({
     profile: {
       type: new GraphQLNonNull(userProfileInput),
     },
+    private: {
+      type: GraphQLBoolean,
+    },
   },
   outputFields: {
     user: {
@@ -232,7 +233,7 @@ const createUserIdentityMutation = mutationWithClientMutationId({
     viewer: viewerOutput,
   },
   mutateAndGetPayload: async (args, ctx) => {
-    const user = await ctx.mutations.createUser(args.profile)
+    const user = await ctx.mutations.createUser(args.profile, args.private)
     return { user }
   },
 })
@@ -255,6 +256,66 @@ const createDeveloperIdentityMutation = mutationWithClientMutationId({
     const user = ctx.openVault.identities.createOwnDeveloper(args.profile)
     await ctx.openVault.save()
     return { user }
+  },
+})
+
+const updateProfileInput = new GraphQLInputObjectType({
+  name: 'UpdateUserProfileInput',
+  fields: () => ({
+    name: {
+      type: GraphQLString,
+    },
+    avatar: {
+      type: GraphQLString,
+    },
+    ethAddress: {
+      type: GraphQLString,
+    },
+  }),
+})
+
+const updateProfileMutation = mutationWithClientMutationId({
+  name: 'UpdateProfile',
+  inputFields: {
+    userID: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    profile: {
+      type: new GraphQLNonNull(updateProfileInput),
+    },
+    privateProfile: {
+      type: GraphQLBoolean,
+    },
+  },
+  outputFields: {
+    viewer: viewerOutput,
+  },
+  mutateAndGetPayload: async (args, ctx) => {
+    await ctx.mutations.updateUser(
+      args.userID,
+      args.profile,
+      args.privateProfile,
+    )
+    return {}
+  },
+})
+
+const setUserProfileVisibilityMutation = mutationWithClientMutationId({
+  name: 'SetUserProfileVisibility',
+  inputFields: {
+    userID: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    visibile: {
+      type: GraphQLBoolean,
+    },
+  },
+  outputFields: {
+    viewer: viewerOutput,
+  },
+  mutateAndGetPayload: async (args, ctx) => {
+    await ctx.mutations.setUserProfileVisibility(args.userID, args.visibile)
+    return {}
   },
 })
 
@@ -315,12 +376,6 @@ const appPermissionDefinitionsInput = new GraphQLInputObjectType({
     CONTACTS_READ: {
       type: GraphQLBoolean,
     },
-    SWARM_UPLOAD: {
-      type: GraphQLBoolean,
-    },
-    SWARM_DOWNLOAD: {
-      type: GraphQLBoolean,
-    },
     WEB_REQUEST: {
       type: new GraphQLList(GraphQLString),
     },
@@ -371,6 +426,28 @@ const appCreateMutation = mutationWithClientMutationId({
   },
 })
 
+const setAppPermissionsRequirementsMutation = mutationWithClientMutationId({
+  name: 'SetAppPermissionsRequirements',
+  inputFields: {
+    appID: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    permissionsRequirements: {
+      type: new GraphQLNonNull(appPermissionsRequirementsInput),
+    },
+  },
+  outputFields: {
+    viewer: viewerOutput,
+  },
+  mutateAndGetPayload: async (args, ctx) => {
+    await ctx.mutations.setAppPermissionsRequirements(
+      args.appID,
+      args.permissionsRequirements,
+    )
+    return {}
+  },
+})
+
 const manifestAuthorInput = new GraphQLInputObjectType({
   name: 'ManifestAuthorInput',
   fields: () => ({
@@ -395,7 +472,10 @@ const appManifestInput = new GraphQLInputObjectType({
     version: {
       type: new GraphQLNonNull(GraphQLString),
     },
-    contentsURI: {
+    contentsHash: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    updateHash: {
       type: new GraphQLNonNull(GraphQLString),
     },
     permissions: {
@@ -421,8 +501,6 @@ const permissionGrantsInput = new GraphQLInputObjectType({
     BLOCKCHAIN_SEND: { type: GraphQLBoolean },
     COMMS_CONTACT: { type: GraphQLBoolean },
     CONTACTS_READ: { type: GraphQLBoolean },
-    SWARM_UPLOAD: { type: GraphQLBoolean },
-    SWARM_DOWNLOAD: { type: GraphQLBoolean },
     WEB_REQUEST: { type: new GraphQLNonNull(webRequestGrantInput) },
   }),
 })
@@ -463,15 +541,34 @@ const appInstallMutation = mutationWithClientMutationId({
     { userID, manifest, permissionsSettings },
     ctx,
   ) => {
-    const app = await ctx.openVault.installApp(
-      manifest,
+    const app = await ctx.mutations.installApp({
       userID,
+      manifest,
       permissionsSettings,
-    )
-    const contentsPath = getContentsPath(ctx.env, manifest)
-    await downloadAppContents(ctx.io.bzz, app, contentsPath)
-    await ctx.openVault.save()
+    })
     return { app }
+  },
+})
+
+const publishAppVersionMutation = mutationWithClientMutationId({
+  name: 'PublishAppVersion',
+  inputFields: {
+    appID: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    version: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+  },
+  outputFields: {
+    versionHash: {
+      type: GraphQLNonNull(GraphQLString),
+    },
+    viewer: viewerOutput,
+  },
+  mutateAndGetPayload: async (params, ctx) => {
+    const versionHash = await ctx.mutations.publishApp(params)
+    return { versionHash }
   },
 })
 
@@ -480,15 +577,19 @@ export default new GraphQLObjectType({
   fields: () => ({
     createApp: appCreateMutation,
     installApp: appInstallMutation,
+    setAppPermissionsRequirements: setAppPermissionsRequirementsMutation,
+    publishAppVersion: publishAppVersionMutation,
     createUserIdentity: createUserIdentityMutation,
     createDeveloperIdentity: createDeveloperIdentityMutation,
     createHDWallet: createHDWalletMutation,
     importHDWallet: importHDWalletMutation,
     addHDWalletAccount: addHDWalletAccountMutation,
-    addLedgerWalletAccount: addLedgerWalletAccountMutation,
+    addLedgerWalletAccounts: addLedgerWalletAccountsMutation,
     deleteWallet: deleteWalletMutation,
     addContact: addContactMutation,
     deleteContact: deleteContactMutation,
     setDefaultWallet: setDefaultWalletMutation,
+    updateProfile: updateProfileMutation,
+    setUserProfileVisibility: setUserProfileVisibilityMutation,
   }),
 })

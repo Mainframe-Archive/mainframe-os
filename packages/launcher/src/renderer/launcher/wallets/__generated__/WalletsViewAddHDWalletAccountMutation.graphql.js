@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash c4f76b05fb86dbb8422605b586ae18d8
+ * @relayHash 313a988a522a08d279cbd2e99750bb97
  */
 
 /* eslint-disable */
@@ -14,7 +14,6 @@ type WalletsView_wallets$ref = any;
 export type AddHDWalletAccountInput = {
   walletID: string,
   index: number,
-  name: string,
   userID?: ?string,
   clientMutationId?: ?string,
 };

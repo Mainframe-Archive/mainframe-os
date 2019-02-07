@@ -37,7 +37,28 @@ class CommsSubscription extends ContextSubscription<RxSubscription> {
   }
 }
 
+const sharedMethods = {
+  wallet_getEthAccounts: async (ctx: AppContext): Promise<Array<string>> => {
+    // $FlowFixMe indexer property
+    const accounts = await ctx.client.wallet.getUserEthAccounts({
+      userID: ctx.appSession.user.localID,
+    })
+    if (
+      ctx.appSession.defaultEthAccount &&
+      accounts.includes(ctx.appSession.defaultEthAccount)
+    ) {
+      // Move default account to top
+      const defaultAccount = ctx.appSession.defaultEthAccount
+      accounts.splice(accounts.indexOf(defaultAccount), 1)
+      accounts.unshift(defaultAccount)
+    }
+    return accounts
+  },
+}
+
 export const sandboxed = {
+  ...sharedMethods,
+
   api_version: (ctx: AppContext) => ctx.client.apiVersion(),
 
   // Blockchain
@@ -56,23 +77,6 @@ export const sandboxed = {
     (ctx: AppContext, params: any) => ctx.client.wallet.signTransaction(params),
     // TODO notify app if using ledger to feedback awaiting sign
   ),
-
-  wallet_getEthAccounts: async (ctx: AppContext): Promise<Array<string>> => {
-    // $FlowFixMe indexer property
-    const accounts = await ctx.client.wallet.getUserEthAccounts({
-      userID: ctx.appSession.user.localID,
-    })
-    if (
-      ctx.appSession.defaultEthAccount &&
-      accounts.includes(ctx.appSession.defaultEthAccount)
-    ) {
-      // Move default account to top
-      const defaultAccount = ctx.appSession.defaultEthAccount
-      accounts.splice(accounts.indexOf(defaultAccount), 1)
-      accounts.unshift(defaultAccount)
-    }
-    return accounts
-  },
 
   // Comms
 
@@ -123,7 +127,7 @@ export const sandboxed = {
   contacts_select: withPermission(
     'CONTACTS_READ',
     async (ctx: AppContext, params: { multi?: boolean }) => {
-      const res = await ctx.trustedRPC.request('permission_ask', {
+      const res = await ctx.trustedRPC.request('user_request', {
         key: 'CONTACTS_SELECT',
         params: { CONTACTS_SELECT: params },
       })
@@ -146,11 +150,12 @@ export const sandboxed = {
       })
       const ids = approvedContacts.map(c => c.id)
 
-      return ctx.client.contacts.getAppUserContacts({
+      const contactsRes = await ctx.client.contacts.getAppUserContacts({
         appID,
         userID,
         contactIDs: ids,
       })
+      return contactsRes.contacts
     },
   ),
 
@@ -159,11 +164,12 @@ export const sandboxed = {
     async (ctx: AppContext, params: { contactIDs: Array<string> }) => {
       const userID = ctx.appSession.user.id
       const appID = ctx.appSession.app.appID
-      return ctx.client.contacts.getAppUserContacts({
+      const contactsRes = await ctx.client.contacts.getAppUserContacts({
         appID,
         userID,
         contactIDs: params.contactIDs,
       })
+      return contactsRes.contacts
     },
   ),
 
@@ -172,10 +178,11 @@ export const sandboxed = {
     async (ctx: AppContext) => {
       const userID = ctx.appSession.user.id
       const appID = ctx.appSession.app.appID
-      return ctx.client.contacts.getAppApprovedContacts({
+      const contactsRes = await ctx.client.contacts.getAppApprovedContacts({
         appID,
         userID,
       })
+      return contactsRes.contacts
     },
   ),
 
@@ -239,6 +246,8 @@ export const sandboxed = {
 }
 
 export const trusted = {
+  ...sharedMethods,
+
   sub_createPermissionDenied: (ctx: AppContext): { id: string } => ({
     id: ctx.createPermissionDeniedSubscription(),
   }),
@@ -251,12 +260,41 @@ export const trusted = {
     },
   },
 
+  blockchain_web3Send: async (
+    ctx: AppContext,
+    params: BlockchainWeb3SendParams,
+  ): Promise<Object> => {
+    return ctx.client.blockchain.web3Send(params)
+  },
+
   wallet_getUserEthWallets: async (
     ctx: AppContext,
   ): Promise<WalletGetEthWalletsResult> => {
     return ctx.client.wallet.getUserEthWallets({
       userID: ctx.appSession.user.localID,
     })
+  },
+
+  wallet_selectDefault: async (
+    ctx: AppContext,
+  ): Promise<{ address: ?string }> => {
+    const res = await ctx.trustedRPC.request('user_request', {
+      key: 'WALLET_ACCOUNT_SELECT',
+      params: {},
+    })
+    let address
+    if (res.data && res.data.address) {
+      address = res.data.address
+      ctx.appSession.defaultEthAccount = res.data.address
+      const userID = ctx.appSession.user.id
+      const appID = ctx.appSession.app.appID
+      await ctx.client.app.setUserDefaultWallet({
+        userID,
+        appID,
+        address,
+      })
+    }
+    return { address }
   },
 
   contacts_getUserContacts: (

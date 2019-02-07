@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 167aff56d8ecb1b2b67988f7d66435a4
+ * @relayHash 7e87ff113c584afbce32f0c2ed3c7c35
  */
 
 /* eslint-disable */
@@ -10,38 +10,40 @@
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
 type WalletsView_wallets$ref = any;
-export type AddLedgerWalletAccountInput = {
-  index: number,
+export type AddLedgerWalletAccountsInput = {
+  indexes?: ?$ReadOnlyArray<?number>,
   name: string,
   userID?: ?string,
   clientMutationId?: ?string,
 };
-export type WalletAddLedgerModalAddLedgerWalletAccountMutationVariables = {|
-  input: AddLedgerWalletAccountInput,
+export type WalletAddLedgerModalAddLedgerWalletAccountsMutationVariables = {|
+  input: AddLedgerWalletAccountsInput,
   userID: string,
 |};
-export type WalletAddLedgerModalAddLedgerWalletAccountMutationResponse = {|
-  +addLedgerWalletAccount: ?{|
+export type WalletAddLedgerModalAddLedgerWalletAccountsMutationResponse = {|
+  +addLedgerWalletAccounts: ?{|
+    +addresses: ?$ReadOnlyArray<?string>,
     +viewer: {|
       +wallets: {|
         +$fragmentRefs: WalletsView_wallets$ref
       |}
-    |}
+    |},
   |}
 |};
-export type WalletAddLedgerModalAddLedgerWalletAccountMutation = {|
-  variables: WalletAddLedgerModalAddLedgerWalletAccountMutationVariables,
-  response: WalletAddLedgerModalAddLedgerWalletAccountMutationResponse,
+export type WalletAddLedgerModalAddLedgerWalletAccountsMutation = {|
+  variables: WalletAddLedgerModalAddLedgerWalletAccountsMutationVariables,
+  response: WalletAddLedgerModalAddLedgerWalletAccountsMutationResponse,
 |};
 */
 
 
 /*
-mutation WalletAddLedgerModalAddLedgerWalletAccountMutation(
-  $input: AddLedgerWalletAccountInput!
+mutation WalletAddLedgerModalAddLedgerWalletAccountsMutation(
+  $input: AddLedgerWalletAccountsInput!
   $userID: String!
 ) {
-  addLedgerWalletAccount(input: $input) {
+  addLedgerWalletAccounts(input: $input) {
+    addresses
     viewer {
       wallets {
         ...WalletsView_wallets_3iqrP
@@ -86,7 +88,7 @@ var v0 = [
   {
     "kind": "LocalArgument",
     "name": "input",
-    "type": "AddLedgerWalletAccountInput!",
+    "type": "AddLedgerWalletAccountsInput!",
     "defaultValue": null
   },
   {
@@ -101,17 +103,24 @@ v1 = [
     "kind": "Variable",
     "name": "input",
     "variableName": "input",
-    "type": "AddLedgerWalletAccountInput!"
+    "type": "AddLedgerWalletAccountsInput!"
   }
 ],
 v2 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "addresses",
+  "args": null,
+  "storageKey": null
+},
+v3 = {
   "kind": "ScalarField",
   "alias": null,
   "name": "id",
   "args": null,
   "storageKey": null
 },
-v3 = [
+v4 = [
   {
     "kind": "ScalarField",
     "alias": null,
@@ -169,18 +178,18 @@ v3 = [
       }
     ]
   },
-  v2
+  v3
 ];
 return {
   "kind": "Request",
   "operationKind": "mutation",
-  "name": "WalletAddLedgerModalAddLedgerWalletAccountMutation",
+  "name": "WalletAddLedgerModalAddLedgerWalletAccountsMutation",
   "id": null,
-  "text": "mutation WalletAddLedgerModalAddLedgerWalletAccountMutation(\n  $input: AddLedgerWalletAccountInput!\n  $userID: String!\n) {\n  addLedgerWalletAccount(input: $input) {\n    viewer {\n      wallets {\n        ...WalletsView_wallets_3iqrP\n      }\n      id\n    }\n  }\n}\n\nfragment WalletsView_wallets_3iqrP on Wallets {\n  ethWallets(userID: $userID) {\n    hd {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n    ledger {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n  }\n}\n",
+  "text": "mutation WalletAddLedgerModalAddLedgerWalletAccountsMutation(\n  $input: AddLedgerWalletAccountsInput!\n  $userID: String!\n) {\n  addLedgerWalletAccounts(input: $input) {\n    addresses\n    viewer {\n      wallets {\n        ...WalletsView_wallets_3iqrP\n      }\n      id\n    }\n  }\n}\n\nfragment WalletsView_wallets_3iqrP on Wallets {\n  ethWallets(userID: $userID) {\n    hd {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n    ledger {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
-    "name": "WalletAddLedgerModalAddLedgerWalletAccountMutation",
+    "name": "WalletAddLedgerModalAddLedgerWalletAccountsMutation",
     "type": "Mutation",
     "metadata": null,
     "argumentDefinitions": v0,
@@ -188,12 +197,13 @@ return {
       {
         "kind": "LinkedField",
         "alias": null,
-        "name": "addLedgerWalletAccount",
+        "name": "addLedgerWalletAccounts",
         "storageKey": null,
         "args": v1,
-        "concreteType": "AddLedgerWalletAccountPayload",
+        "concreteType": "AddLedgerWalletAccountsPayload",
         "plural": false,
         "selections": [
+          v2,
           {
             "kind": "LinkedField",
             "alias": null,
@@ -234,18 +244,19 @@ return {
   },
   "operation": {
     "kind": "Operation",
-    "name": "WalletAddLedgerModalAddLedgerWalletAccountMutation",
+    "name": "WalletAddLedgerModalAddLedgerWalletAccountsMutation",
     "argumentDefinitions": v0,
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
-        "name": "addLedgerWalletAccount",
+        "name": "addLedgerWalletAccounts",
         "storageKey": null,
         "args": v1,
-        "concreteType": "AddLedgerWalletAccountPayload",
+        "concreteType": "AddLedgerWalletAccountsPayload",
         "plural": false,
         "selections": [
+          v2,
           {
             "kind": "LinkedField",
             "alias": null,
@@ -288,7 +299,7 @@ return {
                         "args": null,
                         "concreteType": "EthHDWallet",
                         "plural": true,
-                        "selections": v3
+                        "selections": v4
                       },
                       {
                         "kind": "LinkedField",
@@ -298,13 +309,13 @@ return {
                         "args": null,
                         "concreteType": "EthLedgerWallet",
                         "plural": true,
-                        "selections": v3
+                        "selections": v4
                       }
                     ]
                   }
                 ]
               },
-              v2
+              v3
             ]
           }
         ]
@@ -314,5 +325,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '2795fecf3d4353c2fdec562bcb9b8ea0';
+(node/*: any*/).hash = '6aa469bb1cc0401c1c6beb4e4883b304';
 module.exports = node;

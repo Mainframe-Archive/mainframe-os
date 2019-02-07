@@ -60,12 +60,16 @@ export const APP_INSTALL_SCHEMA = {
   permissionsSettings: APP_PERMISSIONS_SETTINGS_SCHEMA,
 }
 
+export const APP_LOAD_MANIFEST_SCHEMA = {
+  hash: 'string',
+}
+
 export const APP_OPEN_SCHEMA = {
   appID: LOCAL_ID_SCHEMA,
   userID: LOCAL_ID_SCHEMA,
 }
 
-export const APP_PUBLISH_CONTENTS_SCHEMA = {
+export const APP_PUBLISH_SCHEMA = {
   appID: LOCAL_ID_SCHEMA,
   version: OPTIONAL_SEMVER_SCHEMA,
 }
@@ -85,6 +89,12 @@ export const APP_SET_PERMISSION_SCHEMA = {
   persist: { type: 'boolean', optional: true },
 }
 
+export const APP_SET_USER_DEFAULT_WALLET_SCHEMA = {
+  appID: 'string',
+  userID: 'string',
+  address: 'string',
+}
+
 export const APP_SET_USER_PERMISSIONS_SETTINGS_SCHEMA = {
   appID: LOCAL_ID_SCHEMA,
   userID: LOCAL_ID_SCHEMA,
@@ -94,12 +104,6 @@ export const APP_SET_USER_PERMISSIONS_SETTINGS_SCHEMA = {
 export const APP_SET_PERMISSIONS_REQUIREMENTS_SCHEMA = {
   appID: LOCAL_ID_SCHEMA,
   permissions: PERMISSIONS_REQUIREMENTS_SCHEMA,
-  version: OPTIONAL_SEMVER_SCHEMA,
-}
-
-export const APP_WRITE_MANIFEST_SCHEMA = {
-  appID: LOCAL_ID_SCHEMA,
-  path: 'string',
   version: OPTIONAL_SEMVER_SCHEMA,
 }
 
