@@ -4,8 +4,9 @@ import React, { Component } from 'react'
 import { Text, Button, Checkbox, Row, Column } from '@morpheus-ui/core'
 import styled from 'styled-components/native'
 import QRCode from 'qrcode-react'
+import { shell } from 'electron'
+
 import EtherscanIcon from '@morpheus-ui/icons/Etherscan'
-import UploadSmIcon from '@morpheus-ui/icons/UploadSm'
 
 import FormModalView from '../../UIComponents/FormModalView'
 
@@ -106,13 +107,18 @@ export default class WalletCreateModal extends Component<Props, State> {
 
   toggleAlert = () => this.setState({ alert: !this.state.alert })
 
+  openEtherscan = () => {
+    shell.openExternal(`https://etherscan.io/address/${this.props.address}`)
+  }
+
   render() {
     return (
       <FormModalView
         full={this.props.full}
         onRequestClose={this.props.onClose}
         title="Address Details"
-        dismissButton="DELETE"
+        // Disable Delete while not implemented
+        // dismissButton="DELETE"
         onPressDismiss={this.toggleAlert}
         dismissButtonDisabled={this.state.alert}>
         <Container>
@@ -126,21 +132,11 @@ export default class WalletCreateModal extends Component<Props, State> {
           </Address>
           <Buttons>
             <Button
-              variant={[
-                'completeOnboarding',
-                'walletOnboarding',
-                'medium',
-                'marginRight20',
-              ]}
+              variant={['completeOnboarding', 'walletOnboarding', 'medium']}
               theme={{ minWidth: 200 }}
               title="View account on Etherscan"
               Icon={EtherscanIcon}
-            />
-            <Button
-              variant={['completeOnboarding', 'walletOnboarding', 'medium']}
-              theme={{ minWidth: 200 }}
-              title="Export private key"
-              Icon={UploadSmIcon}
+              onPress={this.openEtherscan}
             />
           </Buttons>
           <CheckBoxContainer>
