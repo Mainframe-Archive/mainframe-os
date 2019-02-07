@@ -2,10 +2,10 @@
 
 import React, { Component } from 'react'
 import { createFragmentContainer, graphql } from 'react-relay'
-import type { AppOwnData, AppInstalledData } from '@mainframe/client'
+import type { AppInstalledData } from '@mainframe/client'
 import styled from 'styled-components/native'
-
 import { Text } from '@morpheus-ui/core'
+import type OwnApp from '../settings/__generated__/OwnAppDetailView_ownApp.graphql.js'
 
 const AppButtonContainer = styled.TouchableOpacity`
   padding: 15px 10px;
@@ -23,7 +23,7 @@ const AppIcon = styled.View`
   margin-bottom: 10px;
 `
 
-type AppData = AppOwnData | AppInstalledData
+type AppData = OwnApp | AppInstalledData
 
 type SharedProps = {
   onOpenApp: (app: AppData, own: boolean) => any,

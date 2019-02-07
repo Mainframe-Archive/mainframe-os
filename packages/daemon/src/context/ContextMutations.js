@@ -6,7 +6,10 @@ import {
   isValidSemver,
   type ManifestData,
 } from '@mainframe/app-manifest'
-import { type StrictPermissionsRequirements } from '@mainframe/app-permissions'
+import {
+  type StrictPermissionsRequirements,
+  type PermissionsRequirements,
+} from '@mainframe/app-permissions'
 import type {
   AppUserContact,
   AppUserPermissionsSettings,
@@ -250,6 +253,19 @@ export default class ContextMutations {
       throw new Error('Wallet not found')
     }
     app.setDefaultEthAccount(idType(userID), idType(wallet.localID), address)
+    await openVault.save()
+  }
+
+  async setAppPermissionsRequirements(
+    appID: string,
+    permissionRequirements: PermissionsRequirements,
+  ): Promise<void> {
+    const { openVault } = this._context
+    const app = openVault.apps.getOwnByID(idType(appID))
+    if (!app) {
+      throw new Error('App not found')
+    }
+    app.setPermissionsRequirements(permissionRequirements)
     await openVault.save()
   }
 

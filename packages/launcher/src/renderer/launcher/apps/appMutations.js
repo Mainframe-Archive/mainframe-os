@@ -12,7 +12,7 @@ export const appCreateMutation = graphql`
       }
       viewer {
         apps {
-          ...AppsView_apps
+          ...OwnAppsView_apps
         }
       }
     }

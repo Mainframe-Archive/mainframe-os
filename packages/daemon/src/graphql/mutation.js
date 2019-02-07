@@ -373,12 +373,6 @@ const appPermissionDefinitionsInput = new GraphQLInputObjectType({
     CONTACTS_READ: {
       type: GraphQLBoolean,
     },
-    SWARM_UPLOAD: {
-      type: GraphQLBoolean,
-    },
-    SWARM_DOWNLOAD: {
-      type: GraphQLBoolean,
-    },
     WEB_REQUEST: {
       type: new GraphQLList(GraphQLString),
     },
@@ -426,6 +420,28 @@ const appCreateMutation = mutationWithClientMutationId({
   mutateAndGetPayload: async (args, ctx) => {
     const app = await ctx.mutations.createApp(args)
     return { app }
+  },
+})
+
+const setAppPermissionsRequirementsMutation = mutationWithClientMutationId({
+  name: 'SetAppPermissionsRequirements',
+  inputFields: {
+    appID: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    permissionsRequirements: {
+      type: new GraphQLNonNull(appPermissionsRequirementsInput),
+    },
+  },
+  outputFields: {
+    viewer: viewerOutput,
+  },
+  mutateAndGetPayload: async (args, ctx) => {
+    await ctx.mutations.setAppPermissionsRequirements(
+      args.appID,
+      args.permissionsRequirements,
+    )
+    return {}
   },
 })
 
@@ -481,8 +497,6 @@ const permissionGrantsInput = new GraphQLInputObjectType({
   fields: () => ({
     BLOCKCHAIN_SEND: { type: GraphQLBoolean },
     CONTACTS_READ: { type: GraphQLBoolean },
-    SWARM_UPLOAD: { type: GraphQLBoolean },
-    SWARM_DOWNLOAD: { type: GraphQLBoolean },
     WEB_REQUEST: { type: new GraphQLNonNull(webRequestGrantInput) },
   }),
 })
@@ -532,11 +546,35 @@ const appInstallMutation = mutationWithClientMutationId({
   },
 })
 
+const publishAppVersionMutation = mutationWithClientMutationId({
+  name: 'PublishAppVersion',
+  inputFields: {
+    appID: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    version: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+  },
+  outputFields: {
+    versionHash: {
+      type: GraphQLNonNull(GraphQLString),
+    },
+    viewer: viewerOutput,
+  },
+  mutateAndGetPayload: async (params, ctx) => {
+    const versionHash = await ctx.mutations.publishApp(params)
+    return { versionHash }
+  },
+})
+
 export default new GraphQLObjectType({
   name: 'Mutation',
   fields: () => ({
     createApp: appCreateMutation,
     installApp: appInstallMutation,
+    setAppPermissionsRequirements: setAppPermissionsRequirementsMutation,
+    publishAppVersion: publishAppVersionMutation,
     createUserIdentity: createUserIdentityMutation,
     createDeveloperIdentity: createDeveloperIdentityMutation,
     createHDWallet: createHDWalletMutation,

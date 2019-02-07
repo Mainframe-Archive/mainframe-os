@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash ced2d0eaf56500a88d86a3f2261d4d7c
+ * @relayHash e40a6ac8113577ba9cd9a4bd87d20d17
  */
 
 /* eslint-disable */
@@ -9,48 +9,65 @@
 
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
-type AppsScreen_apps$ref = any;
-export type AppsScreenQueryVariables = {||};
-export type AppsScreenQueryResponse = {|
+type OwnAppsView_apps$ref = any;
+type OwnAppsView_identities$ref = any;
+export type OwnAppsViewQueryVariables = {||};
+export type OwnAppsViewQueryResponse = {|
   +viewer: {|
+    +identities: {|
+      +$fragmentRefs: OwnAppsView_identities$ref
+    |},
     +apps: {|
-      +$fragmentRefs: AppsScreen_apps$ref
-    |}
+      +$fragmentRefs: OwnAppsView_apps$ref
+    |},
   |}
 |};
-export type AppsScreenQuery = {|
-  variables: AppsScreenQueryVariables,
-  response: AppsScreenQueryResponse,
+export type OwnAppsViewQuery = {|
+  variables: OwnAppsViewQueryVariables,
+  response: OwnAppsViewQueryResponse,
 |};
 */
 
 
 /*
-query AppsScreenQuery {
+query OwnAppsViewQuery {
   viewer {
+    identities {
+      ...OwnAppsView_identities
+    }
     apps {
-      ...AppsScreen_apps
+      ...OwnAppsView_apps
     }
     id
   }
 }
 
-fragment AppsScreen_apps on Apps {
-  ...AppsView_apps
-}
-
-fragment AppsView_apps on Apps {
-  installed {
+fragment OwnAppsView_identities on Identities {
+  ownDevelopers {
     localID
-    ...AppItem_installedApp
     id
   }
 }
 
-fragment AppItem_installedApp on App {
+fragment OwnAppsView_apps on Apps {
+  own {
+    localID
+    name
+    ...AppItem_ownApp
+    ...OwnAppDetailView_ownApp
+    id
+  }
+}
+
+fragment AppItem_ownApp on OwnApp {
   localID
   name
-  manifest {
+  developer {
+    id
+    name
+  }
+  versions {
+    version
     permissions {
       optional {
         WEB_REQUEST
@@ -61,10 +78,6 @@ fragment AppItem_installedApp on App {
         BLOCKCHAIN_SEND
       }
     }
-    author {
-      id
-      name
-    }
   }
   users {
     localID
@@ -74,19 +87,33 @@ fragment AppItem_installedApp on App {
       }
       id
     }
-    settings {
-      permissionsSettings {
-        permissionsChecked
-        grants {
-          BLOCKCHAIN_SEND
-          WEB_REQUEST {
-            granted
-            denied
-          }
-        }
+    id
+  }
+}
+
+fragment OwnAppDetailView_ownApp on OwnApp {
+  localID
+  name
+  contentsPath
+  developer {
+    id
+    name
+  }
+  versions {
+    version
+    versionHash
+    permissions {
+      optional {
+        WEB_REQUEST
+        BLOCKCHAIN_SEND
+        CONTACTS_READ
+      }
+      required {
+        WEB_REQUEST
+        BLOCKCHAIN_SEND
+        CONTACTS_READ
       }
     }
-    id
   }
 }
 */
@@ -102,14 +129,14 @@ var v0 = {
 v1 = {
   "kind": "ScalarField",
   "alias": null,
-  "name": "name",
+  "name": "id",
   "args": null,
   "storageKey": null
 },
 v2 = {
   "kind": "ScalarField",
   "alias": null,
-  "name": "BLOCKCHAIN_SEND",
+  "name": "name",
   "args": null,
   "storageKey": null
 },
@@ -121,25 +148,31 @@ v3 = [
     "args": null,
     "storageKey": null
   },
-  v2
-],
-v4 = {
-  "kind": "ScalarField",
-  "alias": null,
-  "name": "id",
-  "args": null,
-  "storageKey": null
-};
+  {
+    "kind": "ScalarField",
+    "alias": null,
+    "name": "BLOCKCHAIN_SEND",
+    "args": null,
+    "storageKey": null
+  },
+  {
+    "kind": "ScalarField",
+    "alias": null,
+    "name": "CONTACTS_READ",
+    "args": null,
+    "storageKey": null
+  }
+];
 return {
   "kind": "Request",
   "operationKind": "query",
-  "name": "AppsScreenQuery",
+  "name": "OwnAppsViewQuery",
   "id": null,
-  "text": "query AppsScreenQuery {\n  viewer {\n    apps {\n      ...AppsScreen_apps\n    }\n    id\n  }\n}\n\nfragment AppsScreen_apps on Apps {\n  ...AppsView_apps\n}\n\nfragment AppsView_apps on Apps {\n  installed {\n    localID\n    ...AppItem_installedApp\n    id\n  }\n}\n\nfragment AppItem_installedApp on App {\n  localID\n  name\n  manifest {\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n    }\n    author {\n      id\n      name\n    }\n  }\n  users {\n    localID\n    identity {\n      profile {\n        name\n      }\n      id\n    }\n    settings {\n      permissionsSettings {\n        permissionsChecked\n        grants {\n          BLOCKCHAIN_SEND\n          WEB_REQUEST {\n            granted\n            denied\n          }\n        }\n      }\n    }\n    id\n  }\n}\n",
+  "text": "query OwnAppsViewQuery {\n  viewer {\n    identities {\n      ...OwnAppsView_identities\n    }\n    apps {\n      ...OwnAppsView_apps\n    }\n    id\n  }\n}\n\nfragment OwnAppsView_identities on Identities {\n  ownDevelopers {\n    localID\n    id\n  }\n}\n\nfragment OwnAppsView_apps on Apps {\n  own {\n    localID\n    name\n    ...AppItem_ownApp\n    ...OwnAppDetailView_ownApp\n    id\n  }\n}\n\nfragment AppItem_ownApp on OwnApp {\n  localID\n  name\n  developer {\n    id\n    name\n  }\n  versions {\n    version\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n    }\n  }\n  users {\n    localID\n    identity {\n      profile {\n        name\n      }\n      id\n    }\n    id\n  }\n}\n\nfragment OwnAppDetailView_ownApp on OwnApp {\n  localID\n  name\n  contentsPath\n  developer {\n    id\n    name\n  }\n  versions {\n    version\n    versionHash\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        CONTACTS_READ\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        CONTACTS_READ\n      }\n    }\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
-    "name": "AppsScreenQuery",
+    "name": "OwnAppsViewQuery",
     "type": "Query",
     "metadata": null,
     "argumentDefinitions": [],
@@ -156,6 +189,22 @@ return {
           {
             "kind": "LinkedField",
             "alias": null,
+            "name": "identities",
+            "storageKey": null,
+            "args": null,
+            "concreteType": "Identities",
+            "plural": false,
+            "selections": [
+              {
+                "kind": "FragmentSpread",
+                "name": "OwnAppsView_identities",
+                "args": null
+              }
+            ]
+          },
+          {
+            "kind": "LinkedField",
+            "alias": null,
             "name": "apps",
             "storageKey": null,
             "args": null,
@@ -164,7 +213,7 @@ return {
             "selections": [
               {
                 "kind": "FragmentSpread",
-                "name": "AppsScreen_apps",
+                "name": "OwnAppsView_apps",
                 "args": null
               }
             ]
@@ -175,7 +224,7 @@ return {
   },
   "operation": {
     "kind": "Operation",
-    "name": "AppsScreenQuery",
+    "name": "OwnAppsViewQuery",
     "argumentDefinitions": [],
     "selections": [
       {
@@ -190,6 +239,30 @@ return {
           {
             "kind": "LinkedField",
             "alias": null,
+            "name": "identities",
+            "storageKey": null,
+            "args": null,
+            "concreteType": "Identities",
+            "plural": false,
+            "selections": [
+              {
+                "kind": "LinkedField",
+                "alias": null,
+                "name": "ownDevelopers",
+                "storageKey": null,
+                "args": null,
+                "concreteType": "OwnDeveloperIdentity",
+                "plural": true,
+                "selections": [
+                  v0,
+                  v1
+                ]
+              }
+            ]
+          },
+          {
+            "kind": "LinkedField",
+            "alias": null,
             "name": "apps",
             "storageKey": null,
             "args": null,
@@ -199,23 +272,43 @@ return {
               {
                 "kind": "LinkedField",
                 "alias": null,
-                "name": "installed",
+                "name": "own",
                 "storageKey": null,
                 "args": null,
-                "concreteType": "App",
+                "concreteType": "OwnApp",
                 "plural": true,
                 "selections": [
                   v0,
-                  v1,
+                  v2,
                   {
                     "kind": "LinkedField",
                     "alias": null,
-                    "name": "manifest",
+                    "name": "developer",
                     "storageKey": null,
                     "args": null,
-                    "concreteType": "AppManifestData",
+                    "concreteType": "AppAuthor",
                     "plural": false,
                     "selections": [
+                      v1,
+                      v2
+                    ]
+                  },
+                  {
+                    "kind": "LinkedField",
+                    "alias": null,
+                    "name": "versions",
+                    "storageKey": null,
+                    "args": null,
+                    "concreteType": "AppVersionData",
+                    "plural": true,
+                    "selections": [
+                      {
+                        "kind": "ScalarField",
+                        "alias": null,
+                        "name": "version",
+                        "args": null,
+                        "storageKey": null
+                      },
                       {
                         "kind": "LinkedField",
                         "alias": null,
@@ -248,17 +341,11 @@ return {
                         ]
                       },
                       {
-                        "kind": "LinkedField",
+                        "kind": "ScalarField",
                         "alias": null,
-                        "name": "author",
-                        "storageKey": null,
+                        "name": "versionHash",
                         "args": null,
-                        "concreteType": "AppAuthor",
-                        "plural": false,
-                        "selections": [
-                          v4,
-                          v1
-                        ]
+                        "storageKey": null
                       }
                     ]
                   },
@@ -290,87 +377,28 @@ return {
                             "concreteType": "NamedProfile",
                             "plural": false,
                             "selections": [
-                              v1
+                              v2
                             ]
                           },
-                          v4
+                          v1
                         ]
                       },
-                      {
-                        "kind": "LinkedField",
-                        "alias": null,
-                        "name": "settings",
-                        "storageKey": null,
-                        "args": null,
-                        "concreteType": "AppUserSettings",
-                        "plural": false,
-                        "selections": [
-                          {
-                            "kind": "LinkedField",
-                            "alias": null,
-                            "name": "permissionsSettings",
-                            "storageKey": null,
-                            "args": null,
-                            "concreteType": "AppPermissionsSettings",
-                            "plural": false,
-                            "selections": [
-                              {
-                                "kind": "ScalarField",
-                                "alias": null,
-                                "name": "permissionsChecked",
-                                "args": null,
-                                "storageKey": null
-                              },
-                              {
-                                "kind": "LinkedField",
-                                "alias": null,
-                                "name": "grants",
-                                "storageKey": null,
-                                "args": null,
-                                "concreteType": "AppPermissions",
-                                "plural": false,
-                                "selections": [
-                                  v2,
-                                  {
-                                    "kind": "LinkedField",
-                                    "alias": null,
-                                    "name": "WEB_REQUEST",
-                                    "storageKey": null,
-                                    "args": null,
-                                    "concreteType": "WebRequestGrants",
-                                    "plural": false,
-                                    "selections": [
-                                      {
-                                        "kind": "ScalarField",
-                                        "alias": null,
-                                        "name": "granted",
-                                        "args": null,
-                                        "storageKey": null
-                                      },
-                                      {
-                                        "kind": "ScalarField",
-                                        "alias": null,
-                                        "name": "denied",
-                                        "args": null,
-                                        "storageKey": null
-                                      }
-                                    ]
-                                  }
-                                ]
-                              }
-                            ]
-                          }
-                        ]
-                      },
-                      v4
+                      v1
                     ]
                   },
-                  v4
+                  {
+                    "kind": "ScalarField",
+                    "alias": null,
+                    "name": "contentsPath",
+                    "args": null,
+                    "storageKey": null
+                  },
+                  v1
                 ]
               }
             ]
           },
-          v4
+          v1
         ]
       }
     ]
@@ -378,5 +406,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '210fbe1af5e37e7da7b7d4f11f7be256';
+(node/*: any*/).hash = '5cf69b652d8cf062dc6a0a9b02d26474';
 module.exports = node;

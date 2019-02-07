@@ -107,6 +107,27 @@ export default class AppsRepository {
     this._ownApps = params.ownApps || {}
 
     // Fill references for apps
+
+    Object.keys(this._ownApps).forEach(appID => {
+      const id = idType(appID)
+      const ownApp = this._ownApps[id]
+      const mfid = MFID.canonical(ownApp.data.mfid)
+      this._byMFID[mfid] = id
+
+      if (ownApp.updateFeed.feedHash) {
+        this._byHash[ownApp.updateFeed.feedHash] = id
+      }
+
+      Object.keys(ownApp.settings).forEach(uid => {
+        const userID = idType(uid)
+        if (this._appsByUser[userID]) {
+          this._appsByUser[userID].push(id)
+        } else {
+          this._appsByUser[userID] = [id]
+        }
+      })
+    })
+
     Object.keys(this._apps).forEach(appID => {
       const id = idType(appID)
       const app = this._apps[id]

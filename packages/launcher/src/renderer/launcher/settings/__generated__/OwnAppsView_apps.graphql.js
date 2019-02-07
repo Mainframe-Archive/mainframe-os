@@ -8,22 +8,24 @@
 
 /*::
 import type { ConcreteFragment } from 'relay-runtime';
-type AppItem_installedApp$ref = any;
+type AppItem_ownApp$ref = any;
+type OwnAppDetailView_ownApp$ref = any;
 import type { FragmentReference } from "relay-runtime";
-declare export opaque type AppsView_apps$ref: FragmentReference;
-export type AppsView_apps = {|
-  +installed: ?$ReadOnlyArray<?{|
+declare export opaque type OwnAppsView_apps$ref: FragmentReference;
+export type OwnAppsView_apps = {|
+  +own: ?$ReadOnlyArray<?{|
     +localID: string,
-    +$fragmentRefs: AppItem_installedApp$ref,
+    +name: string,
+    +$fragmentRefs: AppItem_ownApp$ref & OwnAppDetailView_ownApp$ref,
   |}>,
-  +$refType: AppsView_apps$ref,
+  +$refType: OwnAppsView_apps$ref,
 |};
 */
 
 
 const node/*: ConcreteFragment*/ = {
   "kind": "Fragment",
-  "name": "AppsView_apps",
+  "name": "OwnAppsView_apps",
   "type": "Apps",
   "metadata": null,
   "argumentDefinitions": [],
@@ -31,10 +33,10 @@ const node/*: ConcreteFragment*/ = {
     {
       "kind": "LinkedField",
       "alias": null,
-      "name": "installed",
+      "name": "own",
       "storageKey": null,
       "args": null,
-      "concreteType": "App",
+      "concreteType": "OwnApp",
       "plural": true,
       "selections": [
         {
@@ -45,8 +47,20 @@ const node/*: ConcreteFragment*/ = {
           "storageKey": null
         },
         {
+          "kind": "ScalarField",
+          "alias": null,
+          "name": "name",
+          "args": null,
+          "storageKey": null
+        },
+        {
           "kind": "FragmentSpread",
-          "name": "AppItem_installedApp",
+          "name": "AppItem_ownApp",
+          "args": null
+        },
+        {
+          "kind": "FragmentSpread",
+          "name": "OwnAppDetailView_ownApp",
           "args": null
         }
       ]
@@ -54,5 +68,5 @@ const node/*: ConcreteFragment*/ = {
   ]
 };
 // prettier-ignore
-(node/*: any*/).hash = '4dbdd4cea318032ed805878c5d991fb2';
+(node/*: any*/).hash = '7543de57b555def5c4526712e26acc81';
 module.exports = node;
