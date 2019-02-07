@@ -49,13 +49,13 @@ const InstallIcon = styled.View`
   ${props => props.hover && 'border: 1px solid #DA1157;'}
 `
 
-export const renderNewAppButton = (
+export const NewAppButton = (props: {
   title: string,
   onPress: () => void,
   testID: string,
-) => {
+}) => {
   return (
-    <AppInstallContainer onPress={onPress} testID={testID}>
+    <AppInstallContainer onPress={props.onPress} testID={props.testID}>
       <InstallIcon>
         <PlusIcon color="#808080" />
       </InstallIcon>
@@ -69,7 +69,7 @@ export const renderNewAppButton = (
           borderRadius: '3px',
           textAlign: 'center',
         }}>
-        {title}
+        {props.title}
       </Text>
     </AppInstallContainer>
   )
@@ -199,11 +199,11 @@ class AppsView extends Component<Props, State> {
         <Text variant="smallTitle">Installed Applications</Text>
         <AppsGrid>
           {apps.map(app => this.renderApp(app))}
-          {renderNewAppButton(
-            'Install',
-            this.onPressInstall,
-            'launcher-install-app-button',
-          )}
+          <NewAppButton
+            title="Install"
+            onPress={this.onPressInstall}
+            testID="launcher-install-app-button"
+          />
         </AppsGrid>
       </>
     )

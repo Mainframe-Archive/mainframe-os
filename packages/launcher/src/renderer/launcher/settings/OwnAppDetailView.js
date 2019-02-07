@@ -12,7 +12,6 @@ import rpc from '../rpc'
 import { EnvironmentContext } from '../RelayEnvironment'
 import applyContext, { type CurrentUser } from '../LauncherContext'
 import ModalView from '../../UIComponents/ModalView'
-// import type { OwnAppDetailView_ownApp as OwnApp } from './__generated__/OwnAppDetailView_ownApp.graphql.js'
 import PermissionsRequirementsView from './PermissionsRequirements'
 import AppSummary from './AppSummary'
 
@@ -27,7 +26,6 @@ export type OwnApp = {
   versions: Array<{
     version: string,
     versionHash: ?string,
-    contentsURI: ?string,
     permissions: StrictPermissionsRequirements,
   }>,
 }
@@ -396,7 +394,6 @@ export default createFragmentContainer(OwnAppDetailViewWithContext, {
       versions {
         version
         versionHash
-        contentsURI
         permissions {
           optional {
             WEB_REQUEST

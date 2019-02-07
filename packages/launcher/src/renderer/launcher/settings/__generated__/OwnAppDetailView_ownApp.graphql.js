@@ -21,7 +21,6 @@ export type OwnAppDetailView_ownApp = {|
   +versions: $ReadOnlyArray<{|
     +version: string,
     +versionHash: ?string,
-    +contentsURI: ?string,
     +permissions: {|
       +optional: {|
         +WEB_REQUEST: ?$ReadOnlyArray<?string>,
@@ -136,13 +135,6 @@ return {
           "storageKey": null
         },
         {
-          "kind": "ScalarField",
-          "alias": null,
-          "name": "contentsURI",
-          "args": null,
-          "storageKey": null
-        },
-        {
           "kind": "LinkedField",
           "alias": null,
           "name": "permissions",
@@ -179,5 +171,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '3bcba18629b85856d5fe2a0dfe32d748';
+(node/*: any*/).hash = '87e8d92b53132d09045e638798bf94f1';
 module.exports = node;

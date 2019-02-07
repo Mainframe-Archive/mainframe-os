@@ -7,7 +7,7 @@ import styled from 'styled-components/native'
 
 import { EnvironmentContext } from '../RelayEnvironment'
 import RelayLoaderView from '../RelayLoaderView'
-import { AppsGrid, renderNewAppButton } from '../apps/AppsView'
+import { AppsGrid, NewAppButton } from '../apps/AppsView'
 import { OwnAppItem } from '../apps/AppItem'
 import CreateAppModal from './CreateAppModal'
 import CreateDevIdentityView from './CreateDevIdentityView'
@@ -85,18 +85,18 @@ class OwnAppsView extends Component<Props, State> {
       const onOpen = () => this.onOpenApp(a)
       return <OwnAppItem key={a.localID} ownApp={a} onOpenApp={onOpen} />
     })
-    const createButton = renderNewAppButton(
-      'ADD',
-      this.onPressCreateApp,
-      'launcher-create-app-button',
-    )
+
     return (
       <Container>
         <Text variant={['smallTitle', 'blue', 'bold']}>My Apps</Text>
         <ScrollView>
           <AppsGrid>
             {apps}
-            {createButton}
+            <NewAppButton
+              title="ADD"
+              onPress={this.onPressCreateApp}
+              testID="launcher-create-app-button"
+            />
           </AppsGrid>
         </ScrollView>
       </Container>

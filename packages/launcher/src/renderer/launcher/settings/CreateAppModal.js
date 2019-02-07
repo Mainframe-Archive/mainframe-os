@@ -294,19 +294,6 @@ class CreateAppModal extends Component<Props, State> {
     )
   }
 
-  renderContent() {
-    switch (this.state.screen) {
-      case 'info':
-        return this.renderInfoForm()
-      case 'permissions':
-        return this.renderPermissions()
-      case 'summary':
-        return this.renderSummary()
-      default:
-        return null
-    }
-  }
-
   renderError() {
     return this.state.errorMsg ? (
       <Text variant="error">{this.state.errorMsg}</Text>
@@ -314,7 +301,15 @@ class CreateAppModal extends Component<Props, State> {
   }
 
   render() {
-    return this.renderContent()
+    switch (this.state.screen) {
+      case 'permissions':
+        return this.renderPermissions()
+      case 'summary':
+        return this.renderSummary()
+      case 'info':
+      default:
+        return this.renderInfoForm()
+    }
   }
 }
 

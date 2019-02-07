@@ -143,7 +143,7 @@ class AppInstallModal extends Component<ViewProps, State> {
       },
       onError: err => {
         const msg =
-          err.message || 'Sorry, there was a problem creating your app.'
+          err.message || 'Sorry, there was a problem installing this app.'
         this.setState({
           errorMsg: msg,
         })

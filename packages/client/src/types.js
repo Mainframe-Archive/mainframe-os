@@ -167,7 +167,7 @@ export type AppOpenResult = {
 
 export type AppPublishParams = {
   appID: ID,
-  version: string,
+  version?: ?string,
 }
 
 export type AppPublishResult = {

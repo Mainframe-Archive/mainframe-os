@@ -218,9 +218,6 @@ export const appVersionData = new GraphQLObjectType({
     versionHash: {
       type: GraphQLString,
     },
-    contentsURI: {
-      type: GraphQLString,
-    },
     permissions: {
       type: new GraphQLNonNull(appPermissionsRequirements),
     },
