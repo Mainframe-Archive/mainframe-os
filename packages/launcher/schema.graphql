@@ -100,20 +100,18 @@ input AppManifestInput {
 type AppPermissionDefinitions {
   WEB_REQUEST: [String]
   BLOCKCHAIN_SEND: Boolean
+  CONTACTS_READ: Boolean
 }
 
 input AppPermissionDefinitionsInput {
   BLOCKCHAIN_SEND: Boolean
   CONTACTS_READ: Boolean
-  SWARM_UPLOAD: Boolean
-  SWARM_DOWNLOAD: Boolean
   WEB_REQUEST: [String]
 }
 
 type AppPermissions {
   BLOCKCHAIN_SEND: Boolean
-  SWARM_UPLOAD: Boolean
-  SWARM_DOWNLOAD: Boolean
+  CONTACS_READ: Boolean
   WEB_REQUEST: WebRequestGrants!
 }
 
@@ -157,7 +155,6 @@ type AppUserSettings {
 type AppVersionData {
   version: String!
   versionHash: String
-  contentsURI: String
   permissions: AppPermissionsRequirements!
 }
 
@@ -207,6 +204,7 @@ type CreateHDWalletPayload {
 
 input CreateUserIdentityInput {
   profile: UserProfileInput!
+  private: Boolean
   clientMutationId: String
 }
 
@@ -292,6 +290,7 @@ input ManifestAuthorInput {
 type Mutation {
   createApp(input: AppCreateMutationInput!): AppCreateMutationPayload
   installApp(input: AppInstallMutationInput!): AppInstallMutationPayload
+  setAppPermissionsRequirements(input: SetAppPermissionsRequirementsInput!): SetAppPermissionsRequirementsPayload
   publishAppVersion(input: PublishAppVersionInput!): PublishAppVersionPayload
   updateAppDetails(input: UpdateAppDetailsInput!): UpdateAppDetailsPayload
   addContact(input: AddContactInput!): AddContactPayload
@@ -299,6 +298,7 @@ type Mutation {
   createDeveloperIdentity(input: CreateDeveloperIdentityInput!): CreateDeveloperIdentityPayload
   deleteContact(input: DeletContactInput!): DeletContactPayload
   setDefaultWallet(input: SetDefaultWalletInput!): SetDefaultWalletPayload
+  setUserProfileVisibility(input: SetUserProfileVisibilityInput!): SetUserProfileVisibilityPayload
   updateProfile(input: UpdateProfileInput!): UpdateProfilePayload
   addHDWalletAccount(input: AddHDWalletAccountInput!): AddHDWalletAccountPayload
   addLedgerWalletAccounts(input: AddLedgerWalletAccountsInput!): AddLedgerWalletAccountsPayload
@@ -350,6 +350,7 @@ type OwnUserIdentity implements Node {
   wallets: EthWallets!
   profile: NamedProfile!
   pubKey: String!
+  privateProfile: Boolean
 }
 
 type Peer {
@@ -364,8 +365,6 @@ type Peers {
 input PermissionGrantsInput {
   BLOCKCHAIN_SEND: Boolean
   CONTACTS_READ: Boolean
-  SWARM_UPLOAD: Boolean
-  SWARM_DOWNLOAD: Boolean
   WEB_REQUEST: WebRequestGrantInput!
 }
 
@@ -391,6 +390,17 @@ type Query {
   peers: Peers!
 }
 
+input SetAppPermissionsRequirementsInput {
+  appID: String!
+  permissionsRequirements: AppPermissionsRequirementsInput!
+  clientMutationId: String
+}
+
+type SetAppPermissionsRequirementsPayload {
+  viewer: Viewer!
+  clientMutationId: String
+}
+
 input SetDefaultWalletInput {
   userID: String!
   address: String!
@@ -398,6 +408,17 @@ input SetDefaultWalletInput {
 }
 
 type SetDefaultWalletPayload {
+  viewer: Viewer!
+  clientMutationId: String
+}
+
+input SetUserProfileVisibilityInput {
+  userID: String!
+  visibile: Boolean
+  clientMutationId: String
+}
+
+type SetUserProfileVisibilityPayload {
   viewer: Viewer!
   clientMutationId: String
 }
@@ -426,6 +447,7 @@ type UpdateAppDetailsPayload {
 input UpdateProfileInput {
   userID: String!
   profile: UpdateUserProfileInput!
+  privateProfile: Boolean
   clientMutationId: String
 }
 

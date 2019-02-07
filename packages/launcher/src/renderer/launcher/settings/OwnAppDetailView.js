@@ -5,13 +5,30 @@ import { ActivityIndicator } from 'react-native'
 import styled from 'styled-components/native'
 import { Text, Button } from '@morpheus-ui/core'
 import { graphql, createFragmentContainer, commitMutation } from 'react-relay'
+import type { StrictPermissionsRequirements } from '@mainframe/app-permissions'
 
 import colors from '../../colors'
 import rpc from '../rpc'
 import { EnvironmentContext } from '../RelayEnvironment'
 import applyContext, { type CurrentUser } from '../LauncherContext'
 import ModalView from '../../UIComponents/ModalView'
-import type { OwnAppDetailView_ownApp as OwnApp } from './__generated__/OwnAppDetailView_ownApp.graphql.js'
+import PermissionsRequirementsView from './PermissionsRequirements'
+import AppSummary from './AppSummary'
+
+export type OwnApp = {
+  name: string,
+  localID: string,
+  contentsPath: ?string,
+  developer: {
+    id: string,
+    name: string,
+  },
+  versions: Array<{
+    version: string,
+    versionHash: ?string,
+    permissions: StrictPermissionsRequirements,
+  }>,
+}
 
 type Props = {
   ownApp: OwnApp,
@@ -21,8 +38,9 @@ type Props = {
 
 type State = {
   errorMsg?: ?string,
-  selectedVersion: string,
   publishing?: ?boolean,
+  showModal?: ?'confirm_permissions' | 'app_summary',
+  selectedVersionIndex: number,
 }
 
 const Container = styled.View`
@@ -110,19 +128,41 @@ const updateAppDetailsMutation = graphql`
   }
 `
 
+const setAppPermissionsRequirementsMutation = graphql`
+  mutation OwnAppDetailViewSetAppPermissionsRequirementsMutation(
+    $input: SetAppPermissionsRequirementsInput!
+  ) {
+    setAppPermissionsRequirements(input: $input) {
+      viewer {
+        apps {
+          ...OwnAppsView_apps
+        }
+      }
+    }
+  }
+`
+
 export class OwnAppDetailView extends Component<Props, State> {
   static contextType = EnvironmentContext
 
   constructor(props: Props) {
     super(props)
-    const state = {}
-    if (props.ownApp.versions && props.ownApp.versions.length) {
-      state.selectedVersion = props.ownApp.versions[0].version
+    this.state = {
+      selectedVersionIndex: 0, // Currently only supporting a single version
     }
-    this.state = state
+  }
+
+  get selectedVersion() {
+    return this.props.ownApp.versions[this.state.selectedVersionIndex]
   }
 
   // HANDLERS
+
+  onPressPublishVersion = () => {
+    this.setState({
+      showModal: 'confirm_permissions',
+    })
+  }
 
   onPressSave = () => {
     const { ownApp } = this.props
@@ -159,15 +199,16 @@ export class OwnAppDetailView extends Component<Props, State> {
     })
   }
 
-  onPressPublishVersion = (version: string) => {
+  publishApp = () => {
     const { ownApp } = this.props
     const input = {
-      version,
       appID: ownApp.localID,
+      version: this.selectedVersion.version,
     }
 
     this.setState({
       publishing: true,
+      showModal: undefined,
     })
 
     commitMutation(this.context, {
@@ -192,14 +233,7 @@ export class OwnAppDetailView extends Component<Props, State> {
     })
   }
 
-  onPressPublishManifest = () => {
-    // TODO: Needs implementing in daemon
-  }
-
-  onPressSubmitFoReview = () => {
-    // TODO REVERT!
-    this.onPressSave()
-  }
+  onPressSubmitFoReview = () => {}
 
   onPressOpenApp = async () => {
     const { user, ownApp } = this.props
@@ -212,11 +246,51 @@ export class OwnAppDetailView extends Component<Props, State> {
     }
   }
 
+  onCloseModal = () => {
+    this.setState({
+      showModal: undefined,
+    })
+  }
+
+  onSetPermissions = (requirements: StrictPermissionsRequirements) => {
+    const { ownApp } = this.props
+    const input = {
+      permissionsRequirements: requirements,
+      appID: ownApp.localID,
+    }
+    commitMutation(this.context, {
+      mutation: setAppPermissionsRequirementsMutation,
+      // $FlowFixMe permission key
+      variables: { input },
+      onCompleted: (res, errors) => {
+        if (errors) {
+          const errorMsg = errors.length
+            ? errors[0].message
+            : 'Error updating permissions settings.'
+          this.setState({
+            errorMsg,
+            showModal: undefined,
+          })
+        } else {
+          this.setState({
+            showModal: 'app_summary',
+          })
+        }
+      },
+      onError: err => {
+        this.setState({
+          errorMsg: err.message,
+          showModal: undefined,
+        })
+      },
+    })
+  }
+
   // RENDER
 
   renderVersions() {
     const versions = this.props.ownApp.versions.map(v => {
-      const selected = v.version === this.state.selectedVersion
+      const selected = v.version === this.selectedVersion.version
       return (
         <VersionRow selected={selected} key={v.version}>
           <Text variant="greyDark">Version {v.version}</Text>
@@ -228,90 +302,111 @@ export class OwnAppDetailView extends Component<Props, State> {
 
   renderVersionDetail() {
     const { ownApp } = this.props
-    const version = ownApp.versions.find(
-      v => v.version === this.state.selectedVersion,
+    const details = (
+      <>
+        <VersionDetailRow>
+          <Text variant="smallLabel">APP NAME</Text>
+          <Text theme={detailTextStyle}>{ownApp.name}</Text>
+        </VersionDetailRow>
+        <VersionDetailRow>
+          <Text variant="smallLabel">VERSION</Text>
+          <Text theme={detailTextStyle}>{this.selectedVersion.version}</Text>
+        </VersionDetailRow>
+      </>
     )
-    if (version) {
-      const details = (
+    let publishedState
+    if (!this.selectedVersion.versionHash) {
+      const actions = this.state.publishing ? (
+        <ActivityIndicator />
+      ) : (
+        <ButtonsContainer>
+          <Button
+            title="OPEN"
+            variant={['mediumUppercase', 'marginRight10']}
+            onPress={this.onPressOpenApp}
+          />
+          <Button title="EDIT" variant={['mediumUppercase', 'marginRight10']} />
+          <Button
+            variant={['mediumUppercase', 'red']}
+            title="PUBLISH APP"
+            onPress={this.onPressPublishVersion}
+          />
+        </ButtonsContainer>
+      )
+      publishedState = (
         <>
           <VersionDetailRow>
-            <Text variant="smallLabel">APP NAME</Text>
-            <Text theme={detailTextStyle}>{ownApp.name}</Text>
+            <Text variant="smallLabel">CONTENT PATH</Text>
+            <Text theme={detailTextStyle}>{ownApp.contentsPath}</Text>
           </VersionDetailRow>
-          <VersionDetailRow>
-            <Text variant="smallLabel">VERSION</Text>
-            <Text theme={detailTextStyle}>{version.version}</Text>
-          </VersionDetailRow>
+          {actions}
         </>
       )
-      let publishedState
-      if (!version.versionHash) {
-        const publishVersion = () => this.onPressPublishVersion(version.version)
-        const actions = this.state.publishing ? (
-          <ActivityIndicator />
-        ) : (
+    } else {
+      publishedState = (
+        <>
+          <VersionDetailRow>
+            <Text variant="smallLabel">CONTENTS URI</Text>
+            <Text theme={detailTextStyle}>
+              {this.selectedVersion.versionHash}
+            </Text>
+          </VersionDetailRow>
+
           <ButtonsContainer>
             <Button
-              title="OPEN"
-              variant={['mediumUppercase', 'marginRight10']}
-              onPress={this.onPressOpenApp}
-            />
-            <Button
-              title="EDIT"
-              variant={['mediumUppercase', 'marginRight10']}
-            />
-            <Button
               variant={['mediumUppercase', 'red']}
-              title="PUBLISH APP"
-              onPress={publishVersion}
+              title="SUBMIT TO MAINRAME APP STORE"
+              onPress={this.onPressSubmitFoReview}
             />
           </ButtonsContainer>
-        )
-        publishedState = (
-          <>
-            <VersionDetailRow>
-              <Text variant="smallLabel">CONTENT PATH</Text>
-              <Text theme={detailTextStyle}>{ownApp.contentsPath}</Text>
-            </VersionDetailRow>
-            {actions}
-          </>
-        )
-      } else {
-        publishedState = (
-          <>
-            <VersionDetailRow>
-              <Text variant="smallLabel">CONTENTS URI</Text>
-              <Text theme={detailTextStyle}>{version.versionHash}</Text>
-            </VersionDetailRow>
-
-            <ButtonsContainer>
-              <Button
-                variant={['mediumUppercase', 'red']}
-                title="SUBMIT TO MAINRAME APP STORE"
-                onPress={this.onPressSubmitFoReview}
-              />
-            </ButtonsContainer>
-          </>
-        )
-      }
-
-      const errorView = this.state.errorMsg ? (
-        <ErrorView>
-          <Text variant="error">{this.state.errorMsg}</Text>
-        </ErrorView>
-      ) : null
-      return (
-        <VersionDetailContainer>
-          {details}
-          {publishedState}
-          {errorView}
-        </VersionDetailContainer>
+        </>
       )
     }
+
+    const errorView = this.state.errorMsg ? (
+      <ErrorView>
+        <Text variant="error">{this.state.errorMsg}</Text>
+      </ErrorView>
+    ) : null
+    return (
+      <VersionDetailContainer>
+        {details}
+        {publishedState}
+        {errorView}
+      </VersionDetailContainer>
+    )
   }
 
   render() {
     const { ownApp } = this.props
+    switch (this.state.showModal) {
+      case 'confirm_permissions':
+        return (
+          <PermissionsRequirementsView
+            permissionRequirements={this.selectedVersion.permissions}
+            onSetPermissions={this.onSetPermissions}
+            onRequestClose={this.onCloseModal}
+          />
+        )
+      case 'app_summary': {
+        const appData = {
+          name: ownApp.name,
+          contentsPath: ownApp.contentsPath,
+          version: this.selectedVersion.version,
+        }
+        return (
+          <AppSummary
+            appData={appData}
+            permissionsRequirements={this.selectedVersion.permissions}
+            onPressBack={this.onPressPublishVersion}
+            onRequestClose={this.onCloseModal}
+            onPressSave={this.publishApp}
+            submitButtonTitle="PUBLISH"
+          />
+        )
+      }
+      default:
+    }
 
     const header = (
       <Header>
@@ -348,23 +443,16 @@ export default createFragmentContainer(OwnAppDetailViewWithContext, {
       versions {
         version
         versionHash
-        contentsURI
         permissions {
           optional {
             WEB_REQUEST
             BLOCKCHAIN_SEND
+            CONTACTS_READ
           }
           required {
             WEB_REQUEST
             BLOCKCHAIN_SEND
-          }
-        }
-      }
-      users {
-        localID
-        identity {
-          profile {
-            name
+            CONTACTS_READ
           }
         }
       }

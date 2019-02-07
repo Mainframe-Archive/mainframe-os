@@ -221,6 +221,9 @@ const createUserIdentityMutation = mutationWithClientMutationId({
     profile: {
       type: new GraphQLNonNull(userProfileInput),
     },
+    private: {
+      type: GraphQLBoolean,
+    },
   },
   outputFields: {
     user: {
@@ -230,7 +233,7 @@ const createUserIdentityMutation = mutationWithClientMutationId({
     viewer: viewerOutput,
   },
   mutateAndGetPayload: async (args, ctx) => {
-    const user = await ctx.mutations.createUser(args.profile)
+    const user = await ctx.mutations.createUser(args.profile, args.private)
     return { user }
   },
 })
@@ -280,12 +283,38 @@ const updateProfileMutation = mutationWithClientMutationId({
     profile: {
       type: new GraphQLNonNull(updateProfileInput),
     },
+    privateProfile: {
+      type: GraphQLBoolean,
+    },
   },
   outputFields: {
     viewer: viewerOutput,
   },
   mutateAndGetPayload: async (args, ctx) => {
-    await ctx.mutations.updateUser(args.userID, args.profile)
+    await ctx.mutations.updateUser(
+      args.userID,
+      args.profile,
+      args.privateProfile,
+    )
+    return {}
+  },
+})
+
+const setUserProfileVisibilityMutation = mutationWithClientMutationId({
+  name: 'SetUserProfileVisibility',
+  inputFields: {
+    userID: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    visibile: {
+      type: GraphQLBoolean,
+    },
+  },
+  outputFields: {
+    viewer: viewerOutput,
+  },
+  mutateAndGetPayload: async (args, ctx) => {
+    await ctx.mutations.setUserProfileVisibility(args.userID, args.visibile)
     return {}
   },
 })
@@ -344,12 +373,6 @@ const appPermissionDefinitionsInput = new GraphQLInputObjectType({
     CONTACTS_READ: {
       type: GraphQLBoolean,
     },
-    SWARM_UPLOAD: {
-      type: GraphQLBoolean,
-    },
-    SWARM_DOWNLOAD: {
-      type: GraphQLBoolean,
-    },
     WEB_REQUEST: {
       type: new GraphQLList(GraphQLString),
     },
@@ -397,6 +420,28 @@ const appCreateMutation = mutationWithClientMutationId({
   mutateAndGetPayload: async (args, ctx) => {
     const app = await ctx.mutations.createApp(args)
     return { app }
+  },
+})
+
+const setAppPermissionsRequirementsMutation = mutationWithClientMutationId({
+  name: 'SetAppPermissionsRequirements',
+  inputFields: {
+    appID: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    permissionsRequirements: {
+      type: new GraphQLNonNull(appPermissionsRequirementsInput),
+    },
+  },
+  outputFields: {
+    viewer: viewerOutput,
+  },
+  mutateAndGetPayload: async (args, ctx) => {
+    await ctx.mutations.setAppPermissionsRequirements(
+      args.appID,
+      args.permissionsRequirements,
+    )
+    return {}
   },
 })
 
@@ -452,8 +497,6 @@ const permissionGrantsInput = new GraphQLInputObjectType({
   fields: () => ({
     BLOCKCHAIN_SEND: { type: GraphQLBoolean },
     CONTACTS_READ: { type: GraphQLBoolean },
-    SWARM_UPLOAD: { type: GraphQLBoolean },
-    SWARM_DOWNLOAD: { type: GraphQLBoolean },
     WEB_REQUEST: { type: new GraphQLNonNull(webRequestGrantInput) },
   }),
 })
@@ -556,6 +599,7 @@ export default new GraphQLObjectType({
     // Apps
     createApp: appCreateMutation,
     installApp: appInstallMutation,
+    setAppPermissionsRequirements: setAppPermissionsRequirementsMutation,
     publishAppVersion: publishAppVersionMutation,
     updateAppDetails: updateAppDetailsMutation,
     // Users
@@ -564,6 +608,7 @@ export default new GraphQLObjectType({
     createDeveloperIdentity: createDeveloperIdentityMutation,
     deleteContact: deleteContactMutation,
     setDefaultWallet: setDefaultWalletMutation,
+    setUserProfileVisibility: setUserProfileVisibilityMutation,
     updateProfile: updateProfileMutation,
     // Wallets
     addHDWalletAccount: addHDWalletAccountMutation,

@@ -453,6 +453,7 @@ class ContactsViewComponent extends Component<Props, State> {
 
   renderPeerLookup() {
     const { foundPeer, queryInProgress } = this.state
+    const hasName = foundPeer && foundPeer.profile.name
     return queryInProgress ? (
       <Loader />
     ) : (
@@ -462,8 +463,11 @@ class ContactsViewComponent extends Component<Props, State> {
             <Blocky>
               <Avatar id={foundPeer.publicKey} size="small" />
             </Blocky>
-            <Text variant="greyDark23" size={13}>
-              {foundPeer.profile.name}
+            <Text
+              variant="greyDark23"
+              theme={{ fontStyle: hasName ? 'normal' : 'italic' }}
+              size={13}>
+              {foundPeer.profile.name || 'This user has a private profile'}
             </Text>
           </AvatarWrapper>
         </Column>

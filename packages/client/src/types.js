@@ -167,7 +167,7 @@ export type AppOpenResult = {
 
 export type AppPublishParams = {
   appID: ID,
-  version: string,
+  version?: ?string,
 }
 
 export type AppPublishResult = {
@@ -349,7 +349,6 @@ export type ContactsApproveContactsForAppParams = {
 
 export type ContactProfile = {
   name?: ?string,
-  aliasName?: ?string,
   avatar?: ?string,
   ethAddress?: ?string,
 }

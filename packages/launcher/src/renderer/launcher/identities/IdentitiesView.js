@@ -65,7 +65,7 @@ class IdentitiesView extends Component<Props, State> {
 
   closeModal = () => this.setState({ editUser: null })
 
-  renderUser(user: User) {
+  renderUser(user: User, hideEdit?: boolean) {
     const onPress = () => this.openEditModal(user)
     return (
       <UserItem key={user.localID}>
@@ -76,18 +76,23 @@ class IdentitiesView extends Component<Props, State> {
             {user.feedHash}
           </Text>
         </Profile>
-        <Button
-          onPress={onPress}
-          variant={['small', 'completeOnboarding']}
-          title="EDIT"
-        />
+        {!hideEdit && (
+          <Button
+            onPress={onPress}
+            variant={['small', 'completeOnboarding']}
+            title="EDIT"
+          />
+        )}
       </UserItem>
     )
   }
 
   renderModal() {
     return this.state.editUser ? (
-      <IdentityEditModal onClose={this.closeModal} user={this.state.editUser} />
+      <IdentityEditModal
+        onClose={this.closeModal}
+        ownUserIdentity={this.state.editUser}
+      />
     ) : null
   }
 
@@ -99,7 +104,7 @@ class IdentitiesView extends Component<Props, State> {
         {this.props.identities.ownDevelopers.length > 0 && (
           <>
             <Text variant="smallTitle">Developer</Text>
-            {this.renderUser(this.props.identities.ownDevelopers[0])}
+            {this.renderUser(this.props.identities.ownDevelopers[0], true)}
           </>
         )}
         {this.renderModal()}
@@ -112,6 +117,7 @@ export default createFragmentContainer(IdentitiesView, {
   identities: graphql`
     fragment IdentitiesView_identities on Identities {
       ownUsers {
+        ...IdentityEditModal_ownUserIdentity
         localID
         feedHash
         profile {

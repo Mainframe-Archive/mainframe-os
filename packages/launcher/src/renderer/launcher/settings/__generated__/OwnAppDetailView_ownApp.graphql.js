@@ -21,24 +21,17 @@ export type OwnAppDetailView_ownApp = {|
   +versions: $ReadOnlyArray<{|
     +version: string,
     +versionHash: ?string,
-    +contentsURI: ?string,
     +permissions: {|
       +optional: {|
         +WEB_REQUEST: ?$ReadOnlyArray<?string>,
         +BLOCKCHAIN_SEND: ?boolean,
+        +CONTACTS_READ: ?boolean,
       |},
       +required: {|
         +WEB_REQUEST: ?$ReadOnlyArray<?string>,
         +BLOCKCHAIN_SEND: ?boolean,
+        +CONTACTS_READ: ?boolean,
       |},
-    |},
-  |}>,
-  +users: ?$ReadOnlyArray<?{|
-    +localID: string,
-    +identity: {|
-      +profile: {|
-        +name: string
-      |}
     |},
   |}>,
   +$refType: OwnAppDetailView_ownApp$ref,
@@ -50,18 +43,11 @@ const node/*: ConcreteFragment*/ = (function(){
 var v0 = {
   "kind": "ScalarField",
   "alias": null,
-  "name": "localID",
-  "args": null,
-  "storageKey": null
-},
-v1 = {
-  "kind": "ScalarField",
-  "alias": null,
   "name": "name",
   "args": null,
   "storageKey": null
 },
-v2 = [
+v1 = [
   {
     "kind": "ScalarField",
     "alias": null,
@@ -75,6 +61,13 @@ v2 = [
     "name": "BLOCKCHAIN_SEND",
     "args": null,
     "storageKey": null
+  },
+  {
+    "kind": "ScalarField",
+    "alias": null,
+    "name": "CONTACTS_READ",
+    "args": null,
+    "storageKey": null
   }
 ];
 return {
@@ -84,8 +77,14 @@ return {
   "metadata": null,
   "argumentDefinitions": [],
   "selections": [
+    {
+      "kind": "ScalarField",
+      "alias": null,
+      "name": "localID",
+      "args": null,
+      "storageKey": null
+    },
     v0,
-    v1,
     {
       "kind": "ScalarField",
       "alias": null,
@@ -109,7 +108,7 @@ return {
           "args": null,
           "storageKey": null
         },
-        v1
+        v0
       ]
     },
     {
@@ -136,13 +135,6 @@ return {
           "storageKey": null
         },
         {
-          "kind": "ScalarField",
-          "alias": null,
-          "name": "contentsURI",
-          "args": null,
-          "storageKey": null
-        },
-        {
           "kind": "LinkedField",
           "alias": null,
           "name": "permissions",
@@ -159,7 +151,7 @@ return {
               "args": null,
               "concreteType": "AppPermissionDefinitions",
               "plural": false,
-              "selections": v2
+              "selections": v1
             },
             {
               "kind": "LinkedField",
@@ -169,42 +161,7 @@ return {
               "args": null,
               "concreteType": "AppPermissionDefinitions",
               "plural": false,
-              "selections": v2
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "kind": "LinkedField",
-      "alias": null,
-      "name": "users",
-      "storageKey": null,
-      "args": null,
-      "concreteType": "AppUser",
-      "plural": true,
-      "selections": [
-        v0,
-        {
-          "kind": "LinkedField",
-          "alias": null,
-          "name": "identity",
-          "storageKey": null,
-          "args": null,
-          "concreteType": "OwnUserIdentity",
-          "plural": false,
-          "selections": [
-            {
-              "kind": "LinkedField",
-              "alias": null,
-              "name": "profile",
-              "storageKey": null,
-              "args": null,
-              "concreteType": "NamedProfile",
-              "plural": false,
-              "selections": [
-                v1
-              ]
+              "selections": v1
             }
           ]
         }
@@ -214,5 +171,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '64223c3191c14526c6d38b0c021aa829';
+(node/*: any*/).hash = '87e8d92b53132d09045e638798bf94f1';
 module.exports = node;

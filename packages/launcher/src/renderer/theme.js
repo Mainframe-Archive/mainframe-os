@@ -1,6 +1,9 @@
 import COLORS from './colors'
 
 const MARGINS = {
+  marginLeft5: {
+    margin: '0 0 0 5px',
+  },
   marginLeft10: {
     margin: '0 0 0 10px',
   },
@@ -10,8 +13,14 @@ const MARGINS = {
   marginRight10: {
     margin: '0 10px 0 0',
   },
+  marginRight5: {
+    margin: '0 5px 0 0',
+  },
   marginRight20: {
     margin: '0 20px 0 0',
+  },
+  marginTop5: {
+    margin: '5px 0 0 0',
   },
   marginTop10: {
     margin: '10px 0 0 0',
@@ -19,17 +28,26 @@ const MARGINS = {
   marginTop20: {
     margin: '20px 0 0 0',
   },
+  marginBottom5: {
+    margin: '0 0 5px 0',
+  },
   marginBottom10: {
     margin: '0 0 10px 0',
   },
   marginBottom20: {
     margin: '0 0 20px 0',
   },
+  marginVertical5: {
+    margin: '5px 0',
+  },
   marginVertical10: {
     margin: '10px 0',
   },
   marginVertical20: {
     margin: '20px 0',
+  },
+  marginHorizontal5: {
+    margin: '0 5px',
   },
   marginHorizontal10: {
     margin: '0 10px',
@@ -276,6 +294,16 @@ export default {
       padding: '5px',
       backgroundColor: COLORS.PRIMARY_RED,
       fontWeight: 'bold',
+    },
+    smallButton: {
+      fontSize: '9px',
+      borderRadius: '3px',
+      padding: '5px 10px',
+      borderColor: '#808080',
+      borderWidth: '1px',
+      borderStyle: 'solid',
+      fontWeight: 'bold',
+      color: '#808080',
     },
     flex1: {
       flex: 1,

@@ -1,10 +1,6 @@
 // @flow
 
-export type PermissionKeyBasic =
-  | 'SWARM_DOWNLOAD'
-  | 'SWARM_UPLOAD'
-  | 'BLOCKCHAIN_SEND'
-  | 'CONTACTS_READ'
+export type PermissionKeyBasic = 'BLOCKCHAIN_SEND' | 'CONTACTS_READ'
 export type PermissionKey = 'WEB_REQUEST' | PermissionKeyBasic
 
 export type WebRequestDefinition = Array<string>

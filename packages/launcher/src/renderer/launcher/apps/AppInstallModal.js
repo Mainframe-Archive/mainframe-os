@@ -17,7 +17,6 @@ import { EnvironmentContext } from '../RelayEnvironment'
 
 import applyContext, { type CurrentUser } from '../LauncherContext'
 import FormModalView from '../../UIComponents/FormModalView'
-import DropFile from '../../UIComponents/DropFile'
 import Loader from '../../UIComponents/Loader'
 import rpc from '../rpc'
 import PermissionsView from '../PermissionsView'
@@ -55,13 +54,6 @@ const TextContainer = styled.View`
 
 const View = styled.View``
 
-const DragView = styled.TouchableOpacity`
-  border-style: dashed;
-  border-width: 1px;
-  border-color: #d3d3d3;
-  padding: 50px;
-`
-
 class AppInstallModal extends Component<ViewProps, State> {
   static contextType = EnvironmentContext
 
@@ -73,48 +65,15 @@ class AppInstallModal extends Component<ViewProps, State> {
 
   // HANDLERS
 
-  onDrop = (files: Array<File>) => {
-    this.handleSelectedFiles(files)
-  }
-
-  // TODO: Remove once replaced by hash input
-  handleSelectedFiles = async (files: Array<Object>) => {
-    if (files.length) {
-      try {
-        const manifest = {} //await rpc.readManifest(files[0].path)
-        if (
-          typeof manifest.data.name === 'string' &&
-          typeof manifest.data.permissions === 'object'
-        ) {
-          this.setState({
-            manifest: manifest.data,
-          })
-          if (havePermissionsToGrant(manifest.data.permissions)) {
-            this.setState({
-              installStep: 'permissions',
-            })
-          } else {
-            const strictGrants = createStrictPermissionGrants({})
-            this.onSubmitPermissions(strictGrants)
-          }
-        } else {
-          // eslint-disable-next-line no-console
-          console.log('invalid manifest')
-        }
-      } catch (err) {
-        // TODO: Feedback error
-        // eslint-disable-next-line no-console
-        console.log('error parsing manifest: ', err)
-      }
-    }
-  }
-
   onSubmitManifest = async (payload: FormSubmitPayload) => {
     if (payload.valid) {
       try {
+        this.setState({ installStep: 'download' })
+
         const { manifest, appID } = await rpc.loadManifest(payload.fields.appid)
         // If appID is returned it means the app is already installed.
         // If we only support a single user in the launcher, the app must have been already installed by this user.
+
         if (appID != null) {
           return this.props.onInstallComplete()
         }
@@ -173,12 +132,18 @@ class AppInstallModal extends Component<ViewProps, State> {
     commitMutation(this.context, {
       mutation: appInstallMutation,
       variables: { input: params },
-      onCompleted: () => {
-        this.props.onInstallComplete()
+      onCompleted: (res, errors) => {
+        if (errors && errors.length) {
+          this.setState({
+            errorMsg: errors[0].message,
+          })
+        } else {
+          this.props.onInstallComplete()
+        }
       },
       onError: err => {
         const msg =
-          err.message || 'Sorry, there was a problem creating your app.'
+          err.message || 'Sorry, there was a problem installing this app.'
         this.setState({
           errorMsg: msg,
         })
@@ -205,16 +170,6 @@ class AppInstallModal extends Component<ViewProps, State> {
           </TextContainer>
           <View>
             <TextField name="appid" required label="Mainframe App ID" />
-            <DropFile
-              onDrop={this.onDrop}
-              inputTestID="installer-file-selector"
-              accept={['application/json']}>
-              <DragView>
-                <Text variant={['modalText', 'center']}>
-                  Or drag and drop a manifest file here.
-                </Text>
-              </DragView>
-            </DropFile>
           </View>
         </Container>
       </FormModalView>
@@ -237,8 +192,9 @@ class AppInstallModal extends Component<ViewProps, State> {
   renderDownload() {
     const { manifest } = this.state
 
-    return manifest ? (
-      <FormModalView title={`Downloading ${manifest.name}`}>
+    return (
+      <FormModalView
+        title={`Downloading ${manifest ? manifest.name : 'App Manifest'}`}>
         <Container>
           <TextContainer>
             <Text variant={['modalText', 'center']}>
@@ -247,7 +203,7 @@ class AppInstallModal extends Component<ViewProps, State> {
           </TextContainer>
         </Container>
       </FormModalView>
-    ) : null
+    )
   }
 
   render() {

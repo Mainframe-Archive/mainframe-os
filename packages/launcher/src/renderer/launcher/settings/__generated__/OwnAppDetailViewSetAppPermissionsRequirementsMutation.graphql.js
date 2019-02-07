@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 2a7a0212aa40c9c3ff80672f183b4d11
+ * @relayHash 09ce9fa39329c08a941a7f9b4f8fd861
  */
 
 /* eslint-disable */
@@ -10,11 +10,8 @@
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
 type OwnAppsView_apps$ref = any;
-export type AppCreateMutationInput = {
-  name: string,
-  contentsPath: string,
-  version: string,
-  developerID: string,
+export type SetAppPermissionsRequirementsInput = {
+  appID: string,
   permissionsRequirements: AppPermissionsRequirementsInput,
   clientMutationId?: ?string,
 };
@@ -29,40 +26,30 @@ export type AppPermissionDefinitionsInput = {
   SWARM_DOWNLOAD?: ?boolean,
   WEB_REQUEST?: ?$ReadOnlyArray<?string>,
 };
-export type appMutationsAppCreateMutationVariables = {|
-  input: AppCreateMutationInput
+export type OwnAppDetailViewSetAppPermissionsRequirementsMutationVariables = {|
+  input: SetAppPermissionsRequirementsInput
 |};
-export type appMutationsAppCreateMutationResponse = {|
-  +createApp: ?{|
-    +app: ?{|
-      +id: string,
-      +localID: string,
-      +name: string,
-    |},
+export type OwnAppDetailViewSetAppPermissionsRequirementsMutationResponse = {|
+  +setAppPermissionsRequirements: ?{|
     +viewer: {|
       +apps: {|
         +$fragmentRefs: OwnAppsView_apps$ref
       |}
-    |},
+    |}
   |}
 |};
-export type appMutationsAppCreateMutation = {|
-  variables: appMutationsAppCreateMutationVariables,
-  response: appMutationsAppCreateMutationResponse,
+export type OwnAppDetailViewSetAppPermissionsRequirementsMutation = {|
+  variables: OwnAppDetailViewSetAppPermissionsRequirementsMutationVariables,
+  response: OwnAppDetailViewSetAppPermissionsRequirementsMutationResponse,
 |};
 */
 
 
 /*
-mutation appMutationsAppCreateMutation(
-  $input: AppCreateMutationInput!
+mutation OwnAppDetailViewSetAppPermissionsRequirementsMutation(
+  $input: SetAppPermissionsRequirementsInput!
 ) {
-  createApp(input: $input) {
-    app {
-      id
-      localID
-      name
-    }
+  setAppPermissionsRequirements(input: $input) {
     viewer {
       apps {
         ...OwnAppsView_apps
@@ -146,7 +133,7 @@ var v0 = [
   {
     "kind": "LocalArgument",
     "name": "input",
-    "type": "AppCreateMutationInput!",
+    "type": "SetAppPermissionsRequirementsInput!",
     "defaultValue": null
   }
 ],
@@ -155,45 +142,31 @@ v1 = [
     "kind": "Variable",
     "name": "input",
     "variableName": "input",
-    "type": "AppCreateMutationInput!"
+    "type": "SetAppPermissionsRequirementsInput!"
   }
 ],
 v2 = {
-  "kind": "ScalarField",
-  "alias": null,
-  "name": "id",
-  "args": null,
-  "storageKey": null
-},
-v3 = {
   "kind": "ScalarField",
   "alias": null,
   "name": "localID",
   "args": null,
   "storageKey": null
 },
-v4 = {
+v3 = {
   "kind": "ScalarField",
   "alias": null,
   "name": "name",
   "args": null,
   "storageKey": null
 },
-v5 = {
-  "kind": "LinkedField",
+v4 = {
+  "kind": "ScalarField",
   "alias": null,
-  "name": "app",
-  "storageKey": null,
+  "name": "id",
   "args": null,
-  "concreteType": "OwnApp",
-  "plural": false,
-  "selections": [
-    v2,
-    v3,
-    v4
-  ]
+  "storageKey": null
 },
-v6 = [
+v5 = [
   {
     "kind": "ScalarField",
     "alias": null,
@@ -219,13 +192,13 @@ v6 = [
 return {
   "kind": "Request",
   "operationKind": "mutation",
-  "name": "appMutationsAppCreateMutation",
+  "name": "OwnAppDetailViewSetAppPermissionsRequirementsMutation",
   "id": null,
-  "text": "mutation appMutationsAppCreateMutation(\n  $input: AppCreateMutationInput!\n) {\n  createApp(input: $input) {\n    app {\n      id\n      localID\n      name\n    }\n    viewer {\n      apps {\n        ...OwnAppsView_apps\n      }\n      id\n    }\n  }\n}\n\nfragment OwnAppsView_apps on Apps {\n  own {\n    localID\n    name\n    ...AppItem_ownApp\n    ...OwnAppDetailView_ownApp\n    id\n  }\n}\n\nfragment AppItem_ownApp on OwnApp {\n  localID\n  name\n  developer {\n    id\n    name\n  }\n  versions {\n    version\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n    }\n  }\n  users {\n    localID\n    identity {\n      profile {\n        name\n      }\n      id\n    }\n    id\n  }\n}\n\nfragment OwnAppDetailView_ownApp on OwnApp {\n  localID\n  name\n  contentsPath\n  developer {\n    id\n    name\n  }\n  versions {\n    version\n    versionHash\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        CONTACTS_READ\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        CONTACTS_READ\n      }\n    }\n  }\n}\n",
+  "text": "mutation OwnAppDetailViewSetAppPermissionsRequirementsMutation(\n  $input: SetAppPermissionsRequirementsInput!\n) {\n  setAppPermissionsRequirements(input: $input) {\n    viewer {\n      apps {\n        ...OwnAppsView_apps\n      }\n      id\n    }\n  }\n}\n\nfragment OwnAppsView_apps on Apps {\n  own {\n    localID\n    name\n    ...AppItem_ownApp\n    ...OwnAppDetailView_ownApp\n    id\n  }\n}\n\nfragment AppItem_ownApp on OwnApp {\n  localID\n  name\n  developer {\n    id\n    name\n  }\n  versions {\n    version\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n    }\n  }\n  users {\n    localID\n    identity {\n      profile {\n        name\n      }\n      id\n    }\n    id\n  }\n}\n\nfragment OwnAppDetailView_ownApp on OwnApp {\n  localID\n  name\n  contentsPath\n  developer {\n    id\n    name\n  }\n  versions {\n    version\n    versionHash\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        CONTACTS_READ\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        CONTACTS_READ\n      }\n    }\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
-    "name": "appMutationsAppCreateMutation",
+    "name": "OwnAppDetailViewSetAppPermissionsRequirementsMutation",
     "type": "Mutation",
     "metadata": null,
     "argumentDefinitions": v0,
@@ -233,13 +206,12 @@ return {
       {
         "kind": "LinkedField",
         "alias": null,
-        "name": "createApp",
+        "name": "setAppPermissionsRequirements",
         "storageKey": null,
         "args": v1,
-        "concreteType": "AppCreateMutationPayload",
+        "concreteType": "SetAppPermissionsRequirementsPayload",
         "plural": false,
         "selections": [
-          v5,
           {
             "kind": "LinkedField",
             "alias": null,
@@ -273,19 +245,18 @@ return {
   },
   "operation": {
     "kind": "Operation",
-    "name": "appMutationsAppCreateMutation",
+    "name": "OwnAppDetailViewSetAppPermissionsRequirementsMutation",
     "argumentDefinitions": v0,
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
-        "name": "createApp",
+        "name": "setAppPermissionsRequirements",
         "storageKey": null,
         "args": v1,
-        "concreteType": "AppCreateMutationPayload",
+        "concreteType": "SetAppPermissionsRequirementsPayload",
         "plural": false,
         "selections": [
-          v5,
           {
             "kind": "LinkedField",
             "alias": null,
@@ -313,8 +284,8 @@ return {
                     "concreteType": "OwnApp",
                     "plural": true,
                     "selections": [
+                      v2,
                       v3,
-                      v4,
                       {
                         "kind": "LinkedField",
                         "alias": null,
@@ -324,8 +295,8 @@ return {
                         "concreteType": "AppAuthor",
                         "plural": false,
                         "selections": [
-                          v2,
-                          v4
+                          v4,
+                          v3
                         ]
                       },
                       {
@@ -361,7 +332,7 @@ return {
                                 "args": null,
                                 "concreteType": "AppPermissionDefinitions",
                                 "plural": false,
-                                "selections": v6
+                                "selections": v5
                               },
                               {
                                 "kind": "LinkedField",
@@ -371,7 +342,7 @@ return {
                                 "args": null,
                                 "concreteType": "AppPermissionDefinitions",
                                 "plural": false,
-                                "selections": v6
+                                "selections": v5
                               }
                             ]
                           },
@@ -393,7 +364,7 @@ return {
                         "concreteType": "AppUser",
                         "plural": true,
                         "selections": [
-                          v3,
+                          v2,
                           {
                             "kind": "LinkedField",
                             "alias": null,
@@ -412,13 +383,13 @@ return {
                                 "concreteType": "NamedProfile",
                                 "plural": false,
                                 "selections": [
-                                  v4
+                                  v3
                                 ]
                               },
-                              v2
+                              v4
                             ]
                           },
-                          v2
+                          v4
                         ]
                       },
                       {
@@ -428,12 +399,12 @@ return {
                         "args": null,
                         "storageKey": null
                       },
-                      v2
+                      v4
                     ]
                   }
                 ]
               },
-              v2
+              v4
             ]
           }
         ]
@@ -443,5 +414,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '954c5f8b516fc2de93670403fecc6b96';
+(node/*: any*/).hash = 'f35f1ca10fa351676864199904c87463';
 module.exports = node;
