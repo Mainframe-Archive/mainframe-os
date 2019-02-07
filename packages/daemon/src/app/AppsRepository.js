@@ -241,13 +241,13 @@ export default class AppsRepository {
   }
 
   updateAppDetails(params: UpdateAppDetailsParams): void {
-    const app = this.getOwnByID(params.appID)
+    const app = this.getOwnByID(idType(params.appID))
     if (app == null) {
       throw new Error('Invalid app')
     }
     app.name = params.name
-    app.version = params.version
     app.contentsPath = params.contentsPath
+    app.editNextVersionNumber(params.version)
   }
 
   setUserPermissionsSettings(

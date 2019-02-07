@@ -130,12 +130,17 @@ export default class OwnApp extends AbstractApp {
     this._data.name = name
   }
 
-  set version(version: string) {
-    this._data.version = version
-  }
-
   set contentsPath(path: string) {
     this._data.contentsPath = path
+  }
+
+  editNextVersionNumber(version: string) {
+    const latestVersion = { ...this._versions[this._data.version] }
+    // $FlowFixMe Spread
+    latestVersion.version = version
+    delete this._versions[this._data.version]
+    this._versions[version] = latestVersion
+    this._data.version = version
   }
 
   createNextVersion(
