@@ -199,7 +199,7 @@ export const sandboxed = {
             if (filePaths.length !== 0) {
               try {
                 const filePath = filePaths[0]
-                const { address, encryptionKey, feedHash } = ctx.storage
+                let { address, encryptionKey, feedHash } = ctx.storage
 
                 // TODO: move out encryption code to a separate file
                 const iv = crypto.randomBytes(16) // TODO: use a constant for the length of the IV
@@ -211,19 +211,46 @@ export const sandboxed = {
                 const stream = createReadStream(filePath)
                   .pipe(cipher)
                   .pipe(new PrependInitializationVector(iv))
-                const feedManifest =
-                  feedHash || (await ctx.bzz.createFeedManifest(address))
-                const [dataHash, feedMetadata] = await Promise.all([
-                  ctx.bzz.uploadFileStream(stream, {
-                    contentType: mime.getType(filePath),
-                  }),
-                  ctx.bzz.getFeedMetadata(feedManifest),
-                ])
+
+                let feedMetadata
+                let dataHash
+                let manifestHash
+
+                console.log(params, 'params')
+                console.log(filePaths, 'filePaths')
+                console.log(mime.getType(filePath), 'mime.getType(filePath)')
+                console.log(feedHash, 'feedHash')
+
+                if (feedHash) {
+                  console.log(`feedHash is ${feedHash}`)
+                  const feedValue = await ctx.bzz.getFeedValue(feedHash, {}, { mode: 'content-hash' })
+                  console.log(feedValue, 'feedValue')
+                  manifestHash = feedValue
+                  feedMetadata = await ctx.bzz.getFeedMetadata(feedHash)
+                } else {
+                  console.log('feedHash does not exist')
+                  feedHash = await ctx.bzz.createFeedManifest(address)
+                  feedMetadata = await ctx.bzz.getFeedMetadata(feedHash)
+                  const manifest = {entries: []}
+                  const initialManifest = await ctx.bzz.uploadFile(JSON.stringify(manifest), {})
+                  console.log(initialManifest, 'initialManifest')
+                  manifestHash = initialManifest
+                }
+
+                dataHash = await ctx.bzz.uploadFileStream(stream, {
+                  contentType: mime.getType(filePath),
+                  path: params.name,
+                  manifestHash: manifestHash
+                })
+
+                console.log(dataHash, 'dataHash')
+                console.log(feedMetadata, 'feedMetadata')
+                console.log(manifestHash, 'manifestHash')
+
                 await ctx.bzz.postFeedValue(feedMetadata, `0x${dataHash}`)
-                // TODO: persist to the vault, atm feedHash is lost with the current session
-                ctx.storage.feedHash = feedManifest
-                console.log(ctx.client.app, 'ctx.client.app')
-                await ctx.client.app.setFeedHash({ sessID: ctx.appSession.session.sessID, feedHash: feedManifest })
+
+                ctx.storage.feedHash = feedHash
+                await ctx.client.app.setFeedHash({ sessID: ctx.appSession.session.sessID, feedHash: feedHash })
                 resolve(params.name)
               } catch (error) {
                 console.log(error, 'storage_promptUpload error')
@@ -237,6 +264,27 @@ export const sandboxed = {
           },
         )
       })
+    },
+  },
+
+
+  storage_list: {
+    handler: async(ctx: AppContext): Promise<Array<string>> => {
+      console.log('storage list called')
+      try {
+        console.log(ctx.storage.feedHash, 'feedHash')
+        const feedHash = ctx.appSession.storage.feedHash
+        const feedValue = await ctx.bzz.getFeedValue(feedHash, {}, { mode: 'content-hash' })
+        console.log(feedValue, 'feedValue')
+        const list = await ctx.bzz.list(feedHash)
+        console.log(list, 'list')
+        return list
+      } catch (error) {
+        console.log(error, 'storage_list error')
+        // TODO: use RPCError to provide a custom error code
+        new Error('Upload failed')
+      }
+      return {}
     },
   },
 }

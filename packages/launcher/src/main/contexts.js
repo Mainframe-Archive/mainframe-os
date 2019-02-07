@@ -127,7 +127,6 @@ export class AppContext extends Context {
 
   get storage(): AppStorageSettings {
     if (this._storage == null) {
-      console.log(this, 'this')
       const keyPair = createKeyPair(this.appSession.storage.feedKey, 'hex')
       const privKey = keyPair.getPrivate()
       this._storage = {
