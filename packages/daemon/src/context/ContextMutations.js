@@ -113,11 +113,11 @@ export default class ContextMutations {
     }
     const { userID, contact } = res
 
-    const app = openVault.identities.getApp(appID)
+    const app = openVault.apps.getByID(appID)
     if (!app) {
       throw new Error('App not found')
     }
-    const sharedAppID = app.id
+    const sharedAppID = app.mfid
 
     const existingSharedData = openVault.contactAppData.getSharedData(
       sharedAppID,
@@ -193,8 +193,7 @@ export default class ContextMutations {
             type: 'app_data_changed',
             sharedData,
             // $FlowFixMe: filter guarantees non-null
-            // appID: openVault.identities.getID(sharedAppID),
-            appID: contactID,
+            appID: openVault.identities.getID(sharedAppID),
             contactID,
           })
         }

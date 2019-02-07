@@ -202,20 +202,20 @@ export type BlockchainWeb3SendResult = any
 
 export type CommsPublishParams = {
   appID: ID,
-  contactID: ID,
+  contactID: string,
   key: string,
   value: Object,
 }
 
 export type CommsSubscribeParams = {
   appID: ID,
-  contactID: ID,
+  contactID: string,
   key: string,
 }
 
 export type CommsGetSubscribableParams = {
   appID: ID,
-  contactID: ID,
+  contactID: string,
 }
 
 export type CommsGetSubscribableResult = Array<string>

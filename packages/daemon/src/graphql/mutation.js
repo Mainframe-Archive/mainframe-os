@@ -309,6 +309,9 @@ const appPermissionDefinitionsInput = new GraphQLInputObjectType({
     BLOCKCHAIN_SEND: {
       type: GraphQLBoolean,
     },
+    COMMS_CONTACT: {
+      type: GraphQLBoolean,
+    },
     CONTACTS_READ: {
       type: GraphQLBoolean,
     },
@@ -416,6 +419,7 @@ const permissionGrantsInput = new GraphQLInputObjectType({
   name: 'PermissionGrantsInput',
   fields: () => ({
     BLOCKCHAIN_SEND: { type: GraphQLBoolean },
+    COMMS_CONTACT: { type: GraphQLBoolean },
     CONTACTS_READ: { type: GraphQLBoolean },
     SWARM_UPLOAD: { type: GraphQLBoolean },
     SWARM_DOWNLOAD: { type: GraphQLBoolean },

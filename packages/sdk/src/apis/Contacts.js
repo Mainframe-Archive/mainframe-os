@@ -2,7 +2,7 @@
 
 import ClientAPIs from '../ClientAPIs'
 
-type ContactID = string
+export type ContactID = string
 
 export default class ContactsAPIs extends ClientAPIs {
   async selectContacts(params: { multi: boolean }) {

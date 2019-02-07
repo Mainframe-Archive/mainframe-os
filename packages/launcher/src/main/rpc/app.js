@@ -25,6 +25,18 @@ class TopicSubscription extends ContextSubscription<RxSubscription> {
   }
 }
 
+class CommsSubscription extends ContextSubscription<RxSubscription> {
+  constructor() {
+    super('comms_subscription')
+  }
+
+  async dispose() {
+    if (this.data != null) {
+      this.data.unsubscribe()
+    }
+  }
+}
+
 export const sandboxed = {
   api_version: (ctx: AppContext) => ctx.client.apiVersion(),
 
@@ -61,6 +73,50 @@ export const sandboxed = {
     }
     return accounts
   },
+
+  // Comms
+
+  comms_publish: withPermission(
+    'COMMS_CONTACT',
+    async (
+      ctx: AppContext,
+      params: { contactID: string, key: string, value: Object },
+    ): Promise<void> => {
+      const appID = ctx.appSession.app.appID
+      return ctx.client.comms.publish({ ...params, appID })
+    },
+  ),
+
+  comms_subscribe: withPermission(
+    'COMMS_CONTACT',
+    async (
+      ctx: AppContext,
+      params: { contactID: string, key: string },
+    ): Promise<string> => {
+      const appID = ctx.appSession.app.appID
+      const subscription = await ctx.client.comms.subscribe({
+        ...params,
+        appID,
+      })
+      const sub = new CommsSubscription()
+      sub.data = subscription.subscribe(msg => {
+        ctx.notifySandboxed(sub.id, msg)
+      })
+      ctx.setSubscription(sub)
+      return sub.id
+    },
+  ),
+
+  comms_getSubscribable: withPermission(
+    'COMMS_CONTACT',
+    async (
+      ctx: AppContext,
+      params: { contactID: string },
+    ): Promise<Array<string>> => {
+      const appID = ctx.appSession.app.appID
+      return ctx.client.comms.getSubscribable({ ...params, appID })
+    },
+  ),
 
   // Contacts
 

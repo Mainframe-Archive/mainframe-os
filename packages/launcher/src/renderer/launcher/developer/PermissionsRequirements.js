@@ -40,6 +40,7 @@ type State = {
 
 export const PERMISSIONS_DESCRIPTIONS = {
   BLOCKCHAIN_SEND: 'Make transactions to Ethereum Blockchain',
+  COMMS_CONTACT: 'Communication between contacts',
   CONTACTS_READ: 'Access contact data',
   SWARM_UPLOAD: 'Upload files to Swarm',
   SWARM_DOWNLOAD: 'Download files from Swarm',

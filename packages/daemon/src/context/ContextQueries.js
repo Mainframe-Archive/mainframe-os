@@ -91,11 +91,11 @@ export default class ContextQueries {
   async getContactAppFeeds(appID: ID, contactID: ID): AppFeedsPayload {
     const { openVault, io } = this._context
 
-    const app = openVault.identities.getApp(appID)
+    const app = openVault.apps.getByID(appID)
     if (!app) {
       throw new Error('App not found')
     }
-    const sharedAppID = app.id
+    const sharedAppID = app.mfid
 
     const sharedData = openVault.contactAppData.getSharedData(
       sharedAppID,

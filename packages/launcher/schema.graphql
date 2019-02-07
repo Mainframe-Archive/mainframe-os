@@ -104,6 +104,7 @@ type AppPermissionDefinitions {
 
 input AppPermissionDefinitionsInput {
   BLOCKCHAIN_SEND: Boolean
+  COMMS_CONTACT: Boolean
   CONTACTS_READ: Boolean
   SWARM_UPLOAD: Boolean
   SWARM_DOWNLOAD: Boolean
@@ -356,6 +357,7 @@ type Peers {
 
 input PermissionGrantsInput {
   BLOCKCHAIN_SEND: Boolean
+  COMMS_CONTACT: Boolean
   CONTACTS_READ: Boolean
   SWARM_UPLOAD: Boolean
   SWARM_DOWNLOAD: Boolean

@@ -66,6 +66,10 @@ export default class App extends AbstractApp {
     return this._manifest
   }
 
+  get mfid(): string {
+    return this.manifest.id
+  }
+
   getPermissionsChecked(userID: ID): boolean {
     if (!havePermissionsToGrant(this._manifest.permissions)) {
       return true
