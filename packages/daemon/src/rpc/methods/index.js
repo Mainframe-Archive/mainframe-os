@@ -39,6 +39,7 @@ export default {
   blockchain_web3Send: blockchain.web3Send,
 
   comms_publish: comms.publish,
+  comms_subscribe: comms.subscribe,
   comms_getSubscribable: comms.getSubscribable,
 
   contact_approveContacts: contact.approveContactsForApp,

@@ -207,6 +207,12 @@ export type CommsPublishParams = {
   value: Object,
 }
 
+export type CommsSubscribeParams = {
+  appID: ID,
+  contactID: ID,
+  key: string,
+}
+
 export type CommsGetSubscribableParams = {
   appID: ID,
   contactID: ID,

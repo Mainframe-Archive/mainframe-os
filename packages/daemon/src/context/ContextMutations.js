@@ -4,6 +4,7 @@ import { hexValueType } from '@erebos/hex'
 import type { StrictPermissionsRequirements } from '@mainframe/app-permissions'
 import { idType, type ID } from '@mainframe/utils-id'
 import type { AppUserContact } from '@mainframe/client'
+import { isValidMFID } from '@mainframe/data-types'
 
 import type { OwnApp } from '../app'
 import type { ContactToApprove } from '../app/AbstractApp'
@@ -165,7 +166,10 @@ export default class ContextMutations {
   updateContactApps(contactID: ID | string, apps: ContactAppsPayload) {
     const { openVault } = this._context
     Object.keys(apps)
-      .filter(sharedAppID => openVault.identities.getID(sharedAppID))
+      .filter(
+        sharedAppID =>
+          isValidMFID(sharedAppID) && openVault.identities.getID(sharedAppID),
+      )
       .forEach(sharedAppID => {
         const existingSharedData = openVault.contactAppData.getSharedData(
           sharedAppID,

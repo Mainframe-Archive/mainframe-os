@@ -110,6 +110,12 @@ export const COMMS_PUBLISH_SCHEMA = {
   value: 'object',
 }
 
+export const COMMS_SUBSCRIBE_SCHEMA = {
+  appID: LOCAL_ID_SCHEMA,
+  contactID: LOCAL_ID_SCHEMA,
+  key: 'string',
+}
+
 export const COMMS_GET_SUBSCRIBABLE_SCHEMA = {
   appID: LOCAL_ID_SCHEMA,
   contactID: LOCAL_ID_SCHEMA,
