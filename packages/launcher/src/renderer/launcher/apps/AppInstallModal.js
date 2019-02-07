@@ -17,7 +17,6 @@ import { EnvironmentContext } from '../RelayEnvironment'
 
 import applyContext, { type CurrentUser } from '../LauncherContext'
 import FormModalView from '../../UIComponents/FormModalView'
-import DropFile from '../../UIComponents/DropFile'
 import Loader from '../../UIComponents/Loader'
 import rpc from '../rpc'
 import PermissionsView from '../PermissionsView'
@@ -55,13 +54,6 @@ const TextContainer = styled.View`
 
 const View = styled.View``
 
-const DragView = styled.TouchableOpacity`
-  border-style: dashed;
-  border-width: 1px;
-  border-color: #d3d3d3;
-  padding: 50px;
-`
-
 class AppInstallModal extends Component<ViewProps, State> {
   static contextType = EnvironmentContext
 
@@ -72,42 +64,6 @@ class AppInstallModal extends Component<ViewProps, State> {
   }
 
   // HANDLERS
-
-  onDrop = (files: Array<File>) => {
-    this.handleSelectedFiles(files)
-  }
-
-  // TODO: Remove once replaced by hash input
-  handleSelectedFiles = async (files: Array<Object>) => {
-    if (files.length) {
-      try {
-        const manifest = {} //await rpc.readManifest(files[0].path)
-        if (
-          typeof manifest.data.name === 'string' &&
-          typeof manifest.data.permissions === 'object'
-        ) {
-          this.setState({
-            manifest: manifest.data,
-          })
-          if (havePermissionsToGrant(manifest.data.permissions)) {
-            this.setState({
-              installStep: 'permissions',
-            })
-          } else {
-            const strictGrants = createStrictPermissionGrants({})
-            this.onSubmitPermissions(strictGrants)
-          }
-        } else {
-          // eslint-disable-next-line no-console
-          console.log('invalid manifest')
-        }
-      } catch (err) {
-        // TODO: Feedback error
-        // eslint-disable-next-line no-console
-        console.log('error parsing manifest: ', err)
-      }
-    }
-  }
 
   onSubmitManifest = async (payload: FormSubmitPayload) => {
     if (payload.valid) {
@@ -214,16 +170,6 @@ class AppInstallModal extends Component<ViewProps, State> {
           </TextContainer>
           <View>
             <TextField name="appid" required label="Mainframe App ID" />
-            <DropFile
-              onDrop={this.onDrop}
-              inputTestID="installer-file-selector"
-              accept={['application/json']}>
-              <DragView>
-                <Text variant={['modalText', 'center']}>
-                  Or drag and drop a manifest file here.
-                </Text>
-              </DragView>
-            </DropFile>
           </View>
         </Container>
       </FormModalView>

@@ -354,6 +354,7 @@ export class OwnAppDetailView extends Component<Props, State> {
             onPressBack={this.onPressPublishVersion}
             onRequestClose={this.onCloseModal}
             onPressSave={this.publishApp}
+            submitButtonTitle="PUBLISH"
           />
         )
       }

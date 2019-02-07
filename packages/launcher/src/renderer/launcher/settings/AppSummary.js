@@ -24,6 +24,7 @@ type Props = {
   onRequestClose?: () => any,
   onPressBack?: () => any,
   onPressSave: () => any,
+  submitButtonTitle?: ?string,
   permissionsRequirements?: StrictPermissionsRequirements,
   appData: AppData,
 }
@@ -139,7 +140,7 @@ export default class AppSummary extends Component<Props> {
         dismissButton={this.props.onPressBack ? 'BACK' : 'CLOSE'}
         onPressDismiss={this.props.onPressBack}
         confirmTestID="create-app-complete-button"
-        confirmButton="SAVE"
+        confirmButton={this.props.submitButtonTitle || 'SAVE'}
         onPressConfirm={this.props.onPressSave}
         onRequestClose={this.props.onRequestClose}>
         <Container>
