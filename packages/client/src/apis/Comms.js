@@ -10,7 +10,7 @@ import type {
   CommsSubscribeParams,
 } from '../types'
 
-export default class ContactAPIs extends ClientAPIs {
+export default class CommsAPIs extends ClientAPIs {
   publish(params: CommsPublishParams): Promise<void> {
     return this._rpc.request('comms_publish', params)
   }

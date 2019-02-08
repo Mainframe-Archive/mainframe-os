@@ -69,6 +69,7 @@ export const subscribe = {
     const sub = new CommsSubscription()
     ctx.subscriptions.set(sub)
 
+    // TODO: Integrate with FeedsHandler to de-duplicate multiple calls to poll the same feed
     const poll = pollFeedJSON(ctx.io.bzz, appFeeds[params.key].feedHash, {
       interval: MINUTE,
     })
