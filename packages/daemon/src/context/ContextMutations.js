@@ -117,7 +117,7 @@ export default class ContextMutations {
   }
 
   async createApp(params: CreateAppParams): Promise<OwnApp> {
-    const { openVault } = this._context
+    const { openVault, io } = this._context
 
     const appIdentity = openVault.identities.getOwnApp(
       openVault.identities.createOwnApp(),
@@ -142,6 +142,8 @@ export default class ContextMutations {
           ? '1.0.0'
           : params.version,
     })
+    // Do this here so app shared data can be referenced by update hash
+    await app.updateFeed.syncManifest(io.bzz)
 
     this._context.next({ type: 'app_created', app })
     return app
@@ -228,8 +230,7 @@ export default class ContextMutations {
       userID,
       contactsToApprove,
     )
-    // $FlowFixMe map type
-    const contactsIDs = Object.values(approvedContacts).map(c => c.id)
+    const contactsIDs = Object.keys(approvedContacts)
     const contacts = this._context.queries.getAppUserContacts(
       appID,
       userID,
@@ -274,12 +275,12 @@ export default class ContextMutations {
 
   async publishAppData(
     appID: ID,
-    contactID: ID,
+    contactID: ID | string,
     key: string,
     value: Object,
   ): Promise<void> {
     const { openVault, io } = this._context
-    const res = openVault.identities.getContactByID(contactID) || {}
+    const res = openVault.identities.getContactByID(contactID)
     if (!res) {
       throw new Error('Contact not found')
     }
@@ -289,7 +290,7 @@ export default class ContextMutations {
     if (!app) {
       throw new Error('App not found')
     }
-    const sharedAppID = app.mfid
+    const sharedAppID = app.updateFeedHash
 
     const existingSharedData = openVault.contactAppData.getSharedData(
       sharedAppID,

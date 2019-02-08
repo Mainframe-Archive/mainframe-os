@@ -91,7 +91,7 @@ export default class ContextQueries {
     if (!app) {
       throw new Error('App not found')
     }
-    const contactIDs = app.listApprovedContacts(userID).map(c => c.id)
+    const contactIDs = Object.keys(app.getApprovedContacts(userID))
     return this.getAppUserContacts(appID, userID, contactIDs)
   }
 
@@ -105,10 +105,10 @@ export default class ContextQueries {
     if (!app) {
       throw new Error('App not found')
     }
-    const approvedContacts = app.listApprovedContacts(userID)
+    const approvedContacts = app.getApprovedContacts(userID)
     const contacts = this.getUserContacts(userID)
     return contactIDs.map(id => {
-      const approvedContact = approvedContacts.find(c => c.id === id)
+      const approvedContact = approvedContacts[id]
       const contactData: AppUserContact = {
         id,
         data: null,
@@ -127,14 +127,14 @@ export default class ContextQueries {
     })
   }
 
-  async getContactAppFeeds(appID: ID, contactID: ID): AppFeedsPayload {
+  async getContactAppFeeds(appID: ID, contactID: ID | string): AppFeedsPayload {
     const { openVault, io } = this._context
 
     const app = openVault.apps.getByID(appID)
     if (!app) {
       throw new Error('App not found')
     }
-    const sharedAppID = app.mfid
+    const sharedAppID = app.updateFeedHash
 
     const sharedData = openVault.contactAppData.getSharedData(
       sharedAppID,
@@ -150,6 +150,19 @@ export default class ContextQueries {
     ): SharedAppDataPayload)
     // TODO: validate payload version
     return remoteData.feeds || {}
+  }
+
+  getContactLocalIDByAppApprovedID(
+    appID: string,
+    userID: string,
+    contactID: string,
+  ): ?string {
+    const app = this._context.openVault.apps.getByID(appID)
+    if (!app) {
+      throw new Error('App not found')
+    }
+
+    return app.getLocalIDByApprovedID(userID, contactID)
   }
 
   // Wallets

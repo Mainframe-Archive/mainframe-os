@@ -160,7 +160,7 @@ export default class AppsRepository {
     return this._ownApps
   }
 
-  getByID(id: ID): ?App {
+  getByID(id: ID | string): ?App {
     return this._apps[id] || this._ownApps[id]
   }
 
@@ -262,7 +262,7 @@ export default class AppsRepository {
     appID: ID | string,
     userID: ID | string,
     contactsToApprove: Array<ContactToApprove>,
-  ): { [localID: string]: ApprovedContact } {
+  ): { [id: string]: ApprovedContact } {
     const app = this.getAnyByID(appID)
     if (app == null) {
       throw new Error('Invalid app')

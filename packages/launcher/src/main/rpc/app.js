@@ -87,7 +87,8 @@ export const sandboxed = {
       params: { contactID: string, key: string, value: Object },
     ): Promise<void> => {
       const appID = ctx.appSession.app.appID
-      return ctx.client.comms.publish({ ...params, appID })
+      const userID = ctx.appSession.user.id
+      return ctx.client.comms.publish({ ...params, appID, userID })
     },
   ),
 
@@ -98,9 +99,11 @@ export const sandboxed = {
       params: { contactID: string, key: string },
     ): Promise<string> => {
       const appID = ctx.appSession.app.appID
+      const userID = ctx.appSession.user.id
       const subscription = await ctx.client.comms.subscribe({
         ...params,
         appID,
+        userID,
       })
       const sub = new CommsSubscription()
       sub.data = subscription.subscribe(msg => {
@@ -118,7 +121,8 @@ export const sandboxed = {
       params: { contactID: string },
     ): Promise<Array<string>> => {
       const appID = ctx.appSession.app.appID
-      return ctx.client.comms.getSubscribable({ ...params, appID })
+      const userID = ctx.appSession.user.id
+      return ctx.client.comms.getSubscribable({ ...params, appID, userID })
     },
   ),
 

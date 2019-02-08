@@ -9,7 +9,7 @@ import {
 } from '@mainframe/app-permissions'
 import { uniqueID, type ID } from '@mainframe/utils-id'
 
-import { OwnFeed, type OwnFeedSerialized } from '../swarm/feed'
+import { OwnFeed, type OwnFeedSerialized, type bzzHash } from '../swarm/feed'
 
 import AbstractApp, {
   type AbstractAppParams,
@@ -114,6 +114,10 @@ export default class OwnApp extends AbstractApp {
 
   get updateFeed(): OwnFeed {
     return this._updateFeed
+  }
+
+  get updateFeedHash(): ?bzzHash {
+    return this._updateFeed.feedHash
   }
 
   get versions(): { [version: string]: AppVersion } {

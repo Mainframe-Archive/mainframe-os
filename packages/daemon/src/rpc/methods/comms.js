@@ -43,9 +43,17 @@ export const publish = {
     ctx: ClientContext,
     params: CommsPublishParams,
   ): Promise<void> => {
+    const localID = ctx.queries.getContactLocalIDByAppApprovedID(
+      fromClientID(params.appID),
+      fromClientID(params.userID),
+      fromClientID(params.contactID),
+    )
+    if (!localID) {
+      throw new Error('Contact not found')
+    }
     await ctx.mutations.publishAppData(
       fromClientID(params.appID),
-      fromClientID(params.contactID),
+      localID,
       params.key,
       params.value,
     )
@@ -58,9 +66,17 @@ export const subscribe = {
     ctx: ClientContext,
     params: CommsSubscribeParams,
   ): Promise<string> => {
+    const localID = ctx.queries.getContactLocalIDByAppApprovedID(
+      fromClientID(params.appID),
+      fromClientID(params.userID),
+      fromClientID(params.contactID),
+    )
+    if (!localID) {
+      throw new Error('Contact not found')
+    }
     const appFeeds = await ctx.queries.getContactAppFeeds(
       fromClientID(params.appID),
-      fromClientID(params.contactID),
+      localID,
     )
     if (!appFeeds[params.key]) {
       throw new Error('Feed not found')
@@ -85,9 +101,17 @@ export const getSubscribable = {
     ctx: ClientContext,
     params: CommsGetSubscribableParams,
   ): Promise<CommsGetSubscribableResult> => {
+    const localID = ctx.queries.getContactLocalIDByAppApprovedID(
+      fromClientID(params.appID),
+      fromClientID(params.userID),
+      fromClientID(params.contactID),
+    )
+    if (!localID) {
+      throw new Error('Contact not found')
+    }
     const appFeeds = await ctx.queries.getContactAppFeeds(
       fromClientID(params.appID),
-      fromClientID(params.contactID),
+      localID,
     )
     return Object.keys(appFeeds).filter(key => appFeeds[key].type === 'json')
   },

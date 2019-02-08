@@ -46,6 +46,7 @@ export type AppCheckPermissionResult = {
 export type ApprovedContact = {
   publicDataOnly: boolean,
   id: string,
+  localID: string,
 }
 
 export type AppUserPermissionsSettings = {
@@ -71,7 +72,7 @@ export type AppUserWalletSettings = {
 
 export type AppUserSettings = {
   approvedContacts: {
-    [localID: string]: ApprovedContact,
+    [id: string]: ApprovedContact,
   },
   permissionsSettings: AppUserPermissionsSettings,
   walletSettings: AppUserWalletSettings,
@@ -226,6 +227,7 @@ export type BlockchainWeb3SendResult = any
 
 export type CommsPublishParams = {
   appID: ID,
+  userID: string,
   contactID: string,
   key: string,
   value: Object,
@@ -233,12 +235,14 @@ export type CommsPublishParams = {
 
 export type CommsSubscribeParams = {
   appID: ID,
+  userID: string,
   contactID: string,
   key: string,
 }
 
 export type CommsGetSubscribableParams = {
   appID: ID,
+  userID: string,
   contactID: string,
 }
 
