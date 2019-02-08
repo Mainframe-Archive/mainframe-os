@@ -111,7 +111,7 @@ input AppPermissionDefinitionsInput {
 
 type AppPermissions {
   BLOCKCHAIN_SEND: Boolean
-  CONTACS_READ: Boolean
+  CONTACTS_READ: Boolean
   WEB_REQUEST: WebRequestGrants!
 }
 

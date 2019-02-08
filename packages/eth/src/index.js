@@ -6,6 +6,6 @@ export { default as EthClient } from './Client'
 export * from './types'
 
 export const INFURA_URLS = {
-  ropsten: 'https://ropsten.infura.io/KWLG1YOMaYgl4wiFlcJv',
-  mainnet: 'https://mainnet.infura.io/KWLG1YOMaYgl4wiFlcJv',
+  ropsten: 'https://ropsten.infura.io/v3/8ec0911ee74c4583b1346bbc1afdf22d',
+  mainnet: 'https://mainnet.infura.io/v3/8ec0911ee74c4583b1346bbc1afdf22d',
 }
