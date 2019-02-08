@@ -65,7 +65,7 @@ class IdentitiesView extends Component<Props, State> {
 
   closeModal = () => this.setState({ editUser: null })
 
-  renderUser(user: User) {
+  renderUser(user: User, hideEdit?: boolean) {
     const onPress = () => this.openEditModal(user)
     return (
       <UserItem key={user.localID}>
@@ -76,11 +76,13 @@ class IdentitiesView extends Component<Props, State> {
             {user.feedHash}
           </Text>
         </Profile>
-        <Button
-          onPress={onPress}
-          variant={['small', 'completeOnboarding']}
-          title="EDIT"
-        />
+        {!hideEdit && (
+          <Button
+            onPress={onPress}
+            variant={['small', 'completeOnboarding']}
+            title="EDIT"
+          />
+        )}
       </UserItem>
     )
   }
@@ -102,7 +104,7 @@ class IdentitiesView extends Component<Props, State> {
         {this.props.identities.ownDevelopers.length > 0 && (
           <>
             <Text variant="smallTitle">Developer</Text>
-            {this.renderUser(this.props.identities.ownDevelopers[0])}
+            {this.renderUser(this.props.identities.ownDevelopers[0], true)}
           </>
         )}
         {this.renderModal()}

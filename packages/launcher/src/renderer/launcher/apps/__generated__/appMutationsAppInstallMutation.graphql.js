@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 9c85b80a0e5f9e57c342bf7ca4938f25
+ * @relayHash a2bebe40e9ce6deebe4a09264abf3d92
  */
 
 /* eslint-disable */
@@ -104,11 +104,6 @@ fragment AppsView_apps on Apps {
     ...AppItem_installedApp
     id
   }
-  own {
-    localID
-    ...AppItem_ownApp
-    id
-  }
 }
 
 fragment AppItem_installedApp on App {
@@ -149,38 +144,6 @@ fragment AppItem_installedApp on App {
           }
         }
       }
-    }
-    id
-  }
-}
-
-fragment AppItem_ownApp on OwnApp {
-  localID
-  name
-  developer {
-    id
-    name
-  }
-  versions {
-    version
-    permissions {
-      optional {
-        WEB_REQUEST
-        BLOCKCHAIN_SEND
-      }
-      required {
-        WEB_REQUEST
-        BLOCKCHAIN_SEND
-      }
-    }
-  }
-  users {
-    localID
-    identity {
-      profile {
-        name
-      }
-      id
     }
     id
   }
@@ -255,72 +218,13 @@ v7 = [
     "storageKey": null
   },
   v6
-],
-v8 = {
-  "kind": "LinkedField",
-  "alias": null,
-  "name": "permissions",
-  "storageKey": null,
-  "args": null,
-  "concreteType": "AppPermissionsRequirements",
-  "plural": false,
-  "selections": [
-    {
-      "kind": "LinkedField",
-      "alias": null,
-      "name": "optional",
-      "storageKey": null,
-      "args": null,
-      "concreteType": "AppPermissionDefinitions",
-      "plural": false,
-      "selections": v7
-    },
-    {
-      "kind": "LinkedField",
-      "alias": null,
-      "name": "required",
-      "storageKey": null,
-      "args": null,
-      "concreteType": "AppPermissionDefinitions",
-      "plural": false,
-      "selections": v7
-    }
-  ]
-},
-v9 = [
-  v2,
-  v4
-],
-v10 = {
-  "kind": "LinkedField",
-  "alias": null,
-  "name": "identity",
-  "storageKey": null,
-  "args": null,
-  "concreteType": "OwnUserIdentity",
-  "plural": false,
-  "selections": [
-    {
-      "kind": "LinkedField",
-      "alias": null,
-      "name": "profile",
-      "storageKey": null,
-      "args": null,
-      "concreteType": "NamedProfile",
-      "plural": false,
-      "selections": [
-        v4
-      ]
-    },
-    v2
-  ]
-};
+];
 return {
   "kind": "Request",
   "operationKind": "mutation",
   "name": "appMutationsAppInstallMutation",
   "id": null,
-  "text": "mutation appMutationsAppInstallMutation(\n  $input: AppInstallMutationInput!\n) {\n  installApp(input: $input) {\n    app {\n      id\n      localID\n      name\n    }\n    viewer {\n      apps {\n        ...AppsView_apps\n      }\n      id\n    }\n  }\n}\n\nfragment AppsView_apps on Apps {\n  installed {\n    localID\n    ...AppItem_installedApp\n    id\n  }\n  own {\n    localID\n    ...AppItem_ownApp\n    id\n  }\n}\n\nfragment AppItem_installedApp on App {\n  localID\n  name\n  manifest {\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n    }\n    author {\n      id\n      name\n    }\n  }\n  users {\n    localID\n    identity {\n      profile {\n        name\n      }\n      id\n    }\n    settings {\n      permissionsSettings {\n        permissionsChecked\n        grants {\n          BLOCKCHAIN_SEND\n          WEB_REQUEST {\n            granted\n            denied\n          }\n        }\n      }\n    }\n    id\n  }\n}\n\nfragment AppItem_ownApp on OwnApp {\n  localID\n  name\n  developer {\n    id\n    name\n  }\n  versions {\n    version\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n    }\n  }\n  users {\n    localID\n    identity {\n      profile {\n        name\n      }\n      id\n    }\n    id\n  }\n}\n",
+  "text": "mutation appMutationsAppInstallMutation(\n  $input: AppInstallMutationInput!\n) {\n  installApp(input: $input) {\n    app {\n      id\n      localID\n      name\n    }\n    viewer {\n      apps {\n        ...AppsView_apps\n      }\n      id\n    }\n  }\n}\n\nfragment AppsView_apps on Apps {\n  installed {\n    localID\n    ...AppItem_installedApp\n    id\n  }\n}\n\nfragment AppItem_installedApp on App {\n  localID\n  name\n  manifest {\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n    }\n    author {\n      id\n      name\n    }\n  }\n  users {\n    localID\n    identity {\n      profile {\n        name\n      }\n      id\n    }\n    settings {\n      permissionsSettings {\n        permissionsChecked\n        grants {\n          BLOCKCHAIN_SEND\n          WEB_REQUEST {\n            granted\n            denied\n          }\n        }\n      }\n    }\n    id\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -423,7 +327,37 @@ return {
                         "concreteType": "AppManifestData",
                         "plural": false,
                         "selections": [
-                          v8,
+                          {
+                            "kind": "LinkedField",
+                            "alias": null,
+                            "name": "permissions",
+                            "storageKey": null,
+                            "args": null,
+                            "concreteType": "AppPermissionsRequirements",
+                            "plural": false,
+                            "selections": [
+                              {
+                                "kind": "LinkedField",
+                                "alias": null,
+                                "name": "optional",
+                                "storageKey": null,
+                                "args": null,
+                                "concreteType": "AppPermissionDefinitions",
+                                "plural": false,
+                                "selections": v7
+                              },
+                              {
+                                "kind": "LinkedField",
+                                "alias": null,
+                                "name": "required",
+                                "storageKey": null,
+                                "args": null,
+                                "concreteType": "AppPermissionDefinitions",
+                                "plural": false,
+                                "selections": v7
+                              }
+                            ]
+                          },
                           {
                             "kind": "LinkedField",
                             "alias": null,
@@ -432,7 +366,10 @@ return {
                             "args": null,
                             "concreteType": "AppAuthor",
                             "plural": false,
-                            "selections": v9
+                            "selections": [
+                              v2,
+                              v4
+                            ]
                           }
                         ]
                       },
@@ -446,7 +383,30 @@ return {
                         "plural": true,
                         "selections": [
                           v3,
-                          v10,
+                          {
+                            "kind": "LinkedField",
+                            "alias": null,
+                            "name": "identity",
+                            "storageKey": null,
+                            "args": null,
+                            "concreteType": "OwnUserIdentity",
+                            "plural": false,
+                            "selections": [
+                              {
+                                "kind": "LinkedField",
+                                "alias": null,
+                                "name": "profile",
+                                "storageKey": null,
+                                "args": null,
+                                "concreteType": "NamedProfile",
+                                "plural": false,
+                                "selections": [
+                                  v4
+                                ]
+                              },
+                              v2
+                            ]
+                          },
                           {
                             "kind": "LinkedField",
                             "alias": null,
@@ -513,63 +473,6 @@ return {
                               }
                             ]
                           },
-                          v2
-                        ]
-                      },
-                      v2
-                    ]
-                  },
-                  {
-                    "kind": "LinkedField",
-                    "alias": null,
-                    "name": "own",
-                    "storageKey": null,
-                    "args": null,
-                    "concreteType": "OwnApp",
-                    "plural": true,
-                    "selections": [
-                      v3,
-                      v4,
-                      {
-                        "kind": "LinkedField",
-                        "alias": null,
-                        "name": "developer",
-                        "storageKey": null,
-                        "args": null,
-                        "concreteType": "AppAuthor",
-                        "plural": false,
-                        "selections": v9
-                      },
-                      {
-                        "kind": "LinkedField",
-                        "alias": null,
-                        "name": "versions",
-                        "storageKey": null,
-                        "args": null,
-                        "concreteType": "AppVersionData",
-                        "plural": true,
-                        "selections": [
-                          {
-                            "kind": "ScalarField",
-                            "alias": null,
-                            "name": "version",
-                            "args": null,
-                            "storageKey": null
-                          },
-                          v8
-                        ]
-                      },
-                      {
-                        "kind": "LinkedField",
-                        "alias": null,
-                        "name": "users",
-                        "storageKey": null,
-                        "args": null,
-                        "concreteType": "AppUser",
-                        "plural": true,
-                        "selections": [
-                          v3,
-                          v10,
                           v2
                         ]
                       },

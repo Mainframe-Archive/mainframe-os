@@ -24,7 +24,7 @@ export default {
   ) => {
     return rpc.request('app_install', { manifest, userID, permissionsSettings })
   },
-  launchApp: (appID: ID, userID: ID) => {
+  launchApp: (appID: ID | string, userID: ID | string) => {
     return rpc.request('app_launch', { appID, userID })
   },
   loadManifest: (hash: string) => {
@@ -33,8 +33,8 @@ export default {
   removeApp: (appID: ID) => rpc.request('app_remove', { appID }),
   removeOwnApp: (appID: ID) => rpc.request('app_removeOwn', { appID }),
   setAppUserPermissionsSettings: (
-    appID: ID,
-    userID: ID,
+    appID: string,
+    userID: string,
     settings: AppUserPermissionsSettings,
   ) => {
     return rpc.request('app_setUserPermissionsSettings', {

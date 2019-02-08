@@ -100,6 +100,7 @@ input AppManifestInput {
 type AppPermissionDefinitions {
   WEB_REQUEST: [String]
   BLOCKCHAIN_SEND: Boolean
+  CONTACTS_READ: Boolean
 }
 
 input AppPermissionDefinitionsInput {
@@ -156,8 +157,9 @@ type AppUserSettings {
 
 type AppVersionData {
   version: String!
+  versionHash: String
+  contentsURI: String
   permissions: AppPermissionsRequirements!
-  publicationState: String!
 }
 
 enum ConnectionState {
@@ -292,6 +294,8 @@ input ManifestAuthorInput {
 type Mutation {
   createApp(input: AppCreateMutationInput!): AppCreateMutationPayload
   installApp(input: AppInstallMutationInput!): AppInstallMutationPayload
+  setAppPermissionsRequirements(input: SetAppPermissionsRequirementsInput!): SetAppPermissionsRequirementsPayload
+  publishAppVersion(input: PublishAppVersionInput!): PublishAppVersionPayload
   createUserIdentity(input: CreateUserIdentityInput!): CreateUserIdentityPayload
   createDeveloperIdentity(input: CreateDeveloperIdentityInput!): CreateDeveloperIdentityPayload
   createHDWallet(input: CreateHDWalletInput!): CreateHDWalletPayload
@@ -323,7 +327,8 @@ type OwnApp implements Node {
   id: ID!
   localID: ID!
   name: String!
-  versions: [AppVersionData]
+  contentsPath: String!
+  versions: [AppVersionData!]!
   developer: AppAuthor!
   users: [AppUser]
 }
@@ -368,6 +373,18 @@ input PermissionGrantsInput {
   WEB_REQUEST: WebRequestGrantInput!
 }
 
+input PublishAppVersionInput {
+  appID: String!
+  version: String!
+  clientMutationId: String
+}
+
+type PublishAppVersionPayload {
+  versionHash: String!
+  viewer: Viewer!
+  clientMutationId: String
+}
+
 type Query {
   """Fetches an object given its ID"""
   node(
@@ -376,6 +393,17 @@ type Query {
   ): Node
   viewer: Viewer!
   peers: Peers!
+}
+
+input SetAppPermissionsRequirementsInput {
+  appID: String!
+  permissionsRequirements: AppPermissionsRequirementsInput!
+  clientMutationId: String
+}
+
+type SetAppPermissionsRequirementsPayload {
+  viewer: Viewer!
+  clientMutationId: String
 }
 
 input SetDefaultWalletInput {

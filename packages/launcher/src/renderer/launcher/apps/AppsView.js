@@ -6,26 +6,25 @@ import {
   havePermissionsToGrant,
   type StrictPermissionsGrants,
 } from '@mainframe/app-permissions'
-import type { AppOwnData, AppInstalledData } from '@mainframe/client'
+import type { AppInstalledData } from '@mainframe/client'
 import styled from 'styled-components/native'
 import { Text } from '@morpheus-ui/core'
 import PlusIcon from '@morpheus-ui/icons/PlusSymbolCircled'
 
 import rpc from '../rpc'
-import CreateAppModal from '../developer/CreateAppModal'
 import PermissionsView from '../PermissionsView'
 import OSLogo from '../../UIComponents/MainframeOSLogo'
-import LauncherContext from '../LauncherContext'
+import applyContext, { type CurrentUser } from '../LauncherContext'
 import CompleteOnboardSession from './CompleteOnboardSession'
 
 import AppInstallModal from './AppInstallModal'
-import { OwnAppItem, InstalledAppItem } from './AppItem'
+import { InstalledAppItem } from './AppItem'
 
 const Header = styled.View`
   height: 50px;
 `
 
-const AppsGrid = styled.View`
+export const AppsGrid = styled.View`
   flex-direction: row;
   flex-wrap: wrap;
 `
@@ -50,23 +49,48 @@ const InstallIcon = styled.View`
   ${props => props.hover && 'border: 1px solid #DA1157;'}
 `
 
-type AppData = AppOwnData | AppInstalledData
+export const NewAppButton = (props: {
+  title: string,
+  onPress: () => void,
+  testID: string,
+}) => {
+  return (
+    <AppInstallContainer onPress={props.onPress} testID={props.testID}>
+      <InstallIcon>
+        <PlusIcon color="#808080" />
+      </InstallIcon>
+      <Text
+        theme={{
+          width: '72px',
+          fontSize: '11px',
+          padding: '5px 0',
+          color: '#808080',
+          border: '1px solid #a9a9a9',
+          borderRadius: '3px',
+          textAlign: 'center',
+        }}>
+        {props.title}
+      </Text>
+    </AppInstallContainer>
+  )
+}
+
+type AppData = AppInstalledData
 
 export type Apps = {
   installed: Array<AppData>,
-  own: Array<AppData>,
 }
 
 type Props = {
   apps: Apps,
+  user: CurrentUser,
 }
 
 type State = {
   showModal: ?{
-    type: 'accept_permissions' | 'app_install' | 'app_create',
+    type: 'accept_permissions' | 'app_install',
     data?: ?{
       app: AppData,
-      own: boolean,
     },
   },
   hover: ?string,
@@ -74,7 +98,6 @@ type State = {
 }
 
 class AppsView extends Component<Props, State> {
-  static contextType = LauncherContext
   state = {
     hover: null,
     showModal: null,
@@ -108,7 +131,7 @@ class AppsView extends Component<Props, State> {
       this.state.showModal.data
     ) {
       const { app } = this.state.showModal.data
-      const { user } = this.context
+      const { user } = this.props
       try {
         await rpc.setAppUserPermissionsSettings(app.localID, user.localID, {
           grants: permissionSettings,
@@ -126,21 +149,10 @@ class AppsView extends Component<Props, State> {
     }
   }
 
-  // App Creation
-
-  onPressCreateApp = () => {
-    this.setState({
-      showModal: {
-        type: 'app_create',
-      },
-    })
-  }
-
-  onOpenApp = async (app: AppData, own: boolean) => {
-    const { user } = this.context
+  onOpenApp = async (app: AppData) => {
+    const { user } = this.props
     const appUser = app.users.find(u => u.localID === user.localID)
     if (
-      !own &&
       havePermissionsToGrant(app.manifest.permissions) &&
       (!appUser || !appUser.settings.permissionsSettings.permissionsChecked)
     ) {
@@ -151,7 +163,6 @@ class AppsView extends Component<Props, State> {
           type: 'accept_permissions',
           data: {
             app,
-            own,
           },
         },
       })
@@ -170,16 +181,10 @@ class AppsView extends Component<Props, State> {
     })
   }
 
-  onAppCreated = () => {
-    this.onCloseModal()
-  }
-
   // RENDER
 
-  renderApp(app: AppData, own: boolean) {
-    return own ? (
-      <OwnAppItem key={app.localID} ownApp={app} onOpenApp={this.onOpenApp} />
-    ) : (
+  renderApp(app: AppData) {
+    return (
       <InstalledAppItem
         key={app.localID}
         installedApp={app}
@@ -188,36 +193,24 @@ class AppsView extends Component<Props, State> {
     )
   }
 
-  renderApps(apps: Array<AppData>, own: boolean) {
+  renderApps(apps: Array<AppData>) {
     return (
       <>
-        <Text variant="smallTitle">
-          {own ? 'Own Applications' : 'Installed Applications'}
-        </Text>
+        <Text variant="smallTitle">Installed Applications</Text>
         <AppsGrid>
-          {apps.map(app => this.renderApp(app, own))}
-          {own
-            ? this.renderButton(
-                'Create new',
-                this.onPressCreateApp,
-                'launcher-create-app-button',
-              )
-            : this.renderButton(
-                'Install',
-                this.onPressInstall,
-                'launcher-install-app-button',
-              )}
+          {apps.map(app => this.renderApp(app))}
+          <NewAppButton
+            title="Install"
+            onPress={this.onPressInstall}
+            testID="launcher-install-app-button"
+          />
         </AppsGrid>
       </>
     )
   }
 
   renderInstalled() {
-    return this.renderApps(this.props.apps.installed, false)
-  }
-
-  renderOwn() {
-    return this.renderApps(this.props.apps.own, true)
+    return this.renderApps(this.props.apps.installed)
   }
 
   renderButton(title: string, onPress: () => void, testID: string) {
@@ -272,14 +265,6 @@ class AppsView extends Component<Props, State> {
           )
           break
         }
-        case 'app_create':
-          modal = (
-            <CreateAppModal
-              onRequestClose={this.onCloseModal}
-              onAppCreated={this.onAppCreated}
-            />
-          )
-          break
         default:
       }
     }
@@ -295,24 +280,21 @@ class AppsView extends Component<Props, State> {
           />
         )}
         {this.renderInstalled()}
-        {this.renderOwn()}
         {modal}
       </>
     )
   }
 }
 
-export default createFragmentContainer(AppsView, {
+const AppsViewFragmentContainer = createFragmentContainer(AppsView, {
   apps: graphql`
     fragment AppsView_apps on Apps {
       installed {
         localID
         ...AppItem_installedApp
       }
-      own {
-        localID
-        ...AppItem_ownApp
-      }
     }
   `,
 })
+
+export default applyContext(AppsViewFragmentContainer)
