@@ -19,7 +19,10 @@ import { ensureDir } from 'fs-extra'
 
 import { type App, OwnApp } from '../app'
 import type { ContactToApprove } from '../app/AbstractApp'
-import { getContentsPath } from '../app/AppsRepository'
+import {
+  getContentsPath,
+  type UpdateAppDetailsParams,
+} from '../app/AppsRepository'
 import type {
   Contact,
   OwnDeveloperIdentity,
@@ -144,6 +147,12 @@ export default class ContextMutations {
 
     this._context.next({ type: 'app_created', app })
     return app
+  }
+
+  async updateAppDetails(params: UpdateAppDetailsParams): Promise<void> {
+    const { openVault } = this._context
+    openVault.apps.updateAppDetails(params)
+    await openVault.save()
   }
 
   async publishApp(params: PublishAppParams): Promise<string> {

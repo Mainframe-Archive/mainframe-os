@@ -292,18 +292,19 @@ type Mutation {
   installApp(input: AppInstallMutationInput!): AppInstallMutationPayload
   setAppPermissionsRequirements(input: SetAppPermissionsRequirementsInput!): SetAppPermissionsRequirementsPayload
   publishAppVersion(input: PublishAppVersionInput!): PublishAppVersionPayload
+  updateAppDetails(input: UpdateAppDetailsInput!): UpdateAppDetailsPayload
+  addContact(input: AddContactInput!): AddContactPayload
   createUserIdentity(input: CreateUserIdentityInput!): CreateUserIdentityPayload
   createDeveloperIdentity(input: CreateDeveloperIdentityInput!): CreateDeveloperIdentityPayload
-  createHDWallet(input: CreateHDWalletInput!): CreateHDWalletPayload
-  importHDWallet(input: ImportHDWalletInput!): ImportHDWalletPayload
-  addHDWalletAccount(input: AddHDWalletAccountInput!): AddHDWalletAccountPayload
-  addLedgerWalletAccounts(input: AddLedgerWalletAccountsInput!): AddLedgerWalletAccountsPayload
-  deleteWallet(input: DeleteWalletInput!): DeleteWalletPayload
-  addContact(input: AddContactInput!): AddContactPayload
   deleteContact(input: DeletContactInput!): DeletContactPayload
   setDefaultWallet(input: SetDefaultWalletInput!): SetDefaultWalletPayload
-  updateProfile(input: UpdateProfileInput!): UpdateProfilePayload
   setUserProfileVisibility(input: SetUserProfileVisibilityInput!): SetUserProfileVisibilityPayload
+  updateProfile(input: UpdateProfileInput!): UpdateProfilePayload
+  addHDWalletAccount(input: AddHDWalletAccountInput!): AddHDWalletAccountPayload
+  addLedgerWalletAccounts(input: AddLedgerWalletAccountsInput!): AddLedgerWalletAccountsPayload
+  createHDWallet(input: CreateHDWalletInput!): CreateHDWalletPayload
+  deleteWallet(input: DeleteWalletInput!): DeleteWalletPayload
+  importHDWallet(input: ImportHDWalletInput!): ImportHDWalletPayload
   setEthNetwork(input: SetEthNetworkInput!): SetEthNetworkPayload
 }
 
@@ -443,6 +444,19 @@ type Subscription {
 
 enum SupportedWallets {
   ETHEREUM
+}
+
+input UpdateAppDetailsInput {
+  appID: String!
+  name: String!
+  contentsPath: String!
+  version: String!
+  clientMutationId: String
+}
+
+type UpdateAppDetailsPayload {
+  viewer: Viewer!
+  clientMutationId: String
 }
 
 input UpdateProfileInput {
