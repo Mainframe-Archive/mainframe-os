@@ -15,18 +15,6 @@ import applyContext, { type CurrentUser } from '../LauncherContext'
 import RelayLoaderView from '../RelayLoaderView'
 import ContactsView, { type Contact } from './ContactsView'
 
-const CONTACT_CHANGED_SUBSCRIPTION = graphql`
-  subscription ContactsScreenContactChangedSubscription {
-    contactChanged {
-      connectionState
-      profile {
-        name
-        avatar
-      }
-    }
-  }
-`
-
 type QueryProps = {
   user: CurrentUser,
 }
@@ -78,20 +66,6 @@ const ContactsScreenRelayContainer = createFragmentContainer(
 
 export class ContactsScreenRenderer extends Component<QueryProps> {
   static contextType = EnvironmentContext
-
-  _subscription: ?Disposable
-
-  componentDidMount() {
-    this._subscription = requestSubscription(this.context, {
-      subscription: CONTACT_CHANGED_SUBSCRIPTION,
-    })
-  }
-
-  componentWillUnmount() {
-    if (this._subscription != null) {
-      this._subscription.dispose()
-    }
-  }
 
   render() {
     return (
