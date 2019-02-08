@@ -8,7 +8,6 @@ import BlockchainAPIs from './apis/Blockchain'
 import ContactAPIs from './apis/Contact'
 import GraphQLAPIs from './apis/GraphQL'
 import IdentityAPIs from './apis/Identity'
-import PssAPIs from './apis/Pss'
 import VaultAPIs from './apis/Vault'
 import WalletAPIs from './apis/Wallet'
 
@@ -23,7 +22,6 @@ export default class MainframeClient {
   contacts: ContactAPIs
   graphql: GraphQLAPIs
   identity: IdentityAPIs
-  pss: PssAPIs
   vault: VaultAPIs
   wallet: WalletAPIs
 
@@ -34,7 +32,6 @@ export default class MainframeClient {
     this.contacts = new ContactAPIs(this._rpc)
     this.graphql = new GraphQLAPIs(this._rpc)
     this.identity = new IdentityAPIs(this._rpc)
-    this.pss = new PssAPIs(this._rpc)
     this.vault = new VaultAPIs(this._rpc)
     this.wallet = new WalletAPIs(this._rpc)
   }
