@@ -48,7 +48,7 @@ const validateVersion = (params: FieldValidateFunctionParams) => {
     typeof params.value === 'string' &&
     !isValidSemver(params.value)
   ) {
-    return 'Please provide a valid verison number, e.g. 1.0.0'
+    return 'Please provide a valid version number, e.g. 1.0.0'
   }
 }
 
@@ -57,7 +57,7 @@ const appNameValidaton = ({ value }: FieldValidateFunctionParams) => {
     !value ||
     typeof value !== 'string' ||
     value.length > 30 ||
-    value.length < 2
+    value.length < 3
   ) {
     return 'App name must be between 3 and 30 characters'
   }

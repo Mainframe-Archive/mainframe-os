@@ -135,6 +135,12 @@ export default class OwnApp extends AbstractApp {
   }
 
   editNextVersionNumber(version: string) {
+    if (version === this._data.version) {
+      return
+    }
+    if (this._versions[version]) {
+      throw new Error('Version already exists')
+    }
     const latestVersion = { ...this._versions[this._data.version] }
     // $FlowFixMe Spread
     latestVersion.version = version
