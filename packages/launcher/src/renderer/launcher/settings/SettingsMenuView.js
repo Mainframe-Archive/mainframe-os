@@ -72,18 +72,19 @@ export default class SettingsMenuView extends Component<Props> {
           <Text variant={['smallTitle', 'blue', 'bold']}>About</Text>
           <List>
             <SettingsItem
-              firsr
+              first
               onPress={() => this.props.onSelectMenuItem('feedback')}
               title="Feedback"
               Icon={FeedbackIcon}
-              RightElement={GreaterIcon}
+              RightElement={ExportIcon}
             />
             <SettingsItem
               title="Alpha version 0.2.3"
               Icon={MainframeLogoIcon}
               RightElement={() => (
                 <Button
-                  title="UPDATE AVAILABLE"
+                  onPress={() => this.props.onSelectMenuItem('update')}
+                  title="CHECK FOR UPDATES"
                   variant={['completeOnboarding', 'small']}
                 />
               )}
