@@ -15,7 +15,7 @@
     "@mainframe/utils-id": "^0.1.0",
     "conf": "^2.0.0",
     "env-paths": "^2.0.0",
-    "esm": "3.0.84",
+    "esm": "3.2.4",
     "fs-extra": "^7.0.0"
   },
   "devDependencies": {
