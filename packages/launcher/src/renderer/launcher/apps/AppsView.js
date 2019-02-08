@@ -49,6 +49,8 @@ const InstallIcon = styled.View`
   ${props => props.hover && 'border: 1px solid #DA1157;'}
 `
 
+const ScrollView = styled.ScrollView``
+
 export const NewAppButton = (props: {
   title: string,
   onPress: () => void,
@@ -195,7 +197,7 @@ class AppsView extends Component<Props, State> {
 
   renderApps(apps: Array<AppData>) {
     return (
-      <>
+      <ScrollView>
         <Text variant="smallTitle">Installed Applications</Text>
         <AppsGrid>
           {apps.map(app => this.renderApp(app))}
@@ -205,7 +207,7 @@ class AppsView extends Component<Props, State> {
             testID="launcher-install-app-button"
           />
         </AppsGrid>
-      </>
+      </ScrollView>
     )
   }
 

@@ -130,6 +130,29 @@ export default class OwnApp extends AbstractApp {
 
   // Setters
 
+  set name(name: string) {
+    this._data.name = name
+  }
+
+  set contentsPath(path: string) {
+    this._data.contentsPath = path
+  }
+
+  editNextVersionNumber(version: string) {
+    if (version === this._data.version) {
+      return
+    }
+    if (this._versions[version]) {
+      throw new Error('Version already exists')
+    }
+    const latestVersion = { ...this._versions[this._data.version] }
+    // $FlowFixMe Spread
+    latestVersion.version = version
+    delete this._versions[this._data.version]
+    this._versions[version] = latestVersion
+    this._data.version = version
+  }
+
   createNextVersion(
     version: string,
     permissions?: ?StrictPermissionsRequirements,

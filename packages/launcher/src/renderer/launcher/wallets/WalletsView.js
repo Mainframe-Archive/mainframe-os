@@ -377,10 +377,9 @@ class WalletsView extends Component<Props, State> {
     return (
       <>
         {this.state.wallets.map(w => {
-          const setEditWallet = () => this.setState({ editName: w.name })
           const editing = this.state.editName === w.name
-
-          const setHover = () => this.setState({ hoverName: w.name })
+          // const setEditWallet = () => this.setState({ editName: w.name })
+          // const setHover = () => this.setState({ hoverName: w.name })
 
           const hover = this.state.hoverName === w.name
 
@@ -407,11 +406,11 @@ class WalletsView extends Component<Props, State> {
               ) : (
                 <WalletTitle
                   className="transition"
-                  onFocus={setHover}
-                  onMouseOver={setHover}
-                  onMouseOut={this.dismissNameHover}
-                  onBlur={this.dismissNameHover}
-                  onPress={setEditWallet}
+                  // onFocus={setHover}
+                  // onMouseOver={setHover}
+                  // onMouseOut={this.dismissNameHover}
+                  // onBlur={this.dismissNameHover}
+                  // onPress={setEditWallet}
                   hover={hover}>
                   {w.type === 'ledger' && (
                     <IconWrapper>

@@ -17,6 +17,7 @@ import {
   createSecretBoxKeyFromPassword,
 } from '@mainframe/utils-crypto'
 import { type ID } from '@mainframe/utils-id'
+import { INFURA_URLS } from '@mainframe/eth'
 
 import type { SessionData } from '../app/AbstractApp'
 import type App from '../app/App'
@@ -119,7 +120,6 @@ export type UserSettings = {
   bzzURL: string,
   pssURL: string,
   ethURL: string,
-  ethChainID: number,
 }
 
 export type VaultData = {
@@ -174,8 +174,7 @@ export default class Vault {
       settings: {
         bzzURL: 'http://swarm-gateways.net',
         pssURL: 'ws://localhost:8546',
-        ethURL: 'https://ropsten.infura.io/KWLG1YOMaYgl4wiFlcJv',
-        ethChainID: 3, // Mainnet 1, Ropsten 3, Rinkeby 4, Kovan 42, Local (ganache) 1977
+        ethURL: INFURA_URLS.ropsten,
       },
       identityWallets: new IdentityWallets(),
       contactAppData: new ContactAppData(),
@@ -289,10 +288,6 @@ export default class Vault {
 
   setEthUrl(url: string): void {
     this._data.settings.ethURL = url
-  }
-
-  setEthChainID(chainID: number): void {
-    this._data.settings.ethChainID = chainID
   }
 
   // Vault lifecycle

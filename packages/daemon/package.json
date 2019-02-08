@@ -4,7 +4,7 @@
   "main": "lib/index.js",
   "license": "MIT",
   "bin": {
-    "mainframe-daemon": "./bin/run"
+    "mainframed": "./bin/run"
   },
   "files": [
     "/bin",
@@ -12,14 +12,14 @@
   ],
   "oclif": {
     "commands": "./lib/cli/commands",
-    "bin": "mainframe-daemon",
+    "bin": "mainframed",
     "plugins": [
       "@oclif/plugin-help"
     ]
   },
   "scripts": {
     "clean": "del-cli lib",
-    "build:js": "cross-env BABEL_ENV=browser-cjs babel src --out-dir lib",
+    "build:js": "babel src --out-dir lib",
     "build:flow": "flow-copy-source src lib",
     "build": "npm run clean && npm run build:js && npm run build:flow",
     "test:types": "flow check",
