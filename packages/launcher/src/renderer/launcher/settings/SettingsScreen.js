@@ -52,7 +52,7 @@ export default class SettingsScreen extends Component<{}, State> {
         break
       case 'update':
         shell.openExternal(
-          'https://github.com/MainframeHQ/js-mainframe/releases',
+          'https://github.com/MainframeHQ/mainframe-os/releases',
         )
         break
       default:

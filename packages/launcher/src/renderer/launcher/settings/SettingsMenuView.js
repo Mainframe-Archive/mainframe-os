@@ -79,7 +79,7 @@ export default class SettingsMenuView extends Component<Props> {
               RightElement={ExportIcon}
             />
             <SettingsItem
-              title="Alpha version 0.2.3"
+              title="Alpha version 0.2"
               Icon={MainframeLogoIcon}
               RightElement={() => (
                 <Button
