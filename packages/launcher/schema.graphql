@@ -100,6 +100,7 @@ input AppManifestInput {
 type AppPermissionDefinitions {
   WEB_REQUEST: [String]
   BLOCKCHAIN_SEND: Boolean
+  COMMS_CONTACT: Boolean
   CONTACTS_READ: Boolean
 }
 
@@ -107,15 +108,12 @@ input AppPermissionDefinitionsInput {
   BLOCKCHAIN_SEND: Boolean
   COMMS_CONTACT: Boolean
   CONTACTS_READ: Boolean
-  SWARM_UPLOAD: Boolean
-  SWARM_DOWNLOAD: Boolean
   WEB_REQUEST: [String]
 }
 
 type AppPermissions {
   BLOCKCHAIN_SEND: Boolean
-  SWARM_UPLOAD: Boolean
-  SWARM_DOWNLOAD: Boolean
+  CONTACS_READ: Boolean
   WEB_REQUEST: WebRequestGrants!
 }
 
@@ -159,7 +157,6 @@ type AppUserSettings {
 type AppVersionData {
   version: String!
   versionHash: String
-  contentsURI: String
   permissions: AppPermissionsRequirements!
 }
 
@@ -370,8 +367,6 @@ input PermissionGrantsInput {
   BLOCKCHAIN_SEND: Boolean
   COMMS_CONTACT: Boolean
   CONTACTS_READ: Boolean
-  SWARM_UPLOAD: Boolean
-  SWARM_DOWNLOAD: Boolean
   WEB_REQUEST: WebRequestGrantInput!
 }
 

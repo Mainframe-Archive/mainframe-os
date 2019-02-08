@@ -37,7 +37,7 @@ const PERMISSION_NAMES = {
   },
   COMMS_CONTACT: {
     name: 'Communicate with your contacts',
-    description: 'Allows the app to send data to approved contacts.',
+    description: 'Allows the app to communicate data with approved contacts.',
   },
   CONTACTS_READ: {
     name: 'Request to fetch contacts',

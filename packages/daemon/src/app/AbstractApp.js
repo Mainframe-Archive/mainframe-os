@@ -106,11 +106,8 @@ export default class AbstractApp {
     this._settings[userID] = settings
   }
 
-  getPermissions(userID: ID): ?StrictPermissionsGrants {
-    const settings = this._settings[userID]
-    if (settings != null && settings.permissionsSettings != null) {
-      return settings.permissionsSettings.grants
-    }
+  getPermissions(userID: ID): StrictPermissionsGrants {
+    return this.getSettings(userID).permissionsSettings.grants
   }
 
   setPermissions(

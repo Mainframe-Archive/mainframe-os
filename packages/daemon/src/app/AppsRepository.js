@@ -219,12 +219,8 @@ export default class AppsRepository {
       appID,
       manifest,
       installationState: 'pending',
-      settings: {
-        [(userID: string)]: {
-          permissionsSettings,
-        },
-      },
     })
+    app.setPermissionsSettings(userID, permissionsSettings)
 
     this._apps[appID] = app
     this._byHash[manifest.updateHash] = appID
