@@ -5,10 +5,10 @@ import { Text } from '@morpheus-ui/core'
 
 import SettingsIcon from '@morpheus-ui/icons/SettingsXSm'
 import GreaterIcon from '@morpheus-ui/icons/GreaterXSm'
+import { shell } from 'electron'
 
 import OwnAppsView from './OwnAppsView'
 import SettingsMenuView from './SettingsMenuView'
-
 const Container = styled.View`
   flex: 1;
   padding: 5px;
@@ -22,7 +22,13 @@ const NavItem = styled.TouchableOpacity`
   align-items: center;
 `
 
-export type MenuKey = 'menu' | 'developer' | 'docs' | 'help' | 'feedback'
+export type MenuKey =
+  | 'menu'
+  | 'developer'
+  | 'docs'
+  | 'help'
+  | 'feedback'
+  | 'update'
 
 type State = {
   openView: MenuKey,
@@ -34,9 +40,26 @@ export default class SettingsScreen extends Component<{}, State> {
   }
 
   onSelectMenuItem = (key: MenuKey) => {
-    this.setState({
-      openView: key,
-    })
+    switch (key) {
+      case 'docs':
+        shell.openExternal('https://mainframe.com/developers/')
+        break
+      case 'help':
+        shell.openExternal('https://community.mainframe.com/')
+        break
+      case 'feedback':
+        shell.openExternal('https://mainframe.com/contact/')
+        break
+      case 'update':
+        shell.openExternal(
+          'https://github.com/MainframeHQ/mainframe-os/releases',
+        )
+        break
+      default:
+        this.setState({
+          openView: key,
+        })
+    }
   }
 
   goBack = () => {
