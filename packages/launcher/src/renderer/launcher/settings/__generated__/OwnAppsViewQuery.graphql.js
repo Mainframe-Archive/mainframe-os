@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash e40a6ac8113577ba9cd9a4bd87d20d17
+ * @relayHash e478359b252a5c7f21c7048c49da98f7
  */
 
 /* eslint-disable */
@@ -60,6 +60,7 @@ fragment OwnAppsView_apps on Apps {
 }
 
 fragment AppItem_ownApp on OwnApp {
+  mfid
   localID
   name
   developer {
@@ -93,6 +94,7 @@ fragment AppItem_ownApp on OwnApp {
 
 fragment OwnAppDetailView_ownApp on OwnApp {
   localID
+  mfid
   name
   contentsPath
   developer {
@@ -168,7 +170,7 @@ return {
   "operationKind": "query",
   "name": "OwnAppsViewQuery",
   "id": null,
-  "text": "query OwnAppsViewQuery {\n  viewer {\n    identities {\n      ...OwnAppsView_identities\n    }\n    apps {\n      ...OwnAppsView_apps\n    }\n    id\n  }\n}\n\nfragment OwnAppsView_identities on Identities {\n  ownDevelopers {\n    localID\n    id\n  }\n}\n\nfragment OwnAppsView_apps on Apps {\n  own {\n    localID\n    name\n    ...AppItem_ownApp\n    ...OwnAppDetailView_ownApp\n    id\n  }\n}\n\nfragment AppItem_ownApp on OwnApp {\n  localID\n  name\n  developer {\n    id\n    name\n  }\n  versions {\n    version\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n    }\n  }\n  users {\n    localID\n    identity {\n      profile {\n        name\n      }\n      id\n    }\n    id\n  }\n}\n\nfragment OwnAppDetailView_ownApp on OwnApp {\n  localID\n  name\n  contentsPath\n  developer {\n    id\n    name\n  }\n  versions {\n    version\n    versionHash\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        CONTACTS_READ\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        CONTACTS_READ\n      }\n    }\n  }\n}\n",
+  "text": "query OwnAppsViewQuery {\n  viewer {\n    identities {\n      ...OwnAppsView_identities\n    }\n    apps {\n      ...OwnAppsView_apps\n    }\n    id\n  }\n}\n\nfragment OwnAppsView_identities on Identities {\n  ownDevelopers {\n    localID\n    id\n  }\n}\n\nfragment OwnAppsView_apps on Apps {\n  own {\n    localID\n    name\n    ...AppItem_ownApp\n    ...OwnAppDetailView_ownApp\n    id\n  }\n}\n\nfragment AppItem_ownApp on OwnApp {\n  mfid\n  localID\n  name\n  developer {\n    id\n    name\n  }\n  versions {\n    version\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n    }\n  }\n  users {\n    localID\n    identity {\n      profile {\n        name\n      }\n      id\n    }\n    id\n  }\n}\n\nfragment OwnAppDetailView_ownApp on OwnApp {\n  localID\n  mfid\n  name\n  contentsPath\n  developer {\n    id\n    name\n  }\n  versions {\n    version\n    versionHash\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        CONTACTS_READ\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        CONTACTS_READ\n      }\n    }\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -280,6 +282,13 @@ return {
                 "selections": [
                   v0,
                   v2,
+                  {
+                    "kind": "ScalarField",
+                    "alias": null,
+                    "name": "mfid",
+                    "args": null,
+                    "storageKey": null
+                  },
                   {
                     "kind": "LinkedField",
                     "alias": null,

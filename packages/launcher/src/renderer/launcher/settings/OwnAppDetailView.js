@@ -12,12 +12,14 @@ import rpc from '../rpc'
 import { EnvironmentContext } from '../RelayEnvironment'
 import applyContext, { type CurrentUser } from '../LauncherContext'
 import ModalView from '../../UIComponents/ModalView'
+import AppIcon from '../apps/AppIcon'
 import PermissionsRequirementsView from './PermissionsRequirements'
 import AppSummary from './AppSummary'
 
 export type OwnApp = {
   name: string,
   localID: string,
+  mfid: string,
   contentsPath: ?string,
   developer: {
     id: string,
@@ -56,7 +58,7 @@ const Header = styled.View`
   align-items: center;
 `
 
-const AppIcon = styled.View`
+const IconContainer = styled.View`
   width: 40px;
   height: 40px;
   background-color: #232323;
@@ -361,7 +363,9 @@ export class OwnAppDetailView extends Component<Props, State> {
 
     const header = (
       <Header>
-        <AppIcon />
+        <IconContainer>
+          <AppIcon size="small" id={ownApp.mfid} />
+        </IconContainer>
         <Text variant={['mediumTitle', 'darkBlue']}>{ownApp.name}</Text>
       </Header>
     )
@@ -385,6 +389,7 @@ export default createFragmentContainer(OwnAppDetailViewWithContext, {
   ownApp: graphql`
     fragment OwnAppDetailView_ownApp on OwnApp {
       localID
+      mfid
       name
       contentsPath
       developer {

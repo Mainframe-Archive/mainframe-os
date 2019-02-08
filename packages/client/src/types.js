@@ -83,6 +83,7 @@ export type AppUser = IdentityOwnData & {
 
 export type AppInstalledData = {
   localID: ID,
+  mfid: ID,
   manifest: ManifestData,
   users: Array<AppUser>,
   name: string,
@@ -90,6 +91,7 @@ export type AppInstalledData = {
 
 export type AppOwnData = {
   localID: ID,
+  mfid: ID,
   manifest: ManifestData,
   users: Array<AppUser>,
   name: string,

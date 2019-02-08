@@ -41,7 +41,6 @@ type AddLedgerWalletAccountsPayload {
 type App implements Node {
   """The ID of an object"""
   id: ID!
-  mfid: String!
   localID: ID!
   name: String!
   manifest: AppManifestData!
@@ -323,7 +322,6 @@ type OwnApp implements Node {
   """The ID of an object"""
   id: ID!
   localID: ID!
-  mfid: String!
   name: String!
   contentsPath: String!
   versions: [AppVersionData!]!
