@@ -111,7 +111,7 @@ input AppPermissionDefinitionsInput {
 
 type AppPermissions {
   BLOCKCHAIN_SEND: Boolean
-  CONTACS_READ: Boolean
+  CONTACTS_READ: Boolean
   WEB_REQUEST: WebRequestGrants!
 }
 
@@ -305,6 +305,7 @@ type Mutation {
   createHDWallet(input: CreateHDWalletInput!): CreateHDWalletPayload
   deleteWallet(input: DeleteWalletInput!): DeleteWalletPayload
   importHDWallet(input: ImportHDWalletInput!): ImportHDWalletPayload
+  setEthNetwork(input: SetEthNetworkInput!): SetEthNetworkPayload
 }
 
 type NamedProfile {
@@ -412,6 +413,20 @@ type SetDefaultWalletPayload {
   clientMutationId: String
 }
 
+input SetEthNetworkInput {
+  url: String!
+  clientMutationId: String
+}
+
+type SetEthNetworkPayload {
+  viewer: Viewer!
+  clientMutationId: String
+}
+
+type Settings {
+  ethereumUrl: String!
+}
+
 input SetUserProfileVisibilityInput {
   userID: String!
   visibile: Boolean
@@ -473,6 +488,7 @@ type Viewer {
   contacts: Contacts!
   identities: Identities!
   wallets: Wallets!
+  settings: Settings!
 }
 
 type WalletAccount {

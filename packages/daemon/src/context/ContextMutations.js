@@ -523,4 +523,11 @@ export default class ContextMutations {
     )
     await openVault.save()
   }
+
+  async setEthNetwork(url: string): Promise<void> {
+    const { openVault, io } = this._context
+    openVault.setEthUrl(url)
+    io.eth.ethHttpUrl = url
+    await openVault.save()
+  }
 }

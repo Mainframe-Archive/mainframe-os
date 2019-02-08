@@ -203,6 +203,22 @@ const setDefaultWalletMutation = mutationWithClientMutationId({
   },
 })
 
+const setEthNetworkMutation = mutationWithClientMutationId({
+  name: 'SetEthNetwork',
+  inputFields: {
+    url: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+  },
+  outputFields: {
+    viewer: viewerOutput,
+  },
+  mutateAndGetPayload: async (args, ctx) => {
+    await ctx.mutations.setEthNetwork(args.url)
+    return {}
+  },
+})
+
 const userProfileInput = new GraphQLInputObjectType({
   name: 'UserProfileInput',
   fields: () => ({
@@ -616,5 +632,6 @@ export default new GraphQLObjectType({
     createHDWallet: createHDWalletMutation,
     deleteWallet: deleteWalletMutation,
     importHDWallet: importHDWalletMutation,
+    setEthNetwork: setEthNetworkMutation,
   }),
 })
