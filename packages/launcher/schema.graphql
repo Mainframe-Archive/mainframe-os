@@ -106,15 +106,12 @@ type AppPermissionDefinitions {
 input AppPermissionDefinitionsInput {
   BLOCKCHAIN_SEND: Boolean
   CONTACTS_READ: Boolean
-  SWARM_UPLOAD: Boolean
-  SWARM_DOWNLOAD: Boolean
   WEB_REQUEST: [String]
 }
 
 type AppPermissions {
   BLOCKCHAIN_SEND: Boolean
-  SWARM_UPLOAD: Boolean
-  SWARM_DOWNLOAD: Boolean
+  CONTACS_READ: Boolean
   WEB_REQUEST: WebRequestGrants!
 }
 
@@ -158,7 +155,6 @@ type AppUserSettings {
 type AppVersionData {
   version: String!
   versionHash: String
-  contentsURI: String
   permissions: AppPermissionsRequirements!
 }
 
@@ -308,6 +304,7 @@ type Mutation {
   setDefaultWallet(input: SetDefaultWalletInput!): SetDefaultWalletPayload
   updateProfile(input: UpdateProfileInput!): UpdateProfilePayload
   setUserProfileVisibility(input: SetUserProfileVisibilityInput!): SetUserProfileVisibilityPayload
+  setEthNetwork(input: SetEthNetworkInput!): SetEthNetworkPayload
 }
 
 type NamedProfile {
@@ -368,8 +365,6 @@ type Peers {
 input PermissionGrantsInput {
   BLOCKCHAIN_SEND: Boolean
   CONTACTS_READ: Boolean
-  SWARM_UPLOAD: Boolean
-  SWARM_DOWNLOAD: Boolean
   WEB_REQUEST: WebRequestGrantInput!
 }
 
@@ -415,6 +410,20 @@ input SetDefaultWalletInput {
 type SetDefaultWalletPayload {
   viewer: Viewer!
   clientMutationId: String
+}
+
+input SetEthNetworkInput {
+  url: String!
+  clientMutationId: String
+}
+
+type SetEthNetworkPayload {
+  viewer: Viewer!
+  clientMutationId: String
+}
+
+type Settings {
+  ethereumUrl: String!
 }
 
 input SetUserProfileVisibilityInput {
@@ -465,6 +474,7 @@ type Viewer {
   contacts: Contacts!
   identities: Identities!
   wallets: Wallets!
+  settings: Settings!
 }
 
 type WalletAccount {

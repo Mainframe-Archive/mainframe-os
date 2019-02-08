@@ -2,6 +2,8 @@
 import React, { Component } from 'react'
 import { Text, Button, DropDown } from '@morpheus-ui/core'
 import styled from 'styled-components/native'
+import { INFURA_URLS } from '@mainframe/eth'
+import { commitMutation, graphql } from 'react-relay'
 
 import SettingsToolIcon from '@morpheus-ui/icons/SettingsToolSm'
 import DocumentIcon from '@morpheus-ui/icons/DocumentSm'
@@ -12,12 +14,17 @@ import MainframeLogoIcon from '@morpheus-ui/icons/MainframeLogoSm'
 import GreaterIcon from '@morpheus-ui/icons/GreaterSm'
 import ExportIcon from '@morpheus-ui/icons/ExportSm'
 
+import { EnvironmentContext } from '../RelayEnvironment'
 import SettingsItem from './SettingsItem'
-
 import { type MenuKey } from './SettingsScreen'
 
 type Props = {
   onSelectMenuItem: (key: MenuKey) => void,
+  ethereumUrl: string,
+}
+
+type State = {
+  errorMsg?: ?string,
 }
 
 const Container = styled.View`
@@ -30,8 +37,66 @@ const List = styled.View`
   margin-bottom: 50px;
 `
 
-export default class SettingsMenuView extends Component<Props> {
+const setEthNetworkMutation = graphql`
+  mutation SettingsMenuViewSetEthNetworkMutation($input: SetEthNetworkInput!) {
+    setEthNetwork(input: $input) {
+      viewer {
+        settings {
+          ethereumUrl
+        }
+      }
+    }
+  }
+`
+
+const NETWORK_NAMES = {
+  ropsten: 'Testnet (Ropsten)',
+  mainnet: 'Mainnet',
+  custom: 'Custom (MFT transfers disabled)',
+}
+
+export default class SettingsMenuView extends Component<Props, State> {
+  static contextType = EnvironmentContext
+
+  state = {}
+
+  getNetworkName() {
+    const networkKey = Object.keys(INFURA_URLS).find(
+      key => INFURA_URLS[key] === this.props.ethereumUrl,
+    )
+    return networkKey ? NETWORK_NAMES[networkKey] : NETWORK_NAMES.custom
+  }
+
+  onChangeEthNetwork = (value: string) => {
+    const url =
+      value === NETWORK_NAMES.mainnet
+        ? INFURA_URLS.mainnet
+        : INFURA_URLS.ropsten
+
+    const input = { url }
+
+    commitMutation(this.context, {
+      mutation: setEthNetworkMutation,
+      variables: { input },
+      onCompleted: (res, errors) => {
+        if (errors) {
+          this.setState({
+            errorMsg: errors[0].message || 'Error updating eth network.',
+          })
+        }
+      },
+      onError: err => {
+        this.setState({
+          errorMsg: err.message,
+        })
+      },
+    })
+  }
+
   render() {
+    const errorMessage = this.state.errorMsg && (
+      <Text variant="error">{this.state.errorMsg}</Text>
+    )
     return (
       <ScrollView>
         <Container>
@@ -63,11 +128,13 @@ export default class SettingsMenuView extends Component<Props> {
                 <DropDown
                   theme={{ minWidth: 150 }}
                   label="Select"
-                  options={['TestNet (Ropsten)', 'MainNet']}
-                  defaultValue={'TestNet (Ropsten)'}
+                  onChange={this.onChangeEthNetwork}
+                  options={['Testnet (Ropsten)', 'Mainnet']}
+                  defaultValue={this.getNetworkName()}
                 />
               )}
             />
+            {errorMessage}
           </List>
           <Text variant={['smallTitle', 'blue', 'bold']}>About</Text>
           <List>

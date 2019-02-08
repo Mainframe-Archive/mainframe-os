@@ -2,10 +2,13 @@
 import React, { Component } from 'react'
 import styled from 'styled-components/native'
 import { Text } from '@morpheus-ui/core'
+import { graphql, createFragmentContainer, QueryRenderer } from 'react-relay'
 
 import SettingsIcon from '@morpheus-ui/icons/SettingsXSm'
 import GreaterIcon from '@morpheus-ui/icons/GreaterXSm'
 
+import { EnvironmentContext } from '../RelayEnvironment'
+import RelayLoaderView from '../RelayLoaderView'
 import OwnAppsView from './OwnAppsView'
 import SettingsMenuView from './SettingsMenuView'
 
@@ -24,11 +27,17 @@ const NavItem = styled.TouchableOpacity`
 
 export type MenuKey = 'menu' | 'developer' | 'docs' | 'help' | 'feedback'
 
+type Props = {
+  settings: {
+    ethereumUrl: string,
+  },
+}
+
 type State = {
   openView: MenuKey,
 }
 
-export default class SettingsScreen extends Component<{}, State> {
+export class SettingsScreen extends Component<Props, State> {
   state = {
     openView: 'menu',
   }
@@ -48,7 +57,12 @@ export default class SettingsScreen extends Component<{}, State> {
   renderView() {
     switch (this.state.openView) {
       case 'menu':
-        return <SettingsMenuView onSelectMenuItem={this.onSelectMenuItem} />
+        return (
+          <SettingsMenuView
+            onSelectMenuItem={this.onSelectMenuItem}
+            ethereumUrl={this.props.settings.ethereumUrl}
+          />
+        )
       case 'developer':
         return <OwnAppsView />
       default:
@@ -79,6 +93,45 @@ export default class SettingsScreen extends Component<{}, State> {
         {nav}
         {this.renderView()}
       </Container>
+    )
+  }
+}
+
+const SettingsScreenRelayContainer = createFragmentContainer(SettingsScreen, {
+  settings: graphql`
+    fragment SettingsScreen_settings on Settings {
+      ethereumUrl
+    }
+  `,
+})
+
+export default class SettingsScreenQueryRenderer extends Component<{}> {
+  static contextType = EnvironmentContext
+
+  render() {
+    return (
+      <QueryRenderer
+        environment={this.context}
+        query={graphql`
+          query SettingsScreenQuery {
+            viewer {
+              settings {
+                ...SettingsScreen_settings
+              }
+            }
+          }
+        `}
+        variables={{}}
+        render={({ error, props }) => {
+          if (error || !props) {
+            return <RelayLoaderView error={error ? error.message : undefined} />
+          } else {
+            return (
+              <SettingsScreenRelayContainer {...props.viewer} {...this.props} />
+            )
+          }
+        }}
+      />
     )
   }
 }

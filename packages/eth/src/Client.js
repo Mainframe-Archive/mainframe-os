@@ -56,6 +56,7 @@ export default class EthClient extends RequestManager {
   async setup() {
     this._networkID = await this.fetchNetwork()
     this._networkName = NETWORKS[this._networkID]
+    this.emit('networkChanged', this._networkID)
   }
 
   async beginTrackingChanges() {
@@ -208,6 +209,9 @@ export default class EthClient extends RequestManager {
 
   sendTX(requestData: Object, confirmations: ?number = 10): TXEventEmitter {
     const eventEmitter = new EventEmitter()
+    if (requestData.params.length && !requestData.params[0].chainId) {
+      requestData.params[0].chainId = Number(this.networkID)
+    }
     const req = this.createRequest(requestData.method, requestData.params)
     this.sendRequest(req)
       .then(res => {
