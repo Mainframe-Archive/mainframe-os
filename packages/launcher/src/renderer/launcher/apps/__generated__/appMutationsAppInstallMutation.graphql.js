@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash a2bebe40e9ce6deebe4a09264abf3d92
+ * @relayHash 0462fa174d88d0bae0aded3ddf34d45b
  */
 
 /* eslint-disable */
@@ -31,6 +31,7 @@ export type AppPermissionsRequirementsInput = {
 };
 export type AppPermissionDefinitionsInput = {
   BLOCKCHAIN_SEND?: ?boolean,
+  COMMS_CONTACT?: ?boolean,
   CONTACTS_READ?: ?boolean,
   SWARM_UPLOAD?: ?boolean,
   SWARM_DOWNLOAD?: ?boolean,
@@ -46,6 +47,7 @@ export type AppPermissionsSettingsInput = {
 };
 export type PermissionGrantsInput = {
   BLOCKCHAIN_SEND?: ?boolean,
+  COMMS_CONTACT?: ?boolean,
   CONTACTS_READ?: ?boolean,
   SWARM_UPLOAD?: ?boolean,
   SWARM_DOWNLOAD?: ?boolean,
