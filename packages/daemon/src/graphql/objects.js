@@ -107,7 +107,7 @@ export const appPermissionGrants = new GraphQLObjectType({
   name: 'AppPermissions',
   fields: () => ({
     BLOCKCHAIN_SEND: { type: GraphQLBoolean },
-    CONTACS_READ: { type: GraphQLBoolean },
+    CONTACTS_READ: { type: GraphQLBoolean },
     WEB_REQUEST: { type: new GraphQLNonNull(webRequestGrants) },
   }),
 })
@@ -718,6 +718,18 @@ export const wallets = new GraphQLObjectType({
   }),
 })
 
+export const settings = new GraphQLObjectType({
+  name: 'Settings',
+  fields: () => ({
+    ethereumUrl: {
+      type: new GraphQLNonNull(GraphQLString),
+      resolve: (self, args, ctx: ClientContext) => {
+        return ctx.openVault.settings.ethURL
+      },
+    },
+  }),
+})
+
 export const viewer = new GraphQLObjectType({
   name: 'Viewer',
   fields: () => ({
@@ -739,6 +751,10 @@ export const viewer = new GraphQLObjectType({
     },
     wallets: {
       type: new GraphQLNonNull(wallets),
+      resolve: () => ({}),
+    },
+    settings: {
+      type: new GraphQLNonNull(settings),
       resolve: () => ({}),
     },
   }),

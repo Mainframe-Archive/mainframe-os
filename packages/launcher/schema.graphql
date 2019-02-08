@@ -112,7 +112,7 @@ input AppPermissionDefinitionsInput {
 
 type AppPermissions {
   BLOCKCHAIN_SEND: Boolean
-  CONTACS_READ: Boolean
+  CONTACTS_READ: Boolean
   WEB_REQUEST: WebRequestGrants!
 }
 
@@ -293,18 +293,20 @@ type Mutation {
   installApp(input: AppInstallMutationInput!): AppInstallMutationPayload
   setAppPermissionsRequirements(input: SetAppPermissionsRequirementsInput!): SetAppPermissionsRequirementsPayload
   publishAppVersion(input: PublishAppVersionInput!): PublishAppVersionPayload
+  updateAppDetails(input: UpdateAppDetailsInput!): UpdateAppDetailsPayload
+  addContact(input: AddContactInput!): AddContactPayload
   createUserIdentity(input: CreateUserIdentityInput!): CreateUserIdentityPayload
   createDeveloperIdentity(input: CreateDeveloperIdentityInput!): CreateDeveloperIdentityPayload
-  createHDWallet(input: CreateHDWalletInput!): CreateHDWalletPayload
-  importHDWallet(input: ImportHDWalletInput!): ImportHDWalletPayload
-  addHDWalletAccount(input: AddHDWalletAccountInput!): AddHDWalletAccountPayload
-  addLedgerWalletAccounts(input: AddLedgerWalletAccountsInput!): AddLedgerWalletAccountsPayload
-  deleteWallet(input: DeleteWalletInput!): DeleteWalletPayload
-  addContact(input: AddContactInput!): AddContactPayload
   deleteContact(input: DeletContactInput!): DeletContactPayload
   setDefaultWallet(input: SetDefaultWalletInput!): SetDefaultWalletPayload
-  updateProfile(input: UpdateProfileInput!): UpdateProfilePayload
   setUserProfileVisibility(input: SetUserProfileVisibilityInput!): SetUserProfileVisibilityPayload
+  updateProfile(input: UpdateProfileInput!): UpdateProfilePayload
+  addHDWalletAccount(input: AddHDWalletAccountInput!): AddHDWalletAccountPayload
+  addLedgerWalletAccounts(input: AddLedgerWalletAccountsInput!): AddLedgerWalletAccountsPayload
+  createHDWallet(input: CreateHDWalletInput!): CreateHDWalletPayload
+  deleteWallet(input: DeleteWalletInput!): DeleteWalletPayload
+  importHDWallet(input: ImportHDWalletInput!): ImportHDWalletPayload
+  setEthNetwork(input: SetEthNetworkInput!): SetEthNetworkPayload
 }
 
 type NamedProfile {
@@ -413,6 +415,20 @@ type SetDefaultWalletPayload {
   clientMutationId: String
 }
 
+input SetEthNetworkInput {
+  url: String!
+  clientMutationId: String
+}
+
+type SetEthNetworkPayload {
+  viewer: Viewer!
+  clientMutationId: String
+}
+
+type Settings {
+  ethereumUrl: String!
+}
+
 input SetUserProfileVisibilityInput {
   userID: String!
   visibile: Boolean
@@ -430,6 +446,19 @@ type Subscription {
 
 enum SupportedWallets {
   ETHEREUM
+}
+
+input UpdateAppDetailsInput {
+  appID: String!
+  name: String!
+  contentsPath: String!
+  version: String!
+  clientMutationId: String
+}
+
+type UpdateAppDetailsPayload {
+  viewer: Viewer!
+  clientMutationId: String
 }
 
 input UpdateProfileInput {
@@ -461,6 +490,7 @@ type Viewer {
   contacts: Contacts!
   identities: Identities!
   wallets: Wallets!
+  settings: Settings!
 }
 
 type WalletAccount {

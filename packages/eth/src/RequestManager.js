@@ -24,6 +24,14 @@ export default class EthRequestManager extends EventEmitter {
     return this._httpUrl
   }
 
+  set ethHttpUrl(url: string) {
+    if (this._httpUrl && this._web3Provider) {
+      // Only set if using http provider
+      this._httpUrl = url
+      this._web3Provider.host = url
+    }
+  }
+
   get web3Provider(): Web3HTTPProvider {
     return this._web3Provider
   }

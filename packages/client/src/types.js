@@ -417,7 +417,6 @@ export type VaultSettings = {
   bzzURL: string,
   pssURL: string,
   ethURL: string,
-  ethChainID: number,
 }
 
 export type VaultSettingsParams = $Shape<VaultSettings>

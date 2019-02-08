@@ -91,6 +91,10 @@ class AppInstallModal extends Component<ViewProps, State> {
           )
         }
       } catch (err) {
+        this.setState({
+          errorMsg: err.message,
+          installStep: 'manifest',
+        })
         // eslint-disable-next-line no-console
         console.log('error loading manifest:', err)
       }
@@ -136,6 +140,7 @@ class AppInstallModal extends Component<ViewProps, State> {
         if (errors && errors.length) {
           this.setState({
             errorMsg: errors[0].message,
+            installStep: 'manifest',
           })
         } else {
           this.props.onInstallComplete()
@@ -146,6 +151,7 @@ class AppInstallModal extends Component<ViewProps, State> {
           err.message || 'Sorry, there was a problem installing this app.'
         this.setState({
           errorMsg: msg,
+          installStep: 'manifest',
         })
       },
     })
@@ -154,6 +160,9 @@ class AppInstallModal extends Component<ViewProps, State> {
   // RENDER
 
   renderManifestImport() {
+    const errorMsg = this.state.errorMsg && (
+      <Text variant="error">Error: {this.state.errorMsg}</Text>
+    )
     return (
       <FormModalView
         dismissButton="CANCEL"
@@ -171,6 +180,7 @@ class AppInstallModal extends Component<ViewProps, State> {
           <View>
             <TextField name="appid" required label="Mainframe App ID" />
           </View>
+          {errorMsg}
         </Container>
       </FormModalView>
     )

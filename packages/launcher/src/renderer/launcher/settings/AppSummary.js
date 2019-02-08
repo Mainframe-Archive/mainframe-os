@@ -14,8 +14,8 @@ import FormModalView from '../../UIComponents/FormModalView'
 import { PERMISSIONS_DESCRIPTIONS } from './PermissionsRequirements'
 
 export type AppData = {
-  name?: string,
-  version?: string,
+  name?: ?string,
+  version?: ?string,
   contentsPath?: ?string,
   developerID?: ?string,
 }
