@@ -9,6 +9,7 @@ import { View, StyleSheet } from 'react-native-web'
 import { ThemeProvider as MFThemeProvider, Button } from '@morpheus-ui/core'
 import WalletsFilledIcon from '@morpheus-ui/icons/WalletsFilledMd'
 import styled from 'styled-components/native'
+import { EthClient } from '@mainframe/eth'
 
 import THEME from '../theme'
 import colors from '../colors'
@@ -52,6 +53,7 @@ type State = {
   contentsPath: string,
   bundleUrl: string,
   showUrlButtons?: ?boolean,
+  ethNetwork: string,
 }
 
 const store = new Store()
@@ -74,7 +76,35 @@ const HeaderButtons = styled.View`
   flex: 1;
 `
 
+const EthNetwork = styled.View`
+  height: 28px;
+  margin-right: 10px;
+  background-color: #171717;
+  border-radius: 3px;
+  padding-horizontal: 10px;
+  justify-content: center;
+`
+
+// TODO: Refactor various web3 providers
+const ethClientProvider = {
+  sendAsync: async (payload: Object, cb: (?Error, ?any) => any) => {
+    try {
+      const res = await rpc.web3Send(payload)
+      const jsonResponse = {
+        jsonrpc: '2.0',
+        id: payload.id,
+        result: res,
+      }
+      cb(null, jsonResponse)
+    } catch (err) {
+      cb(err)
+    }
+  },
+}
+
 export default class AppContainer extends Component<Props, State> {
+  eth: EthClient
+
   constructor(props: Props) {
     super(props)
     const bundleUrl = url.format({
@@ -84,11 +114,18 @@ export default class AppContainer extends Component<Props, State> {
     })
     const cachedData = store.get(props.appSession.app.appID)
     const customUrl = cachedData ? cachedData.customUrl : null
+    this.eth = new EthClient(ethClientProvider, true)
     this.state = {
       bundleUrl,
       urlInputValue: customUrl || bundleUrl,
       contentsPath: customUrl || bundleUrl,
+      ethNetwork: this.eth.networkName,
     }
+    this.eth.on('networkChanged', () => {
+      this.setState({
+        ethNetwork: this.eth.networkName,
+      })
+    })
   }
 
   onChangeUrl = (value: string) => {
@@ -202,6 +239,9 @@ export default class AppContainer extends Component<Props, State> {
             </TitleBar>
             {urlBar}
             <HeaderButtons>
+              <EthNetwork>
+                <Text style={styles.headerLabel}>{this.state.ethNetwork}</Text>
+              </EthNetwork>
               <Button
                 variant={['appHeader']}
                 Icon={WalletsFilledIcon}
