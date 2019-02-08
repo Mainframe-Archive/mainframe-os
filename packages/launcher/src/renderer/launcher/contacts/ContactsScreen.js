@@ -1,14 +1,7 @@
 // @flow
 
 import React, { Component } from 'react'
-import {
-  graphql,
-  createFragmentContainer,
-  QueryRenderer,
-  // $FlowFixMe: requestSubscription not present in Flow definition but exported by library
-  requestSubscription,
-  type Disposable,
-} from 'react-relay'
+import { graphql, createFragmentContainer, QueryRenderer } from 'react-relay'
 
 import { EnvironmentContext } from '../RelayEnvironment'
 import applyContext, { type CurrentUser } from '../LauncherContext'
