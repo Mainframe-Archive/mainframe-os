@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 679ec50a1d311e511b17dcf4dcac6e04
+ * @relayHash 6b2c64f82e036dcbd9785a0a8ba041e1
  */
 
 /* eslint-disable */
@@ -31,6 +31,7 @@ export type AppPermissionsRequirementsInput = {
 };
 export type AppPermissionDefinitionsInput = {
   BLOCKCHAIN_SEND?: ?boolean,
+  COMMS_CONTACT?: ?boolean,
   CONTACTS_READ?: ?boolean,
   WEB_REQUEST?: ?$ReadOnlyArray<?string>,
 };
@@ -44,6 +45,7 @@ export type AppPermissionsSettingsInput = {
 };
 export type PermissionGrantsInput = {
   BLOCKCHAIN_SEND?: ?boolean,
+  COMMS_CONTACT?: ?boolean,
   CONTACTS_READ?: ?boolean,
   WEB_REQUEST: WebRequestGrantInput,
 };

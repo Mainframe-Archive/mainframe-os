@@ -127,6 +127,7 @@ export const checkPermission = (
       return 'not_set'
 
     case 'CONTACTS_READ':
+    case 'COMMS_CONTACT':
     case 'BLOCKCHAIN_SEND':
       if (permissions[key] == null) {
         return 'not_set'

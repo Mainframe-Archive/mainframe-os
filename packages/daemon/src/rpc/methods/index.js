@@ -2,6 +2,7 @@
 
 import * as app from './app'
 import * as blockchain from './blockchain'
+import * as comms from './comms'
 import * as contact from './contact'
 import * as graphql from './graphql'
 import * as identity from './identity'
@@ -37,6 +38,10 @@ export default {
   app_update: noop, // TODO: similar to install
 
   blockchain_web3Send: blockchain.web3Send,
+
+  comms_publish: comms.publish,
+  comms_subscribe: comms.subscribe,
+  comms_getSubscribable: comms.getSubscribable,
 
   contact_approveContacts: contact.approveContactsForApp,
   contact_getAppApprovedContacts: contact.getAppApprovedContacts,

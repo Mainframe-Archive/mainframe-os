@@ -25,11 +25,13 @@ export type OwnAppDetailView_ownApp = {|
       +optional: {|
         +WEB_REQUEST: ?$ReadOnlyArray<?string>,
         +BLOCKCHAIN_SEND: ?boolean,
+        +COMMS_CONTACT: ?boolean,
         +CONTACTS_READ: ?boolean,
       |},
       +required: {|
         +WEB_REQUEST: ?$ReadOnlyArray<?string>,
         +BLOCKCHAIN_SEND: ?boolean,
+        +COMMS_CONTACT: ?boolean,
         +CONTACTS_READ: ?boolean,
       |},
     |},
@@ -59,6 +61,13 @@ v1 = [
     "kind": "ScalarField",
     "alias": null,
     "name": "BLOCKCHAIN_SEND",
+    "args": null,
+    "storageKey": null
+  },
+  {
+    "kind": "ScalarField",
+    "alias": null,
+    "name": "COMMS_CONTACT",
     "args": null,
     "storageKey": null
   },
@@ -171,5 +180,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '87e8d92b53132d09045e638798bf94f1';
+(node/*: any*/).hash = 'af48ad201bdbe488497535eb8bbdd7cb';
 module.exports = node;

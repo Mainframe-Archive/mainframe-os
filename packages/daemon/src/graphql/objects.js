@@ -161,6 +161,9 @@ export const appPermissionDefinitions = new GraphQLObjectType({
     BLOCKCHAIN_SEND: {
       type: GraphQLBoolean,
     },
+    COMMS_CONTACT: {
+      type: GraphQLBoolean,
+    },
     CONTACTS_READ: {
       type: GraphQLBoolean,
     },

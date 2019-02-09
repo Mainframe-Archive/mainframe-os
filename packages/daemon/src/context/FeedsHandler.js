@@ -4,7 +4,10 @@ import { type Observable, Subject, type Subscription } from 'rxjs'
 import { filter, multicast, refCount, tap, flatMap } from 'rxjs/operators'
 import { getFeedTopic } from '@erebos/api-bzz-base'
 
-import type Contact, { FirstContactSerialized } from '../identity/Contact'
+import type Contact, {
+  FirstContactPayload,
+  ContactPayload,
+} from '../identity/Contact'
 import type {
   default as PeerUserIdentity,
   PublicFeedSerialized,
@@ -190,7 +193,7 @@ export class ContactsFeedsHandler extends FeedsHandler {
             return (
               e.type === 'contact_changed' &&
               e.contact.localID === contact.localID &&
-              e.change === 'contactFeed'
+              e.change === 'remoteFeed'
             )
           }),
         )
@@ -217,7 +220,8 @@ export class ContactsFeedsHandler extends FeedsHandler {
         )
         .pipe(flatMap(res => res.json()))
         .subscribe({
-          next: (data: FirstContactSerialized) => {
+          next: (data: FirstContactPayload) => {
+            // TODO: validate payload version
             this._context.mutations.setContactFeed(
               userID,
               contact.localID,
@@ -232,28 +236,35 @@ export class ContactsFeedsHandler extends FeedsHandler {
           },
         })
     } else {
-      this._subscriptions[contactSubRef] = pollFeedJSON(
-        this._context.io.bzz,
-        // $FlowFixMe: contact.contactFeed can never be null here
-        contact.contactFeed,
-        { interval: DEFAULT_POLL_INTERVAL },
-      ).subscribe({
-        next: (data: Object) => {
-          if (data.profile != null) {
-            this._context.mutations.updateContactProfile(
-              userID,
-              contact.localID,
-              data.profile,
-            )
-          }
-        },
-        error: err => {
-          this._context.log('contact feed subscription error', err)
-        },
-        complete: () => {
-          delete this._subscriptions[contactSubRef]
-        },
-      })
+      this._subscriptions[contactSubRef] = contact.sharedFeed
+        .pollRemoteData(this._context.io.bzz, {
+          interval: DEFAULT_POLL_INTERVAL,
+        })
+        .subscribe({
+          next: (data: ContactPayload) => {
+            // TODO: validate payload version
+            if (data.profile != null) {
+              this._context.mutations.updateContactProfile(
+                userID,
+                contact.localID,
+                data.profile,
+              )
+            }
+            if (data.apps != null) {
+              this._context.mutations.updateContactApps(
+                userID,
+                contact.localID,
+                data.apps,
+              )
+            }
+          },
+          error: err => {
+            this._context.log('contact feed subscription error', err)
+          },
+          complete: () => {
+            delete this._subscriptions[contactSubRef]
+          },
+        })
     }
 
     return true
