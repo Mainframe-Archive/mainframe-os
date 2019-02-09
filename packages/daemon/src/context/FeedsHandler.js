@@ -252,6 +252,7 @@ export class ContactsFeedsHandler extends FeedsHandler {
             }
             if (data.apps != null) {
               this._context.mutations.updateContactApps(
+                userID,
                 contact.localID,
                 data.apps,
               )

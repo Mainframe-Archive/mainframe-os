@@ -197,7 +197,7 @@ export default class AppsRepository {
     return this.getByID(idType(id)) || this.getOwnByID(idType(id))
   }
 
-  getAppsForUser(id: ID): ?Array<App> {
+  getAppsForUser(id: ID): Array<App> {
     const apps = []
     if (this._appsByUser[id]) {
       this._appsByUser[id].forEach(id => {

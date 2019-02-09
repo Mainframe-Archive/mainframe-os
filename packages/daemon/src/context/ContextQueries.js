@@ -135,6 +135,9 @@ export default class ContextQueries {
       throw new Error('App not found')
     }
     const sharedAppID = app.updateFeedHash
+    if (!sharedAppID) {
+      throw new Error('updateFeedHash missing for app')
+    }
 
     const sharedData = openVault.contactAppData.getSharedData(
       sharedAppID,
