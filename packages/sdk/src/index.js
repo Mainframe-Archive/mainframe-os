@@ -8,7 +8,6 @@ import EthAPIs from './apis/Eth'
 import CommsAPIs from './apis/Comms'
 import ContactsAPIs from './apis/Contacts'
 import PaymentAPIs from './apis/Payments'
-import PssAPIs from './apis/Pss'
 
 export * from './types'
 
@@ -18,7 +17,6 @@ export default class MainframeSDK {
   comms: CommsAPIs
   contacts: ContactsAPIs
   payments: PaymentAPIs
-  pss: PssAPIs
 
   constructor() {
     if (window.mainframe) {
@@ -30,7 +28,6 @@ export default class MainframeSDK {
     this.comms = new CommsAPIs(this._rpc)
     this.contacts = new ContactsAPIs(this._rpc)
     this.payments = new PaymentAPIs(this)
-    this.pss = new PssAPIs(this._rpc)
   }
 
   get ethereum() {
