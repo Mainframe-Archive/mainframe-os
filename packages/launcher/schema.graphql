@@ -331,6 +331,7 @@ type OwnApp implements Node {
   mfid: String!
   name: String!
   contentsPath: String!
+  updateFeedHash: String
   versions: [AppVersionData!]!
   developer: AppAuthor!
   users: [AppUser]

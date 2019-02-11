@@ -142,6 +142,7 @@ export type AppLoadManifestParams = {
 export type AppLoadManifestResult = {
   appID?: ID,
   manifest: ManifestData,
+  isOwn?: ?boolean,
 }
 
 export type AppOpenParams = {

@@ -108,7 +108,7 @@ export default class EditAppDetailsView extends Component<Props, State> {
         onRequestClose={this.props.onRequestClose}>
         <Container>
           <Text
-            size={12}
+            size={13}
             variant={['greyMed', 'center']}
             theme={{ marginBottom: '30px' }}>
             Set your app details.

@@ -99,14 +99,14 @@ export class SettingsScreen extends Component<Props, State> {
         <Nav>
           <NavItem onPress={this.goBack}>
             <SettingsIcon color="#A9A9A9" width={10} height={10} />
-            <Text size={9} color="#A9A9A9" variant="marginHorizontal5" bold>
+            <Text size={10} color="#A9A9A9" variant="marginHorizontal5" bold>
               More
             </Text>
           </NavItem>
-          <Text size={9} color="#A9A9A9" variant="marginHorizontal5">
+          <Text size={10} color="#A9A9A9" variant="marginHorizontal5">
             <GreaterIcon color="#A9A9A9" width={6} height={6} />
           </Text>
-          <Text size={9} color="#A9A9A9" variant="marginHorizontal5" bold>
+          <Text size={10} color="#A9A9A9" variant="marginHorizontal5" bold>
             App Development Tool
           </Text>
         </Nav>

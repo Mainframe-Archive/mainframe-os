@@ -278,6 +278,9 @@ export const ownApp = new GraphQLObjectType({
       type: new GraphQLNonNull(GraphQLString),
       resolve: self => self.data.contentsPath,
     },
+    updateFeedHash: {
+      type: GraphQLString,
+    },
     versions: {
       type: new GraphQLNonNull(
         new GraphQLList(new GraphQLNonNull(appVersionData)),
