@@ -17,6 +17,7 @@ import {
   createSecretBoxKeyFromPassword,
 } from '@mainframe/utils-crypto'
 import { type ID } from '@mainframe/utils-id'
+import { INFURA_URLS } from '@mainframe/eth'
 
 import type { SessionData } from '../app/AbstractApp'
 import type App from '../app/App'
@@ -33,6 +34,9 @@ import WalletsRepository, {
 import IdentityWallets, {
   type IdentityWalletsSerialized,
 } from '../identity/IdentityWallets'
+import ContactAppData, {
+  type ContactAppDataSerialized,
+} from '../contact/ContactAppData'
 
 type VaultKDF = {
   algorithm: number,
@@ -116,7 +120,6 @@ export type UserSettings = {
   bzzURL: string,
   pssURL: string,
   ethURL: string,
-  ethChainID: number,
 }
 
 export type VaultData = {
@@ -125,6 +128,7 @@ export type VaultData = {
   settings: UserSettings,
   wallets: WalletsRepository,
   identityWallets: IdentityWallets,
+  contactAppData: ContactAppData,
 }
 
 export type VaultSerialized = {
@@ -133,6 +137,7 @@ export type VaultSerialized = {
   settings?: UserSettings,
   wallets?: WalletsRepositorySerialized,
   identityWallets?: IdentityWalletsSerialized,
+  contactAppData?: ContactAppDataSerialized,
 }
 
 export default class Vault {
@@ -150,6 +155,7 @@ export default class Vault {
       identities: IdentitiesRepository.fromJSON(data.identities),
       wallets: WalletsRepository.fromJSON(data.wallets),
       identityWallets: IdentityWallets.fromJSON(data.identityWallets),
+      contactAppData: ContactAppData.fromJSON(data.contactAppData),
       settings: data.settings,
     })
   }
@@ -168,10 +174,10 @@ export default class Vault {
       settings: {
         bzzURL: 'http://swarm-gateways.net',
         pssURL: 'ws://localhost:8546',
-        ethURL: 'https://ropsten.infura.io/KWLG1YOMaYgl4wiFlcJv',
-        ethChainID: 3, // Mainnet 1, Ropsten 3, Rinkeby 4, Kovan 42, Local (ganache) 1977
+        ethURL: INFURA_URLS.ropsten,
       },
       identityWallets: new IdentityWallets(),
+      contactAppData: new ContactAppData(),
       wallets: new WalletsRepository(),
     }
     this._data = data ? Object.assign(vaultData, data) : vaultData
@@ -201,6 +207,10 @@ export default class Vault {
 
   get identityWallets(): IdentityWallets {
     return this._data.identityWallets
+  }
+
+  get contactAppData(): ContactAppData {
+    return this._data.contactAppData
   }
 
   // App lifecycle
@@ -280,10 +290,6 @@ export default class Vault {
     this._data.settings.ethURL = url
   }
 
-  setEthChainID(chainID: number): void {
-    this._data.settings.ethChainID = chainID
-  }
-
   // Vault lifecycle
 
   save() {
@@ -301,6 +307,7 @@ export default class Vault {
           identities: IdentitiesRepository.toJSON(this._data.identities),
           wallets: WalletsRepository.toJSON(this._data.wallets),
           identityWallets: IdentityWallets.toJSON(this._data.identityWallets),
+          contactAppData: ContactAppData.toJSON(this._data.contactAppData),
           settings: this._data.settings,
         }
       : {}

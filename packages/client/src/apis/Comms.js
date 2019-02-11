@@ -3,17 +3,20 @@
 import { Observable } from 'rxjs'
 
 import ClientAPIs from '../ClientAPIs'
+import type {
+  CommsGetSubscribableParams,
+  CommsGetSubscribableResult,
+  CommsPublishParams,
+  CommsSubscribeParams,
+} from '../types'
 
-export default class PssAPIs extends ClientAPIs {
-  baseAddr(): Promise<string> {
-    return this._rpc.request('pss_baseAddr')
+export default class CommsAPIs extends ClientAPIs {
+  publish(params: CommsPublishParams): Promise<void> {
+    return this._rpc.request('comms_publish', params)
   }
 
-  async createTopicSubscription(topic: string): Promise<Observable<Object>> {
-    const subscription = await this._rpc.request(
-      'pss_createTopicSubscription',
-      { topic },
-    )
+  async subscribe(params: CommsSubscribeParams): Promise<Observable<Object>> {
+    const subscription = await this._rpc.request('comms_subscribe', params)
     const unsubscribe = () => {
       return this._rpc.request('sub_unsubscribe', { id: subscription })
     }
@@ -22,7 +25,7 @@ export default class PssAPIs extends ClientAPIs {
       this._rpc.subscribe({
         next: msg => {
           if (
-            msg.method === 'pss_subscription' &&
+            msg.method === 'comms_subscription' &&
             msg.params != null &&
             msg.params.subscription === subscription
           ) {
@@ -51,19 +54,9 @@ export default class PssAPIs extends ClientAPIs {
     })
   }
 
-  getPublicKey(): Promise<string> {
-    return this._rpc.request('pss_getPublicKey')
-  }
-
-  sendAsym(key: string, topic: string, message: string): Promise<null> {
-    return this._rpc.request('pss_sendAsym', { key, topic, message })
-  }
-
-  setPeerPublicKey(key: string, topic: string): Promise<null> {
-    return this._rpc.request('pss_setPeerPublicKey', { key, topic })
-  }
-
-  stringToTopic(string: string): Promise<string> {
-    return this._rpc.request('pss_stringToTopic', { string })
+  getSubscribable(
+    params: CommsGetSubscribableParams,
+  ): Promise<CommsGetSubscribableResult> {
+    return this._rpc.request('comms_getSubscribable', params)
   }
 }

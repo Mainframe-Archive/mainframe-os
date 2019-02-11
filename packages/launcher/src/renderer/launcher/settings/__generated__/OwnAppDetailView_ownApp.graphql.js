@@ -12,8 +12,10 @@ import type { FragmentReference } from "relay-runtime";
 declare export opaque type OwnAppDetailView_ownApp$ref: FragmentReference;
 export type OwnAppDetailView_ownApp = {|
   +localID: string,
+  +mfid: string,
   +name: string,
   +contentsPath: string,
+  +updateFeedHash: ?string,
   +developer: {|
     +id: ?string,
     +name: ?string,
@@ -25,11 +27,13 @@ export type OwnAppDetailView_ownApp = {|
       +optional: {|
         +WEB_REQUEST: ?$ReadOnlyArray<?string>,
         +BLOCKCHAIN_SEND: ?boolean,
+        +COMMS_CONTACT: ?boolean,
         +CONTACTS_READ: ?boolean,
       |},
       +required: {|
         +WEB_REQUEST: ?$ReadOnlyArray<?string>,
         +BLOCKCHAIN_SEND: ?boolean,
+        +COMMS_CONTACT: ?boolean,
         +CONTACTS_READ: ?boolean,
       |},
     |},
@@ -65,6 +69,13 @@ v1 = [
   {
     "kind": "ScalarField",
     "alias": null,
+    "name": "COMMS_CONTACT",
+    "args": null,
+    "storageKey": null
+  },
+  {
+    "kind": "ScalarField",
+    "alias": null,
     "name": "CONTACTS_READ",
     "args": null,
     "storageKey": null
@@ -84,11 +95,25 @@ return {
       "args": null,
       "storageKey": null
     },
+    {
+      "kind": "ScalarField",
+      "alias": null,
+      "name": "mfid",
+      "args": null,
+      "storageKey": null
+    },
     v0,
     {
       "kind": "ScalarField",
       "alias": null,
       "name": "contentsPath",
+      "args": null,
+      "storageKey": null
+    },
+    {
+      "kind": "ScalarField",
+      "alias": null,
+      "name": "updateFeedHash",
       "args": null,
       "storageKey": null
     },
@@ -171,5 +196,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '87e8d92b53132d09045e638798bf94f1';
+(node/*: any*/).hash = 'eeae199b11af420b39ec6ab4625eee49';
 module.exports = node;

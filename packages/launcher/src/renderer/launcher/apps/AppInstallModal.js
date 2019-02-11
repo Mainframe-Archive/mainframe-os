@@ -70,12 +70,20 @@ class AppInstallModal extends Component<ViewProps, State> {
       try {
         this.setState({ installStep: 'download' })
 
-        const { manifest, appID } = await rpc.loadManifest(payload.fields.appid)
+        const { manifest, appID, isOwn } = await rpc.loadManifest(
+          payload.fields.appid,
+        )
         // If appID is returned it means the app is already installed.
         // If we only support a single user in the launcher, the app must have been already installed by this user.
-
         if (appID != null) {
-          return this.props.onInstallComplete()
+          if (isOwn) {
+            return this.setState({
+              installStep: 'manifest',
+              errorMsg: `We currently don't support installing your own apps, they should be accessed from the developer section.`,
+            })
+          } else {
+            return this.props.onInstallComplete()
+          }
         }
 
         if (havePermissionsToGrant(manifest.permissions)) {
@@ -91,6 +99,10 @@ class AppInstallModal extends Component<ViewProps, State> {
           )
         }
       } catch (err) {
+        this.setState({
+          errorMsg: err.message,
+          installStep: 'manifest',
+        })
         // eslint-disable-next-line no-console
         console.log('error loading manifest:', err)
       }
@@ -135,7 +147,8 @@ class AppInstallModal extends Component<ViewProps, State> {
       onCompleted: (res, errors) => {
         if (errors && errors.length) {
           this.setState({
-            errorMsg: errors[0].message,
+            errorMsg: `Error: ${errors[0].message}`,
+            installStep: 'manifest',
           })
         } else {
           this.props.onInstallComplete()
@@ -146,6 +159,7 @@ class AppInstallModal extends Component<ViewProps, State> {
           err.message || 'Sorry, there was a problem installing this app.'
         this.setState({
           errorMsg: msg,
+          installStep: 'manifest',
         })
       },
     })
@@ -154,6 +168,9 @@ class AppInstallModal extends Component<ViewProps, State> {
   // RENDER
 
   renderManifestImport() {
+    const errorMsg = this.state.errorMsg && (
+      <Text variant="error">{this.state.errorMsg}</Text>
+    )
     return (
       <FormModalView
         dismissButton="CANCEL"
@@ -171,6 +188,7 @@ class AppInstallModal extends Component<ViewProps, State> {
           <View>
             <TextField name="appid" required label="Mainframe App ID" />
           </View>
+          {errorMsg}
         </Container>
       </FormModalView>
     )

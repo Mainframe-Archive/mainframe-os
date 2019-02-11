@@ -66,6 +66,13 @@ export type AppsRepositorySerialized = {
   ownApps: { [string]: OwnAppSerialized },
 }
 
+export type UpdateAppDetailsParams = {
+  appID: string,
+  contentsPath: string,
+  name: string,
+  version: string,
+}
+
 export const getContentsPath = (
   env: Environment,
   manifest: ManifestData,
@@ -160,7 +167,7 @@ export default class AppsRepository {
     return this._ownApps
   }
 
-  getByID(id: ID): ?App {
+  getByID(id: ID | string): ?App {
     return this._apps[id] || this._ownApps[id]
   }
 
@@ -190,7 +197,7 @@ export default class AppsRepository {
     return this.getByID(idType(id)) || this.getOwnByID(idType(id))
   }
 
-  getAppsForUser(id: ID): ?Array<App> {
+  getAppsForUser(id: ID): Array<App> {
     const apps = []
     if (this._appsByUser[id]) {
       this._appsByUser[id].forEach(id => {
@@ -219,18 +226,24 @@ export default class AppsRepository {
       appID,
       manifest,
       installationState: 'pending',
-      settings: {
-        [(userID: string)]: {
-          permissionsSettings,
-        },
-      },
     })
+    app.setPermissionsSettings(userID, permissionsSettings)
 
     this._apps[appID] = app
     this._byHash[manifest.updateHash] = appID
     this._byMFID[MFID.canonical(manifest.id)] = appID
 
     return app
+  }
+
+  updateAppDetails(params: UpdateAppDetailsParams): void {
+    const app = this.getOwnByID(idType(params.appID))
+    if (app == null) {
+      throw new Error('Invalid app')
+    }
+    app.name = params.name
+    app.contentsPath = params.contentsPath
+    app.editNextVersionNumber(params.version)
   }
 
   setUserPermissionsSettings(
@@ -262,7 +275,7 @@ export default class AppsRepository {
     appID: ID | string,
     userID: ID | string,
     contactsToApprove: Array<ContactToApprove>,
-  ): { [localID: string]: ApprovedContact } {
+  ): { [id: string]: ApprovedContact } {
     const app = this.getAnyByID(appID)
     if (app == null) {
       throw new Error('Invalid app')

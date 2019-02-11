@@ -3,9 +3,8 @@
 import { uniqueID } from '@mainframe/utils-id'
 
 import {
-  OwnFeed,
-  randomTopic,
-  type OwnFeedSerialized,
+  BidirectionalFeed,
+  type BidirectionalFeedSerialized,
   type bzzHash,
 } from '../swarm/feed'
 
@@ -15,18 +14,26 @@ export type ContactProfile = {
   ethAddress?: ?string,
 }
 
+export type FirstContactPayload = {
+  version: string,
+  privateFeed: bzzHash,
+}
+
+export type ContactAppsPayload = { [sharedAppID: string]: bzzHash }
+
+export type ContactPayload = {
+  version: string,
+  profile?: ContactProfile,
+  apps?: ContactAppsPayload,
+}
+
 export type ContactSerialized = {
   localID: string,
   peerID: string,
   profile: ContactProfile,
   aliasName: ?string,
-  ownFeed: OwnFeedSerialized,
+  sharedFeed: BidirectionalFeedSerialized,
   requestSent: boolean,
-  contactFeed?: ?string,
-}
-
-export type FirstContactSerialized = {
-  privateFeed: bzzHash,
 }
 
 export type ConnectionState = 'connected' | 'sent' | 'sending'
@@ -34,22 +41,32 @@ export type ConnectionState = 'connected' | 'sent' | 'sending'
 export default class Contact {
   static create = (
     peerID: string,
-    optional: {
+    optional?: {
       aliasName?: string,
       profile?: ContactProfile,
       contactFeed?: string,
       localID?: string,
     },
   ): Contact => {
+    const sharedFeed = BidirectionalFeed.create({
+      remoteFeed: optional && optional.contactFeed,
+    })
+    sharedFeed.localFeedData = Contact._generateContactPayload()
     return new Contact(
-      optional.localID || uniqueID(),
+      (optional && optional.localID) || uniqueID(),
       peerID,
-      optional.profile || {},
-      optional.aliasName,
-      OwnFeed.create(undefined, randomTopic()),
+      (optional && optional.profile) || {},
+      optional && optional.aliasName,
+      sharedFeed,
       false,
-      optional.contactFeed,
     )
+  }
+
+  static _generateContactPayload(): ContactPayload {
+    return {
+      version: '1.0.0',
+      apps: {},
+    }
   }
 
   static fromJSON = (contactSerialized: ContactSerialized): Contact =>
@@ -58,9 +75,8 @@ export default class Contact {
       contactSerialized.peerID,
       contactSerialized.profile,
       contactSerialized.aliasName,
-      OwnFeed.fromJSON(contactSerialized.ownFeed),
+      BidirectionalFeed.fromJSON(contactSerialized.sharedFeed),
       contactSerialized.requestSent,
-      contactSerialized.contactFeed,
     )
 
   static toJSON = (contact: Contact): ContactSerialized => ({
@@ -68,16 +84,14 @@ export default class Contact {
     peerID: contact.peerID,
     profile: contact.profile,
     aliasName: contact._aliasName,
-    ownFeed: OwnFeed.toJSON(contact.ownFeed),
+    sharedFeed: BidirectionalFeed.toJSON(contact.sharedFeed),
     requestSent: contact._requestSent,
-    contactFeed: contact.contactFeed,
   })
 
   _localID: string
   _peerID: string
-  _ownFeed: OwnFeed
+  _sharedFeed: BidirectionalFeed
   _requestSent: boolean
-  _contactFeed: ?string
   _aliasName: ?string
   _profile: {
     name: ?string,
@@ -90,17 +104,15 @@ export default class Contact {
     peerID: string,
     profile: ContactProfile,
     aliasName: ?string,
-    ownFeed: OwnFeed,
+    sharedFeed: BidirectionalFeed,
     requestSent?: boolean,
-    contactFeed?: ?string,
   ) {
     this._localID = localID
     this._peerID = peerID
     this._profile = profile
     this._aliasName = aliasName
-    this._ownFeed = ownFeed
+    this._sharedFeed = sharedFeed
     this._requestSent = !!requestSent
-    this._contactFeed = contactFeed
   }
 
   get localID(): string {
@@ -111,16 +123,8 @@ export default class Contact {
     return this._peerID
   }
 
-  get ownFeed(): OwnFeed {
-    return this._ownFeed
-  }
-
-  get contactFeed(): ?string {
-    return this._contactFeed
-  }
-
-  set contactFeed(contactFeed: string): void {
-    this._contactFeed = contactFeed
+  get sharedFeed(): BidirectionalFeed {
+    return this._sharedFeed
   }
 
   get profile(): ContactProfile {
@@ -145,15 +149,16 @@ export default class Contact {
 
   get connectionState(): ConnectionState {
     if (!this._requestSent) return 'sending'
-    return this.contactFeed ? 'connected' : 'sent'
+    return this.sharedFeed.remoteFeed ? 'connected' : 'sent'
   }
 
-  firstContactData(): FirstContactSerialized {
-    if (!this.ownFeed.feedHash) {
+  generatefirstContactPayload(): FirstContactPayload {
+    if (!this.sharedFeed.localFeed.feedHash) {
       throw new Error('Contact feed manifest has not been synced')
     }
     return {
-      privateFeed: this.ownFeed.feedHash,
+      version: '1.0.0',
+      privateFeed: this.sharedFeed.localFeed.feedHash,
     }
   }
 }

@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 09ce9fa39329c08a941a7f9b4f8fd861
+ * @relayHash bd795939435d69b1231ce8346f1c9191
  */
 
 /* eslint-disable */
@@ -21,9 +21,8 @@ export type AppPermissionsRequirementsInput = {
 };
 export type AppPermissionDefinitionsInput = {
   BLOCKCHAIN_SEND?: ?boolean,
+  COMMS_CONTACT?: ?boolean,
   CONTACTS_READ?: ?boolean,
-  SWARM_UPLOAD?: ?boolean,
-  SWARM_DOWNLOAD?: ?boolean,
   WEB_REQUEST?: ?$ReadOnlyArray<?string>,
 };
 export type OwnAppDetailViewSetAppPermissionsRequirementsMutationVariables = {|
@@ -70,6 +69,7 @@ fragment OwnAppsView_apps on Apps {
 }
 
 fragment AppItem_ownApp on OwnApp {
+  mfid
   localID
   name
   developer {
@@ -103,8 +103,10 @@ fragment AppItem_ownApp on OwnApp {
 
 fragment OwnAppDetailView_ownApp on OwnApp {
   localID
+  mfid
   name
   contentsPath
+  updateFeedHash
   developer {
     id
     name
@@ -116,11 +118,13 @@ fragment OwnAppDetailView_ownApp on OwnApp {
       optional {
         WEB_REQUEST
         BLOCKCHAIN_SEND
+        COMMS_CONTACT
         CONTACTS_READ
       }
       required {
         WEB_REQUEST
         BLOCKCHAIN_SEND
+        COMMS_CONTACT
         CONTACTS_READ
       }
     }
@@ -184,6 +188,13 @@ v5 = [
   {
     "kind": "ScalarField",
     "alias": null,
+    "name": "COMMS_CONTACT",
+    "args": null,
+    "storageKey": null
+  },
+  {
+    "kind": "ScalarField",
+    "alias": null,
     "name": "CONTACTS_READ",
     "args": null,
     "storageKey": null
@@ -194,7 +205,7 @@ return {
   "operationKind": "mutation",
   "name": "OwnAppDetailViewSetAppPermissionsRequirementsMutation",
   "id": null,
-  "text": "mutation OwnAppDetailViewSetAppPermissionsRequirementsMutation(\n  $input: SetAppPermissionsRequirementsInput!\n) {\n  setAppPermissionsRequirements(input: $input) {\n    viewer {\n      apps {\n        ...OwnAppsView_apps\n      }\n      id\n    }\n  }\n}\n\nfragment OwnAppsView_apps on Apps {\n  own {\n    localID\n    name\n    ...AppItem_ownApp\n    ...OwnAppDetailView_ownApp\n    id\n  }\n}\n\nfragment AppItem_ownApp on OwnApp {\n  localID\n  name\n  developer {\n    id\n    name\n  }\n  versions {\n    version\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n    }\n  }\n  users {\n    localID\n    identity {\n      profile {\n        name\n      }\n      id\n    }\n    id\n  }\n}\n\nfragment OwnAppDetailView_ownApp on OwnApp {\n  localID\n  name\n  contentsPath\n  developer {\n    id\n    name\n  }\n  versions {\n    version\n    versionHash\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        CONTACTS_READ\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        CONTACTS_READ\n      }\n    }\n  }\n}\n",
+  "text": "mutation OwnAppDetailViewSetAppPermissionsRequirementsMutation(\n  $input: SetAppPermissionsRequirementsInput!\n) {\n  setAppPermissionsRequirements(input: $input) {\n    viewer {\n      apps {\n        ...OwnAppsView_apps\n      }\n      id\n    }\n  }\n}\n\nfragment OwnAppsView_apps on Apps {\n  own {\n    localID\n    name\n    ...AppItem_ownApp\n    ...OwnAppDetailView_ownApp\n    id\n  }\n}\n\nfragment AppItem_ownApp on OwnApp {\n  mfid\n  localID\n  name\n  developer {\n    id\n    name\n  }\n  versions {\n    version\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n    }\n  }\n  users {\n    localID\n    identity {\n      profile {\n        name\n      }\n      id\n    }\n    id\n  }\n}\n\nfragment OwnAppDetailView_ownApp on OwnApp {\n  localID\n  mfid\n  name\n  contentsPath\n  updateFeedHash\n  developer {\n    id\n    name\n  }\n  versions {\n    version\n    versionHash\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        COMMS_CONTACT\n        CONTACTS_READ\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        COMMS_CONTACT\n        CONTACTS_READ\n      }\n    }\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -286,6 +297,13 @@ return {
                     "selections": [
                       v2,
                       v3,
+                      {
+                        "kind": "ScalarField",
+                        "alias": null,
+                        "name": "mfid",
+                        "args": null,
+                        "storageKey": null
+                      },
                       {
                         "kind": "LinkedField",
                         "alias": null,
@@ -396,6 +414,13 @@ return {
                         "kind": "ScalarField",
                         "alias": null,
                         "name": "contentsPath",
+                        "args": null,
+                        "storageKey": null
+                      },
+                      {
+                        "kind": "ScalarField",
+                        "alias": null,
+                        "name": "updateFeedHash",
                         "args": null,
                         "storageKey": null
                       },

@@ -9,7 +9,7 @@ import {
 } from '@mainframe/app-permissions'
 import { uniqueID, type ID } from '@mainframe/utils-id'
 
-import { OwnFeed, type OwnFeedSerialized } from '../swarm/feed'
+import { OwnFeed, type OwnFeedSerialized, type bzzHash } from '../swarm/feed'
 
 import AbstractApp, {
   type AbstractAppParams,
@@ -116,6 +116,10 @@ export default class OwnApp extends AbstractApp {
     return this._updateFeed
   }
 
+  get updateFeedHash(): ?bzzHash {
+    return this._updateFeed.feedHash
+  }
+
   get versions(): { [version: string]: AppVersion } {
     return this._versions
   }
@@ -125,6 +129,29 @@ export default class OwnApp extends AbstractApp {
   }
 
   // Setters
+
+  set name(name: string) {
+    this._data.name = name
+  }
+
+  set contentsPath(path: string) {
+    this._data.contentsPath = path
+  }
+
+  editNextVersionNumber(version: string) {
+    if (version === this._data.version) {
+      return
+    }
+    if (this._versions[version]) {
+      throw new Error('Version already exists')
+    }
+    const latestVersion = { ...this._versions[this._data.version] }
+    // $FlowFixMe Spread
+    latestVersion.version = version
+    delete this._versions[this._data.version]
+    this._versions[version] = latestVersion
+    this._data.version = version
+  }
 
   createNextVersion(
     version: string,

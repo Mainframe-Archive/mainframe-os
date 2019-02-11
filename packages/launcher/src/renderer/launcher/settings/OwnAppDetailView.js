@@ -12,13 +12,21 @@ import rpc from '../rpc'
 import { EnvironmentContext } from '../RelayEnvironment'
 import applyContext, { type CurrentUser } from '../LauncherContext'
 import ModalView from '../../UIComponents/ModalView'
+import AppIcon from '../apps/AppIcon'
+
+import EditAppDetailsModal, {
+  type CompleteAppData,
+} from './EditAppDetailsModal'
+
 import PermissionsRequirementsView from './PermissionsRequirements'
 import AppSummary from './AppSummary'
 
 export type OwnApp = {
   name: string,
   localID: string,
+  mfid: string,
   contentsPath: ?string,
+  updateFeedHash: ?string,
   developer: {
     id: string,
     name: string,
@@ -39,7 +47,7 @@ type Props = {
 type State = {
   errorMsg?: ?string,
   publishing?: ?boolean,
-  showModal?: ?'confirm_permissions' | 'app_summary',
+  showModal?: ?'confirm_permissions' | 'app_summary' | 'edit_details',
   selectedVersionIndex: number,
 }
 
@@ -56,12 +64,15 @@ const Header = styled.View`
   align-items: center;
 `
 
-const AppIcon = styled.View`
+const HeaderLabels = styled.View`
+  margin-left: 16px;
+`
+
+const IconContainer = styled.View`
   width: 40px;
   height: 40px;
   background-color: #232323;
   border-radius: 5px;
-  margin-right: 20px;
 `
 
 const VersionsContainer = styled.View`
@@ -114,6 +125,20 @@ const publishVersionMutation = graphql`
   }
 `
 
+const updateAppDetailsMutation = graphql`
+  mutation OwnAppDetailViewUpdateAppDetailsMutation(
+    $input: UpdateAppDetailsInput!
+  ) {
+    updateAppDetails(input: $input) {
+      viewer {
+        apps {
+          ...OwnAppsView_apps
+        }
+      }
+    }
+  }
+`
+
 const setAppPermissionsRequirementsMutation = graphql`
   mutation OwnAppDetailViewSetAppPermissionsRequirementsMutation(
     $input: SetAppPermissionsRequirementsInput!
@@ -147,6 +172,38 @@ export class OwnAppDetailView extends Component<Props, State> {
   onPressPublishVersion = () => {
     this.setState({
       showModal: 'confirm_permissions',
+    })
+  }
+
+  onUpdateAppData = (appData: CompleteAppData) => {
+    const { ownApp } = this.props
+    const input = {
+      appID: ownApp.localID,
+      version: appData.version,
+      name: appData.name,
+      contentsPath: appData.contentsPath,
+    }
+
+    this.setState({
+      showModal: undefined,
+    })
+    commitMutation(this.context, {
+      mutation: updateAppDetailsMutation,
+      variables: { input },
+      onCompleted: (res, errors) => {
+        let errorMsg
+        if (errors) {
+          errorMsg = errors.length ? errors[0].message : 'Error Updating app.'
+        }
+        this.setState({
+          errorMsg,
+        })
+      },
+      onError: err => {
+        this.setState({
+          errorMsg: err.message,
+        })
+      },
     })
   }
 
@@ -185,6 +242,12 @@ export class OwnAppDetailView extends Component<Props, State> {
   }
 
   onPressSubmitFoReview = () => {}
+
+  onPressEdit = () => {
+    this.setState({
+      showModal: 'edit_details',
+    })
+  }
 
   onPressOpenApp = async () => {
     const { user, ownApp } = this.props
@@ -276,7 +339,11 @@ export class OwnAppDetailView extends Component<Props, State> {
             variant={['mediumUppercase', 'marginRight10']}
             onPress={this.onPressOpenApp}
           />
-          <Button title="EDIT" variant={['mediumUppercase', 'marginRight10']} />
+          <Button
+            title="EDIT"
+            variant={['mediumUppercase', 'marginRight10']}
+            onPress={this.onPressEdit}
+          />
           <Button
             variant={['mediumUppercase', 'red']}
             title="PUBLISH APP"
@@ -296,14 +363,12 @@ export class OwnAppDetailView extends Component<Props, State> {
     } else {
       publishedState = (
         <>
-          <VersionDetailRow>
-            <Text variant="smallLabel">CONTENTS URI</Text>
-            <Text theme={detailTextStyle}>
-              {this.selectedVersion.versionHash}
-            </Text>
-          </VersionDetailRow>
-
           <ButtonsContainer>
+            <Button
+              title="OPEN"
+              variant={['mediumUppercase', 'marginRight10']}
+              onPress={this.onPressOpenApp}
+            />
             <Button
               variant={['mediumUppercase', 'red']}
               title="SUBMIT TO MAINRAME APP STORE"
@@ -330,6 +395,13 @@ export class OwnAppDetailView extends Component<Props, State> {
 
   render() {
     const { ownApp } = this.props
+
+    const appData = {
+      name: ownApp.name,
+      contentsPath: ownApp.contentsPath,
+      version: this.selectedVersion.version,
+    }
+
     switch (this.state.showModal) {
       case 'confirm_permissions':
         return (
@@ -340,11 +412,6 @@ export class OwnAppDetailView extends Component<Props, State> {
           />
         )
       case 'app_summary': {
-        const appData = {
-          name: ownApp.name,
-          contentsPath: ownApp.contentsPath,
-          version: this.selectedVersion.version,
-        }
         return (
           <AppSummary
             appData={appData}
@@ -356,13 +423,33 @@ export class OwnAppDetailView extends Component<Props, State> {
           />
         )
       }
+      case 'edit_details':
+        return (
+          <EditAppDetailsModal
+            submitButtonTitle="SAVE"
+            onRequestClose={this.onCloseModal}
+            onSetAppData={this.onUpdateAppData}
+            appData={appData}
+          />
+        )
       default:
     }
 
+    const updateHash = ownApp.updateFeedHash && (
+      <Text variant="greyMed" size={12}>
+        App ID: {ownApp.updateFeedHash}
+      </Text>
+    )
+
     const header = (
       <Header>
-        <AppIcon />
-        <Text variant={['mediumTitle', 'darkBlue']}>{ownApp.name}</Text>
+        <IconContainer>
+          <AppIcon size="small" id={ownApp.mfid} />
+        </IconContainer>
+        <HeaderLabels>
+          <Text variant={['mediumTitle', 'darkBlue']}>{ownApp.name}</Text>
+          {updateHash}
+        </HeaderLabels>
       </Header>
     )
     return (
@@ -385,8 +472,10 @@ export default createFragmentContainer(OwnAppDetailViewWithContext, {
   ownApp: graphql`
     fragment OwnAppDetailView_ownApp on OwnApp {
       localID
+      mfid
       name
       contentsPath
+      updateFeedHash
       developer {
         id
         name
@@ -398,11 +487,13 @@ export default createFragmentContainer(OwnAppDetailViewWithContext, {
           optional {
             WEB_REQUEST
             BLOCKCHAIN_SEND
+            COMMS_CONTACT
             CONTACTS_READ
           }
           required {
             WEB_REQUEST
             BLOCKCHAIN_SEND
+            COMMS_CONTACT
             CONTACTS_READ
           }
         }

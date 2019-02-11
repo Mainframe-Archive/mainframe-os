@@ -2,23 +2,18 @@
 
 import type { StrictPermissionsRequirements } from '@mainframe/app-permissions'
 import type { AppCreateParams, IdentityOwnData } from '@mainframe/client'
-import { isValidSemver } from '@mainframe/app-manifest'
-import React, { createRef, Component, type ElementRef } from 'react'
+import React, { Component } from 'react'
 import { graphql, QueryRenderer, commitMutation } from 'react-relay'
-
-import { Button, TextField, Text } from '@morpheus-ui/core'
-import {
-  type FormSubmitPayload,
-  type FieldValidateFunctionParams,
-} from '@morpheus-ui/forms'
-import styled from 'styled-components/native'
+import { Text } from '@morpheus-ui/core'
 
 import RelayLoaderView from '../RelayLoaderView'
-import FormModalView from '../../UIComponents/FormModalView'
 import { EnvironmentContext } from '../RelayEnvironment'
 import { appCreateMutation } from '../apps/appMutations'
 import PermissionsRequirementsView from './PermissionsRequirements'
 import AppSummary, { type AppData } from './AppSummary'
+import EditAppDetailsModal, {
+  type CompleteAppData,
+} from './EditAppDetailsModal'
 
 type RendererProps = {
   onPressBack?: () => any,
@@ -31,7 +26,6 @@ type Props = RendererProps & {
 }
 
 type State = {
-  inputValue: string,
   screen: 'info' | 'permissions' | 'summary',
   permissionsRequirements: StrictPermissionsRequirements,
   userId?: string,
@@ -39,28 +33,10 @@ type State = {
   errorMsg?: string,
 }
 
-const Container = styled.View`
-  flex: 1;
-  width: 500px;
-  padding: 20px;
-  justify-content: center;
-`
-
-const validateVersion = (params: FieldValidateFunctionParams) => {
-  if (
-    params.value &&
-    typeof params.value === 'string' &&
-    !isValidSemver(params.value)
-  ) {
-    return 'Please provide a valid verison number, e.g. 1.0.0'
-  }
-}
-
 class CreateAppModal extends Component<Props, State> {
   static contextType = EnvironmentContext
 
   state = {
-    inputValue: '',
     screen: 'info',
     manifest: null,
     appData: {},
@@ -73,9 +49,6 @@ class CreateAppModal extends Component<Props, State> {
       },
     },
   }
-
-  // $FlowFixMe: React Ref
-  fileInput: ElementRef<'input'> = createRef()
 
   // HANDLERS
 
@@ -135,62 +108,16 @@ class CreateAppModal extends Component<Props, State> {
     })
   }
 
-  onPressSelectContentsFolder = () => {
-    this.fileInput.current.webkitdirectory = true
-    this.fileInput.current.click()
-  }
-
-  onChangeName = (value: string) => {
-    this.setState(({ appData }) => ({
-      appData: {
-        ...appData,
-        name: value,
-      },
-    }))
-  }
-
-  onChangeVersion = (value: string) => {
-    this.setState(({ appData }) => ({
-      appData: {
-        ...appData,
-        version: value,
-      },
-    }))
-  }
-
-  onChangeContentsPath = (value: string) => {
-    this.setState(({ appData }) => ({
-      appData: {
-        ...appData,
-        contentsPath: value,
-      },
-    }))
-  }
-
-  onFileInputChange = () => {
-    const files = [...this.fileInput.current.files]
-    if (files.length) {
-      this.setState(({ appData }) => ({
-        appData: {
-          ...appData,
-          contentsPath: files[0].path,
-        },
-      }))
-    }
-  }
-
-  onSetAppData = (payload: FormSubmitPayload) => {
+  onSetAppData = (appData: CompleteAppData) => {
     const { ownDevelopers } = this.props
 
-    if (payload.valid && ownDevelopers.length) {
-      this.setState({
-        appData: {
-          ...payload.fields,
-          developerID: ownDevelopers[0].localID,
-        },
-        screen: 'permissions',
-      })
-    }
+    this.setState({
+      appData: {
+        ...appData,
+        developerID: ownDevelopers[0].localID,
+      },
+      screen: 'permissions',
+    })
   }
 
   onSetPermissions = (
@@ -213,61 +140,11 @@ class CreateAppModal extends Component<Props, State> {
   // RENDER
   renderInfoForm() {
     return (
-      <FormModalView
-        title="Create an App"
-        dismissButton="CANCEL"
-        confirmTestID="create-app-set-info-button"
-        confirmButton="CONTINUE"
-        onSubmitForm={this.onSetAppData}
-        onRequestClose={this.props.onRequestClose}>
-        <Container>
-          <Text
-            size={12}
-            variant={['greyMed', 'center']}
-            theme={{ marginBottom: '30px' }}>
-            Set your app details.
-          </Text>
-          <TextField
-            autoFocus
-            name="name"
-            label="App name"
-            testID="create-app-name-input"
-            defaultValue={this.state.appData.name}
-            required
-          />
-          <TextField
-            name="version"
-            label="Version"
-            testID="create-app-version-input"
-            validation={validateVersion}
-            defaultValue={this.state.appData.version}
-            required
-          />
-          <TextField
-            name="contentsPath"
-            label="Content Path"
-            testID="create-app-version-input"
-            disableEdit
-            value={this.state.appData.contentsPath}
-            required
-            IconRight={() => (
-              <Button
-                variant={['small', 'completeOnboarding']}
-                title="BROWSE"
-                onPress={this.onPressSelectContentsFolder}
-              />
-            )}
-          />
-          <input
-            id="app-contents-file-selector"
-            onChange={this.onFileInputChange}
-            ref={this.fileInput}
-            type="file"
-            hidden
-            value={this.state.inputValue}
-          />
-        </Container>
-      </FormModalView>
+      <EditAppDetailsModal
+        onRequestClose={this.props.onRequestClose}
+        onSetAppData={this.onSetAppData}
+        appData={this.state.appData}
+      />
     )
   }
 

@@ -162,6 +162,7 @@ export const getAll = (ctx: ClientContext): AppGetAllResult => {
         localID: toClientID(appID),
         name: app instanceof OwnApp ? app.data.name : app.manifest.name,
         manifest: app.manifest || app._data,
+        mfid: toClientID(app.mfid),
         users: users,
       }
     })
@@ -213,7 +214,12 @@ export const loadManifest = {
     const payload = await res.json()
     const manifest = verifyManifest(payload)
     const appID = ctx.openVault.apps.getID(manifest.id)
-    return { manifest, appID: appID ? toClientID(appID) : undefined }
+    const isOwn = appID != null && !!ctx.openVault.apps.getOwnByID(appID)
+    return {
+      manifest,
+      isOwn,
+      appID: appID ? toClientID(appID) : undefined,
+    }
   },
 }
 

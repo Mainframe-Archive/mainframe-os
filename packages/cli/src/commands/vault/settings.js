@@ -9,7 +9,6 @@ const KEY_FLAGS = {
   bzzURL: '--bzz-url',
   pssURL: '--pss-url',
   ethURL: '--eth-url',
-  ethChainID: '--eth-chain-id',
 }
 
 export default class VaultSettingsCommand extends Command {
@@ -24,9 +23,6 @@ export default class VaultSettingsCommand extends Command {
     }),
     'eth-url': flags.string({
       description: 'Ethereum HTTP URL',
-    }),
-    'eth-chain-id': flags.string({
-      description: 'Ethereum chain id',
     }),
   }
 
@@ -49,10 +45,6 @@ export default class VaultSettingsCommand extends Command {
     if (this.flags['eth-url'] != null) {
       hasSettings = true
       settings.ethURL = this.flags['eth-url']
-    }
-    if (this.flags['eth-chain-id'] != null) {
-      hasSettings = true
-      settings.ethChainID = Number(this.flags['eth-chain-id'])
     }
 
     const res = hasSettings

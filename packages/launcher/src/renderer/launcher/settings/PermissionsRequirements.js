@@ -39,6 +39,7 @@ type State = {
 
 export const PERMISSIONS_DESCRIPTIONS = {
   BLOCKCHAIN_SEND: 'Make transactions to Ethereum blockchain',
+  COMMS_CONTACT: 'Communicate data with users contacts',
   CONTACTS_READ: 'Read data from users contacts',
   WEB_REQUEST: 'Set required web request hosts',
 }

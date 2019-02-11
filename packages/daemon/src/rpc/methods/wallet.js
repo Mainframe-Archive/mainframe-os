@@ -119,9 +119,6 @@ export const signTransaction = {
     ctx: ClientContext,
     params: WalletSignTxParams,
   ): Promise<WalletSignTxResult> => {
-    if (params.chain === 'ethereum') {
-      params.transactionData.chainId = ctx.openVault.settings.ethChainID
-    }
     return ctx.openVault.wallets.signTransaction(
       params.chain,
       params.transactionData,

@@ -10,7 +10,8 @@
   },
   "files": [
     "/bin",
-    "/lib"
+    "/lib",
+    "oclif.manifest.json"
   ],
   "oclif": {
     "commands": "./lib/commands",
@@ -21,10 +22,12 @@
   },
   "scripts": {
     "clean": "del-cli lib",
-    "build:js": "cross-env BABEL_ENV=browser-cjs babel src --out-dir lib",
+    "build:js": "babel src --out-dir lib",
     "build:flow": "flow-copy-source src lib",
     "build": "npm run clean && npm run build:js && npm run build:flow",
-    "test:types": "flow check"
+    "test:types": "flow check",
+    "prepublishOnly": "oclif-dev manifest",
+    "postpublish": "del-cli oclif.manifest.json"
   },
   "dependencies": {
     "@mainframe/client": "*",
@@ -41,6 +44,8 @@
     "rxjs": "^6.3.3"
   },
   "devDependencies": {
+    "@oclif/dev-cli": "^1.21.0",
+    "del-cli": "^1.1.0",
     "flow-bin": "^0.87.0"
   }
 }

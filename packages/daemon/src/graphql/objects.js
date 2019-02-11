@@ -107,7 +107,7 @@ export const appPermissionGrants = new GraphQLObjectType({
   name: 'AppPermissions',
   fields: () => ({
     BLOCKCHAIN_SEND: { type: GraphQLBoolean },
-    CONTACS_READ: { type: GraphQLBoolean },
+    CONTACTS_READ: { type: GraphQLBoolean },
     WEB_REQUEST: { type: new GraphQLNonNull(webRequestGrants) },
   }),
 })
@@ -159,6 +159,9 @@ export const appPermissionDefinitions = new GraphQLObjectType({
       type: new GraphQLList(GraphQLString),
     },
     BLOCKCHAIN_SEND: {
+      type: GraphQLBoolean,
+    },
+    COMMS_CONTACT: {
       type: GraphQLBoolean,
     },
     CONTACTS_READ: {
@@ -229,6 +232,9 @@ export const app = new GraphQLObjectType({
   interfaces: () => [nodeInterface],
   fields: () => ({
     id: globalIdField(),
+    mfid: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
     localID: {
       type: new GraphQLNonNull(GraphQLID),
       resolve: self => self.id,
@@ -261,6 +267,9 @@ export const ownApp = new GraphQLObjectType({
       type: new GraphQLNonNull(GraphQLID),
       resolve: self => self.id,
     },
+    mfid: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
     name: {
       type: new GraphQLNonNull(GraphQLString),
       resolve: self => self.data.name,
@@ -268,6 +277,9 @@ export const ownApp = new GraphQLObjectType({
     contentsPath: {
       type: new GraphQLNonNull(GraphQLString),
       resolve: self => self.data.contentsPath,
+    },
+    updateFeedHash: {
+      type: GraphQLString,
     },
     versions: {
       type: new GraphQLNonNull(
@@ -483,6 +495,9 @@ export const peer = new GraphQLObjectType({
     publicKey: {
       type: new GraphQLNonNull(GraphQLString),
     },
+    publicFeed: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
     profile: {
       type: new GraphQLNonNull(genericProfile),
     },
@@ -508,6 +523,9 @@ export const contact = new GraphQLObjectType({
     },
     peerID: {
       type: new GraphQLNonNull(GraphQLID),
+    },
+    publicFeed: {
+      type: new GraphQLNonNull(GraphQLString),
     },
     pubKey: {
       type: new GraphQLNonNull(GraphQLString),
@@ -589,6 +607,7 @@ export const peers = new GraphQLObjectType({
           const data = await peerPublicRes.json()
           return {
             profile: data.profile,
+            publicFeed: args.feedHash,
             publicKey: data.publicKey,
           }
         } catch (err) {
@@ -712,6 +731,18 @@ export const wallets = new GraphQLObjectType({
   }),
 })
 
+export const settings = new GraphQLObjectType({
+  name: 'Settings',
+  fields: () => ({
+    ethereumUrl: {
+      type: new GraphQLNonNull(GraphQLString),
+      resolve: (self, args, ctx: ClientContext) => {
+        return ctx.openVault.settings.ethURL
+      },
+    },
+  }),
+})
+
 export const viewer = new GraphQLObjectType({
   name: 'Viewer',
   fields: () => ({
@@ -733,6 +764,10 @@ export const viewer = new GraphQLObjectType({
     },
     wallets: {
       type: new GraphQLNonNull(wallets),
+      resolve: () => ({}),
+    },
+    settings: {
+      type: new GraphQLNonNull(settings),
       resolve: () => ({}),
     },
   }),

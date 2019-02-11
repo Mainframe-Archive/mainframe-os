@@ -11,11 +11,9 @@ import type { Subscription as RxSubscription } from 'rxjs'
 import { type AppContext, ContextSubscription } from '../contexts'
 import { withPermission } from '../permissions'
 
-class TopicSubscription extends ContextSubscription<RxSubscription> {
-  data: ?RxSubscription
-
+class CommsSubscription extends ContextSubscription<RxSubscription> {
   constructor() {
-    super('pss_subscription')
+    super('comms_subscription')
   }
 
   async dispose() {
@@ -64,6 +62,54 @@ export const sandboxed = {
     'BLOCKCHAIN_SEND',
     (ctx: AppContext, params: any) => ctx.client.wallet.signTransaction(params),
     // TODO notify app if using ledger to feedback awaiting sign
+  ),
+
+  // Comms
+
+  comms_publish: withPermission(
+    'COMMS_CONTACT',
+    async (
+      ctx: AppContext,
+      params: { contactID: string, key: string, value: Object },
+    ): Promise<void> => {
+      const appID = ctx.appSession.app.appID
+      const userID = ctx.appSession.user.id
+      return ctx.client.comms.publish({ ...params, appID, userID })
+    },
+  ),
+
+  comms_subscribe: withPermission(
+    'COMMS_CONTACT',
+    async (
+      ctx: AppContext,
+      params: { contactID: string, key: string },
+    ): Promise<string> => {
+      const appID = ctx.appSession.app.appID
+      const userID = ctx.appSession.user.id
+      const subscription = await ctx.client.comms.subscribe({
+        ...params,
+        appID,
+        userID,
+      })
+      const sub = new CommsSubscription()
+      sub.data = subscription.subscribe(msg => {
+        ctx.notifySandboxed(sub.id, msg)
+      })
+      ctx.setSubscription(sub)
+      return sub.id
+    },
+  ),
+
+  comms_getSubscribable: withPermission(
+    'COMMS_CONTACT',
+    async (
+      ctx: AppContext,
+      params: { contactID: string },
+    ): Promise<Array<string>> => {
+      const appID = ctx.appSession.app.appID
+      const userID = ctx.appSession.user.id
+      return ctx.client.comms.getSubscribable({ ...params, appID, userID })
+    },
   ),
 
   // Contacts
@@ -129,64 +175,6 @@ export const sandboxed = {
       return contactsRes.contacts
     },
   ),
-
-  // Temporary PSS APIs - should be removed when communication APIs are settled
-  pss_baseAddr: (ctx: AppContext): Promise<string> => {
-    return ctx.client.pss.baseAddr()
-  },
-  pss_createTopicSubscription: {
-    params: {
-      topic: 'string',
-    },
-    handler: async (
-      ctx: AppContext,
-      params: { topic: string },
-    ): Promise<string> => {
-      const subscription = await ctx.client.pss.createTopicSubscription(params)
-      const sub = new TopicSubscription()
-      sub.data = subscription.subscribe(msg => {
-        ctx.notifySandboxed(sub.id, msg)
-      })
-      ctx.setSubscription(sub)
-      return sub.id
-    },
-  },
-  pss_getPublicKey: (ctx: AppContext): Promise<string> => {
-    return ctx.client.pss.getPublicKey()
-  },
-  pss_sendAsym: {
-    params: {
-      key: 'string',
-      topic: 'string',
-      message: 'string',
-    },
-    handler: (
-      ctx: AppContext,
-      params: { key: string, topic: string, message: string },
-    ): Promise<null> => {
-      return ctx.client.pss.sendAsym(params)
-    },
-  },
-  pss_setPeerPublicKey: {
-    params: {
-      key: 'string',
-      topic: 'string',
-    },
-    handler: (
-      ctx: AppContext,
-      params: { key: string, topic: string },
-    ): Promise<null> => {
-      return ctx.client.pss.setPeerPublicKey(params)
-    },
-  },
-  pss_stringToTopic: {
-    params: {
-      string: 'string',
-    },
-    handler: (ctx: AppContext, params: { string: string }): Promise<string> => {
-      return ctx.client.pss.stringToTopic(params)
-    },
-  },
 }
 
 export const trusted = {

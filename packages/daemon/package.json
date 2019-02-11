@@ -4,32 +4,35 @@
   "main": "lib/index.js",
   "license": "MIT",
   "bin": {
-    "mainframe-daemon": "./bin/run"
+    "mainframed": "./bin/run"
   },
   "files": [
     "/bin",
-    "/lib"
+    "/lib",
+    "oclif.manifest.json"
   ],
   "oclif": {
     "commands": "./lib/cli/commands",
-    "bin": "mainframe-daemon",
+    "bin": "mainframed",
     "plugins": [
       "@oclif/plugin-help"
     ]
   },
   "scripts": {
     "clean": "del-cli lib",
-    "build:js": "cross-env BABEL_ENV=browser-cjs babel src --out-dir lib",
+    "build:js": "babel src --out-dir lib",
     "build:flow": "flow-copy-source src lib",
     "build": "npm run clean && npm run build:js && npm run build:flow",
     "test:types": "flow check",
     "test:unit": "jest",
-    "start": "node -r esm lib"
+    "start": "node -r esm lib",
+    "prepublishOnly": "oclif-dev manifest",
+    "postpublish": "del-cli oclif.manifest.json"
   },
   "dependencies": {
     "@babel/polyfill": "^7.2.5",
-    "@erebos/api-bzz-node": "^0.6.2",
-    "@erebos/api-pss": "^0.5.3",
+    "@erebos/api-bzz-node": "^0.6.3",
+    "@erebos/api-pss": "^0.6.3",
     "@erebos/hex": "^0.5.4",
     "@erebos/keccak256": "^0.6.0",
     "@erebos/secp256k1": "^0.6.0",
@@ -72,6 +75,8 @@
     "web3-utils": "^1.0.0-beta.36"
   },
   "devDependencies": {
+    "@oclif/dev-cli": "^1.21.0",
+    "del-cli": "^1.1.0",
     "flow-bin": "^0.87.0"
   }
 }

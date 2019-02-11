@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 8c6462c5b7836a0ff057e6fcdff39e88
+ * @relayHash 567a63345ad9b34ea022e45726c5de6c
  */
 
 /* eslint-disable */
@@ -10,8 +10,8 @@
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
 export type ConnectionState = "CONNECTED" | "SENDING" | "SENT" | "%future added value";
-export type ContactsScreenContactChangedSubscriptionVariables = {||};
-export type ContactsScreenContactChangedSubscriptionResponse = {|
+export type LauncherContactChangedSubscriptionVariables = {||};
+export type LauncherContactChangedSubscriptionResponse = {|
   +contactChanged: {|
     +connectionState: ConnectionState,
     +profile: {|
@@ -20,15 +20,15 @@ export type ContactsScreenContactChangedSubscriptionResponse = {|
     |},
   |}
 |};
-export type ContactsScreenContactChangedSubscription = {|
-  variables: ContactsScreenContactChangedSubscriptionVariables,
-  response: ContactsScreenContactChangedSubscriptionResponse,
+export type LauncherContactChangedSubscription = {|
+  variables: LauncherContactChangedSubscriptionVariables,
+  response: LauncherContactChangedSubscriptionResponse,
 |};
 */
 
 
 /*
-subscription ContactsScreenContactChangedSubscription {
+subscription LauncherContactChangedSubscription {
   contactChanged {
     connectionState
     profile {
@@ -76,13 +76,13 @@ v1 = {
 return {
   "kind": "Request",
   "operationKind": "subscription",
-  "name": "ContactsScreenContactChangedSubscription",
+  "name": "LauncherContactChangedSubscription",
   "id": null,
-  "text": "subscription ContactsScreenContactChangedSubscription {\n  contactChanged {\n    connectionState\n    profile {\n      name\n      avatar\n    }\n    id\n  }\n}\n",
+  "text": "subscription LauncherContactChangedSubscription {\n  contactChanged {\n    connectionState\n    profile {\n      name\n      avatar\n    }\n    id\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
-    "name": "ContactsScreenContactChangedSubscription",
+    "name": "LauncherContactChangedSubscription",
     "type": "Subscription",
     "metadata": null,
     "argumentDefinitions": [],
@@ -104,7 +104,7 @@ return {
   },
   "operation": {
     "kind": "Operation",
-    "name": "ContactsScreenContactChangedSubscription",
+    "name": "LauncherContactChangedSubscription",
     "argumentDefinitions": [],
     "selections": [
       {
@@ -132,5 +132,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '20ba0037e9cd927533f7e4e82ae082fd';
+(node/*: any*/).hash = '39b178e29579a15f96e59416b67e9cf0';
 module.exports = node;

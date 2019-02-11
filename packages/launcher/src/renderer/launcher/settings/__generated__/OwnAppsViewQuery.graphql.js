@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash e40a6ac8113577ba9cd9a4bd87d20d17
+ * @relayHash e43525e55b25219d451a1448461ff46c
  */
 
 /* eslint-disable */
@@ -60,6 +60,7 @@ fragment OwnAppsView_apps on Apps {
 }
 
 fragment AppItem_ownApp on OwnApp {
+  mfid
   localID
   name
   developer {
@@ -93,8 +94,10 @@ fragment AppItem_ownApp on OwnApp {
 
 fragment OwnAppDetailView_ownApp on OwnApp {
   localID
+  mfid
   name
   contentsPath
+  updateFeedHash
   developer {
     id
     name
@@ -106,11 +109,13 @@ fragment OwnAppDetailView_ownApp on OwnApp {
       optional {
         WEB_REQUEST
         BLOCKCHAIN_SEND
+        COMMS_CONTACT
         CONTACTS_READ
       }
       required {
         WEB_REQUEST
         BLOCKCHAIN_SEND
+        COMMS_CONTACT
         CONTACTS_READ
       }
     }
@@ -158,6 +163,13 @@ v3 = [
   {
     "kind": "ScalarField",
     "alias": null,
+    "name": "COMMS_CONTACT",
+    "args": null,
+    "storageKey": null
+  },
+  {
+    "kind": "ScalarField",
+    "alias": null,
     "name": "CONTACTS_READ",
     "args": null,
     "storageKey": null
@@ -168,7 +180,7 @@ return {
   "operationKind": "query",
   "name": "OwnAppsViewQuery",
   "id": null,
-  "text": "query OwnAppsViewQuery {\n  viewer {\n    identities {\n      ...OwnAppsView_identities\n    }\n    apps {\n      ...OwnAppsView_apps\n    }\n    id\n  }\n}\n\nfragment OwnAppsView_identities on Identities {\n  ownDevelopers {\n    localID\n    id\n  }\n}\n\nfragment OwnAppsView_apps on Apps {\n  own {\n    localID\n    name\n    ...AppItem_ownApp\n    ...OwnAppDetailView_ownApp\n    id\n  }\n}\n\nfragment AppItem_ownApp on OwnApp {\n  localID\n  name\n  developer {\n    id\n    name\n  }\n  versions {\n    version\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n    }\n  }\n  users {\n    localID\n    identity {\n      profile {\n        name\n      }\n      id\n    }\n    id\n  }\n}\n\nfragment OwnAppDetailView_ownApp on OwnApp {\n  localID\n  name\n  contentsPath\n  developer {\n    id\n    name\n  }\n  versions {\n    version\n    versionHash\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        CONTACTS_READ\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        CONTACTS_READ\n      }\n    }\n  }\n}\n",
+  "text": "query OwnAppsViewQuery {\n  viewer {\n    identities {\n      ...OwnAppsView_identities\n    }\n    apps {\n      ...OwnAppsView_apps\n    }\n    id\n  }\n}\n\nfragment OwnAppsView_identities on Identities {\n  ownDevelopers {\n    localID\n    id\n  }\n}\n\nfragment OwnAppsView_apps on Apps {\n  own {\n    localID\n    name\n    ...AppItem_ownApp\n    ...OwnAppDetailView_ownApp\n    id\n  }\n}\n\nfragment AppItem_ownApp on OwnApp {\n  mfid\n  localID\n  name\n  developer {\n    id\n    name\n  }\n  versions {\n    version\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n    }\n  }\n  users {\n    localID\n    identity {\n      profile {\n        name\n      }\n      id\n    }\n    id\n  }\n}\n\nfragment OwnAppDetailView_ownApp on OwnApp {\n  localID\n  mfid\n  name\n  contentsPath\n  updateFeedHash\n  developer {\n    id\n    name\n  }\n  versions {\n    version\n    versionHash\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        COMMS_CONTACT\n        CONTACTS_READ\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        COMMS_CONTACT\n        CONTACTS_READ\n      }\n    }\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -281,6 +293,13 @@ return {
                   v0,
                   v2,
                   {
+                    "kind": "ScalarField",
+                    "alias": null,
+                    "name": "mfid",
+                    "args": null,
+                    "storageKey": null
+                  },
+                  {
                     "kind": "LinkedField",
                     "alias": null,
                     "name": "developer",
@@ -390,6 +409,13 @@ return {
                     "kind": "ScalarField",
                     "alias": null,
                     "name": "contentsPath",
+                    "args": null,
+                    "storageKey": null
+                  },
+                  {
+                    "kind": "ScalarField",
+                    "alias": null,
+                    "name": "updateFeedHash",
                     "args": null,
                     "storageKey": null
                   },

@@ -35,6 +35,10 @@ const PERMISSION_NAMES = {
     description:
       'Allow this app to make transactional calls to the blockchain, e.g. send tokens',
   },
+  COMMS_CONTACT: {
+    name: 'Communicate with your contacts',
+    description: 'Allows the app to communicate data with approved contacts.',
+  },
   CONTACTS_READ: {
     name: 'Request to fetch contacts',
     description: 'Allows the app to read data on approved contacts.',

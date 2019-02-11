@@ -4,6 +4,11 @@ import { type PartialManifestData } from '@mainframe/app-manifest'
 import type { ContactResult, AppUserContact } from '@mainframe/client'
 import { idType, type ID } from '@mainframe/utils-id'
 
+import { fetchJSON } from '../swarm/feed'
+import type {
+  AppFeedsPayload,
+  SharedAppDataPayload,
+} from '../contact/SharedAppData'
 import type ClientContext from './ClientContext'
 
 export type Wallet = {
@@ -71,6 +76,7 @@ export default class ContextQueries {
             profile,
             localID: id,
             peerID: contact.peerID,
+            publicFeed: peer.publicFeed,
             connectionState: contact.connectionState,
           }
           result.push(contactRes)
@@ -86,7 +92,7 @@ export default class ContextQueries {
     if (!app) {
       throw new Error('App not found')
     }
-    const contactIDs = app.listApprovedContacts(userID).map(c => c.id)
+    const contactIDs = Object.keys(app.getApprovedContacts(userID))
     return this.getAppUserContacts(appID, userID, contactIDs)
   }
 
@@ -100,10 +106,10 @@ export default class ContextQueries {
     if (!app) {
       throw new Error('App not found')
     }
-    const approvedContacts = app.listApprovedContacts(userID)
+    const approvedContacts = app.getApprovedContacts(userID)
     const contacts = this.getUserContacts(userID)
     return contactIDs.map(id => {
-      const approvedContact = approvedContacts.find(c => c.id === id)
+      const approvedContact = approvedContacts[id]
       const contactData: AppUserContact = {
         id,
         data: null,
@@ -120,6 +126,47 @@ export default class ContextQueries {
       }
       return contactData
     })
+  }
+
+  async getContactAppFeeds(appID: ID, contactID: ID | string): AppFeedsPayload {
+    const { openVault, io } = this._context
+
+    const app = openVault.apps.getByID(appID)
+    if (!app) {
+      throw new Error('App not found')
+    }
+    const sharedAppID = app.updateFeedHash
+    if (!sharedAppID) {
+      throw new Error('updateFeedHash missing for app')
+    }
+
+    const sharedData = openVault.contactAppData.getSharedData(
+      sharedAppID,
+      contactID,
+    )
+    if (!sharedData || !sharedData.remoteFeed) {
+      return {}
+    }
+
+    const remoteData = (await fetchJSON(
+      io.bzz,
+      sharedData.remoteFeed,
+    ): SharedAppDataPayload)
+    // TODO: validate payload version
+    return remoteData.feeds || {}
+  }
+
+  getContactLocalIDByAppApprovedID(
+    appID: string,
+    userID: string,
+    contactID: string,
+  ): ?string {
+    const app = this._context.openVault.apps.getByID(appID)
+    if (!app) {
+      throw new Error('App not found')
+    }
+
+    return app.getLocalIDByApprovedID(userID, contactID)
   }
 
   // Wallets
