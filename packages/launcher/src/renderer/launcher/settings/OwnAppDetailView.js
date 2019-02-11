@@ -475,11 +475,13 @@ export default createFragmentContainer(OwnAppDetailViewWithContext, {
           optional {
             WEB_REQUEST
             BLOCKCHAIN_SEND
+            COMMS_CONTACT
             CONTACTS_READ
           }
           required {
             WEB_REQUEST
             BLOCKCHAIN_SEND
+            COMMS_CONTACT
             CONTACTS_READ
           }
         }

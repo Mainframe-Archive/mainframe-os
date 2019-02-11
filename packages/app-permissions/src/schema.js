@@ -25,7 +25,11 @@ export const webHostCheck = function(value: string) {
   return isValidWebHost(value) || this.makeError('host', null, value)
 }
 
-export const PERMISSION_KEYS_BOOLEAN = ['BLOCKCHAIN_SEND', 'CONTACTS_READ']
+export const PERMISSION_KEYS_BOOLEAN = [
+  'BLOCKCHAIN_SEND',
+  'CONTACTS_READ',
+  'COMMS_CONTACT',
+]
 
 export const PERMISSION_KEYS = [...PERMISSION_KEYS_BOOLEAN, 'WEB_REQUEST']
 

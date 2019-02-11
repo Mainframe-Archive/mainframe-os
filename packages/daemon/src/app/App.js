@@ -11,6 +11,7 @@ import {
 import type { AppInstallationState } from '@mainframe/client'
 import { uniqueID, type ID } from '@mainframe/utils-id'
 
+import type { bzzHash } from '../swarm/feed'
 import AbstractApp, {
   type AbstractAppParams,
   type SessionData,
@@ -59,7 +60,11 @@ export default class App extends AbstractApp {
   }
 
   get mfid(): string {
-    return this._manifest.id
+    return this.manifest.id
+  }
+
+  get updateFeedHash(): bzzHash {
+    return this.manifest.updateHash
   }
 
   getPermissionsChecked(userID: ID): boolean {
