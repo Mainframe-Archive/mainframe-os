@@ -5,6 +5,7 @@
 import type StreamRPC from '@mainframe/rpc-stream'
 
 import EthAPIs from './apis/Eth'
+import CommsAPIs from './apis/Comms'
 import ContactsAPIs from './apis/Contacts'
 import PaymentAPIs from './apis/Payments'
 
@@ -13,6 +14,7 @@ export * from './types'
 export default class MainframeSDK {
   _rpc: StreamRPC
   _ethereum: EthAPIs
+  comms: CommsAPIs
   contacts: ContactsAPIs
   payments: PaymentAPIs
 
@@ -23,6 +25,7 @@ export default class MainframeSDK {
       throw new Error('Cannot find expected mainframe client instance')
     }
 
+    this.comms = new CommsAPIs(this._rpc)
     this.contacts = new ContactsAPIs(this._rpc)
     this.payments = new PaymentAPIs(this)
   }

@@ -32,7 +32,7 @@ import type {
 import type { OwnDeveloperProfile } from '../identity/OwnDeveloperIdentity'
 import type { OwnUserProfile } from '../identity/OwnUserIdentity'
 import type { PeerUserProfile } from '../identity/PeerUserIdentity'
-import type { ContactProfile } from '../identity/Contact'
+import type { ContactProfile, ContactAppsPayload } from '../identity/Contact'
 import type { bzzHash } from '../swarm/feed'
 
 import type {
@@ -119,7 +119,7 @@ export default class ContextMutations {
   }
 
   async createApp(params: CreateAppParams): Promise<OwnApp> {
-    const { openVault } = this._context
+    const { openVault, io } = this._context
 
     const appIdentity = openVault.identities.getOwnApp(
       openVault.identities.createOwnApp(),
@@ -144,6 +144,8 @@ export default class ContextMutations {
           ? '1.0.0'
           : params.version,
     })
+    // Do this here so app shared data can be referenced by update hash
+    await app.updateFeed.syncManifest(io.bzz)
 
     this._context.next({ type: 'app_created', app })
     return app
@@ -236,8 +238,7 @@ export default class ContextMutations {
       userID,
       contactsToApprove,
     )
-    // $FlowFixMe map type
-    const contactsIDs = Object.values(approvedContacts).map(c => c.id)
+    const contactsIDs = Object.keys(approvedContacts)
     const contacts = this._context.queries.getAppUserContacts(
       appID,
       userID,
@@ -276,6 +277,114 @@ export default class ContextMutations {
     }
     app.setPermissionsRequirements(permissionRequirements)
     await openVault.save()
+  }
+
+  // Comms
+
+  async publishAppData(
+    appID: ID,
+    contactID: ID | string,
+    key: string,
+    value: Object,
+  ): Promise<void> {
+    const { openVault, io } = this._context
+    const res = openVault.identities.getContactByID(contactID)
+    if (!res) {
+      throw new Error('Contact not found')
+    }
+    const { userID, contact } = res
+
+    const app = openVault.apps.getByID(appID)
+    if (!app) {
+      throw new Error('App not found')
+    }
+    const sharedAppID = app.updateFeedHash
+    if (!sharedAppID) {
+      throw new Error('updateFeedHash missing for app')
+    }
+
+    const existingSharedData = openVault.contactAppData.getSharedData(
+      sharedAppID,
+      contactID,
+    )
+    const sharedData = existingSharedData
+      ? existingSharedData
+      : openVault.contactAppData.createSharedData(sharedAppID, contactID)
+
+    const existingAppFeed = sharedData.getAppFeed(key)
+    const appFeed = existingAppFeed
+      ? existingAppFeed
+      : sharedData.createAppFeed('json', key)
+
+    if (appFeed.type !== 'json') {
+      throw new Error(`Incorrect feed type '${appFeed.type}' expected 'json'`)
+    }
+
+    await appFeed.feed.publishJSON(io.bzz, value)
+
+    if (!existingAppFeed) {
+      await appFeed.feed.syncManifest(io.bzz)
+      await sharedData.publish(io.bzz)
+      this._context.next({
+        type: 'app_data_changed',
+        sharedData,
+        appID,
+        contactID,
+      })
+    }
+
+    if (!existingSharedData || sharedData.feedHash == null) {
+      await sharedData.syncManifest(io.bzz)
+      const { apps } = contact.sharedFeed.localFeedData
+      apps[sharedAppID] = sharedData.feedHash
+      await contact.sharedFeed.publishLocalData(io.bzz)
+      this._context.next({
+        type: 'contact_changed',
+        contact,
+        userID,
+        change: 'localFeed',
+      })
+    }
+  }
+
+  updateContactApps(
+    userID: ID | string,
+    contactID: ID | string,
+    apps: ContactAppsPayload,
+  ) {
+    const { openVault } = this._context
+    Object.keys(apps).forEach(sharedAppID => {
+      const app = openVault.apps
+        .getAppsForUser(idType(userID))
+        .find((a: App) => a.updateFeedHash === sharedAppID)
+      if (!app) return
+
+      const existingSharedData = openVault.contactAppData.getSharedData(
+        sharedAppID,
+        contactID,
+      )
+      const sharedData = existingSharedData
+        ? existingSharedData
+        : openVault.contactAppData.createSharedData(sharedAppID, contactID, {
+            remoteFeed: apps[sharedAppID],
+          })
+      let changed = false
+      if (!existingSharedData) {
+        changed = true
+      } else if (sharedData.remoteFeed !== apps[sharedAppID]) {
+        sharedData.remoteFeed = apps[sharedAppID]
+        changed = true
+      }
+
+      if (changed) {
+        this._context.next({
+          type: 'app_data_changed',
+          sharedData,
+          appID: app.id,
+          contactID,
+        })
+      }
+    })
   }
 
   // Contacts
@@ -341,12 +450,12 @@ export default class ContextMutations {
     )
     if (!contact) throw new Error('User not found')
 
-    contact.contactFeed = feed
+    contact.sharedFeed.remoteFeed = feed
     this._context.next({
       type: 'contact_changed',
       contact,
       userID,
-      change: 'contactFeed',
+      change: 'remoteFeed',
     })
   }
 

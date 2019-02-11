@@ -8,6 +8,7 @@ import Command from '../../OpenVaultCommand'
 const permissionOptions = {
   WEB_REQUEST: 'Web Request',
   BLOCKCHAIN_SEND: 'Make Blockchain Transactions',
+  COMMS_CONTACT: 'Communication between contacts',
   CONTACTS_READ: 'Access Contacts',
 }
 

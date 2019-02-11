@@ -6,9 +6,22 @@ import {
   type ContactsGetUserContactsResult,
   type WalletGetEthWalletsResult,
 } from '@mainframe/client'
+import type { Subscription as RxSubscription } from 'rxjs'
 
-import { type AppContext } from '../contexts'
+import { type AppContext, ContextSubscription } from '../contexts'
 import { withPermission } from '../permissions'
+
+class CommsSubscription extends ContextSubscription<RxSubscription> {
+  constructor() {
+    super('comms_subscription')
+  }
+
+  async dispose() {
+    if (this.data != null) {
+      this.data.unsubscribe()
+    }
+  }
+}
 
 const sharedMethods = {
   wallet_getEthAccounts: async (ctx: AppContext): Promise<Array<string>> => {
@@ -49,6 +62,54 @@ export const sandboxed = {
     'BLOCKCHAIN_SEND',
     (ctx: AppContext, params: any) => ctx.client.wallet.signTransaction(params),
     // TODO notify app if using ledger to feedback awaiting sign
+  ),
+
+  // Comms
+
+  comms_publish: withPermission(
+    'COMMS_CONTACT',
+    async (
+      ctx: AppContext,
+      params: { contactID: string, key: string, value: Object },
+    ): Promise<void> => {
+      const appID = ctx.appSession.app.appID
+      const userID = ctx.appSession.user.id
+      return ctx.client.comms.publish({ ...params, appID, userID })
+    },
+  ),
+
+  comms_subscribe: withPermission(
+    'COMMS_CONTACT',
+    async (
+      ctx: AppContext,
+      params: { contactID: string, key: string },
+    ): Promise<string> => {
+      const appID = ctx.appSession.app.appID
+      const userID = ctx.appSession.user.id
+      const subscription = await ctx.client.comms.subscribe({
+        ...params,
+        appID,
+        userID,
+      })
+      const sub = new CommsSubscription()
+      sub.data = subscription.subscribe(msg => {
+        ctx.notifySandboxed(sub.id, msg)
+      })
+      ctx.setSubscription(sub)
+      return sub.id
+    },
+  ),
+
+  comms_getSubscribable: withPermission(
+    'COMMS_CONTACT',
+    async (
+      ctx: AppContext,
+      params: { contactID: string },
+    ): Promise<Array<string>> => {
+      const appID = ctx.appSession.app.appID
+      const userID = ctx.appSession.user.id
+      return ctx.client.comms.getSubscribable({ ...params, appID, userID })
+    },
   ),
 
   // Contacts

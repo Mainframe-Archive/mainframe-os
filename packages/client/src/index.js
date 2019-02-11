@@ -5,6 +5,7 @@ import type StreamRPC from '@mainframe/rpc-stream'
 
 import AppAPIs from './apis/App'
 import BlockchainAPIs from './apis/Blockchain'
+import CommsAPIs from './apis/Comms'
 import ContactAPIs from './apis/Contact'
 import GraphQLAPIs from './apis/GraphQL'
 import IdentityAPIs from './apis/Identity'
@@ -19,6 +20,7 @@ export default class MainframeClient {
   _rpc: StreamRPC
   app: AppAPIs
   blockchain: BlockchainAPIs
+  comms: CommsAPIs
   contacts: ContactAPIs
   graphql: GraphQLAPIs
   identity: IdentityAPIs
@@ -29,6 +31,7 @@ export default class MainframeClient {
     this._rpc = ipcRPC(socketPath)
     this.app = new AppAPIs(this._rpc)
     this.blockchain = new BlockchainAPIs(this._rpc)
+    this.comms = new CommsAPIs(this._rpc)
     this.contacts = new ContactAPIs(this._rpc)
     this.graphql = new GraphQLAPIs(this._rpc)
     this.identity = new IdentityAPIs(this._rpc)
