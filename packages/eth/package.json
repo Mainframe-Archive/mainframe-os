@@ -5,6 +5,10 @@
   "author": "Mainframe",
   "license": "MIT",
   "main": "cjs/index.js",
+  "files": [
+    "cjs/*",
+    "dist/*"
+  ],
   "scripts": {
     "clean": "del-cli cjs dist",
     "webpack": "webpack",
