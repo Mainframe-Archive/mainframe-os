@@ -14,6 +14,7 @@ export type OwnAppDetailView_ownApp = {|
   +localID: string,
   +name: string,
   +contentsPath: string,
+  +updateFeedHash: ?string,
   +developer: {|
     +id: ?string,
     +name: ?string,
@@ -102,6 +103,13 @@ return {
       "storageKey": null
     },
     {
+      "kind": "ScalarField",
+      "alias": null,
+      "name": "updateFeedHash",
+      "args": null,
+      "storageKey": null
+    },
+    {
       "kind": "LinkedField",
       "alias": null,
       "name": "developer",
@@ -180,5 +188,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = 'af48ad201bdbe488497535eb8bbdd7cb';
+(node/*: any*/).hash = '5fa1306ffd206c30da0c59cd2e5907c6';
 module.exports = node;

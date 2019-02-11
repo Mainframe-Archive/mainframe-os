@@ -329,6 +329,7 @@ type OwnApp implements Node {
   localID: ID!
   name: String!
   contentsPath: String!
+  updateFeedHash: String
   versions: [AppVersionData!]!
   developer: AppAuthor!
   users: [AppUser]

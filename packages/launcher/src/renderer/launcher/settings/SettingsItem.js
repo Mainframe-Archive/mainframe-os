@@ -36,7 +36,7 @@ const Container = styled.TouchableOpacity`
      shadow-color: #000;
      shadow-offset: {width: 0, height: 0};
      shadow-opacity: 0.1;
-     shadow-radius: 8; 
+     shadow-radius: 8;
   `}
   ${props => props.first && 'border-top-width: 1px;'}
 `
@@ -71,7 +71,7 @@ export default class SettingsItem extends Component<Props, State> {
               height={14}
             />
           )}
-          <Text variant={['greyDark23', 'marginLeft20']} bold size={11}>
+          <Text variant={['greyDark23', 'marginLeft20']} bold size={12}>
             {title}
           </Text>
         </TitleArea>
