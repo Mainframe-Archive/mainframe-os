@@ -5,8 +5,8 @@
     "previous": "Previous",
     "tagline": "Get started using Mainframe.",
     "docs": {
-      "contributing": {
-        "title": "Contributing"
+      "build-dapps": {
+        "title": "Building Mainframe Dapps"
       },
       "doc4": {
         "title": "Other Document"
@@ -14,13 +14,12 @@
       "doc5": {
         "title": "Fifth Document"
       },
-      "installation": {
-        "title": "Installation",
-        "sidebar_label": "Introduction"
-      },
       "introduction": {
         "title": "Mainframe Platform",
         "sidebar_label": "Introduction"
+      },
+      "publish": {
+        "title": "Publish Your Dapp"
       },
       "quick-start": {
         "title": "Quick Start"

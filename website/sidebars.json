@@ -1,7 +1,7 @@
 {
   "docs": {
     "Mainframe OS": ["introduction"],
-    "Development": ["quick-start"],
+    "Development": ["quick-start", "build-dapps", "publish"],
     "Compile From Source": ["unix", "windows"],
     "Guidelines": ["web3"]
   },
