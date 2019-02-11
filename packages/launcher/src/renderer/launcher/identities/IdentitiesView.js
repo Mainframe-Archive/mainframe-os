@@ -54,6 +54,12 @@ const Profile = styled.View`
   margin-left: 15px;
 `
 
+const InfoBox = styled.View`
+  padding: 10px;
+  background-color: ${props => props.theme.colors.PRIMARY_LIGHT_BLUE};
+  border-radius: 3px;
+`
+
 class IdentitiesView extends Component<Props, State> {
   state = {}
 
@@ -72,9 +78,11 @@ class IdentitiesView extends Component<Props, State> {
         <Avatar size="medium" id={user.localID} />
         <Profile>
           <Text variant="bold">{user.profile.name}</Text>
-          <Text theme={{ color: '#585858', fontSize: '11px' }}>
-            {user.feedHash}
-          </Text>
+          {user.feedHash ? (
+            <Text theme={{ color: '#585858', fontSize: '11px' }}>
+              Contact ID: {user.feedHash}
+            </Text>
+          ) : null}
         </Profile>
         {!hideEdit && (
           <Button
@@ -101,6 +109,12 @@ class IdentitiesView extends Component<Props, State> {
       <Container>
         <Text variant="smallTitle">Personal</Text>
         {this.renderUser(this.props.identities.ownUsers[0])}
+        <InfoBox>
+          <Text theme={{ color: '#ffffff' }}>
+            Share your Contact ID with your contacts so they can add you on
+            Mainframe.
+          </Text>
+        </InfoBox>
         {this.props.identities.ownDevelopers.length > 0 && (
           <>
             <Text variant="smallTitle">Developer</Text>
