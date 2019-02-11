@@ -32,29 +32,22 @@ const siteConfig = {
   ],
 
   /* path to images for header/footer */
-  headerIcon: 'img/docusaurus.svg',
-  footerIcon: 'img/docusaurus.svg',
+  headerIcon: 'img/MF_Symbol_Red-Rose_BG.png',
+  footerIcon: 'img/MF_Symbol_Dark_BG.png',
   favicon: 'img/favicon.png',
 
   /* Colors for website */
   colors: {
-    primaryColor: '#2E8555',
-    secondaryColor: '#205C3B',
+    primaryColor: '#DA1157',
+    secondaryColor: '#00A7E7',
   },
 
   /* Custom fonts for website */
-  /*
+
   fonts: {
-    myFont: [
-      "Times New Roman",
-      "Serif"
-    ],
-    myOtherFont: [
-      "-apple-system",
-      "system-ui"
-    ]
+    myFont: ['Poppins', 'Serif'],
+    myOtherFont: ['Poppins', '-apple-system', 'system-ui'],
   },
-  */
 
   // This copyright info is used in /core/Footer.js and blog RSS/Atom feeds.
   copyright: `Copyright © ${new Date().getFullYear()} Mainframe`,
