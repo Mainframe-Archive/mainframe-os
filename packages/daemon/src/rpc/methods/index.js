@@ -6,7 +6,6 @@ import * as comms from './comms'
 import * as contact from './contact'
 import * as graphql from './graphql'
 import * as identity from './identity'
-import * as pss from './pss'
 import * as sub from './subscription'
 import * as vault from './vault'
 import * as wallet from './wallet'
@@ -64,14 +63,6 @@ export default {
   identity_updateUser: identity.updateUser,
   identity_linkEthWallet: identity.linkEthWallet,
   identity_unlinkEthWallet: identity.unlinkEthWallet,
-
-  // Temporary PSS APIs - should be removed when communication APIs are settled
-  pss_baseAddr: pss.baseAddr,
-  pss_createTopicSubscription: pss.createTopicSubscription,
-  pss_getPublicKey: pss.getPublicKey,
-  pss_sendAsym: pss.sendAsym,
-  pss_setPeerPublicKey: pss.setPeerPublicKey,
-  pss_stringToTopic: pss.stringToTopic,
 
   sub_unsubscribe: sub.unsubscribe,
 

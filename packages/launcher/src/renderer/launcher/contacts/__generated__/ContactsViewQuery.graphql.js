@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 890374fa0da5240c5c15094c5b365283
+ * @relayHash 619dd2ad365460a96d8937ffb94abae4
  */
 
 /* eslint-disable */
@@ -18,6 +18,7 @@ export type ContactsViewQueryResponse = {|
       +profile: {|
         +name: ?string
       |},
+      +publicFeed: string,
       +publicKey: string,
     |}
   |}
@@ -38,6 +39,7 @@ query ContactsViewQuery(
       profile {
         name
       }
+      publicFeed
       publicKey
     }
   }
@@ -100,6 +102,13 @@ v1 = [
           {
             "kind": "ScalarField",
             "alias": null,
+            "name": "publicFeed",
+            "args": null,
+            "storageKey": null
+          },
+          {
+            "kind": "ScalarField",
+            "alias": null,
             "name": "publicKey",
             "args": null,
             "storageKey": null
@@ -114,7 +123,7 @@ return {
   "operationKind": "query",
   "name": "ContactsViewQuery",
   "id": null,
-  "text": "query ContactsViewQuery(\n  $feedHash: String!\n) {\n  peers {\n    peerLookupByFeed(feedHash: $feedHash) {\n      profile {\n        name\n      }\n      publicKey\n    }\n  }\n}\n",
+  "text": "query ContactsViewQuery(\n  $feedHash: String!\n) {\n  peers {\n    peerLookupByFeed(feedHash: $feedHash) {\n      profile {\n        name\n      }\n      publicFeed\n      publicKey\n    }\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -133,5 +142,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '3315d9492edb9b34541707ffbb58b320';
+(node/*: any*/).hash = 'c611705ab8415f9d50a5ca90317a4a03';
 module.exports = node;
