@@ -232,6 +232,9 @@ export const app = new GraphQLObjectType({
   interfaces: () => [nodeInterface],
   fields: () => ({
     id: globalIdField(),
+    mfid: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
     localID: {
       type: new GraphQLNonNull(GraphQLID),
       resolve: self => self.id,
@@ -263,6 +266,9 @@ export const ownApp = new GraphQLObjectType({
     localID: {
       type: new GraphQLNonNull(GraphQLID),
       resolve: self => self.id,
+    },
+    mfid: {
+      type: new GraphQLNonNull(GraphQLString),
     },
     name: {
       type: new GraphQLNonNull(GraphQLString),

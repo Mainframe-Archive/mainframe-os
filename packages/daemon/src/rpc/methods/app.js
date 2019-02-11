@@ -162,6 +162,7 @@ export const getAll = (ctx: ClientContext): AppGetAllResult => {
         localID: toClientID(appID),
         name: app instanceof OwnApp ? app.data.name : app.manifest.name,
         manifest: app.manifest || app._data,
+        mfid: toClientID(app.mfid),
         users: users,
       }
     })

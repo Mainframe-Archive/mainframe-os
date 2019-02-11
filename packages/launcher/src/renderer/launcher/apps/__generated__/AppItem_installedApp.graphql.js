@@ -11,6 +11,7 @@ import type { ConcreteFragment } from 'relay-runtime';
 import type { FragmentReference } from "relay-runtime";
 declare export opaque type AppItem_installedApp$ref: FragmentReference;
 export type AppItem_installedApp = {|
+  +mfid: string,
   +localID: string,
   +name: string,
   +manifest: {|
@@ -93,6 +94,13 @@ return {
   "metadata": null,
   "argumentDefinitions": [],
   "selections": [
+    {
+      "kind": "ScalarField",
+      "alias": null,
+      "name": "mfid",
+      "args": null,
+      "storageKey": null
+    },
     v0,
     v1,
     {
@@ -261,5 +269,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = 'e176d545f3c129c227019985dfc14716';
+(node/*: any*/).hash = 'e11783ad0c0fe1b173bb7bca0ffe83ee';
 module.exports = node;
