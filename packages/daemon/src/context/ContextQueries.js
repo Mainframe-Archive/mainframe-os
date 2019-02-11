@@ -76,6 +76,7 @@ export default class ContextQueries {
             profile,
             localID: id,
             peerID: contact.peerID,
+            publicFeed: peer.publicFeed,
             connectionState: contact.connectionState,
           }
           result.push(contactRes)

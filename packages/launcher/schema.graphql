@@ -171,6 +171,7 @@ type Contact implements Node {
   id: ID!
   localID: ID!
   peerID: ID!
+  publicFeed: String!
   pubKey: String!
   profile: GenericProfile!
   connectionState: ConnectionState!
@@ -358,6 +359,7 @@ type OwnUserIdentity implements Node {
 
 type Peer {
   publicKey: String!
+  publicFeed: String!
   profile: GenericProfile!
 }
 
