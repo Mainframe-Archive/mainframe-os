@@ -486,6 +486,9 @@ export const peer = new GraphQLObjectType({
     publicKey: {
       type: new GraphQLNonNull(GraphQLString),
     },
+    publicFeed: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
     profile: {
       type: new GraphQLNonNull(genericProfile),
     },
@@ -511,6 +514,9 @@ export const contact = new GraphQLObjectType({
     },
     peerID: {
       type: new GraphQLNonNull(GraphQLID),
+    },
+    publicFeed: {
+      type: new GraphQLNonNull(GraphQLString),
     },
     pubKey: {
       type: new GraphQLNonNull(GraphQLString),
@@ -592,6 +598,7 @@ export const peers = new GraphQLObjectType({
           const data = await peerPublicRes.json()
           return {
             profile: data.profile,
+            publicFeed: args.feedHash,
             publicKey: data.publicKey,
           }
         } catch (err) {

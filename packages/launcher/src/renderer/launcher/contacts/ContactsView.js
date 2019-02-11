@@ -140,6 +140,7 @@ const Blocky = styled.View`
 export type Contact = {
   localID: string,
   peerID: string,
+  publicFeed: string,
   ethAddress?: string,
   profile: {
     name?: string,
@@ -175,6 +176,7 @@ type State = {
     profile: {
       name: string,
     },
+    publicFeed: string,
     publicKey: string,
   },
 }
@@ -201,6 +203,7 @@ const peerLookupQuery = graphql`
         profile {
           name
         }
+        publicFeed
         publicKey
       }
     }
@@ -408,7 +411,7 @@ class ContactsViewComponent extends Component<Props, State> {
                   selected={selected}>
                   <ContactCardText>
                     <Text variant={['greyMed', 'ellipsis']} bold size={13}>
-                      {contact.profile.name || contact.localID}
+                      {contact.profile.name || contact.publicFeed}
                     </Text>
                     {contact.connectionState === 'SENT' ||
                     contact.connectionState === 'SENDING' ? (
@@ -461,7 +464,7 @@ class ContactsViewComponent extends Component<Props, State> {
         <Column>
           <AvatarWrapper>
             <Blocky>
-              <Avatar id={foundPeer.publicKey} size="small" />
+              <Avatar id={foundPeer.publicFeed} size="small" />
             </Blocky>
             <Text
               variant="greyDark23"
@@ -566,7 +569,7 @@ class ContactsViewComponent extends Component<Props, State> {
               <Column>
                 <AvatarWrapper>
                   <Blocky>
-                    <Avatar id={selectedContact.localID} size="large" />
+                    <Avatar id={selectedContact.publicFeed} size="large" />
                   </Blocky>
                   <Text bold size={24}>
                     {selectedContact.profile.name}
@@ -579,7 +582,7 @@ class ContactsViewComponent extends Component<Props, State> {
                 <Text variant="smallTitle" theme={{ padding: '20px 0 10px 0' }}>
                   Mainframe ID
                 </Text>
-                <Text variant="addressLarge">{selectedContact.localID}</Text>
+                <Text variant="addressLarge">{selectedContact.publicFeed}</Text>
               </Column>
             </Row>
             {selectedContact.ethAddress && (
@@ -590,7 +593,9 @@ class ContactsViewComponent extends Component<Props, State> {
                     theme={{ padding: '20px 0 10px 0' }}>
                     ETH Address
                   </Text>
-                  <Text variant="addressLarge">{selectedContact.localID}</Text>
+                  <Text variant="addressLarge">
+                    {selectedContact.publicFeed}
+                  </Text>
                 </Column>
               </Row>
             )}
@@ -651,7 +656,7 @@ class ContactsViewComponent extends Component<Props, State> {
         <FormContainer modal={true}>
           <Row size={1}>
             <Column styles="align-items:center; justify-content: center; flex-direction: row; margin-bottom: 30px;">
-              <Avatar id={this.state.selectedContact.localID} size="large" />
+              <Avatar id={this.state.selectedContact.publicFeed} size="large" />
             </Column>
             <Column>
               <TextField
@@ -697,6 +702,7 @@ const ContactsView = createFragmentContainer(ContactsViewComponent, {
         peerID
         localID
         connectionState
+        publicFeed
         profile {
           name
           ethAddress
