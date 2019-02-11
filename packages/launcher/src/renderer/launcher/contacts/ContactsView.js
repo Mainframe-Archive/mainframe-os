@@ -498,12 +498,13 @@ class ContactsViewComponent extends Component<Props, State> {
                 size={12}
                 theme={{ textAlign: 'center', marginBottom: 50 }}>
                 You have no contacts in your address book. Add someone to join
-                you by entering their Mainframe ID or scanning their QR code.
+                you by entering their Mainframe Contact ID.
+                {/*  or scanning their QR code */}
               </Text>
             </Column>
           )}
           <Column>
-            <TextField name="peerLookupHash" required label="Mainframe ID" />
+            <TextField name="peerLookupHash" required label="Contact ID" />
           </Column>
           {this.renderPeerLookup()}
         </Row>
@@ -550,8 +551,8 @@ class ContactsViewComponent extends Component<Props, State> {
           <Row size={1}>
             <Column>
               <Text variant="greyMed" size={12}>
-                You have no contacts in your address book. Invite someone to
-                join you by entering their Public Key or scanning their QR code.
+                You have no contacts in your address book. Add a contact by
+                entering their Mainframe Contact ID below.
               </Text>
             </Column>
           </Row>
@@ -580,7 +581,7 @@ class ContactsViewComponent extends Component<Props, State> {
             <Row size={1}>
               <Column>
                 <Text variant="smallTitle" theme={{ padding: '20px 0 10px 0' }}>
-                  Mainframe ID
+                  Mainframe Contact ID
                 </Text>
                 <Text variant="addressLarge">{selectedContact.publicFeed}</Text>
               </Column>

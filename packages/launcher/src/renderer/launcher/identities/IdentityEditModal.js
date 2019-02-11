@@ -127,7 +127,7 @@ export class IdentityEditModal extends Component<Props, State> {
             {this.props.ownUserIdentity.feedHash && (
               <>
                 <Text variant="smallTitle" theme={{ padding: '20px 0 10px 0' }}>
-                  Mainframe ID
+                  Mainframe Contact ID
                 </Text>
                 <Text variant="addressLarge">
                   {this.props.ownUserIdentity.feedHash}
