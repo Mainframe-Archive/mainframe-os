@@ -213,7 +213,12 @@ export const loadManifest = {
     const payload = await res.json()
     const manifest = verifyManifest(payload)
     const appID = ctx.openVault.apps.getID(manifest.id)
-    return { manifest, appID: appID ? toClientID(appID) : undefined }
+    const isOwn = appID != null && !!ctx.openVault.apps.getOwnByID(appID)
+    return {
+      manifest,
+      isOwn,
+      appID: appID ? toClientID(appID) : undefined,
+    }
   },
 }
 

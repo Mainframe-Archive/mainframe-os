@@ -22,6 +22,7 @@ export type OwnApp = {
   name: string,
   localID: string,
   contentsPath: ?string,
+  updateFeedHash: ?string,
   developer: {
     id: string,
     name: string,
@@ -59,12 +60,15 @@ const Header = styled.View`
   align-items: center;
 `
 
+const HeaderLabels = styled.View`
+  margin-left: 16px;
+`
+
 const AppIcon = styled.View`
   width: 40px;
   height: 40px;
   background-color: #232323;
   border-radius: 5px;
-  margin-right: 20px;
 `
 
 const VersionsContainer = styled.View`
@@ -355,14 +359,12 @@ export class OwnAppDetailView extends Component<Props, State> {
     } else {
       publishedState = (
         <>
-          <VersionDetailRow>
-            <Text variant="smallLabel">CONTENTS URI</Text>
-            <Text theme={detailTextStyle}>
-              {this.selectedVersion.versionHash}
-            </Text>
-          </VersionDetailRow>
-
           <ButtonsContainer>
+            <Button
+              title="OPEN"
+              variant={['mediumUppercase', 'marginRight10']}
+              onPress={this.onPressOpenApp}
+            />
             <Button
               variant={['mediumUppercase', 'red']}
               title="SUBMIT TO MAINRAME APP STORE"
@@ -429,10 +431,19 @@ export class OwnAppDetailView extends Component<Props, State> {
       default:
     }
 
+    const updateHash = ownApp.updateFeedHash && (
+      <Text variant="greyMed" size={12}>
+        App ID: {ownApp.updateFeedHash}
+      </Text>
+    )
+
     const header = (
       <Header>
         <AppIcon />
-        <Text variant={['mediumTitle', 'darkBlue']}>{ownApp.name}</Text>
+        <HeaderLabels>
+          <Text variant={['mediumTitle', 'darkBlue']}>{ownApp.name}</Text>
+          {updateHash}
+        </HeaderLabels>
       </Header>
     )
     return (
@@ -457,6 +468,7 @@ export default createFragmentContainer(OwnAppDetailViewWithContext, {
       localID
       name
       contentsPath
+      updateFeedHash
       developer {
         id
         name
