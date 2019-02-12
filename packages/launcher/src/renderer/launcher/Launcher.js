@@ -12,8 +12,6 @@ import {
   type Environment,
 } from 'react-relay'
 
-import { Text } from '@morpheus-ui/core'
-
 import OnboardView from './onboarding/OnboardView'
 import { EnvironmentContext } from './RelayEnvironment'
 import { Provider } from './LauncherContext'
