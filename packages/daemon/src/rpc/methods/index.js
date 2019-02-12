@@ -37,6 +37,7 @@ export default {
   app_update: noop, // TODO: similar to install
 
   blockchain_web3Send: blockchain.web3Send,
+  blockchain_subEthNetworkChanged: blockchain.subEthNetworkChanged,
 
   comms_publish: comms.publish,
   comms_subscribe: comms.subscribe,

@@ -631,6 +631,11 @@ export default class ContextMutations {
       address,
     )
     await openVault.save()
+    this._context.next({
+      type: 'wallet_changed',
+      address,
+      change: 'userDefault',
+    })
   }
 
   async setEthNetwork(url: string): Promise<void> {
@@ -638,5 +643,6 @@ export default class ContextMutations {
     openVault.setEthUrl(url)
     io.eth.ethHttpUrl = url
     await openVault.save()
+    this._context.next({ type: 'eth_network_changed', url, change: 'network' })
   }
 }

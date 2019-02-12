@@ -114,7 +114,7 @@ export default class AppContainer extends Component<Props, State> {
     })
     const cachedData = store.get(props.appSession.app.appID)
     const customUrl = cachedData ? cachedData.customUrl : null
-    this.eth = new EthClient(ethClientProvider, true)
+    this.eth = new EthClient(ethClientProvider)
     this.state = {
       bundleUrl,
       urlInputValue: customUrl || bundleUrl,
@@ -125,6 +125,14 @@ export default class AppContainer extends Component<Props, State> {
       this.setState({
         ethNetwork: this.eth.networkName,
       })
+    })
+    this.init()
+  }
+
+  async init() {
+    const sub = await rpc.ethNetworkChangedSubscription()
+    sub.subscribe(res => {
+      console.log('net changed: ', res)
     })
   }
 

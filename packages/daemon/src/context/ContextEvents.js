@@ -1,7 +1,13 @@
 // @flow
 
-import type { Observable, Subscription } from 'rxjs'
-import { debounceTime, filter } from 'rxjs/operators'
+import { type Observable, type Subscription, Subject } from 'rxjs'
+import {
+  debounceTime,
+  filter,
+  multicast,
+  refCount,
+  flatMap,
+} from 'rxjs/operators'
 import { idType } from '@mainframe/utils-id'
 
 import { OwnFeed } from '../swarm/feed'
@@ -18,6 +24,7 @@ import type {
 export default class ContextEvents {
   vaultOpened: Observable<ContextEvent>
   vaultModified: Observable<ContextEvent>
+  ethNetworkChanged: Observable<ContextEvent>
 
   _context: ClientContext
   _subscriptions: { [key: string]: Subscription } = {}
@@ -48,6 +55,17 @@ export default class ContextEvents {
           e.type === 'user_deleted'
         )
       }),
+    )
+    this.ethNetworkChanged = this._context.pipe(
+      filter((e: ContextEvent) => {
+        return e.type === 'eth_network_changed'
+      }),
+      flatMap(async (e: ContextEvent) => {
+        const networkID = await ctx.io.eth.fetchNetwork()
+        return { networkID }
+      }),
+      multicast(new Subject()),
+      refCount(),
     )
 
     // Using addSubscription() will make sure the subscription will be cleared when the client disconnects

@@ -53,10 +53,17 @@ export default class EthClient extends RequestManager {
     return this._defaultAccount
   }
 
+  setNetworkID(id: string) {
+    if (id !== this._networkID) {
+      this._networkID = id
+      this._networkName = NETWORKS[id]
+      this.emit('networkChanged', id)
+    }
+  }
+
   async setup() {
-    this._networkID = await this.fetchNetwork()
-    this._networkName = NETWORKS[this._networkID]
-    this.emit('networkChanged', this._networkID)
+    const id = await this.fetchNetwork()
+    this.setNetworkID(id)
   }
 
   async beginTrackingChanges() {

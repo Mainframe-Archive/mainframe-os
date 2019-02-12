@@ -47,6 +47,45 @@ export default {
     })
   },
 
+  ethNetworkChangedSubscription: async (): Promise<Observable<Object>> => {
+    const { id } = await rpc.request('blockchain_subscribeNetworkChanged')
+    const unsubscribe = () => {
+      return rpc.request('sub_unsubscribe', { id })
+    }
+
+    return Observable.create(observer => {
+      rpc.subscribe({
+        next: msg => {
+          if (
+            msg.method === 'eth_network_subscription' &&
+            msg.params != null &&
+            msg.params.subscription === id
+          ) {
+            const { result } = msg.params
+            if (result != null) {
+              try {
+                observer.next(result)
+              } catch (err) {
+                // eslint-disable-next-line no-console
+                console.warn('Error handling message', result, err)
+              }
+            }
+          }
+        },
+        error: err => {
+          observer.error(err)
+          unsubscribe()
+        },
+        complete: () => {
+          observer.complete()
+          unsubscribe()
+        },
+      })
+
+      return unsubscribe
+    })
+  },
+
   // Wallets
 
   getUserEthWallets: async () => {

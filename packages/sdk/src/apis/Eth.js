@@ -60,8 +60,13 @@ export default class EthAPIs extends ClientAPIs {
     this._ethClient.on('accountsChange', value => {
       this.emit('accountsChange', value)
     })
-    this._ethClient.on('networkChanged', value => {
-      this.emit('networkChanged', value)
+    this.init()
+  }
+
+  async init() {
+    const sub = await rpc.ethNetworkChangedSubscription()
+    sub.subscribe(res => {
+      this._ethClient.setNetworkID(res.networkID)
     })
   }
 
@@ -87,5 +92,46 @@ export default class EthAPIs extends ClientAPIs {
 
   getAccounts(): Promise<Array<string>> {
     return this._ethClient.getAccounts()
+  }
+
+  async subscribeEthNetworkChanged(): Promise<Observable<Object>> {
+    const subscription = await this._rpc.request(
+      'blockchain_subscribeNetworkChanged',
+    )
+    const unsubscribe = () => {
+      return this._rpc.request('sub_unsubscribe', { id: subscription })
+    }
+
+    return Observable.create(observer => {
+      this._rpc.subscribe({
+        next: msg => {
+          if (
+            msg.method === 'eth_network_changed' &&
+            msg.params != null &&
+            msg.params.subscription === subscription
+          ) {
+            const { result } = msg.params
+            if (result != null) {
+              try {
+                observer.next(result)
+              } catch (err) {
+                // eslint-disable-next-line no-console
+                console.warn('Error handling message', result, err)
+              }
+            }
+          }
+        },
+        error: err => {
+          observer.error(err)
+          unsubscribe()
+        },
+        complete: () => {
+          observer.complete()
+          unsubscribe()
+        },
+      })
+
+      return unsubscribe
+    })
   }
 }
