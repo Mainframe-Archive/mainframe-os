@@ -2,26 +2,24 @@
 id: quick-start
 title: Quick Start
 ---
-> This guide is intended for dapp developers with some familiarity with React development.  
-## Getting Started
+> This guide assumes some familiarity with React development.
 ### Prerequisites
  - [Yarn](https://yarnpkg.com/lang/en/docs/install/) v1.13.x 
 
-### Environment Setup
-Download [Mainframe OS]() and install the package on your local machine.
+### Install Mainframe OS
+Download [Mainframe OS]() and install it on your local machine.
 Alternatively, jump to the respective [Unix Instructions](unix.md) or [Windows Instructions](windows.md) to compile it from source.
 
-### Screen Cast
-<script id="asciicast-hhORMkpwEHMnliU8kUHfa00C4" src="https://asciinema.org/a/hhORMkpwEHMnliU8kUHfa00C4.js" data-size="medium" data-speed="2" async></script>
-
 #### Fork create-mainframe-dapp
-* Fork the [create-mainframe-dapp](https://github.com/MainframeHQ/create-mainframe-dapp) repo.
+* [Fork the create-mainframe-dapp](https://github.com/MainframeHQ/create-mainframe-dapp/fork) repo.
 * `git clone https://github.com/<YOUR_USERNAME>/create-mainframe-dapp.git` 
 * `cd create-mainframe-dapp`
 * `yarn`
 * `yarn start`
 
 This project contains a react based example dApp. It is configured for development within our electron environment and integrated with the Mainframe SDK out of the box. 
+
+<script id="asciicast-hhORMkpwEHMnliU8kUHfa00C4" src="https://asciinema.org/a/hhORMkpwEHMnliU8kUHfa00C4.js" data-size="medium" data-speed="2" async></script>
 
 ### Launch within Mainframe OS
 
