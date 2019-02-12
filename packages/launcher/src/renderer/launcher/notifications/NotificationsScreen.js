@@ -11,7 +11,7 @@ const Container = styled.View`
   align-items: center;
 `
 
-class NotificationsScreen extends Component<Props, State> {
+class NotificationsScreen extends Component<> {
   render() {
     return (
       <Container>
