@@ -283,7 +283,7 @@ export default {
       textAlign: 'center',
     },
     modalText: {
-      fontSize: 12,
+      fontSize: 13,
       color: '#585858',
     },
     padding10: {

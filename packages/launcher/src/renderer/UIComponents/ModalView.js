@@ -62,7 +62,7 @@ export default class ModalView extends Component<Props> {
     ) : null
 
     const header = this.props.headerView || (
-      <Text variant={['smallTitle', 'blue', 'noPadding', 'bold']}>
+      <Text variant={['smallTitle', 'blue', 'noPadding', 'bold']} size={11}>
         {this.props.title}
       </Text>
     )
