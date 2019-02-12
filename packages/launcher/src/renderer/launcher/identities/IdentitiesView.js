@@ -107,7 +107,9 @@ class IdentitiesView extends Component<Props, State> {
   render() {
     return (
       <Container>
-        <Text variant="smallTitle">Personal</Text>
+        {this.props.identities.ownDevelopers.length > 0 && (
+          <Text variant={['smallTitle', 'blue', 'bold']}>Personal</Text>
+        )}
         {this.renderUser(this.props.identities.ownUsers[0])}
         <InfoBox>
           <Text theme={{ color: '#ffffff' }}>
@@ -117,7 +119,7 @@ class IdentitiesView extends Component<Props, State> {
         </InfoBox>
         {this.props.identities.ownDevelopers.length > 0 && (
           <>
-            <Text variant="smallTitle">Developer</Text>
+            <Text variant={['smallTitle', 'blue', 'bold']}>Developer</Text>
             {this.renderUser(this.props.identities.ownDevelopers[0], true)}
           </>
         )}

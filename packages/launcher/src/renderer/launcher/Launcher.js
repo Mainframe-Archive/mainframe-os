@@ -12,6 +12,8 @@ import {
   type Environment,
 } from 'react-relay'
 
+import { Text } from '@morpheus-ui/core'
+
 import OnboardView from './onboarding/OnboardView'
 import { EnvironmentContext } from './RelayEnvironment'
 import { Provider } from './LauncherContext'
@@ -21,6 +23,7 @@ import AppsScreen from './apps/AppsScreen'
 import IdentitiesScreen from './identities/IdentitiesScreen'
 import WalletsScreen from './wallets/WalletsScreen'
 import ContactsScreen from './contacts/ContactsScreen'
+import NotificationsScreen from './notifications/NotificationsScreen'
 import SettingsScreen from './settings/SettingsScreen'
 
 const CONTACT_CHANGED_SUBSCRIPTION = graphql`
@@ -126,6 +129,8 @@ class Launcher extends Component<Props, State> {
         return <WalletsScreen />
       case 'contacts':
         return <ContactsScreen />
+      case 'notifications':
+        return <NotificationsScreen />
       case 'settings':
         return <SettingsScreen />
       default:
