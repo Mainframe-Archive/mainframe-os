@@ -497,8 +497,8 @@ class ContactsViewComponent extends Component<Props, State> {
                 variant="greyMid"
                 size={12}
                 theme={{ textAlign: 'center', marginBottom: 50 }}>
-                You have no contacts in your address book. Add someone to join
-                you by entering their Mainframe Contact ID.
+                Connect with other Mainframe users by entering their Mainframe Contact ID.
+                Be sure to have them add your Mainframe Contact ID too.
                 {/*  or scanning their QR code */}
               </Text>
             </Column>
@@ -619,7 +619,7 @@ class ContactsViewComponent extends Component<Props, State> {
     return (
       this.state.addModalOpen && (
         <FormModalView
-          title="INVITE A NEW CONTACT"
+          title="ADD A NEW CONTACT"
           confirmButton="ADD"
           dismissButton="CANCEL"
           onRequestClose={this.closeModal}
