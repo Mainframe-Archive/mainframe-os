@@ -20,7 +20,7 @@
   },
   "devDependencies": {
     "@mainframe/app-permissions": "*",
-    "@mainframe/utils-crypto": "^0.2.1",
+    "@mainframe/utils-crypto": "^0.3.0",
     "flow-bin": "^0.91.0"
   }
 }
