@@ -497,8 +497,9 @@ class ContactsViewComponent extends Component<Props, State> {
                 variant="greyMid"
                 size={12}
                 theme={{ textAlign: 'center', marginBottom: 50 }}>
-                Connect with other Mainframe users by entering their Mainframe Contact ID.
-                Be sure to have them add your Mainframe Contact ID too.
+                Connect with other Mainframe users by entering their Mainframe
+                Contact ID. Be sure to have them add your Mainframe Contact ID
+                too.
                 {/*  or scanning their QR code */}
               </Text>
             </Column>
