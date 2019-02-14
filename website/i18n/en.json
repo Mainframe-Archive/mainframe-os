@@ -25,7 +25,8 @@
         "title": "Quick Start"
       },
       "sdk": {
-        "title": "SDK"
+        "title": "SDK",
+        "sidebar_label": "SDK"
       },
       "unix": {
         "title": "Unix Instructions",
@@ -42,8 +43,7 @@
     },
     "links": {
       "Docs": "Docs",
-      "API": "API",
-      "Help": "Help"
+      "SDK": "SDK"
     },
     "categories": {
       "Mainframe OS": "Mainframe OS",

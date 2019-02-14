@@ -43,10 +43,10 @@ class Footer extends React.Component {
           <div>
             <h5>Community</h5>
             <a
-              href="https://t.me/mainframehq"
+              href="https://gitter.im/MainframeHQ/Lobby"
               target="_blank"
               rel="noreferrer noopener">
-              Telegram
+              Gitter
             </a>
             <a href="https://www.youtube.com/c/MainframeHQ">YouTube</a>
             <a

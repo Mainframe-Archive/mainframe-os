@@ -9,7 +9,7 @@
 // site configuration options.
 
 const siteConfig = {
-  title: 'Mainframe Developer Portal', // Title for your website.
+  title: 'Mainframe Developer Documentation', // Title for your website.
   tagline: 'Get started using Mainframe.',
   url: 'https://mainframe.com', // Your website URL
   baseUrl: '/', // Base URL for your project */
@@ -27,8 +27,7 @@ const siteConfig = {
   // For no header links in the top nav bar -> headerLinks: [],
   headerLinks: [
     {doc: 'introduction', label: 'Docs'},
-    {doc: 'doc4', label: 'API'},
-    {page: 'help', label: 'Help'},
+    {doc: 'sdk', label: 'SDK'},
   ],
 
   /* path to images for header/footer */
@@ -66,8 +65,8 @@ const siteConfig = {
   cleanUrl: true,
 
   // Open Graph and Twitter card images.
-  ogImage: 'img/docusaurus.png',
-  twitterImage: 'img/docusaurus.png',
+  // ogImage: 'img/docusaurus.png',
+  // twitterImage: 'img/docusaurus.png',
 
   // Show documentation's last contributor's name.
   // enableUpdateBy: true,
