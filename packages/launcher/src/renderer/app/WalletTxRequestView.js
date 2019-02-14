@@ -5,8 +5,8 @@ import { View, StyleSheet, ScrollView } from 'react-native-web'
 import web3Utils from 'web3-utils'
 import Web3Contract from 'web3-eth-contract'
 import {
-  ABI,
-  getERC20Data,
+  // ABI,
+  // getERC20Data,
   decodeTransactionData,
   type ERC20DataResult,
   type DecodedTxResult,
@@ -17,9 +17,9 @@ import Text from '../UIComponents/Text'
 import colors from '../colors'
 import { truncateAddress } from '../../utils'
 import rpc from './rpc'
-import renderRPCProvider from './RPCProvider'
+// import renderRPCProvider from './RPCProvider'
 
-Web3Contract.setProvider(renderRPCProvider)
+// Web3Contract.setProvider(renderRPCProvider)
 
 type Props = {
   transaction: {
@@ -66,10 +66,10 @@ export default class WalletTxRequestView extends Component<Props, State> {
       try {
         const txInfo = await decodeTransactionData(txData)
         let tokenInfo
-        if (txInfo.contractType === 'ERC20') {
-          const contract = new Web3Contract(ABI.ERC20, transaction.to)
-          tokenInfo = await getERC20Data(contract, transaction.from)
-        }
+        // if (txInfo.contractType === 'ERC20') {
+        //   const contract = new Web3Contract(ABI.ERC20, transaction.to)
+        //   tokenInfo = await getERC20Data(contract, transaction.from)
+        // }
         this.setState({
           tokenInfo,
           txInfo,

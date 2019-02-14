@@ -18,17 +18,17 @@ jobs:
             sudo apt-get install build-essential libudev-dev libusb-1.0-0-dev -y
       - run:
           name: Setup
-          command: npm install && npm run bootstrap:ci
+          command: yarn install && yarn run bootstrap:ci
       - save_cache:
           paths:
             - node_modules
           key: v1-dependencies-{{ .Branch }}
       - run:
           name: Build and check
-          command: npm run build && npm run lint && npm run test:types-ci
+          command: yarn run build && yarn run lint && yarn run test:types-ci
       - run:
           name: Project tests
-          command: npm run test:ci
+          command: yarn run test:ci
           environment:
             JEST_JUNIT_OUTPUT: '/tmp/test-reports/jest/results.xml'
       - run:
@@ -40,6 +40,6 @@ jobs:
           background: true
       - run:
           name: Integration tests
-          command: cd ./packages/launcher && npm run dist:ci && npm run test
+          command: cd ./packages/launcher && yarn run dist:ci && yarn run test
       - store_test_results:
           path: /tmp/test-reports

@@ -2,12 +2,10 @@
 
 import path from 'path'
 import url from 'url'
-// eslint-disable-next-line import/named
 import Client from '@mainframe/client'
 import { Environment, DaemonConfig, VaultConfig } from '@mainframe/config'
 import StreamRPC from '@mainframe/rpc-stream'
 import { startDaemon } from '@mainframe/toolbox'
-// eslint-disable-next-line import/named
 import { app, BrowserWindow, ipcMain } from 'electron'
 import { is } from 'electron-util'
 
