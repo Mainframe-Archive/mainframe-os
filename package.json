@@ -9,7 +9,12 @@
       "applications/*",
       "packages/*"
     ],
-    "nohoist": []
+    "nohoist": [
+      "**/electron-builder",
+      "**/electron-builder/**",
+      "**/electron-webpack",
+      "**/electron-webpack/**"
+    ]
   },
   "scripts": {
     "flow:install": "lerna exec --concurrency 1 -- flow-typed install --ignoreDeps=dev",
