@@ -15,8 +15,8 @@ The main components (packages) of the Mainframe Platform are as follows:
 
 In addition, there are several auxiliary packages:
 
-- `app-manifest`: an utility library for app manifests creation an validation
-- `app-permissions`: an utility library for distributed app permissions
+- `app-manifest`: a utility library for app manifests creation an validation
+- `app-permissions`: a utility library for distributed app permissions
 - `cli`: a command-line interface to communicate with the daemon
 - `client`: a library used by the CLI & launcher to communicate with the daemon
 - `config`: shared configuration utilities used by several packages
