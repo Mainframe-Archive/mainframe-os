@@ -8,12 +8,6 @@
       "build-dapps": {
         "title": "Building Mainframe Dapps"
       },
-      "doc4": {
-        "title": "Other Document"
-      },
-      "doc5": {
-        "title": "Fifth Document"
-      },
       "introduction": {
         "title": "Mainframe Platform",
         "sidebar_label": "Introduction"
@@ -25,7 +19,7 @@
         "title": "Quick Start"
       },
       "sdk": {
-        "title": "SDK",
+        "title": "Mainframe SDK",
         "sidebar_label": "SDK"
       },
       "unix": {
