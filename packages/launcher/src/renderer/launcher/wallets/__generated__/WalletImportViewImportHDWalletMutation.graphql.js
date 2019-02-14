@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 53e6defd2b014cd7b7b5573c16a5f9a3
+ * @relayHash 2b08f39c8f88d081c823f6df4fd6af25
  */
 
 /* eslint-disable */
@@ -12,13 +12,13 @@ import type { ConcreteRequest } from 'relay-runtime';
 type Launcher_identities$ref = any;
 type WalletsView_wallets$ref = any;
 export type SupportedWallets = "ETHEREUM" | "%future added value";
-export type ImportHDWalletInput = {
+export type ImportHDWalletInput = {|
   blockchain: SupportedWallets,
   mnemonic: string,
   name: string,
   userID?: ?string,
   clientMutationId?: ?string,
-};
+|};
 export type WalletImportViewImportHDWalletMutationVariables = {|
   input: ImportHDWalletInput,
   userID: string,
@@ -160,7 +160,7 @@ v3 = {
   "concreteType": "WalletAccount",
   "plural": true,
   "selections": [
-    v2
+    (v2/*: any*/)
   ]
 },
 v4 = {
@@ -178,8 +178,8 @@ v5 = {
   "storageKey": null
 },
 v6 = [
-  v4,
-  v5
+  (v4/*: any*/),
+  (v5/*: any*/)
 ],
 v7 = [
   {
@@ -189,7 +189,7 @@ v7 = [
     "args": null,
     "storageKey": null
   },
-  v4,
+  (v4/*: any*/),
   {
     "kind": "LinkedField",
     "alias": null,
@@ -199,7 +199,7 @@ v7 = [
     "concreteType": "WalletAccount",
     "plural": true,
     "selections": [
-      v2,
+      (v2/*: any*/),
       {
         "kind": "LinkedField",
         "alias": null,
@@ -227,28 +227,23 @@ v7 = [
       }
     ]
   },
-  v5
+  (v5/*: any*/)
 ];
 return {
   "kind": "Request",
-  "operationKind": "mutation",
-  "name": "WalletImportViewImportHDWalletMutation",
-  "id": null,
-  "text": "mutation WalletImportViewImportHDWalletMutation(\n  $input: ImportHDWalletInput!\n  $userID: String!\n) {\n  importHDWallet(input: $input) {\n    hdWallet {\n      accounts {\n        address\n      }\n      localID\n      id\n    }\n    viewer {\n      identities {\n        ...Launcher_identities\n      }\n      wallets {\n        ...WalletsView_wallets_3iqrP\n      }\n      id\n    }\n  }\n}\n\nfragment Launcher_identities on Identities {\n  ownUsers {\n    defaultEthAddress\n    localID\n    wallets {\n      hd {\n        localID\n        id\n      }\n      ledger {\n        localID\n        id\n      }\n    }\n    id\n  }\n}\n\nfragment WalletsView_wallets_3iqrP on Wallets {\n  ethWallets(userID: $userID) {\n    hd {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n    ledger {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n  }\n}\n",
-  "metadata": {},
   "fragment": {
     "kind": "Fragment",
     "name": "WalletImportViewImportHDWalletMutation",
     "type": "Mutation",
     "metadata": null,
-    "argumentDefinitions": v0,
+    "argumentDefinitions": (v0/*: any*/),
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
         "name": "importHDWallet",
         "storageKey": null,
-        "args": v1,
+        "args": (v1/*: any*/),
         "concreteType": "ImportHDWalletPayload",
         "plural": false,
         "selections": [
@@ -261,8 +256,8 @@ return {
             "concreteType": "EthHDWallet",
             "plural": false,
             "selections": [
-              v3,
-              v4
+              (v3/*: any*/),
+              (v4/*: any*/)
             ]
           },
           {
@@ -322,14 +317,14 @@ return {
   "operation": {
     "kind": "Operation",
     "name": "WalletImportViewImportHDWalletMutation",
-    "argumentDefinitions": v0,
+    "argumentDefinitions": (v0/*: any*/),
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
         "name": "importHDWallet",
         "storageKey": null,
-        "args": v1,
+        "args": (v1/*: any*/),
         "concreteType": "ImportHDWalletPayload",
         "plural": false,
         "selections": [
@@ -342,9 +337,9 @@ return {
             "concreteType": "EthHDWallet",
             "plural": false,
             "selections": [
-              v3,
-              v4,
-              v5
+              (v3/*: any*/),
+              (v4/*: any*/),
+              (v5/*: any*/)
             ]
           },
           {
@@ -381,7 +376,7 @@ return {
                         "args": null,
                         "storageKey": null
                       },
-                      v4,
+                      (v4/*: any*/),
                       {
                         "kind": "LinkedField",
                         "alias": null,
@@ -399,7 +394,7 @@ return {
                             "args": null,
                             "concreteType": "EthHDWallet",
                             "plural": true,
-                            "selections": v6
+                            "selections": (v6/*: any*/)
                           },
                           {
                             "kind": "LinkedField",
@@ -409,11 +404,11 @@ return {
                             "args": null,
                             "concreteType": "EthLedgerWallet",
                             "plural": true,
-                            "selections": v6
+                            "selections": (v6/*: any*/)
                           }
                         ]
                       },
-                      v5
+                      (v5/*: any*/)
                     ]
                   }
                 ]
@@ -451,7 +446,7 @@ return {
                         "args": null,
                         "concreteType": "EthHDWallet",
                         "plural": true,
-                        "selections": v7
+                        "selections": (v7/*: any*/)
                       },
                       {
                         "kind": "LinkedField",
@@ -461,18 +456,25 @@ return {
                         "args": null,
                         "concreteType": "EthLedgerWallet",
                         "plural": true,
-                        "selections": v7
+                        "selections": (v7/*: any*/)
                       }
                     ]
                   }
                 ]
               },
-              v5
+              (v5/*: any*/)
             ]
           }
         ]
       }
     ]
+  },
+  "params": {
+    "operationKind": "mutation",
+    "name": "WalletImportViewImportHDWalletMutation",
+    "id": null,
+    "text": "mutation WalletImportViewImportHDWalletMutation(\n  $input: ImportHDWalletInput!\n  $userID: String!\n) {\n  importHDWallet(input: $input) {\n    hdWallet {\n      accounts {\n        address\n      }\n      localID\n      id\n    }\n    viewer {\n      identities {\n        ...Launcher_identities\n      }\n      wallets {\n        ...WalletsView_wallets_3iqrP\n      }\n      id\n    }\n  }\n}\n\nfragment Launcher_identities on Identities {\n  ownUsers {\n    defaultEthAddress\n    localID\n    wallets {\n      hd {\n        localID\n        id\n      }\n      ledger {\n        localID\n        id\n      }\n    }\n    id\n  }\n}\n\nfragment WalletsView_wallets_3iqrP on Wallets {\n  ethWallets(userID: $userID) {\n    hd {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n    ledger {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n  }\n}\n",
+    "metadata": {}
   }
 };
 })();

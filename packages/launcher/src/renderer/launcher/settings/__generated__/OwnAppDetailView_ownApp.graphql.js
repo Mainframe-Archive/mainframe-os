@@ -7,7 +7,7 @@
 'use strict';
 
 /*::
-import type { ConcreteFragment } from 'relay-runtime';
+import type { ReaderFragment } from 'relay-runtime';
 import type { FragmentReference } from "relay-runtime";
 declare export opaque type OwnAppDetailView_ownApp$ref: FragmentReference;
 export type OwnAppDetailView_ownApp = {|
@@ -43,7 +43,7 @@ export type OwnAppDetailView_ownApp = {|
 */
 
 
-const node/*: ConcreteFragment*/ = (function(){
+const node/*: ReaderFragment*/ = (function(){
 var v0 = {
   "kind": "ScalarField",
   "alias": null,
@@ -102,7 +102,7 @@ return {
       "args": null,
       "storageKey": null
     },
-    v0,
+    (v0/*: any*/),
     {
       "kind": "ScalarField",
       "alias": null,
@@ -133,7 +133,7 @@ return {
           "args": null,
           "storageKey": null
         },
-        v0
+        (v0/*: any*/)
       ]
     },
     {
@@ -176,7 +176,7 @@ return {
               "args": null,
               "concreteType": "AppPermissionDefinitions",
               "plural": false,
-              "selections": v1
+              "selections": (v1/*: any*/)
             },
             {
               "kind": "LinkedField",
@@ -186,7 +186,7 @@ return {
               "args": null,
               "concreteType": "AppPermissionDefinitions",
               "plural": false,
-              "selections": v1
+              "selections": (v1/*: any*/)
             }
           ]
         }

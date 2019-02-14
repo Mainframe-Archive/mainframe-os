@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash d0b5a6ccbfb9aff4282fdcd709f24b04
+ * @relayHash 752c2c0328ba622a1750262d732c64cd
  */
 
 /* eslint-disable */
@@ -10,12 +10,12 @@
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
 type ContactsView_contacts$ref = any;
-export type AddContactInput = {
+export type AddContactInput = {|
   userID: string,
   publicFeed: string,
   aliasName?: ?string,
   clientMutationId?: ?string,
-};
+|};
 export type ContactsViewAddContactMutationVariables = {|
   input: AddContactInput,
   userID: string,
@@ -98,24 +98,19 @@ v2 = {
 };
 return {
   "kind": "Request",
-  "operationKind": "mutation",
-  "name": "ContactsViewAddContactMutation",
-  "id": null,
-  "text": "mutation ContactsViewAddContactMutation(\n  $input: AddContactInput!\n  $userID: String!\n) {\n  addContact(input: $input) {\n    viewer {\n      contacts {\n        ...ContactsView_contacts_3iqrP\n      }\n      id\n    }\n  }\n}\n\nfragment ContactsView_contacts_3iqrP on Contacts {\n  userContacts(userID: $userID) {\n    peerID\n    localID\n    connectionState\n    publicFeed\n    profile {\n      name\n      ethAddress\n    }\n    id\n  }\n}\n",
-  "metadata": {},
   "fragment": {
     "kind": "Fragment",
     "name": "ContactsViewAddContactMutation",
     "type": "Mutation",
     "metadata": null,
-    "argumentDefinitions": v0,
+    "argumentDefinitions": (v0/*: any*/),
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
         "name": "addContact",
         "storageKey": null,
-        "args": v1,
+        "args": (v1/*: any*/),
         "concreteType": "AddContactPayload",
         "plural": false,
         "selections": [
@@ -160,14 +155,14 @@ return {
   "operation": {
     "kind": "Operation",
     "name": "ContactsViewAddContactMutation",
-    "argumentDefinitions": v0,
+    "argumentDefinitions": (v0/*: any*/),
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
         "name": "addContact",
         "storageKey": null,
-        "args": v1,
+        "args": (v1/*: any*/),
         "concreteType": "AddContactPayload",
         "plural": false,
         "selections": [
@@ -258,17 +253,24 @@ return {
                           }
                         ]
                       },
-                      v2
+                      (v2/*: any*/)
                     ]
                   }
                 ]
               },
-              v2
+              (v2/*: any*/)
             ]
           }
         ]
       }
     ]
+  },
+  "params": {
+    "operationKind": "mutation",
+    "name": "ContactsViewAddContactMutation",
+    "id": null,
+    "text": "mutation ContactsViewAddContactMutation(\n  $input: AddContactInput!\n  $userID: String!\n) {\n  addContact(input: $input) {\n    viewer {\n      contacts {\n        ...ContactsView_contacts_3iqrP\n      }\n      id\n    }\n  }\n}\n\nfragment ContactsView_contacts_3iqrP on Contacts {\n  userContacts(userID: $userID) {\n    peerID\n    localID\n    connectionState\n    publicFeed\n    profile {\n      name\n      ethAddress\n    }\n    id\n  }\n}\n",
+    "metadata": {}
   }
 };
 })();

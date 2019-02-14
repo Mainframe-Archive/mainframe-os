@@ -23,7 +23,7 @@
   },
   "devDependencies": {
     "babel-loader": "^8.0.0",
-    "flow-bin": "^0.87.0",
+    "flow-bin": "^0.93.0",
     "webpack": "^4.19.1",
     "webpack-cli": "^3.1.0"
   }

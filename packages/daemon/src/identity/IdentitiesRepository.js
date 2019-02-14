@@ -102,7 +102,7 @@ type IdentitiesData = {
   contacts: ContactsRepository,
 }
 
-type Domain = $Keys<PeerIdentitiesRepositoryGroup>
+type Domain = 'apps' | 'developers' | 'users'
 type Ownership = $Keys<IdentitiesData>
 type Reference = { domain: Domain, ownership: Ownership }
 
@@ -263,7 +263,8 @@ export default class IdentitiesRepository {
         })
       } else {
         // Add references so an identity can be retrieved by local ID or Mainframe ID lookup
-        Object.keys(this._identities[ownership]).forEach(domain => {
+        // $FlowFixMe: key type lost
+        Object.keys(this._identities[ownership]).forEach((domain: Domain) => {
           Object.keys(this._identities[ownership][domain]).forEach(id => {
             const identity = this._identities[ownership][domain][id]
             const mfid = MFID.canonical(identity.id)

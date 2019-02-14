@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 619dd2ad365460a96d8937ffb94abae4
+ * @relayHash 23045ad83b082d8b0a1dbaf84026e2c2
  */
 
 /* eslint-disable */
@@ -120,24 +120,26 @@ v1 = [
 ];
 return {
   "kind": "Request",
-  "operationKind": "query",
-  "name": "ContactsViewQuery",
-  "id": null,
-  "text": "query ContactsViewQuery(\n  $feedHash: String!\n) {\n  peers {\n    peerLookupByFeed(feedHash: $feedHash) {\n      profile {\n        name\n      }\n      publicFeed\n      publicKey\n    }\n  }\n}\n",
-  "metadata": {},
   "fragment": {
     "kind": "Fragment",
     "name": "ContactsViewQuery",
     "type": "Query",
     "metadata": null,
-    "argumentDefinitions": v0,
-    "selections": v1
+    "argumentDefinitions": (v0/*: any*/),
+    "selections": (v1/*: any*/)
   },
   "operation": {
     "kind": "Operation",
     "name": "ContactsViewQuery",
-    "argumentDefinitions": v0,
-    "selections": v1
+    "argumentDefinitions": (v0/*: any*/),
+    "selections": (v1/*: any*/)
+  },
+  "params": {
+    "operationKind": "query",
+    "name": "ContactsViewQuery",
+    "id": null,
+    "text": "query ContactsViewQuery(\n  $feedHash: String!\n) {\n  peers {\n    peerLookupByFeed(feedHash: $feedHash) {\n      profile {\n        name\n      }\n      publicFeed\n      publicKey\n    }\n  }\n}\n",
+    "metadata": {}
   }
 };
 })();

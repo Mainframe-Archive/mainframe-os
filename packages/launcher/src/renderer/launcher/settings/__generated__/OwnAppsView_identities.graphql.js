@@ -7,7 +7,7 @@
 'use strict';
 
 /*::
-import type { ConcreteFragment } from 'relay-runtime';
+import type { ReaderFragment } from 'relay-runtime';
 import type { FragmentReference } from "relay-runtime";
 declare export opaque type OwnAppsView_identities$ref: FragmentReference;
 export type OwnAppsView_identities = {|
@@ -19,7 +19,7 @@ export type OwnAppsView_identities = {|
 */
 
 
-const node/*: ConcreteFragment*/ = {
+const node/*: ReaderFragment*/ = {
   "kind": "Fragment",
   "name": "OwnAppsView_identities",
   "type": "Identities",

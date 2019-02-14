@@ -49,7 +49,7 @@ const updateProfileMutation = graphql`
   }
 `
 
-export class IdentityEditModal extends Component<Props, State> {
+class IdentityEditModal extends Component<Props, State> {
   static contextType = EnvironmentContext
 
   state = {}

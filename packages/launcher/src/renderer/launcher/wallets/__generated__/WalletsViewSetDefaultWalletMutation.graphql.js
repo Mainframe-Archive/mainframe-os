@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash a8be5be7182f7c167590871dba6fc2f5
+ * @relayHash 6a5514b7c0cdf86f8b1abd005ac27247
  */
 
 /* eslint-disable */
@@ -11,11 +11,11 @@
 import type { ConcreteRequest } from 'relay-runtime';
 type Launcher_identities$ref = any;
 type WalletsView_wallets$ref = any;
-export type SetDefaultWalletInput = {
+export type SetDefaultWalletInput = {|
   userID: string,
   address: string,
   clientMutationId?: ?string,
-};
+|};
 export type WalletsViewSetDefaultWalletMutationVariables = {|
   input: SetDefaultWalletInput,
   userID: string,
@@ -143,8 +143,8 @@ v3 = {
   "storageKey": null
 },
 v4 = [
-  v2,
-  v3
+  (v2/*: any*/),
+  (v3/*: any*/)
 ],
 v5 = [
   {
@@ -154,7 +154,7 @@ v5 = [
     "args": null,
     "storageKey": null
   },
-  v2,
+  (v2/*: any*/),
   {
     "kind": "LinkedField",
     "alias": null,
@@ -198,28 +198,23 @@ v5 = [
       }
     ]
   },
-  v3
+  (v3/*: any*/)
 ];
 return {
   "kind": "Request",
-  "operationKind": "mutation",
-  "name": "WalletsViewSetDefaultWalletMutation",
-  "id": null,
-  "text": "mutation WalletsViewSetDefaultWalletMutation(\n  $input: SetDefaultWalletInput!\n  $userID: String!\n) {\n  setDefaultWallet(input: $input) {\n    viewer {\n      identities {\n        ...Launcher_identities\n      }\n      wallets {\n        ...WalletsView_wallets_3iqrP\n      }\n      id\n    }\n  }\n}\n\nfragment Launcher_identities on Identities {\n  ownUsers {\n    defaultEthAddress\n    localID\n    wallets {\n      hd {\n        localID\n        id\n      }\n      ledger {\n        localID\n        id\n      }\n    }\n    id\n  }\n}\n\nfragment WalletsView_wallets_3iqrP on Wallets {\n  ethWallets(userID: $userID) {\n    hd {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n    ledger {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n  }\n}\n",
-  "metadata": {},
   "fragment": {
     "kind": "Fragment",
     "name": "WalletsViewSetDefaultWalletMutation",
     "type": "Mutation",
     "metadata": null,
-    "argumentDefinitions": v0,
+    "argumentDefinitions": (v0/*: any*/),
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
         "name": "setDefaultWallet",
         "storageKey": null,
-        "args": v1,
+        "args": (v1/*: any*/),
         "concreteType": "SetDefaultWalletPayload",
         "plural": false,
         "selections": [
@@ -280,14 +275,14 @@ return {
   "operation": {
     "kind": "Operation",
     "name": "WalletsViewSetDefaultWalletMutation",
-    "argumentDefinitions": v0,
+    "argumentDefinitions": (v0/*: any*/),
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
         "name": "setDefaultWallet",
         "storageKey": null,
-        "args": v1,
+        "args": (v1/*: any*/),
         "concreteType": "SetDefaultWalletPayload",
         "plural": false,
         "selections": [
@@ -325,7 +320,7 @@ return {
                         "args": null,
                         "storageKey": null
                       },
-                      v2,
+                      (v2/*: any*/),
                       {
                         "kind": "LinkedField",
                         "alias": null,
@@ -343,7 +338,7 @@ return {
                             "args": null,
                             "concreteType": "EthHDWallet",
                             "plural": true,
-                            "selections": v4
+                            "selections": (v4/*: any*/)
                           },
                           {
                             "kind": "LinkedField",
@@ -353,11 +348,11 @@ return {
                             "args": null,
                             "concreteType": "EthLedgerWallet",
                             "plural": true,
-                            "selections": v4
+                            "selections": (v4/*: any*/)
                           }
                         ]
                       },
-                      v3
+                      (v3/*: any*/)
                     ]
                   }
                 ]
@@ -395,7 +390,7 @@ return {
                         "args": null,
                         "concreteType": "EthHDWallet",
                         "plural": true,
-                        "selections": v5
+                        "selections": (v5/*: any*/)
                       },
                       {
                         "kind": "LinkedField",
@@ -405,18 +400,25 @@ return {
                         "args": null,
                         "concreteType": "EthLedgerWallet",
                         "plural": true,
-                        "selections": v5
+                        "selections": (v5/*: any*/)
                       }
                     ]
                   }
                 ]
               },
-              v3
+              (v3/*: any*/)
             ]
           }
         ]
       }
     ]
+  },
+  "params": {
+    "operationKind": "mutation",
+    "name": "WalletsViewSetDefaultWalletMutation",
+    "id": null,
+    "text": "mutation WalletsViewSetDefaultWalletMutation(\n  $input: SetDefaultWalletInput!\n  $userID: String!\n) {\n  setDefaultWallet(input: $input) {\n    viewer {\n      identities {\n        ...Launcher_identities\n      }\n      wallets {\n        ...WalletsView_wallets_3iqrP\n      }\n      id\n    }\n  }\n}\n\nfragment Launcher_identities on Identities {\n  ownUsers {\n    defaultEthAddress\n    localID\n    wallets {\n      hd {\n        localID\n        id\n      }\n      ledger {\n        localID\n        id\n      }\n    }\n    id\n  }\n}\n\nfragment WalletsView_wallets_3iqrP on Wallets {\n  ethWallets(userID: $userID) {\n    hd {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n    ledger {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n  }\n}\n",
+    "metadata": {}
   }
 };
 })();

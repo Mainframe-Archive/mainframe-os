@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 467f90235f267f06c71eafe424fca7b0
+ * @relayHash d377d9d876cef6c7ed1260f9bd147b40
  */
 
 /* eslint-disable */
@@ -86,8 +86,8 @@ v1 = {
   ]
 },
 v2 = [
-  v0,
-  v1
+  (v0/*: any*/),
+  (v1/*: any*/)
 ],
 v3 = {
   "kind": "ScalarField",
@@ -97,17 +97,12 @@ v3 = {
   "storageKey": null
 },
 v4 = [
-  v0,
-  v1,
-  v3
+  (v0/*: any*/),
+  (v1/*: any*/),
+  (v3/*: any*/)
 ];
 return {
   "kind": "Request",
-  "operationKind": "query",
-  "name": "IdentitySelectorViewQuery",
-  "id": null,
-  "text": "query IdentitySelectorViewQuery {\n  viewer {\n    identities {\n      ownUsers {\n        localID\n        profile {\n          name\n        }\n        id\n      }\n      ownDevelopers {\n        localID\n        profile {\n          name\n        }\n        id\n      }\n    }\n    id\n  }\n}\n",
-  "metadata": {},
   "fragment": {
     "kind": "Fragment",
     "name": "IdentitySelectorViewQuery",
@@ -141,7 +136,7 @@ return {
                 "args": null,
                 "concreteType": "OwnUserIdentity",
                 "plural": true,
-                "selections": v2
+                "selections": (v2/*: any*/)
               },
               {
                 "kind": "LinkedField",
@@ -151,7 +146,7 @@ return {
                 "args": null,
                 "concreteType": "OwnDeveloperIdentity",
                 "plural": true,
-                "selections": v2
+                "selections": (v2/*: any*/)
               }
             ]
           }
@@ -190,7 +185,7 @@ return {
                 "args": null,
                 "concreteType": "OwnUserIdentity",
                 "plural": true,
-                "selections": v4
+                "selections": (v4/*: any*/)
               },
               {
                 "kind": "LinkedField",
@@ -200,14 +195,21 @@ return {
                 "args": null,
                 "concreteType": "OwnDeveloperIdentity",
                 "plural": true,
-                "selections": v4
+                "selections": (v4/*: any*/)
               }
             ]
           },
-          v3
+          (v3/*: any*/)
         ]
       }
     ]
+  },
+  "params": {
+    "operationKind": "query",
+    "name": "IdentitySelectorViewQuery",
+    "id": null,
+    "text": "query IdentitySelectorViewQuery {\n  viewer {\n    identities {\n      ownUsers {\n        localID\n        profile {\n          name\n        }\n        id\n      }\n      ownDevelopers {\n        localID\n        profile {\n          name\n        }\n        id\n      }\n    }\n    id\n  }\n}\n",
+    "metadata": {}
   }
 };
 })();

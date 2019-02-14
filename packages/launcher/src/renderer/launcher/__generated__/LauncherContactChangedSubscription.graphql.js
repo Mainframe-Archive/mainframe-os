@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 567a63345ad9b34ea022e45726c5de6c
+ * @relayHash b28801f5a0dc771895853fa243be8b5c
  */
 
 /* eslint-disable */
@@ -75,11 +75,6 @@ v1 = {
 };
 return {
   "kind": "Request",
-  "operationKind": "subscription",
-  "name": "LauncherContactChangedSubscription",
-  "id": null,
-  "text": "subscription LauncherContactChangedSubscription {\n  contactChanged {\n    connectionState\n    profile {\n      name\n      avatar\n    }\n    id\n  }\n}\n",
-  "metadata": {},
   "fragment": {
     "kind": "Fragment",
     "name": "LauncherContactChangedSubscription",
@@ -96,8 +91,8 @@ return {
         "concreteType": "Contact",
         "plural": false,
         "selections": [
-          v0,
-          v1
+          (v0/*: any*/),
+          (v1/*: any*/)
         ]
       }
     ]
@@ -116,8 +111,8 @@ return {
         "concreteType": "Contact",
         "plural": false,
         "selections": [
-          v0,
-          v1,
+          (v0/*: any*/),
+          (v1/*: any*/),
           {
             "kind": "ScalarField",
             "alias": null,
@@ -128,6 +123,13 @@ return {
         ]
       }
     ]
+  },
+  "params": {
+    "operationKind": "subscription",
+    "name": "LauncherContactChangedSubscription",
+    "id": null,
+    "text": "subscription LauncherContactChangedSubscription {\n  contactChanged {\n    connectionState\n    profile {\n      name\n      avatar\n    }\n    id\n  }\n}\n",
+    "metadata": {}
   }
 };
 })();

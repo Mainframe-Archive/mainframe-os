@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 4519e46e1b508ccc411f552ab2526032
+ * @relayHash fc7a4d438e49ee6ef27ba8d5cffe0a4f
  */
 
 /* eslint-disable */
@@ -70,16 +70,11 @@ v1 = {
   "storageKey": null
 },
 v2 = [
-  v0,
-  v1
+  (v0/*: any*/),
+  (v1/*: any*/)
 ];
 return {
   "kind": "Request",
-  "operationKind": "query",
-  "name": "LauncherQuery",
-  "id": null,
-  "text": "query LauncherQuery {\n  viewer {\n    identities {\n      ...Launcher_identities\n    }\n    id\n  }\n}\n\nfragment Launcher_identities on Identities {\n  ownUsers {\n    defaultEthAddress\n    localID\n    wallets {\n      hd {\n        localID\n        id\n      }\n      ledger {\n        localID\n        id\n      }\n    }\n    id\n  }\n}\n",
-  "metadata": {},
   "fragment": {
     "kind": "Fragment",
     "name": "LauncherQuery",
@@ -155,7 +150,7 @@ return {
                     "args": null,
                     "storageKey": null
                   },
-                  v0,
+                  (v0/*: any*/),
                   {
                     "kind": "LinkedField",
                     "alias": null,
@@ -173,7 +168,7 @@ return {
                         "args": null,
                         "concreteType": "EthHDWallet",
                         "plural": true,
-                        "selections": v2
+                        "selections": (v2/*: any*/)
                       },
                       {
                         "kind": "LinkedField",
@@ -183,19 +178,26 @@ return {
                         "args": null,
                         "concreteType": "EthLedgerWallet",
                         "plural": true,
-                        "selections": v2
+                        "selections": (v2/*: any*/)
                       }
                     ]
                   },
-                  v1
+                  (v1/*: any*/)
                 ]
               }
             ]
           },
-          v1
+          (v1/*: any*/)
         ]
       }
     ]
+  },
+  "params": {
+    "operationKind": "query",
+    "name": "LauncherQuery",
+    "id": null,
+    "text": "query LauncherQuery {\n  viewer {\n    identities {\n      ...Launcher_identities\n    }\n    id\n  }\n}\n\nfragment Launcher_identities on Identities {\n  ownUsers {\n    defaultEthAddress\n    localID\n    wallets {\n      hd {\n        localID\n        id\n      }\n      ledger {\n        localID\n        id\n      }\n    }\n    id\n  }\n}\n",
+    "metadata": {}
   }
 };
 })();

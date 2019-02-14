@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 0d78e7b2847958f06b5bf03fd198b428
+ * @relayHash dd6334e276c52d7b45878bc0de134719
  */
 
 /* eslint-disable */
@@ -10,11 +10,11 @@
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
 type WalletsView_wallets$ref = any;
-export type DeleteWalletInput = {
+export type DeleteWalletInput = {|
   walletID: string,
   type: string,
   clientMutationId?: ?string,
-};
+|};
 export type WalletImportViewDeleteWalletMutationVariables = {|
   input: DeleteWalletInput,
   userID: string,
@@ -168,28 +168,23 @@ v3 = [
       }
     ]
   },
-  v2
+  (v2/*: any*/)
 ];
 return {
   "kind": "Request",
-  "operationKind": "mutation",
-  "name": "WalletImportViewDeleteWalletMutation",
-  "id": null,
-  "text": "mutation WalletImportViewDeleteWalletMutation(\n  $input: DeleteWalletInput!\n  $userID: String!\n) {\n  deleteWallet(input: $input) {\n    viewer {\n      wallets {\n        ...WalletsView_wallets_3iqrP\n      }\n      id\n    }\n  }\n}\n\nfragment WalletsView_wallets_3iqrP on Wallets {\n  ethWallets(userID: $userID) {\n    hd {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n    ledger {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n  }\n}\n",
-  "metadata": {},
   "fragment": {
     "kind": "Fragment",
     "name": "WalletImportViewDeleteWalletMutation",
     "type": "Mutation",
     "metadata": null,
-    "argumentDefinitions": v0,
+    "argumentDefinitions": (v0/*: any*/),
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
         "name": "deleteWallet",
         "storageKey": null,
-        "args": v1,
+        "args": (v1/*: any*/),
         "concreteType": "DeleteWalletPayload",
         "plural": false,
         "selections": [
@@ -234,14 +229,14 @@ return {
   "operation": {
     "kind": "Operation",
     "name": "WalletImportViewDeleteWalletMutation",
-    "argumentDefinitions": v0,
+    "argumentDefinitions": (v0/*: any*/),
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
         "name": "deleteWallet",
         "storageKey": null,
-        "args": v1,
+        "args": (v1/*: any*/),
         "concreteType": "DeleteWalletPayload",
         "plural": false,
         "selections": [
@@ -287,7 +282,7 @@ return {
                         "args": null,
                         "concreteType": "EthHDWallet",
                         "plural": true,
-                        "selections": v3
+                        "selections": (v3/*: any*/)
                       },
                       {
                         "kind": "LinkedField",
@@ -297,18 +292,25 @@ return {
                         "args": null,
                         "concreteType": "EthLedgerWallet",
                         "plural": true,
-                        "selections": v3
+                        "selections": (v3/*: any*/)
                       }
                     ]
                   }
                 ]
               },
-              v2
+              (v2/*: any*/)
             ]
           }
         ]
       }
     ]
+  },
+  "params": {
+    "operationKind": "mutation",
+    "name": "WalletImportViewDeleteWalletMutation",
+    "id": null,
+    "text": "mutation WalletImportViewDeleteWalletMutation(\n  $input: DeleteWalletInput!\n  $userID: String!\n) {\n  deleteWallet(input: $input) {\n    viewer {\n      wallets {\n        ...WalletsView_wallets_3iqrP\n      }\n      id\n    }\n  }\n}\n\nfragment WalletsView_wallets_3iqrP on Wallets {\n  ethWallets(userID: $userID) {\n    hd {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n    ledger {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n  }\n}\n",
+    "metadata": {}
   }
 };
 })();

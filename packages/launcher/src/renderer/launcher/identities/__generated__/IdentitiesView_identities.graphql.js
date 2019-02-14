@@ -7,7 +7,7 @@
 'use strict';
 
 /*::
-import type { ConcreteFragment } from 'relay-runtime';
+import type { ReaderFragment } from 'relay-runtime';
 type IdentityEditModal_ownUserIdentity$ref = any;
 import type { FragmentReference } from "relay-runtime";
 declare export opaque type IdentitiesView_identities$ref: FragmentReference;
@@ -47,7 +47,7 @@ export type IdentitiesView_identities = {|
 */
 
 
-const node/*: ConcreteFragment*/ = (function(){
+const node/*: ReaderFragment*/ = (function(){
 var v0 = {
   "kind": "ScalarField",
   "alias": null,
@@ -72,7 +72,7 @@ v2 = {
   "args": null,
   "concreteType": "NamedProfile",
   "plural": false,
-  "selections": v1
+  "selections": (v1/*: any*/)
 };
 return {
   "kind": "Fragment",
@@ -95,7 +95,7 @@ return {
           "name": "IdentityEditModal_ownUserIdentity",
           "args": null
         },
-        v0,
+        (v0/*: any*/),
         {
           "kind": "ScalarField",
           "alias": null,
@@ -103,7 +103,7 @@ return {
           "args": null,
           "storageKey": null
         },
-        v2,
+        (v2/*: any*/),
         {
           "kind": "LinkedField",
           "alias": null,
@@ -113,7 +113,7 @@ return {
           "concreteType": "App",
           "plural": true,
           "selections": [
-            v0,
+            (v0/*: any*/),
             {
               "kind": "LinkedField",
               "alias": null,
@@ -122,7 +122,7 @@ return {
               "args": null,
               "concreteType": "AppManifestData",
               "plural": false,
-              "selections": v1
+              "selections": (v1/*: any*/)
             },
             {
               "kind": "LinkedField",
@@ -195,8 +195,8 @@ return {
       "concreteType": "OwnDeveloperIdentity",
       "plural": true,
       "selections": [
-        v0,
-        v2
+        (v0/*: any*/),
+        (v2/*: any*/)
       ]
     }
   ]

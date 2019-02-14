@@ -43,7 +43,7 @@ type State = {
   openView: MenuKey,
 }
 
-export class SettingsScreen extends Component<Props, State> {
+class SettingsScreen extends Component<Props, State> {
   state = {
     openView: 'menu',
   }

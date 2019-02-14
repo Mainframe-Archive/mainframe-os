@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash c5220cc02fd1b0d1a4f22bc3169d35f1
+ * @relayHash 39236413e7ac9a219f83f4af3a87dbbd
  */
 
 /* eslint-disable */
@@ -10,17 +10,17 @@
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
 type Launcher_identities$ref = any;
-export type UpdateProfileInput = {
+export type UpdateProfileInput = {|
   userID: string,
   profile: UpdateUserProfileInput,
   privateProfile?: ?boolean,
   clientMutationId?: ?string,
-};
-export type UpdateUserProfileInput = {
+|};
+export type UpdateUserProfileInput = {|
   name?: ?string,
   avatar?: ?string,
   ethAddress?: ?string,
-};
+|};
 export type OnboardWalletViewUpdateProfileMutationVariables = {|
   input: UpdateProfileInput
 |};
@@ -105,29 +105,24 @@ v3 = {
   "storageKey": null
 },
 v4 = [
-  v2,
-  v3
+  (v2/*: any*/),
+  (v3/*: any*/)
 ];
 return {
   "kind": "Request",
-  "operationKind": "mutation",
-  "name": "OnboardWalletViewUpdateProfileMutation",
-  "id": null,
-  "text": "mutation OnboardWalletViewUpdateProfileMutation(\n  $input: UpdateProfileInput!\n) {\n  updateProfile(input: $input) {\n    viewer {\n      identities {\n        ...Launcher_identities\n      }\n      id\n    }\n  }\n}\n\nfragment Launcher_identities on Identities {\n  ownUsers {\n    defaultEthAddress\n    localID\n    wallets {\n      hd {\n        localID\n        id\n      }\n      ledger {\n        localID\n        id\n      }\n    }\n    id\n  }\n}\n",
-  "metadata": {},
   "fragment": {
     "kind": "Fragment",
     "name": "OnboardWalletViewUpdateProfileMutation",
     "type": "Mutation",
     "metadata": null,
-    "argumentDefinitions": v0,
+    "argumentDefinitions": (v0/*: any*/),
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
         "name": "updateProfile",
         "storageKey": null,
-        "args": v1,
+        "args": (v1/*: any*/),
         "concreteType": "UpdateProfilePayload",
         "plural": false,
         "selections": [
@@ -165,14 +160,14 @@ return {
   "operation": {
     "kind": "Operation",
     "name": "OnboardWalletViewUpdateProfileMutation",
-    "argumentDefinitions": v0,
+    "argumentDefinitions": (v0/*: any*/),
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
         "name": "updateProfile",
         "storageKey": null,
-        "args": v1,
+        "args": (v1/*: any*/),
         "concreteType": "UpdateProfilePayload",
         "plural": false,
         "selections": [
@@ -210,7 +205,7 @@ return {
                         "args": null,
                         "storageKey": null
                       },
-                      v2,
+                      (v2/*: any*/),
                       {
                         "kind": "LinkedField",
                         "alias": null,
@@ -228,7 +223,7 @@ return {
                             "args": null,
                             "concreteType": "EthHDWallet",
                             "plural": true,
-                            "selections": v4
+                            "selections": (v4/*: any*/)
                           },
                           {
                             "kind": "LinkedField",
@@ -238,21 +233,28 @@ return {
                             "args": null,
                             "concreteType": "EthLedgerWallet",
                             "plural": true,
-                            "selections": v4
+                            "selections": (v4/*: any*/)
                           }
                         ]
                       },
-                      v3
+                      (v3/*: any*/)
                     ]
                   }
                 ]
               },
-              v3
+              (v3/*: any*/)
             ]
           }
         ]
       }
     ]
+  },
+  "params": {
+    "operationKind": "mutation",
+    "name": "OnboardWalletViewUpdateProfileMutation",
+    "id": null,
+    "text": "mutation OnboardWalletViewUpdateProfileMutation(\n  $input: UpdateProfileInput!\n) {\n  updateProfile(input: $input) {\n    viewer {\n      identities {\n        ...Launcher_identities\n      }\n      id\n    }\n  }\n}\n\nfragment Launcher_identities on Identities {\n  ownUsers {\n    defaultEthAddress\n    localID\n    wallets {\n      hd {\n        localID\n        id\n      }\n      ledger {\n        localID\n        id\n      }\n    }\n    id\n  }\n}\n",
+    "metadata": {}
   }
 };
 })();

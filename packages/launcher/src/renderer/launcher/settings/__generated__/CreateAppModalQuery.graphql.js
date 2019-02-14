@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 90a66c32252fadae7d38d8102a26d810
+ * @relayHash a5177a93eaef6ab3c280bc66d462f361
  */
 
 /* eslint-disable */
@@ -57,11 +57,6 @@ v1 = {
 };
 return {
   "kind": "Request",
-  "operationKind": "query",
-  "name": "CreateAppModalQuery",
-  "id": null,
-  "text": "query CreateAppModalQuery {\n  viewer {\n    identities {\n      ownDevelopers {\n        localID\n        id\n      }\n    }\n    id\n  }\n}\n",
-  "metadata": {},
   "fragment": {
     "kind": "Fragment",
     "name": "CreateAppModalQuery",
@@ -96,7 +91,7 @@ return {
                 "concreteType": "OwnDeveloperIdentity",
                 "plural": true,
                 "selections": [
-                  v0
+                  (v0/*: any*/)
                 ]
               }
             ]
@@ -137,16 +132,23 @@ return {
                 "concreteType": "OwnDeveloperIdentity",
                 "plural": true,
                 "selections": [
-                  v0,
-                  v1
+                  (v0/*: any*/),
+                  (v1/*: any*/)
                 ]
               }
             ]
           },
-          v1
+          (v1/*: any*/)
         ]
       }
     ]
+  },
+  "params": {
+    "operationKind": "query",
+    "name": "CreateAppModalQuery",
+    "id": null,
+    "text": "query CreateAppModalQuery {\n  viewer {\n    identities {\n      ownDevelopers {\n        localID\n        id\n      }\n    }\n    id\n  }\n}\n",
+    "metadata": {}
   }
 };
 })();

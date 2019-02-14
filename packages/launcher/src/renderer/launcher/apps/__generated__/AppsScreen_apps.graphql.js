@@ -7,7 +7,7 @@
 'use strict';
 
 /*::
-import type { ConcreteFragment } from 'relay-runtime';
+import type { ReaderFragment } from 'relay-runtime';
 type AppsView_apps$ref = any;
 import type { FragmentReference } from "relay-runtime";
 declare export opaque type AppsScreen_apps$ref: FragmentReference;
@@ -18,7 +18,7 @@ export type AppsScreen_apps = {|
 */
 
 
-const node/*: ConcreteFragment*/ = {
+const node/*: ReaderFragment*/ = {
   "kind": "Fragment",
   "name": "AppsScreen_apps",
   "type": "Apps",

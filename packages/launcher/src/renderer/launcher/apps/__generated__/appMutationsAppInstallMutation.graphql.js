@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash c071120885c1738d7217f85c846fc76d
+ * @relayHash 4b749699422ae4cab99a784d51aa9807
  */
 
 /* eslint-disable */
@@ -10,13 +10,13 @@
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
 type AppsView_apps$ref = any;
-export type AppInstallMutationInput = {
+export type AppInstallMutationInput = {|
   userID: string,
   manifest: AppManifestInput,
   permissionsSettings: AppPermissionsSettingsInput,
   clientMutationId?: ?string,
-};
-export type AppManifestInput = {
+|};
+export type AppManifestInput = {|
   id: string,
   name: string,
   version: string,
@@ -24,35 +24,35 @@ export type AppManifestInput = {
   updateHash: string,
   permissions: AppPermissionsRequirementsInput,
   author: ManifestAuthorInput,
-};
-export type AppPermissionsRequirementsInput = {
+|};
+export type AppPermissionsRequirementsInput = {|
   optional: AppPermissionDefinitionsInput,
   required: AppPermissionDefinitionsInput,
-};
-export type AppPermissionDefinitionsInput = {
+|};
+export type AppPermissionDefinitionsInput = {|
   BLOCKCHAIN_SEND?: ?boolean,
   COMMS_CONTACT?: ?boolean,
   CONTACTS_READ?: ?boolean,
   WEB_REQUEST?: ?$ReadOnlyArray<?string>,
-};
-export type ManifestAuthorInput = {
+|};
+export type ManifestAuthorInput = {|
   id: string,
   name: string,
-};
-export type AppPermissionsSettingsInput = {
+|};
+export type AppPermissionsSettingsInput = {|
   permissionsChecked: boolean,
   grants: PermissionGrantsInput,
-};
-export type PermissionGrantsInput = {
+|};
+export type PermissionGrantsInput = {|
   BLOCKCHAIN_SEND?: ?boolean,
   COMMS_CONTACT?: ?boolean,
   CONTACTS_READ?: ?boolean,
   WEB_REQUEST: WebRequestGrantInput,
-};
-export type WebRequestGrantInput = {
+|};
+export type WebRequestGrantInput = {|
   granted?: ?$ReadOnlyArray<?string>,
   denied?: ?$ReadOnlyArray<?string>,
-};
+|};
 export type appMutationsAppInstallMutationVariables = {|
   input: AppInstallMutationInput
 |};
@@ -196,9 +196,9 @@ v5 = {
   "concreteType": "App",
   "plural": false,
   "selections": [
-    v2,
-    v3,
-    v4
+    (v2/*: any*/),
+    (v3/*: any*/),
+    (v4/*: any*/)
   ]
 },
 v6 = {
@@ -216,32 +216,27 @@ v7 = [
     "args": null,
     "storageKey": null
   },
-  v6
+  (v6/*: any*/)
 ];
 return {
   "kind": "Request",
-  "operationKind": "mutation",
-  "name": "appMutationsAppInstallMutation",
-  "id": null,
-  "text": "mutation appMutationsAppInstallMutation(\n  $input: AppInstallMutationInput!\n) {\n  installApp(input: $input) {\n    app {\n      id\n      localID\n      name\n    }\n    viewer {\n      apps {\n        ...AppsView_apps\n      }\n      id\n    }\n  }\n}\n\nfragment AppsView_apps on Apps {\n  installed {\n    localID\n    ...AppItem_installedApp\n    id\n  }\n}\n\nfragment AppItem_installedApp on App {\n  mfid\n  localID\n  name\n  manifest {\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n    }\n    author {\n      id\n      name\n    }\n  }\n  users {\n    localID\n    identity {\n      profile {\n        name\n      }\n      id\n    }\n    settings {\n      permissionsSettings {\n        permissionsChecked\n        grants {\n          BLOCKCHAIN_SEND\n          WEB_REQUEST {\n            granted\n            denied\n          }\n        }\n      }\n    }\n    id\n  }\n}\n",
-  "metadata": {},
   "fragment": {
     "kind": "Fragment",
     "name": "appMutationsAppInstallMutation",
     "type": "Mutation",
     "metadata": null,
-    "argumentDefinitions": v0,
+    "argumentDefinitions": (v0/*: any*/),
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
         "name": "installApp",
         "storageKey": null,
-        "args": v1,
+        "args": (v1/*: any*/),
         "concreteType": "AppInstallMutationPayload",
         "plural": false,
         "selections": [
-          v5,
+          (v5/*: any*/),
           {
             "kind": "LinkedField",
             "alias": null,
@@ -276,18 +271,18 @@ return {
   "operation": {
     "kind": "Operation",
     "name": "appMutationsAppInstallMutation",
-    "argumentDefinitions": v0,
+    "argumentDefinitions": (v0/*: any*/),
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
         "name": "installApp",
         "storageKey": null,
-        "args": v1,
+        "args": (v1/*: any*/),
         "concreteType": "AppInstallMutationPayload",
         "plural": false,
         "selections": [
-          v5,
+          (v5/*: any*/),
           {
             "kind": "LinkedField",
             "alias": null,
@@ -315,7 +310,7 @@ return {
                     "concreteType": "App",
                     "plural": true,
                     "selections": [
-                      v3,
+                      (v3/*: any*/),
                       {
                         "kind": "ScalarField",
                         "alias": null,
@@ -323,7 +318,7 @@ return {
                         "args": null,
                         "storageKey": null
                       },
-                      v4,
+                      (v4/*: any*/),
                       {
                         "kind": "LinkedField",
                         "alias": null,
@@ -350,7 +345,7 @@ return {
                                 "args": null,
                                 "concreteType": "AppPermissionDefinitions",
                                 "plural": false,
-                                "selections": v7
+                                "selections": (v7/*: any*/)
                               },
                               {
                                 "kind": "LinkedField",
@@ -360,7 +355,7 @@ return {
                                 "args": null,
                                 "concreteType": "AppPermissionDefinitions",
                                 "plural": false,
-                                "selections": v7
+                                "selections": (v7/*: any*/)
                               }
                             ]
                           },
@@ -373,8 +368,8 @@ return {
                             "concreteType": "AppAuthor",
                             "plural": false,
                             "selections": [
-                              v2,
-                              v4
+                              (v2/*: any*/),
+                              (v4/*: any*/)
                             ]
                           }
                         ]
@@ -388,7 +383,7 @@ return {
                         "concreteType": "AppUser",
                         "plural": true,
                         "selections": [
-                          v3,
+                          (v3/*: any*/),
                           {
                             "kind": "LinkedField",
                             "alias": null,
@@ -407,10 +402,10 @@ return {
                                 "concreteType": "NamedProfile",
                                 "plural": false,
                                 "selections": [
-                                  v4
+                                  (v4/*: any*/)
                                 ]
                               },
-                              v2
+                              (v2/*: any*/)
                             ]
                           },
                           {
@@ -447,7 +442,7 @@ return {
                                     "concreteType": "AppPermissions",
                                     "plural": false,
                                     "selections": [
-                                      v6,
+                                      (v6/*: any*/),
                                       {
                                         "kind": "LinkedField",
                                         "alias": null,
@@ -479,20 +474,27 @@ return {
                               }
                             ]
                           },
-                          v2
+                          (v2/*: any*/)
                         ]
                       },
-                      v2
+                      (v2/*: any*/)
                     ]
                   }
                 ]
               },
-              v2
+              (v2/*: any*/)
             ]
           }
         ]
       }
     ]
+  },
+  "params": {
+    "operationKind": "mutation",
+    "name": "appMutationsAppInstallMutation",
+    "id": null,
+    "text": "mutation appMutationsAppInstallMutation(\n  $input: AppInstallMutationInput!\n) {\n  installApp(input: $input) {\n    app {\n      id\n      localID\n      name\n    }\n    viewer {\n      apps {\n        ...AppsView_apps\n      }\n      id\n    }\n  }\n}\n\nfragment AppsView_apps on Apps {\n  installed {\n    localID\n    ...AppItem_installedApp\n    id\n  }\n}\n\nfragment AppItem_installedApp on App {\n  mfid\n  localID\n  name\n  manifest {\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n    }\n    author {\n      id\n      name\n    }\n  }\n  users {\n    localID\n    identity {\n      profile {\n        name\n      }\n      id\n    }\n    settings {\n      permissionsSettings {\n        permissionsChecked\n        grants {\n          BLOCKCHAIN_SEND\n          WEB_REQUEST {\n            granted\n            denied\n          }\n        }\n      }\n    }\n    id\n  }\n}\n",
+    "metadata": {}
   }
 };
 })();

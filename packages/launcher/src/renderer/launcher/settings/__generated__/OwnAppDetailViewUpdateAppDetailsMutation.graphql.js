@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 9dbdd449e6765dc8bf966c4b2e6ee6be
+ * @relayHash 9fb7f0a0e8f5aa164f1c3c0191fe6746
  */
 
 /* eslint-disable */
@@ -10,13 +10,13 @@
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
 type OwnAppsView_apps$ref = any;
-export type UpdateAppDetailsInput = {
+export type UpdateAppDetailsInput = {|
   appID: string,
   name: string,
   contentsPath: string,
   version: string,
   clientMutationId?: ?string,
-};
+|};
 export type OwnAppDetailViewUpdateAppDetailsMutationVariables = {|
   input: UpdateAppDetailsInput
 |};
@@ -194,24 +194,19 @@ v5 = [
 ];
 return {
   "kind": "Request",
-  "operationKind": "mutation",
-  "name": "OwnAppDetailViewUpdateAppDetailsMutation",
-  "id": null,
-  "text": "mutation OwnAppDetailViewUpdateAppDetailsMutation(\n  $input: UpdateAppDetailsInput!\n) {\n  updateAppDetails(input: $input) {\n    viewer {\n      apps {\n        ...OwnAppsView_apps\n      }\n      id\n    }\n  }\n}\n\nfragment OwnAppsView_apps on Apps {\n  own {\n    localID\n    name\n    ...AppItem_ownApp\n    ...OwnAppDetailView_ownApp\n    id\n  }\n}\n\nfragment AppItem_ownApp on OwnApp {\n  mfid\n  localID\n  name\n  developer {\n    id\n    name\n  }\n  versions {\n    version\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n    }\n  }\n  users {\n    localID\n    identity {\n      profile {\n        name\n      }\n      id\n    }\n    id\n  }\n}\n\nfragment OwnAppDetailView_ownApp on OwnApp {\n  localID\n  mfid\n  name\n  contentsPath\n  updateFeedHash\n  developer {\n    id\n    name\n  }\n  versions {\n    version\n    versionHash\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        COMMS_CONTACT\n        CONTACTS_READ\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        COMMS_CONTACT\n        CONTACTS_READ\n      }\n    }\n  }\n}\n",
-  "metadata": {},
   "fragment": {
     "kind": "Fragment",
     "name": "OwnAppDetailViewUpdateAppDetailsMutation",
     "type": "Mutation",
     "metadata": null,
-    "argumentDefinitions": v0,
+    "argumentDefinitions": (v0/*: any*/),
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
         "name": "updateAppDetails",
         "storageKey": null,
-        "args": v1,
+        "args": (v1/*: any*/),
         "concreteType": "UpdateAppDetailsPayload",
         "plural": false,
         "selections": [
@@ -249,14 +244,14 @@ return {
   "operation": {
     "kind": "Operation",
     "name": "OwnAppDetailViewUpdateAppDetailsMutation",
-    "argumentDefinitions": v0,
+    "argumentDefinitions": (v0/*: any*/),
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
         "name": "updateAppDetails",
         "storageKey": null,
-        "args": v1,
+        "args": (v1/*: any*/),
         "concreteType": "UpdateAppDetailsPayload",
         "plural": false,
         "selections": [
@@ -287,8 +282,8 @@ return {
                     "concreteType": "OwnApp",
                     "plural": true,
                     "selections": [
-                      v2,
-                      v3,
+                      (v2/*: any*/),
+                      (v3/*: any*/),
                       {
                         "kind": "ScalarField",
                         "alias": null,
@@ -305,8 +300,8 @@ return {
                         "concreteType": "AppAuthor",
                         "plural": false,
                         "selections": [
-                          v4,
-                          v3
+                          (v4/*: any*/),
+                          (v3/*: any*/)
                         ]
                       },
                       {
@@ -342,7 +337,7 @@ return {
                                 "args": null,
                                 "concreteType": "AppPermissionDefinitions",
                                 "plural": false,
-                                "selections": v5
+                                "selections": (v5/*: any*/)
                               },
                               {
                                 "kind": "LinkedField",
@@ -352,7 +347,7 @@ return {
                                 "args": null,
                                 "concreteType": "AppPermissionDefinitions",
                                 "plural": false,
-                                "selections": v5
+                                "selections": (v5/*: any*/)
                               }
                             ]
                           },
@@ -374,7 +369,7 @@ return {
                         "concreteType": "AppUser",
                         "plural": true,
                         "selections": [
-                          v2,
+                          (v2/*: any*/),
                           {
                             "kind": "LinkedField",
                             "alias": null,
@@ -393,13 +388,13 @@ return {
                                 "concreteType": "NamedProfile",
                                 "plural": false,
                                 "selections": [
-                                  v3
+                                  (v3/*: any*/)
                                 ]
                               },
-                              v4
+                              (v4/*: any*/)
                             ]
                           },
-                          v4
+                          (v4/*: any*/)
                         ]
                       },
                       {
@@ -416,17 +411,24 @@ return {
                         "args": null,
                         "storageKey": null
                       },
-                      v4
+                      (v4/*: any*/)
                     ]
                   }
                 ]
               },
-              v4
+              (v4/*: any*/)
             ]
           }
         ]
       }
     ]
+  },
+  "params": {
+    "operationKind": "mutation",
+    "name": "OwnAppDetailViewUpdateAppDetailsMutation",
+    "id": null,
+    "text": "mutation OwnAppDetailViewUpdateAppDetailsMutation(\n  $input: UpdateAppDetailsInput!\n) {\n  updateAppDetails(input: $input) {\n    viewer {\n      apps {\n        ...OwnAppsView_apps\n      }\n      id\n    }\n  }\n}\n\nfragment OwnAppsView_apps on Apps {\n  own {\n    localID\n    name\n    ...AppItem_ownApp\n    ...OwnAppDetailView_ownApp\n    id\n  }\n}\n\nfragment AppItem_ownApp on OwnApp {\n  mfid\n  localID\n  name\n  developer {\n    id\n    name\n  }\n  versions {\n    version\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n    }\n  }\n  users {\n    localID\n    identity {\n      profile {\n        name\n      }\n      id\n    }\n    id\n  }\n}\n\nfragment OwnAppDetailView_ownApp on OwnApp {\n  localID\n  mfid\n  name\n  contentsPath\n  updateFeedHash\n  developer {\n    id\n    name\n  }\n  versions {\n    version\n    versionHash\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        COMMS_CONTACT\n        CONTACTS_READ\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        COMMS_CONTACT\n        CONTACTS_READ\n      }\n    }\n  }\n}\n",
+    "metadata": {}
   }
 };
 })();

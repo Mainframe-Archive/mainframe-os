@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash b1d3e38f7ecc9ff7a4bf6e657faf1c53
+ * @relayHash 46ab08d4883620ea8c3f34e65f2974b8
  */
 
 /* eslint-disable */
@@ -9,10 +9,10 @@
 
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
-export type SetEthNetworkInput = {
+export type SetEthNetworkInput = {|
   url: string,
   clientMutationId?: ?string,
-};
+|};
 export type SettingsMenuViewSetEthNetworkMutationVariables = {|
   input: SetEthNetworkInput
 |};
@@ -84,24 +84,19 @@ v2 = {
 };
 return {
   "kind": "Request",
-  "operationKind": "mutation",
-  "name": "SettingsMenuViewSetEthNetworkMutation",
-  "id": null,
-  "text": "mutation SettingsMenuViewSetEthNetworkMutation(\n  $input: SetEthNetworkInput!\n) {\n  setEthNetwork(input: $input) {\n    viewer {\n      settings {\n        ethereumUrl\n      }\n      id\n    }\n  }\n}\n",
-  "metadata": {},
   "fragment": {
     "kind": "Fragment",
     "name": "SettingsMenuViewSetEthNetworkMutation",
     "type": "Mutation",
     "metadata": null,
-    "argumentDefinitions": v0,
+    "argumentDefinitions": (v0/*: any*/),
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
         "name": "setEthNetwork",
         "storageKey": null,
-        "args": v1,
+        "args": (v1/*: any*/),
         "concreteType": "SetEthNetworkPayload",
         "plural": false,
         "selections": [
@@ -114,7 +109,7 @@ return {
             "concreteType": "Viewer",
             "plural": false,
             "selections": [
-              v2
+              (v2/*: any*/)
             ]
           }
         ]
@@ -124,14 +119,14 @@ return {
   "operation": {
     "kind": "Operation",
     "name": "SettingsMenuViewSetEthNetworkMutation",
-    "argumentDefinitions": v0,
+    "argumentDefinitions": (v0/*: any*/),
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
         "name": "setEthNetwork",
         "storageKey": null,
-        "args": v1,
+        "args": (v1/*: any*/),
         "concreteType": "SetEthNetworkPayload",
         "plural": false,
         "selections": [
@@ -144,7 +139,7 @@ return {
             "concreteType": "Viewer",
             "plural": false,
             "selections": [
-              v2,
+              (v2/*: any*/),
               {
                 "kind": "ScalarField",
                 "alias": null,
@@ -157,6 +152,13 @@ return {
         ]
       }
     ]
+  },
+  "params": {
+    "operationKind": "mutation",
+    "name": "SettingsMenuViewSetEthNetworkMutation",
+    "id": null,
+    "text": "mutation SettingsMenuViewSetEthNetworkMutation(\n  $input: SetEthNetworkInput!\n) {\n  setEthNetwork(input: $input) {\n    viewer {\n      settings {\n        ethereumUrl\n      }\n      id\n    }\n  }\n}\n",
+    "metadata": {}
   }
 };
 })();

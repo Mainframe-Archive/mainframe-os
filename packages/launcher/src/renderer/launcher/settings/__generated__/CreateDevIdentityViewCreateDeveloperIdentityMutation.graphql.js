@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 60de3998107083b9ead2a25fcc6e258f
+ * @relayHash a3b9e3f84e0f1fd71d5977fb14e00b9b
  */
 
 /* eslint-disable */
@@ -9,14 +9,14 @@
 
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
-export type CreateDeveloperIdentityInput = {
+export type CreateDeveloperIdentityInput = {|
   profile: UserProfileInput,
   clientMutationId?: ?string,
-};
-export type UserProfileInput = {
+|};
+export type UserProfileInput = {|
   name: string,
   avatar?: ?string,
-};
+|};
 export type CreateDevIdentityViewCreateDeveloperIdentityMutationVariables = {|
   input: CreateDeveloperIdentityInput
 |};
@@ -104,24 +104,19 @@ v3 = {
 };
 return {
   "kind": "Request",
-  "operationKind": "mutation",
-  "name": "CreateDevIdentityViewCreateDeveloperIdentityMutation",
-  "id": null,
-  "text": "mutation CreateDevIdentityViewCreateDeveloperIdentityMutation(\n  $input: CreateDeveloperIdentityInput!\n) {\n  createDeveloperIdentity(input: $input) {\n    viewer {\n      identities {\n        ownDevelopers {\n          profile {\n            name\n          }\n          id\n        }\n      }\n      id\n    }\n  }\n}\n",
-  "metadata": {},
   "fragment": {
     "kind": "Fragment",
     "name": "CreateDevIdentityViewCreateDeveloperIdentityMutation",
     "type": "Mutation",
     "metadata": null,
-    "argumentDefinitions": v0,
+    "argumentDefinitions": (v0/*: any*/),
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
         "name": "createDeveloperIdentity",
         "storageKey": null,
-        "args": v1,
+        "args": (v1/*: any*/),
         "concreteType": "CreateDeveloperIdentityPayload",
         "plural": false,
         "selections": [
@@ -152,7 +147,7 @@ return {
                     "concreteType": "OwnDeveloperIdentity",
                     "plural": true,
                     "selections": [
-                      v2
+                      (v2/*: any*/)
                     ]
                   }
                 ]
@@ -166,14 +161,14 @@ return {
   "operation": {
     "kind": "Operation",
     "name": "CreateDevIdentityViewCreateDeveloperIdentityMutation",
-    "argumentDefinitions": v0,
+    "argumentDefinitions": (v0/*: any*/),
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
         "name": "createDeveloperIdentity",
         "storageKey": null,
-        "args": v1,
+        "args": (v1/*: any*/),
         "concreteType": "CreateDeveloperIdentityPayload",
         "plural": false,
         "selections": [
@@ -204,18 +199,25 @@ return {
                     "concreteType": "OwnDeveloperIdentity",
                     "plural": true,
                     "selections": [
-                      v2,
-                      v3
+                      (v2/*: any*/),
+                      (v3/*: any*/)
                     ]
                   }
                 ]
               },
-              v3
+              (v3/*: any*/)
             ]
           }
         ]
       }
     ]
+  },
+  "params": {
+    "operationKind": "mutation",
+    "name": "CreateDevIdentityViewCreateDeveloperIdentityMutation",
+    "id": null,
+    "text": "mutation CreateDevIdentityViewCreateDeveloperIdentityMutation(\n  $input: CreateDeveloperIdentityInput!\n) {\n  createDeveloperIdentity(input: $input) {\n    viewer {\n      identities {\n        ownDevelopers {\n          profile {\n            name\n          }\n          id\n        }\n      }\n      id\n    }\n  }\n}\n",
+    "metadata": {}
   }
 };
 })();
