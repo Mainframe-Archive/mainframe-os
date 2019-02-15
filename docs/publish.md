@@ -34,7 +34,7 @@ $("#sandbox-webview").openDevTools();
 
 To allow users to install your app, you will need to upload the contents to swarm and then write and sign a manifest file which can be distributed and used for installation.
 
-This can be done with the **Publish** button inside Mainframe OS, as described [here](quick-start.md), if you installed Mainframe OS through the downloaded binaries.
+This can be done with the **Publish** button inside Mainframe OS, as described [here](introduction.md), if you installed Mainframe OS through the downloaded binaries.
 If you built Mainframe OS from source, the swarm-gateways upload limitation mentioned below will apply. Below are alternate steps to publish manually instead.
 
 #### Upload Content to Swarm
