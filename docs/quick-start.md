@@ -2,50 +2,71 @@
 id: quick-start
 title: Quick Start
 ---
-> This guide assumes some familiarity with React development.
 ### Prerequisites
- - [Yarn](https://yarnpkg.com/lang/en/docs/install/) v1.13.x 
+- [Yarn](https://yarnpkg.com/lang/en/docs/install/) v1.13.x
+- [Node](https://nodejs.org/en/) v10.x and npm v6.x
 
 ### Install Mainframe OS
-Download [Mainframe OS](https://mainframe.com/developers/) and install it on your local machine.
-Alternatively, jump to the respective [Unix Instructions](unix.md) or [Windows Instructions](windows.md) to compile it from source.
 
-#### Fork create-mainframe-dapp
-* [Fork the create-mainframe-dapp](https://github.com/MainframeHQ/create-mainframe-dapp/fork) repo.
-* `git clone https://github.com/<YOUR_USERNAME>/create-mainframe-dapp.git` 
-* `cd create-mainframe-dapp`
-* `yarn`
-* `yarn start`
+First, you'll need to install the Mainframe Daemon.
+```
+npm install --global @mainframe/daemon
+```
 
-This project contains a react based example dApp. It is configured for development within our electron environment and integrated with the Mainframe SDK out of the box. 
 
-<script id="asciicast-hhORMkpwEHMnliU8kUHfa00C4" src="https://asciinema.org/a/hhORMkpwEHMnliU8kUHfa00C4.js" data-size="medium" data-speed="2" async></script>
+Next, download [Mainframe OS](https://mainframe.com/developers/) and install it on your machine.
 
-### Launch within Mainframe OS
+Alternatively, jump to [Mainframe Platform](platform.md) for instructions to compile and run Mainframe OS from source.
+
+### Create your Dapp
+Use [create-mainframe-dapp](create-mainframe-dapp.md) to setup your dapp for easy integration with Mainframe OS.
+
+### Launch your dapp in Mainframe OS
 
 Next, __launch Mainframe OS__ and follow the onboarding prompts.
 
-Once you are setup, with the "Application" window active, select __"Create New"__
+Once you are setup, in the **More Tab** click the **App Development Tool** link.
 
-In the prompts:
+#### Create a developer identity
+ * choose a name for the identity that you will use to publish dapps under.
+ * select "create."
+
+Once you have created your Developer Identity, click **Add** to
+
+#### Import your dapp
+
  * use "test" for the name.
  * 0.0.1 for the version.
  * run `yarn build` from the create-mainframe-dapp directory.
  * select the generated `build` folder for the contents path.
 
 
-Create a developer identity:
- * choose a name for the identity that you will use to publish dapps under.
- * select "create."
-  
-App Permissions: 
+#### App Permissions
  * For our purposes here select "required" for Make transactions to Ethereum Blockchain.
  * And add mainframe.com as a required web request host.
- * Select "save."
- 
-Review the app summary, select "create application." Then, launch the app by double clicking it from the "Applications" window.
+ * Select **Next**
 
-Host locally:
+Review the app summary, select **Save**.
+
+#### Run your dapp
+Click the icon to view/edit dapp details. Then launch the app by clicking **Open**.
+
+You will initially see the pre-built version of your dapp display in the new window.
+
+#### Host locally
  * In a terminal window run `yarn start` if it isn't still running.
  * With the application being hosted at `http://localhost:3000/`, replace the contents path of your active application window with `http://localhost:3000/`.
- * You should now see the `create-mainframe-dapp` render within the active application window.
+ * You should now see live version of `create-mainframe-dapp` render within the active application window.
+
+#### Debugging
+The Chrome Developer Tools window will automatically open to enable debugging your dapp while it's running inside Mainframe OS.
+
+### Publish your Dapp
+From the app details view in Mainframe OS, click **Publish**.
+
+The resulting App ID is what is needed to share and install your dapp.
+
+### Submit your Dapp
+*coming soon*
+
+Submit your dapp to be considered for the Mainframe Suggested Apps. MFT required.

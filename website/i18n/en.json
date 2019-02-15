@@ -6,11 +6,27 @@
     "tagline": "Get started using Mainframe.",
     "docs": {
       "build-dapps": {
-        "title": "Building Mainframe Dapps"
+        "title": "Building Mainframe Apps"
+      },
+      "create-mainframe-dapp": {
+        "title": "create-mainframe-dapp",
+        "sidebar_label": "create-mainframe-dapp"
       },
       "introduction": {
-        "title": "Mainframe Platform",
+        "title": "Mainframe OS",
         "sidebar_label": "Introduction"
+      },
+      "mac": {
+        "title": "Mac & Linux Instructions",
+        "sidebar_label": "Mac & Unix Instructions"
+      },
+      "mft": {
+        "title": "MFT Token Utility",
+        "sidebar_label": "MFT"
+      },
+      "platform": {
+        "title": "Mainframe Platform",
+        "sidebar_label": "Mainframe Platform"
       },
       "publish": {
         "title": "Publish Your Dapp"
@@ -41,10 +57,8 @@
     },
     "categories": {
       "Mainframe OS": "Mainframe OS",
-      "Development": "Development",
-      "Compile From Source": "Compile From Source",
-      "Guidelines": "Guidelines",
-      "API": "API"
+      "Platform Documentation": "Platform Documentation",
+      "Guidelines": "Guidelines"
     }
   },
   "pages-strings": {

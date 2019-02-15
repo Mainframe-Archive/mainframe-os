@@ -1,11 +1,7 @@
 {
   "docs": {
-    "Mainframe OS": ["introduction"],
-    "Development": ["quick-start", "build-dapps", "publish"],
-    "Compile From Source": ["unix", "windows"],
+    "Mainframe OS": ["introduction", "quick-start"],
+    "Platform Documentation": ["platform", "mac", "windows","build-dapps", "publish"],
     "Guidelines": ["web3"]
-  },
-  "docs-other": {
-    "API": ["doc4", "doc5"]
   }
 }

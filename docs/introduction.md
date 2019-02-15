@@ -1,30 +1,21 @@
 ---
 id: introduction
-title: Mainframe Platform
+title: Mainframe OS
 sidebar_label: Introduction
 ---
 
-A platform for easily building and running distributed, unstoppable apps.
+Mainframe OS is an integrated development and execution environment that dramatically simplifies the creation and use of unstoppable, privacy-driven, decentralized applications.
 
-## Overview
+### Key Features
 
-The main components (packages) of the Mainframe Platform are as follows:
+* **One-click Install:** Bundles all required infrastructure
+* **Beautiful User Experience:** What end-users expect from a modern platform
+* **Easy Onboarding:** One-time setup
+* **System Utilities:** Mainframe OS manages users Identity, Wallets, and Contacts
+* **Developer Tools:** Create, Publish, Update, Share your unstoppable dapp
+* **Install Dapps:** Easy discovery of and access to dapps
+* **User-owned Data:** Dapps have permissioned access to user data
+* **Mainframe SDK:** Easy developer access to integrated communications, payments, and encrypted storage functionality
 
-- `daemon`: a background daemon process that communicates with decentralized services
-- `launcher`: the Mainframe application installing, launching and running sandboxed apps
-
-In addition, there are several auxiliary packages:
-
-- `app-manifest`: a utility library for app manifests creation an validation
-- `app-permissions`: a utility library for distributed app permissions
-- `cli`: a command-line interface to communicate with the daemon
-- `client`: a library used by the CLI & launcher to communicate with the daemon
-- `config`: shared configuration utilities used by several packages
-- `data-types`: shared data primitives
-- `toolbox`: a set of functions that both the launcher and the cli use
-
-In order to make it easier to share code among packages, this project uses [lerna](https://lernajs.io/). Whenever code changes, it's expected that you run `npm run build` from the root of the project directory, and it will kick off the necessary `lerna` build processes in the package folders.
-
-## Project Status
-
-This project is in alpha, lots of breaking changes are to be expected between releases. It is using libraries and services that are themselves still in early stages of development. The cryptography and overall security have not been audited, no guarantees should be expected from this project at this stage.
+### Get Started Now
+[Quick Start Guide](quick-start.md)

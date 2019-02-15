@@ -8,15 +8,13 @@ title: Publish Your Dapp
 Mainframe dapps must be packaged as static Web apps with an `index.html` entry file. All assets reference paths must be relative rather than rely on a specific resolution behaviour.
 For example to add the [Onyx Stats](applications/onyx-stats) contents to the Launcher, the `dist` folder (created during the build) must be selected rather than the root application folder.
 
-### Testing your dapp from Mainframe OS
+### Testing your dapp in Mainframe OS
 
-Mainframe OS has a developer mode where you are be able to create, run and manage your apps. To access this dev mode you can use the toggle in the bottom left corner of the Launcher.
+Mainframe OS has a developer mode where you are be able to create, run and manage your apps. To access this dev mode, go to the **More** Tab and click the **App Development Tool** link.
 
-In developer mode, click the `Create new App` button to begin the app creation flow. You will then be guided through some steps to provide meta data for your app, link to your apps contents folder (the folder containing the `index.html` entry file), create or select your developer identity and set any required permissions.
+Once you have created your Developer Identity, click **Add** to import your dapp. You will then be guided through some steps to provide meta data for your app, link to your apps contents folder (the folder containing the `index.html` entry file), and set any required permissions.
 
-Once created, you should see your app displayed in the launcher, clicking it should open it in a new window and load your app contents.
-
-**_Editing your app details from the launcher is currently not supported, if you'd like to amend your app metadata or permissions once it's been created, you can use the CLI or simply delete and recreate your app._**
+Once created, you should see your app displayed in the launcher, clicking **Open** should open it in a new window and load your app contents.
 
 #### Debugging with Chrome Developer Tools
 
@@ -36,7 +34,10 @@ $("#sandbox-webview").openDevTools();
 
 To allow users to install your app, you will need to upload the contents to swarm and then write and sign a manifest file which can be distributed and used for installation.
 
-#### 1. Upload Content to Swarm
+This can be done with the **Publish** button inside Mainframe OS, as described [here](quick-start.md), if you installed Mainframe OS through the downloaded binaries.
+If you built Mainframe OS from source, the swarm-gateways upload limitation mentioned below will apply. Below are alternate steps to publish manually instead.
+
+#### Upload Content to Swarm
 
 By default, a vault is configured to connect to the [Swarm gateways](https://swarm-gateways.net/) to interact with Swarm. This works well for downloads and other requests, however uploads are limited to 1 MB, which might prevent from being able to upload some apps.
 In order to upload apps contents larger than 1 MB, a local Swarm node must be used. Installation instructions are available in the [Swarm guide](https://swarm-guide.readthedocs.io/en/latest/installation.html) and a [Docker image](https://github.com/ethersphere/swarm-docker) is also available.
@@ -59,22 +60,4 @@ If you don't know your app's ID, you can view details of all your apps by runnin
 ./packages/cli/bin/run app:list
 ```
 
-When the upload is complete, you should be presented with a swarm hash, used to identify the location of your contents in the network.
-
-#### 2. Write the App Manifest File
-
-The following command will generate your manifest JSON file and sign it using your app ID and developer ID, allowing users to verify the author and integrity of the file and app contents during the install process.
-
-```
-./packages/cli/bin/run app:writeManifest --id <APP_ID>
-```
-
-When decoded during install, the file will contain:
-
-- App ID
-- Developer identity (automatically created in step 1)
-- Version number
-- Swarm hash
-- Permission requirements
-
----
+When the upload is complete, you should be presented with a swarm hash, used to identify the location of your contents in the network. **This is the address needed for others to install your dapp.**
