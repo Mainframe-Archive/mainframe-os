@@ -1,0 +1,35 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Web3 Notes · Mainframe Developer Documentation</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;p&gt;Web3 recently made a breaking change where it rejects the use of custom providers, which affected us as we use a custom provider in Mainframe OS. There has been a bit of backlash from Truffle and Embark and looks like will be rolling back, but still means we can’t use Web3 1.0.0-beta-38 - 41 in any of our apps with our current provider setup.&lt;/p&gt;
+"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Web3 Notes · Mainframe Developer Documentation"/><meta property="og:type" content="website"/><meta property="og:url" content="https://mainframehq.github.io/mainframe-os/index.html"/><meta property="og:description" content="&lt;p&gt;Web3 recently made a breaking change where it rejects the use of custom providers, which affected us as we use a custom provider in Mainframe OS. There has been a bit of backlash from Truffle and Embark and looks like will be rolling back, but still means we can’t use Web3 1.0.0-beta-38 - 41 in any of our apps with our current provider setup.&lt;/p&gt;
+"/><meta name="twitter:card" content="summary"/><link rel="shortcut icon" href="/mainframe-os/img/favicon.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><link rel="stylesheet" href="/mainframe-os/css/main.css"/></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/mainframe-os/"><img class="logo" src="/mainframe-os/img/MF_Symbol_Red-Rose_BG.png" alt="Mainframe Developer Documentation"/><h2 class="headerTitleWithLogo">Mainframe Developer Documentation</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive"><a href="/mainframe-os/docs/introduction" target="_self">Docs</a></li><li class=""><a href="/mainframe-os/docs/sdk" target="_self">SDK</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><i></i></div><h2><i>›</i><span>Guidelines</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Mainframe OS</h3><ul><li class="navListItem"><a class="navItem" href="/mainframe-os/docs/introduction">Introduction</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Development</h3><ul><li class="navListItem"><a class="navItem" href="/mainframe-os/docs/quick-start">Quick Start</a></li><li class="navListItem"><a class="navItem" href="/mainframe-os/docs/build-dapps">Building Mainframe Dapps</a></li><li class="navListItem"><a class="navItem" href="/mainframe-os/docs/publish">Publish Your Dapp</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Compile From Source</h3><ul><li class="navListItem"><a class="navItem" href="/mainframe-os/docs/unix">Unix Instructions</a></li><li class="navListItem"><a class="navItem" href="/mainframe-os/docs/windows">Windows Instructions</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Guidelines</h3><ul><li class="navListItem navListItemActive"><a class="navItem" href="/mainframe-os/docs/web3">Web3 Notes</a></li></ul></div></div></section></div><script>
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              const headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                if (event.target.tagName === 'A') {
+                  document.body.classList.remove('tocActive');
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 class="postHeaderTitle">Web3 Notes</h1></header><article><div><span><p>Web3 recently made a breaking change where it rejects the use of custom providers, which affected us as we use a custom provider in Mainframe OS. There has been a bit of backlash from Truffle and Embark and looks like will be rolling back, but still means we can’t use Web3 1.0.0-beta-38 - 41 in any of our apps with our current provider setup.
+<br/>
+<br/>
+See: <a href="https://github.com/ethereum/web3.js/issues/2266">https://github.com/ethereum/web3.js/issues/2266</a></p>
+<p><img src="/img/web3_issue.png" alt=""></p>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/mainframe-os/docs/windows"><span class="arrow-prev">← </span><span>Windows Instructions</span></a></div></div></div><nav class="onPageNav"></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/mainframe-os/" class="nav-home"><img src="/mainframe-os/img/MF_Symbol_Dark_BG.png" alt="Mainframe Developer Documentation" width="66"/></a><div><h5>Docs</h5><a href="/mainframe-os/docs/quick-start">Getting Started</a><a href="/mainframe-os/docs/web3">Guidelines</a><a href="/mainframe-os/docs/introduction">API Reference</a></div><div><h5>Community</h5><a href="https://gitter.im/MainframeHQ/Lobby" target="_blank" rel="noreferrer noopener">Gitter</a><a href="https://www.youtube.com/c/MainframeHQ">YouTube</a><a href="https://twitter.com/Mainframe_HQ" target="_blank" rel="noreferrer noopener">Twitter</a></div><div><h5>More</h5><a href="https://github.com/MainframeHQ">GitHub</a><a class="github-button" href="https://github.com/mainframehq/mainframe-os" data-icon="octicon-star" data-show-count="true" aria-label="Star mainframehq/mainframe-os on GitHub">Star</a></div></section><a href="https://www.mainframe.com/developers" target="_blank" rel="noreferrer noopener" class="fbOpenSource"><img src="/mainframe-os/img/mainframe_dark.png" alt="Mainframe" width="170"/></a><section class="copyright">Copyright © 2019 Mainframe</section></footer></div></body></html>
