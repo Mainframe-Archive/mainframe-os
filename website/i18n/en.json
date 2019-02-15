@@ -16,10 +16,6 @@
         "title": "Getting Started with Mainframe OS",
         "sidebar_label": "Getting Started"
       },
-      "mac": {
-        "title": "Mac & Linux Instructions",
-        "sidebar_label": "Mac & Unix Instructions"
-      },
       "mft": {
         "title": "MFT Token Utility",
         "sidebar_label": "MFT"

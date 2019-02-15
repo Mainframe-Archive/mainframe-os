@@ -12,15 +12,16 @@ Mainframe OS is an integrated development and execution environment that dramati
 
 ### Install Mainframe OS
 
-First, you'll need to install the Mainframe Daemon.
-```
-npm install --global @mainframe/daemon
-```
+>BINARY INSTALLER COMING SOON
 
+Go to [Mainframe Platform](platform.md) for instructions to compile and run Mainframe OS from source.
 
-Next, **[Download Mainframe OS](https://s3.us-east-2.amazonaws.com/mainframe-os-releases/v0.2/MainframeOS.dmg)** and install it on your machine.
+### Add a Contact
 
-Alternatively, jump to [Mainframe Platform](platform.md) for instructions to compile and run Mainframe OS from source.
+**Mainframe OS > Contacts > Add Contact**
+Paste Contact ID of another Mainframe OS User
+
+Jake: `a5d66aa829306a04594634b451ca03f293a115a8f37c558f660c2db5bb5bdc83`
 
 ### Create your Dapp
 Use [create-mainframe-dapp](create-mainframe-dapp.md) to setup your dapp for easy integration with Mainframe OS.

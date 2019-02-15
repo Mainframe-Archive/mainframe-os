@@ -10,9 +10,10 @@ sidebar_label: create-mainframe-dapp
 
 #### Fork create-mainframe-dapp
 * [Clone the create-mainframe-dapp](https://github.com/MainframeHQ/create-mainframe-dapp/fork) repo
-* `git clone https://github.com/<YOUR_USERNAME>/create-mainframe-dapp.git`
+* `git clone https://github.com/MainframeHQ/create-mainframe-dapp.git`
 * `cd create-mainframe-dapp`
 * `yarn`
+* `yarn build`
 * `yarn start`
 
 This project contains a react based example dApp. It is configured for development within our electron environment and integrated with the Mainframe SDK out of the box.
