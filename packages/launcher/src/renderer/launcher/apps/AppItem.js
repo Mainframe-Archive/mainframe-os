@@ -22,10 +22,8 @@ const IconContainer = styled.View`
   margin-bottom: 10px;
 `
 
-type AppData = OwnApp | AppInstalledData
-
 type SharedProps = {
-  onOpenApp: (app: AppData, own: boolean) => any,
+  onOpenApp: (app: AppInstalledData | OwnApp, own: boolean) => any,
 }
 
 type InstalledProps = SharedProps & {
@@ -33,12 +31,22 @@ type InstalledProps = SharedProps & {
 }
 
 type OwnProps = SharedProps & {
-  ownApp: AppData,
+  ownApp: OwnApp,
 }
 
-type Props = SharedProps & {
-  app: AppData | AppInstalledData,
-  isOwn?: boolean,
+type SuggestedProps = {
+  appID: string,
+  appName: string,
+  devName: string,
+  onOpen: (appID: string) => void,
+}
+
+type Props = {
+  appID: string,
+  appName: string,
+  devName: string,
+  onOpen: () => void,
+  testID: string,
 }
 
 type State = {
@@ -80,33 +88,72 @@ export default class AppItem extends Component<Props, State> {
   }
 
   render() {
-    const { app, isOwn, onOpenApp } = this.props
-    const open = () => onOpenApp(app, !!isOwn)
-    const testID = isOwn ? 'own-app-item' : 'installed-app-item'
-    // $FlowFixMe: app type
-    const devName = isOwn ? app.developer.name : app.manifest.author.name
+    const { appID, appName, devName, onOpen, testID } = this.props
     return (
-      <AppButtonContainer onPress={open} key={app.localID} testID={testID}>
+      <AppButtonContainer onPress={onOpen} key={appID} testID={testID}>
         <IconContainer
           className={this.state.direction}
           onMouseMove={this.setDirection}
           onMouseOver={this.startMoving}
           onMouseOut={this.stopMoving}>
-          <AppIcon id={app.mfid} />
+          <AppIcon id={appID} />
         </IconContainer>
-        <Text variant="appButtonName">{app.name}</Text>
+        <Text variant="appButtonName">{appName}</Text>
         <Text variant="appButtonId">{devName}</Text>
       </AppButtonContainer>
     )
   }
 }
 
-const InstalledView = (props: InstalledProps) => (
-  <AppItem app={props.installedApp} onOpenApp={props.onOpenApp} />
-)
-const OwnView = (props: OwnProps) => (
-  <AppItem app={props.ownApp} onOpenApp={props.onOpenApp} isOwn />
-)
+export const SuggestedAppItem = (props: SuggestedProps) => {
+  const onOpen = () => {
+    props.onOpen(props.appID)
+  }
+
+  return (
+    <AppItem
+      appID={props.appID}
+      appName={props.appName}
+      devName={props.devName}
+      onOpen={onOpen}
+      testID="suggested-app-item"
+    />
+  )
+}
+
+const InstalledView = (props: InstalledProps) => {
+  const app = props.installedApp
+  const onOpen = () => {
+    props.onOpenApp(app, false)
+  }
+
+  return (
+    <AppItem
+      appID={app.mfid}
+      appName={app.name}
+      devName={app.manifest.author.name}
+      onOpen={onOpen}
+      testID="installed-app-item"
+    />
+  )
+}
+
+const OwnView = (props: OwnProps) => {
+  const app = props.ownApp
+  const onOpen = () => {
+    props.onOpenApp(app, true)
+  }
+
+  return (
+    <AppItem
+      appID={app.mfid}
+      appName={app.name}
+      devName={app.developer.name}
+      onOpen={onOpen}
+      testID="own-app-item"
+    />
+  )
+}
 
 export const InstalledAppItem = createFragmentContainer(InstalledView, {
   installedApp: graphql`

@@ -18,7 +18,14 @@ import applyContext, { type CurrentUser } from '../LauncherContext'
 import CompleteOnboardSession from './CompleteOnboardSession'
 
 import AppInstallModal from './AppInstallModal'
-import { InstalledAppItem } from './AppItem'
+import { InstalledAppItem, SuggestedAppItem } from './AppItem'
+
+const SUGGESTED_APPS = [
+  {
+    hash: '',
+    name: 'Test app',
+  },
+]
 
 const Header = styled.View`
   height: 50px;
@@ -91,6 +98,7 @@ type Props = {
 type State = {
   showModal: ?{
     type: 'accept_permissions' | 'app_install',
+    appID?: ?string,
     data?: ?{
       app: AppData,
     },
@@ -118,6 +126,15 @@ class AppsView extends Component<Props, State> {
     this.setState({
       showModal: {
         type: 'app_install',
+      },
+    })
+  }
+
+  installSuggested = (appID: string) => {
+    this.setState({
+      showModal: {
+        type: 'app_install',
+        appID,
       },
     })
   }
@@ -198,7 +215,9 @@ class AppsView extends Component<Props, State> {
   renderApps(apps: Array<AppData>) {
     return (
       <ScrollView>
-        <Text variant="smallTitle">Installed Applications</Text>
+        <Text variant={['smallTitle', 'blue', 'bold']}>
+          Installed Applications
+        </Text>
         <AppsGrid>
           {apps.map(app => this.renderApp(app))}
           <NewAppButton
@@ -206,6 +225,20 @@ class AppsView extends Component<Props, State> {
             onPress={this.onPressInstall}
             testID="launcher-install-app-button"
           />
+        </AppsGrid>
+        <Text variant={['smallTitle', 'blue', 'bold']}>
+          Suggested Applications
+        </Text>
+        <AppsGrid>
+          {SUGGESTED_APPS.map(app => (
+            <SuggestedAppItem
+              key={app.hash}
+              appID={app.hash}
+              appName={app.name}
+              devName="Mainframe"
+              onOpen={this.installSuggested}
+            />
+          ))}
         </AppsGrid>
       </ScrollView>
     )
@@ -249,6 +282,7 @@ class AppsView extends Component<Props, State> {
         case 'app_install':
           modal = (
             <AppInstallModal
+              appID={this.state.showModal.appID}
               onRequestClose={this.onCloseModal}
               onInstallComplete={this.onInstallComplete}
             />
