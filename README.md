@@ -1,4 +1,4 @@
-# Mainframe Platform
+# Mainframe OS
 
 A platform for easily building and running distributed, unstoppable apps.
 
