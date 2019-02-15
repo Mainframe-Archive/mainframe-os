@@ -1,6 +1,6 @@
 {
   "docs": {
-    "Mainframe OS": ["introduction", "quick-start"],
+    "Mainframe OS": ["introduction"],
     "Platform Documentation": ["platform", "mac", "windows","build-dapps", "publish"],
     "Guidelines": ["web3"]
   }

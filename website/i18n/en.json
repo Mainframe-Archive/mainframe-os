@@ -13,8 +13,8 @@
         "sidebar_label": "create-mainframe-dapp"
       },
       "introduction": {
-        "title": "Mainframe OS",
-        "sidebar_label": "Introduction"
+        "title": "Getting Started with Mainframe OS",
+        "sidebar_label": "Getting Started"
       },
       "mac": {
         "title": "Mac & Linux Instructions",
@@ -30,9 +30,6 @@
       },
       "publish": {
         "title": "Publish Your Dapp"
-      },
-      "quick-start": {
-        "title": "Quick Start"
       },
       "sdk": {
         "title": "Mainframe SDK",
