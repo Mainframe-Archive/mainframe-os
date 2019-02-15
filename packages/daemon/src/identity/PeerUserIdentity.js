@@ -9,6 +9,7 @@ type FeedHash = string
 export type PeerUserProfile = {
   name?: ?string,
   avatar?: ?string,
+  ethAddress?: ?string,
 }
 
 export type PublicFeedSerialized = {
@@ -54,10 +55,7 @@ export default class PeerUserIdentity extends Identity {
   _publicFeed: FeedHash
   _firstContactAddress: hexValue
   _otherFeeds: Feeds
-  _profile: {
-    name?: ?string,
-    avatar?: ?string,
-  }
+  _profile: PeerUserProfile
 
   constructor(
     localID: string,
