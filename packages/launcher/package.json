@@ -73,7 +73,7 @@
     "babel-plugin-react-native-web": "^0.9.9",
     "babel-plugin-relay": "^1.7.0",
     "css-loader": "^2.0.0",
-    "electron": "^3.0.9",
+    "electron": "^4.0.5",
     "electron-builder": "^20.38.2",
     "electron-webpack": "^2.6.1",
     "file-loader": "^2.0.0",
