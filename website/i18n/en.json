@@ -33,7 +33,7 @@
       },
       "sdk": {
         "title": "Mainframe SDK",
-        "sidebar_label": "SDK"
+        "sidebar_label": "Mainframe SDK"
       },
       "unix": {
         "title": "Unix Instructions",
@@ -49,12 +49,14 @@
       }
     },
     "links": {
-      "Docs": "Docs",
+      "Quick Start": "Quick Start",
+      "Platform": "Platform",
       "SDK": "SDK"
     },
     "categories": {
       "Mainframe OS": "Mainframe OS",
       "Platform Documentation": "Platform Documentation",
+      "SDK Documentation": "SDK Documentation",
       "Guidelines": "Guidelines"
     }
   },

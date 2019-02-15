@@ -1,7 +1,7 @@
 ---
 id: sdk
 title: Mainframe SDK
-sidebar_label: SDK
+sidebar_label: Mainframe SDK
 ---
 
 Javascript SDK for communicating with the Mainframe launcher and daemon.
@@ -20,7 +20,7 @@ Get the current api version of the Mainframe client.
 
 **returns:** `Promise<string>`
 
-## Contacts
+# Contacts
 
 ### contacts.selectContacts()
 
@@ -82,7 +82,45 @@ Fetches all the contacts your app has previously been approved to read data from
 const contact = await sdk.contacts.getApprovedContacts()
 ```
 
-## Ethereum
+# Payments
+
+Payment API's to facilitate transferring funds between users.
+
+### payments.payContact()
+
+Read events from the blockchain.
+
+**Arguments**
+
+1. `currency: 'MFT' | 'ETH'`
+1. `value: number`
+1. `contactID?: string`
+1. `from?: string`
+
+**returns:** Promise<[Transaction EventEmitter](#transaction-eventEmitter:)>
+
+If no contact ID is provided the contact picker will be displayed by the trusted UI to allow the user to select a contact.
+
+If no from address is provided the users default eth address will be used.
+
+**Example:**
+
+```
+const params = {
+  value: 500,
+  currency: 'MFT',
+}
+
+const tx = await sdk.payments.payContact(params)
+tx.on('hash', hash => ... )
+  .on('mined', () => ... )
+  .on('confirmed', () => ... )
+  .on('error', error => ... )
+
+
+```
+
+# Ethereum
 
 API's for interacting with the Ethereum blockchain.
 
@@ -189,45 +227,8 @@ await sdk.payments.sendMFT(params)
 
 ```
 
-## Payments
 
-Payment API's to facilitate transferring funds between users.
-
-### payments.payContact()
-
-Read events from the blockchain.
-
-**Arguments**
-
-1. `currency: 'MFT' | 'ETH'`
-1. `value: number`
-1. `contactID?: string`
-1. `from?: string`
-
-**returns:** Promise<[Transaction EventEmitter](#transaction-eventEmitter:)>
-
-If no contact ID is provided the contact picker will be displayed by the trusted UI to allow the user to select a contact.
-
-If no from address is provided the users default eth address will be used.
-
-**Example:**
-
-```
-const params = {
-  value: 500,
-  currency: 'MFT',
-}
-
-const tx = await sdk.payments.payContact(params)
-tx.on('hash', hash => ... )
-  .on('mined', () => ... )
-  .on('confirmed', () => ... )
-  .on('error', error => ... )
-
-
-```
-
-## Types
+# Types
 
 ### Contact:
 
