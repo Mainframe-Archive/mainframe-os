@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 8c34570b084cb6d7aaefd15aa60100e4
+ * @relayHash 2ed95c104d2dd9533bd1b1229efe3289
  */
 
 /* eslint-disable */
@@ -147,16 +147,21 @@ v2 = [
       }
     ]
   },
-  (v1/*: any*/)
+  v1
 ];
 return {
   "kind": "Request",
+  "operationKind": "query",
+  "name": "WalletsScreenQuery",
+  "id": null,
+  "text": "query WalletsScreenQuery(\n  $userID: String!\n) {\n  viewer {\n    wallets {\n      ...WalletsScreen_wallets_3iqrP\n    }\n    id\n  }\n}\n\nfragment WalletsScreen_wallets_3iqrP on Wallets {\n  ...WalletsView_wallets_3iqrP\n}\n\nfragment WalletsView_wallets_3iqrP on Wallets {\n  ethWallets(userID: $userID) {\n    hd {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n    ledger {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n  }\n}\n",
+  "metadata": {},
   "fragment": {
     "kind": "Fragment",
     "name": "WalletsScreenQuery",
     "type": "Query",
     "metadata": null,
-    "argumentDefinitions": (v0/*: any*/),
+    "argumentDefinitions": v0,
     "selections": [
       {
         "kind": "LinkedField",
@@ -197,7 +202,7 @@ return {
   "operation": {
     "kind": "Operation",
     "name": "WalletsScreenQuery",
-    "argumentDefinitions": (v0/*: any*/),
+    "argumentDefinitions": v0,
     "selections": [
       {
         "kind": "LinkedField",
@@ -241,7 +246,7 @@ return {
                     "args": null,
                     "concreteType": "EthHDWallet",
                     "plural": true,
-                    "selections": (v2/*: any*/)
+                    "selections": v2
                   },
                   {
                     "kind": "LinkedField",
@@ -251,23 +256,16 @@ return {
                     "args": null,
                     "concreteType": "EthLedgerWallet",
                     "plural": true,
-                    "selections": (v2/*: any*/)
+                    "selections": v2
                   }
                 ]
               }
             ]
           },
-          (v1/*: any*/)
+          v1
         ]
       }
     ]
-  },
-  "params": {
-    "operationKind": "query",
-    "name": "WalletsScreenQuery",
-    "id": null,
-    "text": "query WalletsScreenQuery(\n  $userID: String!\n) {\n  viewer {\n    wallets {\n      ...WalletsScreen_wallets_3iqrP\n    }\n    id\n  }\n}\n\nfragment WalletsScreen_wallets_3iqrP on Wallets {\n  ...WalletsView_wallets_3iqrP\n}\n\nfragment WalletsView_wallets_3iqrP on Wallets {\n  ethWallets(userID: $userID) {\n    hd {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n    ledger {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n  }\n}\n",
-    "metadata": {}
   }
 };
 })();

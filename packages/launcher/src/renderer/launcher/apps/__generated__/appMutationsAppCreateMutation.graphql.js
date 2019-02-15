@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 9c08c677684cb10782efd235aeced273
+ * @relayHash eaeec66a6c01c6d07a3ba95f6ed2ff4d
  */
 
 /* eslint-disable */
@@ -10,24 +10,24 @@
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
 type OwnAppsView_apps$ref = any;
-export type AppCreateMutationInput = {|
+export type AppCreateMutationInput = {
   name: string,
   contentsPath: string,
   version: string,
   developerID: string,
   permissionsRequirements: AppPermissionsRequirementsInput,
   clientMutationId?: ?string,
-|};
-export type AppPermissionsRequirementsInput = {|
+};
+export type AppPermissionsRequirementsInput = {
   optional: AppPermissionDefinitionsInput,
   required: AppPermissionDefinitionsInput,
-|};
-export type AppPermissionDefinitionsInput = {|
+};
+export type AppPermissionDefinitionsInput = {
   BLOCKCHAIN_SEND?: ?boolean,
   COMMS_CONTACT?: ?boolean,
   CONTACTS_READ?: ?boolean,
   WEB_REQUEST?: ?$ReadOnlyArray<?string>,
-|};
+};
 export type appMutationsAppCreateMutationVariables = {|
   input: AppCreateMutationInput
 |};
@@ -192,9 +192,9 @@ v5 = {
   "concreteType": "OwnApp",
   "plural": false,
   "selections": [
-    (v2/*: any*/),
-    (v3/*: any*/),
-    (v4/*: any*/)
+    v2,
+    v3,
+    v4
   ]
 },
 v6 = [
@@ -229,23 +229,28 @@ v6 = [
 ];
 return {
   "kind": "Request",
+  "operationKind": "mutation",
+  "name": "appMutationsAppCreateMutation",
+  "id": null,
+  "text": "mutation appMutationsAppCreateMutation(\n  $input: AppCreateMutationInput!\n) {\n  createApp(input: $input) {\n    app {\n      id\n      localID\n      name\n    }\n    viewer {\n      apps {\n        ...OwnAppsView_apps\n      }\n      id\n    }\n  }\n}\n\nfragment OwnAppsView_apps on Apps {\n  own {\n    localID\n    name\n    ...AppItem_ownApp\n    ...OwnAppDetailView_ownApp\n    id\n  }\n}\n\nfragment AppItem_ownApp on OwnApp {\n  mfid\n  localID\n  name\n  developer {\n    id\n    name\n  }\n  versions {\n    version\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n    }\n  }\n  users {\n    localID\n    identity {\n      profile {\n        name\n      }\n      id\n    }\n    id\n  }\n}\n\nfragment OwnAppDetailView_ownApp on OwnApp {\n  localID\n  mfid\n  name\n  contentsPath\n  updateFeedHash\n  developer {\n    id\n    name\n  }\n  versions {\n    version\n    versionHash\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        COMMS_CONTACT\n        CONTACTS_READ\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        COMMS_CONTACT\n        CONTACTS_READ\n      }\n    }\n  }\n}\n",
+  "metadata": {},
   "fragment": {
     "kind": "Fragment",
     "name": "appMutationsAppCreateMutation",
     "type": "Mutation",
     "metadata": null,
-    "argumentDefinitions": (v0/*: any*/),
+    "argumentDefinitions": v0,
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
         "name": "createApp",
         "storageKey": null,
-        "args": (v1/*: any*/),
+        "args": v1,
         "concreteType": "AppCreateMutationPayload",
         "plural": false,
         "selections": [
-          (v5/*: any*/),
+          v5,
           {
             "kind": "LinkedField",
             "alias": null,
@@ -280,18 +285,18 @@ return {
   "operation": {
     "kind": "Operation",
     "name": "appMutationsAppCreateMutation",
-    "argumentDefinitions": (v0/*: any*/),
+    "argumentDefinitions": v0,
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
         "name": "createApp",
         "storageKey": null,
-        "args": (v1/*: any*/),
+        "args": v1,
         "concreteType": "AppCreateMutationPayload",
         "plural": false,
         "selections": [
-          (v5/*: any*/),
+          v5,
           {
             "kind": "LinkedField",
             "alias": null,
@@ -319,8 +324,8 @@ return {
                     "concreteType": "OwnApp",
                     "plural": true,
                     "selections": [
-                      (v3/*: any*/),
-                      (v4/*: any*/),
+                      v3,
+                      v4,
                       {
                         "kind": "ScalarField",
                         "alias": null,
@@ -337,8 +342,8 @@ return {
                         "concreteType": "AppAuthor",
                         "plural": false,
                         "selections": [
-                          (v2/*: any*/),
-                          (v4/*: any*/)
+                          v2,
+                          v4
                         ]
                       },
                       {
@@ -374,7 +379,7 @@ return {
                                 "args": null,
                                 "concreteType": "AppPermissionDefinitions",
                                 "plural": false,
-                                "selections": (v6/*: any*/)
+                                "selections": v6
                               },
                               {
                                 "kind": "LinkedField",
@@ -384,7 +389,7 @@ return {
                                 "args": null,
                                 "concreteType": "AppPermissionDefinitions",
                                 "plural": false,
-                                "selections": (v6/*: any*/)
+                                "selections": v6
                               }
                             ]
                           },
@@ -406,7 +411,7 @@ return {
                         "concreteType": "AppUser",
                         "plural": true,
                         "selections": [
-                          (v3/*: any*/),
+                          v3,
                           {
                             "kind": "LinkedField",
                             "alias": null,
@@ -425,13 +430,13 @@ return {
                                 "concreteType": "NamedProfile",
                                 "plural": false,
                                 "selections": [
-                                  (v4/*: any*/)
+                                  v4
                                 ]
                               },
-                              (v2/*: any*/)
+                              v2
                             ]
                           },
-                          (v2/*: any*/)
+                          v2
                         ]
                       },
                       {
@@ -448,24 +453,17 @@ return {
                         "args": null,
                         "storageKey": null
                       },
-                      (v2/*: any*/)
+                      v2
                     ]
                   }
                 ]
               },
-              (v2/*: any*/)
+              v2
             ]
           }
         ]
       }
     ]
-  },
-  "params": {
-    "operationKind": "mutation",
-    "name": "appMutationsAppCreateMutation",
-    "id": null,
-    "text": "mutation appMutationsAppCreateMutation(\n  $input: AppCreateMutationInput!\n) {\n  createApp(input: $input) {\n    app {\n      id\n      localID\n      name\n    }\n    viewer {\n      apps {\n        ...OwnAppsView_apps\n      }\n      id\n    }\n  }\n}\n\nfragment OwnAppsView_apps on Apps {\n  own {\n    localID\n    name\n    ...AppItem_ownApp\n    ...OwnAppDetailView_ownApp\n    id\n  }\n}\n\nfragment AppItem_ownApp on OwnApp {\n  mfid\n  localID\n  name\n  developer {\n    id\n    name\n  }\n  versions {\n    version\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n    }\n  }\n  users {\n    localID\n    identity {\n      profile {\n        name\n      }\n      id\n    }\n    id\n  }\n}\n\nfragment OwnAppDetailView_ownApp on OwnApp {\n  localID\n  mfid\n  name\n  contentsPath\n  updateFeedHash\n  developer {\n    id\n    name\n  }\n  versions {\n    version\n    versionHash\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        COMMS_CONTACT\n        CONTACTS_READ\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        COMMS_CONTACT\n        CONTACTS_READ\n      }\n    }\n  }\n}\n",
-    "metadata": {}
   }
 };
 })();

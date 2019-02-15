@@ -37,7 +37,7 @@
     "@erebos/keccak256": "^0.6.0",
     "@erebos/secp256k1": "^0.6.0",
     "@ledgerhq/hw-app-eth": "^4.24.0",
-    "@ledgerhq/hw-transport-node-hid": "^4.24.0",
+    "@ledgerhq/hw-transport-node-hid": "^4.40.0",
     "@mainframe/app-manifest": "*",
     "@mainframe/app-permissions": "*",
     "@mainframe/client": "*",

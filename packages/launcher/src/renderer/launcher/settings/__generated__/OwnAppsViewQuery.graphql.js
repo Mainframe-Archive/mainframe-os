@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash ee8c1c4ee40336336e5bba6ea2d34332
+ * @relayHash e43525e55b25219d451a1448461ff46c
  */
 
 /* eslint-disable */
@@ -177,6 +177,11 @@ v3 = [
 ];
 return {
   "kind": "Request",
+  "operationKind": "query",
+  "name": "OwnAppsViewQuery",
+  "id": null,
+  "text": "query OwnAppsViewQuery {\n  viewer {\n    identities {\n      ...OwnAppsView_identities\n    }\n    apps {\n      ...OwnAppsView_apps\n    }\n    id\n  }\n}\n\nfragment OwnAppsView_identities on Identities {\n  ownDevelopers {\n    localID\n    id\n  }\n}\n\nfragment OwnAppsView_apps on Apps {\n  own {\n    localID\n    name\n    ...AppItem_ownApp\n    ...OwnAppDetailView_ownApp\n    id\n  }\n}\n\nfragment AppItem_ownApp on OwnApp {\n  mfid\n  localID\n  name\n  developer {\n    id\n    name\n  }\n  versions {\n    version\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n    }\n  }\n  users {\n    localID\n    identity {\n      profile {\n        name\n      }\n      id\n    }\n    id\n  }\n}\n\nfragment OwnAppDetailView_ownApp on OwnApp {\n  localID\n  mfid\n  name\n  contentsPath\n  updateFeedHash\n  developer {\n    id\n    name\n  }\n  versions {\n    version\n    versionHash\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        COMMS_CONTACT\n        CONTACTS_READ\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        COMMS_CONTACT\n        CONTACTS_READ\n      }\n    }\n  }\n}\n",
+  "metadata": {},
   "fragment": {
     "kind": "Fragment",
     "name": "OwnAppsViewQuery",
@@ -261,8 +266,8 @@ return {
                 "concreteType": "OwnDeveloperIdentity",
                 "plural": true,
                 "selections": [
-                  (v0/*: any*/),
-                  (v1/*: any*/)
+                  v0,
+                  v1
                 ]
               }
             ]
@@ -285,8 +290,8 @@ return {
                 "concreteType": "OwnApp",
                 "plural": true,
                 "selections": [
-                  (v0/*: any*/),
-                  (v2/*: any*/),
+                  v0,
+                  v2,
                   {
                     "kind": "ScalarField",
                     "alias": null,
@@ -303,8 +308,8 @@ return {
                     "concreteType": "AppAuthor",
                     "plural": false,
                     "selections": [
-                      (v1/*: any*/),
-                      (v2/*: any*/)
+                      v1,
+                      v2
                     ]
                   },
                   {
@@ -340,7 +345,7 @@ return {
                             "args": null,
                             "concreteType": "AppPermissionDefinitions",
                             "plural": false,
-                            "selections": (v3/*: any*/)
+                            "selections": v3
                           },
                           {
                             "kind": "LinkedField",
@@ -350,7 +355,7 @@ return {
                             "args": null,
                             "concreteType": "AppPermissionDefinitions",
                             "plural": false,
-                            "selections": (v3/*: any*/)
+                            "selections": v3
                           }
                         ]
                       },
@@ -372,7 +377,7 @@ return {
                     "concreteType": "AppUser",
                     "plural": true,
                     "selections": [
-                      (v0/*: any*/),
+                      v0,
                       {
                         "kind": "LinkedField",
                         "alias": null,
@@ -391,13 +396,13 @@ return {
                             "concreteType": "NamedProfile",
                             "plural": false,
                             "selections": [
-                              (v2/*: any*/)
+                              v2
                             ]
                           },
-                          (v1/*: any*/)
+                          v1
                         ]
                       },
-                      (v1/*: any*/)
+                      v1
                     ]
                   },
                   {
@@ -414,22 +419,15 @@ return {
                     "args": null,
                     "storageKey": null
                   },
-                  (v1/*: any*/)
+                  v1
                 ]
               }
             ]
           },
-          (v1/*: any*/)
+          v1
         ]
       }
     ]
-  },
-  "params": {
-    "operationKind": "query",
-    "name": "OwnAppsViewQuery",
-    "id": null,
-    "text": "query OwnAppsViewQuery {\n  viewer {\n    identities {\n      ...OwnAppsView_identities\n    }\n    apps {\n      ...OwnAppsView_apps\n    }\n    id\n  }\n}\n\nfragment OwnAppsView_identities on Identities {\n  ownDevelopers {\n    localID\n    id\n  }\n}\n\nfragment OwnAppsView_apps on Apps {\n  own {\n    localID\n    name\n    ...AppItem_ownApp\n    ...OwnAppDetailView_ownApp\n    id\n  }\n}\n\nfragment AppItem_ownApp on OwnApp {\n  mfid\n  localID\n  name\n  developer {\n    id\n    name\n  }\n  versions {\n    version\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n    }\n  }\n  users {\n    localID\n    identity {\n      profile {\n        name\n      }\n      id\n    }\n    id\n  }\n}\n\nfragment OwnAppDetailView_ownApp on OwnApp {\n  localID\n  mfid\n  name\n  contentsPath\n  updateFeedHash\n  developer {\n    id\n    name\n  }\n  versions {\n    version\n    versionHash\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        COMMS_CONTACT\n        CONTACTS_READ\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        COMMS_CONTACT\n        CONTACTS_READ\n      }\n    }\n  }\n}\n",
-    "metadata": {}
   }
 };
 })();

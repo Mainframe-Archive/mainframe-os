@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 08bcfe6d632d896e3cd6d9dfc92b1121
+ * @relayHash 7e87ff113c584afbce32f0c2ed3c7c35
  */
 
 /* eslint-disable */
@@ -10,12 +10,12 @@
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
 type WalletsView_wallets$ref = any;
-export type AddLedgerWalletAccountsInput = {|
+export type AddLedgerWalletAccountsInput = {
   indexes?: ?$ReadOnlyArray<?number>,
   name: string,
   userID?: ?string,
   clientMutationId?: ?string,
-|};
+};
 export type WalletAddLedgerModalAddLedgerWalletAccountsMutationVariables = {|
   input: AddLedgerWalletAccountsInput,
   userID: string,
@@ -178,27 +178,32 @@ v4 = [
       }
     ]
   },
-  (v3/*: any*/)
+  v3
 ];
 return {
   "kind": "Request",
+  "operationKind": "mutation",
+  "name": "WalletAddLedgerModalAddLedgerWalletAccountsMutation",
+  "id": null,
+  "text": "mutation WalletAddLedgerModalAddLedgerWalletAccountsMutation(\n  $input: AddLedgerWalletAccountsInput!\n  $userID: String!\n) {\n  addLedgerWalletAccounts(input: $input) {\n    addresses\n    viewer {\n      wallets {\n        ...WalletsView_wallets_3iqrP\n      }\n      id\n    }\n  }\n}\n\nfragment WalletsView_wallets_3iqrP on Wallets {\n  ethWallets(userID: $userID) {\n    hd {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n    ledger {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n  }\n}\n",
+  "metadata": {},
   "fragment": {
     "kind": "Fragment",
     "name": "WalletAddLedgerModalAddLedgerWalletAccountsMutation",
     "type": "Mutation",
     "metadata": null,
-    "argumentDefinitions": (v0/*: any*/),
+    "argumentDefinitions": v0,
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
         "name": "addLedgerWalletAccounts",
         "storageKey": null,
-        "args": (v1/*: any*/),
+        "args": v1,
         "concreteType": "AddLedgerWalletAccountsPayload",
         "plural": false,
         "selections": [
-          (v2/*: any*/),
+          v2,
           {
             "kind": "LinkedField",
             "alias": null,
@@ -240,18 +245,18 @@ return {
   "operation": {
     "kind": "Operation",
     "name": "WalletAddLedgerModalAddLedgerWalletAccountsMutation",
-    "argumentDefinitions": (v0/*: any*/),
+    "argumentDefinitions": v0,
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
         "name": "addLedgerWalletAccounts",
         "storageKey": null,
-        "args": (v1/*: any*/),
+        "args": v1,
         "concreteType": "AddLedgerWalletAccountsPayload",
         "plural": false,
         "selections": [
-          (v2/*: any*/),
+          v2,
           {
             "kind": "LinkedField",
             "alias": null,
@@ -294,7 +299,7 @@ return {
                         "args": null,
                         "concreteType": "EthHDWallet",
                         "plural": true,
-                        "selections": (v4/*: any*/)
+                        "selections": v4
                       },
                       {
                         "kind": "LinkedField",
@@ -304,25 +309,18 @@ return {
                         "args": null,
                         "concreteType": "EthLedgerWallet",
                         "plural": true,
-                        "selections": (v4/*: any*/)
+                        "selections": v4
                       }
                     ]
                   }
                 ]
               },
-              (v3/*: any*/)
+              v3
             ]
           }
         ]
       }
     ]
-  },
-  "params": {
-    "operationKind": "mutation",
-    "name": "WalletAddLedgerModalAddLedgerWalletAccountsMutation",
-    "id": null,
-    "text": "mutation WalletAddLedgerModalAddLedgerWalletAccountsMutation(\n  $input: AddLedgerWalletAccountsInput!\n  $userID: String!\n) {\n  addLedgerWalletAccounts(input: $input) {\n    addresses\n    viewer {\n      wallets {\n        ...WalletsView_wallets_3iqrP\n      }\n      id\n    }\n  }\n}\n\nfragment WalletsView_wallets_3iqrP on Wallets {\n  ethWallets(userID: $userID) {\n    hd {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n    ledger {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n  }\n}\n",
-    "metadata": {}
   }
 };
 })();

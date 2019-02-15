@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 59b92563fd7e1387a8fa25cc4c291820
+ * @relayHash ed9376e625cba762bdbc4dd0e9e83f1c
  */
 
 /* eslint-disable */
@@ -42,6 +42,11 @@ fragment SettingsScreen_settings on Settings {
 
 const node/*: ConcreteRequest*/ = {
   "kind": "Request",
+  "operationKind": "query",
+  "name": "SettingsScreenQuery",
+  "id": null,
+  "text": "query SettingsScreenQuery {\n  viewer {\n    settings {\n      ...SettingsScreen_settings\n    }\n    id\n  }\n}\n\nfragment SettingsScreen_settings on Settings {\n  ethereumUrl\n}\n",
+  "metadata": {},
   "fragment": {
     "kind": "Fragment",
     "name": "SettingsScreenQuery",
@@ -120,13 +125,6 @@ const node/*: ConcreteRequest*/ = {
         ]
       }
     ]
-  },
-  "params": {
-    "operationKind": "query",
-    "name": "SettingsScreenQuery",
-    "id": null,
-    "text": "query SettingsScreenQuery {\n  viewer {\n    settings {\n      ...SettingsScreen_settings\n    }\n    id\n  }\n}\n\nfragment SettingsScreen_settings on Settings {\n  ethereumUrl\n}\n",
-    "metadata": {}
   }
 };
 // prettier-ignore

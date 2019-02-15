@@ -7,7 +7,7 @@
 'use strict';
 
 /*::
-import type { ReaderFragment } from 'relay-runtime';
+import type { ConcreteFragment } from 'relay-runtime';
 import type { FragmentReference } from "relay-runtime";
 declare export opaque type WalletsView_wallets$ref: FragmentReference;
 export type WalletsView_wallets = {|
@@ -40,7 +40,7 @@ export type WalletsView_wallets = {|
 */
 
 
-const node/*: ReaderFragment*/ = (function(){
+const node/*: ConcreteFragment*/ = (function(){
 var v0 = [
   {
     "kind": "ScalarField",
@@ -138,7 +138,7 @@ return {
           "args": null,
           "concreteType": "EthHDWallet",
           "plural": true,
-          "selections": (v0/*: any*/)
+          "selections": v0
         },
         {
           "kind": "LinkedField",
@@ -148,7 +148,7 @@ return {
           "args": null,
           "concreteType": "EthLedgerWallet",
           "plural": true,
-          "selections": (v0/*: any*/)
+          "selections": v0
         }
       ]
     }

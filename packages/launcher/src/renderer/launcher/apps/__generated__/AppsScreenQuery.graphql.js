@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 981d257fd1a7c73b588af0333499a4b4
+ * @relayHash 2fad857d77879444f00a3ff29a040eee
  */
 
 /* eslint-disable */
@@ -122,7 +122,7 @@ v3 = [
     "args": null,
     "storageKey": null
   },
-  (v2/*: any*/)
+  v2
 ],
 v4 = {
   "kind": "ScalarField",
@@ -133,6 +133,11 @@ v4 = {
 };
 return {
   "kind": "Request",
+  "operationKind": "query",
+  "name": "AppsScreenQuery",
+  "id": null,
+  "text": "query AppsScreenQuery {\n  viewer {\n    apps {\n      ...AppsScreen_apps\n    }\n    id\n  }\n}\n\nfragment AppsScreen_apps on Apps {\n  ...AppsView_apps\n}\n\nfragment AppsView_apps on Apps {\n  installed {\n    localID\n    ...AppItem_installedApp\n    id\n  }\n}\n\nfragment AppItem_installedApp on App {\n  mfid\n  localID\n  name\n  manifest {\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n    }\n    author {\n      id\n      name\n    }\n  }\n  users {\n    localID\n    identity {\n      profile {\n        name\n      }\n      id\n    }\n    settings {\n      permissionsSettings {\n        permissionsChecked\n        grants {\n          BLOCKCHAIN_SEND\n          WEB_REQUEST {\n            granted\n            denied\n          }\n        }\n      }\n    }\n    id\n  }\n}\n",
+  "metadata": {},
   "fragment": {
     "kind": "Fragment",
     "name": "AppsScreenQuery",
@@ -201,7 +206,7 @@ return {
                 "concreteType": "App",
                 "plural": true,
                 "selections": [
-                  (v0/*: any*/),
+                  v0,
                   {
                     "kind": "ScalarField",
                     "alias": null,
@@ -209,7 +214,7 @@ return {
                     "args": null,
                     "storageKey": null
                   },
-                  (v1/*: any*/),
+                  v1,
                   {
                     "kind": "LinkedField",
                     "alias": null,
@@ -236,7 +241,7 @@ return {
                             "args": null,
                             "concreteType": "AppPermissionDefinitions",
                             "plural": false,
-                            "selections": (v3/*: any*/)
+                            "selections": v3
                           },
                           {
                             "kind": "LinkedField",
@@ -246,7 +251,7 @@ return {
                             "args": null,
                             "concreteType": "AppPermissionDefinitions",
                             "plural": false,
-                            "selections": (v3/*: any*/)
+                            "selections": v3
                           }
                         ]
                       },
@@ -259,8 +264,8 @@ return {
                         "concreteType": "AppAuthor",
                         "plural": false,
                         "selections": [
-                          (v4/*: any*/),
-                          (v1/*: any*/)
+                          v4,
+                          v1
                         ]
                       }
                     ]
@@ -274,7 +279,7 @@ return {
                     "concreteType": "AppUser",
                     "plural": true,
                     "selections": [
-                      (v0/*: any*/),
+                      v0,
                       {
                         "kind": "LinkedField",
                         "alias": null,
@@ -293,10 +298,10 @@ return {
                             "concreteType": "NamedProfile",
                             "plural": false,
                             "selections": [
-                              (v1/*: any*/)
+                              v1
                             ]
                           },
-                          (v4/*: any*/)
+                          v4
                         ]
                       },
                       {
@@ -333,7 +338,7 @@ return {
                                 "concreteType": "AppPermissions",
                                 "plural": false,
                                 "selections": [
-                                  (v2/*: any*/),
+                                  v2,
                                   {
                                     "kind": "LinkedField",
                                     "alias": null,
@@ -365,25 +370,18 @@ return {
                           }
                         ]
                       },
-                      (v4/*: any*/)
+                      v4
                     ]
                   },
-                  (v4/*: any*/)
+                  v4
                 ]
               }
             ]
           },
-          (v4/*: any*/)
+          v4
         ]
       }
     ]
-  },
-  "params": {
-    "operationKind": "query",
-    "name": "AppsScreenQuery",
-    "id": null,
-    "text": "query AppsScreenQuery {\n  viewer {\n    apps {\n      ...AppsScreen_apps\n    }\n    id\n  }\n}\n\nfragment AppsScreen_apps on Apps {\n  ...AppsView_apps\n}\n\nfragment AppsView_apps on Apps {\n  installed {\n    localID\n    ...AppItem_installedApp\n    id\n  }\n}\n\nfragment AppItem_installedApp on App {\n  mfid\n  localID\n  name\n  manifest {\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n    }\n    author {\n      id\n      name\n    }\n  }\n  users {\n    localID\n    identity {\n      profile {\n        name\n      }\n      id\n    }\n    settings {\n      permissionsSettings {\n        permissionsChecked\n        grants {\n          BLOCKCHAIN_SEND\n          WEB_REQUEST {\n            granted\n            denied\n          }\n        }\n      }\n    }\n    id\n  }\n}\n",
-    "metadata": {}
   }
 };
 })();

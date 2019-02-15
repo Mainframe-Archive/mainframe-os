@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash f648988c9e6b87b19a95b0f2aba35d6d
+ * @relayHash d8b1ac25de6dd962a74d9622396f32aa
  */
 
 /* eslint-disable */
@@ -10,15 +10,15 @@
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
 type Launcher_identities$ref = any;
-export type CreateUserIdentityInput = {|
+export type CreateUserIdentityInput = {
   profile: UserProfileInput,
   private?: ?boolean,
   clientMutationId?: ?string,
-|};
-export type UserProfileInput = {|
+};
+export type UserProfileInput = {
   name: string,
   avatar?: ?string,
-|};
+};
 export type OnboardIdentityViewCreateUserIdentityMutationVariables = {|
   input: CreateUserIdentityInput
 |};
@@ -150,24 +150,29 @@ v5 = {
   "storageKey": null
 },
 v6 = [
-  (v2/*: any*/),
-  (v5/*: any*/)
+  v2,
+  v5
 ];
 return {
   "kind": "Request",
+  "operationKind": "mutation",
+  "name": "OnboardIdentityViewCreateUserIdentityMutation",
+  "id": null,
+  "text": "mutation OnboardIdentityViewCreateUserIdentityMutation(\n  $input: CreateUserIdentityInput!\n) {\n  createUserIdentity(input: $input) {\n    user {\n      localID\n      profile {\n        name\n      }\n      id\n    }\n    viewer {\n      identities {\n        ownUsers {\n          defaultEthAddress\n          localID\n          id\n        }\n        ...Launcher_identities\n      }\n      id\n    }\n  }\n}\n\nfragment Launcher_identities on Identities {\n  ownUsers {\n    defaultEthAddress\n    localID\n    wallets {\n      hd {\n        localID\n        id\n      }\n      ledger {\n        localID\n        id\n      }\n    }\n    id\n  }\n}\n",
+  "metadata": {},
   "fragment": {
     "kind": "Fragment",
     "name": "OnboardIdentityViewCreateUserIdentityMutation",
     "type": "Mutation",
     "metadata": null,
-    "argumentDefinitions": (v0/*: any*/),
+    "argumentDefinitions": v0,
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
         "name": "createUserIdentity",
         "storageKey": null,
-        "args": (v1/*: any*/),
+        "args": v1,
         "concreteType": "CreateUserIdentityPayload",
         "plural": false,
         "selections": [
@@ -180,8 +185,8 @@ return {
             "concreteType": "OwnUserIdentity",
             "plural": false,
             "selections": [
-              (v2/*: any*/),
-              (v3/*: any*/)
+              v2,
+              v3
             ]
           },
           {
@@ -211,8 +216,8 @@ return {
                     "concreteType": "OwnUserIdentity",
                     "plural": true,
                     "selections": [
-                      (v4/*: any*/),
-                      (v2/*: any*/)
+                      v4,
+                      v2
                     ]
                   },
                   {
@@ -231,14 +236,14 @@ return {
   "operation": {
     "kind": "Operation",
     "name": "OnboardIdentityViewCreateUserIdentityMutation",
-    "argumentDefinitions": (v0/*: any*/),
+    "argumentDefinitions": v0,
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
         "name": "createUserIdentity",
         "storageKey": null,
-        "args": (v1/*: any*/),
+        "args": v1,
         "concreteType": "CreateUserIdentityPayload",
         "plural": false,
         "selections": [
@@ -251,9 +256,9 @@ return {
             "concreteType": "OwnUserIdentity",
             "plural": false,
             "selections": [
-              (v2/*: any*/),
-              (v3/*: any*/),
-              (v5/*: any*/)
+              v2,
+              v3,
+              v5
             ]
           },
           {
@@ -283,9 +288,9 @@ return {
                     "concreteType": "OwnUserIdentity",
                     "plural": true,
                     "selections": [
-                      (v4/*: any*/),
-                      (v2/*: any*/),
-                      (v5/*: any*/),
+                      v4,
+                      v2,
+                      v5,
                       {
                         "kind": "LinkedField",
                         "alias": null,
@@ -303,7 +308,7 @@ return {
                             "args": null,
                             "concreteType": "EthHDWallet",
                             "plural": true,
-                            "selections": (v6/*: any*/)
+                            "selections": v6
                           },
                           {
                             "kind": "LinkedField",
@@ -313,7 +318,7 @@ return {
                             "args": null,
                             "concreteType": "EthLedgerWallet",
                             "plural": true,
-                            "selections": (v6/*: any*/)
+                            "selections": v6
                           }
                         ]
                       }
@@ -321,19 +326,12 @@ return {
                   }
                 ]
               },
-              (v5/*: any*/)
+              v5
             ]
           }
         ]
       }
     ]
-  },
-  "params": {
-    "operationKind": "mutation",
-    "name": "OnboardIdentityViewCreateUserIdentityMutation",
-    "id": null,
-    "text": "mutation OnboardIdentityViewCreateUserIdentityMutation(\n  $input: CreateUserIdentityInput!\n) {\n  createUserIdentity(input: $input) {\n    user {\n      localID\n      profile {\n        name\n      }\n      id\n    }\n    viewer {\n      identities {\n        ownUsers {\n          defaultEthAddress\n          localID\n          id\n        }\n        ...Launcher_identities\n      }\n      id\n    }\n  }\n}\n\nfragment Launcher_identities on Identities {\n  ownUsers {\n    defaultEthAddress\n    localID\n    wallets {\n      hd {\n        localID\n        id\n      }\n      ledger {\n        localID\n        id\n      }\n    }\n    id\n  }\n}\n",
-    "metadata": {}
   }
 };
 })();

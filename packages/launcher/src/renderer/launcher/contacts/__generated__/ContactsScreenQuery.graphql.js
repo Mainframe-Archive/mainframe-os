@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash ad8f344fc13c19ac3805a4aee8660b4b
+ * @relayHash cbf1a505ac8695dfbeaca6e34a938050
  */
 
 /* eslint-disable */
@@ -76,12 +76,17 @@ v1 = {
 };
 return {
   "kind": "Request",
+  "operationKind": "query",
+  "name": "ContactsScreenQuery",
+  "id": null,
+  "text": "query ContactsScreenQuery(\n  $userID: String!\n) {\n  viewer {\n    contacts {\n      ...ContactsScreen_contacts_3iqrP\n    }\n    id\n  }\n}\n\nfragment ContactsScreen_contacts_3iqrP on Contacts {\n  ...ContactsView_contacts_3iqrP\n}\n\nfragment ContactsView_contacts_3iqrP on Contacts {\n  userContacts(userID: $userID) {\n    peerID\n    localID\n    connectionState\n    publicFeed\n    profile {\n      name\n      ethAddress\n    }\n    id\n  }\n}\n",
+  "metadata": {},
   "fragment": {
     "kind": "Fragment",
     "name": "ContactsScreenQuery",
     "type": "Query",
     "metadata": null,
-    "argumentDefinitions": (v0/*: any*/),
+    "argumentDefinitions": v0,
     "selections": [
       {
         "kind": "LinkedField",
@@ -122,7 +127,7 @@ return {
   "operation": {
     "kind": "Operation",
     "name": "ContactsScreenQuery",
-    "argumentDefinitions": (v0/*: any*/),
+    "argumentDefinitions": v0,
     "selections": [
       {
         "kind": "LinkedField",
@@ -211,22 +216,15 @@ return {
                       }
                     ]
                   },
-                  (v1/*: any*/)
+                  v1
                 ]
               }
             ]
           },
-          (v1/*: any*/)
+          v1
         ]
       }
     ]
-  },
-  "params": {
-    "operationKind": "query",
-    "name": "ContactsScreenQuery",
-    "id": null,
-    "text": "query ContactsScreenQuery(\n  $userID: String!\n) {\n  viewer {\n    contacts {\n      ...ContactsScreen_contacts_3iqrP\n    }\n    id\n  }\n}\n\nfragment ContactsScreen_contacts_3iqrP on Contacts {\n  ...ContactsView_contacts_3iqrP\n}\n\nfragment ContactsView_contacts_3iqrP on Contacts {\n  userContacts(userID: $userID) {\n    peerID\n    localID\n    connectionState\n    publicFeed\n    profile {\n      name\n      ethAddress\n    }\n    id\n  }\n}\n",
-    "metadata": {}
   }
 };
 })();

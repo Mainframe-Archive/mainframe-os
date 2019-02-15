@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash c835203b345d58a522bae03b59aebc07
+ * @relayHash b2d2d32d4f00f5e989d188648dd90db6
  */
 
 /* eslint-disable */
@@ -11,17 +11,17 @@
 import type { ConcreteRequest } from 'relay-runtime';
 type IdentitiesView_identities$ref = any;
 type Launcher_identities$ref = any;
-export type UpdateProfileInput = {|
+export type UpdateProfileInput = {
   userID: string,
   profile: UpdateUserProfileInput,
   privateProfile?: ?boolean,
   clientMutationId?: ?string,
-|};
-export type UpdateUserProfileInput = {|
+};
+export type UpdateUserProfileInput = {
   name?: ?string,
   avatar?: ?string,
   ethAddress?: ?string,
-|};
+};
 export type IdentityEditModalUpdateProfileMutationVariables = {|
   input: UpdateProfileInput
 |};
@@ -154,8 +154,8 @@ v3 = {
   "storageKey": null
 },
 v4 = [
-  (v2/*: any*/),
-  (v3/*: any*/)
+  v2,
+  v3
 ],
 v5 = {
   "kind": "ScalarField",
@@ -165,23 +165,28 @@ v5 = {
   "storageKey": null
 },
 v6 = [
-  (v5/*: any*/)
+  v5
 ];
 return {
   "kind": "Request",
+  "operationKind": "mutation",
+  "name": "IdentityEditModalUpdateProfileMutation",
+  "id": null,
+  "text": "mutation IdentityEditModalUpdateProfileMutation(\n  $input: UpdateProfileInput!\n) {\n  updateProfile(input: $input) {\n    viewer {\n      identities {\n        ...Launcher_identities\n        ...IdentitiesView_identities\n      }\n      id\n    }\n  }\n}\n\nfragment Launcher_identities on Identities {\n  ownUsers {\n    defaultEthAddress\n    localID\n    wallets {\n      hd {\n        localID\n        id\n      }\n      ledger {\n        localID\n        id\n      }\n    }\n    id\n  }\n}\n\nfragment IdentitiesView_identities on Identities {\n  ownUsers {\n    ...IdentityEditModal_ownUserIdentity\n    localID\n    feedHash\n    profile {\n      name\n    }\n    apps {\n      localID\n      manifest {\n        name\n      }\n      users {\n        settings {\n          permissionsSettings {\n            permissionsChecked\n            grants {\n              BLOCKCHAIN_SEND\n            }\n          }\n        }\n        id\n      }\n      id\n    }\n    id\n  }\n  ownDevelopers {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n}\n\nfragment IdentityEditModal_ownUserIdentity on OwnUserIdentity {\n  localID\n  feedHash\n  privateProfile\n  profile {\n    name\n    avatar\n  }\n}\n",
+  "metadata": {},
   "fragment": {
     "kind": "Fragment",
     "name": "IdentityEditModalUpdateProfileMutation",
     "type": "Mutation",
     "metadata": null,
-    "argumentDefinitions": (v0/*: any*/),
+    "argumentDefinitions": v0,
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
         "name": "updateProfile",
         "storageKey": null,
-        "args": (v1/*: any*/),
+        "args": v1,
         "concreteType": "UpdateProfilePayload",
         "plural": false,
         "selections": [
@@ -224,14 +229,14 @@ return {
   "operation": {
     "kind": "Operation",
     "name": "IdentityEditModalUpdateProfileMutation",
-    "argumentDefinitions": (v0/*: any*/),
+    "argumentDefinitions": v0,
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
         "name": "updateProfile",
         "storageKey": null,
-        "args": (v1/*: any*/),
+        "args": v1,
         "concreteType": "UpdateProfilePayload",
         "plural": false,
         "selections": [
@@ -269,7 +274,7 @@ return {
                         "args": null,
                         "storageKey": null
                       },
-                      (v2/*: any*/),
+                      v2,
                       {
                         "kind": "LinkedField",
                         "alias": null,
@@ -287,7 +292,7 @@ return {
                             "args": null,
                             "concreteType": "EthHDWallet",
                             "plural": true,
-                            "selections": (v4/*: any*/)
+                            "selections": v4
                           },
                           {
                             "kind": "LinkedField",
@@ -297,11 +302,11 @@ return {
                             "args": null,
                             "concreteType": "EthLedgerWallet",
                             "plural": true,
-                            "selections": (v4/*: any*/)
+                            "selections": v4
                           }
                         ]
                       },
-                      (v3/*: any*/),
+                      v3,
                       {
                         "kind": "ScalarField",
                         "alias": null,
@@ -325,7 +330,7 @@ return {
                         "concreteType": "NamedProfile",
                         "plural": false,
                         "selections": [
-                          (v5/*: any*/),
+                          v5,
                           {
                             "kind": "ScalarField",
                             "alias": null,
@@ -344,7 +349,7 @@ return {
                         "concreteType": "App",
                         "plural": true,
                         "selections": [
-                          (v2/*: any*/),
+                          v2,
                           {
                             "kind": "LinkedField",
                             "alias": null,
@@ -353,7 +358,7 @@ return {
                             "args": null,
                             "concreteType": "AppManifestData",
                             "plural": false,
-                            "selections": (v6/*: any*/)
+                            "selections": v6
                           },
                           {
                             "kind": "LinkedField",
@@ -411,10 +416,10 @@ return {
                                   }
                                 ]
                               },
-                              (v3/*: any*/)
+                              v3
                             ]
                           },
-                          (v3/*: any*/)
+                          v3
                         ]
                       }
                     ]
@@ -428,7 +433,7 @@ return {
                     "concreteType": "OwnDeveloperIdentity",
                     "plural": true,
                     "selections": [
-                      (v2/*: any*/),
+                      v2,
                       {
                         "kind": "LinkedField",
                         "alias": null,
@@ -437,26 +442,19 @@ return {
                         "args": null,
                         "concreteType": "NamedProfile",
                         "plural": false,
-                        "selections": (v6/*: any*/)
+                        "selections": v6
                       },
-                      (v3/*: any*/)
+                      v3
                     ]
                   }
                 ]
               },
-              (v3/*: any*/)
+              v3
             ]
           }
         ]
       }
     ]
-  },
-  "params": {
-    "operationKind": "mutation",
-    "name": "IdentityEditModalUpdateProfileMutation",
-    "id": null,
-    "text": "mutation IdentityEditModalUpdateProfileMutation(\n  $input: UpdateProfileInput!\n) {\n  updateProfile(input: $input) {\n    viewer {\n      identities {\n        ...Launcher_identities\n        ...IdentitiesView_identities\n      }\n      id\n    }\n  }\n}\n\nfragment Launcher_identities on Identities {\n  ownUsers {\n    defaultEthAddress\n    localID\n    wallets {\n      hd {\n        localID\n        id\n      }\n      ledger {\n        localID\n        id\n      }\n    }\n    id\n  }\n}\n\nfragment IdentitiesView_identities on Identities {\n  ownUsers {\n    ...IdentityEditModal_ownUserIdentity\n    localID\n    feedHash\n    profile {\n      name\n    }\n    apps {\n      localID\n      manifest {\n        name\n      }\n      users {\n        settings {\n          permissionsSettings {\n            permissionsChecked\n            grants {\n              BLOCKCHAIN_SEND\n            }\n          }\n        }\n        id\n      }\n      id\n    }\n    id\n  }\n  ownDevelopers {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n}\n\nfragment IdentityEditModal_ownUserIdentity on OwnUserIdentity {\n  localID\n  feedHash\n  privateProfile\n  profile {\n    name\n    avatar\n  }\n}\n",
-    "metadata": {}
   }
 };
 })();

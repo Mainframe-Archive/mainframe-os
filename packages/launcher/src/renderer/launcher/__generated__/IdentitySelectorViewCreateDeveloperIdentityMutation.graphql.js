@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 852727d7e016077bced0e9749f8c4a93
+ * @relayHash da07adaa268691ff799d12c53e6ab9ca
  */
 
 /* eslint-disable */
@@ -9,14 +9,14 @@
 
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
-export type CreateDeveloperIdentityInput = {|
+export type CreateDeveloperIdentityInput = {
   profile: UserProfileInput,
   clientMutationId?: ?string,
-|};
-export type UserProfileInput = {|
+};
+export type UserProfileInput = {
   name: string,
   avatar?: ?string,
-|};
+};
 export type IdentitySelectorViewCreateDeveloperIdentityMutationVariables = {|
   input: CreateDeveloperIdentityInput
 |};
@@ -127,7 +127,7 @@ v3 = {
   ]
 },
 v4 = [
-  (v3/*: any*/)
+  v3
 ],
 v5 = {
   "kind": "ScalarField",
@@ -137,24 +137,29 @@ v5 = {
   "storageKey": null
 },
 v6 = [
-  (v3/*: any*/),
-  (v5/*: any*/)
+  v3,
+  v5
 ];
 return {
   "kind": "Request",
+  "operationKind": "mutation",
+  "name": "IdentitySelectorViewCreateDeveloperIdentityMutation",
+  "id": null,
+  "text": "mutation IdentitySelectorViewCreateDeveloperIdentityMutation(\n  $input: CreateDeveloperIdentityInput!\n) {\n  createDeveloperIdentity(input: $input) {\n    user {\n      localID\n      profile {\n        name\n      }\n      id\n    }\n    viewer {\n      identities {\n        ownUsers {\n          profile {\n            name\n          }\n          id\n        }\n        ownDevelopers {\n          profile {\n            name\n          }\n          id\n        }\n      }\n      id\n    }\n  }\n}\n",
+  "metadata": {},
   "fragment": {
     "kind": "Fragment",
     "name": "IdentitySelectorViewCreateDeveloperIdentityMutation",
     "type": "Mutation",
     "metadata": null,
-    "argumentDefinitions": (v0/*: any*/),
+    "argumentDefinitions": v0,
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
         "name": "createDeveloperIdentity",
         "storageKey": null,
-        "args": (v1/*: any*/),
+        "args": v1,
         "concreteType": "CreateDeveloperIdentityPayload",
         "plural": false,
         "selections": [
@@ -167,8 +172,8 @@ return {
             "concreteType": "OwnDeveloperIdentity",
             "plural": false,
             "selections": [
-              (v2/*: any*/),
-              (v3/*: any*/)
+              v2,
+              v3
             ]
           },
           {
@@ -197,7 +202,7 @@ return {
                     "args": null,
                     "concreteType": "OwnUserIdentity",
                     "plural": true,
-                    "selections": (v4/*: any*/)
+                    "selections": v4
                   },
                   {
                     "kind": "LinkedField",
@@ -207,7 +212,7 @@ return {
                     "args": null,
                     "concreteType": "OwnDeveloperIdentity",
                     "plural": true,
-                    "selections": (v4/*: any*/)
+                    "selections": v4
                   }
                 ]
               }
@@ -220,14 +225,14 @@ return {
   "operation": {
     "kind": "Operation",
     "name": "IdentitySelectorViewCreateDeveloperIdentityMutation",
-    "argumentDefinitions": (v0/*: any*/),
+    "argumentDefinitions": v0,
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
         "name": "createDeveloperIdentity",
         "storageKey": null,
-        "args": (v1/*: any*/),
+        "args": v1,
         "concreteType": "CreateDeveloperIdentityPayload",
         "plural": false,
         "selections": [
@@ -240,9 +245,9 @@ return {
             "concreteType": "OwnDeveloperIdentity",
             "plural": false,
             "selections": [
-              (v2/*: any*/),
-              (v3/*: any*/),
-              (v5/*: any*/)
+              v2,
+              v3,
+              v5
             ]
           },
           {
@@ -271,7 +276,7 @@ return {
                     "args": null,
                     "concreteType": "OwnUserIdentity",
                     "plural": true,
-                    "selections": (v6/*: any*/)
+                    "selections": v6
                   },
                   {
                     "kind": "LinkedField",
@@ -281,23 +286,16 @@ return {
                     "args": null,
                     "concreteType": "OwnDeveloperIdentity",
                     "plural": true,
-                    "selections": (v6/*: any*/)
+                    "selections": v6
                   }
                 ]
               },
-              (v5/*: any*/)
+              v5
             ]
           }
         ]
       }
     ]
-  },
-  "params": {
-    "operationKind": "mutation",
-    "name": "IdentitySelectorViewCreateDeveloperIdentityMutation",
-    "id": null,
-    "text": "mutation IdentitySelectorViewCreateDeveloperIdentityMutation(\n  $input: CreateDeveloperIdentityInput!\n) {\n  createDeveloperIdentity(input: $input) {\n    user {\n      localID\n      profile {\n        name\n      }\n      id\n    }\n    viewer {\n      identities {\n        ownUsers {\n          profile {\n            name\n          }\n          id\n        }\n        ownDevelopers {\n          profile {\n            name\n          }\n          id\n        }\n      }\n      id\n    }\n  }\n}\n",
-    "metadata": {}
   }
 };
 })();

@@ -7,7 +7,7 @@
 'use strict';
 
 /*::
-import type { ReaderFragment } from 'relay-runtime';
+import type { ConcreteFragment } from 'relay-runtime';
 import type { FragmentReference } from "relay-runtime";
 declare export opaque type Launcher_identities$ref: FragmentReference;
 export type Launcher_identities = {|
@@ -28,7 +28,7 @@ export type Launcher_identities = {|
 */
 
 
-const node/*: ReaderFragment*/ = (function(){
+const node/*: ConcreteFragment*/ = (function(){
 var v0 = {
   "kind": "ScalarField",
   "alias": null,
@@ -37,7 +37,7 @@ var v0 = {
   "storageKey": null
 },
 v1 = [
-  (v0/*: any*/)
+  v0
 ];
 return {
   "kind": "Fragment",
@@ -62,7 +62,7 @@ return {
           "args": null,
           "storageKey": null
         },
-        (v0/*: any*/),
+        v0,
         {
           "kind": "LinkedField",
           "alias": null,
@@ -80,7 +80,7 @@ return {
               "args": null,
               "concreteType": "EthHDWallet",
               "plural": true,
-              "selections": (v1/*: any*/)
+              "selections": v1
             },
             {
               "kind": "LinkedField",
@@ -90,7 +90,7 @@ return {
               "args": null,
               "concreteType": "EthLedgerWallet",
               "plural": true,
-              "selections": (v1/*: any*/)
+              "selections": v1
             }
           ]
         }

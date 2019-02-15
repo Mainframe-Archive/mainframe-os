@@ -7,7 +7,7 @@
 'use strict';
 
 /*::
-import type { ReaderFragment } from 'relay-runtime';
+import type { ConcreteFragment } from 'relay-runtime';
 import type { FragmentReference } from "relay-runtime";
 declare export opaque type AppItem_installedApp$ref: FragmentReference;
 export type AppItem_installedApp = {|
@@ -55,7 +55,7 @@ export type AppItem_installedApp = {|
 */
 
 
-const node/*: ReaderFragment*/ = (function(){
+const node/*: ConcreteFragment*/ = (function(){
 var v0 = {
   "kind": "ScalarField",
   "alias": null,
@@ -85,7 +85,7 @@ v3 = [
     "args": null,
     "storageKey": null
   },
-  (v2/*: any*/)
+  v2
 ];
 return {
   "kind": "Fragment",
@@ -101,8 +101,8 @@ return {
       "args": null,
       "storageKey": null
     },
-    (v0/*: any*/),
-    (v1/*: any*/),
+    v0,
+    v1,
     {
       "kind": "LinkedField",
       "alias": null,
@@ -129,7 +129,7 @@ return {
               "args": null,
               "concreteType": "AppPermissionDefinitions",
               "plural": false,
-              "selections": (v3/*: any*/)
+              "selections": v3
             },
             {
               "kind": "LinkedField",
@@ -139,7 +139,7 @@ return {
               "args": null,
               "concreteType": "AppPermissionDefinitions",
               "plural": false,
-              "selections": (v3/*: any*/)
+              "selections": v3
             }
           ]
         },
@@ -159,7 +159,7 @@ return {
               "args": null,
               "storageKey": null
             },
-            (v1/*: any*/)
+            v1
           ]
         }
       ]
@@ -173,7 +173,7 @@ return {
       "concreteType": "AppUser",
       "plural": true,
       "selections": [
-        (v0/*: any*/),
+        v0,
         {
           "kind": "LinkedField",
           "alias": null,
@@ -192,7 +192,7 @@ return {
               "concreteType": "NamedProfile",
               "plural": false,
               "selections": [
-                (v1/*: any*/)
+                v1
               ]
             }
           ]
@@ -231,7 +231,7 @@ return {
                   "concreteType": "AppPermissions",
                   "plural": false,
                   "selections": [
-                    (v2/*: any*/),
+                    v2,
                     {
                       "kind": "LinkedField",
                       "alias": null,
