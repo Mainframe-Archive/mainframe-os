@@ -36,6 +36,7 @@ type OwnProps = SharedProps & {
 
 type SuggestedProps = {
   appID: string,
+  mfid: string,
   appName: string,
   devName: string,
   onOpen: (appID: string) => void,
@@ -112,7 +113,7 @@ export const SuggestedAppItem = (props: SuggestedProps) => {
 
   return (
     <AppItem
-      appID={props.appID}
+      appID={props.mfid}
       appName={props.appName}
       devName={props.devName}
       onOpen={onOpen}

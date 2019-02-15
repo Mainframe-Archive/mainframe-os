@@ -10,6 +10,8 @@ import type { AppInstalledData } from '@mainframe/client'
 import styled from 'styled-components/native'
 import { Text } from '@morpheus-ui/core'
 import PlusIcon from '@morpheus-ui/icons/PlusSymbolCircled'
+import { findIndex } from 'lodash'
+import memoize from 'memoize-one'
 
 import rpc from '../rpc'
 import PermissionsView from '../PermissionsView'
@@ -22,8 +24,16 @@ import { InstalledAppItem, SuggestedAppItem } from './AppItem'
 
 const SUGGESTED_APPS = [
   {
-    hash: '',
-    name: 'Test app',
+    hash: '3dda9f3c3ba97551e66d7704cbc9c06b32689b3f2e9e4927dcf343f4431aed61',
+    mfid:
+      'mf:0/app:pub-key:ed25519/base64:OpJx6d2IskYgWJwc65yC+HzWHnXHt++ikWz8ZFpX9Es=',
+    name: 'Test app 1',
+  },
+  {
+    hash: 'c4405a27e0f700e6796d42e78710e96cf4e06008f49a989ba4bf68a9b35c51fb',
+    mfid:
+      'mf:0/app:pub-key:ed25519/base64:8940Tpo5zGSgV0MMYG3ApvjVFD6UAcOBb+KGPLR31jw=',
+    name: 'Test app 2',
   },
 ]
 
@@ -200,6 +210,12 @@ class AppsView extends Component<Props, State> {
     })
   }
 
+  getSuggestedList = memoize((apps: Array<AppData>) => {
+    return SUGGESTED_APPS.filter(
+      item => findIndex(apps, { mfid: item.mfid }) < 0,
+    )
+  })
+
   // RENDER
 
   renderApp(app: AppData) {
@@ -213,6 +229,7 @@ class AppsView extends Component<Props, State> {
   }
 
   renderApps(apps: Array<AppData>) {
+    const suggested = this.getSuggestedList(apps)
     return (
       <ScrollView>
         <Text variant={['smallTitle', 'blue', 'bold']}>
@@ -226,20 +243,25 @@ class AppsView extends Component<Props, State> {
             testID="launcher-install-app-button"
           />
         </AppsGrid>
-        <Text variant={['smallTitle', 'blue', 'bold']}>
-          Suggested Applications
-        </Text>
-        <AppsGrid>
-          {SUGGESTED_APPS.map(app => (
-            <SuggestedAppItem
-              key={app.hash}
-              appID={app.hash}
-              appName={app.name}
-              devName="Mainframe"
-              onOpen={this.installSuggested}
-            />
-          ))}
-        </AppsGrid>
+        {suggested.length ? (
+          <>
+            <Text variant={['smallTitle', 'blue', 'bold']}>
+              Suggested Applications
+            </Text>
+            <AppsGrid>
+              {suggested.map(app => (
+                <SuggestedAppItem
+                  key={app.hash}
+                  appID={app.hash}
+                  mfid={app.mfid}
+                  appName={app.name}
+                  devName="Mainframe"
+                  onOpen={this.installSuggested}
+                />
+              ))}
+            </AppsGrid>
+          </>
+        ) : null}
       </ScrollView>
     )
   }
@@ -327,6 +349,7 @@ const AppsViewFragmentContainer = createFragmentContainer(AppsView, {
     fragment AppsView_apps on Apps {
       installed {
         localID
+        mfid
         ...AppItem_installedApp
       }
     }
