@@ -18,7 +18,7 @@ npm install --global @mainframe/daemon
 ```
 
 
-Next, download [Mainframe OS](https://mainframe.com/developers/) and install it on your machine.
+Next, **[Download Mainframe OS](https://s3.us-east-2.amazonaws.com/mainframe-os-releases/v0.2/MainframeOS.dmg)** and install it on your machine.
 
 Alternatively, jump to [Mainframe Platform](platform.md) for instructions to compile and run Mainframe OS from source.
 
