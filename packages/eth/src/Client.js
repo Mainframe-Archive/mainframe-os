@@ -3,6 +3,7 @@ import EventEmitter from 'events'
 import web3Utils from 'web3-utils'
 import Web3EthAbi from 'web3-eth-abi'
 import type Web3HTTPProvider from 'web3-providers-http'
+import type { Observable } from 'rxjs'
 
 import RequestManager from './RequestManager'
 import ABI from './abi'
@@ -26,19 +27,25 @@ const MFT_TOKEN_ADDRESSES = {
   mainnet: '0xdf2c7238198ad8b389666574f2d8bc411a4b7428',
 }
 
+type Subscriptions = {
+  networkChanged: () => Observable,
+  accountsChanged: () => Observable,
+}
+
 export default class EthClient extends RequestManager {
   _polling = false
   _defaultAccount: ?string
   _networkName: ?string
   _networkID: ?string
+  _subscriptions: ?Subscriptions
 
-  constructor(provider: Web3HTTPProvider | string, trackChanges?: boolean) {
+  constructor(
+    provider: Web3HTTPProvider | string,
+    subscriptions?: Subscriptions,
+  ) {
     super(provider)
-
+    this._subscriptions = subscriptions
     this.setup()
-    if (trackChanges) {
-      this.beginTrackingChanges()
-    }
   }
 
   get networkName(): string {
@@ -64,29 +71,23 @@ export default class EthClient extends RequestManager {
   async setup() {
     const id = await this.fetchNetwork()
     this.setNetworkID(id)
-  }
 
-  async beginTrackingChanges() {
-    if (!this._polling) {
-      this._polling = setInterval(async () => {
-        const network = await this.fetchNetwork()
-        if (network !== this._networkID) {
-          this._networkID = network
-          this._networkName = NETWORKS[network]
-          this.emit('networkChanged', network)
-        }
-        const accounts = await this.getAccounts()
-        if (accounts[0] !== this._defaultAccount) {
-          this._defaultAccount = accounts[0]
-          this.emit('accountsChange', accounts)
-        }
-      }, 1500)
+    if (!this._subscriptions) {
+      return
     }
-  }
 
-  stopTrackChanges() {
-    if (this._polling) {
-      clearInterval(this._polling)
+    if (this._subscriptions.networkChanged) {
+      const sub = await this._subscriptions.networkChanged()
+      sub.subscribe(res => {
+        this.setNetworkID(res.networkID)
+      })
+    }
+
+    if (this._subscriptions.accountsChanged) {
+      const sub = await this._subscriptions.accountsChanged()
+      sub.subscribe(res => {
+        this.emit('accountsChanged', res.accounts)
+      })
     }
   }
 

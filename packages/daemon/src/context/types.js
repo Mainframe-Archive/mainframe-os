@@ -50,7 +50,11 @@ export type ContactDeletedEvent = {|
 
 export type EthNetworkChanged = {|
   type: 'eth_network_changed',
-  networkID: string,
+|}
+
+export type EthAccountsChanged = {|
+  type: 'eth_accounts_changed',
+  userID: string,
 |}
 
 export type PeerCreatedEvent = {|
@@ -95,6 +99,7 @@ export type ContextEvent =
   | ContactCreatedEvent
   | ContactChangedEvent
   | ContactDeletedEvent
+  | EthAccountsChanged
   | EthNetworkChanged
   | PeerCreatedEvent
   | PeerChangedEvent

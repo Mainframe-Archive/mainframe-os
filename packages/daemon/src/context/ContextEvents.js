@@ -25,6 +25,7 @@ export default class ContextEvents {
   vaultOpened: Observable<ContextEvent>
   vaultModified: Observable<ContextEvent>
   ethNetworkChanged: Observable<ContextEvent>
+  ethAccountsChanged: Observable<ContextEvent>
 
   _context: ClientContext
   _subscriptions: { [key: string]: Subscription } = {}
@@ -60,9 +61,22 @@ export default class ContextEvents {
       filter((e: ContextEvent) => {
         return e.type === 'eth_network_changed'
       }),
-      flatMap(async (e: ContextEvent) => {
-        const networkID = await ctx.io.eth.fetchNetwork()
+      flatMap(async () => {
+        const networkID = await this._context.io.eth.fetchNetwork()
         return { networkID }
+      }),
+      multicast(new Subject()),
+      refCount(),
+    )
+    this.ethAccountsChanged = this._context.pipe(
+      filter((e: ContextEvent) => {
+        return e.type === 'eth_accounts_changed'
+      }),
+      flatMap(async (e: ContextEvent) => {
+        const accounts = await this._context.queries.getUserEthAccounts(
+          e.userID,
+        )
+        return { accounts }
       }),
       multicast(new Subject()),
       refCount(),

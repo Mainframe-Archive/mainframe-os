@@ -29,9 +29,30 @@ import {
   type WalletSignTxParams,
   type WalletSignTxResult,
 } from '@mainframe/client'
+import type { Subscription as RxSubscription, Observable } from 'rxjs'
 
 import type ClientContext from '../../context/ClientContext'
 import { getAccountsByPage } from '../../wallet/ledgerClient'
+import { ContextSubscription } from '../../context/ContextSubscriptions'
+import type { NotifyFunc } from '../../rpc/handleClient'
+
+class EthWalletSubscription extends ContextSubscription<RxSubscription> {
+  constructor() {
+    super('eth_accounts_subscription')
+  }
+
+  startNotify(notify: NotifyFunc, observable: Observable<Object>) {
+    this.data = observable.subscribe(result =>
+      notify(this.method, { subscription: this.id, result }),
+    )
+  }
+
+  async dispose() {
+    if (this.data != null) {
+      this.data.unsubscribe()
+    }
+  }
+}
 
 export const createHDWallet = {
   params: WALLET_CREATE_HD_SCHEMA,
@@ -157,5 +178,14 @@ export const setUsersDefaultWallet = {
     params: WalletSetUserDefaulParams,
   ): Promise<void> => {
     return ctx.mutations.setUsersDefaultWallet(params.userID, params.address)
+  },
+}
+
+export const subEthAccountsChanged = {
+  handler: async (ctx: ClientContext): Promise<string> => {
+    const sub = new EthWalletSubscription()
+    ctx.subscriptions.set(sub)
+    sub.startNotify(ctx.notify, ctx.events.ethAccountsChanged)
+    return sub.id
   },
 }

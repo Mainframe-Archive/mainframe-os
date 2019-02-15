@@ -52,6 +52,9 @@ export default (
       const context = getAppContext(sender)
       if (context.sandbox == null) {
         context.sandbox = sender
+        sender.on('destroyed', () => {
+          context.sandbox = null
+        })
       }
       return context
     },

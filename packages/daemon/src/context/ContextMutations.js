@@ -264,6 +264,11 @@ export default class ContextMutations {
     }
     app.setDefaultEthAccount(idType(userID), idType(wallet.localID), address)
     await openVault.save()
+    this._context.next({
+      type: 'eth_accounts_changed',
+      userID,
+      change: 'userDefault',
+    })
   }
 
   async setAppPermissionsRequirements(
@@ -631,9 +636,10 @@ export default class ContextMutations {
       address,
     )
     await openVault.save()
+
     this._context.next({
-      type: 'wallet_changed',
-      address,
+      type: 'eth_accounts_changed',
+      userID,
       change: 'userDefault',
     })
   }
@@ -643,6 +649,6 @@ export default class ContextMutations {
     openVault.setEthUrl(url)
     io.eth.ethHttpUrl = url
     await openVault.save()
-    this._context.next({ type: 'eth_network_changed', url, change: 'network' })
+    this._context.next({ type: 'eth_network_changed', change: 'network' })
   }
 }

@@ -2,6 +2,7 @@
 import HookedProvider from 'web3-provider-engine/subproviders/hooked-wallet.js'
 import ProviderEngine from 'web3-provider-engine'
 import SubscriptionsProvider from 'web3-provider-engine/subproviders/subscriptions.js'
+import { Observable } from 'rxjs'
 import { EthClient, type SendParams, type TXEventEmitter } from '@mainframe/eth'
 import type StreamRPC from '@mainframe/rpc-stream'
 
@@ -34,6 +35,45 @@ const createHookedWallet = (rpc: StreamRPC) => {
   })
 }
 
+const subscribe = async (rpc, rpcMethod, subMethod) => {
+  const subscription = await rpc.request(rpcMethod)
+  const unsubscribe = () => {
+    return rpc.request('sub_unsubscribe', { id: subscription })
+  }
+
+  return Observable.create(observer => {
+    rpc.subscribe({
+      next: msg => {
+        if (
+          msg.method === subMethod &&
+          msg.params != null &&
+          msg.params.subscription === subscription.id
+        ) {
+          const { result } = msg.params
+          if (result != null) {
+            try {
+              observer.next(result)
+            } catch (err) {
+              // eslint-disable-next-line no-console
+              console.warn('Error handling message', result, err)
+            }
+          }
+        }
+      },
+      error: err => {
+        observer.error(err)
+        unsubscribe()
+      },
+      complete: () => {
+        observer.complete()
+        unsubscribe()
+      },
+    })
+
+    return unsubscribe
+  })
+}
+
 export default class EthAPIs extends ClientAPIs {
   _web3Provider: ProviderEngine
   _ethClient: EthClient
@@ -53,20 +93,31 @@ export default class EthAPIs extends ClientAPIs {
     engine.addProvider(rpcProvider)
     engine.start()
     this._web3Provider = engine
-    this._ethClient = new EthClient(engine, true)
+
+    const subscriptions = {
+      accountsChanged: () =>
+        subscribe(
+          sdk._rpc,
+          'wallet_subEthAccountsChanged',
+          'eth_accounts_subscription',
+        ),
+      networkChanged: () =>
+        subscribe(
+          sdk._rpc,
+          'blockchain_subscribeNetworkChanged',
+          'eth_network_subscription',
+        ),
+    }
+
+    this._ethClient = new EthClient(engine, subscriptions)
     subsProvider.on('data', (err, notif) => {
       engine.emit('data', err, notif)
     })
-    this._ethClient.on('accountsChange', value => {
-      this.emit('accountsChange', value)
+    this._ethClient.on('accountsChanged', value => {
+      this.emit('accountsChanged', value)
     })
-    this.init()
-  }
-
-  async init() {
-    const sub = await rpc.ethNetworkChangedSubscription()
-    sub.subscribe(res => {
-      this._ethClient.setNetworkID(res.networkID)
+    this._ethClient.on('networkChanged', value => {
+      this.emit('networkChanged', value)
     })
   }
 
@@ -92,46 +143,5 @@ export default class EthAPIs extends ClientAPIs {
 
   getAccounts(): Promise<Array<string>> {
     return this._ethClient.getAccounts()
-  }
-
-  async subscribeEthNetworkChanged(): Promise<Observable<Object>> {
-    const subscription = await this._rpc.request(
-      'blockchain_subscribeNetworkChanged',
-    )
-    const unsubscribe = () => {
-      return this._rpc.request('sub_unsubscribe', { id: subscription })
-    }
-
-    return Observable.create(observer => {
-      this._rpc.subscribe({
-        next: msg => {
-          if (
-            msg.method === 'eth_network_changed' &&
-            msg.params != null &&
-            msg.params.subscription === subscription
-          ) {
-            const { result } = msg.params
-            if (result != null) {
-              try {
-                observer.next(result)
-              } catch (err) {
-                // eslint-disable-next-line no-console
-                console.warn('Error handling message', result, err)
-              }
-            }
-          }
-        },
-        error: err => {
-          observer.error(err)
-          unsubscribe()
-        },
-        complete: () => {
-          observer.complete()
-          unsubscribe()
-        },
-      })
-
-      return unsubscribe
-    })
   }
 }
