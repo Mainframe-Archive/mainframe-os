@@ -29,6 +29,7 @@ git checkout release-v0.2
 
 [Linux Dependencies](unix.md)
 
+Mac & Unix Instructions - continue below
 
 ### Setup
 
