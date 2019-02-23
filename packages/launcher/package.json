@@ -80,7 +80,7 @@
     "flow-bin": "^0.87.0",
     "graphql": "^0.13.2",
     "mocha": "^5.2.0",
-    "relay-compiler": "^1.7.0",
+    "relay-compiler": "^3.0.0",
     "spectron": "^5.0.0",
     "url-loader": "^1.1.2",
     "webpack": "^4.27.0"
