@@ -10,8 +10,28 @@ const execStartDaemon = (
   binPath: string,
   envName: string,
   detached: boolean = false,
-): ChildProcess => {
-  return spawn(binPath, ['start', `--env=${envName}`], { detached })
+): Promise<ChildProcess> => {
+  return new Promise((resolve, reject) => {
+    const proc = spawn(binPath, ['start', `--env=${envName}`], { detached })
+    const stopOut = onDataMatch(
+      proc.stdout,
+      `${envName} server started`,
+      () => {
+        stopOut()
+        console.log(`${envName} server started`)
+        resolve(proc)
+      },
+    )
+    const stopErr = onDataMatch(
+      proc.stderr,
+      `${envName} server failed to start`,
+      () => {
+        stopErr()
+        reject(new Error('Server failed to start'))
+        console.log('daemon failed to start')
+      },
+    )
+  })
 }
 
 const execStopDaemon = (binPath: string, envName: string) => {
