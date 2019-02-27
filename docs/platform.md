@@ -9,7 +9,7 @@ sidebar_label: Mainframe Platform
 
 [Mainframe OS Github Repository](https://github.com/MainframeHQ/mainframe-os)
 ```
-git clone git@github.com:MainframeHQ/mainframe-os.git
+git clone https://github.com/MainframeHQ/mainframe-os.git
 cd mainframe-os
 git checkout release-v0.2
 ```
