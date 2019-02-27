@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native-web'
+import { isAddress } from 'web3-utils'
 
 import applyContext, { type ContextProps } from './Context'
 import { ABI } from '@mainframe/eth'
@@ -95,7 +96,7 @@ class SendFunds extends Component<ContextProps, State> {
 
   validateSend(): boolean {
     const { web3 } = this.props
-    if (!web3.utils.isAddress(this.state.recipient)) {
+    if (!isAddress(this.state.recipient)) {
       this.setState({ errorMsg: 'Please provide a valid recipent address' })
       return false
     }
