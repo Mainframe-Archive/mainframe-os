@@ -4,6 +4,8 @@ import { spawn, type ChildProcess } from 'child_process'
 import type { DaemonConfig } from '@mainframe/config'
 import execa from 'execa'
 
+import { onDataMatch } from './utils'
+
 const execStartDaemon = (
   binPath: string,
   envName: string,
