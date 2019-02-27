@@ -11,8 +11,9 @@
 const siteConfig = {
   title: 'Mainframe Developer Documentation', // Title for your website.
   tagline: 'Get started using Mainframe.',
-  url: 'https://mainframehq.github.io', // Your website URL
+  url: 'https://docs.mainframe.com', // Your website URL
   baseUrl: '/mainframe-os/', // Base URL for your project */
+  cname: 'docs.mainframe.com',
   // For github.io type URLs, you would set the url and baseUrl like:
   //   url: 'https://facebook.github.io',
   //   baseUrl: '/test-site/',
