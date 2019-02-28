@@ -62,7 +62,6 @@
     "source-map-support": "^0.5.9",
     "typeface-ibm-plex-mono": "^0.0.61",
     "web3-eth-abi": "^1.0.0-beta.36",
-    "web3-eth-contract": "^1.0.0-beta.36",
     "web3-utils": "^1.0.0-beta.36"
   },
   "devDependencies": {

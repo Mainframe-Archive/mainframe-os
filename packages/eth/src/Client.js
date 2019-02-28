@@ -1,9 +1,10 @@
 // @flow
 import EventEmitter from 'events'
-import web3Utils from 'web3-utils'
+import { fromWei, toWei, toHex, hexToNumber, hexToString } from 'web3-utils'
 import Web3EthAbi from 'web3-eth-abi'
 import type Web3HTTPProvider from 'web3-providers-http'
 
+import { unitMap } from './contractHelpers'
 import RequestManager from './RequestManager'
 import ABI from './abi'
 import type { SendParams, TXEventEmitter } from './types'
@@ -93,18 +94,55 @@ export default class EthClient extends RequestManager {
     return this.sendRequest(accountsReq)
   }
 
+  encodeERC20Call(name: string, params?: Array<any>) {
+    const abi = ABI.ERC20.find(a => a.name === name)
+    return Web3EthAbi.encodeFunctionCall(abi, params || [])
+  }
+
+  async getTokenDecimals(tokenAddress: string): Promise<number> {
+    const data = this.encodeERC20Call('decimals')
+    const request = this.createRequest('eth_call', [
+      { data, to: tokenAddress },
+      'latest',
+    ])
+    return this.sendRequest(request)
+  }
+
+  async getTokenDecimalsUnit(tokenAddress: string): Promise<string> {
+    const decimals = await this.getTokenDecimals(tokenAddress)
+    const decimalsString = Math.pow(10, decimals).toString()
+    const unit = Object.keys(unitMap).find(unitName => {
+      const unit = unitMap[unitName]
+      return decimalsString === unit
+    })
+    if (!unit) {
+      throw new Error('Error getting token decimal unit')
+    }
+    return unit
+  }
+
+  async getTokenTicker(tokenAddress: string): Promise<string> {
+    const data = this.encodeERC20Call('symbol')
+    const request = this.createRequest('eth_call', [
+      { data, to: tokenAddress },
+      'latest',
+    ])
+    const res = await this.sendRequest(request)
+    return hexToString(res)
+  }
+
   async getTokenBalance(
     tokenAddress: string,
     accountAddress: string,
   ): Promise<Object> {
-    const abi = ABI.ERC20.find(a => a.name === 'balanceOf')
-    const data = Web3EthAbi.encodeFunctionCall(abi, [accountAddress])
+    const decimalsUnit = await this.getTokenDecimalsUnit(tokenAddress)
+    const data = this.encodeERC20Call('balanceOf', [accountAddress])
     const mftBalanceReq = this.createRequest('eth_call', [
       { data, to: tokenAddress },
       'latest',
     ])
     const res = await this.sendRequest(mftBalanceReq)
-    return web3Utils.fromWei(res, 'ether')
+    return fromWei(res, decimalsUnit)
   }
 
   async getMFTBalance(accountAddress: string): Promise<Object> {
@@ -123,7 +161,7 @@ export default class EthClient extends RequestManager {
       'latest',
     ])
     const res = await this.sendRequest(ethBalanceReq)
-    return web3Utils.fromWei(res, 'ether')
+    return fromWei(res, 'ether')
   }
 
   // async getTokenDecimals(tokenAddr: string) {
@@ -137,8 +175,8 @@ export default class EthClient extends RequestManager {
   // Sending transactions
 
   sendETH(params: SendParams) {
-    const valueWei = web3Utils.toWei(String(params.value))
-    const valueHex = web3Utils.toHex(valueWei)
+    const valueWei = toWei(String(params.value))
+    const valueHex = toHex(valueWei)
     const reqParams = {
       to: params.to,
       from: params.from,
@@ -152,7 +190,7 @@ export default class EthClient extends RequestManager {
   }
 
   sendMFT(params: SendParams) {
-    const valueWei = web3Utils.toWei(String(params.value))
+    const valueWei = toWei(String(params.value))
     const abi = ABI.ERC20.find(a => a.name === 'transfer')
     const data = Web3EthAbi.encodeFunctionCall(abi, [params.to, valueWei])
     if (!this._networkName || !MFT_TOKEN_ADDRESSES[this._networkName]) {
@@ -177,8 +215,8 @@ export default class EthClient extends RequestManager {
     }
     const blockRequest = this.createRequest('eth_blockNumber', [])
     const blockRes = await this.sendRequest(blockRequest)
-    const txBlock = web3Utils.hexToNumber(res.blockNumber)
-    const latestBlock = web3Utils.hexToNumber(blockRes)
+    const txBlock = hexToNumber(res.blockNumber)
+    const latestBlock = hexToNumber(blockRes)
     return latestBlock - txBlock
   }
 

@@ -249,7 +249,10 @@ export default class AppContainer extends Component<Props, State> {
               />
             </HeaderButtons>
           </View>
-          <UserAlertView appSession={this.props.appSession} />
+          <UserAlertView
+            ethClient={this.eth}
+            appSession={this.props.appSession}
+          />
           <webview
             id="sandbox-webview"
             src={appUrl}
