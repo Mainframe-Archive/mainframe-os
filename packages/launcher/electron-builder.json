@@ -1,15 +1,39 @@
 {
   "appId": "com.mainframe.launcher",
-  "productName": "Mainframe",
+  "productName": "MainframeOS",
   "artifactName": "${productName}.${ext}",
   "appImage": {
     "systemIntegration": "doNotAsk"
   },
-  "mac": {
-    "target": ["dmg", "dir"]
-  },
   "linux": {
     "category": "Network",
-    "target": ["AppImage", "dir"]
+    "target": ["AppImage", "dir"],
+    "icon": "./build/icon.png",
+    "extraResources": [
+      {
+        "from": "./bin/swarm-linux",
+        "to": "bin/swarm"
+      }
+    ]
+  },
+  "mac": {
+    "icon": "./build/icon.png",
+    "target": ["dir", "dmg"],
+    "extraResources": [
+      {
+        "from": "./bin/swarm-mac",
+        "to": "bin/swarm"
+      }
+    ]
+  },
+  "win": {
+    "icon": "./build/icon.png",
+    "target": "nsis",
+    "extraResources": [
+      {
+        "from": "./bin/swarm-win.exe",
+        "to": "bin/swarm.exe"
+      }
+    ]
   }
 }
