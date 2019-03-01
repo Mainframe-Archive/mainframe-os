@@ -8,7 +8,7 @@ import { Environment, DaemonConfig, VaultConfig } from '@mainframe/config'
 import StreamRPC from '@mainframe/rpc-stream'
 import { setupDaemon, startDaemon, startSwarm } from '@mainframe/toolbox'
 // eslint-disable-next-line import/named
-import { app, BrowserWindow, ipcMain } from 'electron'
+import { app, BrowserWindow, ipcMain, Menu } from 'electron'
 import { is } from 'electron-util'
 
 import { APP_TRUSTED_REQUEST_CHANNEL } from '../constants'
@@ -20,6 +20,10 @@ import createElectronTransport from './createElectronTransport'
 import createRPCChannels from './rpc/createChannels'
 
 const PORT = process.env.ELECTRON_WEBPACK_WDS_PORT || ''
+
+const DAEMON_BIN_PATH = is.development
+  ? path.resolve(__dirname, '../../../daemon/bin/run')
+  : `mainframed`
 
 const envType =
   process.env.NODE_ENV === 'production' ? 'production' : 'development'
@@ -61,6 +65,87 @@ const newWindow = (params: Object = {}) => {
     window.loadURL(formattedUrl)
   }
   return window
+}
+
+const template = [
+  {
+    label: 'Edit',
+    submenu: [
+      { role: 'undo' },
+      { role: 'redo' },
+      { type: 'separator' },
+      { role: 'cut' },
+      { role: 'copy' },
+      { role: 'paste' },
+      { role: 'pasteandmatchstyle' },
+      { role: 'delete' },
+      { role: 'selectall' },
+    ],
+  },
+  {
+    label: 'View',
+    submenu: [
+      { role: 'reload' },
+      { role: 'forcereload' },
+      { role: 'toggledevtools' },
+      { type: 'separator' },
+      { role: 'resetzoom' },
+      { role: 'zoomin' },
+      { role: 'zoomout' },
+      { type: 'separator' },
+      { role: 'togglefullscreen' },
+    ],
+  },
+  {
+    role: 'window',
+    submenu: [{ role: 'minimize' }, { role: 'close' }],
+  },
+  {
+    role: 'help',
+    submenu: [
+      {
+        label: 'Learn More',
+        click() {
+          require('electron').shell.openExternal('https://electronjs.org')
+        },
+      },
+    ],
+  },
+]
+
+if (process.platform === 'darwin') {
+  template.unshift({
+    label: app.getName(),
+    submenu: [
+      { role: 'about' },
+      { type: 'separator' },
+      { role: 'services' },
+      { type: 'separator' },
+      { role: 'hide' },
+      { role: 'hideothers' },
+      { role: 'unhide' },
+      { type: 'separator' },
+      { role: 'quit' },
+    ],
+  })
+
+  // Edit menu
+  template[1].submenu.push(
+    { type: 'separator' },
+    {
+      label: 'Speech',
+      submenu: [{ role: 'startspeaking' }, { role: 'stopspeaking' }],
+    },
+  )
+
+  // Window menu
+  template[3].submenu = [
+    { role: 'close' },
+    { role: 'minimize' },
+    { role: 'zoom' },
+    { type: 'separator' },
+    { role: 'front' },
+  ]
 }
 
 // App Lifecycle
@@ -130,27 +215,13 @@ const setupClient = async () => {
     })
   }
 
-  // Start Swarm
-  try {
-    console.log(`swarm bin path from config: ${swarmConfig.binPath}`)
-    await startSwarm(swarmConfig)
-    console.log(`started swarm`)
-  } catch (e) {
-    // eslint-disable-next-line no-console
-    console.log('Failed to start Swarm:', e)
-  }
-
   // Start daemon and connect local client to it
   if (daemonConfig.runStatus !== 'running') {
     daemonConfig.runStatus = 'stopped'
-    console.log(`daemon status: ${daemonConfig.runStatus}`)
   }
-  console.log('starting daemon')
   await startDaemon(daemonConfig, true)
-  console.log(`daemon started`)
   daemonConfig.runStatus = 'running'
   client = new Client(daemonConfig.socketPath)
-  console.log(`client started`)
 
   // Simple check for API call, not proper versioning logic
   const version = await client.apiVersion()
@@ -223,4 +294,6 @@ ipcMain.on('init-window', event => {
 
 ipcMain.on('ready-window', event => {
   BrowserWindow.fromWebContents(event.sender).show()
+  const menu = Menu.buildFromTemplate(template)
+  Menu.setApplicationMenu(menu)
 })
