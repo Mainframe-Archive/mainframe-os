@@ -6,7 +6,7 @@ import url from 'url'
 import Client from '@mainframe/client'
 import { Environment, DaemonConfig, VaultConfig } from '@mainframe/config'
 import StreamRPC from '@mainframe/rpc-stream'
-import { setupDaemon, startDaemon, startSwarm } from '@mainframe/toolbox'
+import { setupDaemon, startDaemon } from '@mainframe/toolbox'
 // eslint-disable-next-line import/named
 import { app, BrowserWindow, ipcMain, Menu } from 'electron'
 import { is } from 'electron-util'
