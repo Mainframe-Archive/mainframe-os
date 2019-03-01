@@ -6,7 +6,7 @@ import url from 'url'
 import Client from '@mainframe/client'
 import { Environment, DaemonConfig, VaultConfig } from '@mainframe/config'
 import StreamRPC from '@mainframe/rpc-stream'
-import { startDaemon } from '@mainframe/toolbox'
+import { setupDaemon, startDaemon, startSwarm } from '@mainframe/toolbox'
 // eslint-disable-next-line import/named
 import { app, BrowserWindow, ipcMain } from 'electron'
 import { is } from 'electron-util'
@@ -121,17 +121,36 @@ const launchApp = async (appSession: AppSession) => {
 
 // TODO: proper setup, this is just temporary logic to simplify development flow
 const setupClient = async () => {
-  // /!\ Temporary only, should be handled by toolbox with installation flow
+  // First launch flow: initial setup
   if (daemonConfig.binPath == null) {
-    daemonConfig.binPath = path.resolve(__dirname, '../../../daemon/bin/run')
-  }
-  if (daemonConfig.runStatus !== 'running') {
-    daemonConfig.runStatus = 'stopped'
+    // Setup daemon
+    await setupDaemon(daemonConfig, {
+      binPath: DAEMON_BIN_PATH,
+      socketPath: env.createSocketPath('mainframe.ipc'),
+    })
   }
 
+  // Start Swarm
+  try {
+    console.log(`swarm bin path from config: ${swarmConfig.binPath}`)
+    await startSwarm(swarmConfig)
+    console.log(`started swarm`)
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.log('Failed to start Swarm:', e)
+  }
+
+  // Start daemon and connect local client to it
+  if (daemonConfig.runStatus !== 'running') {
+    daemonConfig.runStatus = 'stopped'
+    console.log(`daemon status: ${daemonConfig.runStatus}`)
+  }
+  console.log('starting daemon')
   await startDaemon(daemonConfig, true)
+  console.log(`daemon started`)
   daemonConfig.runStatus = 'running'
   client = new Client(daemonConfig.socketPath)
+  console.log(`client started`)
 
   // Simple check for API call, not proper versioning logic
   const version = await client.apiVersion()
