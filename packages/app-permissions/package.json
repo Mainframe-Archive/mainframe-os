@@ -11,6 +11,6 @@
     "test:types": "flow check"
   },
   "devDependencies": {
-    "flow-bin": "^0.87.0"
+    "flow-bin": "^0.94.0"
   }
 }
