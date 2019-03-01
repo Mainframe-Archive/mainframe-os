@@ -243,7 +243,7 @@ export class OwnAppDetailView extends Component<Props, State> {
   }
 
   onPressSubmitFoReview = () => {
-    shell.openExternal('https://mainframehq.github.io/mainframe-os/docs/mft')
+    shell.openExternal('https://docs.mainframe.com/docs/mft')
   }
 
   onPressEdit = () => {
