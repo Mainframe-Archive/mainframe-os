@@ -206,6 +206,8 @@ const launchApp = async (appSession: AppSession) => {
 
 // TODO: proper setup, this is just temporary logic to simplify development flow
 const setupClient = async () => {
+  const fixPath = require('fix-path')
+  fixPath()
   // First launch flow: initial setup
   if (daemonConfig.binPath == null) {
     // Setup daemon

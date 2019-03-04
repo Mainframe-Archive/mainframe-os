@@ -48,6 +48,7 @@
     "@morpheus-ui/icons": "0.0.16",
     "electron-store": "^2.0.0",
     "electron-util": "^0.10.2",
+    "fix-path": "^2.1.0",
     "gsap": "^2.0.2",
     "qrcode-react": "^0.1.16",
     "react": "^16.6.3",
