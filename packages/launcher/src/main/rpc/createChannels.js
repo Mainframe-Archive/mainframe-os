@@ -3,7 +3,7 @@
 import { MANIFEST_SCHEMA_MESSAGES } from '@mainframe/app-manifest'
 import createHandler, { type Methods } from '@mainframe/rpc-handler'
 // eslint-disable-next-line import/named
-import { ipcMain, type BrowserWindow, type WebContents } from 'electron'
+import { ipcMain, BrowserWindow, type WebContents } from 'electron'
 
 import {
   APP_SANDBOXED_CHANNEL,
@@ -35,29 +35,32 @@ const createChannel = (
 
 export default (
   launcherContext: LauncherContext,
-  appContexts: WeakMap<BrowserWindow, AppContext>,
+  sandboxContexts: WeakMap<WebContents, AppContext>,
+  windowContexts: WeakMap<BrowserWindow, AppContext>,
 ) => {
-  const getAppContext = (sender: WebContents): AppContext => {
-    const context = appContexts.get(sender.getOwnerBrowserWindow())
-    if (context == null) {
-      throw new Error('AppContext not found')
-    }
-    return context
-  }
-
   createChannel(
     APP_SANDBOXED_CHANNEL,
     sandboxedMethods,
     (sender: WebContents): AppContext => {
-      const context = getAppContext(sender)
-      if (context.sandbox == null) {
-        context.sandbox = sender
+      const context = sandboxContexts.get(sender)
+      if (context == null) {
+        throw new Error('AppContext not found')
       }
       return context
     },
   )
 
-  createChannel(APP_TRUSTED_CHANNEL, trustedMethods, getAppContext)
+  createChannel(
+    APP_TRUSTED_CHANNEL,
+    trustedMethods,
+    (sender: WebContents): AppContext => {
+      const context = windowContexts.get(BrowserWindow.fromWebContents(sender))
+      if (context == null) {
+        throw new Error('AppContext not found')
+      }
+      return context
+    },
+  )
 
   createChannel(LAUNCHER_CHANNEL, launcherMethods, () => launcherContext)
 }

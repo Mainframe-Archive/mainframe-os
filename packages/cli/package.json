@@ -33,19 +33,19 @@
     "@mainframe/client": "*",
     "@mainframe/config": "*",
     "@mainframe/toolbox": "*",
-    "@oclif/command": "^1.5.2",
-    "@oclif/config": "^1.8.4",
+    "@oclif/command": "^1.5.11",
+    "@oclif/config": "^1.12.8",
     "@oclif/plugin-help": "^2.1.2",
     "cli-table": "^0.3.1",
     "get-port": "^4.0.0",
-    "graphql": "^0.13.2",
+    "graphql": "^14.1.1",
     "inquirer": "^6.2.1",
     "micro": "^9.3.3",
     "rxjs": "^6.3.3"
   },
   "devDependencies": {
-    "@oclif/dev-cli": "^1.21.0",
+    "@oclif/dev-cli": "^1.21.2",
     "del-cli": "^1.1.0",
-    "flow-bin": "^0.87.0"
+    "flow-bin": "^0.93.0"
   }
 }

@@ -153,7 +153,7 @@ const setAppPermissionsRequirementsMutation = graphql`
   }
 `
 
-export class OwnAppDetailView extends Component<Props, State> {
+class OwnAppDetailView extends Component<Props, State> {
   static contextType = EnvironmentContext
 
   constructor(props: Props) {

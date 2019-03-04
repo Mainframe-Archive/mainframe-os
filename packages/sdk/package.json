@@ -13,7 +13,7 @@
     "test:types": "flow check"
   },
   "dependencies": {
-    "@babel/runtime": "^7.1.2",
+    "@babel/runtime": "^7.3.4",
     "@mainframe/eth": "*",
     "ethereumjs-abi": "^0.6.6",
     "web3-provider-engine": "^14.1.0"
@@ -21,8 +21,8 @@
   "devDependencies": {
     "@mainframe/rpc-stream": "^0.2.4",
     "babel-loader": "^8.0.4",
-    "flow-bin": "^0.87.0",
-    "webpack": "^4.20.2",
+    "flow-bin": "^0.93.0",
+    "webpack": "^4.29.6",
     "webpack-cli": "^3.1.2"
   }
 }
