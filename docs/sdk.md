@@ -146,7 +146,7 @@ Returns a numeric string representing the Ethereum network ID. A few example val
 ‘42’: Kovan Test Network
 ```
 
-### ethereum.selectedAddress
+### ethereum.selectedAccount
 
 Returns a hex-prefixed string representing the current user’s selected address, e.g.:
 `0xde0B295669a9FD93d5F28D9Ec85E40f4cb697BAe`.
@@ -155,8 +155,8 @@ Returns a hex-prefixed string representing the current user’s selected address
 
 Provides a way to listen to events from the providers event emitter.
 
-1. `accountsChanged`: returns updated accounts array.
-1. `networkChanged`: returns updated network ID string.
+1. `accountsChange`: returns updated accounts array.
+1. `networkChange`: returns updated network ID string.
 
 **Example:**
 
@@ -226,7 +226,6 @@ await sdk.payments.sendMFT(params)
   .on('error', error => ... )
 
 ```
-
 
 # Types
 
