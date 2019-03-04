@@ -105,7 +105,7 @@ export default class SettingsMenuView extends Component<Props, State> {
             <SettingsItem
               onPress={() => this.props.onSelectMenuItem('developer')}
               first
-              title="App develoment tool"
+              title="App development tool"
               Icon={SettingsToolIcon}
               RightElement={GreaterIcon}
             />

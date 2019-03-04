@@ -14,9 +14,6 @@ export default class App extends Component<{}> {
     super()
     this.sdk = new MainframeSDK()
     this.web3 = new Web3(this.sdk.ethereum.web3Provider)
-    this.sdk.ethereum.on('networkChanged', msg => {
-      console.log('net changed app: ', msg)
-    })
   }
 
   render() {

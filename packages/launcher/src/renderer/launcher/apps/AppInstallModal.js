@@ -181,8 +181,7 @@ class AppInstallModal extends Component<ViewProps, State> {
         <Container>
           <TextContainer>
             <Text variant={['modalText', 'center']}>
-              Lorem ipsum dolor amet sitim opsos calibri <br />
-              dos ipsum dolor amet sitimus.
+              Enter an App ID below to begin the install process.
             </Text>
           </TextContainer>
           <View>

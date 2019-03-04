@@ -1,8 +1,11 @@
 {
   "name": "@mainframe/data-types",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "main": "lib/index.js",
   "license": "MIT",
+  "files": [
+    "lib/*"
+  ],
   "scripts": {
     "clean": "del-cli lib",
     "build:js": "babel src --out-dir lib",

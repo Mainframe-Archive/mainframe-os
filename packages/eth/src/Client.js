@@ -17,11 +17,6 @@ export const NETWORKS = {
   '42': 'kovan',
 }
 
-export const TOKEN_ADDRESS = {
-  ropsten: '0xa46f1563984209fe47f8236f8b01a03f03f957e4',
-  mainnet: '0xdf2c7238198ad8b389666574f2d8bc411a4b7428',
-}
-
 const MFT_TOKEN_ADDRESSES = {
   ropsten: '0xa46f1563984209fe47f8236f8b01a03f03f957e4',
   mainnet: '0xdf2c7238198ad8b389666574f2d8bc411a4b7428',
@@ -116,12 +111,12 @@ export default class EthClient extends RequestManager {
   }
 
   async getMFTBalance(accountAddress: string): Promise<Object> {
-    if (!this._networkName || !TOKEN_ADDRESS[this._networkName]) {
+    if (!this._networkName || !MFT_TOKEN_ADDRESSES[this._networkName]) {
       throw new Error(
         `Unsupported Ethereum network: ${this._networkID || 'Undefined'}`,
       )
     }
-    const tokenAddress = TOKEN_ADDRESS[this._networkName]
+    const tokenAddress = MFT_TOKEN_ADDRESSES[this._networkName]
     return this.getTokenBalance(tokenAddress, accountAddress)
   }
 

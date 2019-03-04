@@ -119,7 +119,7 @@ export class IdentityEditModal extends Component<Props, State> {
             <Switch
               name="discoverable"
               defaultValue={!this.props.ownUserIdentity.privateProfile}
-              label="Make my name discoverable"
+              label="Make my name and ETH address discoverable to other users"
               onChange={this.onToggleDiscoverable}
             />
             {updateError}

@@ -161,6 +161,13 @@ export default {
       titleColor: COLORS.WHITE,
       titleHoverColor: COLORS.WHITE,
     },
+    redOutline: {
+      titleColor: COLORS.PRIMARY_RED,
+      borderWidth: 1,
+      borderColor: COLORS.PRIMARY_RED,
+      borderHoverColor: 'transparent',
+      hoverShadow: true,
+    },
     modalButton: {
       titlePadding: '10px 30px',
       fontSize: 12,
@@ -283,7 +290,7 @@ export default {
       textAlign: 'center',
     },
     modalText: {
-      fontSize: 12,
+      fontSize: 13,
       color: '#585858',
     },
     padding10: {
