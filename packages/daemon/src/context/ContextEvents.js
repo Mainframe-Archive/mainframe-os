@@ -74,6 +74,7 @@ export default class ContextEvents {
       }),
       flatMap(async (e: ContextEvent) => {
         const accounts = await this._context.queries.getUserEthAccounts(
+          // $FlowFixMe type checked in filter
           e.userID,
         )
         return { accounts }

@@ -186,38 +186,29 @@ export default class WalletTxRequestView extends Component<Props, State> {
 }
 
 const styles = StyleSheet.create({
+  amountContainer: {
+    borderColor: colors.GREY_DARK_48,
+    borderRadius: 5,
+    borderWidth: 1,
+    paddingVertical: 12,
+    textAlign: 'center',
+  },
+  amountLabel: {
+    color: colors.LIGHT_GREY_AE,
+    fontSize: 28,
+  },
   container: {
     padding: 8,
   },
-  header: {
-    fontWeight: 'bold',
-    paddingBottom: 6,
-    color: colors.LIGHT_GREY_DE,
-    fontSize: 16,
-  },
-  amountContainer: {
-    textAlign: 'center',
-    paddingVertical: 12,
-    borderColor: colors.GREY_DARK_48,
-    borderWidth: 1,
+  dataConatiner: {
+    backgroundColor: colors.GREY_DARK_48,
     borderRadius: 5,
+    maxHeight: 80,
+    padding: 10,
   },
-  amountLabel: {
-    fontSize: 28,
+  dataText: {
     color: colors.LIGHT_GREY_AE,
-  },
-  methodTypeLabel: {
-    color: colors.BRIGHT_BLUE,
-    fontSize: 15,
-  },
-  transactionInfo: {
-    borderColor: colors.GREY_DARK_48,
-    borderBottomWidth: 1,
-    paddingVertical: 10,
-  },
-  paramLabel: {
-    paddingVertical: 3,
-    color: colors.LIGHT_GREY_AE,
+    fontSize: 12,
   },
   gasInfo: {
     flexDirection: 'row',
@@ -226,14 +217,23 @@ const styles = StyleSheet.create({
   gasLabel: {
     paddingRight: 10,
   },
-  dataConatiner: {
-    padding: 10,
-    maxHeight: 80,
-    backgroundColor: colors.GREY_DARK_48,
-    borderRadius: 5,
+  header: {
+    color: colors.LIGHT_GREY_DE,
+    fontSize: 16,
+    fontWeight: 'bold',
+    paddingBottom: 6,
   },
-  dataText: {
-    fontSize: 12,
+  methodTypeLabel: {
+    color: colors.BRIGHT_BLUE,
+    fontSize: 15,
+  },
+  paramLabel: {
     color: colors.LIGHT_GREY_AE,
+    paddingVertical: 3,
+  },
+  transactionInfo: {
+    borderBottomWidth: 1,
+    borderColor: colors.GREY_DARK_48,
+    paddingVertical: 10,
   },
 })

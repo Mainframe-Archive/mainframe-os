@@ -270,36 +270,41 @@ export default class AppContainer extends Component<Props, State> {
 }
 
 const styles = StyleSheet.create({
-  outerContainer: {
-    flex: 1,
-  },
-  header: {
-    paddingTop: 20,
-    height: 60,
-    flexDirection: 'row',
-    backgroundColor: colors.GREY_DARK_23,
-    alignItems: 'center',
-  },
   appInfo: {
-    paddingLeft: 10,
     flex: 1,
-  },
-  headerLabel: {
-    textAlign: 'left',
-    color: colors.LIGHT_GREY_CC,
-    fontSize: 12,
+    paddingLeft: 10,
   },
   boldLabel: {
     fontWeight: 'bold',
   },
-  urlInput: {
-    height: 28,
+  buttonTextStyle: {
+    color: colors.GREY_DARK_54,
     fontSize: 12,
-    marginHorizontal: 8,
-    minWidth: 250,
-    borderColor: colors.GREY_DARK_48,
-    backgroundColor: colors.GREY_DARK_38,
-    color: colors.LIGHT_GREY_F7,
+  },
+  header: {
+    alignItems: 'center',
+    backgroundColor: colors.GREY_DARK_23,
+    flexDirection: 'row',
+    height: 60,
+    paddingTop: 20,
+  },
+  headerLabel: {
+    color: colors.LIGHT_GREY_CC,
+    fontSize: 12,
+    textAlign: 'left',
+  },
+  outerContainer: {
+    flex: 1,
+  },
+  reloadButton: {
+    height: 30,
+    justifyContent: 'center',
+    marginRight: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 0,
+  },
+  resetButton: {
+    backgroundColor: colors.LIGHT_GREY_F7,
   },
   rowContainer: {
     flexDirection: 'row',
@@ -308,18 +313,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginLeft: 10,
   },
-  reloadButton: {
-    height: 30,
-    paddingVertical: 0,
-    justifyContent: 'center',
-    paddingHorizontal: 12,
-    marginRight: 8,
-  },
-  resetButton: {
-    backgroundColor: colors.LIGHT_GREY_F7,
-  },
-  buttonTextStyle: {
+  urlInput: {
+    backgroundColor: colors.GREY_DARK_38,
+    borderColor: colors.GREY_DARK_48,
+    color: colors.LIGHT_GREY_F7,
     fontSize: 12,
-    color: colors.GREY_DARK_54,
+    height: 28,
+    marginHorizontal: 8,
+    minWidth: 250,
   },
 })

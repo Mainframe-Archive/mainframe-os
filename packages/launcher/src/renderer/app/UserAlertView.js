@@ -393,75 +393,75 @@ export default class UserAlertView extends Component<Props, State> {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    top: 60,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    position: 'fixed',
-    backgroundColor: colors.TRANSPARENT_BLACK_50,
-    height: '100%',
+  acceptButton: {
+    backgroundColor: colors.PRIMARY_LIGHT_BLUE,
+    flex: 1,
+    marginRight: 10,
   },
-  requestContainer: {
-    backgroundColor: colors.GREY_DARK_3C,
-    position: 'absolute',
-    top: -35,
-    right: 5,
-    maxWidth: 360,
-    minWidth: 280,
-    padding: 20,
-    marginLeft: 40,
-    borderRadius: 3,
-    shadowColor: colors.BLACK,
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-  },
-  headerText: {
+  boldText: {
     fontWeight: 'bold',
-    color: colors.LIGHT_GREY_CC,
-    fontSize: 15,
+  },
+  buttonsContainer: {
+    flexDirection: 'row',
+    marginTop: 10,
+  },
+  container: {
+    backgroundColor: colors.TRANSPARENT_BLACK_50,
+    bottom: 0,
+    height: '100%',
+    left: 0,
+    position: 'fixed',
+    right: 0,
+    top: 60,
+  },
+  declineButton: {
+    backgroundColor: colors.GREY_MED_81,
+    flex: 1,
   },
   descriptionText: {
-    marginVertical: 6,
-    fontSize: 13,
     color: colors.WHITE,
+    fontSize: 13,
+    marginVertical: 6,
+  },
+  headerText: {
+    color: colors.LIGHT_GREY_CC,
+    fontSize: 15,
+    fontWeight: 'bold',
+  },
+  permissionDeniedAlerts: {
+    bottom: 0,
+    maxWidth: 300,
+    position: 'absolute',
+    right: 0,
+    top: 0,
+  },
+  permissionDeniedLabel: {
+    backgroundColor: colors.TRANSPARENT_BLACK_80,
+    color: colors.LIGHT_GREY_E5,
+    fontSize: 11,
+    paddingHorizontal: 6,
+    paddingVertical: 4,
+  },
+  persistLabel: {
+    color: colors.LIGHT_GREY_CC,
+    marginRight: 15,
   },
   persistOption: {
     flexDirection: 'row',
     marginVertical: 8,
   },
-  persistLabel: {
-    marginRight: 15,
-    color: colors.LIGHT_GREY_CC,
-  },
-  buttonsContainer: {
-    marginTop: 10,
-    flexDirection: 'row',
-  },
-  acceptButton: {
-    marginRight: 10,
-    flex: 1,
-    backgroundColor: colors.PRIMARY_LIGHT_BLUE,
-  },
-  declineButton: {
-    flex: 1,
-    backgroundColor: colors.GREY_MED_81,
-  },
-  permissionDeniedAlerts: {
-    top: 0,
-    right: 0,
-    bottom: 0,
+  requestContainer: {
+    backgroundColor: colors.GREY_DARK_3C,
+    borderRadius: 3,
+    marginLeft: 40,
+    maxWidth: 360,
+    minWidth: 280,
+    padding: 20,
     position: 'absolute',
-    maxWidth: 300,
-  },
-  permissionDeniedLabel: {
-    fontSize: 11,
-    backgroundColor: colors.TRANSPARENT_BLACK_80,
-    color: colors.LIGHT_GREY_E5,
-    paddingVertical: 4,
-    paddingHorizontal: 6,
-  },
-  boldText: {
-    fontWeight: 'bold',
+    right: 5,
+    shadowColor: colors.BLACK,
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    top: -35,
   },
 })

@@ -231,21 +231,21 @@ export default class IdentitySelectorQueryContainer extends Component<ContainerP
 
 const styles = StyleSheet.create({
   createIdContainer: {
-    padding: 12,
+    backgroundColor: colors.WHITE,
+    borderColor: colors.LIGHT_GREY_E8,
     borderWidth: 1,
     marginVertical: 10,
-    borderColor: colors.LIGHT_GREY_E8,
-    backgroundColor: colors.WHITE,
+    padding: 12,
   },
   createIdForm: {
     flexDirection: 'row',
     marginTop: 7,
   },
   input: {
-    padding: 6,
-    flex: 1,
-    borderWidth: 1,
     borderColor: colors.LIGHT_GREY_E8,
+    borderWidth: 1,
+    flex: 1,
     marginRight: 15,
+    padding: 6,
   },
 })
