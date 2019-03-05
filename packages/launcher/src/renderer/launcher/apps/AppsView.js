@@ -24,16 +24,16 @@ import { InstalledAppItem, SuggestedAppItem } from './AppItem'
 
 const SUGGESTED_APPS = [
   {
-    hash: '3dda9f3c3ba97551e66d7704cbc9c06b32689b3f2e9e4927dcf343f4431aed61',
+    hash: '5ac3ae1929a871cec7173606e03bcc05d4bfd3057c6f32a3d3aee8f450f24f5d',
     mfid:
-      'mf:0/app:pub-key:ed25519/base64:OpJx6d2IskYgWJwc65yC+HzWHnXHt++ikWz8ZFpX9Es=',
-    name: 'Test app 1',
+      'mf:0/app:pub-key:ed25519/base64:4bzzARk4wGcphO+XKord64M91PH2oFmzUPQewuYeQMg=',
+    name: 'Payments',
   },
   {
-    hash: 'c4405a27e0f700e6796d42e78710e96cf4e06008f49a989ba4bf68a9b35c51fb',
+    hash: '682716f6f07644fb213466b0c2086e03e32df0cbb42ede4c7953eece4df809f4',
     mfid:
-      'mf:0/app:pub-key:ed25519/base64:8940Tpo5zGSgV0MMYG3ApvjVFD6UAcOBb+KGPLR31jw=',
-    name: 'Test app 2',
+      'mf:0/app:pub-key:ed25519/base64:guo7ZYaX8ZlbEsXCj9oTJRzywznBxGR4AnZYx0vb76c=',
+    name: 'Noted',
   },
 ]
 
