@@ -94,6 +94,7 @@ type AppStorageSettings = {
   encryptionKey: Buffer,
   feedHash: ?string,
   signFeedDigest: SignFeedDigestFunc,
+  manifestHash?: string,
 }
 
 export class AppContext extends Context {

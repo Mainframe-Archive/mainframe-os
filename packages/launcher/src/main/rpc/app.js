@@ -1,6 +1,8 @@
 // @flow
 
 import { createReadStream } from 'fs'
+import getStream from 'get-stream'
+import { pick } from 'lodash'
 import crypto from 'crypto'
 import {
   LOCAL_ID_SCHEMA,
@@ -8,12 +10,13 @@ import {
   type ContactsGetUserContactsResult,
   type WalletGetEthWalletsResult,
 } from '@mainframe/client'
+import { DecryptStream } from '@mainframe/utils-crypto'
 import { dialog } from 'electron'
 import type { Subscription as RxSubscription } from 'rxjs'
 import * as mime from 'mime'
 import { type AppContext, ContextSubscription } from '../contexts'
 import { withPermission } from '../permissions'
-import { PrependInitializationVector } from '../storage'
+import { PrependInitializationVector, Decrypt } from '../storage'
 
 class TopicSubscription extends ContextSubscription<RxSubscription> {
   data: ?RxSubscription
@@ -223,20 +226,20 @@ export const sandboxed = {
 
                 if (feedHash) {
                   console.log(`feedHash is ${feedHash}`)
-                  const feedValue = await ctx.bzz.getFeedValue(feedHash, {}, { mode: 'content-hash' })
-                  console.log(feedValue, 'feedValue')
-                  manifestHash = feedValue
-                  feedMetadata = await ctx.bzz.getFeedMetadata(feedHash)
+                  const contentHash = await ctx.bzz.getFeedValue(feedHash, {}, { mode: 'content-hash' })
+                  console.log(contentHash, 'contentHash')
+                  ctx.storage.contentHash = contentHash
+                  manifestHash = contentHash
                 } else {
                   console.log('feedHash does not exist')
                   feedHash = await ctx.bzz.createFeedManifest(address)
-                  feedMetadata = await ctx.bzz.getFeedMetadata(feedHash)
                   const manifest = {entries: []}
                   const initialManifest = await ctx.bzz.uploadFile(JSON.stringify(manifest), {})
                   console.log(initialManifest, 'initialManifest')
                   manifestHash = initialManifest
                 }
 
+                // TODO: paralelize getting feed metadata and uploading files
                 dataHash = await ctx.bzz.uploadFileStream(stream, {
                   contentType: mime.getType(filePath),
                   path: params.name,
@@ -244,6 +247,8 @@ export const sandboxed = {
                 })
 
                 console.log(dataHash, 'dataHash')
+
+                feedMetadata = await ctx.bzz.getFeedMetadata(feedHash)
                 console.log(feedMetadata, 'feedMetadata')
                 console.log(manifestHash, 'manifestHash')
 
@@ -272,13 +277,26 @@ export const sandboxed = {
     handler: async(ctx: AppContext): Promise<Array<string>> => {
       console.log('storage list called')
       try {
-        console.log(ctx.storage.feedHash, 'feedHash')
+        let entries = []
         const feedHash = ctx.appSession.storage.feedHash
-        const feedValue = await ctx.bzz.getFeedValue(feedHash, {}, { mode: 'content-hash' })
-        console.log(feedValue, 'feedValue')
-        const list = await ctx.bzz.list(feedHash)
-        console.log(list, 'list')
-        return list
+        console.log(feedHash, 'feedHash - storage_list')
+        if (feedHash) {
+          let contentHash = ctx.storage.contentHash
+          console.log(contentHash, 'contentHash - storage_list')
+          if (!contentHash) {
+            console.log('bzz.getFeedValue called')
+            contentHash = await ctx.bzz.getFeedValue(feedHash, {}, { mode: 'content-hash' })
+            console.log(`contentHash is ${contentHash}`)
+          }
+          ctx.storage.contentHash = contentHash
+          console.log('bzz.list called')
+          const list = await ctx.bzz.list(contentHash)
+          console.log(list, 'list')
+          if (list) {
+            entries = list.entries.map(meta => pick(meta, ['contentType', 'path']))
+          }
+        }
+        return entries
       } catch (error) {
         console.log(error, 'storage_list error')
         // TODO: use RPCError to provide a custom error code
@@ -287,6 +305,110 @@ export const sandboxed = {
       return {}
     },
   },
+
+  storage_set: {
+    params: {
+      data: 'string',
+      name: 'string'
+    },
+    handler: async(ctx: AppContext, params: { data: string, name: string }): Promise<?string> => {
+      console.log('storage_set called')
+      try {
+        const filePath = params.name
+        let { encryptionKey, feedHash } = ctx.storage
+
+        // TODO: move out encryption code to a separate file
+        const iv = crypto.randomBytes(16) // TODO: use a constant for the length of the IV
+        const cipher = crypto.createCipheriv(
+          'aes256',
+          encryptionKey,
+          iv,
+        )
+        const Readable = require('stream').Readable
+        const dataStream = new Readable()
+        // dataStream._read = () => {} // redundant? see update below
+        dataStream.push(params.data)
+        dataStream.push(null)
+
+        const stream = dataStream
+          .pipe(cipher)
+          .pipe(new PrependInitializationVector(iv))
+
+        console.log(dataStream, 'dataStream - storage_set')
+        console.log(stream, 'stream - storage_set')
+
+        let feedMetadata
+        let dataHash
+        let manifestHash
+
+        console.log(params, 'params')
+        console.log(feedHash, 'feedHash')
+
+        if (feedHash) {
+          console.log(`feedHash is ${feedHash}`)
+          const contentHash = await ctx.bzz.getFeedValue(feedHash, {}, { mode: 'content-hash' })
+          console.log(contentHash, 'contentHash')
+          ctx.storage.contentHash = contentHash
+          manifestHash = contentHash
+        } else {
+          console.log('feedHash does not exist')
+          feedHash = await ctx.bzz.createFeedManifest(address)
+          const manifest = {entries: []}
+          const initialManifest = await ctx.bzz.uploadFile(JSON.stringify(manifest), {})
+          console.log(initialManifest, 'initialManifest')
+          manifestHash = initialManifest
+        }
+
+
+        dataHash = await ctx.bzz.uploadFileStream(stream, {
+          contentType: 'text/plain',
+          path: params.name,
+          manifestHash: manifestHash
+        })
+
+        console.log(dataHash, 'dataHash')
+
+        feedMetadata = await ctx.bzz.getFeedMetadata(feedHash)
+        console.log(feedMetadata, 'feedMetadata')
+        console.log(manifestHash, 'manifestHash')
+
+        await ctx.bzz.postFeedValue(feedMetadata, `0x${dataHash}`)
+
+        ctx.storage.feedHash = feedHash
+        await ctx.client.app.setFeedHash({ sessID: ctx.appSession.session.sessID, feedHash: feedHash })
+        return params.name
+      } catch (error) {
+        console.log(error, 'storage_set error')
+        // TODO: use RPCError to provide a custom error code
+        reject(new Error('Upload failed'))
+      }
+    },
+  },
+
+  storage_get: {
+    params: {
+      name: 'string'
+    },
+    handler: async(ctx: AppContext, params: { name: string }): Promise<?string> => {
+      console.log('storage_get called')
+      console.log(params, 'storage_get params')
+      console.log(ctx.storage, 'ctx.storage')
+      try {
+        const filePath = params.name
+        let { encryptionKey, feedHash } = ctx.storage
+
+        const res = await ctx.bzz.download(`${ctx.storage.feedHash}/${filePath}`)
+        const stream = res.body.pipe(new Decrypt(ctx.storage.encryptionKey))
+        const data = await getStream(stream)
+        console.log(data, 'storage_get data')
+        return data
+      } catch (error) {
+        console.log(error, 'storage_get error')
+        // TODO: use RPCError to provide a custom error code
+        reject(new Error('Upload failed'))
+      }
+    },
+  }
 }
 
 export const trusted = {

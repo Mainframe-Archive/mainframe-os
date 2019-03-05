@@ -24,7 +24,7 @@ export class PrependInitializationVector extends Transform {
   }
 }
 
-class Decrypt extends Transform {
+export class Decrypt extends Transform {
   constructor(cipherKey) {
     super()
     this.cipherKey = cipherKey
