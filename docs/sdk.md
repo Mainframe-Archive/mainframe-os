@@ -155,8 +155,8 @@ Returns a hex-prefixed string representing the current user’s selected address
 
 Provides a way to listen to events from the providers event emitter.
 
-1. `accountsChange`: returns updated accounts array.
-1. `networkChange`: returns updated network ID string.
+1. `accountsChanged`: returns updated accounts array.
+1. `networkChanged`: returns updated network ID string.
 
 **Example:**
 
