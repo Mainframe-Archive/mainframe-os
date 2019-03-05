@@ -60,6 +60,7 @@ export default class WalletPickerView extends Component<Props, State> {
   async fetchWallets() {
     const wallets = await rpc.getUserEthWallets()
     const defaultWalletAcc = await rpc.getUserDefaultWallet()
+    console.log(wallets)
     this.setState({ wallets, defaultWalletAcc })
   }
 

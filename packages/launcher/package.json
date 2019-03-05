@@ -13,6 +13,7 @@
     "dist:electron": "electron-builder",
     "build:flow": "flow-copy-source src lib",
     "relay": "relay-compiler --src ./src --schema ./schema.graphql",
+    "svg": "npx @svgr/cli -d ./src/renderer/UIComponents/Icons ./src/assets/svgs --icon --replace-attr-values \"#D3D3D3=currentColor\"",
     "test:types": "flow check",
     "test": "mocha"
   },

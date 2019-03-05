@@ -5,6 +5,9 @@ import createHandler from '@mainframe/rpc-handler'
 import { uniqueID } from '@mainframe/utils-id'
 import { ipcRenderer } from 'electron'
 import React, { Component } from 'react'
+import styled from 'styled-components/native'
+import { Text, Button } from '@morpheus-ui/core'
+
 import { View, StyleSheet, Switch } from 'react-native-web'
 import type { Subscription } from 'rxjs'
 import type { WalletSignTxParams } from '@mainframe/client'
@@ -12,8 +15,10 @@ import type { WalletSignTxParams } from '@mainframe/client'
 import { APP_TRUSTED_REQUEST_CHANNEL } from '../../constants'
 
 import colors from '../colors'
-import Text from '../UIComponents/Text'
-import Button from '../UIComponents/Button'
+
+import BellIcon from '../UIComponents/Icons/BellIcon'
+import LockerIcon from '../UIComponents/Icons/LockerIcon'
+
 import WalletTxRequestView from './WalletTxRequestView'
 import ContactPickerView, { type SelectedContactIDs } from './ContactPickerView'
 import WalletPickerView from './WalletPickerView'
@@ -101,6 +106,46 @@ const getPermissionDescription = (key: string, input?: ?string): ?string => {
   }
   return null
 }
+
+const Container = styled.View`
+  top: 60px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  position: fixed;
+  background-color: ${props => props.theme.colors.TRANSPARENT_BLACK_50};
+  height: 100%;
+`
+
+const RequestContainer = styled.View`
+  background-color: ${props => props.theme.colors.GREY_DARK_3C};
+  position: absolute;
+  top: -35px;
+  right: 5px;
+  width: 250px;
+  margin-left: 40px;
+  border-radius: 3px;
+  shadow-color: ${props => props.theme.colors.BLACK};
+  shadow-opacity: 0.2;
+  shadow-radius: 8;
+`
+
+const ContentContainer = styled.View`
+  padding: 0 20px 20px 20px;
+`
+
+const IconContainer = styled.View`
+  width: 100%;
+  padding: 3px;
+  align-items: flex-end;
+`
+
+const TitleContainer = styled.View`
+  width: 100%;
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 20px;
+`
 
 export default class UserAlertView extends Component<Props, State> {
   state = {
@@ -249,14 +294,14 @@ export default class UserAlertView extends Component<Props, State> {
         {txView}
         <View style={styles.buttonsContainer}>
           <Button
-            title="ACCEPT"
-            onPress={() => this.acceptPermission(requestID)}
-            style={styles.acceptButton}
+            variant={['TuiButton']}
+            title="REJECT"
+            onPress={() => this.declinePermission(requestID)}
           />
           <Button
-            title="DECLINE"
-            onPress={() => this.declinePermission(requestID)}
-            style={styles.declineButton}
+            variant={['TuiButton']}
+            title="AUTHORIZE"
+            onPress={() => this.acceptPermission(requestID)}
           />
         </View>
       </>
@@ -295,29 +340,40 @@ export default class UserAlertView extends Component<Props, State> {
     permissionLabel: string,
   ) {
     return (
-      <View>
-        <Text style={styles.headerText}>Permission Required</Text>
-        <Text
-          style={
-            styles.descriptionText
-          }>{`This app is asking permission to ${permissionLabel}.`}</Text>
-        <View style={styles.persistOption}>
-          <Text style={styles.persistLabel}>{`Don't ask me again?`}</Text>
-          <Switch value={persistGrant} onValueChange={this.onTogglePersist} />
-        </View>
-        <View style={styles.buttonsContainer}>
-          <Button
-            title="ACCEPT"
-            onPress={() => this.acceptPermission(requestID)}
-            style={styles.acceptButton}
-          />
-          <Button
-            title="DECLINE"
-            onPress={() => this.declinePermission(requestID)}
-            style={styles.declineButton}
-          />
-        </View>
-      </View>
+      <>
+        <IconContainer>
+          <BellIcon color="#F1F0F0" width={33} height={33} />
+        </IconContainer>
+        <ContentContainer>
+          <TitleContainer>
+            <LockerIcon color="#808080" width={17} height={24} />
+            <Text variant={['marginHorizontal10', 'TuiHeader']}>
+              App Permissions
+            </Text>
+          </TitleContainer>
+          <Text color="#FFF" size={13}>
+            {`${
+              this.props.appSession.app.manifest.name
+            } is requesting access to ${permissionLabel}.`}
+          </Text>
+          <View style={styles.persistOption}>
+            <Text style={styles.persistLabel}>{`Don't ask me again?`}</Text>
+            <Switch value={persistGrant} onValueChange={this.onTogglePersist} />
+          </View>
+          <View style={styles.buttonsContainer}>
+            <Button
+              variant={['TuiButton']}
+              title="REJECT"
+              onPress={() => this.declinePermission(requestID)}
+            />
+            <Button
+              variant={['TuiButton']}
+              title="AUTHORIZE"
+              onPress={() => this.acceptPermission(requestID)}
+            />
+          </View>
+        </ContentContainer>
+      </>
     )
   }
 
@@ -338,21 +394,22 @@ export default class UserAlertView extends Component<Props, State> {
 
     if (permissionLabel == null) {
       return (
-        <View style={styles.container}>
-          <View style={styles.requestContainer}>
+        <Container>
+          <RequestContainer>
             <Text style={styles.headerText}>Unknown Permission</Text>
             <Text style={styles.descriptionText}>
               This app is asking for permission to perform an unknown request
             </Text>
             <View style={styles.buttonsContainer}>
               <Button
+                variant={['TuiButton']}
                 title="DECLINE"
                 onPress={() => this.declinePermission(id)}
                 style={styles.declineButton}
               />
             </View>
-          </View>
-        </View>
+          </RequestContainer>
+        </Container>
       )
     }
 
@@ -374,13 +431,15 @@ export default class UserAlertView extends Component<Props, State> {
 
     return (
       <>
-        <View style={styles.container} onClick={this.onPressBG} />
-        <View style={styles.requestContainer}>{content}</View>
+        <Container onClick={this.onPressBG} />
+        <RequestContainer>{content}</RequestContainer>
       </>
     )
   }
 
   render() {
+    console.log(this.props)
+    console.log(this.state)
     const deniedNotifs = this.renderDeniedNotifs()
     const permissionRequest = this.renderContent()
     return (
@@ -393,38 +452,10 @@ export default class UserAlertView extends Component<Props, State> {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    top: 60,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    position: 'fixed',
-    backgroundColor: colors.TRANSPARENT_BLACK_50,
-    height: '100%',
-  },
-  requestContainer: {
-    backgroundColor: colors.GREY_DARK_3C,
-    position: 'absolute',
-    top: -35,
-    right: 5,
-    maxWidth: 360,
-    minWidth: 280,
-    padding: 20,
-    marginLeft: 40,
-    borderRadius: 3,
-    shadowColor: colors.BLACK,
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-  },
   headerText: {
     fontWeight: 'bold',
     color: colors.LIGHT_GREY_CC,
     fontSize: 15,
-  },
-  descriptionText: {
-    marginVertical: 6,
-    fontSize: 13,
-    color: colors.WHITE,
   },
   persistOption: {
     flexDirection: 'row',

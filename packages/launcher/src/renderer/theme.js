@@ -315,6 +315,11 @@ export default {
     flex1: {
       flex: 1,
     },
+    TuiHeader: {
+      fontWeight: 'bold',
+      color: '#929292',
+      fontSize: 13,
+    },
     ...MARGINS,
   },
   TextField: {
