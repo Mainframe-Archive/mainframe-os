@@ -172,6 +172,25 @@ export default {
       titlePadding: '10px 30px',
       fontSize: 12,
     },
+    TuiButton: {
+      minWidth: '105px',
+      titlePadding: '10px 15px',
+      fontSize: 10,
+      titleColor: '#3C3C3C',
+      titleHoverColor: '#3C3C3C',
+      backgroundColor: '#FFF',
+      backgroundHoverColor: '#A9A9A9',
+      borderColor: 'transparent',
+      borderHoverColor: 'transparent',
+    },
+    TuiButtonDismiss: {
+      titleColor: '#C0C0C0',
+      titleHoverColor: '#A9A9A9',
+      backgroundColor: 'transparent',
+      backgroundHoverColor: 'transparent',
+      borderColor: 'transparent',
+      borderHoverColor: 'transparent',
+    },
     grey: {
       titleColor: COLORS.GREY_A9,
     },
@@ -333,6 +352,16 @@ export default {
   Checkbox: {
     mono: {
       fontFamily: 'IBM Plex Mono',
+    },
+    TrustedUI: {
+      checkSymbolSize: 13,
+      backgroundColor: 'transparent',
+      containerBorderColor: '#929292',
+      backgroundCheckedColor: '#fff',
+      containerCheckedBorderColor: '#fff',
+      fontSize: 11,
+      labelColor: '#FFF',
+      labelCheckedColor: '#FFF',
     },
   },
   DropDown: {

@@ -6,9 +6,9 @@ import { uniqueID } from '@mainframe/utils-id'
 import { ipcRenderer } from 'electron'
 import React, { Component } from 'react'
 import styled from 'styled-components/native'
-import { Text, Button } from '@morpheus-ui/core'
+import { Text, Button, Checkbox } from '@morpheus-ui/core'
 
-import { View, StyleSheet, Switch } from 'react-native-web'
+import { View, StyleSheet } from 'react-native-web'
 import type { Subscription } from 'rxjs'
 import type { WalletSignTxParams } from '@mainframe/client'
 
@@ -60,14 +60,17 @@ type Props = {
   appSession: AppSessionData,
 }
 
+type PendingRequest = {
+  id: string,
+  data: Request,
+  responseRequired?: boolean,
+  resolve: (result: PermissionGrantResult) => void,
+}
+
 type State = {
   permissionDeniedNotifs: Array<PermissionDeniedNotif>,
   requests: {
-    [id: string]: {
-      data: Request,
-      responseRequired?: boolean,
-      resolve: (result: PermissionGrantResult) => void,
-    },
+    [id: string]: PendingRequest,
   },
   persistGrant: boolean,
 }
@@ -75,10 +78,12 @@ type State = {
 const methods = {
   user_request: (ctx, request: Request): Promise<PermissionGrantResult> => {
     return new Promise(resolve => {
+      const id = uniqueID()
       ctx.setState(({ requests }) => ({
         requests: {
           ...requests,
-          [uniqueID()]: {
+          [id]: {
+            id,
             data: request,
             resolve,
           },
@@ -209,16 +214,35 @@ export default class UserAlertView extends Component<Props, State> {
 
   onSetPermissionGrant = (id: string, granted: boolean, data?: GrantedData) => {
     const request = this.state.requests[id]
-
     if (request != null) {
-      request.resolve({
-        granted,
-        data,
-        persist: this.state.persistGrant ? 'always' : 'session',
+      let requestsToResolve = [request]
+      if (request.data.key === 'WEB_REQUEST') {
+        // Resolve web requests with same domain
+        // $FlowFixMe mixed type
+        const requests: Array<PendingRequest> = Object.values(
+          this.state.requests,
+        )
+        const duplicateRequests = requests.filter(
+          r =>
+            r.data.key === 'WEB_REQUEST' &&
+            r.data.domain === request.data.domain &&
+            r.id !== id,
+        )
+        requestsToResolve = requestsToResolve.concat(duplicateRequests)
+      }
+      requestsToResolve.forEach(r => {
+        r.resolve({
+          granted,
+          data,
+          persist: this.state.persistGrant ? 'always' : 'session',
+        })
       })
+
       this.setState(({ requests }) => {
-        const { [id]: _ignore, ...nextRequests } = requests
-        return { requests: nextRequests, persistGrant: false }
+        requestsToResolve.forEach(r => {
+          delete requests[r.id]
+        })
+        return { requests, persistGrant: false }
       })
     }
   }
@@ -244,6 +268,7 @@ export default class UserAlertView extends Component<Props, State> {
   }
 
   onTogglePersist = (value: boolean) => {
+    console.log(value)
     this.setState({
       persistGrant: value,
     })
@@ -357,12 +382,16 @@ export default class UserAlertView extends Component<Props, State> {
             } is requesting access to ${permissionLabel}.`}
           </Text>
           <View style={styles.persistOption}>
-            <Text style={styles.persistLabel}>{`Don't ask me again?`}</Text>
-            <Switch value={persistGrant} onValueChange={this.onTogglePersist} />
+            <Checkbox
+              variant="TrustedUI"
+              defaultValue={persistGrant}
+              onChange={this.onTogglePersist}
+              label="Don't ask me again?"
+            />
           </View>
           <View style={styles.buttonsContainer}>
             <Button
-              variant={['TuiButton']}
+              variant={['TuiButton', 'TuiButtonDismiss']}
               title="REJECT"
               onPress={() => this.declinePermission(requestID)}
             />
