@@ -22,20 +22,8 @@ import CompleteOnboardSession from './CompleteOnboardSession'
 import AppInstallModal from './AppInstallModal'
 import { InstalledAppItem, SuggestedAppItem } from './AppItem'
 
-const SUGGESTED_APPS = [
-  {
-    hash: '5ac3ae1929a871cec7173606e03bcc05d4bfd3057c6f32a3d3aee8f450f24f5d',
-    mfid:
-      'mf:0/app:pub-key:ed25519/base64:4bzzARk4wGcphO+XKord64M91PH2oFmzUPQewuYeQMg=',
-    name: 'Payments',
-  },
-  {
-    hash: '682716f6f07644fb213466b0c2086e03e32df0cbb42ede4c7953eece4df809f4',
-    mfid:
-      'mf:0/app:pub-key:ed25519/base64:guo7ZYaX8ZlbEsXCj9oTJRzywznBxGR4AnZYx0vb76c=',
-    name: 'Noted',
-  },
-]
+const SUGGESTED_APPS_URL =
+  'https://s3-us-west-2.amazonaws.com/suggested-apps/suggested-apps.json'
 
 const Header = styled.View`
   height: 50px;
@@ -115,6 +103,7 @@ type State = {
   },
   hover: ?string,
   showOnboarding: boolean,
+  suggestedApps: Array<Object>,
 }
 
 class AppsView extends Component<Props, State> {
@@ -122,6 +111,18 @@ class AppsView extends Component<Props, State> {
     hover: null,
     showModal: null,
     showOnboarding: false,
+    suggestedApps: [],
+  }
+
+  componentDidMount() {
+    this.fetchSuggested()
+  }
+
+  fetchSuggested = async () => {
+    const suggestedPromise = await fetch(SUGGESTED_APPS_URL)
+
+    const suggestedApps = await suggestedPromise.json()
+    this.setState({ suggestedApps })
   }
 
   onSkipOnboarding = () => {
@@ -210,11 +211,13 @@ class AppsView extends Component<Props, State> {
     })
   }
 
-  getSuggestedList = memoize((apps: Array<AppData>) => {
-    return SUGGESTED_APPS.filter(
-      item => findIndex(apps, { mfid: item.mfid }) < 0,
-    )
-  })
+  getSuggestedList = memoize(
+    (apps: Array<AppData>, suggestedApps: Array<Object>) => {
+      return suggestedApps.filter(
+        item => findIndex(apps, { mfid: item.mfid }) < 0,
+      )
+    },
+  )
 
   // RENDER
 
@@ -229,7 +232,7 @@ class AppsView extends Component<Props, State> {
   }
 
   renderApps(apps: Array<AppData>) {
-    const suggested = this.getSuggestedList(apps)
+    const suggested = this.getSuggestedList(apps, this.state.suggestedApps)
     return (
       <ScrollView>
         <Text variant={['smallTitle', 'blue', 'bold']}>
