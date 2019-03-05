@@ -18,13 +18,7 @@
   },
   "mac": {
     "icon": "./build/icon.png",
-    "target": ["pkg", "dmg"]
-  },
-  "pkg": {
-    "scripts": "pkg-scripts",
-    "installLocation": "/Applications",
-    "isRelocatable": "false",
-    "isVersionChecked": "false"
+    "target": ["dmg"]
   },
   "win": {
     "icon": "./build/icon.png",

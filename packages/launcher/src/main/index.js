@@ -7,10 +7,9 @@ import Client from '@mainframe/client'
 import { Environment, DaemonConfig, VaultConfig } from '@mainframe/config'
 import StreamRPC from '@mainframe/rpc-stream'
 import {
-  createKeyStore,
   setupDaemon,
   startDaemon,
-  startSwarm,
+  stopDaemon,
 } from '@mainframe/toolbox'
 // eslint-disable-next-line import/named
 import { app, BrowserWindow, ipcMain, Menu } from 'electron'
@@ -267,10 +266,16 @@ const createLauncherWindow = async () => {
   })
 }
 
+const shutdown = async () => {
+  await stopDaemon(daemonConfig)
+  daemonConfig.runStatus = 'stopped'
+}
+
 app.on('ready', createLauncherWindow)
 
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {
+  shutdown()
   if (process.platform !== 'darwin') {
     app.quit()
   }
