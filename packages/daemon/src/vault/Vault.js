@@ -174,7 +174,7 @@ export default class Vault {
       settings: {
         bzzURL: 'http://mainframe-gateways.net:8500',
         pssURL: 'ws://mainframe-gateways.net:8546',
-        ethURL: INFURA_URLS.mainnet,
+        ethURL: INFURA_URLS.ropsten,
       },
       identityWallets: new IdentityWallets(),
       contactAppData: new ContactAppData(),
