@@ -10,6 +10,8 @@ import type { AppInstalledData } from '@mainframe/client'
 import styled from 'styled-components/native'
 import { Text } from '@morpheus-ui/core'
 import PlusIcon from '@morpheus-ui/icons/PlusSymbolCircled'
+import { findIndex } from 'lodash'
+import memoize from 'memoize-one'
 
 import rpc from '../rpc'
 import PermissionsView from '../PermissionsView'
@@ -18,7 +20,22 @@ import applyContext, { type CurrentUser } from '../LauncherContext'
 import CompleteOnboardSession from './CompleteOnboardSession'
 
 import AppInstallModal from './AppInstallModal'
-import { InstalledAppItem } from './AppItem'
+import { InstalledAppItem, SuggestedAppItem } from './AppItem'
+
+const SUGGESTED_APPS = [
+  {
+    hash: '5ac3ae1929a871cec7173606e03bcc05d4bfd3057c6f32a3d3aee8f450f24f5d',
+    mfid:
+      'mf:0/app:pub-key:ed25519/base64:4bzzARk4wGcphO+XKord64M91PH2oFmzUPQewuYeQMg=',
+    name: 'Payments',
+  },
+  {
+    hash: '682716f6f07644fb213466b0c2086e03e32df0cbb42ede4c7953eece4df809f4',
+    mfid:
+      'mf:0/app:pub-key:ed25519/base64:guo7ZYaX8ZlbEsXCj9oTJRzywznBxGR4AnZYx0vb76c=',
+    name: 'Noted',
+  },
+]
 
 const Header = styled.View`
   height: 50px;
@@ -91,6 +108,7 @@ type Props = {
 type State = {
   showModal: ?{
     type: 'accept_permissions' | 'app_install',
+    appID?: ?string,
     data?: ?{
       app: AppData,
     },
@@ -118,6 +136,15 @@ class AppsView extends Component<Props, State> {
     this.setState({
       showModal: {
         type: 'app_install',
+      },
+    })
+  }
+
+  installSuggested = (appID: string) => {
+    this.setState({
+      showModal: {
+        type: 'app_install',
+        appID,
       },
     })
   }
@@ -183,6 +210,12 @@ class AppsView extends Component<Props, State> {
     })
   }
 
+  getSuggestedList = memoize((apps: Array<AppData>) => {
+    return SUGGESTED_APPS.filter(
+      item => findIndex(apps, { mfid: item.mfid }) < 0,
+    )
+  })
+
   // RENDER
 
   renderApp(app: AppData) {
@@ -196,9 +229,12 @@ class AppsView extends Component<Props, State> {
   }
 
   renderApps(apps: Array<AppData>) {
+    const suggested = this.getSuggestedList(apps)
     return (
       <ScrollView>
-        <Text variant="smallTitle">Installed Applications</Text>
+        <Text variant={['smallTitle', 'blue', 'bold']}>
+          Installed Applications
+        </Text>
         <AppsGrid>
           {apps.map(app => this.renderApp(app))}
           <NewAppButton
@@ -207,6 +243,25 @@ class AppsView extends Component<Props, State> {
             testID="launcher-install-app-button"
           />
         </AppsGrid>
+        {suggested.length ? (
+          <>
+            <Text variant={['smallTitle', 'blue', 'bold']}>
+              Suggested Applications
+            </Text>
+            <AppsGrid>
+              {suggested.map(app => (
+                <SuggestedAppItem
+                  key={app.hash}
+                  appID={app.hash}
+                  mfid={app.mfid}
+                  appName={app.name}
+                  devName="Mainframe"
+                  onOpen={this.installSuggested}
+                />
+              ))}
+            </AppsGrid>
+          </>
+        ) : null}
       </ScrollView>
     )
   }
@@ -249,6 +304,7 @@ class AppsView extends Component<Props, State> {
         case 'app_install':
           modal = (
             <AppInstallModal
+              appID={this.state.showModal.appID}
               onRequestClose={this.onCloseModal}
               onInstallComplete={this.onInstallComplete}
             />
@@ -293,6 +349,7 @@ const AppsViewFragmentContainer = createFragmentContainer(AppsView, {
     fragment AppsView_apps on Apps {
       installed {
         localID
+        mfid
         ...AppItem_installedApp
       }
     }

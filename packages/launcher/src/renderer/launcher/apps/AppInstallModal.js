@@ -23,6 +23,7 @@ import PermissionsView from '../PermissionsView'
 import { appInstallMutation } from './appMutations'
 
 type Props = {
+  appID?: ?string,
   onRequestClose: () => void,
   onInstallComplete: () => void,
 }
@@ -63,49 +64,57 @@ class AppInstallModal extends Component<ViewProps, State> {
     ownUsers: [],
   }
 
+  componentDidMount() {
+    if (this.props.appID != null) {
+      this.loadManifest(this.props.appID)
+    }
+  }
+
   // HANDLERS
+
+  async loadManifest(hash: string) {
+    try {
+      this.setState({ installStep: 'download' })
+
+      const { manifest, appID, isOwn } = await rpc.loadManifest(hash)
+      // If appID is returned it means the app is already installed.
+      // If we only support a single user in the launcher, the app must have been already installed by this user.
+      if (appID != null) {
+        if (isOwn) {
+          return this.setState({
+            installStep: 'manifest',
+            errorMsg: `We currently don't support installing your own apps, they should be accessed from the developer section.`,
+          })
+        } else {
+          return this.props.onInstallComplete()
+        }
+      }
+
+      if (havePermissionsToGrant(manifest.permissions)) {
+        this.setState({ installStep: 'permissions', manifest })
+      } else {
+        this.setState(
+          {
+            installStep: 'download',
+            manifest,
+            userPermissions: createStrictPermissionGrants({}),
+          },
+          this.saveApp,
+        )
+      }
+    } catch (err) {
+      this.setState({
+        errorMsg: err.message,
+        installStep: 'manifest',
+      })
+      // eslint-disable-next-line no-console
+      console.log('error loading manifest:', err)
+    }
+  }
 
   onSubmitManifest = async (payload: FormSubmitPayload) => {
     if (payload.valid) {
-      try {
-        this.setState({ installStep: 'download' })
-
-        const { manifest, appID, isOwn } = await rpc.loadManifest(
-          payload.fields.appid,
-        )
-        // If appID is returned it means the app is already installed.
-        // If we only support a single user in the launcher, the app must have been already installed by this user.
-        if (appID != null) {
-          if (isOwn) {
-            return this.setState({
-              installStep: 'manifest',
-              errorMsg: `We currently don't support installing your own apps, they should be accessed from the developer section.`,
-            })
-          } else {
-            return this.props.onInstallComplete()
-          }
-        }
-
-        if (havePermissionsToGrant(manifest.permissions)) {
-          this.setState({ installStep: 'permissions', manifest })
-        } else {
-          this.setState(
-            {
-              installStep: 'download',
-              manifest,
-              userPermissions: createStrictPermissionGrants({}),
-            },
-            this.saveApp,
-          )
-        }
-      } catch (err) {
-        this.setState({
-          errorMsg: err.message,
-          installStep: 'manifest',
-        })
-        // eslint-disable-next-line no-console
-        console.log('error loading manifest:', err)
-      }
+      await this.loadManifest(payload.fields.appid)
     }
   }
 
