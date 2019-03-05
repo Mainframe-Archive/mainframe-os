@@ -14,6 +14,7 @@ declare export opaque type AppsView_apps$ref: FragmentReference;
 export type AppsView_apps = {|
   +installed: ?$ReadOnlyArray<?{|
     +localID: string,
+    +mfid: string,
     +$fragmentRefs: AppItem_installedApp$ref,
   |}>,
   +$refType: AppsView_apps$ref,
@@ -45,6 +46,13 @@ const node/*: ConcreteFragment*/ = {
           "storageKey": null
         },
         {
+          "kind": "ScalarField",
+          "alias": null,
+          "name": "mfid",
+          "args": null,
+          "storageKey": null
+        },
+        {
           "kind": "FragmentSpread",
           "name": "AppItem_installedApp",
           "args": null
@@ -54,5 +62,5 @@ const node/*: ConcreteFragment*/ = {
   ]
 };
 // prettier-ignore
-(node/*: any*/).hash = '4dbdd4cea318032ed805878c5d991fb2';
+(node/*: any*/).hash = '7661eb0f3d5284a8cabcc6505a72449f';
 module.exports = node;
