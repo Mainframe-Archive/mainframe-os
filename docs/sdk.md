@@ -227,6 +227,7 @@ await sdk.payments.sendMFT(params)
 
 ```
 
+
 # Types
 
 ### Contact:
