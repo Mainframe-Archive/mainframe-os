@@ -55,14 +55,17 @@ type Props = {
   appSession: AppSessionData,
 }
 
+type PendingRequest = {
+  id: string,
+  data: Request,
+  responseRequired?: boolean,
+  resolve: (result: PermissionGrantResult) => void,
+}
+
 type State = {
   permissionDeniedNotifs: Array<PermissionDeniedNotif>,
   requests: {
-    [id: string]: {
-      data: Request,
-      responseRequired?: boolean,
-      resolve: (result: PermissionGrantResult) => void,
-    },
+    [id: string]: PendingRequest,
   },
   persistGrant: boolean,
 }
@@ -70,10 +73,12 @@ type State = {
 const methods = {
   user_request: (ctx, request: Request): Promise<PermissionGrantResult> => {
     return new Promise(resolve => {
+      const id = uniqueID()
       ctx.setState(({ requests }) => ({
         requests: {
           ...requests,
-          [uniqueID()]: {
+          [id]: {
+            id,
             data: request,
             resolve,
           },
@@ -164,16 +169,35 @@ export default class UserAlertView extends Component<Props, State> {
 
   onSetPermissionGrant = (id: string, granted: boolean, data?: GrantedData) => {
     const request = this.state.requests[id]
-
     if (request != null) {
-      request.resolve({
-        granted,
-        data,
-        persist: this.state.persistGrant ? 'always' : 'session',
+      let requestsToResolve = [request]
+      if (request.data.key === 'WEB_REQUEST') {
+        // Resolve web requests with same domain
+        // $FlowFixMe mixed type
+        const requests: Array<PendingRequest> = Object.values(
+          this.state.requests,
+        )
+        const duplicateRequests = requests.filter(
+          r =>
+            r.data.key === 'WEB_REQUEST' &&
+            r.data.domain === request.data.domain &&
+            r.id !== id,
+        )
+        requestsToResolve = requestsToResolve.concat(duplicateRequests)
+      }
+      requestsToResolve.forEach(r => {
+        r.resolve({
+          granted,
+          data,
+          persist: this.state.persistGrant ? 'always' : 'session',
+        })
       })
+
       this.setState(({ requests }) => {
-        const { [id]: _ignore, ...nextRequests } = requests
-        return { requests: nextRequests, persistGrant: false }
+        requestsToResolve.forEach(r => {
+          delete requests[r.id]
+        })
+        return { requests, persistGrant: false }
       })
     }
   }
