@@ -18,13 +18,13 @@
   },
   "mac": {
     "icon": "./build/icon.png",
-    "target": ["dir", "dmg"],
-    "extraResources": [
-      {
-        "from": "./bin/swarm-mac",
-        "to": "bin/swarm"
-      }
-    ]
+    "target": ["pkg", "dmg"]
+  },
+  "pkg": {
+    "scripts": "pkg-scripts",
+    "installLocation": "/Applications",
+    "isRelocatable": "false",
+    "isVersionChecked": "false"
   },
   "win": {
     "icon": "./build/icon.png",

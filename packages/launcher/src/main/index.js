@@ -6,7 +6,12 @@ import url from 'url'
 import Client from '@mainframe/client'
 import { Environment, DaemonConfig, VaultConfig } from '@mainframe/config'
 import StreamRPC from '@mainframe/rpc-stream'
-import { setupDaemon, startDaemon } from '@mainframe/toolbox'
+import {
+  createKeyStore,
+  setupDaemon,
+  startDaemon,
+  startSwarm,
+} from '@mainframe/toolbox'
 // eslint-disable-next-line import/named
 import { app, BrowserWindow, ipcMain, Menu } from 'electron'
 import { is } from 'electron-util'
@@ -206,10 +211,11 @@ const launchApp = async (appSession: AppSession) => {
 
 // TODO: proper setup, this is just temporary logic to simplify development flow
 const setupClient = async () => {
+  // First launch flow: initial setup
   const fixPath = require('fix-path')
   fixPath()
-  // First launch flow: initial setup
   if (daemonConfig.binPath == null) {
+    console.log('no daemonConfig so calling setup daemon')
     // Setup daemon
     await setupDaemon(daemonConfig, {
       binPath: DAEMON_BIN_PATH,
@@ -220,10 +226,14 @@ const setupClient = async () => {
   // Start daemon and connect local client to it
   if (daemonConfig.runStatus !== 'running') {
     daemonConfig.runStatus = 'stopped'
+    console.log(`daemon status: ${daemonConfig.runStatus}`)
   }
+  console.log('starting daemon')
   await startDaemon(daemonConfig, true)
+  console.log(`daemon started`)
   daemonConfig.runStatus = 'running'
   client = new Client(daemonConfig.socketPath)
+  console.log(`client started`)
 
   // Simple check for API call, not proper versioning logic
   const version = await client.apiVersion()

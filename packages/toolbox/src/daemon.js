@@ -12,6 +12,7 @@ const execStartDaemon = (
   detached: boolean = false,
 ): Promise<ChildProcess> => {
   return new Promise((resolve, reject) => {
+    console.log(`Daemon binpath is ${binPath}`)
     const proc = spawn(binPath, ['start', `--env=${envName}`], { detached })
     const stopOut = onDataMatch(
       proc.stdout,

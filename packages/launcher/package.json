@@ -24,6 +24,7 @@
       "@mainframe/client",
       "@mainframe/eth",
       "@mainframe/config",
+      "@mainframe/rpc-electron",
       "@mainframe/toolbox",
       "@morpheus-ui/core",
       "@morpheus-ui/fonts",
