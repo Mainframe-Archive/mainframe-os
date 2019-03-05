@@ -8,6 +8,7 @@ import React, { Component } from 'react'
 import { View, StyleSheet, Switch } from 'react-native-web'
 import type { Subscription } from 'rxjs'
 import type { WalletSignTxParams } from '@mainframe/client'
+import { type EthClient } from '@mainframe/eth'
 
 import { APP_TRUSTED_REQUEST_CHANNEL } from '../../constants'
 
@@ -53,6 +54,7 @@ type PermissionDeniedNotif = {
 
 type Props = {
   appSession: AppSessionData,
+  ethClient: EthClient,
 }
 
 type PendingRequest = {
@@ -266,6 +268,7 @@ export default class UserAlertView extends Component<Props, State> {
       ) : (
         <WalletTxRequestView
           transaction={params.BLOCKCHAIN_SEND.transactionData}
+          ethClient={this.props.ethClient}
         />
       )
     return (

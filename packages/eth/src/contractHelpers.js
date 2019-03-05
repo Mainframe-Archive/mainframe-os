@@ -1,10 +1,35 @@
 // @flow
-import web3Utils from 'web3-utils'
 import Web3EthAbi from 'web3-eth-abi'
-import type { ERC20DataResult, DecodedTxResult } from './types'
+import type { DecodedTxResult } from './types'
 
-type Web3Contract = {
-  methods: any,
+export const unitMap = {
+  noether: '0',
+  wei: '1',
+  kwei: '1000',
+  Kwei: '1000',
+  babbage: '1000',
+  femtoether: '1000',
+  mwei: '1000000',
+  Mwei: '1000000',
+  lovelace: '1000000',
+  picoether: '1000000',
+  gwei: '1000000000',
+  Gwei: '1000000000',
+  shannon: '1000000000',
+  nanoether: '1000000000',
+  nano: '1000000000',
+  szabo: '1000000000000',
+  microether: '1000000000000',
+  micro: '1000000000000',
+  finney: '1000000000000000',
+  milliether: '1000000000000000',
+  milli: '1000000000000000',
+  ether: '1000000000000000000',
+  kether: '1000000000000000000000',
+  grand: '1000000000000000000000',
+  mether: '1000000000000000000000000',
+  gether: '1000000000000000000000000000',
+  tether: '1000000000000000000000000000000',
 }
 
 const TRANSFER_SIG = 'a9059cbb'
@@ -36,28 +61,6 @@ const decodableContracts = {
       { type: 'uint256', name: 'amount' },
     ],
   },
-}
-
-export const getERC20Data = async (
-  contract: Web3Contract,
-  userAddr: string,
-): Promise<ERC20DataResult> => {
-  const [symbol, decimals, balanceWei] = await Promise.all([
-    contract.methods.symbol().call(),
-    contract.methods.decimals().call(),
-    contract.methods.balanceOf(userAddr).call(),
-  ])
-  const decimalsString = Math.pow(10, decimals).toString()
-  const unit = Object.keys(web3Utils.unitMap).find(unitName => {
-    const unit = web3Utils.unitMap[unitName]
-    return decimalsString === unit
-  })
-  const balance = web3Utils.fromWei(balanceWei, unit)
-  return {
-    decimals,
-    balance,
-    symbol,
-  }
 }
 
 export const decodeTransactionData = async (
