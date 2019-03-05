@@ -119,10 +119,15 @@ class AppsView extends Component<Props, State> {
   }
 
   fetchSuggested = async () => {
-    const suggestedPromise = await fetch(SUGGESTED_APPS_URL)
+    try {
+      const suggestedPromise = await fetch(SUGGESTED_APPS_URL)
 
-    const suggestedApps = await suggestedPromise.json()
-    this.setState({ suggestedApps })
+      const suggestedApps = await suggestedPromise.json()
+      this.setState({ suggestedApps })
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err)
+    }
   }
 
   onSkipOnboarding = () => {
