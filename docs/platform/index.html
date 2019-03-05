@@ -60,6 +60,7 @@ git checkout release-v0.<span class="hljs-number">2</span>
 <h3><a class="anchor" aria-hidden="true" id="prerequisites"></a><a href="#prerequisites" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Prerequisites</h3>
 <ul>
 <li><a href="https://nodejs.org/en/">Node</a> v10.x and npm v6.x</li>
+<li><a href="https://yarnpkg.com/lang/en/docs/install/">Yarn</a> v1.13.x</li>
 <li>Installed git and added to PATH environment variable</li>
 </ul>
 <h3><a class="anchor" aria-hidden="true" id="platform-specific-instructions"></a><a href="#platform-specific-instructions" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Platform Specific Instructions</h3>
@@ -69,9 +70,8 @@ git checkout release-v0.<span class="hljs-number">2</span>
 <h3><a class="anchor" aria-hidden="true" id="setup"></a><a href="#setup" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Setup</h3>
 <p>Each package contains (or will contain) a readme with further information pertaining to setup. A shortcut guide is as follows:</p>
 <p>In the root of the project, install node dependencies:</p>
-<pre><code class="hljs">npm install
-npm <span class="hljs-keyword">run</span><span class="bash"> bootstrap
-</span>npm <span class="hljs-keyword">run</span><span class="bash"> build
+<pre><code class="hljs">yarn <span class="hljs-keyword">install
+</span>yarn <span class="hljs-keyword">build
 </span></code></pre>
 <p>Next, a local environment must be created. An environment contains references to all the vaults created and stores the downloaded application contents. To create a new environment, run the following command:</p>
 <pre><code class="hljs">packages/cli/bin/<span class="hljs-keyword">run</span><span class="bash"> env:create
@@ -85,7 +85,7 @@ The newly created environment then needs to be configured using the CLI:</p>
 <pre><code class="hljs">.<span class="hljs-regexp">/packages/</span>cli<span class="hljs-regexp">/bin/</span>run <span class="hljs-string">daemon:</span>start
 </code></pre>
 <p>Then, in another tab, run the launcher:</p>
-<pre><code class="hljs">cd packages/launcher &amp;&amp; npm <span class="hljs-keyword">run</span><span class="bash"> dev
+<pre><code class="hljs">cd packages/launcher &amp;&amp; yarn <span class="hljs-keyword">run</span><span class="bash"> dev
 </span></code></pre>
 <h2><a class="anchor" aria-hidden="true" id="mainframe-platform-components"></a><a href="#mainframe-platform-components" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Mainframe Platform Components</h2>
 <p>The main components (packages) of the Mainframe Platform are as follows:</p>
