@@ -7,19 +7,17 @@ sidebar_label: Getting Started
 Mainframe OS is an integrated development and execution environment that dramatically simplifies the creation and use of unstoppable, privacy-driven, decentralized applications.
 
 ### Prerequisites
-- [Yarn](https://yarnpkg.com/lang/en/docs/install/) v1.13.x
 - [Node](https://nodejs.org/en/) v10.x and npm v6.x
 
 ## Install Mainframe OS
 
 #### MacOS
-- **[Download](https://s3.us-east-2.amazonaws.com/mainframe-os-releases/v0.2/MainframeOS.dmg)** Mainframe OS Installer
-- Double-click to run. Drag to the Applications Folder. **_Do not run it yet!!!_**
-
-- **_BEFORE YOU RUN MAINFRAME OS:_** from a terminal window run the following command
+1. From a terminal window run the following command to install the Mainframe OS Daemon
 
         $ npm install --global @mainframe/daemon
-- Now you can run Mainframe OS from the Applications icon.
+2. **[Download](https://s3.us-east-2.amazonaws.com/mainframe-os-releases/v0.2/MainframeOS.dmg)** Mainframe OS Installer
+3. Click. Drag. Run!
+
 
 #### Windows & Unix
 

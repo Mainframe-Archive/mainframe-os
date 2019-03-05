@@ -21,6 +21,7 @@ git checkout release-v0.2
 ### Prerequisites
 
 - [Node](https://nodejs.org/en/) v10.x and npm v6.x
+- [Yarn](https://yarnpkg.com/lang/en/docs/install/) v1.13.x
 - Installed git and added to PATH environment variable
 
 ### Platform Specific Instructions
@@ -38,9 +39,8 @@ Each package contains (or will contain) a readme with further information pertai
 In the root of the project, install node dependencies:
 
 ```
-npm install
-npm run bootstrap
-npm run build
+yarn install
+yarn build
 ```
 
 Next, a local environment must be created. An environment contains references to all the vaults created and stores the downloaded application contents. To create a new environment, run the following command:
@@ -67,7 +67,7 @@ In one terminal tab, run the daemon:
 Then, in another tab, run the launcher:
 
 ```
-cd packages/launcher && npm run dev
+cd packages/launcher && yarn run dev
 ```
 
 
