@@ -2,10 +2,11 @@
 
 import React, { Component } from 'react'
 import { createFragmentContainer, graphql } from 'react-relay'
-import type { AppOwnData, AppInstalledData } from '@mainframe/client'
+import type { AppInstalledData } from '@mainframe/client'
 import styled from 'styled-components/native'
-
 import { Text } from '@morpheus-ui/core'
+import type OwnApp from '../settings/__generated__/OwnAppDetailView_ownApp.graphql.js'
+import AppIcon from './AppIcon'
 
 const AppButtonContainer = styled.TouchableOpacity`
   padding: 15px 10px;
@@ -15,15 +16,13 @@ const AppButtonContainer = styled.TouchableOpacity`
   width: 110px;
 `
 
-const AppIcon = styled.View`
+const IconContainer = styled.View`
   width: 72px;
   height: 72px;
-  background-color: #232323;
-  border-radius: 5px;
   margin-bottom: 10px;
 `
 
-type AppData = AppOwnData | AppInstalledData
+type AppData = OwnApp | AppInstalledData
 
 type SharedProps = {
   onOpenApp: (app: AppData, own: boolean) => any,
@@ -88,12 +87,13 @@ export default class AppItem extends Component<Props, State> {
     const devName = isOwn ? app.developer.name : app.manifest.author.name
     return (
       <AppButtonContainer onPress={open} key={app.localID} testID={testID}>
-        <AppIcon
+        <IconContainer
           className={this.state.direction}
           onMouseMove={this.setDirection}
           onMouseOver={this.startMoving}
-          onMouseOut={this.stopMoving}
-        />
+          onMouseOut={this.stopMoving}>
+          <AppIcon id={app.mfid} />
+        </IconContainer>
         <Text variant="appButtonName">{app.name}</Text>
         <Text variant="appButtonId">{devName}</Text>
       </AppButtonContainer>
@@ -111,6 +111,7 @@ const OwnView = (props: OwnProps) => (
 export const InstalledAppItem = createFragmentContainer(InstalledView, {
   installedApp: graphql`
     fragment AppItem_installedApp on App {
+      mfid
       localID
       name
       manifest {
@@ -156,6 +157,7 @@ export const InstalledAppItem = createFragmentContainer(InstalledView, {
 export const OwnAppItem = createFragmentContainer(OwnView, {
   ownApp: graphql`
     fragment AppItem_ownApp on OwnApp {
+      mfid
       localID
       name
       developer {

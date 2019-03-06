@@ -1,19 +1,15 @@
 // @flow
 
-import {
-  parseContentsURI,
-  validateManifest,
-  type ManifestData,
-} from '@mainframe/app-manifest'
-import type BzzAPI from '@erebos/api-bzz-node'
-import { ensureDir } from 'fs-extra'
+import { validateManifest, type ManifestData } from '@mainframe/app-manifest'
 import {
   getRequirementsDifference,
   type PermissionKey,
   type PermissionGrant,
+  type StrictPermissionsRequirements,
 } from '@mainframe/app-permissions'
-import { MFID } from '@mainframe/data-types'
+import type { AppUserPermissionsSettings } from '@mainframe/client'
 import { getAppContentsPath, type Environment } from '@mainframe/config'
+import { MFID } from '@mainframe/data-types'
 import { uniqueID, idType, type ID } from '@mainframe/utils-id'
 
 import { mapObject } from '../utils'
@@ -21,11 +17,13 @@ import { mapObject } from '../utils'
 import type {
   ApprovedContact,
   ContactToApprove,
-  PermissionsSettings,
   SessionData,
 } from './AbstractApp'
 import App, { type AppSerialized } from './App'
-import OwnApp, { type OwnAppParams, type OwnAppSerialized } from './OwnApp'
+import OwnApp, {
+  type OwnAppCreationParams,
+  type OwnAppSerialized,
+} from './OwnApp'
 
 export type AppUpdate = {
   app: App,
@@ -68,37 +66,18 @@ export type AppsRepositorySerialized = {
   ownApps: { [string]: OwnAppSerialized },
 }
 
+export type UpdateAppDetailsParams = {
+  appID: string,
+  contentsPath: string,
+  name: string,
+  version: string,
+}
+
 export const getContentsPath = (
   env: Environment,
   manifest: ManifestData,
 ): string => {
   return getAppContentsPath(env, manifest.id, manifest.version)
-}
-
-export const downloadAppContents = async (
-  bzz: BzzAPI,
-  app: App,
-  contentsPath: string,
-): Promise<App> => {
-  if (app.installationState !== 'ready') {
-    const contentsURI = parseContentsURI(app.manifest.contentsURI)
-    if (contentsURI.nid !== 'bzz' || contentsURI.nss == null) {
-      // Unsupported contentsURI
-      app.installationState = 'download_error'
-    } else {
-      try {
-        app.installationState = 'downloading'
-        await ensureDir(contentsPath)
-        // contentsURI.nss is expected to be the bzz hash
-        // TODO?: bzz hash validation?
-        await bzz.downloadDirectoryTo(contentsURI.nss, contentsPath)
-        app.installationState = 'ready'
-      } catch (err) {
-        app.installationState = 'download_error'
-      }
-    }
-  }
-  return app
 }
 
 export default class AppsRepository {
@@ -125,30 +104,53 @@ export default class AppsRepository {
   _apps: Apps
   _updates: AppUpdates
   _ownApps: OwnApps
-  _byMFID: { [mfid: string]: ID }
-  _appsByUser: { [uid: ID]: Array<ID> }
+  _byHash: { [hash: string]: ID } = {}
+  _byMFID: { [mfid: string]: ID } = {}
+  _appsByUser: { [uid: ID]: Array<ID> } = {}
 
   constructor(params: AppsRepositoryParams = {}) {
     this._apps = params.apps || {}
-    this._byMFID = {}
-    this._appsByUser = {}
+    this._updates = params.updates || {}
+    this._ownApps = params.ownApps || {}
+
+    // Fill references for apps
+
+    Object.keys(this._ownApps).forEach(appID => {
+      const id = idType(appID)
+      const ownApp = this._ownApps[id]
+      const mfid = MFID.canonical(ownApp.data.mfid)
+      this._byMFID[mfid] = id
+
+      if (ownApp.updateFeed.feedHash) {
+        this._byHash[ownApp.updateFeed.feedHash] = id
+      }
+
+      Object.keys(ownApp.settings).forEach(uid => {
+        const userID = idType(uid)
+        if (this._appsByUser[userID]) {
+          this._appsByUser[userID].push(id)
+        } else {
+          this._appsByUser[userID] = [id]
+        }
+      })
+    })
+
     Object.keys(this._apps).forEach(appID => {
       const id = idType(appID)
       const app = this._apps[id]
+      this._byHash[app.manifest.updateHash] = id
       const mfid = MFID.canonical(app.manifest.id)
       this._byMFID[mfid] = id
 
       Object.keys(app.settings).forEach(uid => {
         const userID = idType(uid)
         if (this._appsByUser[userID]) {
-          this._appsByUser[userID].push(idType(appID))
+          this._appsByUser[userID].push(id)
         } else {
-          this._appsByUser[userID] = [idType(appID)]
+          this._appsByUser[userID] = [id]
         }
       })
     })
-    this._updates = params.updates || {}
-    this._ownApps = params.ownApps || {}
   }
 
   // Getters
@@ -165,7 +167,7 @@ export default class AppsRepository {
     return this._ownApps
   }
 
-  getByID(id: ID): ?App {
+  getByID(id: ID | string): ?App {
     return this._apps[id] || this._ownApps[id]
   }
 
@@ -195,7 +197,7 @@ export default class AppsRepository {
     return this.getByID(idType(id)) || this.getOwnByID(idType(id))
   }
 
-  getAppsForUser(id: ID): ?Array<App> {
+  getAppsForUser(id: ID): Array<App> {
     const apps = []
     if (this._appsByUser[id]) {
       this._appsByUser[id].forEach(id => {
@@ -213,32 +215,41 @@ export default class AppsRepository {
   add(
     manifest: ManifestData,
     userID: ID,
-    permissionsSettings: PermissionsSettings,
+    permissionsSettings: AppUserPermissionsSettings,
   ): App {
     if (validateManifest(manifest) === 'valid') {
       throw new Error('Invalid manifest')
     }
+
     const appID = uniqueID()
     const app = new App({
       appID,
       manifest,
       installationState: 'pending',
-      settings: {
-        [(userID: string)]: {
-          permissionsSettings,
-        },
-      },
     })
+    app.setPermissionsSettings(userID, permissionsSettings)
+
     this._apps[appID] = app
+    this._byHash[manifest.updateHash] = appID
     this._byMFID[MFID.canonical(manifest.id)] = appID
 
     return app
   }
 
+  updateAppDetails(params: UpdateAppDetailsParams): void {
+    const app = this.getOwnByID(idType(params.appID))
+    if (app == null) {
+      throw new Error('Invalid app')
+    }
+    app.name = params.name
+    app.contentsPath = params.contentsPath
+    app.editNextVersionNumber(params.version)
+  }
+
   setUserPermissionsSettings(
     appID: ID,
     userID: ID,
-    settings: PermissionsSettings,
+    settings: AppUserPermissionsSettings,
   ): void {
     const app = this.getAnyByID(appID)
     if (app == null) {
@@ -264,7 +275,7 @@ export default class AppsRepository {
     appID: ID | string,
     userID: ID | string,
     contactsToApprove: Array<ContactToApprove>,
-  ): { [localID: string]: ApprovedContact } {
+  ): { [id: string]: ApprovedContact } {
     const app = this.getAnyByID(appID)
     if (app == null) {
       throw new Error('Invalid app')
@@ -289,6 +300,7 @@ export default class AppsRepository {
         delete this._ownApps[id]
       } else {
         // TODO: handle "clean" option to remove the app contents
+        delete this._byHash[app.manifest.updateHash]
         delete this._byMFID[app.manifest.id]
         delete this._apps[id]
       }
@@ -355,10 +367,22 @@ export default class AppsRepository {
 
   // Own apps
 
-  create(params: OwnAppParams): OwnApp {
-    const app = new OwnApp(params)
-    this._byMFID[MFID.canonical(params.data.mfid)] = params.appID
-    this._ownApps[params.appID] = app
+  create(params: OwnAppCreationParams): OwnApp {
+    const app = OwnApp.create(params)
+    this._byMFID[MFID.canonical(app.mfid)] = app.id
+    this._ownApps[app.id] = app
     return app
+  }
+
+  createNextVersion(
+    id: ID,
+    version: string,
+    permissions?: StrictPermissionsRequirements,
+  ): void {
+    const app = this.getOwnByID(id)
+    if (app == null) {
+      throw new Error('App not found')
+    }
+    app.createNextVersion(version, permissions)
   }
 }

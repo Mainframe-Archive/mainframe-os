@@ -7,15 +7,17 @@ import {
 } from '@mainframe/app-permissions'
 import type { IdentityOwnData } from '@mainframe/client'
 import type { ManifestData } from '@mainframe/app-manifest'
-import React, { createRef, Component, type ElementRef } from 'react'
-import { View, StyleSheet } from 'react-native-web'
+import React, { Component } from 'react'
+import { Text, TextField } from '@morpheus-ui/core'
+import { type FormSubmitPayload } from '@morpheus-ui/forms'
 import { commitMutation } from 'react-relay'
+import styled from 'styled-components/native'
+
 import { EnvironmentContext } from '../RelayEnvironment'
 
-import LauncherContext from '../LauncherContext'
-import Button from '../../UIComponents/Button'
-import Text from '../../UIComponents/Text'
-import ModalView from '../../UIComponents/ModalView'
+import applyContext, { type CurrentUser } from '../LauncherContext'
+import FormModalView from '../../UIComponents/FormModalView'
+import Loader from '../../UIComponents/Loader'
 import rpc from '../rpc'
 import PermissionsView from '../PermissionsView'
 import { appInstallMutation } from './appMutations'
@@ -26,11 +28,10 @@ type Props = {
 }
 
 type ViewProps = Props & {
-  userID: string,
+  user: CurrentUser,
 }
 
 type State = {
-  inputValue: string,
   installStep: 'manifest' | 'permissions' | 'download',
   manifest: ?ManifestData,
   userPermissions?: StrictPermissionsGrants,
@@ -38,56 +39,72 @@ type State = {
   errorMsg?: string,
 }
 
+const Container = styled.View`
+  flex: 1;
+  width: 100%;
+  max-width: 550px;
+  padding: 20px;
+  justify-content: center;
+  overflow-y: auto;
+`
+
+const TextContainer = styled.View`
+  padding: 20px;
+`
+
+const View = styled.View``
+
 class AppInstallModal extends Component<ViewProps, State> {
   static contextType = EnvironmentContext
 
   state = {
-    inputValue: '',
     installStep: 'manifest',
     manifest: null,
     ownUsers: [],
   }
 
-  // $FlowFixMe: React Ref
-  fileInput: ElementRef<'input'> = createRef()
-
   // HANDLERS
 
-  onPressImportManifest = () => {
-    this.fileInput.current.click()
-  }
-
-  onFileInputChange = () => {
-    this.handleSelectedFiles([...this.fileInput.current.files])
-  }
-
-  handleSelectedFiles = async (files: Array<Object>) => {
-    if (files.length) {
+  onSubmitManifest = async (payload: FormSubmitPayload) => {
+    if (payload.valid) {
       try {
-        const manifest = await rpc.readManifest(files[0].path)
-        if (
-          typeof manifest.data.name === 'string' &&
-          typeof manifest.data.permissions === 'object'
-        ) {
-          this.setState({
-            manifest: manifest.data,
-          })
-          if (havePermissionsToGrant(manifest.permissions)) {
-            this.setState({
-              installStep: 'permissions',
+        this.setState({ installStep: 'download' })
+
+        const { manifest, appID, isOwn } = await rpc.loadManifest(
+          payload.fields.appid,
+        )
+        // If appID is returned it means the app is already installed.
+        // If we only support a single user in the launcher, the app must have been already installed by this user.
+        if (appID != null) {
+          if (isOwn) {
+            return this.setState({
+              installStep: 'manifest',
+              errorMsg: `We currently don't support installing your own apps, they should be accessed from the developer section.`,
             })
           } else {
-            const strictGrants = createStrictPermissionGrants({})
-            this.onSubmitPermissions(strictGrants)
+            return this.props.onInstallComplete()
           }
+        }
+
+        if (havePermissionsToGrant(manifest.permissions)) {
+          this.setState({ installStep: 'permissions', manifest })
         } else {
-          // eslint-disable-next-line no-console
-          console.log('invalid manifest')
+          this.setState(
+            {
+              installStep: 'download',
+              manifest,
+              userPermissions: createStrictPermissionGrants({}),
+            },
+            this.saveApp,
+          )
         }
       } catch (err) {
-        // TODO: Feedback error
+        this.setState({
+          errorMsg: err.message,
+          installStep: 'manifest',
+        })
         // eslint-disable-next-line no-console
-        console.log('error parsing manifest: ', err)
+        console.log('error loading manifest:', err)
       }
     }
   }
@@ -118,7 +135,7 @@ class AppInstallModal extends Component<ViewProps, State> {
     }
 
     const params = {
-      userID: this.props.userID,
+      userID: this.props.user.localID,
       manifest,
       permissionsSettings,
     }
@@ -127,14 +144,22 @@ class AppInstallModal extends Component<ViewProps, State> {
     commitMutation(this.context, {
       mutation: appInstallMutation,
       variables: { input: params },
-      onCompleted: () => {
-        this.props.onInstallComplete()
+      onCompleted: (res, errors) => {
+        if (errors && errors.length) {
+          this.setState({
+            errorMsg: `Error: ${errors[0].message}`,
+            installStep: 'manifest',
+          })
+        } else {
+          this.props.onInstallComplete()
+        }
       },
       onError: err => {
         const msg =
-          err.message || 'Sorry, there was a problem creating your app.'
+          err.message || 'Sorry, there was a problem installing this app.'
         this.setState({
           errorMsg: msg,
+          installStep: 'manifest',
         })
       },
     })
@@ -143,24 +168,29 @@ class AppInstallModal extends Component<ViewProps, State> {
   // RENDER
 
   renderManifestImport() {
+    const errorMsg = this.state.errorMsg && (
+      <Text variant="error">{this.state.errorMsg}</Text>
+    )
     return (
-      <View>
-        <Text style={styles.header}>Install New App</Text>
-        <Text style={styles.description}>Import an app manifest file</Text>
-        <Button
-          title="Import App Manifest"
-          onPress={this.onPressImportManifest}
-        />
-        <input
-          multiple
-          id="installer-file-selector"
-          onChange={this.onFileInputChange}
-          ref={this.fileInput}
-          type="file"
-          hidden
-          value={this.state.inputValue}
-        />
-      </View>
+      <FormModalView
+        dismissButton="CANCEL"
+        confirmButton="OK"
+        title="Install an app"
+        onRequestClose={this.props.onRequestClose}
+        onSubmitForm={this.onSubmitManifest}>
+        <Container>
+          <TextContainer>
+            <Text variant={['modalText', 'center']}>
+              Lorem ipsum dolor amet sitim opsos calibri <br />
+              dos ipsum dolor amet sitimus.
+            </Text>
+          </TextContainer>
+          <View>
+            <TextField name="appid" required label="Mainframe App ID" />
+          </View>
+          {errorMsg}
+        </Container>
+      </FormModalView>
     )
   }
 
@@ -168,30 +198,33 @@ class AppInstallModal extends Component<ViewProps, State> {
     const { manifest } = this.state
 
     return manifest ? (
-      <View>
-        <Text style={styles.header}>{`Manage permissions for ${
-          manifest.name
-        }`}</Text>
-        <PermissionsView
-          permissions={manifest.permissions}
-          onSubmit={this.onSubmitPermissions}
-        />
-      </View>
+      <PermissionsView
+        name={manifest.name}
+        permissions={manifest.permissions}
+        onSubmit={this.onSubmitPermissions}
+        onCancel={this.props.onRequestClose}
+      />
     ) : null
   }
 
   renderDownload() {
     const { manifest } = this.state
 
-    return manifest ? (
-      <View>
-        <Text style={styles.header}>{`Downloading ${manifest.name}`}</Text>
-        <Text>Downloading from swarm...</Text>
-      </View>
-    ) : null
+    return (
+      <FormModalView
+        title={`Downloading ${manifest ? manifest.name : 'App Manifest'}`}>
+        <Container>
+          <TextContainer>
+            <Text variant={['modalText', 'center']}>
+              <Loader />
+            </Text>
+          </TextContainer>
+        </Container>
+      </FormModalView>
+    )
   }
 
-  renderContent() {
+  render() {
     switch (this.state.installStep) {
       case 'manifest':
         return this.renderManifestImport()
@@ -203,31 +236,6 @@ class AppInstallModal extends Component<ViewProps, State> {
         return null
     }
   }
-
-  render() {
-    return (
-      <ModalView isOpen={true} onRequestClose={this.props.onRequestClose}>
-        {this.renderContent()}
-      </ModalView>
-    )
-  }
 }
 
-export default class AppInstallContextWrapper extends Component<Props> {
-  static contextType = LauncherContext
-  render() {
-    return (
-      <AppInstallModal userID={this.context.user.localID} {...this.props} />
-    )
-  }
-}
-
-const styles = StyleSheet.create({
-  header: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  description: {
-    paddingVertical: 15,
-  },
-})
+export default applyContext(AppInstallModal)

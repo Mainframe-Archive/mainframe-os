@@ -2,17 +2,38 @@
 
 import React, { Component } from 'react'
 import styled from 'styled-components/native'
-import { graphql, QueryRenderer, createFragmentContainer } from 'react-relay'
+import {
+  graphql,
+  QueryRenderer,
+  createFragmentContainer,
+  // $FlowFixMe: requestSubscription not present in Flow definition but exported by library
+  requestSubscription,
+  type Disposable,
+  type Environment,
+} from 'react-relay'
 
 import OnboardView from './onboarding/OnboardView'
 import { EnvironmentContext } from './RelayEnvironment'
-import LauncherContext from './LauncherContext'
+import { Provider } from './LauncherContext'
 import RelayLoaderView from './RelayLoaderView'
 import SideMenu, { type ScreenNames } from './SideMenu'
 import AppsScreen from './apps/AppsScreen'
 import IdentitiesScreen from './identities/IdentitiesScreen'
 import WalletsScreen from './wallets/WalletsScreen'
 import ContactsScreen from './contacts/ContactsScreen'
+import SettingsScreen from './settings/SettingsScreen'
+
+const CONTACT_CHANGED_SUBSCRIPTION = graphql`
+  subscription LauncherContactChangedSubscription {
+    contactChanged {
+      connectionState
+      profile {
+        name
+        avatar
+      }
+    }
+  }
+`
 
 const Container = styled.View`
   flex-direction: row;
@@ -38,6 +59,9 @@ type Props = {
       },
     }>,
   },
+  relay: {
+    environment: Environment,
+  },
 }
 
 type OnboardSteps = 'identity' | 'wallet'
@@ -48,6 +72,8 @@ type State = {
 }
 
 class Launcher extends Component<Props, State> {
+  _subscription: ?Disposable
+
   constructor(props: Props) {
     super(props)
     const { ownUsers } = props.identities
@@ -63,6 +89,18 @@ class Launcher extends Component<Props, State> {
     this.state = {
       onboardRequired,
       openScreen: 'apps',
+    }
+  }
+
+  componentDidMount() {
+    this._subscription = requestSubscription(this.props.relay.environment, {
+      subscription: CONTACT_CHANGED_SUBSCRIPTION,
+    })
+  }
+
+  componentWillUnmount() {
+    if (this._subscription != null) {
+      this._subscription.dispose()
     }
   }
 
@@ -88,6 +126,8 @@ class Launcher extends Component<Props, State> {
         return <WalletsScreen />
       case 'contacts':
         return <ContactsScreen />
+      case 'settings':
+        return <SettingsScreen />
       default:
         return null
     }
@@ -108,7 +148,7 @@ class Launcher extends Component<Props, State> {
     }
 
     return (
-      <LauncherContext.Provider value={{ user: ownUsers[0] }}>
+      <Provider value={{ user: ownUsers[0] }}>
         <Container testID="launcher-view">
           <SideMenu
             selected={this.state.openScreen}
@@ -116,7 +156,7 @@ class Launcher extends Component<Props, State> {
           />
           <ContentContainer>{this.renderScreen()}</ContentContainer>
         </Container>
-      </LauncherContext.Provider>
+      </Provider>
     )
   }
 }

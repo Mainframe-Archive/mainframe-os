@@ -4,7 +4,6 @@ import React, { Component } from 'react'
 import styled from 'styled-components/native'
 import { graphql, commitMutation, createFragmentContainer } from 'react-relay'
 import { fetchQuery } from 'relay-runtime'
-import { ActivityIndicator } from 'react-native'
 import { debounce } from 'lodash'
 import { Text, Button, Row, Column, TextField } from '@morpheus-ui/core'
 import { Form, type FormSubmitPayload } from '@morpheus-ui/forms'
@@ -19,6 +18,7 @@ import Avatar from '../../UIComponents/Avatar'
 import SvgSelectedPointer from '../../UIComponents/SVGSelectedPointer'
 
 import FormModalView from '../../UIComponents/FormModalView'
+import Loader from '../../UIComponents/Loader'
 
 const SvgSmallClose = props => (
   <svg width="10" height="10" viewBox="0 0 10 10" {...props}>
@@ -140,6 +140,7 @@ const Blocky = styled.View`
 export type Contact = {
   localID: string,
   peerID: string,
+  publicFeed: string,
   ethAddress?: string,
   profile: {
     name?: string,
@@ -175,6 +176,7 @@ type State = {
     profile: {
       name: string,
     },
+    publicFeed: string,
     publicKey: string,
   },
 }
@@ -201,6 +203,7 @@ const peerLookupQuery = graphql`
         profile {
           name
         }
+        publicFeed
         publicKey
       }
     }
@@ -221,13 +224,25 @@ class ContactsViewComponent extends Component<Props, State> {
   }
 
   componentDidUpdate(prevProps: Props) {
-    if (
-      !prevProps.contacts.userContacts.length &&
-      this.props.contacts.userContacts.length
-    ) {
-      this.setState({
-        selectedContact: this.props.contacts.userContacts[0],
-      })
+    if (this.props.contacts.userContacts.length) {
+      if (!prevProps.contacts.userContacts.length) {
+        this.setState({
+          selectedContact: this.props.contacts.userContacts[0],
+        })
+      } else if (
+        this.state.selectedContact != null &&
+        !this.props.contacts.userContacts.includes(this.state.selectedContact)
+      ) {
+        const { localID } = this.state.selectedContact
+        const updatedContact = this.props.contacts.userContacts.find(
+          contact => contact.localID === localID,
+        )
+        this.setState({
+          selectedContact: updatedContact
+            ? updatedContact
+            : this.props.contacts.userContacts[0],
+        })
+      }
     }
   }
 
@@ -396,7 +411,7 @@ class ContactsViewComponent extends Component<Props, State> {
                   selected={selected}>
                   <ContactCardText>
                     <Text variant={['greyMed', 'ellipsis']} bold size={13}>
-                      {contact.profile.name || contact.localID}
+                      {contact.profile.name || contact.publicFeed}
                     </Text>
                     {contact.connectionState === 'SENT' ||
                     contact.connectionState === 'SENDING' ? (
@@ -441,17 +456,21 @@ class ContactsViewComponent extends Component<Props, State> {
 
   renderPeerLookup() {
     const { foundPeer, queryInProgress } = this.state
+    const hasName = foundPeer && foundPeer.profile.name
     return queryInProgress ? (
-      <ActivityIndicator />
+      <Loader />
     ) : (
       foundPeer && (
         <Column>
           <AvatarWrapper>
             <Blocky>
-              <Avatar id={foundPeer.publicKey} size="small" />
+              <Avatar id={foundPeer.publicFeed} size="small" />
             </Blocky>
-            <Text variant="greyDark23" size={13}>
-              {foundPeer.profile.name}
+            <Text
+              variant="greyDark23"
+              theme={{ fontStyle: hasName ? 'normal' : 'italic' }}
+              size={13}>
+              {foundPeer.profile.name || 'This user has a private profile'}
             </Text>
           </AvatarWrapper>
         </Column>
@@ -479,12 +498,13 @@ class ContactsViewComponent extends Component<Props, State> {
                 size={12}
                 theme={{ textAlign: 'center', marginBottom: 50 }}>
                 You have no contacts in your address book. Add someone to join
-                you by entering their Mainframe ID or scanning their QR code.
+                you by entering their Mainframe Contact ID.
+                {/*  or scanning their QR code */}
               </Text>
             </Column>
           )}
           <Column>
-            <TextField name="peerLookupHash" required label="Mainframe ID" />
+            <TextField name="peerLookupHash" required label="Contact ID" />
           </Column>
           {this.renderPeerLookup()}
         </Row>
@@ -496,26 +516,21 @@ class ContactsViewComponent extends Component<Props, State> {
       return innerContent
     }
 
-    const addButton = addingContact ? (
-      <ActivityIndicator />
-    ) : (
-      <Row size={2} top>
-        <Column styles="align-items:flex-end;" smOffset={1}>
-          <Button
-            title="ADD"
-            variant="onboarding"
-            Icon={CircleArrowRight}
-            submit
-          />
-        </Column>
-      </Row>
-    )
-
     return (
       <FormContainer modal={modal}>
         <Form onChange={this.onFormChange} onSubmit={this.submitNewContact}>
           {innerContent}
-          {addButton}
+          <Row size={2} top>
+            <Column styles="align-items:flex-end;" smOffset={1}>
+              <Button
+                disabled={addingContact}
+                title="ADD"
+                variant="onboarding"
+                Icon={CircleArrowRight}
+                submit
+              />
+            </Column>
+          </Row>
         </Form>
       </FormContainer>
     )
@@ -536,8 +551,8 @@ class ContactsViewComponent extends Component<Props, State> {
           <Row size={1}>
             <Column>
               <Text variant="greyMed" size={12}>
-                You have no contacts in your address book. Invite someone to
-                join you by entering their Public Key or scanning their QR code.
+                You have no contacts in your address book. Add a contact by
+                entering their Mainframe Contact ID below.
               </Text>
             </Column>
           </Row>
@@ -555,7 +570,7 @@ class ContactsViewComponent extends Component<Props, State> {
               <Column>
                 <AvatarWrapper>
                   <Blocky>
-                    <Avatar id={selectedContact.localID} size="large" />
+                    <Avatar id={selectedContact.publicFeed} size="large" />
                   </Blocky>
                   <Text bold size={24}>
                     {selectedContact.profile.name}
@@ -566,9 +581,9 @@ class ContactsViewComponent extends Component<Props, State> {
             <Row size={1}>
               <Column>
                 <Text variant="smallTitle" theme={{ padding: '20px 0 10px 0' }}>
-                  Mainframe ID
+                  Mainframe Contact ID
                 </Text>
-                <Text variant="addressLarge">{selectedContact.localID}</Text>
+                <Text variant="addressLarge">{selectedContact.publicFeed}</Text>
               </Column>
             </Row>
             {selectedContact.ethAddress && (
@@ -579,7 +594,9 @@ class ContactsViewComponent extends Component<Props, State> {
                     theme={{ padding: '20px 0 10px 0' }}>
                     ETH Address
                   </Text>
-                  <Text variant="addressLarge">{selectedContact.localID}</Text>
+                  <Text variant="addressLarge">
+                    {selectedContact.publicFeed}
+                  </Text>
                 </Column>
               </Row>
             )}
@@ -640,7 +657,7 @@ class ContactsViewComponent extends Component<Props, State> {
         <FormContainer modal={true}>
           <Row size={1}>
             <Column styles="align-items:center; justify-content: center; flex-direction: row; margin-bottom: 30px;">
-              <Avatar id={this.state.selectedContact.localID} size="large" />
+              <Avatar id={this.state.selectedContact.publicFeed} size="large" />
             </Column>
             <Column>
               <TextField
@@ -686,8 +703,10 @@ const ContactsView = createFragmentContainer(ContactsViewComponent, {
         peerID
         localID
         connectionState
+        publicFeed
         profile {
           name
+          ethAddress
         }
       }
     }

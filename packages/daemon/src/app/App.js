@@ -8,22 +8,15 @@ import {
   PERMISSION_KEYS_BOOLEAN,
   type StrictPermissionsGrants,
 } from '@mainframe/app-permissions'
-// eslint-disable-next-line import/named
+import type { AppInstallationState } from '@mainframe/client'
 import { uniqueID, type ID } from '@mainframe/utils-id'
 
+import type { bzzHash } from '../swarm/feed'
 import AbstractApp, {
   type AbstractAppParams,
   type SessionData,
 } from './AbstractApp'
 import Session from './Session'
-
-export type AppInstallationState =
-  | 'pending'
-  | 'hash_lookup'
-  | 'hash_not_found'
-  | 'downloading'
-  | 'download_error'
-  | 'ready'
 
 export type AppParams = AbstractAppParams & {
   manifest: ManifestData,
@@ -64,6 +57,14 @@ export default class App extends AbstractApp {
 
   get manifest(): ManifestData {
     return this._manifest
+  }
+
+  get mfid(): string {
+    return this.manifest.id
+  }
+
+  get updateFeedHash(): bzzHash {
+    return this.manifest.updateHash
   }
 
   getPermissionsChecked(userID: ID): boolean {

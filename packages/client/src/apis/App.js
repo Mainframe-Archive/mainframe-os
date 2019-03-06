@@ -12,13 +12,16 @@ import type {
   AppGetManifestDataResult,
   AppInstallParams,
   AppInstallResult,
+  AppLoadManifestParams,
+  AppLoadManifestResult,
   AppOpenParams,
   AppOpenResult,
-  AppPublishContentsParams,
-  AppPublishContentsResult,
+  AppPublishParams,
+  AppPublishResult,
   AppRemoveParams,
   AppSetPermissionParams,
   AppSetPermissionsRequirementsParams,
+  AppSetUserDefaultWalletParams,
   AppSetUserPermissionsSettingsParams,
   AppSetFeedHashParams,
   AppWriteManifestParams,
@@ -53,14 +56,16 @@ export default class AppAPIs extends ClientAPIs {
     return this._rpc.request('app_install', params)
   }
 
+  loadManifest(params: AppLoadManifestParams): Promise<AppLoadManifestResult> {
+    return this._rpc.request('app_loadManifest', params)
+  }
+
   open(params: AppOpenParams): Promise<AppOpenResult> {
     return this._rpc.request('app_open', params)
   }
 
-  publishContents(
-    params: AppPublishContentsParams,
-  ): Promise<AppPublishContentsResult> {
-    return this._rpc.request('app_publishContents', params)
+  publish(params: AppPublishParams): Promise<AppPublishResult> {
+    return this._rpc.request('app_publish', params)
   }
 
   remove(params: AppRemoveParams): Promise<void> {
@@ -89,5 +94,9 @@ export default class AppAPIs extends ClientAPIs {
 
   writeManifest(params: AppWriteManifestParams): Promise<void> {
     return this._rpc.request('app_writeManifest', params)
+  }
+
+  setUserDefaultWallet(params: AppSetUserDefaultWalletParams): Promise<void> {
+    return this._rpc.request('app_setUserDefaultWallet', params)
   }
 }

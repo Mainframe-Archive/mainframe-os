@@ -47,6 +47,7 @@ export type AppCheckPermissionResult = {
 export type ApprovedContact = {
   publicDataOnly: boolean,
   id: string,
+  localID: string,
 }
 
 export type AppUserPermissionsSettings = {
@@ -66,13 +67,16 @@ export type AppCreateParams = {
 
 export type AppCreateResult = { appID: ID }
 
-export type WalletSettings = {
+export type AppUserWalletSettings = {
   defaultEthAccount: ?string,
 }
 
 export type AppUserSettings = {
+  approvedContacts: {
+    [id: string]: ApprovedContact,
+  },
   permissionsSettings: AppUserPermissionsSettings,
-  walletSettings: WalletSettings,
+  walletSettings: AppUserWalletSettings,
 }
 
 export type AppUser = IdentityOwnData & {
@@ -81,6 +85,7 @@ export type AppUser = IdentityOwnData & {
 
 export type AppInstalledData = {
   localID: ID,
+  mfid: ID,
   manifest: ManifestData,
   users: Array<AppUser>,
   name: string,
@@ -88,6 +93,7 @@ export type AppInstalledData = {
 
 export type AppOwnData = {
   localID: ID,
+  mfid: ID,
   manifest: ManifestData,
   users: Array<AppUser>,
   name: string,
@@ -117,7 +123,28 @@ export type AppInstallParams = {
   permissionsSettings: AppUserPermissionsSettings,
 }
 
-export type AppInstallResult = { appID: ID }
+export type AppInstallationState =
+  | 'pending'
+  | 'hash_lookup'
+  | 'hash_not_found'
+  | 'downloading'
+  | 'download_error'
+  | 'ready'
+
+export type AppInstallResult = {
+  appID: ID,
+  installationState: AppInstallationState,
+}
+
+export type AppLoadManifestParams = {
+  hash: string,
+}
+
+export type AppLoadManifestResult = {
+  appID?: ID,
+  manifest: ManifestData,
+  isOwn?: ?boolean,
+}
 
 export type AppOpenParams = {
   appID: ID,
@@ -146,19 +173,26 @@ export type AppOpenResult = {
   app: AppData,
   session: AppSession,
   user: IdentityOwnData,
+  isDev?: ?boolean,
   defaultEthAccount: ?string,
 }
 
-export type AppPublishContentsParams = {
+export type AppPublishParams = {
   appID: ID,
   version?: ?string,
 }
 
-export type AppPublishContentsResult = {
-  contentsURI: string,
+export type AppPublishResult = {
+  hash: string,
 }
 
 export type AppRemoveParams = { appID: ID }
+
+export type AppSetUserDefaultWalletParams = {
+  appID: string,
+  userID: string,
+  address: string,
+}
 
 export type AppSetUserPermissionsSettingsParams = {
   appID: ID,
@@ -211,6 +245,31 @@ export type BlockchainWeb3SendParams = {
 
 export type BlockchainWeb3SendResult = any
 
+// Comms
+
+export type CommsPublishParams = {
+  appID: ID,
+  userID: string,
+  contactID: string,
+  key: string,
+  value: Object,
+}
+
+export type CommsSubscribeParams = {
+  appID: ID,
+  userID: string,
+  contactID: string,
+  key: string,
+}
+
+export type CommsGetSubscribableParams = {
+  appID: ID,
+  userID: string,
+  contactID: string,
+}
+
+export type CommsGetSubscribableResult = Array<string>
+
 // GraphQL
 
 export type GraphQLQueryParams = {
@@ -233,6 +292,7 @@ export type IdentityAddPeerParams = {
   profile: {
     name?: ?string,
     avatar?: ?string,
+    ethAddress?: ?string,
   },
   publicFeed: string,
   firstContactAddress: string,
@@ -249,6 +309,7 @@ export type IdentityPeerResult = {
   profile: {
     name?: ?string,
     avatar?: ?string,
+    ethAddress?: ?string,
   },
 }
 
@@ -265,6 +326,7 @@ export type IdentityCreateUserParams = {
   profile: {
     name: string,
     avatar?: ?string,
+    ethAddress?: ?string,
   },
 }
 
@@ -335,7 +397,6 @@ export type ContactsApproveContactsForAppParams = {
 
 export type ContactProfile = {
   name?: ?string,
-  aliasName?: ?string,
   avatar?: ?string,
   ethAddress?: ?string,
 }
@@ -375,6 +436,7 @@ export type IdentityUpdateUserParams = {
   profile: {
     name?: string,
     avatar?: ?string,
+    ethAddress?: ?string,
   },
 }
 
@@ -401,7 +463,6 @@ export type VaultSettings = {
   bzzURL: string,
   pssURL: string,
   ethURL: string,
-  ethChainID: number,
 }
 
 export type VaultSettingsParams = $Shape<VaultSettings>
@@ -474,8 +535,8 @@ export type WalletGetLedgerEthAccountsResult = Array<string>
 
 export type WalletGetEthAccountsResult = Array<string>
 
-export type WalletAddLedgerEthAccountParams = {
-  index: number,
+export type WalletAddLedgerEthAccountsParams = {
+  indexes: Array<number>,
   name: string,
   userID?: string,
 }
@@ -490,7 +551,7 @@ export type WalletAddHDAccountResult = string
 
 export type WalletAddLedgerResult = {
   localID: string,
-  address: string,
+  addresses: Array<string>,
 }
 
 export type WalletSetUserDefaulParams = {

@@ -43,7 +43,7 @@ export type WalletsRepositorySerialized = {
 
 export type WalletAddLedgerResult = {
   localID: string,
-  address: string,
+  addresses: Array<string>,
 }
 
 export type ImportHDWalletParams = {
@@ -241,8 +241,8 @@ export default class WalletsRepository {
     }
   }
 
-  async addLedgerEthAccount(
-    index: number,
+  async addLedgerEthAccounts(
+    indexes: Array<number>,
     name: string,
   ): Promise<WalletAddLedgerResult> {
     // Identify ledger wallets with first address
@@ -259,11 +259,11 @@ export default class WalletsRepository {
       this._wallets.ethereum.ledger[walletID] = ledgerWallet
     }
 
-    const addresses = await ledgerWallet.addAccounts([index])
+    const addresses = await ledgerWallet.addAccounts(indexes)
 
     return {
       localID: ledgerWallet.id,
-      address: addresses[0],
+      addresses: addresses,
     }
   }
 }

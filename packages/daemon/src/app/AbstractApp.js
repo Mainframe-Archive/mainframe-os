@@ -12,6 +12,10 @@ import {
 import { encodeBase64, type base64 } from '@mainframe/utils-base64'
 import { secureRandomBytes } from '@mainframe/utils-crypto'
 // eslint-disable-next-line import/named
+import type {
+  AppUserPermissionsSettings,
+  AppUserSettings,
+} from '@mainframe/client'
 import { idType, type ID, uniqueID } from '@mainframe/utils-id'
 
 import type Session from './Session'
@@ -57,20 +61,8 @@ export type ContactToApprove = {
 
 export type ApprovedContact = {
   id: string,
+  localID: string,
   publicDataOnly: boolean,
-}
-
-export type PermissionsSettings = {
-  grants: StrictPermissionsGrants,
-  permissionsChecked: boolean,
-}
-
-export type AppUserSettings = {
-  permissionsSettings: PermissionsSettings,
-  walletSettings: WalletSettings,
-  approvedContacts: {
-    [localID: string]: ApprovedContact,
-  },
 }
 
 export type AbstractAppParams = {
@@ -142,11 +134,8 @@ export default class AbstractApp {
     this._settings[userID] = settings
   }
 
-  getPermissions(userID: ID): ?StrictPermissionsGrants {
-    const settings = this._settings[userID]
-    if (settings != null && settings.permissionsSettings != null) {
-      return settings.permissionsSettings.grants
-    }
+  getPermissions(userID: ID): StrictPermissionsGrants {
+    return this.getSettings(userID).permissionsSettings.grants
   }
 
   setPermissions(
@@ -160,7 +149,10 @@ export default class AbstractApp {
     this._settings[userID] = settings
   }
 
-  setPermissionsSettings(userID: ID, settings: PermissionsSettings): void {
+  setPermissionsSettings(
+    userID: ID,
+    settings: AppUserPermissionsSettings,
+  ): void {
     const appSettings = this.getSettings(userID)
     appSettings.permissionsSettings.grants = createStrictPermissionGrants(
       settings.grants,
@@ -214,31 +206,47 @@ export default class AbstractApp {
     }
   }
 
-  listApprovedContacts(userID: ID | string) {
-    const settings = this.getSettings(userID)
-    const approvedContacts = settings.approvedContacts
-    // $FlowFixMe map type
-    return Object.keys(approvedContacts).map(localID => ({
-      ...approvedContacts[localID],
-      localID,
-    }))
+  getLocalIDByApprovedID(userID: ID | string, id: string): ?string {
+    const found = this.getSettings(userID).approvedContacts[id]
+    return found ? found.localID : null
   }
 
-  approveContacts(userID: ID, contacts: Array<ContactToApprove>) {
+  getApprovedIDByLocalID(userID: ID | string, localID: ?string): ?string {
+    const { approvedContacts } = this.getSettings(userID)
+    const found = Object.values(approvedContacts).find(
+      // $FlowFixMe: Object.values
+      c => c.localID === localID,
+    )
+    // $FlowFixMe: Object.values
+    return found ? found.id : null
+  }
+
+  getApprovedContacts(userID: ID | string): { [string]: ApprovedContact } {
+    const { approvedContacts } = this.getSettings(userID)
+    return approvedContacts
+  }
+
+  approveContacts(
+    userID: ID,
+    contacts: Array<ContactToApprove>,
+  ): { [string]: ApprovedContact } {
     const settings = this.getSettings(userID)
     const approvedContacts = settings.approvedContacts
-    const contactsAddedd = {}
+    const contactsAdded = {}
     contacts.forEach(c => {
-      if (!approvedContacts[c.localID]) {
-        approvedContacts[c.localID] = {
-          id: uniqueID(),
+      let id = this.getApprovedIDByLocalID(userID, c.localID)
+      if (!id) {
+        id = (uniqueID(): string)
+        approvedContacts[id] = {
+          id,
+          localID: c.localID,
           publicDataOnly: c.publicDataOnly,
         }
       }
-      contactsAddedd[c.localID] = approvedContacts[c.localID]
+      contactsAdded[id] = approvedContacts[id]
     })
     this._settings[userID] = settings
-    return contactsAddedd
+    return contactsAdded
   }
 
   // Session

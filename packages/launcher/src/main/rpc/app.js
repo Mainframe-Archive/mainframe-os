@@ -18,11 +18,9 @@ import { type AppContext, ContextSubscription } from '../contexts'
 import { withPermission } from '../permissions'
 import { PrependInitializationVector, Decrypt } from '../storage'
 
-class TopicSubscription extends ContextSubscription<RxSubscription> {
-  data: ?RxSubscription
-
+class CommsSubscription extends ContextSubscription<RxSubscription> {
   constructor() {
-    super('pss_subscription')
+    super('comms_subscription')
   }
 
   async dispose() {
@@ -32,7 +30,28 @@ class TopicSubscription extends ContextSubscription<RxSubscription> {
   }
 }
 
+const sharedMethods = {
+  wallet_getEthAccounts: async (ctx: AppContext): Promise<Array<string>> => {
+    // $FlowFixMe indexer property
+    const accounts = await ctx.client.wallet.getUserEthAccounts({
+      userID: ctx.appSession.user.localID,
+    })
+    if (
+      ctx.appSession.defaultEthAccount &&
+      accounts.includes(ctx.appSession.defaultEthAccount)
+    ) {
+      // Move default account to top
+      const defaultAccount = ctx.appSession.defaultEthAccount
+      accounts.splice(accounts.indexOf(defaultAccount), 1)
+      accounts.unshift(defaultAccount)
+    }
+    return accounts
+  },
+}
+
 export const sandboxed = {
+  ...sharedMethods,
+
   api_version: (ctx: AppContext) => ctx.client.apiVersion(),
 
   // Blockchain
@@ -52,29 +71,60 @@ export const sandboxed = {
     // TODO notify app if using ledger to feedback awaiting sign
   ),
 
-  wallet_getEthAccounts: async (ctx: AppContext): Promise<Array<string>> => {
-    // $FlowFixMe indexer property
-    const accounts = await ctx.client.wallet.getUserEthAccounts({
-      userID: ctx.appSession.user.localID,
-    })
-    if (
-      ctx.appSession.defaultEthAccount &&
-      accounts.includes(ctx.appSession.defaultEthAccount)
-    ) {
-      // Move default account to top
-      const defaultAccount = ctx.appSession.defaultEthAccount
-      accounts.splice(accounts.indexOf(defaultAccount), 1)
-      accounts.unshift(defaultAccount)
-    }
-    return accounts
-  },
+  // Comms
+
+  comms_publish: withPermission(
+    'COMMS_CONTACT',
+    async (
+      ctx: AppContext,
+      params: { contactID: string, key: string, value: Object },
+    ): Promise<void> => {
+      const appID = ctx.appSession.app.appID
+      const userID = ctx.appSession.user.id
+      return ctx.client.comms.publish({ ...params, appID, userID })
+    },
+  ),
+
+  comms_subscribe: withPermission(
+    'COMMS_CONTACT',
+    async (
+      ctx: AppContext,
+      params: { contactID: string, key: string },
+    ): Promise<string> => {
+      const appID = ctx.appSession.app.appID
+      const userID = ctx.appSession.user.id
+      const subscription = await ctx.client.comms.subscribe({
+        ...params,
+        appID,
+        userID,
+      })
+      const sub = new CommsSubscription()
+      sub.data = subscription.subscribe(msg => {
+        ctx.notifySandboxed(sub.id, msg)
+      })
+      ctx.setSubscription(sub)
+      return sub.id
+    },
+  ),
+
+  comms_getSubscribable: withPermission(
+    'COMMS_CONTACT',
+    async (
+      ctx: AppContext,
+      params: { contactID: string },
+    ): Promise<Array<string>> => {
+      const appID = ctx.appSession.app.appID
+      const userID = ctx.appSession.user.id
+      return ctx.client.comms.getSubscribable({ ...params, appID, userID })
+    },
+  ),
 
   // Contacts
 
   contacts_select: withPermission(
     'CONTACTS_READ',
     async (ctx: AppContext, params: { multi?: boolean }) => {
-      const res = await ctx.trustedRPC.request('permission_ask', {
+      const res = await ctx.trustedRPC.request('user_request', {
         key: 'CONTACTS_SELECT',
         params: { CONTACTS_SELECT: params },
       })
@@ -97,11 +147,12 @@ export const sandboxed = {
       })
       const ids = approvedContacts.map(c => c.id)
 
-      return ctx.client.contacts.getAppUserContacts({
+      const contactsRes = await ctx.client.contacts.getAppUserContacts({
         appID,
         userID,
         contactIDs: ids,
       })
+      return contactsRes.contacts
     },
   ),
 
@@ -110,11 +161,12 @@ export const sandboxed = {
     async (ctx: AppContext, params: { contactIDs: Array<string> }) => {
       const userID = ctx.appSession.user.id
       const appID = ctx.appSession.app.appID
-      return ctx.client.contacts.getAppUserContacts({
+      const contactsRes = await ctx.client.contacts.getAppUserContacts({
         appID,
         userID,
         contactIDs: params.contactIDs,
       })
+      return contactsRes.contacts
     },
   ),
 
@@ -123,70 +175,13 @@ export const sandboxed = {
     async (ctx: AppContext) => {
       const userID = ctx.appSession.user.id
       const appID = ctx.appSession.app.appID
-      return ctx.client.contacts.getAppApprovedContacts({
+      const contactsRes = await ctx.client.contacts.getAppApprovedContacts({
         appID,
         userID,
       })
+      return contactsRes.contacts
     },
   ),
-
-  // Temporary PSS APIs - should be removed when communication APIs are settled
-  pss_baseAddr: (ctx: AppContext): Promise<string> => {
-    return ctx.client.pss.baseAddr()
-  },
-  pss_createTopicSubscription: {
-    params: {
-      topic: 'string',
-    },
-    handler: async (
-      ctx: AppContext,
-      params: { topic: string },
-    ): Promise<string> => {
-      const subscription = await ctx.client.pss.createTopicSubscription(params)
-      const sub = new TopicSubscription()
-      sub.data = subscription.subscribe(msg => {
-        ctx.notifySandboxed(sub.id, msg)
-      })
-      ctx.setSubscription(sub)
-      return sub.id
-    },
-  },
-  pss_getPublicKey: (ctx: AppContext): Promise<string> => {
-    return ctx.client.pss.getPublicKey()
-  },
-  pss_sendAsym: {
-    params: {
-      key: 'string',
-      topic: 'string',
-      message: 'string',
-    },
-    handler: (
-      ctx: AppContext,
-      params: { key: string, topic: string, message: string },
-    ): Promise<null> => {
-      return ctx.client.pss.sendAsym(params)
-    },
-  },
-  pss_setPeerPublicKey: {
-    params: {
-      key: 'string',
-      topic: 'string',
-    },
-    handler: (
-      ctx: AppContext,
-      params: { key: string, topic: string },
-    ): Promise<null> => {
-      return ctx.client.pss.setPeerPublicKey(params)
-    },
-  },
-  pss_stringToTopic: {
-    params: {
-      string: 'string',
-    },
-    handler: (ctx: AppContext, params: { string: string }): Promise<string> => {
-      return ctx.client.pss.stringToTopic(params)
-    },
-  },
 
   storage_promptUpload: {
     params: {
@@ -412,6 +407,8 @@ export const sandboxed = {
 }
 
 export const trusted = {
+  ...sharedMethods,
+
   sub_createPermissionDenied: (ctx: AppContext): { id: string } => ({
     id: ctx.createPermissionDeniedSubscription(),
   }),
@@ -424,12 +421,41 @@ export const trusted = {
     },
   },
 
+  blockchain_web3Send: async (
+    ctx: AppContext,
+    params: BlockchainWeb3SendParams,
+  ): Promise<Object> => {
+    return ctx.client.blockchain.web3Send(params)
+  },
+
   wallet_getUserEthWallets: async (
     ctx: AppContext,
   ): Promise<WalletGetEthWalletsResult> => {
     return ctx.client.wallet.getUserEthWallets({
       userID: ctx.appSession.user.localID,
     })
+  },
+
+  wallet_selectDefault: async (
+    ctx: AppContext,
+  ): Promise<{ address: ?string }> => {
+    const res = await ctx.trustedRPC.request('user_request', {
+      key: 'WALLET_ACCOUNT_SELECT',
+      params: {},
+    })
+    let address
+    if (res.data && res.data.address) {
+      address = res.data.address
+      ctx.appSession.defaultEthAccount = res.data.address
+      const userID = ctx.appSession.user.id
+      const appID = ctx.appSession.app.appID
+      await ctx.client.app.setUserDefaultWallet({
+        userID,
+        appID,
+        address,
+      })
+    }
+    return { address }
   },
 
   contacts_getUserContacts: (

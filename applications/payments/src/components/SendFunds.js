@@ -10,19 +10,22 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native-web'
+import { isAddress } from 'web3-utils'
 
 import applyContext, { type ContextProps } from './Context'
-import { ABI } from '@mainframe/contract-utils'
+import { ABI } from '@mainframe/eth'
 
 type State = {
   recipient: string,
-  tokenAddress: string,
   amount: string,
   data: string,
   errorMsg?: ?string,
-  txReceipt?: ?string,
+  currentTX: ?{
+    hash?: ?string,
+    state: 'broadcast' | 'mined' | 'confirmed',
+  },
   processingTransaction?: ?boolean,
-  sendType: 'tokens' | 'ether',
+  sendType: 'tokens' | 'ether' | 'contact',
 }
 
 class SendFunds extends Component<ContextProps, State> {
@@ -30,8 +33,8 @@ class SendFunds extends Component<ContextProps, State> {
     recipient: '',
     amount: '',
     data: '',
-    tokenAddress: '',
     sendType: 'ether',
+    currentTX: undefined,
   }
 
   // HANDLERS
@@ -46,12 +49,6 @@ class SendFunds extends Component<ContextProps, State> {
   onChangeAmount = (value: string) => {
     this.setState({
       amount: value,
-    })
-  }
-
-  onChangeTokenAddress = (value: string) => {
-    this.setState({
-      tokenAddress: value,
     })
   }
 
@@ -73,28 +70,33 @@ class SendFunds extends Component<ContextProps, State> {
     })
   }
 
-  onFocusRecipient = () => {
-    this.selectContacts()
+  onPressShowPayContact = () => {
+    this.setState({
+      sendType: 'contact',
+    })
   }
 
-  async selectContacts() {
+  onFocusContactRecipient = () => {
+    this.selectContact()
+  }
+
+  async selectContact() {
+    const { sdk } = this.props
     try {
-      const { contacts } = await this.props.sdk.contacts.selectContacts({
-        multi: true,
-      })
-      if (contacts.length && contacts[0].data.profile.ethAddress) {
+      const contact = await sdk.contacts.selectContact()
+      if (contact && contact.data.profile.ethAddress) {
         this.setState({
-          recipient: contacts[0].data.profile.ethAddress,
+          recipient: contact.data.profile.ethAddress,
         })
       }
     } catch (err) {
-      console.log('select contacts err: ', err)
+      console.log('contacts err: ', err)
     }
   }
 
   validateSend(): boolean {
     const { web3 } = this.props
-    if (!web3.utils.isAddress(this.state.recipient)) {
+    if (!isAddress(this.state.recipient)) {
       this.setState({ errorMsg: 'Please provide a valid recipent address' })
       return false
     }
@@ -105,86 +107,87 @@ class SendFunds extends Component<ContextProps, State> {
     return true
   }
 
-  validateSendTokens() {
-    const { web3 } = this.props
-    if (this.validateSend()) {
-      if (!web3.utils.isAddress(this.state.tokenAddress)) {
-        this.setState({ errorMsg: 'Please provide a valid token address' })
-        return false
-      }
-    }
-    return true
-  }
-
   onPressSendToken = async () => {
-    const { web3 } = this.props
-    if (!this.validateSend()) {
-      return
-    }
-    const tokenContract = new web3.eth.Contract(
-      ABI.ERC20,
-      this.state.tokenAddress,
-    )
-    const accounts = await web3.eth.getAccounts()
-    // TODO: fetch decimal
-    const amount = web3.utils.toWei(this.state.amount)
-    try {
-      this.sendTransaction(() => {
-        return tokenContract.methods
-          .transfer(this.state.recipient, amount)
-          .send({
-            from: accounts[0],
-          })
-      })
-    } catch (err) {
-      this.setState({
-        processingTransaction: false,
-        errorMsg: err.message || 'Error processing transaction',
-      })
-    }
+    this.sendTransaction(true)
   }
 
   onPressSendEth = async () => {
-    const { web3 } = this.props
-    const accounts = await web3.eth.getAccounts()
-    const amount = web3.utils.toWei(this.state.amount || '0')
+    this.sendTransaction()
+  }
 
+  onPressPayContact = async () => {
+    const { sdk } = this.props
+    const params = {
+      currency: 'ETH',
+      value: this.state.amount,
+    }
+    this.setState({
+      currentTX: undefined,
+      errorMsg: undefined,
+    })
     try {
-      this.sendTransaction(() => {
-        return this.props.web3.eth.sendTransaction({
-          data: this.state.data,
-          to: this.state.recipient,
-          from: accounts[0],
-          value: amount,
-        })
-      })
+      const tx = await sdk.payments.payContact(params)
+      this.listenTX(tx)
     } catch (err) {
       this.setState({
-        processingTransaction: false,
-        errorMsg: err.message || 'Error processing transaction',
+        errorMsg: err.message || 'Error sending transaction',
       })
     }
   }
 
-  sendTransaction = txFunc => {
+  sendTransaction = async (mft?: boolean) => {
+    const { web3, sdk } = this.props
+    if (!this.validateSend()) {
+      return
+    }
+    const accounts = await web3.eth.getAccounts()
     this.setState({
       processingTransaction: true,
-      txReceipt: undefined,
+      currentTX: undefined,
       errorMsg: undefined,
     })
-    txFunc()
-      .on('error', err => {
-        console.warn(err)
+    const params = {
+      from: accounts[0],
+      to: this.state.recipient,
+      value: this.state.amount,
+    }
+    const txSub = mft
+      ? sdk.ethereum.sendMFT(params)
+      : sdk.ethereum.sendETH(params)
+
+    this.listenTX(txSub)
+  }
+
+  listenTX(tx) {
+    tx.on('hash', hash => {
+      this.setState({
+        currentTX: {
+          hash,
+          state: 'broadcast',
+        },
+      })
+    })
+      .on('mined', () => {
         this.setState({
           processingTransaction: false,
-          errorMsg: err.message || 'Error processing transaction',
+          currentTX: {
+            ...this.state.currentTX,
+            state: 'mined',
+          },
         })
       })
-      .on('receipt', receipt => {
-        console.log(receipt)
+      .on('confirmed', () => {
+        this.setState({
+          currentTX: {
+            ...this.state.currentTX,
+            state: 'confirmed',
+          },
+        })
+      })
+      .on('error', error => {
         this.setState({
           processingTransaction: false,
-          txReceipt: receipt.transactionHash,
+          errorMsg: error.message || 'Error sending transaction',
         })
       })
   }
@@ -195,17 +198,10 @@ class SendFunds extends Component<ContextProps, State> {
     return (
       <View>
         <TextInput
-          placeholder="Token address"
-          style={styles.textInput}
-          onChangeText={this.onChangeTokenAddress}
-          value={this.state.tokenAddress}
-        />
-        <TextInput
           placeholder="Recipient address"
           style={styles.textInput}
           onChangeText={this.onChangeRecipient}
           value={this.state.recipient}
-          onFocus={this.onFocusRecipient}
         />
         <TextInput
           placeholder="Amount"
@@ -225,7 +221,6 @@ class SendFunds extends Component<ContextProps, State> {
           style={styles.textInput}
           onChangeText={this.onChangeRecipient}
           value={this.state.recipient}
-          onFocus={this.onFocusRecipient}
         />
         <TextInput
           placeholder="Amount"
@@ -244,34 +239,67 @@ class SendFunds extends Component<ContextProps, State> {
     )
   }
 
+  renderPayContact() {
+    return (
+      <View>
+        <TextInput
+          placeholder="Amount"
+          style={styles.textInput}
+          onChangeText={this.onChangeAmount}
+          value={this.state.amount}
+        />
+      </View>
+    )
+  }
+
   renderTabs() {
     const ethStyles = [styles.tab]
     const tokenStyles = [styles.tab]
-    if (this.state.sendType === 'ether') {
-      ethStyles.push(styles.tabSelected)
-    } else {
-      tokenStyles.push(styles.tabSelected)
+    const tabStyles = {
+      ether: [styles.tab],
+      tokens: [styles.tab],
+      contact: [styles.tab],
     }
+    tabStyles[this.state.sendType].push(styles.tabSelected)
 
     return (
       <View style={styles.tabs}>
-        <TouchableOpacity onPress={this.onPressShowEthSend} style={ethStyles}>
+        <TouchableOpacity
+          onPress={this.onPressShowEthSend}
+          style={tabStyles.ether}>
           <Text style={styles.tabLabel}>ETHER</Text>
         </TouchableOpacity>
         <TouchableOpacity
           onPress={this.onPressShowTokenSend}
-          style={tokenStyles}>
-          <Text style={styles.tabLabel}>TOKENS</Text>
+          style={tabStyles.tokens}>
+          <Text style={styles.tabLabel}>MFT</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={this.onPressShowPayContact}
+          style={tabStyles.contact}>
+          <Text style={styles.tabLabel}>PAY CONTACT</Text>
         </TouchableOpacity>
       </View>
     )
   }
 
   renderResult() {
-    if (this.state.txReceipt) {
+    const { currentTX } = this.state
+    if (currentTX) {
+      const style =
+        currentTX.state === 'broadcast'
+          ? styles.broadcastContainer
+          : styles.receiptContainer
+      const label =
+        currentTX.state === 'broadcast'
+          ? 'Waiting to be mined: '
+          : 'Transaction confirmed: '
       return (
-        <View style={[styles.feedbackContainer, styles.receiptContainer]}>
-          <Text>{this.state.txReceipt}</Text>
+        <View style={[styles.feedbackContainer, style]}>
+          <Text>
+            {label}
+            {currentTX.hash}
+          </Text>
         </View>
       )
     }
@@ -288,15 +316,22 @@ class SendFunds extends Component<ContextProps, State> {
   }
 
   render() {
-    const content =
-      this.state.sendType === 'ether'
-        ? this.renderEthSend()
-        : this.renderTokenSend()
-
-    const onPress =
-      this.state.sendType === 'ether'
-        ? this.onPressSendEth
-        : this.onPressSendToken
+    let content, onPress
+    switch (this.state.sendType) {
+      case 'tokens':
+        content = this.renderTokenSend()
+        onPress = this.onPressSendToken
+        break
+      case 'contact':
+        content = this.renderPayContact()
+        onPress = this.onPressPayContact
+        break
+      case 'ether':
+      default:
+        content = this.renderEthSend()
+        onPress = this.onPressSendEth
+        break
+    }
 
     const button = this.state.processingTransaction ? (
       <ActivityIndicator />
@@ -366,9 +401,12 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   receiptContainer: {
-    color: '#535748',
     backgroundColor: '#e6f2bf',
     borderColor: '#d3e2a7',
+  },
+  broadcastContainer: {
+    backgroundColor: '#F8F2E2',
+    borderColor: '#E7E2D2',
   },
   errorContainer: {
     color: '#473f3e',

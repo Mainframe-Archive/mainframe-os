@@ -3,29 +3,18 @@
 import { PERMISSIONS_REQUIREMENTS_SCHEMA } from '@mainframe/app-permissions'
 import { isValidMFID } from '@mainframe/data-types'
 import semver from 'semver'
-import { parse as parseURI } from 'uri-js'
 
 export const INVALID_ID_ERROR =
   "The value '{actual}' is not a valid Mainframe ID!"
 export const INVALID_SEMVER_ERROR = "The value '{actual}' is not valid semver!"
-export const INVALID_URN_ERROR = "The value '{actual}' is not a valid URN!"
 
 export const MANIFEST_SCHEMA_MESSAGES = {
   id: INVALID_ID_ERROR,
   semver: INVALID_SEMVER_ERROR,
-  urn: INVALID_URN_ERROR,
 }
 
 export const isValidSemver = (value: ?string): boolean => {
   return value != null && semver.valid(value) != null
-}
-
-export const isValidURN = (value: ?string): boolean => {
-  if (value == null) {
-    return false
-  }
-  const parsed = parseURI(value)
-  return parsed.scheme === 'urn' && parsed.error == null
 }
 
 export const idCheck = function(value: string) {
@@ -34,10 +23,6 @@ export const idCheck = function(value: string) {
 
 export const semverCheck = function(value: string) {
   return isValidSemver(value) || this.makeError('semver', null, value)
-}
-
-export const urnCheck = function(value: string) {
-  return isValidURN(value) || this.makeError('urn', null, value)
 }
 
 export const ID_SCHEMA = {
@@ -50,9 +35,9 @@ export const SEMVER_SCHEMA = {
   check: semverCheck,
 }
 
-export const URN_SCHEMA = {
-  type: 'custom',
-  check: urnCheck,
+export const HASH_SCHEMA = {
+  type: 'string',
+  pattern: /^[0-9a-f]{64}$/,
 }
 
 export const NAME_SCHEMA = {
@@ -76,7 +61,8 @@ export const MANIFEST_SCHEMA_PROPS = {
   },
   name: NAME_SCHEMA,
   version: SEMVER_SCHEMA,
-  contentsURI: URN_SCHEMA,
+  contentsHash: HASH_SCHEMA,
+  updateHash: HASH_SCHEMA,
   permissions: PERMISSIONS_REQUIREMENTS_SCHEMA,
 }
 

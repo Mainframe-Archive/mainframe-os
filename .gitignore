@@ -11,3 +11,4 @@ dist/
 *.log
 .DS_Store
 .idea
+shell.nix

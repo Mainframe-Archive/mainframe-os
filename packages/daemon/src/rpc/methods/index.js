@@ -2,10 +2,10 @@
 
 import * as app from './app'
 import * as blockchain from './blockchain'
+import * as comms from './comms'
 import * as contact from './contact'
 import * as graphql from './graphql'
 import * as identity from './identity'
-import * as pss from './pss'
 import * as sub from './subscription'
 import * as vault from './vault'
 import * as wallet from './wallet'
@@ -17,11 +17,17 @@ export default {
 
   app_checkPermission: app.checkPermission,
   app_close: app.close,
-  app_install: app.install,
-  app_remove: app.remove,
-  app_open: app.open,
+  app_create: app.create,
   app_getAll: app.getAll,
+  app_getManifestData: app.getManifestData,
+  app_install: app.install,
+  app_loadManifest: app.loadManifest,
+  app_open: app.open,
+  app_publish: app.publish,
+  app_remove: app.remove,
   app_setPermission: app.setPermission,
+  app_setPermissionsRequirements: app.setPermissionsRequirements,
+  app_setUserDefaultWallet: app.setUserDefaultWallet,
   app_setUserPermissionsSettings: app.setUserPermissionsSettings,
   app_setFeedHash: app.setFeedHash,
   // TODO: remove app for given user only
@@ -30,13 +36,12 @@ export default {
   // - "remove": clear + also removes manifest, no more knowledge about this app in vault
   app_uninstall: noop,
   app_update: noop, // TODO: similar to install
-  app_create: app.create,
-  app_getManifestData: app.getManifestData,
-  app_setPermissionsRequirements: app.setPermissionsRequirements,
-  app_publishContents: app.publishContents,
-  app_writeManifest: app.writeManifest,
 
   blockchain_web3Send: blockchain.web3Send,
+
+  comms_publish: comms.publish,
+  comms_subscribe: comms.subscribe,
+  comms_getSubscribable: comms.getSubscribable,
 
   contact_approveContacts: contact.approveContactsForApp,
   contact_getAppApprovedContacts: contact.getAppApprovedContacts,
@@ -60,14 +65,6 @@ export default {
   identity_linkEthWallet: identity.linkEthWallet,
   identity_unlinkEthWallet: identity.unlinkEthWallet,
 
-  // Temporary PSS APIs - should be removed when communication APIs are settled
-  pss_baseAddr: pss.baseAddr,
-  pss_createTopicSubscription: pss.createTopicSubscription,
-  pss_getPublicKey: pss.getPublicKey,
-  pss_sendAsym: pss.sendAsym,
-  pss_setPeerPublicKey: pss.setPeerPublicKey,
-  pss_stringToTopic: pss.stringToTopic,
-
   sub_unsubscribe: sub.unsubscribe,
 
   vault_create: vault.create,
@@ -82,7 +79,7 @@ export default {
   wallet_getUserEthWallets: wallet.getUserEthWallets,
   wallet_getUserEthAccounts: wallet.getUserEthAccounts,
   wallet_ledgerGetEthAccounts: wallet.getLedgerEthAccounts,
-  wallet_ledgerAddEthAccount: wallet.addLedgerEthAccount,
+  wallet_ledgerAddEthAccounts: wallet.addLedgerEthAccounts,
   wallet_setUserDefault: wallet.setUsersDefaultWallet,
   wallet_signTx: wallet.signTransaction,
 }

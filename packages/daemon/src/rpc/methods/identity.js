@@ -2,7 +2,6 @@
 
 import {
   idType as toClientID,
-  /* eslint-disable import/named */
   type IdentityAddPeerParams,
   type IdentityAddPeerResult,
   type IdentityAddPeerByFeedParams,
@@ -29,7 +28,6 @@ import {
   IDENTITY_LINK_ETH_WALLET_SCHEMA,
   IDENTITY_UNLINK_ETH_WALLET_SCHEMA,
   IDENTITY_UPDATE_USER_SCHEMA,
-  /* eslint-enable import/named */
 } from '@mainframe/client'
 import { idType as fromClientID } from '@mainframe/utils-id'
 

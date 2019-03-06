@@ -7,8 +7,7 @@ import Client, { type VaultSettings } from '@mainframe/client'
 import { Environment, DaemonConfig, VaultConfig } from '@mainframe/config'
 import StreamRPC from '@mainframe/rpc-stream'
 import { startDaemon } from '@mainframe/toolbox'
-// eslint-disable-next-line import/named
-import { app, BrowserWindow, ipcMain } from 'electron'
+import { app, BrowserWindow, WebContents, ipcMain } from 'electron'
 import { is } from 'electron-util'
 
 import { APP_TRUSTED_REQUEST_CHANNEL } from '../constants'
@@ -41,6 +40,7 @@ let launcherWindow
 type AppContexts = { [appID: string]: { [userID: string]: AppContext } }
 
 const appContexts: AppContexts = {}
+const contextsBySandbox: WeakMap<WebContents, AppContext> = new WeakMap()
 const contextsByWindow: WeakMap<BrowserWindow, AppContext> = new WeakMap()
 
 const newWindow = (params: Object = {}) => {
@@ -84,7 +84,7 @@ const launchApp = async (
   }
 
   const appWindow = newWindow()
-  if (is.development) {
+  if (appSession.isDev) {
     appWindow.webContents.on('did-attach-webview', () => {
       // Open a separate developer tools window for the app
       appWindow.webContents.executeJavaScript(
@@ -112,7 +112,18 @@ const launchApp = async (
     settings: vaultSettings,
   })
   contextsByWindow.set(appWindow, appContext)
-  interceptWebRequests(appContext)
+
+  appWindow.webContents.on('did-attach-webview', (event, webContents) => {
+    webContents.on('destroyed', () => {
+      contextsBySandbox.delete(webContents)
+      appContext.sandbox = null
+    })
+
+    contextsBySandbox.set(webContents, appContext)
+    appContext.sandbox = webContents
+
+    interceptWebRequests(appContext, webContents.session)
+  })
 
   if (appContexts[appID]) {
     appContexts[appID][userID] = appContext
@@ -175,7 +186,7 @@ const createLauncherWindow = async () => {
     vaultConfig,
     window: launcherWindow,
   })
-  createRPCChannels(launcherContext, contextsByWindow)
+  createRPCChannels(launcherContext, contextsBySandbox, contextsByWindow)
 
   // Emitted when the window is closed.
   launcherWindow.on('closed', async () => {

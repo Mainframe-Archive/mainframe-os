@@ -1,6 +1,5 @@
 // @flow
 
-import { readManifestFile } from '@mainframe/app-manifest'
 import {
   /* eslint-disable import/named */
   type AppGetAllResult,
@@ -54,6 +53,15 @@ class GraphQLSubscription extends ContextSubscription<RxSubscription> {
 
 export default {
   // Apps
+  app_create: {
+    params: APP_CREATE_SCHEMA,
+    handler: (
+      ctx: LauncherContext,
+      params: AppCreateParams,
+    ): Promise<AppCreateResult> => {
+      return ctx.client.app.create(params)
+    },
+  },
   app_getAll: (ctx: LauncherContext): Promise<AppGetAllResult> => {
     return ctx.client.app.getAll()
   },
@@ -76,13 +84,12 @@ export default {
       ctx.launchApp(appSession, vaultSettings)
     },
   },
-  app_create: {
-    params: APP_CREATE_SCHEMA,
-    handler: (
-      ctx: LauncherContext,
-      params: AppCreateParams,
-    ): Promise<AppCreateResult> => {
-      return ctx.client.app.create(params)
+  app_loadManifest: {
+    params: {
+      hash: 'string',
+    },
+    handler: (ctx: LauncherContext, params: { hash: string }) => {
+      return ctx.client.app.loadManifest(params)
     },
   },
   app_remove: {
@@ -97,20 +104,6 @@ export default {
       return ctx.client.app.remove(params)
     },
   },
-  app_readManifest: {
-    params: {
-      path: 'string',
-    },
-    handler: async (ctx: LauncherContext, params: { path: string }) => {
-      const manifest = await readManifestFile(params.path)
-      return {
-        data: manifest.data,
-        // TODO: lookup keys to check if they match know identities in vault
-        keys: manifest.keys,
-      }
-    },
-  },
-
   app_setUserPermissionsSettings: {
     params: APP_SET_USER_PERMISSIONS_SETTINGS_SCHEMA,
     handler: (

@@ -11,6 +11,7 @@ type Props = {
   onRequestClose?: () => void,
   children?: ?Node,
   full?: boolean,
+  headerView?: ?Node,
 }
 
 const ChildrenContainer = styled.View`
@@ -59,6 +60,13 @@ export default class ModalView extends Component<Props> {
         <CloseIcon color="#808080" width={12} height={12} />
       </CloseButton>
     ) : null
+
+    const header = this.props.headerView || (
+      <Text variant={['smallTitle', 'blue', 'noPadding', 'bold']}>
+        {this.props.title}
+      </Text>
+    )
+
     return (
       <ReactModal
         overlayClassName={this.props.full ? 'full-modal' : 'inner-modal'}
@@ -66,9 +74,7 @@ export default class ModalView extends Component<Props> {
         onRequestClose={this.props.onRequestClose}>
         <InternalModal>
           <ModalTitle>
-            <Text variant={['smallTitle', 'blue', 'noPadding', 'bold']}>
-              {this.props.title}
-            </Text>
+            {header}
             {closeButton}
           </ModalTitle>
           <ChildrenContainer>{this.props.children}</ChildrenContainer>

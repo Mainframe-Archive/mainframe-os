@@ -12,21 +12,26 @@ import styled from 'styled-components/native'
 import { EnvironmentContext } from '../RelayEnvironment'
 import FormModalView from '../../UIComponents/FormModalView'
 
+type Wallet = {
+  accounts: Array<{
+    address: string,
+  }>,
+  mnemonic: string,
+  localID: string,
+}
+
 type State = {
   errorMsg?: ?string,
   step: 'create' | 'backup' | 'confirm_backup',
   confirmedWords: Array<string>,
   seedWords: Array<{ value: string, index: number }>,
-  wallet?: ?{
-    mnemonic: string,
-    localID: string,
-  },
+  wallet?: ?Wallet,
 }
 
 type Props = {
   userID: string,
   onClose?: () => void,
-  onSetupWallet: () => void,
+  onSetupWallet: (address: string) => void,
   full?: boolean,
 }
 
@@ -187,8 +192,8 @@ export default class WalletCreateModal extends Component<Props, State> {
   }
 
   onPressConfirmBackup = () => {
-    if (this.state.confirmedWords.length === 12) {
-      this.props.onSetupWallet()
+    if (this.state.wallet && this.state.confirmedWords.length === 12) {
+      this.props.onSetupWallet(this.state.wallet.accounts[0].address)
     }
   }
 

@@ -4,7 +4,10 @@ import { type Observable, Subject, type Subscription } from 'rxjs'
 import { filter, multicast, refCount, tap, flatMap } from 'rxjs/operators'
 import { getFeedTopic } from '@erebos/api-bzz-base'
 
-import type Contact, { FirstContactSerialized } from '../identity/Contact'
+import type Contact, {
+  FirstContactPayload,
+  ContactPayload,
+} from '../identity/Contact'
 import type {
   default as PeerUserIdentity,
   PublicFeedSerialized,
@@ -25,6 +28,7 @@ type ObserveFeed<T = Object> = {
 }
 
 const MINUTE = 60 * 1000
+const DEFAULT_POLL_INTERVAL = 5 * MINUTE
 
 class FeedsHandler {
   _context: ClientContext
@@ -78,6 +82,9 @@ const peerSubscriptionRef = (contact: Contact): string =>
 const contactSubscriptionRef = (contact: Contact): string =>
   `${contact.localID}-contactFeed`
 
+const contactFeedChangeSubscriptionRef = (contact: Contact): string =>
+  `${contact.localID}-contactFeedChange`
+
 export class ContactsFeedsHandler extends FeedsHandler {
   _peerFeeds: { [localID: string]: PeerFeed } = {}
   _peerDeletedSubscription: ?Subscription
@@ -93,7 +100,7 @@ export class ContactsFeedsHandler extends FeedsHandler {
     const refCounted = pollFeedJSON(
       this._context.io.bzz,
       peer.publicFeed,
-      { interval: 5 * MINUTE },
+      { interval: DEFAULT_POLL_INTERVAL },
       // $FlowFixMe: ConnectableObservable pipe
     ).pipe(
       tap((data: PublicFeedSerialized) => {
@@ -112,8 +119,8 @@ export class ContactsFeedsHandler extends FeedsHandler {
   }
 
   _subscribe(userID: string, contact: Contact) {
-    if (this._subscribePeerFeed(userID, contact) != null) return
-    if (this._subscribeContactFeed(userID, contact) != null) return
+    if (!this._subscribePeerFeed(userID, contact)) return
+    if (!this._subscribeContactFeed(userID, contact)) return
 
     // Delete subscription if contact gets deleted
     const sub = this._context
@@ -163,6 +170,7 @@ export class ContactsFeedsHandler extends FeedsHandler {
 
   _subscribeContactFeed(userID: string, contact: Contact): boolean {
     const contactSubRef = contactSubscriptionRef(contact)
+    const feedChangeSubRef = contactFeedChangeSubscriptionRef(contact)
     if (this._subscriptions[contactSubRef] != null) {
       return false
     }
@@ -177,35 +185,87 @@ export class ContactsFeedsHandler extends FeedsHandler {
       return false
     }
 
-    const topic = getFeedTopic({ name: user.base64PublicKey() })
-    this._subscriptions[contactSubRef] = this._context.io.bzz
-      .pollFeedValue(
-        peer.firstContactAddress,
-        {
-          mode: 'content-response',
-          whenEmpty: 'ignore',
-          contentChangedOnly: true,
-          immediate: true,
-          interval: 5 * MINUTE,
-        },
-        { topic },
-      )
-      .pipe(flatMap(res => res.json()))
-      .subscribe({
-        next: (data: FirstContactSerialized) => {
-          this._context.mutations.setContactFeed(
-            userID,
-            contact.localID,
-            data.privateFeed,
-          )
-        },
-        error: err => {
-          this._context.log('contact feed subscription error', err)
-        },
-        complete: () => {
-          delete this._subscriptions[contactSubRef]
-        },
-      })
+    // Resubscribe if feedHash changes
+    if (this._subscriptions[feedChangeSubRef] == null) {
+      this._subscriptions[feedChangeSubRef] = this._context
+        .pipe(
+          filter((e: ContextEvent) => {
+            return (
+              e.type === 'contact_changed' &&
+              e.contact.localID === contact.localID &&
+              e.change === 'remoteFeed'
+            )
+          }),
+        )
+        .subscribe(() => {
+          this.remove(contactSubRef)
+          const res = this._subscribeContactFeed(userID, contact)
+          this._context.log('contact feed resubscription:', res)
+        })
+    }
+
+    if (contact.connectionState !== 'connected') {
+      const topic = getFeedTopic({ name: user.base64PublicKey() })
+      this._subscriptions[contactSubRef] = this._context.io.bzz
+        .pollFeedValue(
+          peer.firstContactAddress,
+          {
+            mode: 'content-response',
+            whenEmpty: 'ignore',
+            contentChangedOnly: true,
+            immediate: true,
+            interval: DEFAULT_POLL_INTERVAL,
+          },
+          { topic },
+        )
+        .pipe(flatMap(res => res.json()))
+        .subscribe({
+          next: (data: FirstContactPayload) => {
+            // TODO: validate payload version
+            this._context.mutations.setContactFeed(
+              userID,
+              contact.localID,
+              data.privateFeed,
+            )
+          },
+          error: err => {
+            this._context.log('contact feed subscription error', err)
+          },
+          complete: () => {
+            delete this._subscriptions[contactSubRef]
+          },
+        })
+    } else {
+      this._subscriptions[contactSubRef] = contact.sharedFeed
+        .pollRemoteData(this._context.io.bzz, {
+          interval: DEFAULT_POLL_INTERVAL,
+        })
+        .subscribe({
+          next: (data: ContactPayload) => {
+            // TODO: validate payload version
+            if (data.profile != null) {
+              this._context.mutations.updateContactProfile(
+                userID,
+                contact.localID,
+                data.profile,
+              )
+            }
+            if (data.apps != null) {
+              this._context.mutations.updateContactApps(
+                userID,
+                contact.localID,
+                data.apps,
+              )
+            }
+          },
+          error: err => {
+            this._context.log('contact feed subscription error', err)
+          },
+          complete: () => {
+            delete this._subscriptions[contactSubRef]
+          },
+        })
+    }
 
     return true
   }
@@ -213,6 +273,7 @@ export class ContactsFeedsHandler extends FeedsHandler {
   _unsubscribe(contact: Contact) {
     this.remove(peerSubscriptionRef(contact))
     this.remove(contactSubscriptionRef(contact))
+    this.remove(contactFeedChangeSubscriptionRef(contact))
   }
 
   _setup() {

@@ -1,9 +1,9 @@
 module.exports = {
-  extends: ['mainframe', 'mainframe/jest'],
+  extends: ['mainframe', 'mainframe/flow', 'mainframe/jest'],
   settings: {
     react: {
-      version: '16.5',
-      flowVersion: '0.82',
+      version: '16.8',
+      flowVersion: '0.93',
     },
   },
 }

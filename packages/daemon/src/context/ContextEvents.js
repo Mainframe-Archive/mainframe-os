@@ -33,15 +33,19 @@ export default class ContextEvents {
     this.vaultModified = this._context.pipe(
       filter((e: ContextEvent) => {
         return (
-          e.type === 'user_created' ||
-          e.type === 'user_changed' ||
-          e.type === 'user_deleted' ||
+          e.type === 'app_created' ||
+          e.type === 'app_changed' ||
+          e.type === 'app_data_changed' ||
+          e.type === 'app_installed' ||
+          e.type === 'contact_created' ||
+          e.type === 'contact_changed' ||
+          e.type === 'contact_deleted' ||
           e.type === 'peer_created' ||
           e.type === 'peer_changed' ||
           e.type === 'peer_deleted' ||
-          e.type === 'contact_created' ||
-          e.type === 'contact_changed' ||
-          e.type === 'contact_deleted'
+          e.type === 'user_created' ||
+          e.type === 'user_changed' ||
+          e.type === 'user_deleted'
         )
       }),
     )
@@ -107,11 +111,10 @@ export default class ContextEvents {
           )
           if (!user || !peer) return
 
-          // TODO: Actual data
-          await contact.ownFeed.publishJSON(this._context.io.bzz, {
-            message: 'connected',
-          })
-          await contact.ownFeed.syncManifest(this._context.io.bzz)
+          await Promise.all([
+            contact.sharedFeed.publishLocalData(this._context.io.bzz),
+            contact.sharedFeed.syncManifest(this._context.io.bzz),
+          ])
 
           // Create ephemeral one-use feed from the first-contact keypair and peer-specific topic
           const firstContactFeed = OwnFeed.create(
@@ -120,7 +123,7 @@ export default class ContextEvents {
           )
           await firstContactFeed.publishJSON(
             this._context.io.bzz,
-            contact.firstContactData(),
+            contact.generatefirstContactPayload(),
           )
           contact.requestSent = true
 

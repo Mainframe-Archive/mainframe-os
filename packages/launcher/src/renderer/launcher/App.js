@@ -1,9 +1,9 @@
 //@flow
 
 import React, { Component } from 'react'
-import { ActivityIndicator } from 'react-native'
 import { ThemeProvider as MFThemeProvider } from '@morpheus-ui/core'
 import styled from 'styled-components/native'
+import Loader from '../UIComponents/Loader'
 
 import THEME from '../theme'
 
@@ -19,6 +19,7 @@ import Launcher from './Launcher'
 const LoadingContainer = styled.View`
   flex: 1;
   justify-content: center;
+  align-items: center;
 `
 
 const Container = styled.View`
@@ -75,7 +76,7 @@ export default class App extends Component<{}, State> {
     if (!this.state.vaultsData) {
       return (
         <LoadingContainer>
-          <ActivityIndicator />
+          <Loader />
         </LoadingContainer>
       )
     }

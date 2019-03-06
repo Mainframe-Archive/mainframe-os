@@ -25,7 +25,7 @@ import type ClientContext from '../context/ClientContext'
 import LedgerWallet from '../wallet/LedgerWallet'
 import HDWallet from '../wallet/HDWallet'
 
-export const { nodeInterface, nodeField } = nodeDefinitions(
+export const { nodeInterface, nodeField } = nodeDefinitions<ClientContext>(
   (globalId: string, ctx: ClientContext) => {
     if (globalId === 'viewer') {
       return {}
@@ -107,8 +107,7 @@ export const appPermissionGrants = new GraphQLObjectType({
   name: 'AppPermissions',
   fields: () => ({
     BLOCKCHAIN_SEND: { type: GraphQLBoolean },
-    SWARM_UPLOAD: { type: GraphQLBoolean },
-    SWARM_DOWNLOAD: { type: GraphQLBoolean },
+    CONTACTS_READ: { type: GraphQLBoolean },
     WEB_REQUEST: { type: new GraphQLNonNull(webRequestGrants) },
   }),
 })
@@ -162,6 +161,12 @@ export const appPermissionDefinitions = new GraphQLObjectType({
     BLOCKCHAIN_SEND: {
       type: GraphQLBoolean,
     },
+    COMMS_CONTACT: {
+      type: GraphQLBoolean,
+    },
+    CONTACTS_READ: {
+      type: GraphQLBoolean,
+    },
   }),
 })
 
@@ -213,11 +218,11 @@ export const appVersionData = new GraphQLObjectType({
     version: {
       type: new GraphQLNonNull(GraphQLString),
     },
+    versionHash: {
+      type: GraphQLString,
+    },
     permissions: {
       type: new GraphQLNonNull(appPermissionsRequirements),
-    },
-    publicationState: {
-      type: new GraphQLNonNull(GraphQLString),
     },
   }),
 })
@@ -227,6 +232,9 @@ export const app = new GraphQLObjectType({
   interfaces: () => [nodeInterface],
   fields: () => ({
     id: globalIdField(),
+    mfid: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
     localID: {
       type: new GraphQLNonNull(GraphQLID),
       resolve: self => self.id,
@@ -259,12 +267,24 @@ export const ownApp = new GraphQLObjectType({
       type: new GraphQLNonNull(GraphQLID),
       resolve: self => self.id,
     },
+    mfid: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
     name: {
       type: new GraphQLNonNull(GraphQLString),
       resolve: self => self.data.name,
     },
+    contentsPath: {
+      type: new GraphQLNonNull(GraphQLString),
+      resolve: self => self.data.contentsPath,
+    },
+    updateFeedHash: {
+      type: GraphQLString,
+    },
     versions: {
-      type: new GraphQLList(appVersionData),
+      type: new GraphQLNonNull(
+        new GraphQLList(new GraphQLNonNull(appVersionData)),
+      ),
       resolve: ({ versions }) => {
         return Object.keys(versions).map(version => ({
           version: version,
@@ -317,6 +337,9 @@ export const genericProfile = new GraphQLObjectType({
     avatar: {
       type: GraphQLString,
     },
+    ethAddress: {
+      type: GraphQLString,
+    },
   }),
 })
 
@@ -327,6 +350,9 @@ export const namedProfile = new GraphQLObjectType({
       type: GraphQLNonNull(GraphQLString),
     },
     avatar: {
+      type: GraphQLString,
+    },
+    ethAddress: {
       type: GraphQLString,
     },
   }),
@@ -412,6 +438,9 @@ export const ownUserIdentity = new GraphQLObjectType({
     pubKey: {
       type: new GraphQLNonNull(GraphQLString),
     },
+    privateProfile: {
+      type: GraphQLBoolean,
+    },
   }),
 })
 
@@ -466,6 +495,9 @@ export const peer = new GraphQLObjectType({
     publicKey: {
       type: new GraphQLNonNull(GraphQLString),
     },
+    publicFeed: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
     profile: {
       type: new GraphQLNonNull(genericProfile),
     },
@@ -491,6 +523,9 @@ export const contact = new GraphQLObjectType({
     },
     peerID: {
       type: new GraphQLNonNull(GraphQLID),
+    },
+    publicFeed: {
+      type: new GraphQLNonNull(GraphQLString),
     },
     pubKey: {
       type: new GraphQLNonNull(GraphQLString),
@@ -572,6 +607,7 @@ export const peers = new GraphQLObjectType({
           const data = await peerPublicRes.json()
           return {
             profile: data.profile,
+            publicFeed: args.feedHash,
             publicKey: data.publicKey,
           }
         } catch (err) {
@@ -589,15 +625,23 @@ export const walletBalances = new GraphQLObjectType({
     eth: {
       type: new GraphQLNonNull(GraphQLString),
       resolve: async (self, args, ctx) => {
-        const balance = await ctx.io.eth.getETHBalance(self)
-        return balance || 0
+        try {
+          return await ctx.io.eth.getETHBalance(self)
+        } catch (err) {
+          ctx.log(err)
+          return 0
+        }
       },
     },
     mft: {
       type: new GraphQLNonNull(GraphQLString),
       resolve: async (self, args, ctx) => {
-        const balance = await ctx.io.eth.getMFTBalance(self)
-        return balance || 0
+        try {
+          return await ctx.io.eth.getMFTBalance(self)
+        } catch (err) {
+          ctx.log(err)
+          return 0
+        }
       },
     },
   }),
@@ -687,6 +731,18 @@ export const wallets = new GraphQLObjectType({
   }),
 })
 
+export const settings = new GraphQLObjectType({
+  name: 'Settings',
+  fields: () => ({
+    ethereumUrl: {
+      type: new GraphQLNonNull(GraphQLString),
+      resolve: (self, args, ctx: ClientContext) => {
+        return ctx.openVault.settings.ethURL
+      },
+    },
+  }),
+})
+
 export const viewer = new GraphQLObjectType({
   name: 'Viewer',
   fields: () => ({
@@ -708,6 +764,10 @@ export const viewer = new GraphQLObjectType({
     },
     wallets: {
       type: new GraphQLNonNull(wallets),
+      resolve: () => ({}),
+    },
+    settings: {
+      type: new GraphQLNonNull(settings),
       resolve: () => ({}),
     },
   }),

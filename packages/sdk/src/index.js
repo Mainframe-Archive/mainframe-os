@@ -4,17 +4,21 @@
 
 import type StreamRPC from '@mainframe/rpc-stream'
 
-import BlockchainAPIs from './apis/Blockchain'
-import PssAPIs from './apis/Pss'
+import EthAPIs from './apis/Eth'
+import CommsAPIs from './apis/Comms'
 import StorageAPIs from './apis/Storage'
 import ContactsAPIs from './apis/Contacts'
+import PaymentAPIs from './apis/Payments'
+
+export * from './types'
 
 export default class MainframeSDK {
   _rpc: StreamRPC
-  blockchain: BlockchainAPIs
-  pss: PssAPIs
+  _ethereum: EthAPIs
+  comms: CommsAPIs
   storage: StorageAPIs
   contacts: ContactsAPIs
+  payments: PaymentAPIs
 
   constructor() {
     if (window.mainframe) {
@@ -23,10 +27,19 @@ export default class MainframeSDK {
       throw new Error('Cannot find expected mainframe client instance')
     }
 
-    this.blockchain = new BlockchainAPIs(this._rpc)
-    this.pss = new PssAPIs(this._rpc)
+    this.comms = new CommsAPIs(this._rpc)
     this.storage = new StorageAPIs(this._rpc)
     this.contacts = new ContactsAPIs(this._rpc)
+    this.payments = new PaymentAPIs(this)
+  }
+
+  get ethereum() {
+    // Lazy load Eth API's as provider
+    // engine will start fetching blocks
+    if (!this._ethereum) {
+      this._ethereum = new EthAPIs(this)
+    }
+    return this._ethereum
   }
 
   apiVersion = () => {
