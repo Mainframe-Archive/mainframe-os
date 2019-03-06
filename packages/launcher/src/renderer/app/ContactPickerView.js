@@ -1,14 +1,11 @@
 // @flow
 
 import React, { Component } from 'react'
-import { TouchableOpacity } from 'react-native-web'
-import ContactsIcon from '@morpheus-ui/icons/ContactsMd'
 import styled from 'styled-components/native'
-import { Button } from '@morpheus-ui/core'
+import { Button, Text, Checkbox } from '@morpheus-ui/core'
 
 import colors from '../colors'
 import rpc from './rpc'
-import AlertHeader from './AlertHeader'
 
 export type SelectedContactIDs = Array<string>
 
@@ -24,19 +21,35 @@ type Props = {
   userID: string,
   multiSelect?: ?boolean,
   onSelectedContacts: (contactIDs: SelectedContactIDs) => void,
+  onReject: () => void,
 }
 
 type State = {
   contacts: Array<Contact>,
   selectedContacts: Set<string>,
+  hover?: ?string,
 }
+
+const Container = styled.View`
+  margin: 0 -20px;
+`
 
 const ContactRow = styled.View`
   padding-vertical: 10px;
+  padding-right: 20px;
+  padding-left: 20px;
   border-color: ${colors.GREY_DARK_48};
   border-bottom-width: 1px;
-  background-color: ${props =>
-    props.selected ? colors.GREY_DARK_48 : colors.GREY_DARK_3C};
+
+  ${props => props.selected && `background-color: ${colors.GREY_DARK_48};`}
+  ${props => props.last && 'border-bottom-width: 0;'}
+  flex-direction: row;
+  align-items: center;
+`
+
+const ContactData = styled.View`
+  flex: 1;
+  padding-right: 20px;
 `
 
 const ScrollViewStyled = styled.ScrollView`
@@ -45,11 +58,12 @@ const ScrollViewStyled = styled.ScrollView`
 
 const ButtonsContainer = styled.View`
   flex-direction: row;
-  margin-top: 10px;
+  margin-top: 20px;
+  padding: 0 20px;
 `
 
-const NameLabel = styled.Text`
-  color: ${colors.LIGHT_GREY_EE};
+const TouchableOpacity = styled.TouchableOpacity`
+  ${props => props.hover && `background-color: ${colors.GREY_DARK_48};`}
 `
 
 export default class ContactPickerView extends Component<Props, State> {
@@ -67,47 +81,89 @@ export default class ContactPickerView extends Component<Props, State> {
     this.setState({ contacts })
   }
 
-  onSelectContact(contact: Contact) {
-    if (this.props.multiSelect) {
-      const { selectedContacts } = this.state
-      if (selectedContacts.has(contact.localID)) {
-        selectedContacts.delete(contact.localID)
-      } else {
-        selectedContacts.add(contact.localID)
-      }
-      this.setState({ selectedContacts })
+  checkContact(contact: Contact) {
+    const { selectedContacts } = this.state
+    if (selectedContacts.has(contact.localID)) {
+      selectedContacts.delete(contact.localID)
     } else {
-      this.props.onSelectedContacts([contact.localID])
+      selectedContacts.add(contact.localID)
     }
+    this.setState({ selectedContacts })
   }
 
   onSubmit = () => {
     this.props.onSelectedContacts(Array.from(this.state.selectedContacts))
   }
 
+  releaseHover = () => {
+    this.setState({ hover: null })
+  }
+
+  setHover = (id: string) => {
+    this.setState({ hover: id })
+  }
+
   render() {
-    const rows = this.state.contacts.map(c => {
-      const onPress = () => this.onSelectContact(c)
+    const rows = this.state.contacts.map((c, i) => {
+      const onPress = () => this.props.onSelectedContacts([c.localID])
       const selected = this.state.selectedContacts.has(c.localID)
+      const content = (
+        <ContactRow key={c.localID} last={i === this.state.contacts.length - 1}>
+          <ContactData selected={selected}>
+            <Text size={13} color="#FFF">
+              {c.profile.name}
+            </Text>
+            <Text size={10} color="#F9F9F9" variant="ellipsis">
+              {c.profile.ethAddress}
+            </Text>
+          </ContactData>
+          {this.props.multiSelect && (
+            <Checkbox
+              variant="TrustedUI"
+              onChange={() => this.checkContact(c)}
+            />
+          )}
+        </ContactRow>
+      )
+
+      if (this.props.multiSelect) {
+        return content
+      }
+
+      const setFocus = () => this.setHover(c.localID)
+
       return (
-        <TouchableOpacity key={c.localID} onPress={onPress}>
-          <ContactRow selected={selected}>
-            <NameLabel>{c.profile.name}</NameLabel>
-          </ContactRow>
+        <TouchableOpacity
+          hover={this.state.hover === c.localID}
+          onFocus={setFocus}
+          onBlur={this.releaseHover}
+          key={c.localID}
+          onPress={onPress}>
+          {content}
         </TouchableOpacity>
       )
     })
     const submitButton = this.props.multiSelect ? (
-      <Button title="DONE" onPress={() => this.onSubmit()} />
+      <ButtonsContainer>
+        <Button
+          variant={['TuiButton', 'TuiButtonDismiss']}
+          title="REJECT"
+          onPress={this.props.onReject}
+        />
+        <Button
+          disabled={!this.state.selectedContacts.size}
+          variant={['TuiButton']}
+          title="CONFIRM"
+          onPress={this.onSubmit}
+        />
+      </ButtonsContainer>
     ) : null
 
-    const title = this.props.multiSelect ? 'Select Contacts' : 'Select Contact'
     return (
-      <>
-        <AlertHeader Icon={ContactsIcon} title={title} />
+      <Container>
         <ScrollViewStyled>{rows}</ScrollViewStyled>
-        <ButtonsContainer>{submitButton}</ButtonsContainer>
-      </>
+        {submitButton}
+      </Container>
     )
   }
 }

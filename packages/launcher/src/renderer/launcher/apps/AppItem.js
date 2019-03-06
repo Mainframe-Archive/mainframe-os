@@ -127,7 +127,7 @@ const InstalledView = (props: InstalledProps) => {
   const onOpen = () => {
     props.onOpenApp(app, false)
   }
-
+  console.log(props)
   return (
     <AppItem
       appID={app.mfid}
@@ -162,6 +162,7 @@ export const InstalledAppItem = createFragmentContainer(InstalledView, {
       mfid
       localID
       name
+      version
       manifest {
         permissions {
           optional {

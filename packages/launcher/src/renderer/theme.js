@@ -182,6 +182,8 @@ export default {
       backgroundHoverColor: '#A9A9A9',
       borderColor: 'transparent',
       borderHoverColor: 'transparent',
+      backgroundDisabledColor: '#6f6f6f',
+      borderDisabledColor: 'transparent',
     },
     TuiButtonDismiss: {
       titleColor: '#C0C0C0',
@@ -337,7 +339,13 @@ export default {
     TuiHeader: {
       fontWeight: 'bold',
       color: '#929292',
-      fontSize: 13,
+      fontSize: '13px',
+    },
+    TuiPermissionDeniedLabel: {
+      fontSize: '11px',
+      backgroundColor: COLORS.TRANSPARENT_BLACK_80,
+      color: COLORS.LIGHT_GREY_E5,
+      padding: '4px 6px',
     },
     ...MARGINS,
   },
@@ -362,6 +370,7 @@ export default {
       fontSize: 11,
       labelColor: '#FFF',
       labelCheckedColor: '#FFF',
+      margin: '20px 0 0 0',
     },
   },
   DropDown: {
