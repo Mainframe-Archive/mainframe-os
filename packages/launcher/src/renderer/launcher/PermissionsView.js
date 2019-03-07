@@ -233,7 +233,7 @@ export default class PermissionsView extends Component<Props, State> {
         options = null
         domainOptions = (
           <Domains key={key}>
-            {['google.com', ...value].map(domain => (
+            {value.map(domain => (
               <DomainRow key={domain}>
                 <Text variant={['greyDark23', 'flex1']} size={12}>
                   {domain}
