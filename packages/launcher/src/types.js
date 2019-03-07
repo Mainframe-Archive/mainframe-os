@@ -5,7 +5,12 @@ import type { BrowserWindow } from 'electron'
 
 // UI
 
-export type Style = ?number | ?Array<Style> | ?Object
+type StyleObject = { [key: string]: string | number }
+export type Style =
+  | void
+  | number
+  | StyleObject
+  | Array<void | number | StyleObject>
 
 // Vault
 

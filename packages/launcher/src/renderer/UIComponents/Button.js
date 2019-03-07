@@ -24,7 +24,7 @@ export default class AppInstallModal extends Component<Props> {
         style={[styles.button, this.props.style]}
         onPress={this.props.onPress}
         disabled={this.props.disabled}>
-        <Text style={[styles.label, this.props.textStyle]}>
+        <Text style={[styles.label].concat(this.props.textStyle)}>
           {this.props.title}
         </Text>
       </TouchableOpacity>

@@ -10,6 +10,8 @@ import type { AppInstalledData } from '@mainframe/client'
 import styled from 'styled-components/native'
 import { Text } from '@morpheus-ui/core'
 import PlusIcon from '@morpheus-ui/icons/PlusSymbolCircled'
+import { findIndex } from 'lodash'
+import memoize from 'memoize-one'
 
 import rpc from '../rpc'
 import PermissionsView from '../PermissionsView'
@@ -18,7 +20,10 @@ import applyContext, { type CurrentUser } from '../LauncherContext'
 import CompleteOnboardSession from './CompleteOnboardSession'
 
 import AppInstallModal from './AppInstallModal'
-import { InstalledAppItem } from './AppItem'
+import { InstalledAppItem, SuggestedAppItem } from './AppItem'
+
+const SUGGESTED_APPS_URL =
+  'https://s3-us-west-2.amazonaws.com/suggested-apps/suggested-apps.json'
 
 const Header = styled.View`
   height: 50px;
@@ -91,12 +96,14 @@ type Props = {
 type State = {
   showModal: ?{
     type: 'accept_permissions' | 'app_install',
+    appID?: ?string,
     data?: ?{
       app: AppData,
     },
   },
   hover: ?string,
   showOnboarding: boolean,
+  suggestedApps: Array<Object>,
 }
 
 class AppsView extends Component<Props, State> {
@@ -104,6 +111,23 @@ class AppsView extends Component<Props, State> {
     hover: null,
     showModal: null,
     showOnboarding: false,
+    suggestedApps: [],
+  }
+
+  componentDidMount() {
+    this.fetchSuggested()
+  }
+
+  fetchSuggested = async () => {
+    try {
+      const suggestedPromise = await fetch(SUGGESTED_APPS_URL)
+
+      const suggestedApps = await suggestedPromise.json()
+      this.setState({ suggestedApps })
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err)
+    }
   }
 
   onSkipOnboarding = () => {
@@ -118,6 +142,15 @@ class AppsView extends Component<Props, State> {
     this.setState({
       showModal: {
         type: 'app_install',
+      },
+    })
+  }
+
+  installSuggested = (appID: string) => {
+    this.setState({
+      showModal: {
+        type: 'app_install',
+        appID,
       },
     })
   }
@@ -183,6 +216,14 @@ class AppsView extends Component<Props, State> {
     })
   }
 
+  getSuggestedList = memoize(
+    (apps: Array<AppData>, suggestedApps: Array<Object>) => {
+      return suggestedApps.filter(
+        item => findIndex(apps, { mfid: item.mfid }) < 0,
+      )
+    },
+  )
+
   // RENDER
 
   renderApp(app: AppData) {
@@ -196,9 +237,12 @@ class AppsView extends Component<Props, State> {
   }
 
   renderApps(apps: Array<AppData>) {
+    const suggested = this.getSuggestedList(apps, this.state.suggestedApps)
     return (
       <ScrollView>
-        <Text variant="smallTitle">Installed Applications</Text>
+        <Text variant={['smallTitle', 'blue', 'bold']}>
+          Installed Applications
+        </Text>
         <AppsGrid>
           {apps.map(app => this.renderApp(app))}
           <NewAppButton
@@ -207,6 +251,25 @@ class AppsView extends Component<Props, State> {
             testID="launcher-install-app-button"
           />
         </AppsGrid>
+        {suggested.length ? (
+          <>
+            <Text variant={['smallTitle', 'blue', 'bold']}>
+              Suggested Applications
+            </Text>
+            <AppsGrid>
+              {suggested.map(app => (
+                <SuggestedAppItem
+                  key={app.hash}
+                  appID={app.hash}
+                  mfid={app.mfid}
+                  appName={app.name}
+                  devName="Mainframe"
+                  onOpen={this.installSuggested}
+                />
+              ))}
+            </AppsGrid>
+          </>
+        ) : null}
       </ScrollView>
     )
   }
@@ -249,6 +312,7 @@ class AppsView extends Component<Props, State> {
         case 'app_install':
           modal = (
             <AppInstallModal
+              appID={this.state.showModal.appID}
               onRequestClose={this.onCloseModal}
               onInstallComplete={this.onInstallComplete}
             />
@@ -293,6 +357,7 @@ const AppsViewFragmentContainer = createFragmentContainer(AppsView, {
     fragment AppsView_apps on Apps {
       installed {
         localID
+        mfid
         ...AppItem_installedApp
       }
     }
