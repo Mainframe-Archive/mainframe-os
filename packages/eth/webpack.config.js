@@ -5,8 +5,8 @@ module.exports = {
   entry: './src/index.js',
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'ContractUtils.js',
-    library: 'ContractUtils',
+    filename: 'EthClient.js',
+    library: 'EthClient',
     libraryTarget: 'umd',
   },
   module: {

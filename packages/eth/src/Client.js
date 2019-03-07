@@ -1,14 +1,16 @@
 // @flow
 import EventEmitter from 'events'
-import { fromWei, toWei, toHex, hexToNumber, hexToString } from 'web3-utils'
-import Web3EthAbi from 'web3-eth-abi'
-import type Web3HTTPProvider from 'web3-providers-http'
+import { fromWei, toWei, toHex, hexToNumber, isAddress } from 'web3-utils'
 import type { Observable } from 'rxjs'
 
-import { unitMap } from './contractHelpers'
 import RequestManager from './RequestManager'
-import ABI from './abi'
-import type { SendParams, TXEventEmitter } from './types'
+import ERC20 from './Contracts/ERC20'
+import type {
+  SendParams,
+  TXEventEmitter,
+  AbstractProvider,
+  TXParams,
+} from './types'
 
 export const NETWORKS = {
   '1': 'mainnet',
@@ -18,14 +20,14 @@ export const NETWORKS = {
   '42': 'kovan',
 }
 
-const MFT_TOKEN_ADDRESSES = {
-  ropsten: '0xa46f1563984209fe47f8236f8b01a03f03f957e4',
-  mainnet: '0xdf2c7238198ad8b389666574f2d8bc411a4b7428',
-}
-
 type Subscriptions = {
   networkChanged: () => Observable,
   accountsChanged: () => Observable,
+}
+
+type WalletProvider = {
+  +signTransaction: (params: TXParams) => Promise<Object>,
+  +getAccounts: () => Promise<Array<string>>,
 }
 
 export default class EthClient extends RequestManager {
@@ -34,18 +36,23 @@ export default class EthClient extends RequestManager {
   _networkName: ?string
   _networkID: ?string
   _subscriptions: ?Subscriptions
+  _walletProvider: ?WalletProvider
+  _contracts = {}
+  _intervals = {}
 
   constructor(
-    provider: Web3HTTPProvider | string,
-    subscriptions?: Subscriptions,
+    provider: AbstractProvider, // TODO: - Allow string URL and setup provider
+    walletProvider?: ?WalletProvider,
+    subscriptions?: ?Subscriptions,
   ) {
     super(provider)
     this._subscriptions = subscriptions
+    this._walletProvider = walletProvider
     this.setup()
   }
 
   get networkName(): string {
-    return this._networkName || 'ropsten'
+    return this._networkName || 'Awaiting network'
   }
 
   get networkID(): ?string {
@@ -56,10 +63,14 @@ export default class EthClient extends RequestManager {
     return this._defaultAccount
   }
 
+  get walletProvider(): ?WalletProvider {
+    return this._walletProvider
+  }
+
   setNetworkID(id: string) {
     if (id !== this._networkID) {
       this._networkID = id
-      this._networkName = NETWORKS[id]
+      this._networkName = NETWORKS[id] || 'Local Testnet'
       this.emit('networkChanged', id)
     }
   }
@@ -67,7 +78,6 @@ export default class EthClient extends RequestManager {
   async setup() {
     const id = await this.fetchNetwork()
     this.setNetworkID(id)
-
     if (!this._subscriptions) {
       return
     }
@@ -97,67 +107,6 @@ export default class EthClient extends RequestManager {
     return this.sendRequest(accountsReq)
   }
 
-  encodeERC20Call(name: string, params?: Array<any>) {
-    const abi = ABI.ERC20.find(a => a.name === name)
-    return Web3EthAbi.encodeFunctionCall(abi, params || [])
-  }
-
-  async getTokenDecimals(tokenAddress: string): Promise<number> {
-    const data = this.encodeERC20Call('decimals')
-    const request = this.createRequest('eth_call', [
-      { data, to: tokenAddress },
-      'latest',
-    ])
-    return this.sendRequest(request)
-  }
-
-  async getTokenDecimalsUnit(tokenAddress: string): Promise<string> {
-    const decimals = await this.getTokenDecimals(tokenAddress)
-    const decimalsString = Math.pow(10, decimals).toString()
-    const unit = Object.keys(unitMap).find(unitName => {
-      const unit = unitMap[unitName]
-      return decimalsString === unit
-    })
-    if (!unit) {
-      throw new Error('Error getting token decimal unit')
-    }
-    return unit
-  }
-
-  async getTokenTicker(tokenAddress: string): Promise<string> {
-    const data = this.encodeERC20Call('symbol')
-    const request = this.createRequest('eth_call', [
-      { data, to: tokenAddress },
-      'latest',
-    ])
-    const res = await this.sendRequest(request)
-    return hexToString(res)
-  }
-
-  async getTokenBalance(
-    tokenAddress: string,
-    accountAddress: string,
-  ): Promise<Object> {
-    const decimalsUnit = await this.getTokenDecimalsUnit(tokenAddress)
-    const data = this.encodeERC20Call('balanceOf', [accountAddress])
-    const mftBalanceReq = this.createRequest('eth_call', [
-      { data, to: tokenAddress },
-      'latest',
-    ])
-    const res = await this.sendRequest(mftBalanceReq)
-    return fromWei(res, decimalsUnit)
-  }
-
-  async getMFTBalance(accountAddress: string): Promise<Object> {
-    if (!this._networkName || !MFT_TOKEN_ADDRESSES[this._networkName]) {
-      throw new Error(
-        `Unsupported Ethereum network: ${this._networkID || 'Undefined'}`,
-      )
-    }
-    const tokenAddress = MFT_TOKEN_ADDRESSES[this._networkName]
-    return this.getTokenBalance(tokenAddress, accountAddress)
-  }
-
   async getETHBalance(address: string) {
     const ethBalanceReq = this.createRequest('eth_getBalance', [
       address,
@@ -167,47 +116,26 @@ export default class EthClient extends RequestManager {
     return fromWei(res, 'ether')
   }
 
-  // async getTokenDecimals(tokenAddr: string) {
-  //   const abi = ABI.ERC20.find(a => a.name === 'decimals')
-  //   const data = Web3EthAbi.encodeFunctionCall(abi)
-  //   const req = this.createRequest('eth_call', [{ data, to: tokenAddr }])
-  //   const res = await this.sendRequest(req)
-  //   return web3Utils.hexToNumber(res)
-  // }
+  erc20Contract(address: string) {
+    if (this._contracts[address]) {
+      return this._contracts[address]
+    }
+    const contract = new ERC20(this, address)
+    this._contracts[address] = contract
+    return contract
+  }
 
   // Sending transactions
 
   sendETH(params: SendParams) {
     const valueWei = toWei(String(params.value))
     const valueHex = toHex(valueWei)
-    const reqParams = {
+    const txParams = {
       to: params.to,
       from: params.from,
       value: valueHex,
     }
-    const request = {
-      method: 'eth_sendTransaction',
-      params: [reqParams],
-    }
-    return this.sendTX(request, params.confirmations)
-  }
-
-  sendMFT(params: SendParams) {
-    const valueWei = toWei(String(params.value))
-    const abi = ABI.ERC20.find(a => a.name === 'transfer')
-    const data = Web3EthAbi.encodeFunctionCall(abi, [params.to, valueWei])
-    if (!this._networkName || !MFT_TOKEN_ADDRESSES[this._networkName]) {
-      throw new Error(
-        `Unsupported Ethereum network: ${this._networkID || 'Undefined'}`,
-      )
-    }
-    const to = MFT_TOKEN_ADDRESSES[this._networkName]
-    const reqParams = { from: params.from, to, data }
-    const request = {
-      method: 'eth_sendTransaction',
-      params: [reqParams],
-    }
-    return this.sendTX(request, params.confirmations)
+    return this.sendAndListen(txParams, params.confirmations)
   }
 
   async getConfirmations(txHash: string): Promise<?number> {
@@ -244,22 +172,81 @@ export default class EthClient extends RequestManager {
         } catch (err) {
           reject(err)
         }
-      }, 1500)
+      }, 2000)
     })
   }
 
-  sendTX(requestData: Object, confirmations: ?number = 10): TXEventEmitter {
-    const eventEmitter = new EventEmitter()
-    if (requestData.params.length && !requestData.params[0].chainId) {
-      requestData.params[0].chainId = Number(this.networkID)
+  async completeTxParams(txParams: Object): Promise<Object> {
+    if (!txParams.nonce) {
+      const nonceReq = this.createRequest('eth_getTransactionCount', [
+        txParams.from,
+        'pending',
+      ])
+      txParams.nonce = await this.sendRequest(nonceReq)
     }
-    const req = this.createRequest(requestData.method, requestData.params)
-    this.sendRequest(req)
+
+    if (!txParams.gas) {
+      const gasReq = this.createRequest('eth_estimateGas', [txParams])
+      try {
+        txParams.gas = await this.sendRequest(gasReq)
+      } catch (err) {
+        // handle simple value transfer case
+        if (err.message === 'no contract code at given address') {
+          txParams.gas = '0xcf08'
+        }
+      }
+    }
+
+    if (!txParams.gasPrice) {
+      const gasPriceReq = this.createRequest('eth_gasPrice', [])
+      txParams.gasPrice = await this.sendRequest(gasPriceReq)
+    }
+    return txParams
+  }
+
+  async prepareAndSignTx(txParams: Object): Promise<string> {
+    if (this._walletProvider != null) {
+      this.validateTransaction(txParams)
+      const fullParams = await this.completeTxParams(txParams)
+      // $FlowFixMe checked for wallet provider
+      return this._walletProvider.signTransaction(fullParams)
+    }
+    throw new Error('No wallet provider found')
+  }
+
+  validateTransaction(txParams: Object) {
+    if (!txParams.from || !isAddress(txParams.from)) {
+      throw new Error('Invalid sender address')
+    }
+    if (!txParams.to || !isAddress(txParams.to)) {
+      throw new Error('Invalid recipient address')
+    }
+  }
+
+  async generateTXRequest(txParams: Object) {
+    const signedTx = await this.prepareAndSignTx(txParams)
+    const requestData = {
+      method: 'eth_sendRawTransaction',
+      params: [signedTx],
+    }
+    // if (requestData.params.length && !requestData.params[0].chainId) {
+    //   requestData.params[0].chainId = Number(this.networkID)
+    // }
+    return this.createRequest(requestData.method, requestData.params)
+  }
+
+  async sendAndListen(
+    txParams: Object,
+    confirmations: ?number = 10,
+  ): Promise<TXEventEmitter> {
+    const eventEmitter = new EventEmitter()
+    const request = await this.generateTXRequest(txParams)
+    this.sendRequest(request)
       .then(res => {
         eventEmitter.emit('hash', res)
-        return this.confirmTransaction(res, req.id, 0).then(() => {
+        return this.confirmTransaction(res, request.id, 0).then(() => {
           eventEmitter.emit('mined', res)
-          return this.confirmTransaction(res, req.id, confirmations)
+          return this.confirmTransaction(res, request.id, confirmations)
         })
       })
       .then(res => {
@@ -270,4 +257,49 @@ export default class EthClient extends RequestManager {
       })
     return eventEmitter
   }
+
+  // Send function allows this to be used as
+  // a provider for Web3 JS like in Mainframe SDK
+
+  // async send(
+  //   payload: RequestPayload,
+  //   cb?: (error: ?Error, response: ?Object) => void,
+  // ) {
+  //   try {
+  //     let response
+  //     switch (payload.method) {
+  //       case 'eth_sendTransaction':
+  //         if (this.walletProvider) {
+  //           const request = await this.generateTXRequest(payload.params[0])
+  //           response = await this.sendRequest(request)
+  //         }
+  //         break
+  //       case 'eth_accounts':
+  //         if (this.walletProvider) {
+  //           response = await this.walletProvider.getAccounts()
+  //         }
+  //         break
+  //       case 'eth_signTransaction':
+  //         if (this.walletProvider) {
+  //           response = await this.walletProvider.signTransaction(
+  //             payload.params[0],
+  //           )
+  //         }
+  //         break
+  //       default:
+  //         response = await this.sendRequest(payload)
+  //     }
+  //     if (cb) {
+  //       cb(null, jsonRpcResponse(response, payload.id))
+  //     } else {
+  //       return response
+  //     }
+  //   } catch (err) {
+  //     if (cb) {
+  //       cb(err)
+  //     } else {
+  //       throw err
+  //     }
+  //   }
+  // }
 }

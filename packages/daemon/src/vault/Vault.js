@@ -17,7 +17,7 @@ import {
   createSecretBoxKeyFromPassword,
 } from '@mainframe/utils-crypto'
 import { type ID } from '@mainframe/utils-id'
-import { INFURA_URLS } from '@mainframe/eth'
+import { ETH_RPC_URLS } from '@mainframe/eth'
 
 import type { SessionData } from '../app/AbstractApp'
 import type App from '../app/App'
@@ -174,7 +174,7 @@ export default class Vault {
       settings: {
         bzzURL: 'http://mainframe-gateways.net:8500',
         pssURL: 'ws://mainframe-gateways.net:8546',
-        ethURL: INFURA_URLS.ropsten,
+        ethURL: ETH_RPC_URLS.WS.ropsten,
       },
       identityWallets: new IdentityWallets(),
       contactAppData: new ContactAppData(),

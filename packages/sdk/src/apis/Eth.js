@@ -1,38 +1,42 @@
 // @flow
-import HookedProvider from 'web3-provider-engine/subproviders/hooked-wallet.js'
-import ProviderEngine from 'web3-provider-engine'
-import SubscriptionsProvider from 'web3-provider-engine/subproviders/subscriptions.js'
+
 import { Observable } from 'rxjs'
-import { EthClient, type SendParams, type TXEventEmitter } from '@mainframe/eth'
+import {
+  EthClient,
+  type SendParams,
+  type TXEventEmitter,
+  type AbstractProvider,
+} from '@mainframe/eth'
 import type StreamRPC from '@mainframe/rpc-stream'
 
-import RPCProvider from '../RPCProvider'
+import RpcProvider from '../RPCProvider'
+import MFWeb3Provider from '../MFWeb3Provider'
 import ClientAPIs from '../ClientAPIs'
 import type MainrameSDK from '../index'
 
-const createHookedWallet = (rpc: StreamRPC) => {
-  return new HookedProvider({
-    getAccounts: async cb => {
-      try {
-        const accounts = await rpc.request('wallet_getEthAccounts')
-        cb(null, accounts)
-      } catch (err) {
-        cb(err)
-      }
-    },
-    signTransaction: async (params, cb) => {
-      const txParams = {
-        chain: 'ethereum',
-        transactionData: params,
-      }
-      try {
-        const res = await rpc.request('wallet_signTx', txParams)
-        cb(null, res)
-      } catch (err) {
-        cb(err)
-      }
-    },
-  })
+const MFT_TOKEN_ADDRESSES = {
+  ropsten: '0xa46f1563984209fe47f8236f8b01a03f03f957e4',
+  mainnet: '0xdf2c7238198ad8b389666574f2d8bc411a4b7428',
+}
+
+class WalletProvider {
+  _rpc: StreamRPC
+
+  constructor(rpc: StreamRPC) {
+    this._rpc = rpc
+  }
+
+  async getAccounts() {
+    return this._rpc.request('wallet_getEthAccounts')
+  }
+
+  async signTransaction(params) {
+    const txParams = {
+      chain: 'ethereum',
+      transactionData: params,
+    }
+    return this._rpc.request('wallet_signTx', txParams)
+  }
 }
 
 const subscribe = async (rpc, rpcMethod, subMethod) => {
@@ -75,7 +79,7 @@ const subscribe = async (rpc, rpcMethod, subMethod) => {
 }
 
 export default class EthAPIs extends ClientAPIs {
-  _web3Provider: ProviderEngine
+  _web3Provider: AbstractProvider
   _ethClient: EthClient
   _sdk: MainrameSDK
 
@@ -83,16 +87,6 @@ export default class EthAPIs extends ClientAPIs {
     super(sdk._rpc)
 
     this._sdk = sdk
-
-    const engine = new ProviderEngine()
-    const hookedWallet = createHookedWallet(this._rpc)
-    const rpcProvider = new RPCProvider(this._rpc)
-    const subsProvider = new SubscriptionsProvider()
-    engine.addProvider(hookedWallet)
-    engine.addProvider(subsProvider)
-    engine.addProvider(rpcProvider)
-    engine.start()
-    this._web3Provider = engine
 
     const subscriptions = {
       accountsChanged: () =>
@@ -109,15 +103,30 @@ export default class EthAPIs extends ClientAPIs {
         ),
     }
 
-    this._ethClient = new EthClient(engine, subscriptions)
-    subsProvider.on('data', (err, notif) => {
-      engine.emit('data', err, notif)
+    const rpcProvider = new RpcProvider(sdk._rpc)
+    const walletProvider = new WalletProvider(sdk._rpc)
+    this._ethClient = new EthClient(rpcProvider, walletProvider, subscriptions)
+
+    this._web3Provider = new MFWeb3Provider(this._ethClient)
+
+    rpcProvider.on('data', res => {
+      this._web3Provider.emit && this._web3Provider.emit('data', res)
+    })
+
+    this._ethClient.on('eth_subscription', value => {
+      this.emit('eth_subscription', value)
+      this._web3Provider.emit &&
+        this._web3Provider.emit('eth_subscription', value)
     })
     this._ethClient.on('accountsChanged', value => {
       this.emit('accountsChanged', value)
+      this._web3Provider.emit &&
+        this._web3Provider.emit('accountsChanged', value)
     })
     this._ethClient.on('networkChanged', value => {
       this.emit('networkChanged', value)
+      this._web3Provider.emit &&
+        this._web3Provider.emit('networkChanged', value)
     })
   }
 
@@ -133,12 +142,22 @@ export default class EthAPIs extends ClientAPIs {
     return this._ethClient.networkID
   }
 
-  sendETH(params: SendParams): TXEventEmitter {
+  sendETH(params: SendParams): Promise<TXEventEmitter> {
     return this._ethClient.sendETH(params)
   }
 
-  sendMFT(params: SendParams): TXEventEmitter {
-    return this._ethClient.sendMFT(params)
+  sendMFT(params: SendParams): Promise<TXEventEmitter> {
+    if (!this._ethClient._networkName) {
+      throw new Error('Unable to establish Ethereum network')
+    }
+    const tokenAddress = MFT_TOKEN_ADDRESSES[this._ethClient._networkName]
+    if (!tokenAddress) {
+      throw new Error(
+        `MFT contract not available on ${this._ethClient._networkName}`,
+      )
+    }
+    const contract = this._ethClient.erc20Contract(tokenAddress)
+    return contract.transfer(params)
   }
 
   getAccounts(): Promise<Array<string>> {

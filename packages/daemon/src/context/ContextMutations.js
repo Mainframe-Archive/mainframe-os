@@ -16,6 +16,7 @@ import type {
 } from '@mainframe/client'
 import { idType, type ID } from '@mainframe/utils-id'
 import { ensureDir } from 'fs-extra'
+import WebsocketProvider from 'web3-providers-ws'
 
 import { type App, OwnApp } from '../app'
 import type { ContactToApprove } from '../app/AbstractApp'
@@ -646,8 +647,9 @@ export default class ContextMutations {
 
   async setEthNetwork(url: string): Promise<void> {
     const { openVault, io } = this._context
+    const subProvider = new WebsocketProvider(url)
     openVault.setEthUrl(url)
-    io.eth.ethHttpUrl = url
+    io.eth._web3Provider = subProvider
     await openVault.save()
     this._context.next({ type: 'eth_network_changed', change: 'network' })
   }

@@ -30,10 +30,12 @@ class WalletInfo extends Component<ContextProps, State> {
     const { web3 } = this.props
     if (web3) {
       try {
+        console.log('fetching accounts..')
         const accounts = await web3.eth.getAccounts()
         if (accounts.length) {
           const account = accounts[0]
           const weiBalance = await web3.eth.getBalance(account)
+          console.log('got balance...', weiBalance)
           const ethBalance = web3.utils.fromWei(weiBalance)
           this.setState({
             account,

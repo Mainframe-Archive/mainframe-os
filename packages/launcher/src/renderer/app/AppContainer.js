@@ -87,7 +87,7 @@ const EthNetwork = styled.View`
 
 // TODO: Refactor various web3 providers
 const ethClientProvider = {
-  sendAsync: async (payload: Object, cb: (?Error, ?any) => any) => {
+  send: async (payload: Object, cb: (?Error, ?any) => any) => {
     try {
       const res = await rpc.web3Send(payload)
       const jsonResponse = {
@@ -119,7 +119,7 @@ export default class AppContainer extends Component<Props, State> {
     })
     const cachedData = store.get(props.appSession.app.appID)
     const customUrl = cachedData ? cachedData.customUrl : null
-    this.eth = new EthClient(ethClientProvider, subscriptions)
+    this.eth = new EthClient(ethClientProvider, null, subscriptions)
     this.state = {
       bundleUrl,
       urlInputValue: customUrl || bundleUrl,

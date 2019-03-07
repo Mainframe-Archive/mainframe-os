@@ -47,6 +47,18 @@ class EthWalletSubscription extends ContextSubscription<RxSubscription> {
   }
 }
 
+class EthBlockchainSubscription extends ContextSubscription<RxSubscription> {
+  constructor(id: string) {
+    super('eth_blockchain_subscription', null, id)
+  }
+
+  async dispose() {
+    if (this.data != null) {
+      this.data.unsubscribe()
+    }
+  }
+}
+
 const sharedMethods = {
   wallet_getEthAccounts: async (ctx: AppContext): Promise<Array<string>> => {
     // $FlowFixMe indexer property
@@ -72,6 +84,28 @@ export const sandboxed = {
   api_version: (ctx: AppContext) => ctx.client.apiVersion(),
 
   // Blockchain
+
+  blockchain_web3Subscribe: async (
+    ctx: AppContext,
+    params: BlockchainWeb3SendParams,
+  ): Promise<Object> => {
+    const { subscription, id } = await ctx.client.blockchain.web3Subscribe(
+      params,
+    )
+    const sub = new EthBlockchainSubscription(id)
+    sub.data = subscription.subscribe(msg => {
+      ctx.notifySandboxed(sub.id, msg.result)
+    })
+    ctx.setSubscription(sub)
+    return sub.id
+  },
+
+  blockchain_web3Unsubscribe: async (
+    ctx: AppContext,
+    params: BlockchainWeb3SendParams,
+  ): Promise<Object> => {
+    return ctx.client.blockchain.web3Unsubscribe(params)
+  },
 
   blockchain_web3Send: async (
     ctx: AppContext,

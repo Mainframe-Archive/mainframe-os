@@ -2,12 +2,15 @@
 
 import BzzAPI from '@erebos/api-bzz-node'
 import PssAPI from '@erebos/api-pss'
+import WebsocketProvider from 'web3-providers-ws'
 import { sign } from '@erebos/secp256k1'
 import type StreamRPC from '@mainframe/rpc-stream'
 import createWebSocketRPC from '@mainframe/rpc-ws-node'
 import { EthClient } from '@mainframe/eth'
 
 import type ClientContext from './ClientContext'
+
+// let wsReconnectInterval
 
 export default class ContextIO {
   _context: ClientContext
@@ -51,10 +54,38 @@ export default class ContextIO {
 
   get eth(): EthClient {
     if (this._ethClient == null) {
-      this._ethClient = new EthClient(this._context.openVault.settings.ethURL)
+      const provider = new WebsocketProvider(
+        this._context.openVault.settings.ethURL,
+      )
+      this._ethClient = new EthClient(provider)
+      // this.handleEthDisconnect(provider)
     }
     return this._ethClient
   }
+
+  // handleEthDisconnect(wsProvider: WebsocketProvider) {
+  //   const delayedReconnect = () => {
+  //     wsReconnectInterval = setTimeout(() => {
+  //       this.resetEthProvider()
+  //     }, 3000)
+  //   }
+  //   wsProvider.on('error', e => {
+  //     console.error('****WS Error', e)
+  //     // delayedReconnect()
+  //   })
+  //   wsProvider.on('end', e => {
+  //     console.error('***** WS End', e)
+  //     delayedReconnect()
+  //   })
+  // }
+  //
+  // resetEthProvider() {
+  //   const provider = new WebsocketProvider(
+  //     this._context.openVault.settings.ethURL,
+  //   )
+  //   this._ethClient._web3Provider = provider
+  //   this.handleEthDisconnect(provider)
+  // }
 
   clear() {
     this._bzz = undefined

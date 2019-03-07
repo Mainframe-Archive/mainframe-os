@@ -1,44 +1,26 @@
 // @flow
 import EventEmitter from 'events'
-import Web3HTTPProvider from 'web3-providers-http'
 
-type MFWeb3Provider = Object
+import type { AbstractProvider, RequestPayload } from './types'
 
 export default class EthRequestManager extends EventEmitter {
-  _web3Provider: ?Web3HTTPProvider | ?MFWeb3Provider
-  _httpUrl: string
-  _intervals = {}
+  _web3Provider: AbstractProvider
   _requestCount: number = 0
 
-  constructor(provider: string | MFWeb3Provider) {
+  constructor(provider: AbstractProvider) {
     super()
-    if (typeof provider === 'string') {
-      this._web3Provider = new Web3HTTPProvider(provider)
-      this._httpUrl = provider
-    } else {
-      this._web3Provider = provider
-    }
+    // TODO: Embed WS and HTTP provider types
+    // to allow users to just pass a url
+    this._web3Provider = provider
   }
 
-  get ethURL(): string {
-    return this._httpUrl
-  }
-
-  set ethHttpUrl(url: string) {
-    if (this._httpUrl && this._web3Provider) {
-      // Only set if using http provider
-      this._httpUrl = url
-      this._web3Provider.host = url
-    }
-  }
-
-  get web3Provider(): Web3HTTPProvider {
+  get web3Provider(): AbstractProvider {
     return this._web3Provider
   }
 
   // Requests
 
-  createRequest(method: string, params: Array<any>) {
+  createRequest(method: string, params: Array<any>): RequestPayload {
     this._requestCount += 1
     return {
       id: this._requestCount,
@@ -48,16 +30,17 @@ export default class EthRequestManager extends EventEmitter {
     }
   }
 
-  async sendRequest(params: Object): Promise<any> {
-    // Use sendAsync for RPC provider and send for http
-    // as provider engine only supports sendAsync
-    const method = this._httpUrl ? 'send' : 'sendAsync'
+  async sendRequest(params: RequestPayload): Promise<any> {
     return new Promise((resolve, reject) => {
-      this.web3Provider[method](params, (err, res) => {
-        if (err || res.error) {
-          reject(err || res.error)
-        } else {
+      const timeout = setTimeout(() => {
+        reject(new Error('Web3 request timeout'))
+      }, 10000)
+      this.web3Provider.send(params, (err, res) => {
+        clearTimeout(timeout)
+        if (res) {
           resolve(res.result)
+        } else {
+          reject(err || (res && res.error))
         }
       })
     })
