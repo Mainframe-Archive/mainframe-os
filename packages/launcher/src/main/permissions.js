@@ -67,7 +67,7 @@ export const interceptWebRequests = (
             domain,
           })
           granted = res.granted ? 'granted' : 'denied'
-          if (res.persist) {
+          if (res.persist && !permissions[key][granted].includes(domain)) {
             // Grant for session
             permissions[key][granted].push(domain)
             if (res.persist === 'always') {

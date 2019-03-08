@@ -61,10 +61,6 @@ const Container = styled.View`
   flex: 1;
 `
 
-const Title = styled.View`
-  margin-bottom: 10px;
-`
-
 const Buttons = styled.View`
   padding-top: 20px;
   flex-direction: row;
@@ -477,11 +473,6 @@ class WalletsView extends Component<Props, State> {
   render() {
     return (
       <Container>
-        <Title>
-          <Text variant={['smallTitle', 'blue', 'noPadding', 'bold']}>
-            Wallets
-          </Text>
-        </Title>
         <WalletsContainer>
           <ScrollView>
             {this.renderWallets()}
