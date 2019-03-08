@@ -16,7 +16,7 @@ import type { Subscription as RxSubscription } from 'rxjs'
 import * as mime from 'mime'
 import { type AppContext, ContextSubscription } from '../contexts'
 import { withPermission } from '../permissions'
-import { PrependInitializationVector, Decrypt } from '../storage'
+import { createSecretStreamKey, createEncryptStream, createDecryptStream } from '@mainframe/utils-crypto'
 
 class CommsSubscription extends ContextSubscription<RxSubscription> {
   constructor() {
@@ -199,16 +199,8 @@ export const sandboxed = {
                 const filePath = filePaths[0]
                 let { address, encryptionKey, feedHash } = ctx.storage
 
-                // TODO: move out encryption code to a separate file
-                const iv = crypto.randomBytes(16) // TODO: use a constant for the length of the IV
-                const cipher = crypto.createCipheriv(
-                  'aes256',
-                  encryptionKey,
-                  iv,
-                )
                 const stream = createReadStream(filePath)
-                  .pipe(cipher)
-                  .pipe(new PrependInitializationVector(iv))
+                  .pipe(createEncryptStream(ctx.storage.encryptionKey))
 
                 let feedMetadata
                 let dataHash
@@ -310,72 +302,37 @@ export const sandboxed = {
       console.log('storage_set called')
       try {
         const filePath = params.name
-        let { encryptionKey, feedHash } = ctx.storage
-
-        // TODO: move out encryption code to a separate file
-        const iv = crypto.randomBytes(16) // TODO: use a constant for the length of the IV
-        const cipher = crypto.createCipheriv(
-          'aes256',
-          encryptionKey,
-          iv,
-        )
+        let manifestHash
+        let { address, encryptionKey, feedHash } = ctx.storage
         const Readable = require('stream').Readable
         const dataStream = new Readable()
-        // dataStream._read = () => {} // redundant? see update below
         dataStream.push(params.data)
         dataStream.push(null)
-
-        const stream = dataStream
-          .pipe(cipher)
-          .pipe(new PrependInitializationVector(iv))
-
-        console.log(dataStream, 'dataStream - storage_set')
-        console.log(stream, 'stream - storage_set')
-
-        let feedMetadata
-        let dataHash
-        let manifestHash
-
-        console.log(params, 'params')
-        console.log(feedHash, 'feedHash')
+        const stream = dataStream.pipe(createEncryptStream(ctx.storage.encryptionKey))
 
         if (feedHash) {
-          console.log(`feedHash is ${feedHash}`)
           const contentHash = await ctx.bzz.getFeedValue(feedHash, {}, { mode: 'content-hash' })
-          console.log(contentHash, 'contentHash')
           ctx.storage.contentHash = contentHash
           manifestHash = contentHash
         } else {
-          console.log('feedHash does not exist')
           feedHash = await ctx.bzz.createFeedManifest(address)
           const manifest = {entries: []}
           const initialManifest = await ctx.bzz.uploadFile(JSON.stringify(manifest), {})
-          console.log(initialManifest, 'initialManifest')
           manifestHash = initialManifest
         }
-
-
-        dataHash = await ctx.bzz.uploadFileStream(stream, {
+        const dataHash = await ctx.bzz.uploadFileStream(stream, {
           contentType: 'text/plain',
           path: params.name,
           manifestHash: manifestHash
         })
-
-        console.log(dataHash, 'dataHash')
-
-        feedMetadata = await ctx.bzz.getFeedMetadata(feedHash)
-        console.log(feedMetadata, 'feedMetadata')
-        console.log(manifestHash, 'manifestHash')
-
+        const feedMetadata = await ctx.bzz.getFeedMetadata(feedHash)
         await ctx.bzz.postFeedValue(feedMetadata, `0x${dataHash}`)
-
         ctx.storage.feedHash = feedHash
         await ctx.client.app.setFeedHash({ sessID: ctx.appSession.session.sessID, feedHash: feedHash })
         return params.name
       } catch (error) {
         console.log(error, 'storage_set error')
         // TODO: use RPCError to provide a custom error code
-        reject(new Error('Upload failed'))
       }
     },
   },
@@ -385,22 +342,16 @@ export const sandboxed = {
       name: 'string'
     },
     handler: async(ctx: AppContext, params: { name: string }): Promise<?string> => {
-      console.log('storage_get called')
-      console.log(params, 'storage_get params')
-      console.log(ctx.storage, 'ctx.storage')
       try {
         const filePath = params.name
         let { encryptionKey, feedHash } = ctx.storage
-
         const res = await ctx.bzz.download(`${ctx.storage.feedHash}/${filePath}`)
-        const stream = res.body.pipe(new Decrypt(ctx.storage.encryptionKey))
+        const stream = res.body.pipe(createDecryptStream(ctx.storage.encryptionKey))
         const data = await getStream(stream)
-        console.log(data, 'storage_get data')
         return data
       } catch (error) {
         console.log(error, 'storage_get error')
         // TODO: use RPCError to provide a custom error code
-        reject(new Error('Upload failed'))
       }
     },
   }

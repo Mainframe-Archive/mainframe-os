@@ -10,7 +10,7 @@ import {
   type StrictPermissionsGrants,
 } from '@mainframe/app-permissions'
 import { encodeBase64, type base64 } from '@mainframe/utils-base64'
-import { secureRandomBytes } from '@mainframe/utils-crypto'
+import { createSignKeyPair, createSecretStreamKey, secureRandomBytes } from '@mainframe/utils-crypto'
 // eslint-disable-next-line import/named
 import type {
   AppUserPermissionsSettings,
@@ -74,11 +74,14 @@ export type AbstractAppParams = {
 export type AbstractAppSerialized = AbstractAppParams
 
 export const createAppStorage = (): AppStorage => {
+  const keyPair = createSignKeyPair()
+  console.log(keyPair, 'keyPair')
   const kp = createKeyPair()
+  console.log(kp, 'kp')
   return {
     feedHash: undefined,
     feedKey: kp.getPrivate('hex'),
-    encryptionKey: encodeBase64(secureRandomBytes(32)),
+    encryptionKey: encodeBase64(createSecretStreamKey()),
   }
 }
 

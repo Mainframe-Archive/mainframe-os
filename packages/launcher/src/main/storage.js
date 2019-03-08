@@ -4,6 +4,7 @@ import crypto from 'crypto'
 import { Transform } from 'stream'
 import * as mime from 'mime'
 import type { AppContext } from './contexts'
+import { createDecryptStream } from '@mainframe/utils-crypto'
 
 const INITIALIZATION_VECTOR_SIZE = 16
 
@@ -66,7 +67,7 @@ export const registerStreamProtocol = (context: AppContext) => {
         const res = await context.bzz.download(
           `${context.storage.feedHash}/${filePath}`,
         )
-        const data = res.body.pipe(new Decrypt(context.storage.encryptionKey))
+        const data = res.body.pipe(createDecryptStream(context.storage.encryptionKey))
         callback({
           headers: {
             'content-type': contentType,
