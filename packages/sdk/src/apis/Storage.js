@@ -12,12 +12,10 @@ export default class StorageAPIs extends ClientAPIs {
   }
 
   set(params: { data: string, name: string }): Promise<?string> {
-    console.log(params, 'params in StorageAPIs')
     return this._rpc.request('storage_set', params)
   }
 
   get(params: { name: string }): Promise<?string> {
-    console.log(params, 'params in StorageAPIs')
     return this._rpc.request('storage_get', params)
   }
 }

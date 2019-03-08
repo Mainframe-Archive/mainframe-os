@@ -188,7 +188,6 @@ export const sandboxed = {
       name: 'string',
     },
     handler: (ctx: AppContext, params: { name: string }): Promise<?string> => {
-      console.log('storage_promptUpload called')
       return new Promise((resolve, reject) => {
         dialog.showOpenDialog(
           ctx.window,
@@ -197,50 +196,31 @@ export const sandboxed = {
             if (filePaths.length !== 0) {
               try {
                 const filePath = filePaths[0]
+                let manifestHash
                 let { address, encryptionKey, feedHash } = ctx.storage
-
                 const stream = createReadStream(filePath)
                   .pipe(createEncryptStream(ctx.storage.encryptionKey))
 
-                let feedMetadata
-                let dataHash
-                let manifestHash
-
-                console.log(params, 'params')
-                console.log(filePaths, 'filePaths')
-                console.log(mime.getType(filePath), 'mime.getType(filePath)')
-                console.log(feedHash, 'feedHash')
-
                 if (feedHash) {
-                  console.log(`feedHash is ${feedHash}`)
                   const contentHash = await ctx.bzz.getFeedValue(feedHash, {}, { mode: 'content-hash' })
-                  console.log(contentHash, 'contentHash')
                   ctx.storage.contentHash = contentHash
                   manifestHash = contentHash
                 } else {
-                  console.log('feedHash does not exist')
                   feedHash = await ctx.bzz.createFeedManifest(address)
                   const manifest = {entries: []}
                   const initialManifest = await ctx.bzz.uploadFile(JSON.stringify(manifest), {})
-                  console.log(initialManifest, 'initialManifest')
                   manifestHash = initialManifest
                 }
 
                 // TODO: paralelize getting feed metadata and uploading files
-                dataHash = await ctx.bzz.uploadFileStream(stream, {
+                const dataHash = await ctx.bzz.uploadFileStream(stream, {
                   contentType: mime.getType(filePath),
                   path: params.name,
                   manifestHash: manifestHash
                 })
 
-                console.log(dataHash, 'dataHash')
-
-                feedMetadata = await ctx.bzz.getFeedMetadata(feedHash)
-                console.log(feedMetadata, 'feedMetadata')
-                console.log(manifestHash, 'manifestHash')
-
+                const feedMetadata = await ctx.bzz.getFeedMetadata(feedHash)
                 await ctx.bzz.postFeedValue(feedMetadata, `0x${dataHash}`)
-
                 ctx.storage.feedHash = feedHash
                 await ctx.client.app.setFeedHash({ sessID: ctx.appSession.session.sessID, feedHash: feedHash })
                 resolve(params.name)
@@ -262,23 +242,16 @@ export const sandboxed = {
 
   storage_list: {
     handler: async(ctx: AppContext): Promise<Array<string>> => {
-      console.log('storage list called')
       try {
         let entries = []
         const feedHash = ctx.appSession.storage.feedHash
-        console.log(feedHash, 'feedHash - storage_list')
         if (feedHash) {
           let contentHash = ctx.storage.contentHash
-          console.log(contentHash, 'contentHash - storage_list')
           if (!contentHash) {
-            console.log('bzz.getFeedValue called')
             contentHash = await ctx.bzz.getFeedValue(feedHash, {}, { mode: 'content-hash' })
-            console.log(`contentHash is ${contentHash}`)
           }
           ctx.storage.contentHash = contentHash
-          console.log('bzz.list called')
           const list = await ctx.bzz.list(contentHash)
-          console.log(list, 'list')
           if (list) {
             entries = list.entries.map(meta => pick(meta, ['contentType', 'path']))
           }
@@ -299,7 +272,6 @@ export const sandboxed = {
       name: 'string'
     },
     handler: async(ctx: AppContext, params: { data: string, name: string }): Promise<?string> => {
-      console.log('storage_set called')
       try {
         const filePath = params.name
         let manifestHash

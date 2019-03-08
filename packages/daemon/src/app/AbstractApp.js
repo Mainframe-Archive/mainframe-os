@@ -74,10 +74,7 @@ export type AbstractAppParams = {
 export type AbstractAppSerialized = AbstractAppParams
 
 export const createAppStorage = (): AppStorage => {
-  const keyPair = createSignKeyPair()
-  console.log(keyPair, 'keyPair')
   const kp = createKeyPair()
-  console.log(kp, 'kp')
   return {
     feedHash: undefined,
     feedKey: kp.getPrivate('hex'),

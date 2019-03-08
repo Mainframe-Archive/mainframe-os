@@ -330,7 +330,6 @@ export const setFeedHash = {
     ctx: ClientContext,
     params: AppSetFeedHashParams,
   ): Promise<void> => {
-    console.log('setFeedHash in packages/daemon/src/rpc/methods/app.js')
     const session = ctx.openVault.getSession(fromClientID(params.sessID))
     if (session == null) {
       throw clientError('Invalid session')
@@ -340,7 +339,6 @@ export const setFeedHash = {
     if (app == null) {
       throw sessionError('Invalid app')
     }
-    console.log(params, 'params')
     app.setFeedHash(session.userID, params.feedHash)
     await ctx.openVault.save()
   },
