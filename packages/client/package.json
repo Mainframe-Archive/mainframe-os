@@ -14,7 +14,7 @@
     "test:types": "flow check"
   },
   "dependencies": {
-    "@mainframe/rpc-ipc": "^0.2.3",
+    "@mainframe/rpc-ipc": "^0.3.0",
     "graphql": "^14.1.1",
     "rxjs": "^6.3.3"
   },
