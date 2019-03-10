@@ -44,7 +44,7 @@
     "@mainframe/config": "^0.2.0",
     "@mainframe/data-types": "^0.2.0",
     "@mainframe/eth": "^0.2.1",
-    "@mainframe/rpc-error": "^0.3.0",
+    "@mainframe/rpc-error": "^0.4.0",
     "@mainframe/rpc-handler": "^0.2.1",
     "@mainframe/rpc-stream": "^0.2.4",
     "@mainframe/rpc-ws-node": "^0.2.3",
