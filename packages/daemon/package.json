@@ -48,7 +48,7 @@
     "@mainframe/rpc-handler": "^0.2.1",
     "@mainframe/rpc-stream": "^0.2.4",
     "@mainframe/rpc-ws-node": "^0.2.3",
-    "@mainframe/secure-file": "^0.1.3",
+    "@mainframe/secure-file": "^0.2.0",
     "@mainframe/utils-base64": "^0.1.0",
     "@mainframe/utils-crypto": "^0.3.0",
     "@mainframe/utils-hex": "^0.1.1",
