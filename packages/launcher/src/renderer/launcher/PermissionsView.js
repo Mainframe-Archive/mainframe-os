@@ -100,8 +100,7 @@ const Title = styled.View`
 
 const PermissionRow = styled.View`
   padding: 10px 0;
-  margin: 0 10px;
-  margin-bottom: 10px;
+  margin: 0 10px 10px 10px;
   flex-direction: row;
   justify-content: center;
   align-items: center;
@@ -119,7 +118,7 @@ const Domains = styled.View`
   padding-top: 5px;
 `
 const DomainRow = styled.View`
-  padding-top: 5px;
+  margin: 0 10px;
   flex-direction: row;
   padding: 7px 0;
 `
@@ -224,21 +223,21 @@ export default class PermissionsView extends Component<Props, State> {
     }
 
     const { permissionsSettings } = this.state
-    let options, hasOptions
+    let options, domainOptions
 
     if (key === 'WEB_REQUEST') {
       if (Array.isArray(value)) {
         if (!value.length) {
           return null
         }
-        options = (
+        options = null
+        domainOptions = (
           <Domains key={key}>
             {value.map(domain => (
               <DomainRow key={domain}>
-                <Text key={domain} variant="flex1">
+                <Text variant={['greyDark23', 'flex1']} size={12}>
                   {domain}
                 </Text>
-
                 {required
                   ? this.renderRequired()
                   : this.renderToggle(
@@ -254,27 +253,28 @@ export default class PermissionsView extends Component<Props, State> {
         // Bad data provided
         options = null
       }
-      hasOptions = true
     } else {
       options = required
         ? this.renderRequired()
         : // $FlowFixMe
           this.renderToggle(key, permissionsSettings[key])
-      hasOptions = false
     }
 
     return (
-      <PermissionRow first={first} option={hasOptions} key={key}>
-        <PermissionInfo>
-          <Text variant="greyDark23" bold size={12}>
-            {permissionData.name}
-          </Text>
-          <Text variant="greyDark23" size={11}>
-            {permissionData.description}
-          </Text>
-        </PermissionInfo>
-        {options}
-      </PermissionRow>
+      <>
+        <PermissionRow first={first} key={key}>
+          <PermissionInfo>
+            <Text variant="greyDark23" bold size={12}>
+              {permissionData.name}
+            </Text>
+            <Text variant="greyDark23" size={11}>
+              {permissionData.description}
+            </Text>
+          </PermissionInfo>
+          {options}
+        </PermissionRow>
+        {domainOptions}
+      </>
     )
   }
 
@@ -304,24 +304,27 @@ export default class PermissionsView extends Component<Props, State> {
 
     return required || optional ? (
       <ScrollView>
-        <Title>
-          <Text variant="greyDark23" bold size={14}>
-            Required Permissions
-          </Text>
-        </Title>
-        {required || (
-          <Text variant={['modalText', 'center']}>No required permission</Text>
-        )}
-        <Title>
-          <Text variant="greyDark23" bold size={14}>
-            Optional Permissions
-          </Text>
-        </Title>
-        {optional || (
-          <Text variant={['modalText', 'center']}>
-            No additional permission
-          </Text>
-        )}
+        {required ? (
+          <>
+            <Title>
+              <Text variant="greyDark23" bold size={14}>
+                Required Permissions
+              </Text>
+            </Title>
+            {required}
+          </>
+        ) : null}
+
+        {optional ? (
+          <>
+            <Title>
+              <Text variant="greyDark23" bold size={14}>
+                Optional Permissions
+              </Text>
+            </Title>
+            {optional}
+          </>
+        ) : null}
       </ScrollView>
     ) : (
       <Title>

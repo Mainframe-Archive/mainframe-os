@@ -601,7 +601,7 @@ class ContactsViewComponent extends Component<Props, State> {
                 </Column>
               </Row>
             )}
-            <Row size={1}>
+            {/* <Row size={1}>
               <Column styles="margin-top: 10px;">
                 <Button
                   onPress={this.openEditModal}
@@ -609,7 +609,7 @@ class ContactsViewComponent extends Component<Props, State> {
                   title="EDIT"
                 />
               </Column>
-            </Row>
+            </Row> */}
           </ScrollView>
         </RightContainer>
       )
