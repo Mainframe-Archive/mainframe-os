@@ -3,20 +3,21 @@
 import { createReadStream } from 'fs'
 import getStream from 'get-stream'
 import { pick } from 'lodash'
-import crypto from 'crypto'
 import {
   LOCAL_ID_SCHEMA,
   type BlockchainWeb3SendParams,
   type ContactsGetUserContactsResult,
   type WalletGetEthWalletsResult,
 } from '@mainframe/client'
-import { DecryptStream } from '@mainframe/utils-crypto'
 import { dialog } from 'electron'
 import type { Subscription as RxSubscription } from 'rxjs'
 import * as mime from 'mime'
+import {
+  createEncryptStream,
+  createDecryptStream,
+} from '@mainframe/utils-crypto'
 import { type AppContext, ContextSubscription } from '../contexts'
 import { withPermission } from '../permissions'
-import { createSecretStreamKey, createEncryptStream, createDecryptStream } from '@mainframe/utils-crypto'
 
 class CommsSubscription extends ContextSubscription<RxSubscription> {
   constructor() {
@@ -197,18 +198,27 @@ export const sandboxed = {
               try {
                 const filePath = filePaths[0]
                 let manifestHash
-                let { address, encryptionKey, feedHash } = ctx.storage
-                const stream = createReadStream(filePath)
-                  .pipe(createEncryptStream(ctx.storage.encryptionKey))
+                let feedHash = ctx.storage.feedHash
+                const { address, encryptionKey } = ctx.storage
+                const stream = createReadStream(filePath).pipe(
+                  createEncryptStream(encryptionKey),
+                )
 
                 if (feedHash) {
-                  const contentHash = await ctx.bzz.getFeedValue(feedHash, {}, { mode: 'content-hash' })
+                  const contentHash = await ctx.bzz.getFeedValue(
+                    feedHash,
+                    {},
+                    { mode: 'content-hash' },
+                  )
                   ctx.storage.contentHash = contentHash
                   manifestHash = contentHash
                 } else {
                   feedHash = await ctx.bzz.createFeedManifest(address)
-                  const manifest = {entries: []}
-                  const initialManifest = await ctx.bzz.uploadFile(JSON.stringify(manifest), {})
+                  const manifest = { entries: [] }
+                  const initialManifest = await ctx.bzz.uploadFile(
+                    JSON.stringify(manifest),
+                    {},
+                  )
                   manifestHash = initialManifest
                 }
 
@@ -216,15 +226,19 @@ export const sandboxed = {
                 const dataHash = await ctx.bzz.uploadFileStream(stream, {
                   contentType: mime.getType(filePath),
                   path: params.name,
-                  manifestHash: manifestHash
+                  manifestHash: manifestHash,
                 })
 
                 const feedMetadata = await ctx.bzz.getFeedMetadata(feedHash)
                 await ctx.bzz.postFeedValue(feedMetadata, `0x${dataHash}`)
                 ctx.storage.feedHash = feedHash
-                await ctx.client.app.setFeedHash({ sessID: ctx.appSession.session.sessID, feedHash: feedHash })
+                await ctx.client.app.setFeedHash({
+                  sessID: ctx.appSession.session.sessID,
+                  feedHash: feedHash,
+                })
                 resolve(params.name)
               } catch (error) {
+                // eslint-disable-next-line no-console
                 console.log(error, 'storage_promptUpload error')
                 // TODO: use RPCError to provide a custom error code
                 reject(new Error('Upload failed'))
@@ -239,25 +253,31 @@ export const sandboxed = {
     },
   },
 
-
   storage_list: {
-    handler: async(ctx: AppContext): Promise<Array<string>> => {
+    handler: async (ctx: AppContext): Promise<Array<string>> => {
       try {
         let entries = []
         const feedHash = ctx.appSession.storage.feedHash
         if (feedHash) {
           let contentHash = ctx.storage.contentHash
           if (!contentHash) {
-            contentHash = await ctx.bzz.getFeedValue(feedHash, {}, { mode: 'content-hash' })
+            contentHash = await ctx.bzz.getFeedValue(
+              feedHash,
+              {},
+              { mode: 'content-hash' },
+            )
           }
           ctx.storage.contentHash = contentHash
           const list = await ctx.bzz.list(contentHash)
           if (list) {
-            entries = list.entries.map(meta => pick(meta, ['contentType', 'path']))
+            entries = list.entries.map(meta =>
+              pick(meta, ['contentType', 'path']),
+            )
           }
         }
         return entries
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.log(error, 'storage_list error')
         // TODO: use RPCError to provide a custom error code
         new Error('Upload failed')
@@ -269,40 +289,54 @@ export const sandboxed = {
   storage_set: {
     params: {
       data: 'string',
-      name: 'string'
+      name: 'string',
     },
-    handler: async(ctx: AppContext, params: { data: string, name: string }): Promise<?string> => {
+    handler: async (
+      ctx: AppContext,
+      params: { data: string, name: string },
+    ): Promise<?string> => {
       try {
-        const filePath = params.name
         let manifestHash
-        let { address, encryptionKey, feedHash } = ctx.storage
+        let feedHash = ctx.storage.feedHash
+        const { address, encryptionKey } = ctx.storage
         const Readable = require('stream').Readable
         const dataStream = new Readable()
         dataStream.push(params.data)
         dataStream.push(null)
-        const stream = dataStream.pipe(createEncryptStream(ctx.storage.encryptionKey))
+        const stream = dataStream.pipe(createEncryptStream(encryptionKey))
 
         if (feedHash) {
-          const contentHash = await ctx.bzz.getFeedValue(feedHash, {}, { mode: 'content-hash' })
+          const contentHash = await ctx.bzz.getFeedValue(
+            feedHash,
+            {},
+            { mode: 'content-hash' },
+          )
           ctx.storage.contentHash = contentHash
           manifestHash = contentHash
         } else {
           feedHash = await ctx.bzz.createFeedManifest(address)
-          const manifest = {entries: []}
-          const initialManifest = await ctx.bzz.uploadFile(JSON.stringify(manifest), {})
+          const manifest = { entries: [] }
+          const initialManifest = await ctx.bzz.uploadFile(
+            JSON.stringify(manifest),
+            {},
+          )
           manifestHash = initialManifest
         }
         const dataHash = await ctx.bzz.uploadFileStream(stream, {
           contentType: 'text/plain',
           path: params.name,
-          manifestHash: manifestHash
+          manifestHash: manifestHash,
         })
         const feedMetadata = await ctx.bzz.getFeedMetadata(feedHash)
         await ctx.bzz.postFeedValue(feedMetadata, `0x${dataHash}`)
         ctx.storage.feedHash = feedHash
-        await ctx.client.app.setFeedHash({ sessID: ctx.appSession.session.sessID, feedHash: feedHash })
+        await ctx.client.app.setFeedHash({
+          sessID: ctx.appSession.session.sessID,
+          feedHash: feedHash,
+        })
         return params.name
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.log(error, 'storage_set error')
         // TODO: use RPCError to provide a custom error code
       }
@@ -311,22 +345,26 @@ export const sandboxed = {
 
   storage_get: {
     params: {
-      name: 'string'
+      name: 'string',
     },
-    handler: async(ctx: AppContext, params: { name: string }): Promise<?string> => {
+    handler: async (
+      ctx: AppContext,
+      params: { name: string },
+    ): Promise<?string> => {
       try {
         const filePath = params.name
-        let { encryptionKey, feedHash } = ctx.storage
-        const res = await ctx.bzz.download(`${ctx.storage.feedHash}/${filePath}`)
-        const stream = res.body.pipe(createDecryptStream(ctx.storage.encryptionKey))
+        const { encryptionKey, feedHash } = ctx.storage
+        const res = await ctx.bzz.download(`${feedHash}/${filePath}`)
+        const stream = res.body.pipe(createDecryptStream(encryptionKey))
         const data = await getStream(stream)
         return data
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.log(error, 'storage_get error')
         // TODO: use RPCError to provide a custom error code
       }
     },
-  }
+  },
 }
 
 export const trusted = {

@@ -10,7 +10,7 @@ import {
   type StrictPermissionsGrants,
 } from '@mainframe/app-permissions'
 import { encodeBase64, type base64 } from '@mainframe/utils-base64'
-import { createSignKeyPair, createSecretStreamKey, secureRandomBytes } from '@mainframe/utils-crypto'
+import { createSecretStreamKey } from '@mainframe/utils-crypto'
 // eslint-disable-next-line import/named
 import type {
   AppUserPermissionsSettings,

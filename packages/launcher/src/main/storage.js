@@ -32,6 +32,7 @@ export const registerStreamProtocol = (context: AppContext) => {
       }
     },
     error => {
+      // eslint-disable-next-line no-console
       if (error) console.error('Failed to register protocol')
     },
   )
