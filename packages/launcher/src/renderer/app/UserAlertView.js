@@ -10,6 +10,7 @@ import { Text, Button, Checkbox } from '@morpheus-ui/core'
 
 import type { Subscription } from 'rxjs'
 import type { WalletSignTxParams } from '@mainframe/client'
+import { type EthClient } from '@mainframe/eth'
 
 import ContactsIcon from '@morpheus-ui/icons/ContactsMd'
 
@@ -58,6 +59,7 @@ type PermissionDeniedNotif = {
 
 type Props = {
   appSession: AppSessionData,
+  ethClient: EthClient,
 }
 
 type PendingRequest = {
@@ -331,6 +333,7 @@ export default class UserAlertView extends Component<Props, State> {
       ) : (
         <WalletTxRequestView
           transaction={params.BLOCKCHAIN_SEND.transactionData}
+          ethClient={this.props.ethClient}
         />
       )
     return (

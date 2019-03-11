@@ -25,16 +25,16 @@ type Props = {
   permissionRequirements?: StrictPermissionsRequirements,
 }
 
+type PermissionSettings = {
+  WEB_REQUEST: { [host: string]: PermissionRequirement },
+  [PermissionKeyBasic]: PermissionRequirement,
+}
+
 type State = {
   isHovering?: boolean,
   hostInput: string,
   errorMsg?: ?string,
-  permissionSettings: {
-    WEB_REQUEST: {
-      [string]: PermissionRequirement,
-    },
-    [PermissionKeyBasic]: PermissionRequirement,
-  },
+  permissionSettings: PermissionSettings,
 }
 
 export const PERMISSIONS_DESCRIPTIONS = {
@@ -100,28 +100,31 @@ export default class PermissionsRequirementsView extends Component<
 > {
   constructor(props: Props) {
     super(props)
-    const permissionSettings = {
+    const permissionSettings: PermissionSettings = {
       WEB_REQUEST: {},
     }
     const requirements = props.permissionRequirements
     if (requirements) {
-      Object.keys(requirements).forEach(requirement => {
-        Object.keys(requirements[requirement]).forEach(key => {
-          if (
-            key === 'WEB_REQUEST' &&
-            Array.isArray(requirements[requirement][key])
-          ) {
-            requirements[requirement][key].forEach(host => {
-              permissionSettings[key][host] = requirement
-            })
-          } else {
-            if (requirements[requirement][key]) {
-              // @$FlowFixMe missing keys
-              permissionSettings[key] = requirement
-            }
-          }
-        })
-      })
+      Object.keys(requirements).forEach(
+        (requirement: PermissionRequirement) => {
+          Object.keys(requirements[requirement]).forEach(
+            (key: PermissionKey) => {
+              if (
+                key === 'WEB_REQUEST' &&
+                Array.isArray(requirements[requirement].WEB_REQUEST)
+              ) {
+                requirements[requirement].WEB_REQUEST.forEach(host => {
+                  permissionSettings.WEB_REQUEST[host] = requirement
+                })
+              } else if (key !== 'WEB_REQUEST') {
+                if (requirements[requirement][key]) {
+                  permissionSettings[key] = requirement
+                }
+              }
+            },
+          )
+        },
+      )
     }
     this.state = {
       hostInput: '',
@@ -183,14 +186,10 @@ export default class PermissionsRequirementsView extends Component<
     this.setState(({ permissionSettings }) => {
       if (key === 'WEB_REQUEST' && host) {
         permissionSettings.WEB_REQUEST[host] = newState
-
-        return { permissionSettings }
-      } else {
-        // @$FlowFixMe non web request
+      } else if (key !== 'WEB_REQUEST') {
         permissionSettings[key] = newState
-
-        return { permissionSettings }
       }
+      return { permissionSettings }
     })
   }
 

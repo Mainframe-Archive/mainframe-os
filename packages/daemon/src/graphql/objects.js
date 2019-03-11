@@ -25,7 +25,7 @@ import type ClientContext from '../context/ClientContext'
 import LedgerWallet from '../wallet/LedgerWallet'
 import HDWallet from '../wallet/HDWallet'
 
-export const { nodeInterface, nodeField } = nodeDefinitions(
+export const { nodeInterface, nodeField } = nodeDefinitions<ClientContext>(
   (globalId: string, ctx: ClientContext) => {
     if (globalId === 'viewer') {
       return {}

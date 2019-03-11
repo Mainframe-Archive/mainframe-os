@@ -1,3 +1,5 @@
+import '@babel/polyfill'
+
 import methods from '../lib/rpc/methods'
 
 describe('RPC methods', () => {
