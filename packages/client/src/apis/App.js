@@ -24,7 +24,6 @@ import type {
   AppSetUserDefaultWalletParams,
   AppSetUserPermissionsSettingsParams,
   AppSetFeedHashParams,
-  AppWriteManifestParams,
 } from '../types'
 
 export default class AppAPIs extends ClientAPIs {
@@ -90,10 +89,6 @@ export default class AppAPIs extends ClientAPIs {
 
   setFeedHash(params: AppSetFeedHashParams): Promise<void> {
     return this._rpc.request('app_setFeedHash', params)
-  }
-
-  writeManifest(params: AppWriteManifestParams): Promise<void> {
-    return this._rpc.request('app_writeManifest', params)
   }
 
   setUserDefaultWallet(params: AppSetUserDefaultWalletParams): Promise<void> {

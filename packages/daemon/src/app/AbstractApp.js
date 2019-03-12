@@ -9,12 +9,13 @@ import {
   type PermissionsGrants,
   type StrictPermissionsGrants,
 } from '@mainframe/app-permissions'
-import { encodeBase64, type base64 } from '@mainframe/utils-base64'
+import { encodeBase64 } from '@mainframe/utils-base64'
 import { createSecretStreamKey } from '@mainframe/utils-crypto'
 // eslint-disable-next-line import/named
 import type {
   AppUserPermissionsSettings,
   AppUserSettings,
+  StorageSettings,
 } from '@mainframe/client'
 import { idType, type ID, uniqueID } from '@mainframe/utils-id'
 
@@ -36,12 +37,6 @@ const DEFAULT_SETTINGS = {
   approvedContacts: {},
 }
 
-export type AppStorage = {
-  feedHash: ?string,
-  feedKey: string, // hex
-  encryptionKey: base64,
-}
-
 export type WalletSettings = {
   defaultEthAccount: ?string,
 }
@@ -51,7 +46,7 @@ export type SessionData = {
   session: Session,
   permissions: PermissionsDetails,
   isDev?: ?boolean,
-  storage: AppStorage,
+  storage: StorageSettings,
 }
 
 export type ContactToApprove = {
@@ -68,12 +63,12 @@ export type ApprovedContact = {
 export type AbstractAppParams = {
   appID: ID,
   settings?: { [ID]: AppUserSettings },
-  storage?: AppStorage,
+  storage?: StorageSettings,
 }
 
 export type AbstractAppSerialized = AbstractAppParams
 
-export const createAppStorage = (): AppStorage => {
+export const createAppStorage = (): StorageSettings => {
   const kp = createKeyPair()
   return {
     feedHash: undefined,
@@ -117,7 +112,7 @@ export default class AbstractApp {
   // Settings
 
   getDefaultSettings(): AppUserSettings {
-    return { ...DEFAULT_SETTINGS, storage: createAppStorage() }
+    return { ...DEFAULT_SETTINGS, storageSettings: createAppStorage() }
   }
 
   getSettings(userID: ID | string): AppUserSettings {
@@ -189,7 +184,7 @@ export default class AbstractApp {
 
   setFeedHash(userID: ID, feedHash: string): void {
     const settings = this.getSettings(userID)
-    settings.storage.feedHash = feedHash
+    settings.storageSettings.feedHash = feedHash
     this._settings[userID] = settings
   }
 

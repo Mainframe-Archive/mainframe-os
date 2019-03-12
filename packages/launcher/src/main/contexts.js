@@ -2,9 +2,12 @@
 
 import { createKeyPair, sign } from '@erebos/secp256k1'
 import { pubKeyToAddress } from '@erebos/keccak256'
-import type { SignFeedDigestFunc } from '@erebos/api-bzz-base'
 import BzzAPI from '@erebos/api-bzz-node'
-import type Client, { AppOpenResult, VaultSettings } from '@mainframe/client'
+import type Client, {
+  AppOpenResult,
+  VaultSettings,
+  ContextStorageSettings,
+} from '@mainframe/client'
 import type { VaultConfig } from '@mainframe/config'
 import type StreamRPC from '@mainframe/rpc-stream'
 import { decodeBase64 } from '@mainframe/utils-base64'
@@ -89,14 +92,6 @@ export type AppContextParams = {
   window: BrowserWindow,
 }
 
-type AppStorageSettings = {
-  address: string,
-  encryptionKey: Buffer,
-  feedHash: ?string,
-  signFeedDigest: SignFeedDigestFunc,
-  manifestHash?: string,
-}
-
 export class AppContext extends Context {
   appSession: AppSession
   sandbox: ?WebContents
@@ -105,7 +100,7 @@ export class AppContext extends Context {
   window: BrowserWindow
   _bzz: ?BzzAPI
   _permissionDeniedID: ?string
-  _storage: ?AppStorageSettings
+  _storage: ?ContextStorageSettings
 
   constructor(params: AppContextParams) {
     super()
@@ -126,11 +121,12 @@ export class AppContext extends Context {
     return this._bzz
   }
 
-  get storage(): AppStorageSettings {
+  get storage(): ContextStorageSettings {
     if (this._storage == null) {
       const keyPair = createKeyPair(this.appSession.storage.feedKey, 'hex')
       const privKey = keyPair.getPrivate()
       this._storage = {
+        contentHash: null,
         address: pubKeyToAddress(keyPair.getPublic().encode()),
         encryptionKey: decodeBase64(this.appSession.storage.encryptionKey),
         feedHash: this.appSession.storage.feedHash,

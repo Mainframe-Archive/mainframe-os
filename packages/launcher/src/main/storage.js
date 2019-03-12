@@ -5,6 +5,9 @@ import { createDecryptStream } from '@mainframe/utils-crypto'
 import type { AppContext } from './contexts'
 
 export const registerStreamProtocol = (context: AppContext) => {
+  if (!context.sandbox) {
+    throw new Error('context.sandbox does not exist')
+  }
   context.sandbox.session.protocol.registerStreamProtocol(
     'app-file',
     async (request, callback) => {
@@ -17,6 +20,9 @@ export const registerStreamProtocol = (context: AppContext) => {
         })
       } else {
         const contentType = mime.getType(filePath)
+        if (!context.storage.feedHash) {
+          throw new Error('feedHash not found')
+        }
         const res = await context.bzz.download(
           `${context.storage.feedHash}/${filePath}`,
         )

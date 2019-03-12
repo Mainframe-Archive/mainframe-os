@@ -1,5 +1,6 @@
 // @flow
 
+import type { SignFeedDigestFunc } from '@erebos/api-bzz-base'
 import type { ManifestData, PartialManifestData } from '@mainframe/app-manifest'
 import type {
   PermissionCheckResult,
@@ -71,12 +72,28 @@ export type AppUserWalletSettings = {
   defaultEthAccount: ?string,
 }
 
+export type ContextStorageSettings = {
+  address: string,
+  encryptionKey: Buffer,
+  contentHash: ?string,
+  feedHash: ?string,
+  signFeedDigest: SignFeedDigestFunc,
+  manifestHash?: string,
+}
+
+export type StorageSettings = {
+  feedHash: ?string,
+  feedKey: string, // hex
+  encryptionKey: base64,
+}
+
 export type AppUserSettings = {
   approvedContacts: {
     [id: string]: ApprovedContact,
   },
   permissionsSettings: AppUserPermissionsSettings,
   walletSettings: AppUserWalletSettings,
+  storageSettings: StorageSettings,
 }
 
 export type AppUser = IdentityOwnData & {
@@ -166,7 +183,6 @@ export type AppStorage = {
 export type AppSession = {
   sessID: ID,
   permissions: PermissionsDetails,
-  storage: AppStorage,
 }
 
 export type AppOpenResult = {
@@ -175,6 +191,7 @@ export type AppOpenResult = {
   user: IdentityOwnData,
   isDev?: ?boolean,
   defaultEthAccount: ?string,
+  storage: AppStorage,
 }
 
 export type AppPublishParams = {
@@ -214,13 +231,7 @@ export type AppSetPermissionsRequirementsParams = {
 
 export type AppSetFeedHashParams = {
   sessID: ID,
-  feedHash: feedHash,
-}
-
-export type AppWriteManifestParams = {
-  appID: ID,
-  path: string,
-  version?: ?string,
+  feedHash: string,
 }
 
 // Blockchain

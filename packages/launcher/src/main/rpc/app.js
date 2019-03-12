@@ -223,8 +223,12 @@ export const sandboxed = {
                 }
 
                 // TODO: paralelize getting feed metadata and uploading files
+                const contentType = mime.getType(filePath)
+                if (!contentType) {
+                  throw new Error('mime type not found')
+                }
                 const dataHash = await ctx.bzz.uploadFileStream(stream, {
-                  contentType: mime.getType(filePath),
+                  contentType: contentType,
                   path: params.name,
                   manifestHash: manifestHash,
                 })
@@ -269,7 +273,7 @@ export const sandboxed = {
           }
           ctx.storage.contentHash = contentHash
           const list = await ctx.bzz.list(contentHash)
-          if (list) {
+          if (list.entries) {
             entries = list.entries.map(meta =>
               pick(meta, ['contentType', 'path']),
             )
@@ -280,9 +284,9 @@ export const sandboxed = {
         // eslint-disable-next-line no-console
         console.log(error, 'storage_list error')
         // TODO: use RPCError to provide a custom error code
-        new Error('Upload failed')
+        new Error('List failed')
       }
-      return {}
+      return []
     },
   },
 
@@ -354,6 +358,9 @@ export const sandboxed = {
       try {
         const filePath = params.name
         const { encryptionKey, feedHash } = ctx.storage
+        if (!feedHash) {
+          throw new Error('feedHash not found')
+        }
         const res = await ctx.bzz.download(`${feedHash}/${filePath}`)
         const stream = res.body.pipe(createDecryptStream(encryptionKey))
         const data = await getStream(stream)

@@ -145,10 +145,10 @@ const launchApp = async (
 
   appWindow.on('closed', async () => {
     await client.app.close({ sessID: appSession.session.sessID })
-    const ctx = appContexts.get(appWindow)
+    const ctx = contextsByWindow.get(appWindow)
     if (ctx != null) {
       await ctx.clear()
-      appContexts.delete(appWindow)
+      contextsByWindow.delete(appWindow)
     }
     delete appContexts[appID][userID]
   })

@@ -39,8 +39,6 @@ import {
   type AppSetUserPermissionsSettingsParams,
   APP_SET_FEED_HASH_SCHEMA,
   type AppSetFeedHashParams,
-  APP_WRITE_MANIFEST_SCHEMA,
-  type AppWriteManifestParams,
 } from '@mainframe/client'
 import { idType as fromClientID, type ID } from '@mainframe/utils-id'
 
@@ -341,19 +339,5 @@ export const setFeedHash = {
     }
     app.setFeedHash(session.userID, params.feedHash)
     await ctx.openVault.save()
-  },
-}
-
-export const writeManifest = {
-  params: APP_WRITE_MANIFEST_SCHEMA,
-  handler: async (
-    ctx: ClientContext,
-    params: AppWriteManifestParams,
-  ): Promise<void> => {
-    await ctx.openVault.writeAppManifest(
-      fromClientID(params.appID),
-      params.path,
-      params.version,
-    )
   },
 }
