@@ -540,6 +540,7 @@ export default class IdentitiesRepository {
     return {
       name: contact.name || peerProfile.name || truncateString(peer.publicFeed),
       avatar: contact.profile.avatar || peerProfile.avatar,
+      ethAddress: contact.profile.ethAddress || peerProfile.ethAddress,
     }
   }
 

@@ -129,7 +129,7 @@ export default class OnboardIdentityView extends Component<Props, State> {
         id
         step={2}
         title="Identity"
-        description="Create your first identity">
+        description="Create your Mainframe identity">
         <FormContainer>
           <Form onSubmit={this.onSubmit}>
             <Row size={1} top>
@@ -144,8 +144,8 @@ export default class OnboardIdentityView extends Component<Props, State> {
               </Column>
               <Column>
                 <Switch
-                  defaultValue={true}
-                  label="Make my name discoverable"
+                  defaultValue={false}
+                  label="Make my name and ETH address discoverable to other users"
                   name="discoverable"
                   onChange={this.onTogglePrivate}
                 />

@@ -17,7 +17,14 @@ export const start = async (envName: string): Promise<void> => {
     server = new ServerHandler(env)
     servers[envName] = server
   }
-  await server.start()
+  try {
+    await server.start()
+    // eslint-disable-next-line no-console
+    console.log(`${envName} server started`)
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error(`${envName} server failed to start:`, err.message)
+  }
 }
 
 export const stop = async (envName: string): Promise<void> => {

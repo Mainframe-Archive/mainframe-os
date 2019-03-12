@@ -57,8 +57,8 @@ export default class EthAPIs extends ClientAPIs {
     subsProvider.on('data', (err, notif) => {
       engine.emit('data', err, notif)
     })
-    this._ethClient.on('accountsChange', value => {
-      this.emit('accountsChange', value)
+    this._ethClient.on('accountsChanged', value => {
+      this.emit('accountsChanged', value)
     })
     this._ethClient.on('networkChanged', value => {
       this.emit('networkChanged', value)

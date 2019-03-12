@@ -1,10 +1,14 @@
 {
   "name": "@mainframe/eth",
   "description": "Mainframe Ethereum API and utilities",
-  "version": "0.1.0",
+  "version": "0.2.1",
   "author": "Mainframe",
   "license": "MIT",
   "main": "cjs/index.js",
+  "files": [
+    "cjs/*",
+    "dist/*"
+  ],
   "scripts": {
     "clean": "del-cli cjs dist",
     "webpack": "webpack",

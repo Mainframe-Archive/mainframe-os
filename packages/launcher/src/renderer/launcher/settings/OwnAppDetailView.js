@@ -6,6 +6,7 @@ import styled from 'styled-components/native'
 import { Text, Button } from '@morpheus-ui/core'
 import { graphql, createFragmentContainer, commitMutation } from 'react-relay'
 import type { StrictPermissionsRequirements } from '@mainframe/app-permissions'
+import { shell } from 'electron'
 
 import colors from '../../colors'
 import rpc from '../rpc'
@@ -241,7 +242,9 @@ class OwnAppDetailView extends Component<Props, State> {
     })
   }
 
-  onPressSubmitFoReview = () => {}
+  onPressSubmitFoReview = () => {
+    shell.openExternal('https://docs.mainframe.com/docs/mft')
+  }
 
   onPressEdit = () => {
     this.setState({

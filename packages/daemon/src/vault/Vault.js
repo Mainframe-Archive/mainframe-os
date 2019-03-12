@@ -172,8 +172,8 @@ export default class Vault {
       apps: new AppsRepository(),
       identities: new IdentitiesRepository(),
       settings: {
-        bzzURL: 'http://swarm-gateways.net',
-        pssURL: 'ws://localhost:8546',
+        bzzURL: 'http://mainframe-gateways.net:8500',
+        pssURL: 'ws://mainframe-gateways.net:8546',
         ethURL: INFURA_URLS.ropsten,
       },
       identityWallets: new IdentityWallets(),
