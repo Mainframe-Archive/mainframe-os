@@ -2,7 +2,7 @@
 
 import React, { Component } from 'react'
 import { graphql, commitMutation } from 'react-relay'
-import { Button, TextField, Row, Column, Text, Switch } from '@morpheus-ui/core'
+import { Button, TextField, Row, Column, Text } from '@morpheus-ui/core'
 import CircleArrowRight from '@morpheus-ui/icons/CircleArrowRight'
 import { Form, type FormSubmitPayload } from '@morpheus-ui/forms'
 import styled from 'styled-components/native'
@@ -18,7 +18,6 @@ type Props = {
 type State = {
   error?: ?string,
   awaitingResponse?: boolean,
-  discoverable?: ?boolean,
 }
 
 const FormContainer = styled.View`
@@ -51,10 +50,7 @@ export const createUserMutation = graphql`
 
 export default class OnboardIdentityView extends Component<Props, State> {
   static contextType = EnvironmentContext
-
-  state = {
-    discoverable: true,
-  }
+  state = {}
 
   onSubmit = (payload: FormSubmitPayload) => {
     const { valid, fields } = payload
@@ -68,18 +64,12 @@ export default class OnboardIdentityView extends Component<Props, State> {
     }
   }
 
-  onTogglePrivate = (value: boolean) => {
-    this.setState({
-      discoverable: value,
-    })
-  }
-
   async createIdentity(name: string) {
     const input = {
       profile: {
         name,
       },
-      private: !this.state.discoverable,
+      private: true,
     }
     commitMutation(this.context, {
       mutation: createUserMutation,
@@ -121,6 +111,7 @@ export default class OnboardIdentityView extends Component<Props, State> {
         Icon={CircleArrowRight}
         title="CONTINUE"
         testID="onboard-create-identity-button"
+        invalidFormDisabled
         submit
       />
     )
@@ -140,14 +131,6 @@ export default class OnboardIdentityView extends Component<Props, State> {
                   name="name"
                   required
                   testID="onboard-create-identity-input-name"
-                />
-              </Column>
-              <Column>
-                <Switch
-                  defaultValue={false}
-                  label="Make my name and ETH address discoverable to other users"
-                  name="discoverable"
-                  onChange={this.onTogglePrivate}
                 />
               </Column>
             </Row>

@@ -1,0 +1,17 @@
+
+<svg width="14px" height="14px" viewBox="0 0 14 14" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <defs>
+        <path d="M6.5,0.5 L6.5,6.5 L0.5,6.5 C0.225,6.5 0,6.724 0,7 L0,7 C0,7.276 0.225,7.5 0.5,7.5 L0.5,7.5 L6.5,7.5 L6.5,13.5 C6.5,13.775 6.724,14 7,14 L7,14 C7.276,14 7.5,13.775 7.5,13.5 L7.5,13.5 L7.5,7.5 L13.5,7.5 C13.776,7.5 14,7.276 14,7 L14,7 C14,6.724 13.776,6.5 13.5,6.5 L13.5,6.5 L7.5,6.5 L7.5,0.5 C7.5,0.224 7.276,0 7,0 L7,0 C6.724,0 6.5,0.224 6.5,0.5 L6.5,0.5 Z" id="path-1"></path>
+    </defs>
+    <g id="Symbols" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Button/Install/off" transform="translate(-29.000000, -29.000000)">
+            <g id="Group-3" transform="translate(29.000000, 29.000000)">
+                <mask id="mask-2" fill="white">
+                    <use xlink:href="#path-1"></use>
+                </mask>
+                <g id="Clip-2"></g>
+                <polygon id="Fill-1" fill="#D3D3D3" mask="url(#mask-2)" points="-5 19 19 19 19 -5 -5 -5"></polygon>
+            </g>
+        </g>
+    </g>
+</svg>

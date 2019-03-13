@@ -71,6 +71,7 @@ export default class FormModalView extends Component<Props> {
                       onPress={this.props.onPressConfirm}
                       submit={!!this.props.onSubmitForm}
                       testID={this.props.confirmTestID}
+                      invalidFormDisabled
                     />
                   )}
               </Column>

@@ -29,6 +29,7 @@ const Container = styled.View`
   width: ${props => props.iconSize}px;
   height: ${props => props.iconSize}px;
   background-color: #000;
+  z-index: 2;
 `
 
 export default class AppIcon extends Component<Props, State> {

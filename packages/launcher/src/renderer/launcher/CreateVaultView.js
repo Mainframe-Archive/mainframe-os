@@ -25,6 +25,7 @@ type Props = {
 type State = {
   error?: ?string,
   awaitingResponse?: boolean,
+  validPass?: boolean,
 }
 
 const FormContainer = styled.View`
@@ -92,6 +93,7 @@ export default class CreateVaultView extends Component<Props, State> {
         variant="onboarding"
         Icon={CircleArrowRight}
         testID="create-vault-button-submit"
+        invalidFormDisabled
         submit
       />
     )
@@ -99,7 +101,7 @@ export default class CreateVaultView extends Component<Props, State> {
       <OnboardContainer
         step={1}
         title="Welcome"
-        description="Let’s quickly secure your MainframeOS vault.">
+        description="Let’s quickly secure your data.">
         <FormContainer>
           <Form onSubmit={this.onSubmit}>
             <Row size={1} top>
@@ -119,6 +121,7 @@ export default class CreateVaultView extends Component<Props, State> {
                   label="Confirm Password"
                   name="confirmPassword"
                   type="password"
+                  renderIfValid="password"
                   testID="create-vault-input-confirm-password"
                   validation={confirmPasswordValidation}
                 />

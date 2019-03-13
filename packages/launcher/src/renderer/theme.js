@@ -62,10 +62,12 @@ export default {
     default: {
       backgroundColor: 'transparent',
       backgroundHoverColor: 'transparent',
-      backgroundDisabledColor: 'transparent',
       iconBackgroundColor: 'transparent',
       iconHoverBackgroundColor: 'transparent',
       iconHoverColor: COLORS.PRIMARY_RED,
+      titleDisabledColor: '#FFF',
+      iconDisabledColor: '#F8CFDD',
+      backgroundDisabledColor: '#F8CFDD',
     },
     appHeader: {
       backgroundColor: COLORS.GREY_DARK_3C,
@@ -83,7 +85,10 @@ export default {
       iconColor: COLORS.PRIMARY_RED,
       iconHoverColor: COLORS.PRIMARY_DARK_RED,
       borderWidth: 0,
-      iconPadding: 0,
+      iconPadding: '3px',
+      letterSpacing: '1.1px',
+      backgroundDisabledColor: 'transparent',
+      titleDisabledColor: '#F8CFDD',
     },
     leftNav: {
       iconPosition: 'top',
@@ -100,7 +105,6 @@ export default {
       titlePadding: 0,
     },
     leftNavActive: {
-      fontWeight: 'bold',
       titleColor: COLORS.PRIMARY_BLUE,
       iconColor: COLORS.PRIMARY_BLUE,
       titleHoverColor: COLORS.PRIMARY_BLUE,
@@ -153,6 +157,12 @@ export default {
       iconPadding: '5px',
       fontSize: 9,
       borderRadius: 3,
+    },
+    suggestedInstall: {
+      backgroundHoverColor: COLORS.PRIMARY_RED,
+      titleHoverColor: 'white',
+      titlePadding: '3px 10px',
+      margin: '10px 0 0 0',
     },
     red: {
       borderWidth: 0,
@@ -230,6 +240,13 @@ export default {
       paddingBottom: 10,
       color: COLORS.PRIMARY_RED,
     },
+    appsTitle: {
+      textTransform: 'uppercase',
+      color: COLORS.GREY_A9,
+      fontSize: 10,
+      letterSpacing: '1.5px',
+      padding: '20px 0 10px 5px',
+    },
     smallTitle: {
       textTransform: 'uppercase',
       color: COLORS.GREY_A9,
@@ -249,6 +266,16 @@ export default {
       color: COLORS.LIGHT_GREY_C0,
       fontSize: 10,
       letterSpacing: '1.5px',
+    },
+    suggestedAppButtonName: {
+      fontSize: '12px',
+      color: '#303030',
+      fontWeight: 'bold',
+    },
+    suggestedAppButtonId: {
+      fontSize: '10px',
+      color: '#808080',
+      width: '72px',
     },
     appButtonName: {
       fontSize: '12px',
@@ -301,6 +328,7 @@ export default {
       textOverflow: 'ellipsis',
     },
     addressLarge: {
+      fontFamily: 'IBM Plex Mono',
       backgroundColor: '#F9F9F9',
       padding: '30px 20px',
       textAlign: 'center',

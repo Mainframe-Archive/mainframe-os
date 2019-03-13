@@ -27,7 +27,7 @@ type Props = {
 type State = {
   contacts: Array<Contact>,
   selectedContacts: Set<string>,
-  hover?: ?string,
+  hover: ?string,
 }
 
 const Container = styled.View`
@@ -41,7 +41,6 @@ const ContactRow = styled.View`
   border-color: ${colors.GREY_DARK_48};
   border-bottom-width: 1px;
 
-  ${props => props.selected && `background-color: ${colors.GREY_DARK_48};`}
   ${props => props.last && 'border-bottom-width: 0;'}
   flex-direction: row;
   align-items: center;
@@ -70,6 +69,7 @@ export default class ContactPickerView extends Component<Props, State> {
   state = {
     contacts: [],
     selectedContacts: new Set(),
+    hover: null,
   }
 
   componentDidMount() {
@@ -130,13 +130,14 @@ export default class ContactPickerView extends Component<Props, State> {
         return content
       }
 
-      const setFocus = () => this.setHover(c.localID)
-
+      const setHover = () => this.setHover(c.localID)
       return (
         <TouchableOpacity
           hover={this.state.hover === c.localID}
-          onFocus={setFocus}
+          onFocus={setHover}
           onBlur={this.releaseHover}
+          onMouseOver={setHover}
+          onMouseOut={this.releaseHover}
           key={c.localID}
           onPress={onPress}>
           {content}

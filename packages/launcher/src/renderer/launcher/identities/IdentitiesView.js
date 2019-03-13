@@ -79,8 +79,11 @@ class IdentitiesView extends Component<Props, State> {
         <Profile>
           <Text variant="bold">{user.profile.name}</Text>
           {user.feedHash ? (
-            <Text theme={{ color: '#585858', fontSize: '11px' }}>
-              Contact ID: {user.feedHash}
+            <Text color="#585858" size={11}>
+              Contact ID:{' '}
+              <Text variant="mono" color="#585858" size={11}>
+                {user.feedHash}
+              </Text>
             </Text>
           ) : null}
         </Profile>

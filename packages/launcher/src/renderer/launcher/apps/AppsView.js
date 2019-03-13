@@ -9,9 +9,9 @@ import {
 import type { AppInstalledData } from '@mainframe/client'
 import styled from 'styled-components/native'
 import { Text } from '@morpheus-ui/core'
-import PlusIcon from '@morpheus-ui/icons/PlusSymbolCircled'
 import { findIndex } from 'lodash'
 import memoize from 'memoize-one'
+import PlusIcon from '../../UIComponents/Icons/PlusIcon'
 
 import rpc from '../rpc'
 import PermissionsView from '../PermissionsView'
@@ -20,7 +20,8 @@ import applyContext, { type CurrentUser } from '../LauncherContext'
 import CompleteOnboardSession from './CompleteOnboardSession'
 
 import AppInstallModal from './AppInstallModal'
-import { InstalledAppItem, SuggestedAppItem } from './AppItem'
+import { InstalledAppItem } from './AppItem'
+import SuggestedAppItem from './SuggestedItem'
 
 const SUGGESTED_APPS_URL =
   'https://s3-us-west-2.amazonaws.com/suggested-apps/suggested-apps.json'
@@ -35,12 +36,11 @@ export const AppsGrid = styled.View`
 `
 
 const AppInstallContainer = styled.TouchableOpacity`
-  padding: 15px 10px;
+  padding: 20px;
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
   width: 110px;
-  height: 150px;
 `
 
 const InstallIcon = styled.View`
@@ -56,30 +56,53 @@ const InstallIcon = styled.View`
 
 const ScrollView = styled.ScrollView``
 
-export const NewAppButton = (props: {
+type NewAppProps = {
   title: string,
   onPress: () => void,
   testID: string,
-}) => {
-  return (
-    <AppInstallContainer onPress={props.onPress} testID={props.testID}>
-      <InstallIcon>
-        <PlusIcon color="#808080" />
-      </InstallIcon>
-      <Text
-        theme={{
-          width: '72px',
-          fontSize: '11px',
-          padding: '5px 0',
-          color: '#808080',
-          border: '1px solid #a9a9a9',
-          borderRadius: '3px',
-          textAlign: 'center',
-        }}>
-        {props.title}
-      </Text>
-    </AppInstallContainer>
-  )
+}
+
+type NewAppState = {
+  hover: boolean,
+}
+
+export class NewAppButton extends Component<NewAppProps, NewAppState> {
+  state = {
+    hover: false,
+  }
+
+  toggleHover = () => {
+    this.setState({ hover: !this.state.hover })
+  }
+
+  render() {
+    return (
+      <AppInstallContainer
+        onPress={this.props.onPress}
+        testID={this.props.testID}
+        onMouseOver={this.toggleHover}
+        onMouseOut={this.toggleHover}>
+        <InstallIcon hover={this.state.hover}>
+          <PlusIcon color={this.state.hover ? '#DA1157' : '#808080'} />
+        </InstallIcon>
+        <Text
+          className="transition"
+          theme={{
+            width: '72px',
+            fontSize: '11px',
+            padding: '5px 0',
+            color: this.state.hover ? '#DA1157' : '#808080',
+            border: this.state.hover
+              ? '1px solid #DA1157'
+              : '1px solid #a9a9a9',
+            borderRadius: '3px',
+            textAlign: 'center',
+          }}>
+          {this.props.title}
+        </Text>
+      </AppInstallContainer>
+    )
+  }
 }
 
 type AppData = AppInstalledData
@@ -155,6 +178,12 @@ class AppsView extends Component<Props, State> {
     })
   }
 
+  previewSuggested = (appID: string) => {
+    // To be implemented
+    // eslint-disable-next-line no-console
+    console.log(appID)
+  }
+
   onInstallComplete = () => {
     this.onCloseModal()
   }
@@ -218,9 +247,10 @@ class AppsView extends Component<Props, State> {
 
   getSuggestedList = memoize(
     (apps: Array<AppData>, suggestedApps: Array<Object>) => {
-      return suggestedApps.filter(
-        item => findIndex(apps, { mfid: item.mfid }) < 0,
-      )
+      return suggestedApps
+      // .filter(
+      //   item => findIndex(apps, { mfid: item.mfid }) < 0,
+      // )
     },
   )
 
@@ -240,22 +270,18 @@ class AppsView extends Component<Props, State> {
     const suggested = this.getSuggestedList(apps, this.state.suggestedApps)
     return (
       <ScrollView>
-        <Text variant={['smallTitle', 'blue', 'bold']}>
-          Installed Applications
-        </Text>
+        <Text variant={['appsTitle', 'blue', 'bold']}>Installed</Text>
         <AppsGrid>
           {apps.map(app => this.renderApp(app))}
           <NewAppButton
-            title="Install"
+            title="ADD"
             onPress={this.onPressInstall}
             testID="launcher-install-app-button"
           />
         </AppsGrid>
         {suggested.length ? (
           <>
-            <Text variant={['smallTitle', 'blue', 'bold']}>
-              Suggested Applications
-            </Text>
+            <Text variant={['appsTitle', 'blue', 'bold']}>Suggestions</Text>
             <AppsGrid>
               {suggested.map(app => (
                 <SuggestedAppItem
@@ -263,8 +289,9 @@ class AppsView extends Component<Props, State> {
                   appID={app.hash}
                   mfid={app.mfid}
                   appName={app.name}
-                  devName="Mainframe"
-                  onOpen={this.installSuggested}
+                  description="Create fast and secured notes"
+                  onPressInstall={this.installSuggested}
+                  onOpen={this.previewSuggested}
                 />
               ))}
             </AppsGrid>
