@@ -1,8 +1,9 @@
 // @flow
 
 import { createReadStream } from 'fs'
-import getStream from 'get-stream'
+import { Readable } from 'stream'
 import { pick } from 'lodash'
+import getStream from 'get-stream'
 import {
   LOCAL_ID_SCHEMA,
   type BlockchainWeb3SendParams,
@@ -188,7 +189,7 @@ export const sandboxed = {
     params: {
       name: 'string',
     },
-    handler: (ctx: AppContext, params: { name: string }): Promise<?string> => {
+    handler: (ctx: AppContext, params: { name: string }): Promise<boolean> => {
       return new Promise((resolve, reject) => {
         dialog.showOpenDialog(
           ctx.window,
@@ -222,25 +223,27 @@ export const sandboxed = {
                   manifestHash = initialManifest
                 }
 
-                // TODO: paralelize getting feed metadata and uploading files
                 const contentType = mime.getType(filePath)
                 if (!contentType) {
                   throw new Error('mime type not found')
                 }
-                const dataHash = await ctx.bzz.uploadFileStream(stream, {
-                  contentType: contentType,
-                  path: params.name,
-                  manifestHash: manifestHash,
-                })
 
-                const feedMetadata = await ctx.bzz.getFeedMetadata(feedHash)
+                const [dataHash, feedMetadata] = await Promise.all([
+                  ctx.bzz.uploadFileStream(stream, {
+                    contentType: contentType,
+                    path: params.name,
+                    manifestHash: manifestHash,
+                  }),
+                  ctx.bzz.getFeedMetadata(feedHash),
+                ])
+
                 await ctx.bzz.postFeedValue(feedMetadata, `0x${dataHash}`)
                 ctx.storage.feedHash = feedHash
                 await ctx.client.app.setFeedHash({
                   sessID: ctx.appSession.session.sessID,
                   feedHash: feedHash,
                 })
-                resolve(params.name)
+                resolve(true)
               } catch (error) {
                 // eslint-disable-next-line no-console
                 console.log(error, 'storage_promptUpload error')
@@ -249,7 +252,7 @@ export const sandboxed = {
               }
             } else {
               // No file selected
-              resolve()
+              resolve(false)
             }
           },
         )
@@ -258,7 +261,7 @@ export const sandboxed = {
   },
 
   storage_list: {
-    handler: async (ctx: AppContext): Promise<Array<string>> => {
+    handler: async (ctx: AppContext): Promise<Array<?string>> => {
       try {
         let entries = []
         const feedHash = ctx.appSession.storage.feedHash
@@ -298,12 +301,11 @@ export const sandboxed = {
     handler: async (
       ctx: AppContext,
       params: { data: string, name: string },
-    ): Promise<?string> => {
+    ): Promise<void> => {
       try {
         let manifestHash
         let feedHash = ctx.storage.feedHash
         const { address, encryptionKey } = ctx.storage
-        const Readable = require('stream').Readable
         const dataStream = new Readable()
         dataStream.push(params.data)
         dataStream.push(null)

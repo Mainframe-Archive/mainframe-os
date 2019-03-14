@@ -11,7 +11,6 @@ import {
 } from '@mainframe/app-permissions'
 import { encodeBase64 } from '@mainframe/utils-base64'
 import { createSecretStreamKey } from '@mainframe/utils-crypto'
-// eslint-disable-next-line import/named
 import type {
   AppUserPermissionsSettings,
   AppUserSettings,
@@ -20,22 +19,6 @@ import type {
 import { idType, type ID, uniqueID } from '@mainframe/utils-id'
 
 import type Session from './Session'
-
-const DEFAULT_SETTINGS = {
-  permissionsSettings: {
-    grants: {
-      WEB_REQUEST: {
-        denied: [],
-        granted: [],
-      },
-    },
-    permissionsChecked: false,
-  },
-  walletSettings: {
-    defaultEthAccount: null,
-  },
-  approvedContacts: {},
-}
 
 export type WalletSettings = {
   defaultEthAccount: ?string,
@@ -67,15 +50,6 @@ export type AbstractAppParams = {
 }
 
 export type AbstractAppSerialized = AbstractAppParams
-
-export const createAppStorage = (): StorageSettings => {
-  const kp = createKeyPair()
-  return {
-    feedHash: undefined,
-    feedKey: kp.getPrivate('hex'),
-    encryptionKey: encodeBase64(createSecretStreamKey()),
-  }
-}
 
 export default class AbstractApp {
   static toJSON = (app: AbstractApp): AbstractAppSerialized => ({
@@ -111,8 +85,27 @@ export default class AbstractApp {
 
   // Settings
 
-  getDefaultSettings(): AppUserSettings {
-    return { ...DEFAULT_SETTINGS, storageSettings: createAppStorage() }
+  getDefaultSettings = () => {
+    return {
+      approvedContacts: {},
+      permissionsSettings: {
+        grants: {
+          WEB_REQUEST: {
+            denied: [],
+            granted: [],
+          },
+        },
+        permissionsChecked: false,
+      },
+      storageSettings: {
+        feedHash: undefined,
+        feedKey: createKeyPair().getPrivate('hex'),
+        encryptionKey: encodeBase64(createSecretStreamKey()),
+      },
+      walletSettings: {
+        defaultEthAccount: null,
+      },
+    }
   }
 
   getSettings(userID: ID | string): AppUserSettings {

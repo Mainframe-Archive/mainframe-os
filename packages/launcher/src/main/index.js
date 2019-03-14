@@ -2,7 +2,6 @@
 
 import path from 'path'
 import url from 'url'
-// eslint-disable-next-line import/named
 import Client, { type VaultSettings } from '@mainframe/client'
 import { Environment, DaemonConfig, VaultConfig } from '@mainframe/config'
 import StreamRPC from '@mainframe/rpc-stream'

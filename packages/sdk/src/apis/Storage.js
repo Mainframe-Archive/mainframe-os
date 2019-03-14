@@ -7,7 +7,7 @@ export default class StorageAPIs extends ClientAPIs {
     return this._rpc.request('storage_promptUpload', params)
   }
 
-  list(): Promise<?string> {
+  list(): Promise<Array<?string>> {
     return this._rpc.request('storage_list')
   }
 
