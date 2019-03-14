@@ -264,16 +264,13 @@ export const sandboxed = {
     handler: async (ctx: AppContext): Promise<Array<?string>> => {
       try {
         let entries = []
-        const feedHash = ctx.appSession.storage.feedHash
+        const feedHash = ctx.storage.feedHash
         if (feedHash) {
-          let contentHash = ctx.storage.contentHash
-          if (!contentHash) {
-            contentHash = await ctx.bzz.getFeedValue(
-              feedHash,
-              {},
-              { mode: 'content-hash' },
-            )
-          }
+          const contentHash = await ctx.bzz.getFeedValue(
+            feedHash,
+            {},
+            { mode: 'content-hash' },
+          )
           ctx.storage.contentHash = contentHash
           const list = await ctx.bzz.list(contentHash)
           if (list.entries) {
