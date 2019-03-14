@@ -2,7 +2,6 @@
 
 import { createReadStream } from 'fs'
 import { Readable } from 'stream'
-import { pick } from 'lodash'
 import getStream from 'get-stream'
 import {
   LOCAL_ID_SCHEMA,
@@ -186,10 +185,8 @@ export const sandboxed = {
   ),
 
   storage_promptUpload: {
-    params: {
-      name: 'string',
-    },
-    handler: (ctx: AppContext, params: { name: string }): Promise<boolean> => {
+    key: 'string',
+    handler: (ctx: AppContext, name: string): Promise<boolean> => {
       return new Promise((resolve, reject) => {
         dialog.showOpenDialog(
           ctx.window,
@@ -231,7 +228,7 @@ export const sandboxed = {
                 const [dataHash, feedMetadata] = await Promise.all([
                   ctx.bzz.uploadFileStream(stream, {
                     contentType: contentType,
-                    path: params.name,
+                    path: name,
                     manifestHash: manifestHash,
                   }),
                   ctx.bzz.getFeedMetadata(feedHash),
@@ -274,9 +271,9 @@ export const sandboxed = {
           ctx.storage.contentHash = contentHash
           const list = await ctx.bzz.list(contentHash)
           if (list.entries) {
-            entries = list.entries.map(meta =>
-              pick(meta, ['contentType', 'path']),
-            )
+            entries = list.entries.map(meta => {
+              return { contentType: meta['contentType'], key: meta['path'] }
+            })
           }
         }
         return entries
@@ -291,20 +288,19 @@ export const sandboxed = {
   },
 
   storage_set: {
-    params: {
-      data: 'string',
-      name: 'string',
-    },
+    data: 'string',
+    key: 'string',
     handler: async (
       ctx: AppContext,
-      params: { data: string, name: string },
+      data: string,
+      key: string,
     ): Promise<void> => {
       try {
         let manifestHash
         let feedHash = ctx.storage.feedHash
         const { address, encryptionKey } = ctx.storage
         const dataStream = new Readable()
-        dataStream.push(params.data)
+        dataStream.push(data)
         dataStream.push(null)
         const stream = dataStream.pipe(createEncryptStream(encryptionKey))
 
@@ -327,7 +323,7 @@ export const sandboxed = {
         }
         const dataHash = await ctx.bzz.uploadFileStream(stream, {
           contentType: 'text/plain',
-          path: params.name,
+          path: key,
           manifestHash: manifestHash,
         })
         const feedMetadata = await ctx.bzz.getFeedMetadata(feedHash)
@@ -337,7 +333,7 @@ export const sandboxed = {
           sessID: ctx.appSession.session.sessID,
           feedHash: feedHash,
         })
-        return params.name
+        return
       } catch (error) {
         // eslint-disable-next-line no-console
         console.log(error, 'storage_set error')
@@ -347,15 +343,10 @@ export const sandboxed = {
   },
 
   storage_get: {
-    params: {
-      name: 'string',
-    },
-    handler: async (
-      ctx: AppContext,
-      params: { name: string },
-    ): Promise<?string> => {
+    key: 'string',
+    handler: async (ctx: AppContext, key: string): Promise<?string> => {
       try {
-        const filePath = params.name
+        const filePath = key
         const { encryptionKey, feedHash } = ctx.storage
         if (!feedHash) {
           throw new Error('feedHash not found')

@@ -21,7 +21,10 @@ export const registerStreamProtocol = (context: AppContext) => {
       } else {
         const contentType = mime.getType(filePath)
         if (!context.storage.feedHash) {
-          throw new Error('feedHash not found')
+          callback({
+            mimeType: 'text/html',
+            data: Buffer.from('<h5>feedHash not found</h5>'),
+          })
         }
         const res = await context.bzz.download(
           `${context.storage.feedHash}/${filePath}`,
