@@ -31,6 +31,28 @@ class CommsSubscription extends ContextSubscription<RxSubscription> {
   }
 }
 
+const getStorageManifestHash = async (
+  ctx: AppContext,
+): Promise<Array<string>> => {
+  let feedHash = ctx.storage.feedHash
+  if (feedHash) {
+    const contentHash = await ctx.bzz.getFeedValue(
+      feedHash,
+      {},
+      { mode: 'content-hash' },
+    )
+    return { feedHash, manifestHash: contentHash }
+  } else {
+    feedHash = await ctx.bzz.createFeedManifest(ctx.storage.address)
+    const manifest = { entries: [] }
+    const initialManifest = await ctx.bzz.uploadFile(
+      JSON.stringify(manifest),
+      {},
+    )
+    return { feedHash, manifestHash: initialManifest }
+  }
+}
+
 const sharedMethods = {
   wallet_getEthAccounts: async (ctx: AppContext): Promise<Array<string>> => {
     // $FlowFixMe indexer property
@@ -194,37 +216,16 @@ export const sandboxed = {
           async filePaths => {
             if (filePaths.length !== 0) {
               try {
+                const { feedHash, manifestHash } = await getStorageManifestHash(ctx)
                 const filePath = filePaths[0]
-                let manifestHash
-                let feedHash = ctx.storage.feedHash
-                const { address, encryptionKey } = ctx.storage
+                const encryptionKey = ctx.storage.encryptionKey
                 const stream = createReadStream(filePath).pipe(
                   createEncryptStream(encryptionKey),
                 )
-
-                if (feedHash) {
-                  const contentHash = await ctx.bzz.getFeedValue(
-                    feedHash,
-                    {},
-                    { mode: 'content-hash' },
-                  )
-                  ctx.storage.contentHash = contentHash
-                  manifestHash = contentHash
-                } else {
-                  feedHash = await ctx.bzz.createFeedManifest(address)
-                  const manifest = { entries: [] }
-                  const initialManifest = await ctx.bzz.uploadFile(
-                    JSON.stringify(manifest),
-                    {},
-                  )
-                  manifestHash = initialManifest
-                }
-
                 const contentType = mime.getType(filePath)
                 if (!contentType) {
                   throw new Error('mime type not found')
                 }
-
                 const [dataHash, feedMetadata] = await Promise.all([
                   ctx.bzz.uploadFileStream(stream, {
                     contentType: contentType,
@@ -233,8 +234,8 @@ export const sandboxed = {
                   }),
                   ctx.bzz.getFeedMetadata(feedHash),
                 ])
-
                 await ctx.bzz.postFeedValue(feedMetadata, `0x${dataHash}`)
+                ctx.storage.contentHash = manifestHash
                 ctx.storage.feedHash = feedHash
                 await ctx.client.app.setFeedHash({
                   sessID: ctx.appSession.session.sessID,
@@ -298,31 +299,12 @@ export const sandboxed = {
       },
     ): Promise<void> => {
       try {
-        let manifestHash
-        let feedHash = ctx.storage.feedHash
-        const { address, encryptionKey } = ctx.storage
+        const { feedHash, manifestHash } = await getStorageManifestHash(ctx)
+        const encryptionKey = ctx.storage.encryptionKey
         const dataStream = new Readable()
         dataStream.push(params.data)
         dataStream.push(null)
         const stream = dataStream.pipe(createEncryptStream(encryptionKey))
-
-        if (feedHash) {
-          const contentHash = await ctx.bzz.getFeedValue(
-            feedHash,
-            {},
-            { mode: 'content-hash' },
-          )
-          ctx.storage.contentHash = contentHash
-          manifestHash = contentHash
-        } else {
-          feedHash = await ctx.bzz.createFeedManifest(address)
-          const manifest = { entries: [] }
-          const initialManifest = await ctx.bzz.uploadFile(
-            JSON.stringify(manifest),
-            {},
-          )
-          manifestHash = initialManifest
-        }
         const dataHash = await ctx.bzz.uploadFileStream(stream, {
           contentType: 'text/plain',
           path: params.key,
@@ -330,6 +312,7 @@ export const sandboxed = {
         })
         const feedMetadata = await ctx.bzz.getFeedMetadata(feedHash)
         await ctx.bzz.postFeedValue(feedMetadata, `0x${dataHash}`)
+        ctx.storage.contentHash = manifestHash
         ctx.storage.feedHash = feedHash
         await ctx.client.app.setFeedHash({
           sessID: ctx.appSession.session.sessID,
@@ -346,7 +329,10 @@ export const sandboxed = {
 
   storage_get: {
     key: 'string',
-    handler: async (ctx: AppContext, params: { key: string }): Promise<?string> => {
+    handler: async (
+      ctx: AppContext,
+      params: { key: string },
+    ): Promise<?string> => {
       try {
         const filePath = params.key
         const { encryptionKey, feedHash } = ctx.storage
