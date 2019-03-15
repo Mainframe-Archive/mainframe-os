@@ -186,7 +186,7 @@ export const sandboxed = {
 
   storage_promptUpload: {
     key: 'string',
-    handler: (ctx: AppContext, name: string): Promise<boolean> => {
+    handler: (ctx: AppContext, params: { key: string }): Promise<boolean> => {
       return new Promise((resolve, reject) => {
         dialog.showOpenDialog(
           ctx.window,
@@ -228,7 +228,7 @@ export const sandboxed = {
                 const [dataHash, feedMetadata] = await Promise.all([
                   ctx.bzz.uploadFileStream(stream, {
                     contentType: contentType,
-                    path: name,
+                    path: params.key,
                     manifestHash: manifestHash,
                   }),
                   ctx.bzz.getFeedMetadata(feedHash),
@@ -292,15 +292,17 @@ export const sandboxed = {
     key: 'string',
     handler: async (
       ctx: AppContext,
-      data: string,
-      key: string,
+      params: {
+        data: string,
+        key: string,
+      },
     ): Promise<void> => {
       try {
         let manifestHash
         let feedHash = ctx.storage.feedHash
         const { address, encryptionKey } = ctx.storage
         const dataStream = new Readable()
-        dataStream.push(data)
+        dataStream.push(params.data)
         dataStream.push(null)
         const stream = dataStream.pipe(createEncryptStream(encryptionKey))
 
@@ -323,7 +325,7 @@ export const sandboxed = {
         }
         const dataHash = await ctx.bzz.uploadFileStream(stream, {
           contentType: 'text/plain',
-          path: key,
+          path: params.key,
           manifestHash: manifestHash,
         })
         const feedMetadata = await ctx.bzz.getFeedMetadata(feedHash)
@@ -344,9 +346,9 @@ export const sandboxed = {
 
   storage_get: {
     key: 'string',
-    handler: async (ctx: AppContext, key: string): Promise<?string> => {
+    handler: async (ctx: AppContext, params: { key: string }): Promise<?string> => {
       try {
-        const filePath = key
+        const filePath = params.key
         const { encryptionKey, feedHash } = ctx.storage
         if (!feedHash) {
           throw new Error('feedHash not found')
