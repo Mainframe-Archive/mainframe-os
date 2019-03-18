@@ -20,24 +20,25 @@ export const registerStreamProtocol = (context: AppContext) => {
         })
       } else {
         const contentType = mime.getType(filePath)
-        if (!context.storage.feedHash) {
+        if (context.storage.feedHash) {
+          const res = await context.bzz.download(
+            `${context.storage.feedHash}/${filePath}`,
+          )
+          const data = res.body.pipe(
+            createDecryptStream(context.storage.encryptionKey),
+          )
+          callback({
+            headers: {
+              'content-type': contentType,
+            },
+            data: data,
+          })
+        } else {
           callback({
             mimeType: 'text/html',
             data: Buffer.from('<h5>feedHash not found</h5>'),
           })
         }
-        const res = await context.bzz.download(
-          `${context.storage.feedHash}/${filePath}`,
-        )
-        const data = res.body.pipe(
-          createDecryptStream(context.storage.encryptionKey),
-        )
-        callback({
-          headers: {
-            'content-type': contentType,
-          },
-          data: data,
-        })
       }
     },
     error => {

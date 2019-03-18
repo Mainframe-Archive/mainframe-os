@@ -31,9 +31,7 @@ class CommsSubscription extends ContextSubscription<RxSubscription> {
   }
 }
 
-const getStorageManifestHash = async (
-  ctx: AppContext,
-): Promise<Array<string>> => {
+const getStorageManifestHash = async (ctx: AppContext): Promise<Object> => {
   let feedHash = ctx.storage.feedHash
   if (feedHash) {
     const contentHash = await ctx.bzz.getFeedValue(
@@ -226,9 +224,11 @@ export const sandboxed = {
             if (filePaths.length !== 0) {
               try {
                 raiseErrorIfKeyInvalid(params.key)
-                const { feedHash, manifestHash } = await getStorageManifestHash(ctx)
                 const filePath = filePaths[0]
                 const encryptionKey = ctx.storage.encryptionKey
+                const { feedHash, manifestHash } = await getStorageManifestHash(
+                  ctx,
+                )
                 const stream = createReadStream(filePath).pipe(
                   createEncryptStream(encryptionKey),
                 )
@@ -280,9 +280,9 @@ export const sandboxed = {
             { mode: 'content-hash' },
           )
           ctx.storage.contentHash = contentHash
-          const list = await ctx.bzz.list(contentHash)
-          if (list.entries) {
-            entries = list.entries.map(meta => {
+          const response = await ctx.bzz.list(contentHash)
+          if (response.entries instanceof Array) {
+            entries = response.entries.map(meta => {
               return { contentType: meta['contentType'], key: meta['path'] }
             })
           }
