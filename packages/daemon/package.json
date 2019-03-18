@@ -31,7 +31,7 @@
   },
   "dependencies": {
     "@babel/polyfill": "^7.2.5",
-    "@erebos/api-bzz-node": "^0.6.3",
+    "@erebos/api-bzz-node": "^0.7.0",
     "@erebos/api-pss": "^0.6.3",
     "@erebos/hex": "^0.5.4",
     "@erebos/keccak256": "^0.6.0",
