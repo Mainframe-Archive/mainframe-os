@@ -31,11 +31,11 @@ export default class ContextIO {
     if (this._bzz == null) {
       this._bzz = new BzzAPI({
         url: this._context.openVault.settings.bzzURL,
-        signFeedDigest: async (digest: Array<number>, key: ?Object) => {
+        signBytes: async (bytes: Array<number>, key: ?Object) => {
           if (key == null) {
             throw new Error('Missing signing key')
           }
-          return sign(digest, key)
+          return sign(bytes, key)
         },
       })
     }

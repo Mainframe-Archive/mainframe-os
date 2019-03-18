@@ -205,10 +205,12 @@ export class ContactsFeedsHandler extends FeedsHandler {
     }
 
     if (contact.connectionState !== 'connected') {
-      const topic = getFeedTopic({ name: user.base64PublicKey() })
-      this._subscriptions[contactSubRef] = this._context.io.bzz
+      this._context.io.bzz
         .pollFeedValue(
-          peer.firstContactAddress,
+          {
+            user: peer.firstContactAddress,
+            topic: getFeedTopic({ name: user.base64PublicKey() }),
+          },
           {
             mode: 'content-response',
             whenEmpty: 'ignore',
@@ -216,7 +218,6 @@ export class ContactsFeedsHandler extends FeedsHandler {
             immediate: true,
             interval: DEFAULT_POLL_INTERVAL,
           },
-          { topic },
         )
         .pipe(flatMap(res => res.json()))
         .subscribe({

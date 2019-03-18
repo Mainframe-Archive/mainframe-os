@@ -3,6 +3,7 @@
 import crypto from 'crypto'
 import BzzAPI, {
   type DownloadOptions,
+  type FeedParams,
   type PollOptions,
 } from '@erebos/api-bzz-node'
 import { getFeedTopic } from '@erebos/api-bzz-base'
@@ -26,17 +27,15 @@ export type OwnFeedSerialized = {
 
 export class OwnFeed {
   static create = (keyPair?: EthKeyPair, topicOrName?: string): OwnFeed => {
-    let topic = topicOrName
-    if (!isHexValue(topicOrName)) {
-      topic = getFeedTopic({ name: topicOrName })
-    }
-
-    return new OwnFeed(keyPair || createKeyPair(), hexValueType(topic))
+    const topic = isHexValue(topicOrName)
+      ? hexValueType(topicOrName)
+      : getFeedTopic({ name: topicOrName })
+    return new OwnFeed(keyPair || createKeyPair(), topic)
   }
 
   static fromJSON = (serialized: OwnFeedSerialized): OwnFeed => {
     return new OwnFeed(
-      createKeyPair(serialized.ethPrivKey, 'hex'),
+      createKeyPair(serialized.ethPrivKey),
       serialized.topic,
       serialized.feedHash,
     )
@@ -76,6 +75,10 @@ export class OwnFeed {
     return this._topic
   }
 
+  get feedParams(): FeedParams {
+    return { user: this.address, topic: this.topic }
+  }
+
   get feedHash(): ?bzzHash {
     return this._feedHash
   }
@@ -83,9 +86,7 @@ export class OwnFeed {
   async syncManifest(bzz: BzzAPI): Promise<boolean> {
     if (this.feedHash) return false
 
-    const feedHash = await bzz.createFeedManifest(this.address, {
-      topic: this.topic,
-    })
+    const feedHash = await bzz.createFeedManifest(this.feedParams)
     this._feedHash = feedHash
 
     return true
@@ -93,9 +94,8 @@ export class OwnFeed {
 
   async publishJSON(bzz: BzzAPI, payload: Object): Promise<string> {
     return await bzz.uploadFeedValue(
-      this.address,
+      this.feedParams,
       JSON.stringify(payload),
-      { topic: this.topic },
       { contentType: 'application/json' },
       this.keyPair.getPrivate(),
     )
@@ -112,11 +112,11 @@ export const fetchJSON = <T: Object>(
 
 export const pollFeedJSON = <T: Object>(
   bzz: BzzAPI,
-  hash: bzzHash,
+  hashOrParams: bzzHash | FeedParams,
   options: PollOptions,
 ): Observable<T> => {
   return bzz
-    .pollFeedValue(hash, {
+    .pollFeedValue(hashOrParams, {
       mode: 'content-response',
       whenEmpty: 'ignore',
       contentChangedOnly: true,

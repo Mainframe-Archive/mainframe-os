@@ -16,8 +16,8 @@
   "dependencies": {
     "@mainframe/data-types": "^0.2.0",
     "@mainframe/utils-id": "^0.1.0",
-    "conf": "^2.0.0",
-    "env-paths": "^2.0.0",
+    "conf": "^3.0.0",
+    "env-paths": "^2.1.0",
     "fs-extra": "^7.0.0"
   },
   "devDependencies": {

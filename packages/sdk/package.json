@@ -23,7 +23,7 @@
     "web3-provider-engine": "^14.1.0"
   },
   "devDependencies": {
-    "@mainframe/rpc-stream": "^0.2.4",
+    "@mainframe/rpc-stream": "^0.3.0",
     "babel-loader": "^8.0.4",
     "flow-bin": "^0.93.0",
     "webpack": "^4.29.6",
