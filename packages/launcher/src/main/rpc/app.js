@@ -53,6 +53,15 @@ const getStorageManifestHash = async (
   }
 }
 
+const raiseErrorIfKeyInvalid = (key: string): void | Error => {
+  const validFilename = /^([A-Za-z0-9_. =+-]+?)$/
+  if (!validFilename.test(key)) {
+    throw new Error(
+      'key can only contain alphanumeric, .=_+- chracters, and spaces',
+    )
+  }
+}
+
 const sharedMethods = {
   wallet_getEthAccounts: async (ctx: AppContext): Promise<Array<string>> => {
     // $FlowFixMe indexer property
@@ -216,6 +225,7 @@ export const sandboxed = {
           async filePaths => {
             if (filePaths.length !== 0) {
               try {
+                raiseErrorIfKeyInvalid(params.key)
                 const { feedHash, manifestHash } = await getStorageManifestHash(ctx)
                 const filePath = filePaths[0]
                 const encryptionKey = ctx.storage.encryptionKey
@@ -299,6 +309,7 @@ export const sandboxed = {
       },
     ): Promise<void> => {
       try {
+        raiseErrorIfKeyInvalid(params.key)
         const { feedHash, manifestHash } = await getStorageManifestHash(ctx)
         const encryptionKey = ctx.storage.encryptionKey
         const dataStream = new Readable()
