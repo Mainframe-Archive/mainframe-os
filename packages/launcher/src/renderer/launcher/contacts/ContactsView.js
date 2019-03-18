@@ -137,6 +137,15 @@ const Blocky = styled.View`
   margin-right: 15px;
 `
 
+export type Identity = {
+  localID: string,
+  feedHash: string,
+  profile: {
+    name: string,
+    ethAddress?: ?string,
+  },
+}
+
 export type Contact = {
   localID: string,
   peerID: string,
@@ -144,6 +153,7 @@ export type Contact = {
   ethAddress?: string,
   profile: {
     name?: string,
+    ethAddress?: ?string,
   },
   connectionState: 'SENT' | 'RECEIVED' | 'CONNECTED',
 }
@@ -158,6 +168,9 @@ type Props = {
   contacts: {
     userContacts: Array<Contact>,
   },
+  identities: {
+    ownUsers: Array<Identity>,
+  },
   acceptContact: (contact: Contact) => void,
   ignoreContact: (contact: Contact) => void,
 }
@@ -165,7 +178,7 @@ type Props = {
 type State = {
   searching?: boolean,
   searchTerm?: ?string,
-  selectedContact?: ?Contact,
+  selectedContact?: Object,
   addModalOpen?: boolean,
   editModalOpen?: boolean,
   error?: ?string,
@@ -175,6 +188,7 @@ type State = {
   foundPeer?: {
     profile: {
       name: string,
+      ethAddress?: ?string,
     },
     publicFeed: string,
     publicKey: string,
@@ -218,31 +232,19 @@ class ContactsViewComponent extends Component<Props, State> {
 
     this.state = {
       selectedContact: props.contacts.userContacts.length
-        ? props.contacts.userContacts[0]
+        ? this.getIdentity()
         : null,
     }
   }
 
-  componentDidUpdate(prevProps: Props) {
-    if (this.props.contacts.userContacts.length) {
-      if (!prevProps.contacts.userContacts.length) {
-        this.setState({
-          selectedContact: this.props.contacts.userContacts[0],
-        })
-      } else if (
-        this.state.selectedContact != null &&
-        !this.props.contacts.userContacts.includes(this.state.selectedContact)
-      ) {
-        const { localID } = this.state.selectedContact
-        const updatedContact = this.props.contacts.userContacts.find(
-          contact => contact.localID === localID,
-        )
-        this.setState({
-          selectedContact: updatedContact
-            ? updatedContact
-            : this.props.contacts.userContacts[0],
-        })
-      }
+  componentDidUpdate() {
+    if (
+      !this.state.selectedContact &&
+      this.props.contacts.userContacts.length
+    ) {
+      this.setState({
+        selectedContact: this.getIdentity(),
+      })
     }
   }
 
@@ -352,19 +354,39 @@ class ContactsViewComponent extends Component<Props, State> {
     this.setState({ selectedContact: contact })
   }
 
+  getIdentity = () => {
+    const { ownUsers } = this.props.identities
+
+    if (ownUsers.length) {
+      const id = ownUsers[0]
+      return {
+        connectionState: 'CONNECTED',
+        localID: id.localID,
+        peerID: id.localID,
+        publicFeed: id.feedHash,
+        profile: {
+          name: `${id.profile.name} (Me)`,
+        },
+      }
+    } else {
+      return {}
+    }
+  }
+
   renderContactsList() {
     const { userContacts } = this.props.contacts
 
+    const contacts = [this.getIdentity(), ...userContacts]
     const list = this.state.searchTerm
-      ? userContacts.filter(
+      ? contacts.filter(
           cont =>
             cont.profile.name &&
             cont.profile.name.indexOf(this.state.searchTerm || '') > -1,
         )
-      : userContacts
+      : contacts
     return (
       <ContactsListContainer>
-        <ContactsListHeader hascontacts={userContacts.length > 0}>
+        <ContactsListHeader hascontacts={contacts.length > 0}>
           <ButtonContainer>
             {this.state.searching ? (
               <TextField
@@ -390,13 +412,13 @@ class ContactsViewComponent extends Component<Props, State> {
             />
           </ButtonContainer>
         </ContactsListHeader>
-        {userContacts.length === 0 ? (
+        {contacts.length === 0 ? (
           <NoContacts>
             <Text variant={['grey', 'small']}>No Contacts</Text>
           </NoContacts>
         ) : list.length === 0 ? (
           <NoContacts>
-            <Text variant={['grey', 'small']}>No Matching</Text>
+            <Text variant={['grey', 'small']}>No Match</Text>
           </NoContacts>
         ) : (
           <ScrollView>
@@ -582,12 +604,12 @@ class ContactsViewComponent extends Component<Props, State> {
             <Row size={1}>
               <Column>
                 <Text variant="smallTitle" theme={{ padding: '20px 0 10px 0' }}>
-                  Mainframe Contact ID
+                  Mainframe ID
                 </Text>
                 <Text variant="addressLarge">{selectedContact.publicFeed}</Text>
               </Column>
             </Row>
-            {selectedContact.ethAddress && (
+            {selectedContact.profile.ethAddress && (
               <Row size={1}>
                 <Column>
                   <Text
@@ -596,7 +618,7 @@ class ContactsViewComponent extends Component<Props, State> {
                     ETH Address
                   </Text>
                   <Text variant="addressLarge">
-                    {selectedContact.publicFeed}
+                    {selectedContact.profile.ethAddress}
                   </Text>
                 </Column>
               </Row>
@@ -708,6 +730,17 @@ const ContactsView = createFragmentContainer(ContactsViewComponent, {
         profile {
           name
           ethAddress
+        }
+      }
+    }
+  `,
+  identities: graphql`
+    fragment ContactsView_identities on Identities {
+      ownUsers {
+        localID
+        feedHash
+        profile {
+          name
         }
       }
     }

@@ -34,7 +34,6 @@ const ChildrenContainer = styled.View`
   justify-content: center;
   align-items: center;
   flex: 1;
-  margin-bottom: 20px;
 `
 
 export default class FormModalView extends Component<Props> {
@@ -49,8 +48,8 @@ export default class FormModalView extends Component<Props> {
           onChange={this.props.onChangeForm}>
           <ChildrenContainer>
             <ChildrenContainer>{this.props.children}</ChildrenContainer>
-            <Row size={1}>
-              <Column styles="align-items:center; justify-content: center; flex-direction: row;">
+            <Row className="white-shadow" size={1}>
+              <Column styles="align-items:center; margin-bottom: 20px; justify-content: center; flex-direction: row;">
                 {this.props.dismissButton &&
                   (this.props.onPressDismiss || this.props.onRequestClose) && (
                     <Button

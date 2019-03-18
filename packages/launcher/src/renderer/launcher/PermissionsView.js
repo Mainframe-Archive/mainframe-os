@@ -12,6 +12,8 @@ import { Text, DropDown } from '@morpheus-ui/core'
 import styled from 'styled-components/native'
 
 import FormModalView from '../UIComponents/FormModalView'
+import AppIcon from './apps/AppIcon'
+import { AppShadow } from './apps/AppItem'
 
 type Domain = string
 type PermissionGranted = boolean
@@ -67,6 +69,8 @@ const formatSettings = (
 }
 
 type Props = {
+  mfid: string,
+  icon?: ?string,
   name: string,
   permissions: StrictPermissionsRequirements,
   onCancel: () => any,
@@ -82,12 +86,12 @@ const Container = styled.View`
   flex: 1;
   width: 100%;
   max-width: 600px;
-  padding: 40px;
+  padding: 0 40px;
   justify-content: center;
 `
 
 const ScrollView = styled.ScrollView`
-  margin-bottom: 10;
+  padding-bottom: 50px;
   flex: 1;
 `
 
@@ -111,6 +115,11 @@ const PermissionRow = styled.View`
   ${props => props.first && 'border-top-width: 0;'}
 `
 
+const DropDownContainer = styled.View`
+  flex-direction: row;
+  align-items: center;
+`
+
 const PermissionInfo = styled.View`
   flex: 1;
 `
@@ -121,6 +130,11 @@ const DomainRow = styled.View`
   margin: 0 10px;
   flex-direction: row;
   padding: 7px 0;
+`
+
+const IconContainer = styled.View`
+  align-items: center;
+  margin: 20px 0;
 `
 
 export default class PermissionsView extends Component<Props, State> {
@@ -174,13 +188,18 @@ export default class PermissionsView extends Component<Props, State> {
 
   renderRequired() {
     return (
-      <DropDown
-        variant="small"
-        disabled
-        label="Required"
-        defaultValue="Always"
-        options={['Always']}
-      />
+      <DropDownContainer>
+        <DropDown
+          variant="small"
+          disabled
+          label="Required"
+          defaultValue="Always"
+          options={['Always']}
+        />
+        <Text size={9} color="#A9A9A9" variant="requiredLabel">
+          Required
+        </Text>
+      </DropDownContainer>
     )
   }
 
@@ -195,13 +214,18 @@ export default class PermissionsView extends Component<Props, State> {
       )
 
     return (
-      <DropDown
-        variant="small"
-        label="Ask"
-        options={DROP_DOWN_OPTIONS}
-        onChange={onPress}
-        defaultValue={defaultValue}
-      />
+      <DropDownContainer>
+        <DropDown
+          variant="small"
+          label="Ask"
+          options={DROP_DOWN_OPTIONS}
+          onChange={onPress}
+          defaultValue={defaultValue}
+        />
+        <Text size={9} color="#585858" variant="requiredLabel">
+          Optional
+        </Text>
+      </DropDownContainer>
     )
   }
 
@@ -232,7 +256,7 @@ export default class PermissionsView extends Component<Props, State> {
         }
         options = null
         domainOptions = (
-          <Domains key={key}>
+          <Domains key={`${key}-${value[0]}`}>
             {value.map(domain => (
               <DomainRow key={domain}>
                 <Text variant={['greyDark23', 'flex1']} size={12}>
@@ -304,27 +328,12 @@ export default class PermissionsView extends Component<Props, State> {
 
     return required || optional ? (
       <ScrollView>
-        {required ? (
-          <>
-            <Title>
-              <Text variant="greyDark23" bold size={14}>
-                Required Permissions
-              </Text>
-            </Title>
-            {required}
-          </>
-        ) : null}
-
-        {optional ? (
-          <>
-            <Title>
-              <Text variant="greyDark23" bold size={14}>
-                Optional Permissions
-              </Text>
-            </Title>
-            {optional}
-          </>
-        ) : null}
+        <IconContainer>
+          <AppIcon id={this.props.mfid} url={this.props.icon} size="small" />
+          <AppShadow className="app-shadow" small />
+        </IconContainer>
+        {required}
+        {optional}
       </ScrollView>
     ) : (
       <Title>

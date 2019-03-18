@@ -22,6 +22,7 @@ import WalletImportView from './WalletImportView'
 import WalletCreateModal from './WalletCreateModal'
 import WalletAddLedgerModal from './WalletAddLedgerModal'
 import WallePreviewModal from './WalletPreviewModal'
+import WalletIcon from './WalletIcon'
 
 export type WalletAccounts = Array<{
   address: string,
@@ -111,6 +112,7 @@ const AddWrapper = styled.View`
 const AccountView = styled.TouchableOpacity`
   padding: 10px;
   flex-direction: row;
+  align-items: center;
   border-top-width: 1px;
   border-top-color: #efefef;
   ${props => props.first && `border-top-width: 0;`}
@@ -127,7 +129,8 @@ const AccountView = styled.TouchableOpacity`
 const Address = styled.View`
   flex: 1;
   overflow: hidden;
-  flex-wrap: wrap;
+  flex-direction: row;
+  align-items: center;
 `
 
 const Ballance = styled.View`
@@ -333,9 +336,15 @@ class WalletsView extends Component<Props, State> {
           first={index === 0}
           className="transition">
           <Address>
+            <WalletIcon address={a.address} />
             <Text
-              variant={['mono', 'ellipsis', hover ? 'red' : 'greyMed']}
-              size={11}>
+              variant={[
+                'mono',
+                'marginLeft15',
+                'ellipsis',
+                hover ? 'red' : 'greyMed',
+              ]}
+              size={12}>
               {a.address}
             </Text>
           </Address>
@@ -348,7 +357,8 @@ class WalletsView extends Component<Props, State> {
               theme={{
                 marginLeft: 10,
                 minWidth: 80,
-              }}>
+              }}
+              color="#232323">
               {a.balances.eth} ETH
             </Text>
           </Ballance>
@@ -360,7 +370,8 @@ class WalletsView extends Component<Props, State> {
               theme={{
                 marginLeft: 10,
                 minWidth: 80,
-              }}>
+              }}
+              color="#232323">
               {a.balances.mft} MFT
             </Text>
           </Ballance>

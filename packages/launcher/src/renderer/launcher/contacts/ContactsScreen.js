@@ -6,7 +6,7 @@ import { graphql, createFragmentContainer, QueryRenderer } from 'react-relay'
 import { EnvironmentContext } from '../RelayEnvironment'
 import applyContext, { type CurrentUser } from '../LauncherContext'
 import RelayLoaderView from '../RelayLoaderView'
-import ContactsView, { type Contact } from './ContactsView'
+import ContactsView, { type Contact, type Identity } from './ContactsView'
 
 type QueryProps = {
   user: CurrentUser,
@@ -15,6 +15,9 @@ type QueryProps = {
 type Props = QueryProps & {
   contacts: {
     userContacts: Array<Contact>,
+  },
+  identities: {
+    ownUsers: Array<Identity>,
   },
 }
 
@@ -38,6 +41,7 @@ class ContactsScreenComponent extends Component<Props, State> {
       <ContactsView
         user={this.props.user}
         contacts={this.props.contacts}
+        identities={this.props.identities}
         ignoreContact={this.ignoreContact}
         acceptContact={this.acceptContact}
       />
@@ -52,6 +56,11 @@ const ContactsScreenRelayContainer = createFragmentContainer(
       fragment ContactsScreen_contacts on Contacts
         @argumentDefinitions(userID: { type: "String!" }) {
         ...ContactsView_contacts @arguments(userID: $userID)
+      }
+    `,
+    identities: graphql`
+      fragment ContactsScreen_identities on Identities {
+        ...ContactsView_identities
       }
     `,
   },
@@ -69,6 +78,9 @@ export class ContactsScreenRenderer extends Component<QueryProps> {
             viewer {
               contacts {
                 ...ContactsScreen_contacts @arguments(userID: $userID)
+              }
+              identities {
+                ...ContactsScreen_identities
               }
             }
           }

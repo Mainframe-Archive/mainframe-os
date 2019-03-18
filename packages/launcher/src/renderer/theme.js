@@ -7,11 +7,17 @@ const MARGINS = {
   marginLeft10: {
     margin: '0 0 0 10px',
   },
+  marginLeft15: {
+    margin: '0 0 0 15px',
+  },
   marginLeft20: {
     margin: '0 0 0 20px',
   },
   marginRight10: {
     margin: '0 10px 0 0',
+  },
+  marginRight15: {
+    margin: '0 15px 0 0',
   },
   marginRight5: {
     margin: '0 5px 0 0',
@@ -25,6 +31,9 @@ const MARGINS = {
   marginTop10: {
     margin: '10px 0 0 0',
   },
+  marginTop15: {
+    margin: '15px 0 0 0',
+  },
   marginTop20: {
     margin: '20px 0 0 0',
   },
@@ -33,6 +42,9 @@ const MARGINS = {
   },
   marginBottom10: {
     margin: '0 0 10px 0',
+  },
+  marginBottom15: {
+    margin: '0 0 15px 0',
   },
   marginBottom20: {
     margin: '0 0 20px 0',
@@ -43,6 +55,9 @@ const MARGINS = {
   marginVertical10: {
     margin: '10px 0',
   },
+  marginVertical15: {
+    margin: '15px 0',
+  },
   marginVertical20: {
     margin: '20px 0',
   },
@@ -51,6 +66,9 @@ const MARGINS = {
   },
   marginHorizontal10: {
     margin: '0 10px',
+  },
+  marginHorizontal15: {
+    margin: '0 15px',
   },
   marginHorizontal20: {
     margin: '0 20px',
@@ -99,12 +117,13 @@ export default {
       borderWidth: 0,
       padding: 0,
       fontWeight: 'normal',
-      fontSize: 13,
+      fontSize: 11,
       iconPadding: '5px',
       iconMargin: 0,
       titlePadding: 0,
     },
     leftNavActive: {
+      fontWeight: 'normal',
       titleColor: COLORS.PRIMARY_BLUE,
       iconColor: COLORS.PRIMARY_BLUE,
       titleHoverColor: COLORS.PRIMARY_BLUE,
@@ -240,6 +259,9 @@ export default {
       paddingBottom: 10,
       color: COLORS.PRIMARY_RED,
     },
+    requiredLabel: {
+      margin: '0 0 6px 20px',
+    },
     appsTitle: {
       textTransform: 'uppercase',
       color: COLORS.GREY_A9,
@@ -272,16 +294,16 @@ export default {
       color: '#303030',
       fontWeight: 'bold',
     },
-    suggestedAppButtonId: {
+    suggestedAppDescription: {
       fontSize: '10px',
       color: '#808080',
-      width: '72px',
     },
     appButtonName: {
       fontSize: '12px',
       color: '#303030',
       fontWeight: 'bold',
       textAlign: 'center',
+      width: '100%',
     },
     appButtonId: {
       fontSize: '10px',

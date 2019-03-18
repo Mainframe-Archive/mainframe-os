@@ -20,8 +20,9 @@ import applyContext, { type CurrentUser } from '../LauncherContext'
 import CompleteOnboardSession from './CompleteOnboardSession'
 
 import AppInstallModal from './AppInstallModal'
+import AppPreviewModal from './AppPreviewModal'
 import { InstalledAppItem } from './AppItem'
-import SuggestedAppItem from './SuggestedItem'
+import SuggestedAppItem, { type SuggestedAppData } from './SuggestedItem'
 
 const SUGGESTED_APPS_URL =
   'https://s3-us-west-2.amazonaws.com/suggested-apps/suggested-apps.json'
@@ -33,10 +34,14 @@ const Header = styled.View`
 export const AppsGrid = styled.View`
   flex-direction: row;
   flex-wrap: wrap;
+  margin-left: -8px;
+  margin-top: 5px;
+  margin-bottom: 15px;
 `
 
 const AppInstallContainer = styled.TouchableOpacity`
   padding: 20px;
+  margin-left: 12px;
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
@@ -118,15 +123,16 @@ type Props = {
 
 type State = {
   showModal: ?{
-    type: 'accept_permissions' | 'app_install',
+    type: 'accept_permissions' | 'app_install' | 'app_preview',
     appID?: ?string,
+    suggestedApp?: ?Object,
     data?: ?{
       app: AppData,
     },
   },
   hover: ?string,
   showOnboarding: boolean,
-  suggestedApps: Array<Object>,
+  suggestedApps: Array<SuggestedAppData>,
 }
 
 class AppsView extends Component<Props, State> {
@@ -144,7 +150,6 @@ class AppsView extends Component<Props, State> {
   fetchSuggested = async () => {
     try {
       const suggestedPromise = await fetch(SUGGESTED_APPS_URL)
-
       const suggestedApps = await suggestedPromise.json()
       this.setState({ suggestedApps })
     } catch (err) {
@@ -178,10 +183,10 @@ class AppsView extends Component<Props, State> {
     })
   }
 
-  previewSuggested = (appID: string) => {
-    // To be implemented
-    // eslint-disable-next-line no-console
-    console.log(appID)
+  previewSuggested = (app: Object) => {
+    this.setState({
+      showModal: { type: 'app_preview', suggestedApp: app, appID: app.hash },
+    })
   }
 
   onInstallComplete = () => {
@@ -246,19 +251,27 @@ class AppsView extends Component<Props, State> {
   }
 
   getSuggestedList = memoize(
-    (apps: Array<AppData>, suggestedApps: Array<Object>) => {
-      return suggestedApps
-      // .filter(
-      //   item => findIndex(apps, { mfid: item.mfid }) < 0,
-      // )
+    (apps: Array<AppData>, suggestedApps: Array<SuggestedAppData>) => {
+      return suggestedApps.filter(
+        item => findIndex(apps, { mfid: item.mfid }) < 0,
+      )
     },
   )
+
+  getIcon = memoize((mfId?: ?string) => {
+    if (!mfId) return null
+
+    const icon = this.state.suggestedApps.filter(app => app.mfid === mfId)
+    return icon.length ? icon[0].icon : null
+  })
 
   // RENDER
 
   renderApp(app: AppData) {
+    const icon = this.getIcon(app.mfid)
     return (
       <InstalledAppItem
+        icon={icon}
         key={app.localID}
         installedApp={app}
         onOpenApp={this.onOpenApp}
@@ -286,10 +299,7 @@ class AppsView extends Component<Props, State> {
               {suggested.map(app => (
                 <SuggestedAppItem
                   key={app.hash}
-                  appID={app.hash}
-                  mfid={app.mfid}
-                  appName={app.name}
-                  description="Create fast and secured notes"
+                  appData={app}
                   onPressInstall={this.installSuggested}
                   onOpen={this.previewSuggested}
                 />
@@ -342,14 +352,27 @@ class AppsView extends Component<Props, State> {
               appID={this.state.showModal.appID}
               onRequestClose={this.onCloseModal}
               onInstallComplete={this.onInstallComplete}
+              getIcon={this.getIcon}
             />
           )
+          break
+        case 'app_preview':
+          modal = this.state.showModal.suggestedApp ? (
+            <AppPreviewModal
+              appData={this.state.showModal.suggestedApp}
+              onRequestClose={this.onCloseModal}
+              onPressInstall={this.installSuggested}
+            />
+          ) : null
           break
         case 'accept_permissions': {
           // $FlowFixMe ignore undefined warning
           const { app } = this.state.showModal.data
+          const icon = this.getIcon(app.mfid)
           modal = (
             <PermissionsView
+              mfid={app.mfid}
+              icon={icon}
               name={app.manifest.name}
               permissions={app.manifest.permissions}
               onCancel={this.onCloseModal}

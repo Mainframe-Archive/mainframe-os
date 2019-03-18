@@ -6,8 +6,7 @@ import Blockies from 'react-blockies'
 
 type IconSize = 'small' | 'medium' | 'large' | 'x-large' | 'xx-large'
 type Props = {
-  url?: ?string,
-  id?: ?string,
+  address: string,
   size: IconSize,
 }
 
@@ -16,37 +15,37 @@ type State = {
 }
 
 export const ICON_SIZE = {
-  'xx-large': 160,
-  'x-large': 120,
-  large: 96,
-  medium: 72,
-  small: 40,
+  'xx-large': 120,
+  'x-large': 96,
+  large: 72,
+  medium: 40,
+  small: 24,
 }
 
 const Container = styled.View`
   overflow: hidden;
-  border-radius: 5px;
+  border-radius: 3px;
   position: relative;
   width: ${props => props.iconSize}px;
   height: ${props => props.iconSize}px;
   z-index: 2;
+  shadow-color: #000;
+  shadow-offset: {width: 0, height: 0};
+  shadow-opacity: 0.3;
+  shadow-radius: 10;
 `
 
-export default class AppIcon extends Component<Props, State> {
+export default class WalletIcon extends Component<Props, State> {
   static defaultProps = {
-    size: 'medium',
+    size: 'small',
   }
 
   render() {
-    const { id, url, size } = this.props
+    const { address, size } = this.props
     const iconSize = ICON_SIZE[size]
     return (
       <Container iconSize={iconSize}>
-        {url ? (
-          <img src={url} width={iconSize} height={iconSize} alt="" />
-        ) : id ? (
-          <Blockies seed={id} size={8} scale={Math.ceil(iconSize / 8)} />
-        ) : null}
+        <Blockies seed={address} size={8} scale={Math.ceil(iconSize / 8)} />
       </Container>
     )
   }

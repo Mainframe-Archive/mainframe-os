@@ -13,11 +13,13 @@ export const AppShadow = styled.View`
   width: 50px;
   height: 1px;
   margin-top: -1px;
+
+  ${props => props.small && `width: 35px;`}
 `
 
 const AppButtonContainer = styled.TouchableOpacity`
   padding: 20px;
-  margin-left: 5px;
+  margin-left: 12px;
   flex-direction: column;
   align-items: center;
   width: 110px;
@@ -37,9 +39,16 @@ const IconContainer = styled.View`
   width: 72px;
   align-items: center;
   margin-bottom: 15px;
+  ${props =>
+    props.hover &&
+    `
+      margin-top: -3px;
+      margin-bottom: 18px;
+  `}
 `
 
 type SharedProps = {
+  icon?: ?string,
   onOpenApp: (app: AppInstalledData | OwnApp, own: boolean) => any,
 }
 
@@ -57,6 +66,7 @@ type Props = {
   devName: string,
   onOpen: () => void,
   testID: string,
+  icon?: ?string,
 }
 
 type State = {
@@ -104,7 +114,7 @@ export default class AppItem extends Component<Props, State> {
   }
 
   render() {
-    const { appID, appName, devName, onOpen, testID } = this.props
+    const { appID, appName, devName, onOpen, testID, icon } = this.props
     return (
       <AppButtonContainer
         onPress={onOpen}
@@ -115,18 +125,19 @@ export default class AppItem extends Component<Props, State> {
         onMouseOver={this.toggleHover}
         onMouseOut={this.toggleHover}>
         <IconContainer
+          hover={this.state.hover}
           className={this.state.direction}
           onMouseMove={this.setDirection}
           onMouseOver={this.startMoving}
           onMouseOut={this.stopMoving}>
-          <AppIcon id={appID} />
+          <AppIcon url={icon} id={appID} />
           <AppShadow
             className={
               this.state.hover ? 'app-shadow app-shadow-hover' : 'app-shadow'
             }
           />
         </IconContainer>
-        <Text variant="appButtonName">{appName}</Text>
+        <Text variant={['appButtonName', 'ellipsis']}>{appName}</Text>
         <Text variant="appButtonId">{devName}</Text>
       </AppButtonContainer>
     )
@@ -140,6 +151,7 @@ const InstalledView = (props: InstalledProps) => {
   }
   return (
     <AppItem
+      icon={props.icon}
       appID={app.mfid}
       appName={app.name}
       devName={app.manifest.author.name}
@@ -172,7 +184,6 @@ export const InstalledAppItem = createFragmentContainer(InstalledView, {
       mfid
       localID
       name
-      version
       manifest {
         permissions {
           optional {

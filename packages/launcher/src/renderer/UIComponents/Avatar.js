@@ -28,6 +28,10 @@ const Container = styled.View`
   position: relative;
   width: ${props => props.avatarSize}px;
   height: ${props => props.avatarSize}px;
+  shadow-color: #000;
+  shadow-offset: {width: 0, height: 0};
+  shadow-opacity: 0.3;
+  shadow-radius: 10;
 `
 
 export default class Avatar extends Component<Props, State> {

@@ -14,7 +14,7 @@ body,
 }
 .app-shadow-hover {
   transition: all 0.3s;
-  box-shadow: 0px 0px 25px 3px rgba(0,0,0,0.6);
+  box-shadow: 0px 5px 25px 6px rgba(0,0,0,0.3);
 }
 
 .inner-modal {

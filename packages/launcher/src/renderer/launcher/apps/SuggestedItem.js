@@ -8,7 +8,7 @@ import { AppShadow } from './AppItem'
 
 const AppButtonContainer = styled.TouchableOpacity`
   padding: 20px;
-  margin-left: 5px;
+  margin-left: 12px;
   flex-direction: row;
   border-radius: 10px;
 
@@ -32,15 +32,27 @@ const DataContainer = styled.View`
 const IconContainer = styled.View`
   width: 72px;
   align-items: center;
+  ${props =>
+    props.hover &&
+    `
+    margin-top: -3px;
+    margin-bottom: 3px;
+  `}
 `
 
-type Props = {
-  appID: string,
+export type SuggestedAppData = {
+  hash: string,
   mfid: string,
-  appName: string,
-  description: string,
-  onOpen: (appID: string) => void,
-  onPressInstall: (appID: string) => void,
+  icon?: ?string,
+  name: string,
+  description?: ?string,
+  longDescription?: ?string,
+}
+
+type Props = {
+  appData: SuggestedAppData,
+  onOpen: (app: Object) => void,
+  onPressInstall: (hash: string, icon?: ?string) => void,
 }
 
 type State = {
@@ -55,14 +67,14 @@ export default class SuggestedItem extends Component<Props, State> {
   }
 
   onOpen = () => {
-    this.props.onOpen(this.props.appID)
+    this.props.onOpen(this.props.appData)
   }
 
   onPressInstall = () => {
-    this.props.onPressInstall(this.props.appID)
+    this.props.onPressInstall(this.props.appData.hash)
   }
   render() {
-    const { appID, appName, description } = this.props
+    const { hash, name, description, icon, mfid } = this.props.appData
     return (
       <AppButtonContainer
         className="transition"
@@ -70,9 +82,9 @@ export default class SuggestedItem extends Component<Props, State> {
         onMouseOver={this.toggleHover}
         onMouseOut={this.toggleHover}
         onPress={this.onOpen}
-        key={appID}>
-        <IconContainer>
-          <AppIcon id={appID} />
+        key={hash}>
+        <IconContainer className="transition" hover={this.state.hover}>
+          <AppIcon url={icon} id={mfid} />
           <AppShadow
             className={
               this.state.hover ? 'app-shadow app-shadow-hover' : 'app-shadow'
@@ -80,8 +92,8 @@ export default class SuggestedItem extends Component<Props, State> {
           />
         </IconContainer>
         <DataContainer>
-          <Text variant="suggestedAppButtonName">{appName}</Text>
-          <Text variant="suggestedAppButtonId">{description}</Text>
+          <Text variant="suggestedAppButtonName">{name}</Text>
+          <Text variant="suggestedAppDescription">{description}</Text>
           <Button
             title="INSTALL"
             onPress={this.onPressInstall}

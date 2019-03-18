@@ -8,6 +8,7 @@ import type { AppInstalledData } from '@mainframe/client'
 import { Text, Button } from '@morpheus-ui/core'
 
 import Avatar from '../../UIComponents/Avatar'
+import InfoIcon from '../../UIComponents/Icons/InfoIcon'
 import IdentityEditModal from './IdentityEditModal'
 
 export type User = {
@@ -39,7 +40,7 @@ const Container = styled.View`
 
 const UserItem = styled.View`
   margin-bottom: 10px;
-  padding: 30px 25px;
+  padding: 20px;
   background-color: ${props => props.theme.colors.LIGHT_GREY_F9};
   border-left-width: 5px;
   border-left-style: solid;
@@ -55,9 +56,16 @@ const Profile = styled.View`
 `
 
 const InfoBox = styled.View`
-  padding: 10px;
-  background-color: ${props => props.theme.colors.PRIMARY_LIGHT_BLUE};
+  margin-top: 20px;
+  margin-bottom: 30px;
+  padding: 10px 15px;
+  max-width: 340px;
+  border-width: 1px;
+  border-color: #00a7e7;
   border-radius: 3px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
 `
 
 class IdentitiesView extends Component<Props, State> {
@@ -77,10 +85,12 @@ class IdentitiesView extends Component<Props, State> {
       <UserItem key={user.localID}>
         <Avatar size="medium" id={user.localID} />
         <Profile>
-          <Text variant="bold">{user.profile.name}</Text>
+          <Text variant="bold" color="#232323">
+            {user.profile.name}
+          </Text>
           {user.feedHash ? (
             <Text color="#585858" size={11}>
-              Contact ID:{' '}
+              Mainframe ID:{' '}
               <Text variant="mono" color="#585858" size={11}>
                 {user.feedHash}
               </Text>
@@ -110,14 +120,15 @@ class IdentitiesView extends Component<Props, State> {
   render() {
     return (
       <Container>
-        {this.props.identities.ownDevelopers.length > 0 && (
+        {this.props.identities.ownUsers.length > 0 && (
           <Text variant={['smallTitle', 'blue', 'bold']}>Personal</Text>
         )}
         {this.renderUser(this.props.identities.ownUsers[0])}
         <InfoBox>
-          <Text theme={{ color: '#ffffff' }}>
-            Share your Contact ID with your contacts so they can add you on
-            Mainframe.
+          <InfoIcon width={36} height={18} color="#00A7E7" />
+          <Text size={12} color="#00A7E7" variant="marginLeft15">
+            Share your Mainframe ID with your contacts and let your friends add
+            you on Mainframe OS
           </Text>
         </InfoBox>
         {this.props.identities.ownDevelopers.length > 0 && (
