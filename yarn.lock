@@ -1821,13 +1821,6 @@
     npmlog "^4.1.2"
     write-file-atomic "^2.3.0"
 
-"@mainframe/rpc-base@^0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@mainframe/rpc-base/-/rpc-base-0.2.0.tgz#9f7b57288d14d1289f6bc292c737ce0784aca700"
-  dependencies:
-    "@babel/runtime" "^7.0.0"
-    "@mainframe/utils-id" "^0.1.1"
-
 "@mainframe/rpc-base@^0.3.0":
   version "0.3.0"
   resolved "https://registry.yarnpkg.com/@mainframe/rpc-base/-/rpc-base-0.3.0.tgz#e779e9e3d6150f746f6fa8ec58f9380447b60de6"
@@ -1837,20 +1830,14 @@
     "@types/nanoid" "^1.2.0"
     nanoid "^2.0.1"
 
-"@mainframe/rpc-electron@^0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@mainframe/rpc-electron/-/rpc-electron-0.1.0.tgz#23a3172c8ae076ed77672fe9809967a1d152ab87"
-  dependencies:
-    "@mainframe/rpc-stream" "^0.2.4"
-    "@mainframe/transport-electron" "^0.1.0"
-
-"@mainframe/rpc-error@^0.3.0":
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/@mainframe/rpc-error/-/rpc-error-0.3.0.tgz#888c5af9dfa31809e2162bc50dbac3dde528cb31"
+"@mainframe/rpc-electron@^0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@mainframe/rpc-electron/-/rpc-electron-0.2.0.tgz#6873917fd046dfa5298d4554bcec8da17299e65e"
+  integrity sha512-qkt+qlMOSCn5MTA1dySltXW+vFGLCmHKNDGLwqQdEH3gdvt+bJCrjx6QjAb8s1xaxvWVcO/dzli4vrRG5tlzaA==
   dependencies:
     "@babel/runtime" "^7.0.0"
-    "@mainframe/rpc-base" "^0.2.0"
-    es6-error "^4.1.1"
+    "@mainframe/rpc-stream" "^0.3.0"
+    "@mainframe/transport-electron" "^0.2.1"
 
 "@mainframe/rpc-error@^0.4.0":
   version "0.4.0"
@@ -1878,15 +1865,6 @@
     "@babel/runtime" "^7.0.0"
     "@mainframe/rpc-stream" "^0.3.0"
     "@mainframe/transport-ipc" "^0.3.0"
-    rxjs "^6.3.3"
-
-"@mainframe/rpc-stream@^0.2.4":
-  version "0.2.5"
-  resolved "https://registry.yarnpkg.com/@mainframe/rpc-stream/-/rpc-stream-0.2.5.tgz#9845913dd2874423f5d6362cc8f76756b6817de7"
-  dependencies:
-    "@babel/runtime" "^7.0.0"
-    "@mainframe/rpc-base" "^0.2.0"
-    "@mainframe/rpc-error" "^0.3.0"
     rxjs "^6.3.3"
 
 "@mainframe/rpc-stream@^0.3.0":
@@ -1918,9 +1896,13 @@
     "@types/fs-extra" "^5.0.5"
     fs-extra "^7.0.0"
 
-"@mainframe/transport-electron@^0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@mainframe/transport-electron/-/transport-electron-0.1.0.tgz#cea8b6aea3532b7bd6f5d07e5bd701a1bb3c38b0"
+"@mainframe/transport-electron@^0.2.1":
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/@mainframe/transport-electron/-/transport-electron-0.2.1.tgz#c334f1e40cbaeeee861d804950cbcd2f7fa7ae0f"
+  integrity sha512-cV3WFuo2qNHBHG92QZavznJ07cvMSOBVNsVEnuHPKuc1/oWlkAqpnah0iGC9BfpKr3NR9zHPM78l2k6og+Y+mw==
+  dependencies:
+    "@babel/runtime" "^7.0.0"
+    rxjs "^6.0.0"
 
 "@mainframe/transport-ipc@^0.3.0":
   version "0.3.0"
@@ -1957,7 +1939,7 @@
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/@mainframe/utils-hex/-/utils-hex-0.1.1.tgz#2ec97e3b7358960c1b39ee60fc5a17986a3921ae"
 
-"@mainframe/utils-id@^0.1.0", "@mainframe/utils-id@^0.1.1":
+"@mainframe/utils-id@^0.1.0":
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/@mainframe/utils-id/-/utils-id-0.1.1.tgz#5d17ab69b4af712b98b35e331a5627f7fcb700fb"
   dependencies:
@@ -7893,9 +7875,10 @@ flatten@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/flatten/-/flatten-1.0.2.tgz#dae46a9d78fbe25292258cc1e780a41d95c03782"
 
-flow-bin@^0.93.0:
-  version "0.93.0"
-  resolved "https://registry.yarnpkg.com/flow-bin/-/flow-bin-0.93.0.tgz#9192a08d88db2a8da0ff55e42420f44539791430"
+flow-bin@^0.95.1:
+  version "0.95.1"
+  resolved "https://registry.yarnpkg.com/flow-bin/-/flow-bin-0.95.1.tgz#633113831ccff4b7ee70a2730f63fc43b69ba85f"
+  integrity sha512-06IOC/pqPMNRYtC6AMZEWYR9Fi6UdBC7gImGinPuNUpPZFnP5E9/0cBCl3DWrH4zz/gSM2HdDilU7vPGpYIr2w==
 
 flow-copy-source@^2.0.1:
   version "2.0.3"
@@ -14783,7 +14766,7 @@ rx-socket@^0.5.0:
   dependencies:
     oboe "^2.1.4"
 
-rxjs@^6.1.0, rxjs@^6.2.0, rxjs@^6.3.0, rxjs@^6.3.3, rxjs@^6.4.0:
+rxjs@^6.0.0, rxjs@^6.1.0, rxjs@^6.2.0, rxjs@^6.3.0, rxjs@^6.3.3, rxjs@^6.4.0:
   version "6.4.0"
   resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-6.4.0.tgz#f3bb0fe7bda7fb69deac0c16f17b50b0b8790504"
   dependencies:
@@ -17224,7 +17207,7 @@ webidl-conversions@^4.0.2:
   version "4.0.2"
   resolved "https://registry.yarnpkg.com/webidl-conversions/-/webidl-conversions-4.0.2.tgz#a855980b1f0b6b359ba1d5d9fb39ae941faa63ad"
 
-webpack-cli@^3.1.0, webpack-cli@^3.1.2, webpack-cli@^3.2.1:
+webpack-cli@^3.2.1:
   version "3.2.3"
   resolved "https://registry.yarnpkg.com/webpack-cli/-/webpack-cli-3.2.3.tgz#13653549adfd8ccd920ad7be1ef868bacc22e346"
   dependencies:
@@ -17239,6 +17222,23 @@ webpack-cli@^3.1.0, webpack-cli@^3.1.2, webpack-cli@^3.2.1:
     supports-color "^5.5.0"
     v8-compile-cache "^2.0.2"
     yargs "^12.0.4"
+
+webpack-cli@^3.3.0:
+  version "3.3.0"
+  resolved "https://registry.yarnpkg.com/webpack-cli/-/webpack-cli-3.3.0.tgz#55c8a74cae1e88117f9dda3a801c7272e93ca318"
+  integrity sha512-t1M7G4z5FhHKJ92WRKwZ1rtvi7rHc0NZoZRbSkol0YKl4HvcC8+DsmGDmK7MmZxHSAetHagiOsjOB6MmzC2TUw==
+  dependencies:
+    chalk "^2.4.1"
+    cross-spawn "^6.0.5"
+    enhanced-resolve "^4.1.0"
+    findup-sync "^2.0.0"
+    global-modules "^1.0.0"
+    import-local "^2.0.0"
+    interpret "^1.1.0"
+    loader-utils "^1.1.0"
+    supports-color "^5.5.0"
+    v8-compile-cache "^2.0.2"
+    yargs "^12.0.5"
 
 webpack-dev-middleware@3.4.0:
   version "3.4.0"

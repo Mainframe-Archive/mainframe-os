@@ -325,7 +325,11 @@ export default class AppsRepository {
     return this._updates[id]
   }
 
-  createUpdate(appID: ID, manifest: ManifestData): AppUpdate {
+  getUpdatesCount(): number {
+    return Object.keys(this._updates).length
+  }
+
+  setUpdate(appID: ID, manifest: ManifestData): AppUpdate {
     const app = this.getByID(appID)
     if (app == null) {
       throw new Error('Invalid app')

@@ -1,9 +1,12 @@
 // @flow
 
+import { getFeedTopic } from '@erebos/api-bzz-base'
+import type { SignedContents } from '@mainframe/secure-file'
 import { type Observable, Subject, type Subscription } from 'rxjs'
 import { filter, multicast, refCount, tap, flatMap } from 'rxjs/operators'
-import { getFeedTopic } from '@erebos/api-bzz-base'
+import semver from 'semver'
 
+import type App from '../app/App'
 import type Contact, {
   FirstContactPayload,
   ContactPayload,
@@ -16,6 +19,7 @@ import { pollFeedJSON } from '../swarm/feed'
 
 import type ClientContext from './ClientContext'
 import type {
+  AppUpdateEvent,
   ContextEvent,
   ContactChangedEvent,
   ContactCreatedEvent,
@@ -54,6 +58,77 @@ class FeedsHandler {
     })
     this._observers = new Set()
     this._subscriptions = {}
+  }
+}
+
+export class AppsUpdatesHandler extends FeedsHandler {
+  _setup() {
+    // $FlowFixMe: Object.values() losing type
+    Object.values(this._context.openVault.apps.apps).forEach((app: App) => {
+      this._subscribe(app)
+    })
+  }
+
+  _subscribe(app: App) {
+    const { io, log, openVault } = this._context
+
+    this._subscriptions[app.id] = pollFeedJSON(io.bzz, app.updateFeedHash, {
+      interval: DEFAULT_POLL_INTERVAL,
+    }).subscribe((signedManifest: SignedContents) => {
+      try {
+        const manifest = app.verifyManifest(signedManifest)
+        if (semver.lte(manifest.version, app.manifest.version)) {
+          // Ignore this version
+          return
+        }
+
+        const existing = openVault.apps.getUpdate(app.id)
+        if (
+          existing == null ||
+          (semver.gt(manifest.version, existing.app.manifest.version) &&
+            existing.app.installationState !== 'downloading')
+        ) {
+          openVault.apps.setUpdate(app.id, manifest)
+          this._context.next({
+            type: 'app_update',
+            app,
+            version: manifest.version,
+            status: 'updateAvailable',
+          })
+        }
+      } catch (err) {
+        log('Manifest verification failed', err)
+      }
+    })
+  }
+
+  add(appID: string) {
+    const app = this._context.openVault.apps.getByID(appID)
+    if (app == null) {
+      throw new Error('App not found')
+    }
+    if (this._subscriptions[appID] == null && this._observers.size > 0) {
+      this._subscribe(app)
+    }
+  }
+
+  observe(): ObserveFeed<AppUpdateEvent> {
+    if (this._observers.size === 0) {
+      this._setup()
+    }
+
+    const source = this._context.pipe(filter(e => e.type === 'app_update'))
+    this._observers.add(source)
+
+    return {
+      dispose: () => {
+        this._observers.delete(source)
+        if (this._observers.size === 0) {
+          this.clear()
+        }
+      },
+      source,
+    }
   }
 }
 

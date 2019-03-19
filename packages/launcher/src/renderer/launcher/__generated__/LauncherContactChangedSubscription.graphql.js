@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 567a63345ad9b34ea022e45726c5de6c
+ * @relayHash ebb95f28b3198c68da3d6251b93c5cc2
  */
 
 /* eslint-disable */
@@ -13,11 +13,13 @@ export type ConnectionState = "CONNECTED" | "SENDING" | "SENT" | "%future added 
 export type LauncherContactChangedSubscriptionVariables = {||};
 export type LauncherContactChangedSubscriptionResponse = {|
   +contactChanged: {|
-    +connectionState: ConnectionState,
-    +profile: {|
-      +name: ?string,
-      +avatar: ?string,
-    |},
+    +contact: {|
+      +connectionState: ConnectionState,
+      +profile: {|
+        +name: ?string,
+        +avatar: ?string,
+      |},
+    |}
   |}
 |};
 export type LauncherContactChangedSubscription = {|
@@ -30,12 +32,14 @@ export type LauncherContactChangedSubscription = {|
 /*
 subscription LauncherContactChangedSubscription {
   contactChanged {
-    connectionState
-    profile {
-      name
-      avatar
+    contact {
+      connectionState
+      profile {
+        name
+        avatar
+      }
+      id
     }
-    id
   }
 }
 */
@@ -78,7 +82,7 @@ return {
   "operationKind": "subscription",
   "name": "LauncherContactChangedSubscription",
   "id": null,
-  "text": "subscription LauncherContactChangedSubscription {\n  contactChanged {\n    connectionState\n    profile {\n      name\n      avatar\n    }\n    id\n  }\n}\n",
+  "text": "subscription LauncherContactChangedSubscription {\n  contactChanged {\n    contact {\n      connectionState\n      profile {\n        name\n        avatar\n      }\n      id\n    }\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -93,11 +97,22 @@ return {
         "name": "contactChanged",
         "storageKey": null,
         "args": null,
-        "concreteType": "Contact",
+        "concreteType": "ContactChangedPayload",
         "plural": false,
         "selections": [
-          v0,
-          v1
+          {
+            "kind": "LinkedField",
+            "alias": null,
+            "name": "contact",
+            "storageKey": null,
+            "args": null,
+            "concreteType": "Contact",
+            "plural": false,
+            "selections": [
+              v0,
+              v1
+            ]
+          }
         ]
       }
     ]
@@ -113,17 +128,28 @@ return {
         "name": "contactChanged",
         "storageKey": null,
         "args": null,
-        "concreteType": "Contact",
+        "concreteType": "ContactChangedPayload",
         "plural": false,
         "selections": [
-          v0,
-          v1,
           {
-            "kind": "ScalarField",
+            "kind": "LinkedField",
             "alias": null,
-            "name": "id",
+            "name": "contact",
+            "storageKey": null,
             "args": null,
-            "storageKey": null
+            "concreteType": "Contact",
+            "plural": false,
+            "selections": [
+              v0,
+              v1,
+              {
+                "kind": "ScalarField",
+                "alias": null,
+                "name": "id",
+                "args": null,
+                "storageKey": null
+              }
+            ]
           }
         ]
       }
@@ -132,5 +158,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '39b178e29579a15f96e59416b67e9cf0';
+(node/*: any*/).hash = '94bcb435fc6b5f4f397cfcabafe92438';
 module.exports = node;

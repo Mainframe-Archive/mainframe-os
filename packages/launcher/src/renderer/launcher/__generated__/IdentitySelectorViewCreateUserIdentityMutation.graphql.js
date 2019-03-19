@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash f8d655a144258a66f8a4b914b2430948
+ * @relayHash 0aa0f960e5a86fda017b8022826b47fc
  */
 
 /* eslint-disable */
@@ -31,12 +31,12 @@ export type IdentitySelectorViewCreateUserIdentityMutationResponse = {|
     |},
     +viewer: {|
       +identities: {|
-        +ownUsers: ?$ReadOnlyArray<?{|
+        +ownUsers: $ReadOnlyArray<{|
           +profile: {|
             +name: string
           |}
         |}>,
-        +ownDevelopers: ?$ReadOnlyArray<?{|
+        +ownDevelopers: $ReadOnlyArray<{|
           +profile: {|
             +name: string
           |}

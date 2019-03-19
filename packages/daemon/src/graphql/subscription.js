@@ -5,23 +5,59 @@ import { map } from 'rxjs/operators'
 
 import type ClientContext from '../context/ClientContext'
 
-import { contact } from './objects'
+import { app, contact, viewer } from './objects'
 import observableToAsyncIterator from './observableToAsyncIterator'
 
+const appUpdatePayload = new GraphQLObjectType({
+  name: 'AppUpdatePayload',
+  fields: () => ({
+    app: {
+      type: new GraphQLNonNull(app),
+    },
+    viewer: {
+      type: new GraphQLNonNull(viewer),
+    },
+  }),
+})
+
+const appUpdateChanged = {
+  type: new GraphQLNonNull(appUpdatePayload),
+  subscribe: (self, args, ctx: ClientContext) => {
+    const { source, dispose } = ctx.appsUpdates.observe()
+    const observable = source.pipe(
+      map(e => ({ appUpdate: { app: e.app, viewer: {} } })),
+    )
+    return observableToAsyncIterator(observable, dispose)
+  },
+}
+
+const contactChangedPayload = new GraphQLObjectType({
+  name: 'ContactChangedPayload',
+  fields: () => ({
+    contact: {
+      type: new GraphQLNonNull(contact),
+    },
+    viewer: {
+      type: new GraphQLNonNull(viewer),
+    },
+  }),
+})
+
 const contactChanged = {
-  type: new GraphQLNonNull(contact),
+  type: new GraphQLNonNull(contactChangedPayload),
   subscribe: (self, args, ctx: ClientContext) => {
     const { source, dispose } = ctx.contactsFeeds.observe()
-    const contactChanged = source.pipe(
-      map(e => ({ contactChanged: e.contact })),
+    const observable = source.pipe(
+      map(e => ({ contactChanged: { contact: e.contact, viewer: {} } })),
     )
-    return observableToAsyncIterator(contactChanged, dispose)
+    return observableToAsyncIterator(observable, dispose)
   },
 }
 
 export default new GraphQLObjectType({
   name: 'Subscription',
   fields: () => ({
+    appUpdateChanged,
     contactChanged,
   }),
 })

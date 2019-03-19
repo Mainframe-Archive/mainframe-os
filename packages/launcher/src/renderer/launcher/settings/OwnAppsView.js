@@ -11,17 +11,16 @@ import { AppsGrid, NewAppButton } from '../apps/AppsView'
 import { OwnAppItem } from '../apps/AppItem'
 import CreateAppModal from './CreateAppModal'
 import CreateDevIdentityView from './CreateDevIdentityView'
-import OwnAppDetailView, { type OwnApp } from './OwnAppDetailView'
+import OwnAppDetailView from './OwnAppDetailView'
+
+import type { OwnAppsView_apps as Apps } from './__generated__/OwnAppsView_apps.graphql'
+import type { OwnAppsView_identities as Identities } from './__generated__/OwnAppsView_identities.graphql'
+
+type OwnApp = $Call<<T>($ReadOnlyArray<T>) => T, $PropertyType<Apps, 'own'>>
 
 type Props = {
-  identities: {
-    ownDevelopers: Array<{
-      localID: string,
-    }>,
-  },
-  apps: {
-    own: Array<OwnApp>,
-  },
+  identities: Identities,
+  apps: Apps,
 }
 
 type State = {

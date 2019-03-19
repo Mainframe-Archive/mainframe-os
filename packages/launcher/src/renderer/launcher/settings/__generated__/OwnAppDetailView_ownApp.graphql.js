@@ -15,10 +15,14 @@ export type OwnAppDetailView_ownApp = {|
   +mfid: string,
   +name: string,
   +contentsPath: string,
-  +updateFeedHash: ?string,
+  +updateFeedHash: string,
   +developer: {|
     +id: ?string,
     +name: ?string,
+  |},
+  +currentVersionData: {|
+    +version: string,
+    +versionHash: ?string,
   |},
   +versions: $ReadOnlyArray<{|
     +version: string,
@@ -51,7 +55,21 @@ var v0 = {
   "args": null,
   "storageKey": null
 },
-v1 = [
+v1 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "version",
+  "args": null,
+  "storageKey": null
+},
+v2 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "versionHash",
+  "args": null,
+  "storageKey": null
+},
+v3 = [
   {
     "kind": "ScalarField",
     "alias": null,
@@ -139,26 +157,27 @@ return {
     {
       "kind": "LinkedField",
       "alias": null,
+      "name": "currentVersionData",
+      "storageKey": null,
+      "args": null,
+      "concreteType": "AppVersionData",
+      "plural": false,
+      "selections": [
+        v1,
+        v2
+      ]
+    },
+    {
+      "kind": "LinkedField",
+      "alias": null,
       "name": "versions",
       "storageKey": null,
       "args": null,
       "concreteType": "AppVersionData",
       "plural": true,
       "selections": [
-        {
-          "kind": "ScalarField",
-          "alias": null,
-          "name": "version",
-          "args": null,
-          "storageKey": null
-        },
-        {
-          "kind": "ScalarField",
-          "alias": null,
-          "name": "versionHash",
-          "args": null,
-          "storageKey": null
-        },
+        v1,
+        v2,
         {
           "kind": "LinkedField",
           "alias": null,
@@ -176,7 +195,7 @@ return {
               "args": null,
               "concreteType": "AppPermissionDefinitions",
               "plural": false,
-              "selections": v1
+              "selections": v3
             },
             {
               "kind": "LinkedField",
@@ -186,7 +205,7 @@ return {
               "args": null,
               "concreteType": "AppPermissionDefinitions",
               "plural": false,
-              "selections": v1
+              "selections": v3
             }
           ]
         }
@@ -196,5 +215,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = 'eeae199b11af420b39ec6ab4625eee49';
+(node/*: any*/).hash = '114ea8f34c7705ac2c70128b16fb5624';
 module.exports = node;

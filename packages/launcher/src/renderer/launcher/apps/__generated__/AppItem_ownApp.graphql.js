@@ -31,7 +31,7 @@ export type AppItem_ownApp = {|
       |},
     |},
   |}>,
-  +users: ?$ReadOnlyArray<?{|
+  +users: $ReadOnlyArray<{|
     +localID: string,
     +identity: {|
       +profile: {|

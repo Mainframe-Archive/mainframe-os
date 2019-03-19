@@ -89,11 +89,15 @@ export default class AbstractApp {
     return Object.keys(this._settings).map(idType)
   }
 
+  // User settings
+
+  hasUser(userID: ID): boolean {
+    return this._settings[userID] != null
+  }
+
   removeUser(userID: ID) {
     delete this._settings[userID]
   }
-
-  // Settings
 
   getSettings(userID: ID | string): AppUserSettings {
     return (

@@ -27,10 +27,12 @@ import SettingsScreen from './settings/SettingsScreen'
 const CONTACT_CHANGED_SUBSCRIPTION = graphql`
   subscription LauncherContactChangedSubscription {
     contactChanged {
-      connectionState
-      profile {
-        name
-        avatar
+      contact {
+        connectionState
+        profile {
+          name
+          avatar
+        }
       }
     }
   }

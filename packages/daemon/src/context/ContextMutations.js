@@ -56,12 +56,21 @@ export type InstallAppParams = {
   permissionsSettings: AppUserPermissionsSettings,
 }
 
+export type UpdateAppParams = {
+  appID: ID,
+}
+
 export type CreateAppParams = {
   contentsPath: string,
   developerID: ID,
   name?: ?string,
   version?: ?string,
   permissionsRequirements?: ?StrictPermissionsRequirements,
+}
+
+export type CreateAppVersionParams = {
+  appID: ID,
+  version: string,
 }
 
 export type PublishAppParams = {
@@ -118,6 +127,9 @@ export default class ContextMutations {
     return app
   }
 
+  // TODO
+  // async updateApp(params: UpdateAppParams): Promise<void> {}
+
   async createApp(params: CreateAppParams): Promise<OwnApp> {
     const { openVault, io } = this._context
 
@@ -148,6 +160,17 @@ export default class ContextMutations {
     await app.updateFeed.syncManifest(io.bzz)
 
     this._context.next({ type: 'app_created', app })
+    return app
+  }
+
+  async createAppVersion(params: CreateAppVersionParams): Promise<OwnApp> {
+    const app = this._context.openVault.apps.getOwnByID(params.appID)
+    if (app == null) {
+      throw new Error('App not found')
+    }
+
+    app.createNextVersion(params.version)
+    this._context.next({ type: 'app_changed', app, change: 'versionCreated' })
     return app
   }
 

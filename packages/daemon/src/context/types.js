@@ -18,6 +18,12 @@ export type AppInstalledEvent = {|
   app: App,
   userID: string,
 |}
+export type AppUpdateEvent = {|
+  type: 'app_update',
+  app: App,
+  version: string,
+  status: 'updateAvailable' | 'updateDownloading' | 'updateApplied',
+|}
 
 export type AppDataChangedEvent = {|
   type: 'app_data_changed',
@@ -87,6 +93,7 @@ export type ContextEvent =
   | AppChangedEvent
   | AppDataChangedEvent
   | AppInstalledEvent
+  | AppUpdateEvent
   | ContactCreatedEvent
   | ContactChangedEvent
   | ContactDeletedEvent

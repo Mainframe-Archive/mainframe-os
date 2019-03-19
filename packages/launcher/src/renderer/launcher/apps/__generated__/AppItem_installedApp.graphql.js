@@ -30,7 +30,7 @@ export type AppItem_installedApp = {|
       +name: ?string,
     |},
   |},
-  +users: ?$ReadOnlyArray<?{|
+  +users: $ReadOnlyArray<{|
     +localID: string,
     +identity: {|
       +profile: {|
@@ -43,8 +43,8 @@ export type AppItem_installedApp = {|
         +grants: {|
           +BLOCKCHAIN_SEND: ?boolean,
           +WEB_REQUEST: {|
-            +granted: ?$ReadOnlyArray<?string>,
-            +denied: ?$ReadOnlyArray<?string>,
+            +granted: $ReadOnlyArray<string>,
+            +denied: $ReadOnlyArray<string>,
           |},
         |},
       |}

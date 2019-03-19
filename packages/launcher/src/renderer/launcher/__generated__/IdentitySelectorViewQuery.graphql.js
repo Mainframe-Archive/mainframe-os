@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 467f90235f267f06c71eafe424fca7b0
+ * @relayHash a655dc4b4bcdb5315b8794d1ca909161
  */
 
 /* eslint-disable */
@@ -13,13 +13,13 @@ export type IdentitySelectorViewQueryVariables = {||};
 export type IdentitySelectorViewQueryResponse = {|
   +viewer: {|
     +identities: {|
-      +ownUsers: ?$ReadOnlyArray<?{|
+      +ownUsers: $ReadOnlyArray<{|
         +localID: string,
         +profile: {|
           +name: string
         |},
       |}>,
-      +ownDevelopers: ?$ReadOnlyArray<?{|
+      +ownDevelopers: $ReadOnlyArray<{|
         +localID: string,
         +profile: {|
           +name: string

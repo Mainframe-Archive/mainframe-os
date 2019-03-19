@@ -11,7 +11,7 @@ import type { ConcreteFragment } from 'relay-runtime';
 import type { FragmentReference } from "relay-runtime";
 declare export opaque type OwnAppsView_identities$ref: FragmentReference;
 export type OwnAppsView_identities = {|
-  +ownDevelopers: ?$ReadOnlyArray<?{|
+  +ownDevelopers: $ReadOnlyArray<{|
     +localID: string
   |}>,
   +$refType: OwnAppsView_identities$ref,

@@ -18,39 +18,11 @@ import AppIcon from '../apps/AppIcon'
 import EditAppDetailsModal, {
   type CompleteAppData,
 } from './EditAppDetailsModal'
-
+import NewVersionModal from './NewVersionModal'
 import PermissionsRequirementsView from './PermissionsRequirements'
 import AppSummary from './AppSummary'
 
-export type OwnApp = {
-  name: string,
-  localID: string,
-  mfid: string,
-  contentsPath: ?string,
-  updateFeedHash: ?string,
-  developer: {
-    id: string,
-    name: string,
-  },
-  versions: Array<{
-    version: string,
-    versionHash: ?string,
-    permissions: StrictPermissionsRequirements,
-  }>,
-}
-
-type Props = {
-  ownApp: OwnApp,
-  onClose: () => void,
-  user: CurrentUser,
-}
-
-type State = {
-  errorMsg?: ?string,
-  publishing?: ?boolean,
-  showModal?: ?'confirm_permissions' | 'app_summary' | 'edit_details',
-  selectedVersionIndex: number,
-}
+import type { OwnAppDetailView_ownApp as OwnApp } from './__generated__/OwnAppDetailView_ownApp.graphql'
 
 const Container = styled.View`
   flex: 1;
@@ -82,7 +54,7 @@ const VersionsContainer = styled.View`
   border-color: ${colors.LIGHT_GREY_E8};
 `
 
-const VersionRow = styled.View`
+const VersionRow = styled.TouchableOpacity`
   margin: 5px;
   padding-vertical: 15px;
   padding-horizontal: 10px;
@@ -154,13 +126,44 @@ const setAppPermissionsRequirementsMutation = graphql`
   }
 `
 
+const createAppVersionMutation = graphql`
+  mutation OwnAppDetailViewAppCreateVersionMutation(
+    $input: AppCreateVersionMutationInput!
+  ) {
+    createAppVersion(input: $input) {
+      app {
+        ...OwnAppDetailView_ownApp
+      }
+    }
+  }
+`
+
+type Props = {
+  ownApp: OwnApp,
+  onClose: () => void,
+  user: CurrentUser,
+}
+
+type ModalType =
+  | 'confirm_permissions'
+  | 'app_summary'
+  | 'edit_details'
+  | 'new_version'
+
+type State = {
+  errorMsg?: ?string,
+  publishing?: ?boolean,
+  showModal?: ?ModalType,
+  selectedVersionIndex: number,
+}
+
 class OwnAppDetailView extends Component<Props, State> {
   static contextType = EnvironmentContext
 
   constructor(props: Props) {
     super(props)
     this.state = {
-      selectedVersionIndex: 0, // Currently only supporting a single version
+      selectedVersionIndex: 0,
     }
   }
 
@@ -169,6 +172,39 @@ class OwnAppDetailView extends Component<Props, State> {
   }
 
   // HANDLERS
+
+  onSelectVersion = (index: number) => {
+    this.setState({ selectedVersionIndex: index })
+  }
+
+  onPressNewVersion = () => {
+    this.setState({ showModal: 'new_version', errorMsg: undefined })
+  }
+
+  onSetNewVersion = (version: string) => {
+    this.setState({ showModal: undefined })
+
+    commitMutation(this.context, {
+      mutation: createAppVersionMutation,
+      variables: {
+        input: {
+          appID: this.props.ownApp.localID,
+          version,
+        },
+      },
+      onCompleted: (res, errors) => {
+        if (errors) {
+          const errorMsg = errors.length
+            ? errors[0].message
+            : 'Error creating new version.'
+          this.setState({ errorMsg })
+        }
+      },
+      onError: err => {
+        this.setState({ errorMsg: err.message })
+      },
+    })
+  }
 
   onPressPublishVersion = () => {
     this.setState({
@@ -186,6 +222,7 @@ class OwnAppDetailView extends Component<Props, State> {
     }
 
     this.setState({
+      selectedVersionIndex: 0,
       showModal: undefined,
     })
     commitMutation(this.context, {
@@ -212,7 +249,7 @@ class OwnAppDetailView extends Component<Props, State> {
     const { ownApp } = this.props
     const input = {
       appID: ownApp.localID,
-      version: this.selectedVersion.version,
+      version: ownApp.currentVersionData.version,
     }
 
     this.setState({
@@ -306,15 +343,33 @@ class OwnAppDetailView extends Component<Props, State> {
   // RENDER
 
   renderVersions() {
-    const versions = this.props.ownApp.versions.map(v => {
-      const selected = v.version === this.selectedVersion.version
-      return (
-        <VersionRow selected={selected} key={v.version}>
-          <Text variant="greyDark">Version {v.version}</Text>
+    const { currentVersionData, versions } = this.props.ownApp
+    const { selectedVersionIndex } = this.state
+
+    const newVersion =
+      currentVersionData.versionHash == null ? null : (
+        <VersionRow key="new-version" onPress={this.onPressNewVersion}>
+          <Text variant="greyDark">New version</Text>
         </VersionRow>
       )
-    })
-    return <VersionsContainer>{versions}</VersionsContainer>
+
+    const versionRows = versions.map((v, i) => (
+      <VersionRow
+        key={v.version}
+        onPress={() => {
+          this.onSelectVersion(i)
+        }}
+        selected={selectedVersionIndex === i}>
+        <Text variant="greyDark">Version {v.version}</Text>
+      </VersionRow>
+    ))
+
+    return (
+      <VersionsContainer>
+        {newVersion}
+        {versionRows}
+      </VersionsContainer>
+    )
   }
 
   renderVersionDetail() {
@@ -331,6 +386,7 @@ class OwnAppDetailView extends Component<Props, State> {
         </VersionDetailRow>
       </>
     )
+
     let publishedState
     if (!this.selectedVersion.versionHash) {
       const actions = this.state.publishing ? (
@@ -387,6 +443,7 @@ class OwnAppDetailView extends Component<Props, State> {
         <Text variant="error">{this.state.errorMsg}</Text>
       </ErrorView>
     ) : null
+
     return (
       <VersionDetailContainer>
         {details}
@@ -409,15 +466,17 @@ class OwnAppDetailView extends Component<Props, State> {
       case 'confirm_permissions':
         return (
           <PermissionsRequirementsView
+            // $FlowFixMe: different definition between library-imported and Relay-generated one
             permissionRequirements={this.selectedVersion.permissions}
             onSetPermissions={this.onSetPermissions}
             onRequestClose={this.onCloseModal}
           />
         )
-      case 'app_summary': {
+      case 'app_summary':
         return (
           <AppSummary
             appData={appData}
+            // $FlowFixMe: different definition between library-imported and Relay-generated one
             permissionsRequirements={this.selectedVersion.permissions}
             onPressBack={this.onPressPublishVersion}
             onRequestClose={this.onCloseModal}
@@ -425,24 +484,32 @@ class OwnAppDetailView extends Component<Props, State> {
             submitButtonTitle="PUBLISH"
           />
         )
-      }
-      case 'edit_details':
+      case 'edit_details': {
+        const previousVersion = ownApp.versions.find(v => v.versionHash != null)
         return (
           <EditAppDetailsModal
+            isEdition
             submitButtonTitle="SAVE"
             onRequestClose={this.onCloseModal}
             onSetAppData={this.onUpdateAppData}
             appData={appData}
+            previousVersion={
+              previousVersion ? previousVersion.version : undefined
+            }
+          />
+        )
+      }
+
+      case 'new_version':
+        return (
+          <NewVersionModal
+            currentVersion={ownApp.currentVersionData.version}
+            onRequestClose={this.onCloseModal}
+            onSetVersion={this.onSetNewVersion}
           />
         )
       default:
     }
-
-    const updateHash = ownApp.updateFeedHash && (
-      <Text variant="greyMed" size={12}>
-        App ID: {ownApp.updateFeedHash}
-      </Text>
-    )
 
     const header = (
       <Header>
@@ -451,7 +518,9 @@ class OwnAppDetailView extends Component<Props, State> {
         </IconContainer>
         <HeaderLabels>
           <Text variant={['mediumTitle', 'darkBlue']}>{ownApp.name}</Text>
-          {updateHash}
+          <Text variant="greyMed" size={12}>
+            App ID: {ownApp.updateFeedHash}
+          </Text>
         </HeaderLabels>
       </Header>
     )
@@ -482,6 +551,10 @@ export default createFragmentContainer(OwnAppDetailViewWithContext, {
       developer {
         id
         name
+      }
+      currentVersionData {
+        version
+        versionHash
       }
       versions {
         version

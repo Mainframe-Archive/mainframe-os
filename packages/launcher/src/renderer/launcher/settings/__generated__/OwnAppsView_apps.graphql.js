@@ -13,7 +13,7 @@ type OwnAppDetailView_ownApp$ref = any;
 import type { FragmentReference } from "relay-runtime";
 declare export opaque type OwnAppsView_apps$ref: FragmentReference;
 export type OwnAppsView_apps = {|
-  +own: ?$ReadOnlyArray<?{|
+  +own: $ReadOnlyArray<{|
     +localID: string,
     +name: string,
     +$fragmentRefs: AppItem_ownApp$ref & OwnAppDetailView_ownApp$ref,

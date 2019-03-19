@@ -12,7 +12,7 @@ type AppItem_installedApp$ref = any;
 import type { FragmentReference } from "relay-runtime";
 declare export opaque type AppsView_apps$ref: FragmentReference;
 export type AppsView_apps = {|
-  +installed: ?$ReadOnlyArray<?{|
+  +installed: $ReadOnlyArray<{|
     +localID: string,
     +mfid: string,
     +$fragmentRefs: AppItem_installedApp$ref,

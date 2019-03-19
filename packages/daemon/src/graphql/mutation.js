@@ -431,13 +431,36 @@ const appCreateMutation = mutationWithClientMutationId({
   },
   outputFields: {
     app: {
-      type: ownApp,
+      type: new GraphQLNonNull(ownApp),
       resolve: payload => payload.app,
     },
     viewer: viewerOutput,
   },
   mutateAndGetPayload: async (args, ctx) => {
     const app = await ctx.mutations.createApp(args)
+    return { app }
+  },
+})
+
+const appCreateVersionMutation = mutationWithClientMutationId({
+  name: 'AppCreateVersionMutation',
+  inputFields: {
+    appID: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    version: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+  },
+  outputFields: {
+    app: {
+      type: new GraphQLNonNull(ownApp),
+      resolve: payload => payload.app,
+    },
+    viewer: viewerOutput,
+  },
+  mutateAndGetPayload: async (args, ctx) => {
+    const app = await ctx.mutations.createAppVersion(args)
     return { app }
   },
 })
@@ -618,6 +641,7 @@ export default new GraphQLObjectType({
   fields: () => ({
     // Apps
     createApp: appCreateMutation,
+    createAppVersion: appCreateVersionMutation,
     installApp: appInstallMutation,
     setAppPermissionsRequirements: setAppPermissionsRequirementsMutation,
     publishAppVersion: publishAppVersionMutation,
