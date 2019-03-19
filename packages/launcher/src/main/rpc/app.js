@@ -19,6 +19,8 @@ import {
 import { type AppContext, ContextSubscription } from '../contexts'
 import { withPermission } from '../permissions'
 
+const validFilename = /^([A-Za-z0-9_. =+-]+?)$/
+
 class CommsSubscription extends ContextSubscription<RxSubscription> {
   constructor() {
     super('comms_subscription')
@@ -31,7 +33,9 @@ class CommsSubscription extends ContextSubscription<RxSubscription> {
   }
 }
 
-const getStorageManifestHash = async (ctx: AppContext): Promise<Object> => {
+const getStorageManifestHash = async (
+  ctx: AppContext,
+): Promise<{ feedHash: string, manifestHash: string }> => {
   let feedHash = ctx.storage.feedHash
   if (feedHash) {
     const contentHash = await ctx.bzz.getFeedValue(
@@ -51,8 +55,7 @@ const getStorageManifestHash = async (ctx: AppContext): Promise<Object> => {
   }
 }
 
-const raiseErrorIfKeyInvalid = (key: string): void | Error => {
-  const validFilename = /^([A-Za-z0-9_. =+-]+?)$/
+const raiseErrorIfKeyInvalid = (key: string): void => {
   if (!validFilename.test(key)) {
     throw new Error(
       'key can only contain alphanumeric, .=_+- chracters, and spaces',
