@@ -2,6 +2,7 @@
 
 import { createReadStream } from 'fs'
 import { Readable } from 'stream'
+import type { ListResult } from '@erebos/api-bzz-base'
 import getStream from 'get-stream'
 import {
   LOCAL_ID_SCHEMA,
@@ -12,14 +13,16 @@ import {
 import { dialog } from 'electron'
 import type { Subscription as RxSubscription } from 'rxjs'
 import * as mime from 'mime'
-import {
-  createEncryptStream,
-  createDecryptStream,
-} from '@mainframe/utils-crypto'
+
 import { type AppContext, ContextSubscription } from '../contexts'
 import { withPermission } from '../permissions'
+import {
+  getStorageManifestHash,
+  downloadStream,
+  uploadStream,
+} from '../storage'
 
-const validFilename = /^([A-Za-z0-9_. =+-]+?)$/
+const STORAGE_KEY_PARAM = { type: 'string', pattern: /^([A-Za-z0-9_. =+-]+?)$/ }
 
 class CommsSubscription extends ContextSubscription<RxSubscription> {
   constructor() {
@@ -30,36 +33,6 @@ class CommsSubscription extends ContextSubscription<RxSubscription> {
     if (this.data != null) {
       this.data.unsubscribe()
     }
-  }
-}
-
-const getStorageManifestHash = async (
-  ctx: AppContext,
-): Promise<{ feedHash: string, manifestHash: string }> => {
-  let feedHash = ctx.storage.feedHash
-  if (feedHash) {
-    const contentHash = await ctx.bzz.getFeedValue(
-      feedHash,
-      {},
-      { mode: 'content-hash' },
-    )
-    return { feedHash, manifestHash: contentHash }
-  } else {
-    feedHash = await ctx.bzz.createFeedManifest(ctx.storage.address)
-    const manifest = { entries: [] }
-    const initialManifest = await ctx.bzz.uploadFile(
-      JSON.stringify(manifest),
-      {},
-    )
-    return { feedHash, manifestHash: initialManifest }
-  }
-}
-
-const raiseErrorIfKeyInvalid = (key: string): void => {
-  if (!validFilename.test(key)) {
-    throw new Error(
-      'key can only contain alphanumeric, .=_+- chracters, and spaces',
-    )
   }
 }
 
@@ -161,7 +134,7 @@ export const sandboxed = {
         key: 'CONTACTS_SELECT',
         params: { CONTACTS_SELECT: params },
       })
-      if (!res.granted || !res || !res.data || !res.data.selectedContactIDs) {
+      if (!res || !res.granted || !res.data || !res.data.selectedContactIDs) {
         return { contacts: [] }
       }
       const userID = ctx.appSession.user.id
@@ -217,53 +190,30 @@ export const sandboxed = {
   ),
 
   storage_promptUpload: {
-    key: 'string',
+    params: {
+      key: STORAGE_KEY_PARAM,
+    },
     handler: (ctx: AppContext, params: { key: string }): Promise<boolean> => {
       return new Promise((resolve, reject) => {
         dialog.showOpenDialog(
           ctx.window,
           { title: 'Select file to upload', buttonLabel: 'Upload' },
           async filePaths => {
-            if (filePaths.length !== 0) {
+            if (filePaths.length === 0) {
+              // No file selected
+              resolve(false)
+            } else {
               try {
-                raiseErrorIfKeyInvalid(params.key)
                 const filePath = filePaths[0]
-                const encryptionKey = ctx.storage.encryptionKey
-                const { feedHash, manifestHash } = await getStorageManifestHash(
-                  ctx,
-                )
-                const stream = createReadStream(filePath).pipe(
-                  createEncryptStream(encryptionKey),
-                )
-                const contentType = mime.getType(filePath)
-                if (!contentType) {
-                  throw new Error('mime type not found')
-                }
-                const [dataHash, feedMetadata] = await Promise.all([
-                  ctx.bzz.uploadFileStream(stream, {
-                    contentType: contentType,
-                    path: params.key,
-                    manifestHash: manifestHash,
-                  }),
-                  ctx.bzz.getFeedMetadata(feedHash),
-                ])
-                await ctx.bzz.postFeedValue(feedMetadata, `0x${dataHash}`)
-                ctx.storage.contentHash = manifestHash
-                ctx.storage.feedHash = feedHash
-                await ctx.client.app.setFeedHash({
-                  sessID: ctx.appSession.session.sessID,
-                  feedHash: feedHash,
+                await uploadStream(ctx, {
+                  contentType: mime.getType(filePath),
+                  key: params.key,
+                  stream: createReadStream(filePath),
                 })
                 resolve(true)
               } catch (error) {
-                // eslint-disable-next-line no-console
-                console.log(error, 'storage_promptUpload error')
-                // TODO: use RPCError to provide a custom error code
-                reject(new Error('Upload failed'))
+                reject(new Error('Failed to access storage'))
               }
-            } else {
-              // No file selected
-              resolve(false)
             }
           },
         )
@@ -272,38 +222,28 @@ export const sandboxed = {
   },
 
   storage_list: {
-    handler: async (ctx: AppContext): Promise<Array<?string>> => {
+    handler: async (
+      ctx: AppContext,
+    ): Promise<Array<{ contentType: string, key: string }>> => {
       try {
-        let entries = []
-        const feedHash = ctx.storage.feedHash
-        if (feedHash) {
-          const contentHash = await ctx.bzz.getFeedValue(
-            feedHash,
-            {},
-            { mode: 'content-hash' },
-          )
-          ctx.storage.contentHash = contentHash
-          const response = await ctx.bzz.list(contentHash)
-          if (response.entries instanceof Array) {
-            entries = response.entries.map(meta => {
-              return { contentType: meta['contentType'], key: meta['path'] }
+        const { manifestHash } = await getStorageManifestHash(ctx)
+        const list: ListResult = await ctx.bzz.list(manifestHash)
+        return list.entries == null
+          ? []
+          : list.entries.map(meta => {
+              return { contentType: meta.contentType, key: meta.path }
             })
-          }
-        }
-        return entries
       } catch (error) {
-        // eslint-disable-next-line no-console
-        console.log(error, 'storage_list error')
-        // TODO: use RPCError to provide a custom error code
-        new Error('List failed')
+        throw new Error('Failed to access storage')
       }
-      return []
     },
   },
 
   storage_set: {
-    data: 'string',
-    key: 'string',
+    params: {
+      data: 'string',
+      key: STORAGE_KEY_PARAM,
+    },
     handler: async (
       ctx: AppContext,
       params: {
@@ -312,55 +252,35 @@ export const sandboxed = {
       },
     ): Promise<void> => {
       try {
-        raiseErrorIfKeyInvalid(params.key)
-        const { feedHash, manifestHash } = await getStorageManifestHash(ctx)
-        const encryptionKey = ctx.storage.encryptionKey
-        const dataStream = new Readable()
-        dataStream.push(params.data)
-        dataStream.push(null)
-        const stream = dataStream.pipe(createEncryptStream(encryptionKey))
-        const dataHash = await ctx.bzz.uploadFileStream(stream, {
+        const stream = new Readable()
+        stream.push(params.data)
+        stream.push(null)
+        await uploadStream(ctx, {
           contentType: 'text/plain',
-          path: params.key,
-          manifestHash: manifestHash,
+          key: params.key,
+          stream,
         })
-        const feedMetadata = await ctx.bzz.getFeedMetadata(feedHash)
-        await ctx.bzz.postFeedValue(feedMetadata, `0x${dataHash}`)
-        ctx.storage.contentHash = manifestHash
-        ctx.storage.feedHash = feedHash
-        await ctx.client.app.setFeedHash({
-          sessID: ctx.appSession.session.sessID,
-          feedHash: feedHash,
-        })
-        return
       } catch (error) {
-        // eslint-disable-next-line no-console
-        console.log(error, 'storage_set error')
-        // TODO: use RPCError to provide a custom error code
+        throw new Error('Failed to access storage')
       }
     },
   },
 
   storage_get: {
-    key: 'string',
+    params: {
+      key: STORAGE_KEY_PARAM,
+    },
     handler: async (
       ctx: AppContext,
       params: { key: string },
     ): Promise<?string> => {
       try {
-        const filePath = params.key
-        const { encryptionKey, feedHash } = ctx.storage
-        if (!feedHash) {
-          throw new Error('feedHash not found')
+        const stream = await downloadStream(ctx, params.key)
+        if (stream !== null) {
+          return await getStream(stream)
         }
-        const res = await ctx.bzz.download(`${feedHash}/${filePath}`)
-        const stream = res.body.pipe(createDecryptStream(encryptionKey))
-        const data = await getStream(stream)
-        return data
       } catch (error) {
-        // eslint-disable-next-line no-console
-        console.log(error, 'storage_get error')
-        // TODO: use RPCError to provide a custom error code
+        throw new Error('Failed to access storage')
       }
     },
   },
