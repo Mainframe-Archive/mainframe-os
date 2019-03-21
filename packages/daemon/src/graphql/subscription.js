@@ -25,7 +25,7 @@ const appUpdateChanged = {
   subscribe: (self, args, ctx: ClientContext) => {
     const { source, dispose } = ctx.appsUpdates.observe()
     const observable = source.pipe(
-      map(e => ({ appUpdate: { app: e.app, viewer: {} } })),
+      map(e => ({ appUpdateChanged: { app: e.app, viewer: {} } })),
     )
     return observableToAsyncIterator(observable, dispose)
   },

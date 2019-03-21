@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash f989ea3d75bc61cfa46bc1551bc5a825
+ * @relayHash 30c128a65113a5f3d38abf53a071583c
  */
 
 /* eslint-disable */
@@ -10,34 +10,11 @@
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
 type AppsView_apps$ref = any;
-export type AppInstallMutationInput = {
+export type AppUpdateMutationInput = {
+  appID: string,
   userID: string,
-  manifest: AppManifestInput,
-  permissionsSettings: AppPermissionsSettingsInput,
+  permissionsSettings?: ?AppPermissionsSettingsInput,
   clientMutationId?: ?string,
-};
-export type AppManifestInput = {
-  id: string,
-  name: string,
-  version: string,
-  contentsHash: string,
-  updateHash: string,
-  permissions: AppPermissionsRequirementsInput,
-  author: ManifestAuthorInput,
-};
-export type AppPermissionsRequirementsInput = {
-  optional: AppPermissionDefinitionsInput,
-  required: AppPermissionDefinitionsInput,
-};
-export type AppPermissionDefinitionsInput = {
-  BLOCKCHAIN_SEND?: ?boolean,
-  COMMS_CONTACT?: ?boolean,
-  CONTACTS_READ?: ?boolean,
-  WEB_REQUEST?: ?$ReadOnlyArray<?string>,
-};
-export type ManifestAuthorInput = {
-  id: string,
-  name: string,
 };
 export type AppPermissionsSettingsInput = {
   permissionsChecked: boolean,
@@ -53,40 +30,30 @@ export type WebRequestGrantInput = {
   granted?: ?$ReadOnlyArray<?string>,
   denied?: ?$ReadOnlyArray<?string>,
 };
-export type appMutationsAppInstallMutationVariables = {|
-  input: AppInstallMutationInput
+export type AppUpdateModalAppUpdateMutationVariables = {|
+  input: AppUpdateMutationInput
 |};
-export type appMutationsAppInstallMutationResponse = {|
-  +installApp: ?{|
-    +app: ?{|
-      +id: string,
-      +localID: string,
-      +name: string,
-    |},
+export type AppUpdateModalAppUpdateMutationResponse = {|
+  +updateApp: ?{|
     +viewer: {|
       +apps: {|
         +$fragmentRefs: AppsView_apps$ref
       |}
-    |},
+    |}
   |}
 |};
-export type appMutationsAppInstallMutation = {|
-  variables: appMutationsAppInstallMutationVariables,
-  response: appMutationsAppInstallMutationResponse,
+export type AppUpdateModalAppUpdateMutation = {|
+  variables: AppUpdateModalAppUpdateMutationVariables,
+  response: AppUpdateModalAppUpdateMutationResponse,
 |};
 */
 
 
 /*
-mutation appMutationsAppInstallMutation(
-  $input: AppInstallMutationInput!
+mutation AppUpdateModalAppUpdateMutation(
+  $input: AppUpdateMutationInput!
 ) {
-  installApp(input: $input) {
-    app {
-      id
-      localID
-      name
-    }
+  updateApp(input: $input) {
     viewer {
       apps {
         ...AppsView_apps
@@ -203,7 +170,7 @@ var v0 = [
   {
     "kind": "LocalArgument",
     "name": "input",
-    "type": "AppInstallMutationInput!",
+    "type": "AppUpdateMutationInput!",
     "defaultValue": null
   }
 ],
@@ -212,59 +179,45 @@ v1 = [
     "kind": "Variable",
     "name": "input",
     "variableName": "input",
-    "type": "AppInstallMutationInput!"
+    "type": "AppUpdateMutationInput!"
   }
 ],
 v2 = {
-  "kind": "ScalarField",
-  "alias": null,
-  "name": "id",
-  "args": null,
-  "storageKey": null
-},
-v3 = {
   "kind": "ScalarField",
   "alias": null,
   "name": "localID",
   "args": null,
   "storageKey": null
 },
-v4 = {
+v3 = {
   "kind": "ScalarField",
   "alias": null,
   "name": "name",
   "args": null,
   "storageKey": null
 },
-v5 = {
-  "kind": "LinkedField",
+v4 = {
+  "kind": "ScalarField",
   "alias": null,
-  "name": "app",
-  "storageKey": null,
+  "name": "id",
   "args": null,
-  "concreteType": "App",
-  "plural": false,
-  "selections": [
-    v2,
-    v3,
-    v4
-  ]
+  "storageKey": null
 },
-v6 = {
+v5 = {
   "kind": "ScalarField",
   "alias": null,
   "name": "version",
   "args": null,
   "storageKey": null
 },
-v7 = {
+v6 = {
   "kind": "ScalarField",
   "alias": null,
   "name": "BLOCKCHAIN_SEND",
   "args": null,
   "storageKey": null
 },
-v8 = [
+v7 = [
   {
     "kind": "ScalarField",
     "alias": null,
@@ -272,9 +225,9 @@ v8 = [
     "args": null,
     "storageKey": null
   },
-  v7
+  v6
 ],
-v9 = {
+v8 = {
   "kind": "LinkedField",
   "alias": null,
   "name": "permissions",
@@ -291,7 +244,7 @@ v9 = {
       "args": null,
       "concreteType": "AppPermissionDefinitions",
       "plural": false,
-      "selections": v8
+      "selections": v7
     },
     {
       "kind": "LinkedField",
@@ -301,20 +254,20 @@ v9 = {
       "args": null,
       "concreteType": "AppPermissionDefinitions",
       "plural": false,
-      "selections": v8
+      "selections": v7
     }
   ]
 };
 return {
   "kind": "Request",
   "operationKind": "mutation",
-  "name": "appMutationsAppInstallMutation",
+  "name": "AppUpdateModalAppUpdateMutation",
   "id": null,
-  "text": "mutation appMutationsAppInstallMutation(\n  $input: AppInstallMutationInput!\n) {\n  installApp(input: $input) {\n    app {\n      id\n      localID\n      name\n    }\n    viewer {\n      apps {\n        ...AppsView_apps\n      }\n      id\n    }\n  }\n}\n\nfragment AppsView_apps on Apps {\n  installed {\n    ...AppItem_installedApp\n    ...AppUpdateModal_app\n    localID\n    mfid\n    manifest {\n      permissions {\n        optional {\n          WEB_REQUEST\n          BLOCKCHAIN_SEND\n        }\n        required {\n          WEB_REQUEST\n          BLOCKCHAIN_SEND\n        }\n      }\n    }\n    name\n    users {\n      localID\n      identity {\n        profile {\n          name\n        }\n        id\n      }\n      settings {\n        permissionsSettings {\n          permissionsChecked\n          grants {\n            BLOCKCHAIN_SEND\n            WEB_REQUEST {\n              granted\n              denied\n            }\n          }\n        }\n      }\n      id\n    }\n    id\n  }\n}\n\nfragment AppItem_installedApp on App {\n  mfid\n  localID\n  name\n  manifest {\n    author {\n      id\n      name\n    }\n  }\n  update {\n    manifest {\n      version\n    }\n  }\n}\n\nfragment AppUpdateModal_app on App {\n  localID\n  name\n  manifest {\n    version\n  }\n  update {\n    manifest {\n      permissions {\n        optional {\n          WEB_REQUEST\n          BLOCKCHAIN_SEND\n        }\n        required {\n          WEB_REQUEST\n          BLOCKCHAIN_SEND\n        }\n      }\n      version\n    }\n    permissionsChanged\n  }\n  users {\n    localID\n    settings {\n      permissionsSettings {\n        grants {\n          BLOCKCHAIN_SEND\n          WEB_REQUEST {\n            granted\n            denied\n          }\n        }\n      }\n    }\n    id\n  }\n}\n",
+  "text": "mutation AppUpdateModalAppUpdateMutation(\n  $input: AppUpdateMutationInput!\n) {\n  updateApp(input: $input) {\n    viewer {\n      apps {\n        ...AppsView_apps\n      }\n      id\n    }\n  }\n}\n\nfragment AppsView_apps on Apps {\n  installed {\n    ...AppItem_installedApp\n    ...AppUpdateModal_app\n    localID\n    mfid\n    manifest {\n      permissions {\n        optional {\n          WEB_REQUEST\n          BLOCKCHAIN_SEND\n        }\n        required {\n          WEB_REQUEST\n          BLOCKCHAIN_SEND\n        }\n      }\n    }\n    name\n    users {\n      localID\n      identity {\n        profile {\n          name\n        }\n        id\n      }\n      settings {\n        permissionsSettings {\n          permissionsChecked\n          grants {\n            BLOCKCHAIN_SEND\n            WEB_REQUEST {\n              granted\n              denied\n            }\n          }\n        }\n      }\n      id\n    }\n    id\n  }\n}\n\nfragment AppItem_installedApp on App {\n  mfid\n  localID\n  name\n  manifest {\n    author {\n      id\n      name\n    }\n  }\n  update {\n    manifest {\n      version\n    }\n  }\n}\n\nfragment AppUpdateModal_app on App {\n  localID\n  name\n  manifest {\n    version\n  }\n  update {\n    manifest {\n      permissions {\n        optional {\n          WEB_REQUEST\n          BLOCKCHAIN_SEND\n        }\n        required {\n          WEB_REQUEST\n          BLOCKCHAIN_SEND\n        }\n      }\n      version\n    }\n    permissionsChanged\n  }\n  users {\n    localID\n    settings {\n      permissionsSettings {\n        grants {\n          BLOCKCHAIN_SEND\n          WEB_REQUEST {\n            granted\n            denied\n          }\n        }\n      }\n    }\n    id\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
-    "name": "appMutationsAppInstallMutation",
+    "name": "AppUpdateModalAppUpdateMutation",
     "type": "Mutation",
     "metadata": null,
     "argumentDefinitions": v0,
@@ -322,13 +275,12 @@ return {
       {
         "kind": "LinkedField",
         "alias": null,
-        "name": "installApp",
+        "name": "updateApp",
         "storageKey": null,
         "args": v1,
-        "concreteType": "AppInstallMutationPayload",
+        "concreteType": "AppUpdateMutationPayload",
         "plural": false,
         "selections": [
-          v5,
           {
             "kind": "LinkedField",
             "alias": null,
@@ -362,19 +314,18 @@ return {
   },
   "operation": {
     "kind": "Operation",
-    "name": "appMutationsAppInstallMutation",
+    "name": "AppUpdateModalAppUpdateMutation",
     "argumentDefinitions": v0,
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
-        "name": "installApp",
+        "name": "updateApp",
         "storageKey": null,
         "args": v1,
-        "concreteType": "AppInstallMutationPayload",
+        "concreteType": "AppUpdateMutationPayload",
         "plural": false,
         "selections": [
-          v5,
           {
             "kind": "LinkedField",
             "alias": null,
@@ -409,8 +360,8 @@ return {
                         "args": null,
                         "storageKey": null
                       },
+                      v2,
                       v3,
-                      v4,
                       {
                         "kind": "LinkedField",
                         "alias": null,
@@ -429,12 +380,12 @@ return {
                             "concreteType": "AppAuthor",
                             "plural": false,
                             "selections": [
-                              v2,
-                              v4
+                              v4,
+                              v3
                             ]
                           },
-                          v6,
-                          v9
+                          v5,
+                          v8
                         ]
                       },
                       {
@@ -455,8 +406,8 @@ return {
                             "concreteType": "AppManifestData",
                             "plural": false,
                             "selections": [
-                              v6,
-                              v9
+                              v5,
+                              v8
                             ]
                           },
                           {
@@ -477,7 +428,7 @@ return {
                         "concreteType": "AppUser",
                         "plural": true,
                         "selections": [
-                          v3,
+                          v2,
                           {
                             "kind": "LinkedField",
                             "alias": null,
@@ -505,7 +456,7 @@ return {
                                     "concreteType": "AppPermissions",
                                     "plural": false,
                                     "selections": [
-                                      v7,
+                                      v6,
                                       {
                                         "kind": "LinkedField",
                                         "alias": null,
@@ -544,7 +495,7 @@ return {
                               }
                             ]
                           },
-                          v2,
+                          v4,
                           {
                             "kind": "LinkedField",
                             "alias": null,
@@ -563,20 +514,20 @@ return {
                                 "concreteType": "NamedProfile",
                                 "plural": false,
                                 "selections": [
-                                  v4
+                                  v3
                                 ]
                               },
-                              v2
+                              v4
                             ]
                           }
                         ]
                       },
-                      v2
+                      v4
                     ]
                   }
                 ]
               },
-              v2
+              v4
             ]
           }
         ]
@@ -586,5 +537,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = 'd3739c3812348d6740c01bf09811adc4';
+(node/*: any*/).hash = 'ce163426574995ed118d543c70cad0e2';
 module.exports = node;

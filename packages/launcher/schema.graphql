@@ -162,6 +162,19 @@ type AppUpdateData {
   permissionsChanged: Boolean!
 }
 
+input AppUpdateMutationInput {
+  appID: String!
+  userID: String!
+  permissionsSettings: AppPermissionsSettingsInput
+  clientMutationId: String
+}
+
+type AppUpdateMutationPayload {
+  app: App
+  viewer: Viewer!
+  clientMutationId: String
+}
+
 type AppUpdatePayload {
   app: App!
   viewer: Viewer!
@@ -324,6 +337,7 @@ type Mutation {
   createApp(input: AppCreateMutationInput!): AppCreateMutationPayload
   createAppVersion(input: AppCreateVersionMutationInput!): AppCreateVersionMutationPayload
   installApp(input: AppInstallMutationInput!): AppInstallMutationPayload
+  updateApp(input: AppUpdateMutationInput!): AppUpdateMutationPayload
   setAppPermissionsRequirements(input: SetAppPermissionsRequirementsInput!): SetAppPermissionsRequirementsPayload
   publishAppVersion(input: PublishAppVersionInput!): PublishAppVersionPayload
   updateAppDetails(input: UpdateAppDetailsInput!): UpdateAppDetailsPayload

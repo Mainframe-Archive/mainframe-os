@@ -7,7 +7,9 @@ export type CurrentUser = {
   defaultEthAddress: ?string,
 }
 
-export const { Consumer, Provider } = createContext<{ user?: CurrentUser }>({})
+export const LauncherContext = createContext<{ user?: CurrentUser }>({})
+
+export const { Consumer, Provider } = LauncherContext
 
 export default (Component: ElementRef<any>) => {
   return function WrappedComponent(props: any) {

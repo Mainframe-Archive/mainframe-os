@@ -589,6 +589,32 @@ const appInstallMutation = mutationWithClientMutationId({
   },
 })
 
+const appUpdateMutation = mutationWithClientMutationId({
+  name: 'AppUpdateMutation',
+  inputFields: {
+    appID: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    userID: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    permissionsSettings: {
+      type: appPermissionSettingsInput,
+    },
+  },
+  outputFields: {
+    app: {
+      type: app,
+      resolve: payload => payload.app,
+    },
+    viewer: viewerOutput,
+  },
+  mutateAndGetPayload: async (params, ctx) => {
+    const app = await ctx.mutations.updateApp(params)
+    return { app }
+  },
+})
+
 export const updateAppDetailsMutation = mutationWithClientMutationId({
   name: 'UpdateAppDetails',
   inputFields: {
@@ -643,6 +669,7 @@ export default new GraphQLObjectType({
     createApp: appCreateMutation,
     createAppVersion: appCreateVersionMutation,
     installApp: appInstallMutation,
+    updateApp: appUpdateMutation,
     setAppPermissionsRequirements: setAppPermissionsRequirementsMutation,
     publishAppVersion: publishAppVersionMutation,
     updateAppDetails: updateAppDetailsMutation,

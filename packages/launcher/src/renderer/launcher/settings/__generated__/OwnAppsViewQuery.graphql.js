@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 43c20cdc8a8a995b9f999193b38f4686
+ * @relayHash 22194f39115aa029218a7191cb049e0c
  */
 
 /* eslint-disable */
@@ -66,29 +66,6 @@ fragment AppItem_ownApp on OwnApp {
   developer {
     id
     name
-  }
-  versions {
-    version
-    permissions {
-      optional {
-        WEB_REQUEST
-        BLOCKCHAIN_SEND
-      }
-      required {
-        WEB_REQUEST
-        BLOCKCHAIN_SEND
-      }
-    }
-  }
-  users {
-    localID
-    identity {
-      profile {
-        name
-      }
-      id
-    }
-    id
   }
 }
 
@@ -156,7 +133,14 @@ v3 = {
   "args": null,
   "storageKey": null
 },
-v4 = [
+v4 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "versionHash",
+  "args": null,
+  "storageKey": null
+},
+v5 = [
   {
     "kind": "ScalarField",
     "alias": null,
@@ -185,20 +169,13 @@ v4 = [
     "args": null,
     "storageKey": null
   }
-],
-v5 = {
-  "kind": "ScalarField",
-  "alias": null,
-  "name": "versionHash",
-  "args": null,
-  "storageKey": null
-};
+];
 return {
   "kind": "Request",
   "operationKind": "query",
   "name": "OwnAppsViewQuery",
   "id": null,
-  "text": "query OwnAppsViewQuery {\n  viewer {\n    identities {\n      ...OwnAppsView_identities\n    }\n    apps {\n      ...OwnAppsView_apps\n    }\n    id\n  }\n}\n\nfragment OwnAppsView_identities on Identities {\n  ownDevelopers {\n    localID\n    id\n  }\n}\n\nfragment OwnAppsView_apps on Apps {\n  own {\n    localID\n    name\n    ...AppItem_ownApp\n    ...OwnAppDetailView_ownApp\n    id\n  }\n}\n\nfragment AppItem_ownApp on OwnApp {\n  mfid\n  localID\n  name\n  developer {\n    id\n    name\n  }\n  versions {\n    version\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n    }\n  }\n  users {\n    localID\n    identity {\n      profile {\n        name\n      }\n      id\n    }\n    id\n  }\n}\n\nfragment OwnAppDetailView_ownApp on OwnApp {\n  localID\n  mfid\n  name\n  contentsPath\n  updateFeedHash\n  developer {\n    id\n    name\n  }\n  currentVersionData {\n    version\n    versionHash\n  }\n  versions {\n    version\n    versionHash\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        COMMS_CONTACT\n        CONTACTS_READ\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        COMMS_CONTACT\n        CONTACTS_READ\n      }\n    }\n  }\n}\n",
+  "text": "query OwnAppsViewQuery {\n  viewer {\n    identities {\n      ...OwnAppsView_identities\n    }\n    apps {\n      ...OwnAppsView_apps\n    }\n    id\n  }\n}\n\nfragment OwnAppsView_identities on Identities {\n  ownDevelopers {\n    localID\n    id\n  }\n}\n\nfragment OwnAppsView_apps on Apps {\n  own {\n    localID\n    name\n    ...AppItem_ownApp\n    ...OwnAppDetailView_ownApp\n    id\n  }\n}\n\nfragment AppItem_ownApp on OwnApp {\n  mfid\n  localID\n  name\n  developer {\n    id\n    name\n  }\n}\n\nfragment OwnAppDetailView_ownApp on OwnApp {\n  localID\n  mfid\n  name\n  contentsPath\n  updateFeedHash\n  developer {\n    id\n    name\n  }\n  currentVersionData {\n    version\n    versionHash\n  }\n  versions {\n    version\n    versionHash\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        COMMS_CONTACT\n        CONTACTS_READ\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        COMMS_CONTACT\n        CONTACTS_READ\n      }\n    }\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -331,87 +308,6 @@ return {
                     ]
                   },
                   {
-                    "kind": "LinkedField",
-                    "alias": null,
-                    "name": "versions",
-                    "storageKey": null,
-                    "args": null,
-                    "concreteType": "AppVersionData",
-                    "plural": true,
-                    "selections": [
-                      v3,
-                      {
-                        "kind": "LinkedField",
-                        "alias": null,
-                        "name": "permissions",
-                        "storageKey": null,
-                        "args": null,
-                        "concreteType": "AppPermissionsRequirements",
-                        "plural": false,
-                        "selections": [
-                          {
-                            "kind": "LinkedField",
-                            "alias": null,
-                            "name": "optional",
-                            "storageKey": null,
-                            "args": null,
-                            "concreteType": "AppPermissionDefinitions",
-                            "plural": false,
-                            "selections": v4
-                          },
-                          {
-                            "kind": "LinkedField",
-                            "alias": null,
-                            "name": "required",
-                            "storageKey": null,
-                            "args": null,
-                            "concreteType": "AppPermissionDefinitions",
-                            "plural": false,
-                            "selections": v4
-                          }
-                        ]
-                      },
-                      v5
-                    ]
-                  },
-                  {
-                    "kind": "LinkedField",
-                    "alias": null,
-                    "name": "users",
-                    "storageKey": null,
-                    "args": null,
-                    "concreteType": "AppUser",
-                    "plural": true,
-                    "selections": [
-                      v0,
-                      {
-                        "kind": "LinkedField",
-                        "alias": null,
-                        "name": "identity",
-                        "storageKey": null,
-                        "args": null,
-                        "concreteType": "OwnUserIdentity",
-                        "plural": false,
-                        "selections": [
-                          {
-                            "kind": "LinkedField",
-                            "alias": null,
-                            "name": "profile",
-                            "storageKey": null,
-                            "args": null,
-                            "concreteType": "NamedProfile",
-                            "plural": false,
-                            "selections": [
-                              v2
-                            ]
-                          },
-                          v1
-                        ]
-                      },
-                      v1
-                    ]
-                  },
-                  {
                     "kind": "ScalarField",
                     "alias": null,
                     "name": "contentsPath",
@@ -435,7 +331,51 @@ return {
                     "plural": false,
                     "selections": [
                       v3,
-                      v5
+                      v4
+                    ]
+                  },
+                  {
+                    "kind": "LinkedField",
+                    "alias": null,
+                    "name": "versions",
+                    "storageKey": null,
+                    "args": null,
+                    "concreteType": "AppVersionData",
+                    "plural": true,
+                    "selections": [
+                      v3,
+                      v4,
+                      {
+                        "kind": "LinkedField",
+                        "alias": null,
+                        "name": "permissions",
+                        "storageKey": null,
+                        "args": null,
+                        "concreteType": "AppPermissionsRequirements",
+                        "plural": false,
+                        "selections": [
+                          {
+                            "kind": "LinkedField",
+                            "alias": null,
+                            "name": "optional",
+                            "storageKey": null,
+                            "args": null,
+                            "concreteType": "AppPermissionDefinitions",
+                            "plural": false,
+                            "selections": v5
+                          },
+                          {
+                            "kind": "LinkedField",
+                            "alias": null,
+                            "name": "required",
+                            "storageKey": null,
+                            "args": null,
+                            "concreteType": "AppPermissionDefinitions",
+                            "plural": false,
+                            "selections": v5
+                          }
+                        ]
+                      }
                     ]
                   },
                   v1

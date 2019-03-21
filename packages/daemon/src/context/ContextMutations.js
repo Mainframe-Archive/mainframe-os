@@ -46,6 +46,25 @@ import type HDWallet from '../wallet/HDWallet'
 
 import type ClientContext from './ClientContext'
 
+const downloadAppContents = async (
+  ctx: ClientContext,
+  app: App,
+): Promise<void> => {
+  const contentsPath = getContentsPath(ctx.env, app.manifest)
+  try {
+    app.installationState = 'downloading'
+    await ensureDir(contentsPath)
+    await ctx.io.bzz.downloadDirectoryTo(
+      app.manifest.contentsHash,
+      contentsPath,
+    )
+    app.installationState = 'ready'
+  } catch (err) {
+    app.installationState = 'download_error'
+    throw new Error('Failed to download app contents')
+  }
+}
+
 export type Feeds = {
   [type: string]: bzzHash,
 }
@@ -58,6 +77,8 @@ export type InstallAppParams = {
 
 export type UpdateAppParams = {
   appID: ID,
+  userID: ID,
+  permissionsSettings?: AppUserPermissionsSettings,
 }
 
 export type CreateAppParams = {
@@ -100,7 +121,7 @@ export default class ContextMutations {
   // Apps
 
   async installApp(params: InstallAppParams): Promise<App> {
-    const { env, io, openVault } = this._context
+    const { openVault } = this._context
 
     const app = openVault.installApp(
       params.manifest,
@@ -109,26 +130,42 @@ export default class ContextMutations {
     )
 
     if (app.installationState !== 'ready') {
-      const contentsPath = getContentsPath(env, params.manifest)
-      try {
-        app.installationState = 'downloading'
-        await ensureDir(contentsPath)
-        await io.bzz.downloadDirectoryTo(
-          app.manifest.contentsHash,
-          contentsPath,
-        )
-        app.installationState = 'ready'
-      } catch (err) {
-        app.installationState = 'download_error'
-      }
+      await downloadAppContents(this._context, app)
     }
 
     this._context.next({ type: 'app_installed', app, userID: params.userID })
     return app
   }
 
-  // TODO
-  // async updateApp(params: UpdateAppParams): Promise<void> {}
+  async updateApp(params: UpdateAppParams): Promise<App> {
+    const { openVault } = this._context
+
+    const update = openVault.apps.getUpdate(params.appID)
+    if (update == null) {
+      throw new Error('Update not found')
+    }
+
+    const { app } = update
+    if (update.hasRequiredPermissionsChanges) {
+      if (params.permissionsSettings == null) {
+        throw new Error('Missing permissions settings')
+      }
+      app.setPermissionsSettings(params.userID, params.permissionsSettings)
+    }
+
+    if (app.installationState !== 'ready') {
+      await downloadAppContents(this._context, app)
+    }
+    openVault.apps.applyUpdate(app)
+
+    this._context.next({
+      type: 'app_update',
+      app,
+      version: app.version,
+      status: 'updateApplied',
+    })
+    return app
+  }
 
   async createApp(params: CreateAppParams): Promise<OwnApp> {
     const { openVault, io } = this._context

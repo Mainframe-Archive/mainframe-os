@@ -369,6 +369,11 @@ export default class AppsRepository {
     return update
   }
 
+  applyUpdate(app: App): void {
+    delete this._updates[app.id]
+    this._apps[app.id] = app
+  }
+
   // Own apps
 
   create(params: OwnAppCreationParams): OwnApp {

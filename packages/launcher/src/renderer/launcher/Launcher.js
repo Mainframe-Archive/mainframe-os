@@ -24,6 +24,21 @@ import ContactsScreen from './contacts/ContactsScreen'
 import NotificationsScreen from './notifications/NotificationsScreen'
 import SettingsScreen from './settings/SettingsScreen'
 
+const APP_UPDATE_CHANGED_SUBSCRIPTION = graphql`
+  subscription LauncherAppUpdateChangedSubscription {
+    appUpdateChanged {
+      app {
+        ...AppItem_installedApp
+      }
+      viewer {
+        apps {
+          updatesCount
+        }
+      }
+    }
+  }
+`
+
 const CONTACT_CHANGED_SUBSCRIPTION = graphql`
   subscription LauncherContactChangedSubscription {
     contactChanged {
@@ -75,7 +90,7 @@ type State = {
 }
 
 class Launcher extends Component<Props, State> {
-  _subscription: ?Disposable
+  _subscriptions: Array<Disposable> = []
 
   constructor(props: Props) {
     super(props)
@@ -96,15 +111,19 @@ class Launcher extends Component<Props, State> {
   }
 
   componentDidMount() {
-    this._subscription = requestSubscription(this.props.relay.environment, {
-      subscription: CONTACT_CHANGED_SUBSCRIPTION,
+    this._subscriptions = [
+      APP_UPDATE_CHANGED_SUBSCRIPTION,
+      CONTACT_CHANGED_SUBSCRIPTION,
+    ].map(subscription => {
+      return requestSubscription(this.props.relay.environment, { subscription })
     })
   }
 
   componentWillUnmount() {
-    if (this._subscription != null) {
-      this._subscription.dispose()
-    }
+    this._subscriptions.forEach(sub => {
+      sub.dispose()
+    })
+    this._subscriptions = []
   }
 
   setOpenScreen = (name: ScreenNames) => {

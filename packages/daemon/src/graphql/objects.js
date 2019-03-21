@@ -242,9 +242,11 @@ export const appUpdateData = new GraphQLObjectType({
   fields: () => ({
     manifest: {
       type: new GraphQLNonNull(appManifestData),
+      resolve: self => self.app.manifest,
     },
     permissionsChanged: {
       type: new GraphQLNonNull(GraphQLBoolean),
+      resolve: self => self.hasRequiredPermissionsChanges,
     },
   }),
 })
@@ -270,6 +272,9 @@ export const app = new GraphQLObjectType({
     },
     update: {
       type: appUpdateData,
+      resolve: (self, args, ctx) => {
+        return ctx.openVault.apps.getUpdate(self.id)
+      },
     },
     users: {
       type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(appUser))),

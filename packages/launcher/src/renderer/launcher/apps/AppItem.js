@@ -2,13 +2,16 @@
 
 import React, { Component } from 'react'
 import { createFragmentContainer, graphql } from 'react-relay'
-import type { AppInstalledData } from '@mainframe/client'
 import styled from 'styled-components/native'
 import { Text } from '@morpheus-ui/core'
-import type OwnApp from '../settings/__generated__/OwnAppDetailView_ownApp.graphql.js'
+
+import COLORS from '../../colors'
+
+import type { AppItem_installedApp as InstalledApp } from './__generated__/AppItem_installedApp.graphql.js'
+import type { AppItem_ownApp as OwnApp } from './__generated__/AppItem_ownApp.graphql.js'
 import AppIcon from './AppIcon'
 
-const AppButtonContainer = styled.TouchableOpacity`
+const AppButtonContainer = styled.View`
   padding: 15px 10px;
   flex-direction: column;
   align-items: center;
@@ -16,18 +19,28 @@ const AppButtonContainer = styled.TouchableOpacity`
   width: 110px;
 `
 
-const IconContainer = styled.View`
+const IconContainer = styled.TouchableOpacity`
   width: 72px;
   height: 72px;
   margin-bottom: 10px;
 `
 
+const UpdateButton = styled.TouchableOpacity`
+  width: 72px;
+  align-items: center;
+  margin-top: 10px;
+  padding: 5px;
+  border: 1px solid ${COLORS.PRIMARY_DARK_RED};
+  border-radius: 3px;
+`
+
 type SharedProps = {
-  onOpenApp: (app: AppInstalledData | OwnApp, own: boolean) => any,
+  onOpenApp: (appID: string, own: boolean) => any,
 }
 
 type InstalledProps = SharedProps & {
-  installedApp: AppInstalledData,
+  installedApp: InstalledApp,
+  onPressUpdate: (appID: string) => void,
 }
 
 type OwnProps = SharedProps & {
@@ -45,8 +58,9 @@ type SuggestedProps = {
 type Props = {
   appID: string,
   appName: string,
-  devName: string,
+  devName: ?string,
   onOpen: () => void,
+  onUpdate?: ?() => void,
   testID: string,
 }
 
@@ -89,18 +103,32 @@ export default class AppItem extends Component<Props, State> {
   }
 
   render() {
-    const { appID, appName, devName, onOpen, testID } = this.props
+    const { appID, appName, devName, onOpen, onUpdate, testID } = this.props
+
+    let extra = null
+    if (onUpdate != null) {
+      extra = (
+        <UpdateButton onPress={onUpdate}>
+          <Text color={COLORS.PRIMARY_DARK_RED}>Update</Text>
+        </UpdateButton>
+      )
+    } else if (devName != null) {
+      extra = <Text variant="appButtonId">{devName}</Text>
+    }
+
     return (
-      <AppButtonContainer onPress={onOpen} key={appID} testID={testID}>
+      <AppButtonContainer key={appID}>
         <IconContainer
           className={this.state.direction}
           onMouseMove={this.setDirection}
           onMouseOver={this.startMoving}
-          onMouseOut={this.stopMoving}>
+          onMouseOut={this.stopMoving}
+          onPress={onOpen}
+          testID={testID}>
           <AppIcon id={appID} />
         </IconContainer>
         <Text variant="appButtonName">{appName}</Text>
-        <Text variant="appButtonId">{devName}</Text>
+        {extra}
       </AppButtonContainer>
     )
   }
@@ -125,8 +153,14 @@ export const SuggestedAppItem = (props: SuggestedProps) => {
 const InstalledView = (props: InstalledProps) => {
   const app = props.installedApp
   const onOpen = () => {
-    props.onOpenApp(app, false)
+    props.onOpenApp(app.localID, false)
   }
+  const onUpdate =
+    app.update == null
+      ? undefined
+      : () => {
+          props.onPressUpdate(app.localID)
+        }
 
   return (
     <AppItem
@@ -134,6 +168,7 @@ const InstalledView = (props: InstalledProps) => {
       appName={app.name}
       devName={app.manifest.author.name}
       onOpen={onOpen}
+      onUpdate={onUpdate}
       testID="installed-app-item"
     />
   )
@@ -142,7 +177,7 @@ const InstalledView = (props: InstalledProps) => {
 const OwnView = (props: OwnProps) => {
   const app = props.ownApp
   const onOpen = () => {
-    props.onOpenApp(app, true)
+    props.onOpenApp(app.localID, true)
   }
 
   return (
@@ -163,39 +198,14 @@ export const InstalledAppItem = createFragmentContainer(InstalledView, {
       localID
       name
       manifest {
-        permissions {
-          optional {
-            WEB_REQUEST
-            BLOCKCHAIN_SEND
-          }
-          required {
-            WEB_REQUEST
-            BLOCKCHAIN_SEND
-          }
-        }
         author {
           id
           name
         }
       }
-      users {
-        localID
-        identity {
-          profile {
-            name
-          }
-        }
-        settings {
-          permissionsSettings {
-            permissionsChecked
-            grants {
-              BLOCKCHAIN_SEND
-              WEB_REQUEST {
-                granted
-                denied
-              }
-            }
-          }
+      update {
+        manifest {
+          version
         }
       }
     }
@@ -211,27 +221,6 @@ export const OwnAppItem = createFragmentContainer(OwnView, {
       developer {
         id
         name
-      }
-      versions {
-        version
-        permissions {
-          optional {
-            WEB_REQUEST
-            BLOCKCHAIN_SEND
-          }
-          required {
-            WEB_REQUEST
-            BLOCKCHAIN_SEND
-          }
-        }
-      }
-      users {
-        localID
-        identity {
-          profile {
-            name
-          }
-        }
       }
     }
   `,

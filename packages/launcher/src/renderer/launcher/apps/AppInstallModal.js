@@ -177,9 +177,9 @@ class AppInstallModal extends Component<ViewProps, State> {
   // RENDER
 
   renderManifestImport() {
-    const errorMsg = this.state.errorMsg && (
+    const errorMsg = this.state.errorMsg ? (
       <Text variant="error">{this.state.errorMsg}</Text>
-    )
+    ) : null
     return (
       <FormModalView
         dismissButton="CANCEL"
