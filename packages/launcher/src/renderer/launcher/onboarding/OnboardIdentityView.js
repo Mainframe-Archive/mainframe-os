@@ -2,7 +2,7 @@
 
 import React, { Component } from 'react'
 import { graphql, commitMutation } from 'react-relay'
-import { Button, TextField, Row, Column, Text } from '@morpheus-ui/core'
+import { Button, TextField, Row, Column, Text, Switch } from '@morpheus-ui/core'
 import CircleArrowRight from '@morpheus-ui/icons/CircleArrowRight'
 import { Form, type FormSubmitPayload } from '@morpheus-ui/forms'
 import styled from 'styled-components/native'
@@ -60,16 +60,16 @@ export default class OnboardIdentityView extends Component<Props, State> {
         error: null,
         awaitingResponse: true,
       })
-      this.createIdentity(fields.name)
+      this.createIdentity(fields.name, !fields.discoverable)
     }
   }
 
-  async createIdentity(name: string) {
+  async createIdentity(name: string, isPrivate: boolean) {
     const input = {
       profile: {
         name,
       },
-      private: true,
+      private: isPrivate,
     }
     commitMutation(this.context, {
       mutation: createUserMutation,
@@ -131,6 +131,12 @@ export default class OnboardIdentityView extends Component<Props, State> {
                   name="name"
                   required
                   testID="onboard-create-identity-input-name"
+                />
+              </Column>
+              <Column>
+                <Switch
+                  label="Make my identity discoverable to other users"
+                  name="discoverable"
                 />
               </Column>
             </Row>

@@ -3,14 +3,16 @@
 import React, { Component } from 'react'
 import styled from 'styled-components/native'
 import { Button, Text, Checkbox } from '@morpheus-ui/core'
-
-import colors from '../colors'
+import Avatar from '../UIComponents/Avatar'
 import rpc from './rpc'
+
+import { condenseAddress } from './WalletPickerView'
 
 export type SelectedContactIDs = Array<string>
 
 type Contact = {
   localID: string,
+  publicFeed: string,
   profile: {
     name: string,
     ethAddress?: ?string,
@@ -30,15 +32,13 @@ type State = {
   hover: ?string,
 }
 
-const Container = styled.View`
-  margin: 0 -20px;
-`
+const Container = styled.View``
 
 const ContactRow = styled.View`
   padding-vertical: 10px;
   padding-right: 20px;
   padding-left: 20px;
-  border-color: ${colors.GREY_DARK_48};
+  border-color: #303030;
   border-bottom-width: 1px;
 
   ${props => props.last && 'border-bottom-width: 0;'}
@@ -48,7 +48,7 @@ const ContactRow = styled.View`
 
 const ContactData = styled.View`
   flex: 1;
-  padding-right: 20px;
+  padding: 0 20px 0 10px;
 `
 
 const ScrollViewStyled = styled.ScrollView`
@@ -58,11 +58,11 @@ const ScrollViewStyled = styled.ScrollView`
 const ButtonsContainer = styled.View`
   flex-direction: row;
   margin-top: 20px;
-  padding: 0 20px;
+  padding: 0 20px 20px 20px;
 `
 
 const TouchableOpacity = styled.TouchableOpacity`
-  ${props => props.hover && `background-color: ${colors.GREY_DARK_48};`}
+  ${props => props.hover && `background-color: #2C2C2C;`}
 `
 
 export default class ContactPickerView extends Component<Props, State> {
@@ -109,12 +109,13 @@ export default class ContactPickerView extends Component<Props, State> {
       const selected = this.state.selectedContacts.has(c.localID)
       const content = (
         <ContactRow key={c.localID} last={i === this.state.contacts.length - 1}>
+          <Avatar id={c.publicFeed} size="xSmall" />
           <ContactData selected={selected}>
             <Text size={13} color="#FFF">
               {c.profile.name}
             </Text>
-            <Text size={10} color="#F9F9F9" variant="ellipsis">
-              {c.profile.ethAddress}
+            <Text size={10} color="#F9F9F9" variant="mono">
+              {condenseAddress(c.profile.ethAddress)}
             </Text>
           </ContactData>
           {this.props.multiSelect && (
@@ -133,6 +134,7 @@ export default class ContactPickerView extends Component<Props, State> {
       const setHover = () => this.setHover(c.localID)
       return (
         <TouchableOpacity
+          className="transition"
           hover={this.state.hover === c.localID}
           onFocus={setHover}
           onBlur={this.releaseHover}

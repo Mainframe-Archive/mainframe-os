@@ -82,8 +82,8 @@ class IdentitiesView extends Component<Props, State> {
   renderUser(user: User, hideEdit?: boolean) {
     const onPress = () => this.openEditModal(user)
     return (
-      <UserItem key={user.localID}>
-        <Avatar size="medium" id={user.localID} />
+      <UserItem key={user.feedHash}>
+        <Avatar size="medium" id={user.feedHash || user.localID} />
         <Profile>
           <Text variant="bold" color="#232323">
             {user.profile.name}

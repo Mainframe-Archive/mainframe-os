@@ -43,11 +43,14 @@ const Container = styled.View`
 `
 
 const ContactsListContainer = styled.View`
+  position: relative;
   width: 260px;
+  padding-top: 40px;
   border-right-width: 1px;
   border-right-style: solid;
   border-right-color: #f5f5f5;
   height: calc(100vh - 40px);
+  overflow-y: auto;
 `
 
 const ContactCard = styled.TouchableOpacity`
@@ -91,7 +94,10 @@ const RightContainer = styled.View`
 `
 
 const ContactsListHeader = styled.View`
-  padding: 0 0 10px 10px;
+  position: absolute;
+  top: 0;
+  padding: 3px 0 10px 10px;
+  width: 100%;
   height: 45px;
   flex-direction: row;
   ${props =>
@@ -111,7 +117,10 @@ const NoContacts = styled.View`
   margin-top: 30vh;
   margin-left: -40px;
 `
-const ScrollView = styled.ScrollView``
+const ScrollView = styled.View`
+  flex: 1;
+  overflow-y: auto;
+`
 
 const FormContainer = styled.View`
   margin-top: 20px;
@@ -421,39 +430,37 @@ class ContactsViewComponent extends Component<Props, State> {
             <Text variant={['grey', 'small']}>No Match</Text>
           </NoContacts>
         ) : (
-          <ScrollView>
-            {list.map(contact => {
-              const selected =
-                this.state.selectedContact &&
-                this.state.selectedContact.localID === contact.localID
-              return (
-                <ContactCard
-                  key={contact.localID}
-                  onPress={() => this.selectContact(contact)}
-                  selected={selected}>
-                  <ContactCardText>
-                    <Text variant={['greyMed', 'ellipsis']} bold size={13}>
-                      {contact.profile.name || contact.publicFeed}
+          list.map(contact => {
+            const selected =
+              this.state.selectedContact &&
+              this.state.selectedContact.localID === contact.localID
+            return (
+              <ContactCard
+                key={contact.localID}
+                onPress={() => this.selectContact(contact)}
+                selected={selected}>
+                <ContactCardText>
+                  <Text variant={['greyMed', 'ellipsis']} bold size={13}>
+                    {contact.profile.name || contact.publicFeed}
+                  </Text>
+                  {contact.connectionState === 'SENT' ||
+                  contact.connectionState === 'SENDING' ? (
+                    <Text variant={['grey']} size={10}>
+                      Pending
                     </Text>
-                    {contact.connectionState === 'SENT' ||
-                    contact.connectionState === 'SENDING' ? (
-                      <Text variant={['grey']} size={10}>
-                        Pending
-                      </Text>
-                    ) : null}
-                  </ContactCardText>
-                  {contact.connectionState === 'RECEIVED'
-                    ? this.renderAcceptIgnore(contact)
-                    : null}
-                  {selected && (
-                    <SelectedPointer>
-                      <SvgSelectedPointer />
-                    </SelectedPointer>
-                  )}
-                </ContactCard>
-              )
-            })}
-          </ScrollView>
+                  ) : null}
+                </ContactCardText>
+                {contact.connectionState === 'RECEIVED'
+                  ? this.renderAcceptIgnore(contact)
+                  : null}
+                {selected && (
+                  <SelectedPointer>
+                    <SvgSelectedPointer />
+                  </SelectedPointer>
+                )}
+              </ContactCard>
+            )
+          })
         )}
       </ContactsListContainer>
     )
@@ -560,8 +567,8 @@ class ContactsViewComponent extends Component<Props, State> {
   }
 
   renderRightSide() {
-    const { userContacts } = this.props.contacts
-    if (userContacts.length === 0) {
+    const { selectedContact } = this.state
+    if (!selectedContact) {
       return (
         <RightContainer>
           <Row size={1}>
@@ -584,46 +591,42 @@ class ContactsViewComponent extends Component<Props, State> {
       )
     }
 
-    const { selectedContact } = this.state
     return (
-      selectedContact && (
-        <RightContainer>
-          <ScrollView>
-            <Row size={1}>
-              <Column>
-                <AvatarWrapper>
-                  <Blocky>
-                    <Avatar id={selectedContact.publicFeed} size="large" />
-                  </Blocky>
-                  <Text bold size={24}>
-                    {selectedContact.profile.name}
-                  </Text>
-                </AvatarWrapper>
-              </Column>
-            </Row>
+      <RightContainer>
+        <ScrollView>
+          <Row size={1}>
+            <Column>
+              <AvatarWrapper>
+                <Blocky>
+                  <Avatar id={selectedContact.publicFeed} size="large" />
+                </Blocky>
+                <Text bold size={24}>
+                  {selectedContact.profile.name}
+                </Text>
+              </AvatarWrapper>
+            </Column>
+          </Row>
+          <Row size={1}>
+            <Column>
+              <Text variant="smallTitle" theme={{ padding: '20px 0 10px 0' }}>
+                Mainframe ID
+              </Text>
+              <Text variant="addressLarge">{selectedContact.publicFeed}</Text>
+            </Column>
+          </Row>
+          {selectedContact.profile.ethAddress && (
             <Row size={1}>
               <Column>
                 <Text variant="smallTitle" theme={{ padding: '20px 0 10px 0' }}>
-                  Mainframe ID
+                  ETH Address
                 </Text>
-                <Text variant="addressLarge">{selectedContact.publicFeed}</Text>
+                <Text variant="addressLarge">
+                  {selectedContact.profile.ethAddress}
+                </Text>
               </Column>
             </Row>
-            {selectedContact.profile.ethAddress && (
-              <Row size={1}>
-                <Column>
-                  <Text
-                    variant="smallTitle"
-                    theme={{ padding: '20px 0 10px 0' }}>
-                    ETH Address
-                  </Text>
-                  <Text variant="addressLarge">
-                    {selectedContact.profile.ethAddress}
-                  </Text>
-                </Column>
-              </Row>
-            )}
-            {/* <Row size={1}>
+          )}
+          {/* <Row size={1}>
               <Column styles="margin-top: 10px;">
                 <Button
                   onPress={this.openEditModal}
@@ -632,9 +635,8 @@ class ContactsViewComponent extends Component<Props, State> {
                 />
               </Column>
             </Row> */}
-          </ScrollView>
-        </RightContainer>
-      )
+        </ScrollView>
+      </RightContainer>
     )
   }
 

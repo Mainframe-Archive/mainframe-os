@@ -1,11 +1,16 @@
 // @flow
 
 import React, { Component, type Node } from 'react'
-import { TouchableOpacity } from 'react-native-web'
 import styled from 'styled-components/native'
 
-import colors from '../colors'
+import WalletIcon from '../launcher/wallets/WalletIcon'
 import rpc from './rpc'
+
+export const condenseAddress = (a?: ?string): string => {
+  if (!a) return ''
+  const len = 8
+  return a.slice(0, len + 2) + '...' + a.slice(-len, a.length)
+}
 
 type Wallet = {
   name: string,
@@ -25,29 +30,39 @@ type Props = {
 type State = {
   wallets?: Wallets,
   defaultWalletAcc?: string,
+  hover?: ?string,
 }
 
 const ScrollViewStyled = styled.ScrollView`
-  max-height: 250px;
+  max-height: 380px;
 `
 
-const AccountRow = styled.View`
-  border-bottom-width: 1px;
-  border-color: ${colors.GREY_DARK_48};
-  padding-vertical: 12px;
+const AccountRow = styled.TouchableOpacity`
+  flex-direction: row;
+  align-items: center;
+  border-top-width: 1px;
+  border-color: #303030;
+  padding: 20px;
   max-width: 250px;
+  ${props => props.first && `border-color: transparent;`}
+  ${props => props.selected && `background-color: #585858;`}
+  ${props => props.hover && `background-color: #2C2C2C;`}
 `
-
 const AccountLabel = styled.Text`
+  font-family: 'IBM Plex Mono';
   font-size: 12px;
-  color: ${props => (props.selected ? colors.WHITE : colors.LIGHT_GREY_DE)};
-  font-weight: ${props => (props.selected ? 'bold' : 'normal')};
+  padding-left: 20px;
+  color: #fff;
 `
 
 const WalletName = styled.Text`
-  color: #eee;
+  font-family: 'Muli';
+  font-size: 10px;
+  color: #a9a9a9;
   font-weight: bold;
-  margin-top: 10px;
+  padding: 20px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 `
 
 export default class WalletPickerView extends Component<Props, State> {
@@ -60,7 +75,6 @@ export default class WalletPickerView extends Component<Props, State> {
   async fetchWallets() {
     const wallets = await rpc.getUserEthWallets()
     const defaultWalletAcc = await rpc.getUserDefaultWallet()
-    console.log(wallets)
     this.setState({ wallets, defaultWalletAcc })
   }
 
@@ -68,20 +82,38 @@ export default class WalletPickerView extends Component<Props, State> {
     this.props.onSelectedWalletAccount(address)
   }
 
+  releaseHover = () => {
+    this.setState({ hover: null })
+  }
+
+  setHover = (id: string) => {
+    this.setState({ hover: id })
+  }
+
   renderWallets(wallets: Array<Wallet>): Array<Node> {
     return wallets.map(w => {
-      const accounts = w.accounts.map(a => {
+      const accounts = w.accounts.map((a, index) => {
         const onPress = () => this.onSelectWalletAccount(a)
+        const setHover = () => this.setHover(a)
         const selected = this.state.defaultWalletAcc === a
-        const accountText = selected ? `✔   ${a}` : a
+
         return (
-          <TouchableOpacity key={a} onPress={onPress}>
-            <AccountRow>
-              <AccountLabel selected={selected} numberOfLines={1}>
-                {accountText}
-              </AccountLabel>
-            </AccountRow>
-          </TouchableOpacity>
+          <AccountRow
+            key={a}
+            className="transition"
+            onPress={onPress}
+            onFocus={setHover}
+            onBlur={this.releaseHover}
+            onMouseOver={setHover}
+            onMouseOut={this.releaseHover}
+            first={index === 0}
+            selected={selected}
+            hover={this.state.hover === a}>
+            <WalletIcon size="small" address={a} />
+            <AccountLabel selected={selected} numberOfLines={1}>
+              {condenseAddress(a)}
+            </AccountLabel>
+          </AccountRow>
         )
       })
       return (

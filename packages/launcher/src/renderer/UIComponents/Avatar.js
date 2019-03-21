@@ -4,9 +4,16 @@ import React, { Component } from 'react'
 import styled from 'styled-components/native/'
 import Blockies from 'react-blockies'
 
-type AvatarSize = 'small' | 'medium' | 'large' | 'x-large' | 'xx-large'
+type AvatarSize =
+  | 'xSmall'
+  | 'small'
+  | 'medium'
+  | 'large'
+  | 'x-large'
+  | 'xx-large'
+
 type Props = {
-  id: string,
+  id?: ?string,
   size: AvatarSize,
 }
 
@@ -20,6 +27,7 @@ export const AVATAR_SIZE = {
   large: 48,
   medium: 40,
   small: 32,
+  xSmall: 24,
 }
 
 const Container = styled.View`
@@ -42,10 +50,10 @@ export default class Avatar extends Component<Props, State> {
   render() {
     const { id, size } = this.props
     const avatarSize = AVATAR_SIZE[size]
-    return (
+    return id ? (
       <Container avatarSize={avatarSize}>
         <Blockies seed={id} size={8} scale={Math.ceil(avatarSize / 8)} />
       </Container>
-    )
+    ) : null
   }
 }

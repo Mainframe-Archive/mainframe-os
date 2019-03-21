@@ -12,7 +12,7 @@ import type { Subscription } from 'rxjs'
 import type { WalletSignTxParams } from '@mainframe/client'
 import { type EthClient } from '@mainframe/eth'
 
-import ContactsIcon from '@morpheus-ui/icons/ContactsMd'
+import ContactsIcon from '@morpheus-ui/icons/ContactsFilledMd'
 
 import { APP_TRUSTED_REQUEST_CHANNEL } from '../../constants'
 
@@ -60,6 +60,7 @@ type PermissionDeniedNotif = {
 type Props = {
   appSession: AppSessionData,
   ethClient: EthClient,
+  multipleWallets?: ?boolean,
 }
 
 type PendingRequest = {
@@ -115,39 +116,31 @@ const getPermissionDescription = (key: string, input?: ?string): ?string => {
 }
 
 const Container = styled.View`
-  top: 60px;
+  top: 0;
   left: 0;
   right: 0;
   bottom: 0;
   position: fixed;
-  background-color: ${props => props.theme.colors.TRANSPARENT_BLACK_50};
+  background-color: transparent;
   height: 100%;
 `
 
 const RequestContainer = styled.View`
   background-color: ${props => props.theme.colors.GREY_DARK_3C};
   position: absolute;
-  top: 25px;
-  right: 45px;
+  top: 30px;
+  right: 102px;
   width: 250px;
   border-radius: 3px;
   shadow-color: ${props => props.theme.colors.BLACK};
   shadow-opacity: 0.2;
   shadow-radius: 8;
+  overflow: hidden;
   ${props => props.wallet && 'right: 5px'};
 `
 
 const ContentContainer = styled.View`
-  padding: 0 20px 20px 20px;
-`
-
-const IconContainer = styled.Text`
-  display: flex;
-  flex-direction: column;
-  color: #f1f0f0;
-  width: 100%;
-  padding: 3px;
-  align-items: flex-end;
+  padding: 20px;
 `
 
 const TitleContainer = styled.Text`
@@ -156,7 +149,10 @@ const TitleContainer = styled.Text`
   width: 100%;
   flex-direction: row;
   align-items: center;
-  margin-bottom: 20px;
+  justify-content: space-between;
+  background-color: #303030;
+  padding: 0 20px;
+  height: 47px;
 `
 
 const ButtonsContainer = styled.View`
@@ -177,6 +173,7 @@ export default class UserAlertView extends Component<Props, State> {
     permissionDeniedNotifs: [],
     requests: {},
     persistGrant: false,
+    multipleWallets: false,
   }
 
   _onRPCMessage: (Object, Object) => Promise<void>
@@ -338,19 +335,25 @@ export default class UserAlertView extends Component<Props, State> {
       )
     return (
       <>
-        {txView}
-        <ButtonsContainer>
-          <Button
-            variant={['TuiButton', 'TuiButtonDismiss']}
-            title="REJECT"
-            onPress={() => this.declinePermission(requestID)}
-          />
-          <Button
-            variant={['TuiButton']}
-            title="AUTHORIZE"
-            onPress={() => this.acceptPermission(requestID)}
-          />
-        </ButtonsContainer>
+        <TitleContainer>
+          <Text variant="TuiHeader">Sign Transaction</Text>
+          <BellIcon width={24} height={24} />
+        </TitleContainer>
+        <ContentContainer>
+          {txView}
+          <ButtonsContainer>
+            <Button
+              variant={['TuiButton', 'TuiButtonDismiss']}
+              title="REJECT"
+              onPress={() => this.declinePermission(requestID)}
+            />
+            <Button
+              variant={['TuiButton']}
+              title="AUTHORIZE"
+              onPress={() => this.acceptPermission(requestID)}
+            />
+          </ButtonsContainer>
+        </ContentContainer>
       </>
     )
   }
@@ -361,10 +364,10 @@ export default class UserAlertView extends Component<Props, State> {
     const multi =
       params && params.CONTACTS_SELECT ? params.CONTACTS_SELECT.multi : false
     return (
-      <ContentContainer>
+      <>
         <TitleContainer>
+          <Text variant="TuiHeader">Contacts</Text>
           <ContactsIcon width={26} height={24} />
-          <Text variant={['marginHorizontal10', 'TuiHeader']}>Contacts</Text>
         </TitleContainer>
         <ContactPickerView
           userID={id}
@@ -374,18 +377,24 @@ export default class UserAlertView extends Component<Props, State> {
             this.onSelectedContacts(requestID, contacts)
           }
         />
-      </ContentContainer>
+      </>
     )
   }
 
   renderWalletPicker(requestID: string) {
-    return (
-      <WalletPickerView
-        onSelectedWalletAccount={address =>
-          this.onSelectedWalletAccount(requestID, address)
-        }
-      />
-    )
+    return this.props.multipleWallets ? (
+      <>
+        <TitleContainer>
+          <Text variant="TuiHeader">Wallets</Text>
+          <WalletIcon width={24} height={24} />
+        </TitleContainer>
+        <WalletPickerView
+          onSelectedWalletAccount={address =>
+            this.onSelectedWalletAccount(requestID, address)
+          }
+        />
+      </>
+    ) : null
   }
 
   renderPermission(
@@ -395,13 +404,11 @@ export default class UserAlertView extends Component<Props, State> {
   ) {
     return (
       <>
+        <TitleContainer>
+          <Text variant="TuiHeader">App Permissions</Text>
+          <LockerIcon width={17} height={24} color="#808080" />
+        </TitleContainer>
         <ContentContainer>
-          <TitleContainer>
-            <LockerIcon width={17} height={24} />
-            <Text variant={['marginHorizontal10', 'TuiHeader']}>
-              App Permissions
-            </Text>
-          </TitleContainer>
           <Text color="#FFF" size={13}>
             {`${
               this.props.appSession.app.manifest.name
@@ -448,26 +455,26 @@ export default class UserAlertView extends Component<Props, State> {
     let content, wallet
     if (permissionLabel == null) {
       content = (
-        <ContentContainer>
+        <>
           <TitleContainer>
-            <LockerIcon width={17} height={24} />
-            <Text variant={['marginHorizontal10', 'TuiHeader']}>
-              App Permissions
-            </Text>
+            <Text variant="TuiHeader">App Permissions</Text>
+            <BellIcon width={24} height={24} color="#808080" />
           </TitleContainer>
-          <Text color="#FFF" size={13}>
-            {`${
-              this.props.appSession.app.manifest.name
-            } is asking for permission to perform an unknown request`}
-          </Text>
-          <ButtonsContainer>
-            <Button
-              variant={['TuiButton']}
-              title="DECLINE"
-              onPress={() => this.declinePermission(id)}
-            />
-          </ButtonsContainer>
-        </ContentContainer>
+          <ContentContainer>
+            <Text color="#FFF" size={13}>
+              {`${
+                this.props.appSession.app.manifest.name
+              } is asking for permission to perform an unknown request`}
+            </Text>
+            <ButtonsContainer>
+              <Button
+                variant={['TuiButton']}
+                title="DECLINE"
+                onPress={() => this.declinePermission(id)}
+              />
+            </ButtonsContainer>
+          </ContentContainer>
+        </>
       )
     } else {
       switch (requestData.key) {
@@ -490,14 +497,7 @@ export default class UserAlertView extends Component<Props, State> {
     return (
       <>
         <Container onClick={this.onPressBG} />
-        <RequestContainer wallet={wallet}>
-          <IconContainer>
-            {wallet ? (
-              <WalletIcon width={33} height={33} />
-            ) : (
-              <BellIcon width={33} height={33} />
-            )}
-          </IconContainer>
+        <RequestContainer wallet={wallet || !this.props.multipleWallets}>
           {content}
         </RequestContainer>
       </>
