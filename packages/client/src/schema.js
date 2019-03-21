@@ -107,6 +107,11 @@ export const APP_SET_PERMISSIONS_REQUIREMENTS_SCHEMA = {
   version: OPTIONAL_SEMVER_SCHEMA,
 }
 
+export const APP_SET_FEED_HASH_SCHEMA = {
+  sessID: LOCAL_ID_SCHEMA,
+  feedHash: 'string',
+}
+
 export const COMMS_PUBLISH_SCHEMA = {
   appID: LOCAL_ID_SCHEMA,
   contactID: LOCAL_ID_SCHEMA,

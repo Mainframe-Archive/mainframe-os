@@ -1,8 +1,16 @@
 // @flow
 
-import type Client, { AppOpenResult } from '@mainframe/client'
+import { createKeyPair, sign } from '@erebos/secp256k1'
+import { pubKeyToAddress } from '@erebos/keccak256'
+import BzzAPI from '@erebos/api-bzz-node'
+import type Client, {
+  AppOpenResult,
+  VaultSettings,
+  ContextStorageSettings,
+} from '@mainframe/client'
 import type { VaultConfig } from '@mainframe/config'
 import type StreamRPC from '@mainframe/rpc-stream'
+import { decodeBase64 } from '@mainframe/utils-base64'
 import { uniqueID } from '@mainframe/utils-id'
 import type { BrowserWindow, WebContents } from 'electron'
 
@@ -14,7 +22,10 @@ import {
   LAUNCHER_CHANNEL,
 } from '../constants'
 
-export type LaunchAppFunc = (data: AppOpenResult) => Promise<void>
+export type LaunchAppFunc = (
+  data: AppOpenResult,
+  vaultSettings: VaultSettings,
+) => Promise<void>
 
 export class ContextSubscription<T = ?mixed> {
   _id: string
@@ -76,6 +87,7 @@ export class Context {
 export type AppContextParams = {
   appSession: AppSession,
   client: Client,
+  settings: VaultSettings,
   trustedRPC: StreamRPC,
   window: BrowserWindow,
 }
@@ -83,15 +95,45 @@ export type AppContextParams = {
 export class AppContext extends Context {
   appSession: AppSession
   sandbox: ?WebContents
+  settings: VaultSettings
   trustedRPC: StreamRPC
+  window: BrowserWindow
+  _bzz: ?BzzAPI
   _permissionDeniedID: ?string
+  _storage: ?ContextStorageSettings
 
   constructor(params: AppContextParams) {
     super()
     this.appSession = params.appSession
     this.client = params.client
+    this.settings = params.settings
     this.trustedRPC = params.trustedRPC
     this.window = params.window
+  }
+
+  get bzz(): BzzAPI {
+    if (this._bzz == null) {
+      this._bzz = new BzzAPI({
+        url: this.settings.bzzURL,
+        signFeedDigest: this.storage.signFeedDigest,
+      })
+    }
+    return this._bzz
+  }
+
+  get storage(): ContextStorageSettings {
+    if (this._storage == null) {
+      const keyPair = createKeyPair(this.appSession.storage.feedKey, 'hex')
+      const privKey = keyPair.getPrivate()
+      this._storage = {
+        contentHash: null,
+        address: pubKeyToAddress(keyPair.getPublic().encode()),
+        encryptionKey: decodeBase64(this.appSession.storage.encryptionKey),
+        feedHash: this.appSession.storage.feedHash,
+        signFeedDigest: async digest => sign(digest, privKey),
+      }
+    }
+    return this._storage
   }
 
   notifyTrusted(id: string, result?: Object = {}) {
