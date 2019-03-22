@@ -3,9 +3,7 @@
 import React, { Component } from 'react'
 import { createFragmentContainer, graphql } from 'react-relay'
 import styled from 'styled-components/native'
-import { Text } from '@morpheus-ui/core'
-
-import COLORS from '../../colors'
+import { Button, Text } from '@morpheus-ui/core'
 
 import type { AppItem_installedApp as InstalledApp } from './__generated__/AppItem_installedApp.graphql.js'
 import type { AppItem_ownApp as OwnApp } from './__generated__/AppItem_ownApp.graphql.js'
@@ -15,7 +13,6 @@ const AppButtonContainer = styled.View`
   padding: 15px 10px;
   flex-direction: column;
   align-items: center;
-  justify-content: space-between;
   width: 110px;
 `
 
@@ -23,15 +20,6 @@ const IconContainer = styled.TouchableOpacity`
   width: 72px;
   height: 72px;
   margin-bottom: 10px;
-`
-
-const UpdateButton = styled.TouchableOpacity`
-  width: 72px;
-  align-items: center;
-  margin-top: 10px;
-  padding: 5px;
-  border: 1px solid ${COLORS.PRIMARY_DARK_RED};
-  border-radius: 3px;
 `
 
 type SharedProps = {
@@ -108,9 +96,11 @@ export default class AppItem extends Component<Props, State> {
     let extra = null
     if (onUpdate != null) {
       extra = (
-        <UpdateButton onPress={onUpdate}>
-          <Text color={COLORS.PRIMARY_DARK_RED}>Update</Text>
-        </UpdateButton>
+        <Button
+          onPress={onUpdate}
+          title="UPDATE"
+          variant={['marginTop5', 'mediumUppercase', 'red']}
+        />
       )
     } else if (devName != null) {
       extra = <Text variant="appButtonId">{devName}</Text>

@@ -27,6 +27,8 @@ export type AppParams = AbstractAppParams & {
 
 export type AppSerialized = AppParams
 
+export type AppUpdateData = { manifest: SignedContents }
+
 export default class App extends AbstractApp {
   static fromJSON = (params: AppSerialized): App => new App(params)
 

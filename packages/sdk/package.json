@@ -17,9 +17,9 @@
     "test:types": "flow check"
   },
   "dependencies": {
-    "@babel/runtime": "^7.3.4",
+    "@babel/runtime": "^7.4.2",
     "@mainframe/eth": "^0.2.1",
-    "ethereumjs-abi": "^0.6.6",
+    "ethereumjs-abi": "^0.6.7",
     "web3-provider-engine": "^14.1.0"
   },
   "devDependencies": {

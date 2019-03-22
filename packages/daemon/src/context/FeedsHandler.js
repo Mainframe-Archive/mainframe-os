@@ -1,6 +1,7 @@
 // @flow
 
 import { getFeedTopic } from '@erebos/api-bzz-base'
+import { Timeline, type Chapter } from '@erebos/timeline'
 import type { SignedContents } from '@mainframe/secure-file'
 import { type Observable, Subject, type Subscription } from 'rxjs'
 import { filter, multicast, refCount, tap, flatMap } from 'rxjs/operators'
@@ -72,34 +73,41 @@ export class AppsUpdatesHandler extends FeedsHandler {
   _subscribe(app: App) {
     const { io, log, openVault } = this._context
 
-    this._subscriptions[app.id] = pollFeedJSON(io.bzz, app.updateFeedHash, {
-      interval: DEFAULT_POLL_INTERVAL,
-    }).subscribe((signedManifest: SignedContents) => {
-      try {
-        const manifest = app.verifyManifest(signedManifest)
-        if (semver.lte(manifest.version, app.manifest.version)) {
-          // Ignore this version
-          return
-        }
+    const timeline = new Timeline({ bzz: io.bzz, feed: app.updateFeedHash })
+    this._subscriptions[app.id] = timeline
+      .live({ interval: DEFAULT_POLL_INTERVAL })
+      .subscribe({
+        next: (chapters: Array<Chapter<SignedContents>>) => {
+          try {
+            const chapter = chapters[chapters.length - 1]
+            const manifest = app.verifyManifest(chapter.content.manifest)
+            if (semver.lte(manifest.version, app.manifest.version)) {
+              // Ignore this version
+              return
+            }
 
-        const existing = openVault.apps.getUpdate(app.id)
-        if (
-          existing == null ||
-          (semver.gt(manifest.version, existing.app.manifest.version) &&
-            existing.app.installationState !== 'downloading')
-        ) {
-          openVault.apps.setUpdate(app.id, manifest)
-          this._context.next({
-            type: 'app_update',
-            app,
-            version: manifest.version,
-            status: 'updateAvailable',
-          })
-        }
-      } catch (err) {
-        log('Manifest verification failed', err)
-      }
-    })
+            const existing = openVault.apps.getUpdate(app.id)
+            if (
+              existing == null ||
+              (semver.gt(manifest.version, existing.app.manifest.version) &&
+                existing.app.installationState !== 'downloading')
+            ) {
+              openVault.apps.setUpdate(app.id, manifest)
+              this._context.next({
+                type: 'app_update',
+                app,
+                version: manifest.version,
+                status: 'updateAvailable',
+              })
+            }
+          } catch (err) {
+            log('Manifest verification failed', err)
+          }
+        },
+        error: err => {
+          log('Failed to read app update feed', err)
+        },
+      })
   }
 
   add(appID: string) {

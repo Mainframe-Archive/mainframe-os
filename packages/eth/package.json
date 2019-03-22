@@ -19,7 +19,7 @@
     "test:types": "flow check"
   },
   "dependencies": {
-    "@babel/runtime": "^7.3.4",
+    "@babel/runtime": "^7.4.2",
     "@mainframe/rpc-stream": "^0.3.0",
     "web3-eth-abi": "1.0.0-beta.36",
     "web3-providers-http": "1.0.0-beta.36",

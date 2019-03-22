@@ -24,6 +24,9 @@ import ContactsScreen from './contacts/ContactsScreen'
 import NotificationsScreen from './notifications/NotificationsScreen'
 import SettingsScreen from './settings/SettingsScreen'
 
+import type { Launcher_apps as Apps } from './__generated__/Launcher_apps.graphql'
+import type { Launcher_identities as Identities } from './__generated__/Launcher_identities.graphql'
+
 const APP_UPDATE_CHANGED_SUBSCRIPTION = graphql`
   subscription LauncherAppUpdateChangedSubscription {
     appUpdateChanged {
@@ -67,16 +70,8 @@ const ContentContainer = styled.View`
 `
 
 type Props = {
-  identities: {
-    ownUsers: Array<{
-      localID: string,
-      defaultEthAddress: ?string,
-      wallets: {
-        hd: Array<{ localID: string }>,
-        ledger: Array<{ localID: string }>,
-      },
-    }>,
-  },
+  apps: Apps,
+  identities: Identities,
   relay: {
     environment: Environment,
   },
@@ -177,6 +172,7 @@ class Launcher extends Component<Props, State> {
           <SideMenu
             selected={this.state.openScreen}
             onSelectMenuItem={this.setOpenScreen}
+            notifications={this.props.apps.updatesCount > 0 ? ['apps'] : []}
           />
           <ContentContainer>{this.renderScreen()}</ContentContainer>
         </Container>
@@ -186,6 +182,11 @@ class Launcher extends Component<Props, State> {
 }
 
 const LauncherRelayContainer = createFragmentContainer(Launcher, {
+  apps: graphql`
+    fragment Launcher_apps on Apps {
+      updatesCount
+    }
+  `,
   identities: graphql`
     fragment Launcher_identities on Identities {
       ownUsers {
@@ -214,6 +215,9 @@ export default class LauncherQueryRenderer extends Component<{}> {
         query={graphql`
           query LauncherQuery {
             viewer {
+              apps {
+                ...Launcher_apps
+              }
               identities {
                 ...Launcher_identities
               }

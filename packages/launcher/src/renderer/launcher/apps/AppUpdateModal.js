@@ -130,15 +130,14 @@ class AppUpdateModal extends Component<Props, State> {
       <FormModalView
         dismissButton="CANCEL"
         confirmButton="UPDATE"
-        title="Update an app"
+        title={`Update ${app.name}`}
         onRequestClose={this.props.onRequestClose}
         onSubmitForm={this.onSubmitConfirm}>
         <Container>
           <TextContainer>
             <Text variant={['modalText', 'center']}>
-              Are you sure you want to update the app
-              {app.name} from version {app.manifest.version} to version{' '}
-              {app.update.manifest.version}?
+              Are you sure you want to update {app.name} from version{' '}
+              {app.manifest.version} to version {app.update.manifest.version}?
             </Text>
           </TextContainer>
           {errorMsg}

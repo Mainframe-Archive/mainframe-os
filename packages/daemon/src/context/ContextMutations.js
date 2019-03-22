@@ -1,6 +1,7 @@
 // @flow
 
 import { hexValueType } from '@erebos/hex'
+import { Timeline, createChapter } from '@erebos/timeline'
 import {
   createSignedManifest,
   isValidSemver,
@@ -254,37 +255,45 @@ export default class ContextMutations {
     }
     await app.updateFeed.syncManifest(io.bzz)
 
-    const manifestData = {
-      id: app.mfid,
-      author: {
-        id: devIdentity.id,
-        name: devIdentity.profile.name,
-      },
-      name: app.data.name,
-      version: app.data.version,
-      contentsHash: versionData.contentsHash,
-      updateHash: app.updateFeed.feedHash,
-      permissions: versionData.permissions,
-    }
+    const { feedHash } = app.updateFeed
     // Sanity checks
-    if (manifestData.contentsHash == null) {
+    if (versionData.contentsHash == null) {
       throw new Error('Missing contents hash')
     }
-    if (manifestData.updateHash == null) {
+    if (feedHash == null) {
       throw new Error('Missing update hash')
     }
 
-    // $FlowFixMe: doesn't seem to detect sanity checks for hashes
-    const signedManifest = createSignedManifest(manifestData, [
-      appIdentity.keyPair,
-      devIdentity.keyPair,
-    ])
-    const versionHash = await app.updateFeed.publishJSON(io.bzz, signedManifest)
+    const manifest = createSignedManifest(
+      {
+        id: app.mfid,
+        author: {
+          id: devIdentity.id,
+          name: devIdentity.profile.name,
+        },
+        name: app.data.name,
+        version: app.data.version,
+        contentsHash: versionData.contentsHash,
+        updateHash: feedHash,
+        permissions: versionData.permissions,
+      },
+      [appIdentity.keyPair, devIdentity.keyPair],
+    )
+    const chapter = createChapter({
+      author: app.updateFeed.address,
+      content: { manifest },
+    })
+    const timeline = new Timeline({
+      bzz: io.bzz,
+      feed: feedHash,
+      signParams: app.updateFeed.keyPair.getPrivate(),
+    })
+
+    const versionHash = await timeline.addChapter(chapter)
     app.setVersionHash(versionHash, params.version)
 
     this._context.next({ type: 'app_changed', app, change: 'versionPublished' })
-    // $FlowFixMe: weird issue with return type not detected as Promise
-    return manifestData.updateHash
+    return feedHash
   }
 
   async appApproveContacts(

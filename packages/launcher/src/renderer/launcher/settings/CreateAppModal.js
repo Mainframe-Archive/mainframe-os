@@ -39,7 +39,9 @@ class CreateAppModal extends Component<Props, State> {
   state = {
     screen: 'info',
     manifest: null,
-    appData: {},
+    appData: {
+      version: '1.0.0',
+    },
     permissionsRequirements: {
       optional: {
         WEB_REQUEST: [],
