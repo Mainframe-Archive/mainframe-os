@@ -1,5 +1,6 @@
 // @flow
 
+import type { SignFeedDigestFunc } from '@erebos/api-bzz-base'
 import type { ManifestData, PartialManifestData } from '@mainframe/app-manifest'
 import type {
   PermissionCheckResult,
@@ -10,6 +11,7 @@ import type {
   StrictPermissionsRequirements,
   StrictPermissionsGrants,
 } from '@mainframe/app-permissions'
+import type { base64 } from '@mainframe/utils-base64'
 import type { ID } from '@mainframe/utils-id'
 import type { ExecutionResult } from 'graphql'
 
@@ -70,12 +72,28 @@ export type AppUserWalletSettings = {
   defaultEthAccount: ?string,
 }
 
+export type ContextStorageSettings = {
+  address: string,
+  encryptionKey: Buffer,
+  contentHash: ?string,
+  feedHash: ?string,
+  signFeedDigest: SignFeedDigestFunc,
+  manifestHash?: string,
+}
+
+export type StorageSettings = {
+  feedHash: ?string,
+  feedKey: string, // hex
+  encryptionKey: base64,
+}
+
 export type AppUserSettings = {
   approvedContacts: {
     [id: string]: ApprovedContact,
   },
   permissionsSettings: AppUserPermissionsSettings,
   walletSettings: AppUserWalletSettings,
+  storageSettings: StorageSettings,
 }
 
 export type AppUser = IdentityOwnData & {
@@ -156,6 +174,12 @@ export type AppData = {
   contentsPath: string,
 }
 
+export type AppStorage = {
+  feedHash: ?string,
+  feedKey: string, // hex
+  encryptionKey: base64,
+}
+
 export type AppSession = {
   sessID: ID,
   permissions: PermissionsDetails,
@@ -167,6 +191,7 @@ export type AppOpenResult = {
   user: IdentityOwnData,
   isDev?: ?boolean,
   defaultEthAccount: ?string,
+  storage: AppStorage,
 }
 
 export type AppPublishParams = {
@@ -202,6 +227,11 @@ export type AppSetPermissionsRequirementsParams = {
   appID: ID,
   permissions: PermissionsRequirements,
   version?: ?string,
+}
+
+export type AppSetFeedHashParams = {
+  sessID: ID,
+  feedHash: string,
 }
 
 // Blockchain
