@@ -29,9 +29,10 @@ Follow onscreen instructions to secure your vault, setup your identity, and crea
 ### Add a Contact
 
 **Mainframe OS > Contacts > Add Contact**
-Paste Contact ID of another Mainframe OS User
 
-Jake: `a5d66aa829306a04594634b451ca03f293a115a8f37c558f660c2db5bb5bdc83`
+Paste Contact ID of another Mainframe OS user. The Contact ID can be found on the **Identity** tab of Mainframe OS.
+Exchange Contact IDs out-of-band with other Mainframe OS users.
+
 
 ## Create your Dapp
 Use [create-mainframe-dapp](create-mainframe-dapp.md) to setup your dapp for easy integration with Mainframe OS.
