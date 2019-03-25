@@ -6,7 +6,7 @@ title: Publish Your Dapp
 ### Packaging dapps for Mainframe OS
 
 Mainframe dapps must be packaged as static Web apps with an `index.html` entry file. All assets reference paths must be relative rather than rely on a specific resolution behaviour.
-For example to add the [Onyx Stats](applications/onyx-stats) contents to the Launcher, the `dist` folder (created during the build) must be selected rather than the root application folder.
+For example to add an application built from [create-mainframe-dapp](create-mainframe-dapp.md) , the `build` folder (created during the build) must be selected rather than the root application folder.
 
 ### Testing your dapp in Mainframe OS
 
