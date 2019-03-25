@@ -10,7 +10,7 @@ For example to add an application built from [create-mainframe-dapp](create-main
 
 ### Testing your dapp in Mainframe OS
 
-Mainframe OS has a developer mode where you are be able to create, run and manage your apps. To access this dev mode, go to the **More** Tab and click the **App Development Tool** link.
+Mainframe OS has developer tools where you are able to create, run and manage your apps. To access these tools, go to the **More** Tab and click the **App Development Tool** link.
 
 Once you have created your Developer Identity, click **Add** to import your dapp. You will then be guided through some steps to provide meta data for your app, link to your apps contents folder (the folder containing the `index.html` entry file), and set any required permissions.
 
@@ -32,17 +32,20 @@ $("#sandbox-webview").openDevTools();
 
 ### Publishing your app
 
-To allow users to install your app, you will need to upload the contents to swarm and then write and sign a manifest file which can be distributed and used for installation.
+To allow users to install your app, you will need to upload the contents to Swarm. You'll get an App ID which other users can then use to install the app on their Mainframe OS system. This can be done with the **Publish** button inside Mainframe OS, as described [here](introduction.md), which connects to the p2p Swarm network through `mainframe-gateways.net`.
 
-This can be done with the **Publish** button inside Mainframe OS, as described [here](introduction.md), if you installed Mainframe OS through the downloaded binaries.
-If you built Mainframe OS from source, the swarm-gateways upload limitation mentioned below will apply. Below are alternate steps to publish manually instead.
+It is also possible to setup and use a local Swarm node, rather than the gateway.
 
-#### Upload Content to Swarm
 
-By default, a vault is configured to connect to the [Swarm gateways](https://swarm-gateways.net/) to interact with Swarm. This works well for downloads and other requests, however uploads are limited to 1 MB, which might prevent from being able to upload some apps.
-In order to upload apps contents larger than 1 MB, a local Swarm node must be used. Installation instructions are available in the [Swarm guide](https://swarm-guide.readthedocs.io/en/latest/installation.html) and a [Docker image](https://github.com/ethersphere/swarm-docker) is also available.
+### Setup local Swarm node
 
-Your vault settings will need to be updated to use the local node rather than the Swarm gateways, running the following command (replace `http://localhost:8500` by the Swarm URL if different):
+You might prefer to use a local swarm node rather than the Mainframe gateway (configured by default) or Swarm gateways (available through `swarm-gateways.net`).
+
+Changing the Swarm configuration is only possible when using a version of Mainframe OS built from source. There is not access to the CLI tools needed when Mainframe OS is built from the binaries installer.
+
+Installation instructions are available in the [Swarm guide](https://swarm-guide.readthedocs.io/en/latest/installation.html) and a [Docker image](https://github.com/ethersphere/swarm-docker) is also available.
+
+Your vault settings will need to be updated to use the local node rather than the Mainframe or Swarm gateways, running the following command (replace `http://localhost:8500` by the Swarm URL if different):
 
 ```
 ./packages/cli/bin/run vault:settings --bzz-url http://localhost:8500
