@@ -69,6 +69,8 @@ Click the icon to view/edit dapp details. Then launch the app by clicking **Open
 
 You will initially see the pre-built version of your dapp display in the new window.
 
+***Note:** there is a known issue on Windows and Unix systems where the app window for a built or installed app opens, but is blank/only white. See steps below to host locally for a workaround. For end-users, only Mac OS is supported.*
+
 #### Host locally
  * In a terminal window run `yarn start` if it isn't still running.
  * With the application being hosted at `http://localhost:3000/`, replace the contents path of your active application window with `http://localhost:3000/`.
