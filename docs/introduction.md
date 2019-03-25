@@ -84,6 +84,9 @@ From the app details view in Mainframe OS, click **Publish**.
 
 The resulting App ID is what is needed to share and install your dapp.
 
+### Update your Dapp
+*coming soon*
+
 ### Submit your Dapp
 *coming soon*
 
