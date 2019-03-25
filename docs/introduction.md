@@ -51,10 +51,10 @@ Once you have created your Developer Identity, click **Add** to
 
 #### Import your dapp
 
- * use "test" for the name.
- * 0.0.1 for the version.
- * run `yarn build` from the create-mainframe-dapp directory.
- * select the generated `build` folder for the contents path.
+ * give your dapp a name
+ * give your dapp a version (standard semver format, for example 0.1.0)
+ * run `yarn build` from the create-mainframe-dapp directory
+ * select the generated `build` folder for the contents path
 
 
 #### App Permissions
