@@ -11,7 +11,6 @@ sidebar_label: Mainframe Platform
 ```
 git clone https://github.com/MainframeHQ/mainframe-os.git
 cd mainframe-os
-git checkout release-v0.2
 ```
 
 
