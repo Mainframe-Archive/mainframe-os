@@ -29,7 +29,7 @@ type Props = {
   isEdition?: boolean,
   onSetAppData: (appData: CompleteAppData) => void,
   onRequestClose: () => void,
-  previousVersion?: string,
+  previousVersion?: ?string,
   submitButtonTitle?: ?string,
 }
 

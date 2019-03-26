@@ -64,12 +64,12 @@ class IdentitiesView extends Component<Props, State> {
   state = {}
 
   openEditModal = (user: User) => {
-    this.setState({
-      editUser: user,
-    })
+    this.setState({ editUser: user })
   }
 
-  closeModal = () => this.setState({ editUser: null })
+  closeModal = () => {
+    this.setState({ editUser: null })
+  }
 
   renderUser(user: User, hideEdit?: boolean) {
     const onPress = () => this.openEditModal(user)
@@ -112,7 +112,7 @@ class IdentitiesView extends Component<Props, State> {
         )}
         {this.renderUser(this.props.identities.ownUsers[0])}
         <InfoBox>
-          <Text theme={{ color: '#ffffff' }}>
+          <Text color="#ffffff">
             Share your Contact ID with your contacts so they can add you on
             Mainframe.
           </Text>

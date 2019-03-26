@@ -20,6 +20,7 @@ import { pollFeedJSON } from '../swarm/feed'
 
 import type ClientContext from './ClientContext'
 import type {
+  AppInstalledEvent,
   AppUpdateEvent,
   ContextEvent,
   ContactChangedEvent,
@@ -63,7 +64,15 @@ class FeedsHandler {
 }
 
 export class AppsUpdatesHandler extends FeedsHandler {
+  _appInstalledSubscription: ?Subscription
+
   _setup() {
+    this._appInstalledSubscription = this._context
+      .pipe(filter((e: ContextEvent) => e.type === 'app_installed'))
+      .subscribe((e: AppInstalledEvent) => {
+        this.add(e.app.id)
+      })
+
     // $FlowFixMe: Object.values() losing type
     Object.values(this._context.openVault.apps.apps).forEach((app: App) => {
       this._subscribe(app)
@@ -117,6 +126,13 @@ export class AppsUpdatesHandler extends FeedsHandler {
     }
     if (this._subscriptions[appID] == null && this._observers.size > 0) {
       this._subscribe(app)
+    }
+  }
+
+  clear() {
+    super.clear()
+    if (this._appInstalledSubscription != null) {
+      this._appInstalledSubscription.unsubscribe()
     }
   }
 

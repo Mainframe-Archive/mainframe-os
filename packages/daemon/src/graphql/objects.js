@@ -12,7 +12,6 @@ import {
   GraphQLString,
 } from 'graphql'
 import { fromGlobalId, globalIdField, nodeDefinitions } from 'graphql-relay'
-import semver from 'semver'
 
 import { App, OwnApp } from '../app'
 import {
@@ -319,15 +318,20 @@ export const ownApp = new GraphQLObjectType({
         version: self.currentVersion,
       }),
     },
+    publishedVersion: {
+      type: GraphQLString,
+      resolve: self => {
+        const found = self.getSortedVersions().find(v => v.versionHash != null)
+        if (found != null) {
+          return found.version
+        }
+      },
+    },
     versions: {
       type: new GraphQLNonNull(
         new GraphQLList(new GraphQLNonNull(appVersionData)),
       ),
-      resolve: ({ versions }) => {
-        return Object.keys(versions)
-          .sort(semver.rcompare)
-          .map(version => ({ ...versions[version], version }))
-      },
+      resolve: self => self.getSortedVersions(),
     },
     developer: {
       type: new GraphQLNonNull(appAuthor),

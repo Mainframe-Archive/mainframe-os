@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 43f5d1456c2016f21a535d28ad42ae77
+ * @relayHash 48452eb186307c92888b7fac178db711
  */
 
 /* eslint-disable */
@@ -101,11 +101,8 @@ fragment OwnAppDetailView_ownApp on OwnApp {
     id
     name
   }
+  publishedVersion
   currentVersionData {
-    version
-    versionHash
-  }
-  versions {
     version
     versionHash
     permissions {
@@ -178,21 +175,7 @@ v5 = {
     v4
   ]
 },
-v6 = {
-  "kind": "ScalarField",
-  "alias": null,
-  "name": "version",
-  "args": null,
-  "storageKey": null
-},
-v7 = {
-  "kind": "ScalarField",
-  "alias": null,
-  "name": "versionHash",
-  "args": null,
-  "storageKey": null
-},
-v8 = [
+v6 = [
   {
     "kind": "ScalarField",
     "alias": null,
@@ -227,7 +210,7 @@ return {
   "operationKind": "mutation",
   "name": "appMutationsAppCreateMutation",
   "id": null,
-  "text": "mutation appMutationsAppCreateMutation(\n  $input: AppCreateMutationInput!\n) {\n  createApp(input: $input) {\n    app {\n      id\n      localID\n      name\n    }\n    viewer {\n      apps {\n        ...OwnAppsView_apps\n      }\n      id\n    }\n  }\n}\n\nfragment OwnAppsView_apps on Apps {\n  own {\n    localID\n    name\n    ...AppItem_ownApp\n    ...OwnAppDetailView_ownApp\n    id\n  }\n}\n\nfragment AppItem_ownApp on OwnApp {\n  mfid\n  localID\n  name\n  developer {\n    id\n    name\n  }\n}\n\nfragment OwnAppDetailView_ownApp on OwnApp {\n  localID\n  mfid\n  name\n  contentsPath\n  updateFeedHash\n  developer {\n    id\n    name\n  }\n  currentVersionData {\n    version\n    versionHash\n  }\n  versions {\n    version\n    versionHash\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        COMMS_CONTACT\n        CONTACTS_READ\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        COMMS_CONTACT\n        CONTACTS_READ\n      }\n    }\n  }\n}\n",
+  "text": "mutation appMutationsAppCreateMutation(\n  $input: AppCreateMutationInput!\n) {\n  createApp(input: $input) {\n    app {\n      id\n      localID\n      name\n    }\n    viewer {\n      apps {\n        ...OwnAppsView_apps\n      }\n      id\n    }\n  }\n}\n\nfragment OwnAppsView_apps on Apps {\n  own {\n    localID\n    name\n    ...AppItem_ownApp\n    ...OwnAppDetailView_ownApp\n    id\n  }\n}\n\nfragment AppItem_ownApp on OwnApp {\n  mfid\n  localID\n  name\n  developer {\n    id\n    name\n  }\n}\n\nfragment OwnAppDetailView_ownApp on OwnApp {\n  localID\n  mfid\n  name\n  contentsPath\n  updateFeedHash\n  developer {\n    id\n    name\n  }\n  publishedVersion\n  currentVersionData {\n    version\n    versionHash\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        COMMS_CONTACT\n        CONTACTS_READ\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        COMMS_CONTACT\n        CONTACTS_READ\n      }\n    }\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -356,6 +339,13 @@ return {
                         "storageKey": null
                       },
                       {
+                        "kind": "ScalarField",
+                        "alias": null,
+                        "name": "publishedVersion",
+                        "args": null,
+                        "storageKey": null
+                      },
+                      {
                         "kind": "LinkedField",
                         "alias": null,
                         "name": "currentVersionData",
@@ -364,21 +354,20 @@ return {
                         "concreteType": "AppVersionData",
                         "plural": false,
                         "selections": [
-                          v6,
-                          v7
-                        ]
-                      },
-                      {
-                        "kind": "LinkedField",
-                        "alias": null,
-                        "name": "versions",
-                        "storageKey": null,
-                        "args": null,
-                        "concreteType": "AppVersionData",
-                        "plural": true,
-                        "selections": [
-                          v6,
-                          v7,
+                          {
+                            "kind": "ScalarField",
+                            "alias": null,
+                            "name": "version",
+                            "args": null,
+                            "storageKey": null
+                          },
+                          {
+                            "kind": "ScalarField",
+                            "alias": null,
+                            "name": "versionHash",
+                            "args": null,
+                            "storageKey": null
+                          },
                           {
                             "kind": "LinkedField",
                             "alias": null,
@@ -396,7 +385,7 @@ return {
                                 "args": null,
                                 "concreteType": "AppPermissionDefinitions",
                                 "plural": false,
-                                "selections": v8
+                                "selections": v6
                               },
                               {
                                 "kind": "LinkedField",
@@ -406,7 +395,7 @@ return {
                                 "args": null,
                                 "concreteType": "AppPermissionDefinitions",
                                 "plural": false,
-                                "selections": v8
+                                "selections": v6
                               }
                             ]
                           }

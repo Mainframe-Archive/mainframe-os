@@ -32,6 +32,8 @@ export type AppVersion = {
   versionHash?: string,
 }
 
+export type ListedAppVersion = AppVersion & { version: string }
+
 export type OwnAppParams = AbstractAppParams & {
   data: OwnAppData,
   updateFeed: OwnFeed,
@@ -135,6 +137,12 @@ export default class OwnApp extends AbstractApp {
 
   getVersionData(version?: ?string): ?AppVersion {
     return this._versions[version || this.currentVersion]
+  }
+
+  getSortedVersions(): Array<ListedAppVersion> {
+    return Object.keys(this._versions)
+      .sort(semver.rcompare)
+      .map(version => ({ ...this._versions[version], version }))
   }
 
   // Setters

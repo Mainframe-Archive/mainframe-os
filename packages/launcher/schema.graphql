@@ -378,6 +378,7 @@ type OwnApp implements Node {
   updateFeedHash: String!
   currentVersion: String!
   currentVersionData: AppVersionData!
+  publishedVersion: String
   versions: [AppVersionData!]!
   developer: AppAuthor!
   users: [AppUser!]!
