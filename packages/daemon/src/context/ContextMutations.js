@@ -685,7 +685,7 @@ export default class ContextMutations {
   async setEthNetwork(url: string): Promise<void> {
     const { openVault, io } = this._context
     openVault.setEthUrl(url)
-    io.eth.setProviderURL(url)
+    io.eth.providerURL = url
     await openVault.save()
     this._context.next({ type: 'eth_network_changed', change: 'network' })
   }

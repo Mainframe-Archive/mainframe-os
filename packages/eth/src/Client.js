@@ -2,12 +2,13 @@
 import EventEmitter from 'events'
 import { fromWei, toWei, toHex, hexToNumber, isAddress } from 'web3-utils'
 import type { Observable } from 'rxjs'
+import { WebsocketProvider } from 'web3-providers'
 
-import RequestManager from './RequestManager'
 import ERC20 from './Contracts/ERC20'
 import BaseContract from './Contracts/BaseContract'
 import type {
   AbstractProvider,
+  RequestPayload,
   EventFilterParams,
   SendParams,
   TXEventEmitter,
@@ -21,6 +22,10 @@ export const NETWORKS = {
   '4': 'rinkeby',
   '42': 'kovan',
   ganache: 'ganache',
+}
+
+const wsOptions = {
+  timeout: 15000,
 }
 
 type Subscriptions = {
@@ -39,13 +44,15 @@ type WalletProvider = {
   +getAccounts: () => Promise<Array<string>>,
 }
 
-export default class EthClient extends RequestManager {
+export default class EthClient extends EventEmitter {
   _polling = false
   _defaultAccount: ?string
   _networkName: ?string
   _networkID: ?string
+  _web3Provider: AbstractProvider
   _subscriptions: ?Subscriptions
   _walletProvider: ?WalletProvider
+  _requestCount: number = 0
   _contracts = {}
   _intervals = {}
 
@@ -55,9 +62,26 @@ export default class EthClient extends RequestManager {
     subscriptions?: ?Subscriptions,
   ) {
     super(provider)
+    if (typeof provider === 'string') {
+      // TODO: handle http endpoints
+      this._web3Provider = new WebsocketProvider(provider, wsOptions)
+    } else {
+      this._web3Provider = provider
+    }
     this._subscriptions = subscriptions
     this._walletProvider = walletProvider
     this.setup()
+  }
+
+  get web3Provider(): AbstractProvider {
+    return this._web3Provider
+  }
+
+  set providerURL(url: string) {
+    // TODO: handle http
+    // TODO: Cleanup websocket subs
+    this._web3Provider = new WebsocketProvider(url, wsOptions)
+    this.fetchNetwork()
   }
 
   get networkName(): string {
@@ -90,7 +114,6 @@ export default class EthClient extends RequestManager {
 
   async setup() {
     const id = await this.fetchNetwork()
-    this.setNetworkID(id)
     if (!this._subscriptions) {
       return
     }
@@ -112,7 +135,9 @@ export default class EthClient extends RequestManager {
 
   async fetchNetwork(): Promise<string> {
     const req = this.createRequest('net_version', [])
-    return this.sendRequest(req)
+    const id = await this.sendRequest(req)
+    this.setNetworkID(id)
+    return id
   }
 
   async getAccounts(): Promise<Array<string>> {
@@ -310,5 +335,24 @@ export default class EthClient extends RequestManager {
         eventEmitter.emit('error', err)
       })
     return eventEmitter
+  }
+
+  createRequest(method: string, params: Array<any>): RequestPayload {
+    this._requestCount += 1
+    return {
+      id: this._requestCount,
+      jsonrpc: '2.0',
+      method: method,
+      params: params,
+    }
+  }
+
+  async sendRequest(params: RequestPayload): Promise<any> {
+    const res = await this.web3Provider.sendPayload(params)
+    if (res.error) {
+      throw res.error
+    } else {
+      return res.result
+    }
   }
 }
