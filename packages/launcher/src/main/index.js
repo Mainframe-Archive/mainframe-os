@@ -2,7 +2,7 @@
 
 import path from 'path'
 import url from 'url'
-import Client from '@mainframe/client'
+import Client, { type VaultSettings } from '@mainframe/client'
 import { Environment, DaemonConfig, VaultConfig } from '@mainframe/config'
 import StreamRPC from '@mainframe/rpc-stream'
 import { startDaemon } from '@mainframe/toolbox'
@@ -14,6 +14,7 @@ import type { AppSession } from '../types'
 
 import { AppContext, LauncherContext } from './contexts'
 import { interceptWebRequests } from './permissions'
+import { registerStreamProtocol } from './storage'
 import createElectronTransport from './createElectronTransport'
 import createRPCChannels from './rpc/createChannels'
 
@@ -64,7 +65,10 @@ const newWindow = (params: Object = {}) => {
 
 // App Lifecycle
 
-const launchApp = async (appSession: AppSession) => {
+const launchApp = async (
+  appSession: AppSession,
+  vaultSettings: VaultSettings,
+) => {
   const appID = appSession.app.appID
   const userID = appSession.user.id
   const appOpen = appContexts[appID] && appContexts[appID][userID]
@@ -104,6 +108,7 @@ const launchApp = async (appSession: AppSession) => {
       createElectronTransport(appWindow, APP_TRUSTED_REQUEST_CHANNEL),
     ),
     window: appWindow,
+    settings: vaultSettings,
   })
   contextsByWindow.set(appWindow, appContext)
 
@@ -125,6 +130,27 @@ const launchApp = async (appSession: AppSession) => {
     // $FlowFixMe: can't assign ID type
     appContexts[appID] = { [userID]: appContext }
   }
+
+  appWindow.webContents.on('did-attach-webview', (event, webContents) => {
+    // Open a separate developer tools window for the app
+    appContext.sandbox = webContents
+    registerStreamProtocol(appContext)
+    if (is.development) {
+      appWindow.webContents.executeJavaScript(
+        `document.getElementById('sandbox-webview').openDevTools()`,
+      )
+    }
+  })
+
+  appWindow.on('closed', async () => {
+    await client.app.close({ sessID: appSession.session.sessID })
+    const ctx = contextsByWindow.get(appWindow)
+    if (ctx != null) {
+      await ctx.clear()
+      contextsByWindow.delete(appWindow)
+    }
+    delete appContexts[appID][userID]
+  })
 }
 
 // TODO: proper setup, this is just temporary logic to simplify development flow

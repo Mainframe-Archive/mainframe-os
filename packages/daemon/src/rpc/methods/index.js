@@ -29,6 +29,7 @@ export default {
   app_setPermissionsRequirements: app.setPermissionsRequirements,
   app_setUserDefaultWallet: app.setUserDefaultWallet,
   app_setUserPermissionsSettings: app.setUserPermissionsSettings,
+  app_setFeedHash: app.setFeedHash,
   // TODO: remove app for given user only
   // Options:
   // - "clear": removes app contents, only possible if there is no user left for app

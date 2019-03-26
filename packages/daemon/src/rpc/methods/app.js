@@ -37,6 +37,8 @@ import {
   type AppSetPermissionsRequirementsParams,
   APP_SET_USER_PERMISSIONS_SETTINGS_SCHEMA,
   type AppSetUserPermissionsSettingsParams,
+  APP_SET_FEED_HASH_SCHEMA,
+  type AppSetFeedHashParams,
 } from '@mainframe/client'
 import { idType as fromClientID, type ID } from '@mainframe/utils-id'
 
@@ -101,6 +103,7 @@ const createClientSession = (
     defaultEthAccount,
     app: appData,
     isDev: session.isDev,
+    storage: session.storage,
   }
 }
 
@@ -315,6 +318,26 @@ export const setPermissionsRequirements = {
       throw new Error('App not found')
     }
     app.setPermissionsRequirements(params.permissions, params.version)
+    await ctx.openVault.save()
+  },
+}
+
+export const setFeedHash = {
+  params: APP_SET_FEED_HASH_SCHEMA,
+  handler: async (
+    ctx: ClientContext,
+    params: AppSetFeedHashParams,
+  ): Promise<void> => {
+    const session = ctx.openVault.getSession(fromClientID(params.sessID))
+    if (session == null) {
+      throw clientError('Invalid session')
+    }
+
+    const app = ctx.openVault.apps.getByID(session.appID)
+    if (app == null) {
+      throw sessionError('Invalid app')
+    }
+    app.setFeedHash(session.userID, params.feedHash)
     await ctx.openVault.save()
   },
 }

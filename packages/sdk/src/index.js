@@ -6,6 +6,7 @@ import type StreamRPC from '@mainframe/rpc-stream'
 
 import EthAPIs from './apis/Eth'
 import CommsAPIs from './apis/Comms'
+import StorageAPIs from './apis/Storage'
 import ContactsAPIs from './apis/Contacts'
 import PaymentAPIs from './apis/Payments'
 
@@ -15,6 +16,7 @@ export default class MainframeSDK {
   _rpc: StreamRPC
   _ethereum: EthAPIs
   comms: CommsAPIs
+  storage: StorageAPIs
   contacts: ContactsAPIs
   payments: PaymentAPIs
 
@@ -26,6 +28,7 @@ export default class MainframeSDK {
     }
 
     this.comms = new CommsAPIs(this._rpc)
+    this.storage = new StorageAPIs(this._rpc)
     this.contacts = new ContactsAPIs(this._rpc)
     this.payments = new PaymentAPIs(this)
   }
