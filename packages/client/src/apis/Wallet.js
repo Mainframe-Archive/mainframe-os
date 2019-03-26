@@ -18,6 +18,8 @@ import type {
   WalletSetUserDefaulParams,
   WalletSignTxParams,
   WalletSignTxResult,
+  WalletSignParams,
+  WalletSignResult,
 } from '../types'
 
 export default class WalletAPIs extends ClientAPIs {
@@ -59,6 +61,10 @@ export default class WalletAPIs extends ClientAPIs {
     params: WalletSignTxParams,
   ): Promise<WalletSignTxResult> {
     return this._rpc.request('wallet_signTx', params)
+  }
+
+  async sign(params: WalletSignParams): Promise<WalletSignResult> {
+    return this._rpc.request('wallet_sign', params)
   }
 
   async getLedgerEthAccounts(params: { pageNum: number }) {

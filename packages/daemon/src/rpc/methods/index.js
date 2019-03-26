@@ -83,6 +83,7 @@ export default {
   wallet_ledgerGetEthAccounts: wallet.getLedgerEthAccounts,
   wallet_ledgerAddEthAccounts: wallet.addLedgerEthAccounts,
   wallet_setUserDefault: wallet.setUsersDefaultWallet,
+  wallet_sign: wallet.sign,
   wallet_signTx: wallet.signTransaction,
   wallet_subEthAccountsChanged: wallet.subEthAccountsChanged,
 }

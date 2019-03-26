@@ -3,7 +3,7 @@
 import { uniqueID } from '@mainframe/utils-id'
 
 import { mapObject } from '../utils'
-import type { WalletSignTXParams } from './AbstractWallet'
+import type { WalletSignTXParams, WalletSignDataParams } from './AbstractWallet'
 import HDWallet, { type HDWalletSerialized } from './HDWallet'
 import LedgerWallet, { type LedgerWalletSerialized } from './LedgerWallet'
 import { getAddressAtIndex } from './ledgerClient'
@@ -227,6 +227,14 @@ export default class WalletsRepository {
       throw new Error('Wallet not found')
     }
     return wallet.signTransaction(params)
+  }
+
+  async signEthData(params: WalletSignDataParams): Promise<string> {
+    const wallet = this.getEthWalletByAccount(params.address)
+    if (!wallet) {
+      throw new Error('Wallet not found')
+    }
+    return wallet.sign(params)
   }
 
   // Ledger Wallets

@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 8121c90f4d41cc4d23aed79d248b9512
+ * @relayHash b0110d86fb14d7ee61c8a6f61cd3280f
  */
 
 /* eslint-disable */
@@ -10,39 +10,44 @@
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
 type ContactsView_contacts$ref = any;
-export type AddContactInput = {
+export type InviteContactInput = {
   userID: string,
-  publicFeed: string,
-  aliasName?: ?string,
-  sendInvite?: ?boolean,
+  contactID: string,
   clientMutationId?: ?string,
 };
-export type ContactsViewAddContactMutationVariables = {|
-  input: AddContactInput,
+export type ContactsViewInviteContactMutationVariables = {|
+  input: InviteContactInput,
   userID: string,
 |};
-export type ContactsViewAddContactMutationResponse = {|
-  +addContact: ?{|
+export type ContactsViewInviteContactMutationResponse = {|
+  +inviteContact: ?{|
+    +contact: ?{|
+      +inviteTXHash: ?string
+    |},
     +viewer: {|
       +contacts: {|
         +$fragmentRefs: ContactsView_contacts$ref
       |}
-    |}
+    |},
   |}
 |};
-export type ContactsViewAddContactMutation = {|
-  variables: ContactsViewAddContactMutationVariables,
-  response: ContactsViewAddContactMutationResponse,
+export type ContactsViewInviteContactMutation = {|
+  variables: ContactsViewInviteContactMutationVariables,
+  response: ContactsViewInviteContactMutationResponse,
 |};
 */
 
 
 /*
-mutation ContactsViewAddContactMutation(
-  $input: AddContactInput!
+mutation ContactsViewInviteContactMutation(
+  $input: InviteContactInput!
   $userID: String!
 ) {
-  addContact(input: $input) {
+  inviteContact(input: $input) {
+    contact {
+      inviteTXHash
+      id
+    }
     viewer {
       contacts {
         ...ContactsView_contacts_3iqrP
@@ -73,7 +78,7 @@ var v0 = [
   {
     "kind": "LocalArgument",
     "name": "input",
-    "type": "AddContactInput!",
+    "type": "InviteContactInput!",
     "defaultValue": null
   },
   {
@@ -88,10 +93,17 @@ v1 = [
     "kind": "Variable",
     "name": "input",
     "variableName": "input",
-    "type": "AddContactInput!"
+    "type": "InviteContactInput!"
   }
 ],
 v2 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "inviteTXHash",
+  "args": null,
+  "storageKey": null
+},
+v3 = {
   "kind": "ScalarField",
   "alias": null,
   "name": "id",
@@ -101,13 +113,13 @@ v2 = {
 return {
   "kind": "Request",
   "operationKind": "mutation",
-  "name": "ContactsViewAddContactMutation",
+  "name": "ContactsViewInviteContactMutation",
   "id": null,
-  "text": "mutation ContactsViewAddContactMutation(\n  $input: AddContactInput!\n  $userID: String!\n) {\n  addContact(input: $input) {\n    viewer {\n      contacts {\n        ...ContactsView_contacts_3iqrP\n      }\n      id\n    }\n  }\n}\n\nfragment ContactsView_contacts_3iqrP on Contacts {\n  userContacts(userID: $userID) {\n    peerID\n    localID\n    connectionState\n    publicFeed\n    inviteTXHash\n    profile {\n      name\n      ethAddress\n    }\n    id\n  }\n}\n",
+  "text": "mutation ContactsViewInviteContactMutation(\n  $input: InviteContactInput!\n  $userID: String!\n) {\n  inviteContact(input: $input) {\n    contact {\n      inviteTXHash\n      id\n    }\n    viewer {\n      contacts {\n        ...ContactsView_contacts_3iqrP\n      }\n      id\n    }\n  }\n}\n\nfragment ContactsView_contacts_3iqrP on Contacts {\n  userContacts(userID: $userID) {\n    peerID\n    localID\n    connectionState\n    publicFeed\n    inviteTXHash\n    profile {\n      name\n      ethAddress\n    }\n    id\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
-    "name": "ContactsViewAddContactMutation",
+    "name": "ContactsViewInviteContactMutation",
     "type": "Mutation",
     "metadata": null,
     "argumentDefinitions": v0,
@@ -115,12 +127,24 @@ return {
       {
         "kind": "LinkedField",
         "alias": null,
-        "name": "addContact",
+        "name": "inviteContact",
         "storageKey": null,
         "args": v1,
-        "concreteType": "AddContactPayload",
+        "concreteType": "InviteContactPayload",
         "plural": false,
         "selections": [
+          {
+            "kind": "LinkedField",
+            "alias": null,
+            "name": "contact",
+            "storageKey": null,
+            "args": null,
+            "concreteType": "Contact",
+            "plural": false,
+            "selections": [
+              v2
+            ]
+          },
           {
             "kind": "LinkedField",
             "alias": null,
@@ -161,18 +185,31 @@ return {
   },
   "operation": {
     "kind": "Operation",
-    "name": "ContactsViewAddContactMutation",
+    "name": "ContactsViewInviteContactMutation",
     "argumentDefinitions": v0,
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
-        "name": "addContact",
+        "name": "inviteContact",
         "storageKey": null,
         "args": v1,
-        "concreteType": "AddContactPayload",
+        "concreteType": "InviteContactPayload",
         "plural": false,
         "selections": [
+          {
+            "kind": "LinkedField",
+            "alias": null,
+            "name": "contact",
+            "storageKey": null,
+            "args": null,
+            "concreteType": "Contact",
+            "plural": false,
+            "selections": [
+              v2,
+              v3
+            ]
+          },
           {
             "kind": "LinkedField",
             "alias": null,
@@ -235,13 +272,7 @@ return {
                         "args": null,
                         "storageKey": null
                       },
-                      {
-                        "kind": "ScalarField",
-                        "alias": null,
-                        "name": "inviteTXHash",
-                        "args": null,
-                        "storageKey": null
-                      },
+                      v2,
                       {
                         "kind": "LinkedField",
                         "alias": null,
@@ -267,12 +298,12 @@ return {
                           }
                         ]
                       },
-                      v2
+                      v3
                     ]
                   }
                 ]
               },
-              v2
+              v3
             ]
           }
         ]
@@ -282,5 +313,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '91c0e59898d874cbe2446b1dd502b48e';
+(node/*: any*/).hash = 'ee7fd3b41afe5e937ca0785f50cbb86b';
 module.exports = node;

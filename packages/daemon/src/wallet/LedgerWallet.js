@@ -3,7 +3,11 @@ import EthereumTx from 'ethereumjs-tx'
 import ethUtil from 'ethereumjs-util'
 import { toChecksumAddress } from 'web3-utils'
 
-import { getAddressAtIndex, signTransaction } from './ledgerClient'
+import {
+  getAddressAtIndex,
+  signTransaction,
+  signPersonalMessage,
+} from './ledgerClient'
 import AbstractWallet, {
   type WalletSignTXParams,
   type WalletSignDataParams,
@@ -115,8 +119,16 @@ export default class LedgerWallet extends AbstractWallet {
     }
   }
 
-  sign(params: WalletSignDataParams) {
-    params
-    // TODO: Needs implementing
+  async sign(params: WalletSignDataParams): Promise<string> {
+    // TODO: Needs testing, based on:
+    // https://github.com/LedgerHQ/ledgerjs/tree/master/packages/hw-app-eth#examples-4
+    const index = this.getIndexForAccount(params.address)
+    const result = await signPersonalMessage(Number(index), params.data)
+    let v = result['v'] - 27
+    v = v.toString(16)
+    if (v.length < 2) {
+      v = '0' + v
+    }
+    return '0x' + result['r'] + result['s'] + v
   }
 }

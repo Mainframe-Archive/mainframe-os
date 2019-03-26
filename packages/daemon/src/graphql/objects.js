@@ -515,6 +515,7 @@ export const connectionState = new GraphQLEnumType({
     CONNECTED: { value: 'connected' },
     SENDING: { value: 'sending' },
     SENT: { value: 'sent' },
+    RECEIVED: { value: 'received' },
   },
 })
 
@@ -534,6 +535,9 @@ export const contact = new GraphQLObjectType({
     },
     pubKey: {
       type: new GraphQLNonNull(GraphQLString),
+    },
+    inviteTXHash: {
+      type: GraphQLString,
     },
     profile: {
       type: new GraphQLNonNull(genericProfile),

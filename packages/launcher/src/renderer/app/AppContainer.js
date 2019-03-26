@@ -87,18 +87,14 @@ const EthNetwork = styled.View`
 
 // TODO: Refactor various web3 providers
 const ethClientProvider = {
-  send: async (payload: Object, cb: (?Error, ?any) => any) => {
-    try {
-      const res = await rpc.web3Send(payload)
-      const jsonResponse = {
-        jsonrpc: '2.0',
-        id: payload.id,
-        result: res,
-      }
-      cb(null, jsonResponse)
-    } catch (err) {
-      cb(err)
+  sendPayload: async payload => {
+    const res = await rpc.web3Send(payload)
+    const jsonResponse = {
+      jsonrpc: '2.0',
+      id: payload.id,
+      result: res,
     }
+    return jsonResponse
   },
 }
 

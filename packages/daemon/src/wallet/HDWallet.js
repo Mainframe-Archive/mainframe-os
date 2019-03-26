@@ -158,7 +158,7 @@ export default class HDWallet extends AbstractWallet {
     return addHexPrefix(tx.serialize().toString('hex'))
   }
 
-  sign(params: WalletSignDataParams) {
+  sign(params: WalletSignDataParams): string {
     const accountWallet = this._accountWalletByAddress(params.address)
 
     if (!accountWallet) {

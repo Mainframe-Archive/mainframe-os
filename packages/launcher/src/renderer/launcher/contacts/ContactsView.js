@@ -142,8 +142,10 @@ export type Contact = {
   peerID: string,
   publicFeed: string,
   ethAddress?: string,
+  inviteTXHash?: string,
   profile: {
     name?: string,
+    ethAddress?: string,
   },
   connectionState: 'SENT' | 'RECEIVED' | 'CONNECTED',
 }
@@ -169,17 +171,38 @@ type State = {
   addModalOpen?: boolean,
   editModalOpen?: boolean,
   error?: ?string,
+  inviteError?: ?string,
   peerLookupHash?: ?string,
   queryInProgress?: ?boolean,
   addingContact?: ?boolean,
+  invitingContact?: ?string,
   foundPeer?: {
     profile: {
       name: string,
+      ethAddress?: string,
     },
     publicFeed: string,
     publicKey: string,
   },
 }
+
+export const inviteContactMutation = graphql`
+  mutation ContactsViewInviteContactMutation(
+    $input: InviteContactInput!
+    $userID: String!
+  ) {
+    inviteContact(input: $input) {
+      contact {
+        inviteTXHash
+      }
+      viewer {
+        contacts {
+          ...ContactsView_contacts @arguments(userID: $userID)
+        }
+      }
+    }
+  }
+`
 
 export const addContactMutation = graphql`
   mutation ContactsViewAddContactMutation(
@@ -187,6 +210,21 @@ export const addContactMutation = graphql`
     $userID: String!
   ) {
     addContact(input: $input) {
+      viewer {
+        contacts {
+          ...ContactsView_contacts @arguments(userID: $userID)
+        }
+      }
+    }
+  }
+`
+
+export const acceptContactRequestMutation = graphql`
+  mutation ContactsViewAcceptContactRequestMutation(
+    $input: AcceptContactRequestInput!
+    $userID: String!
+  ) {
+    acceptContactRequest(input: $input) {
       viewer {
         contacts {
           ...ContactsView_contacts @arguments(userID: $userID)
@@ -215,7 +253,6 @@ class ContactsViewComponent extends Component<Props, State> {
 
   constructor(props: Props) {
     super(props)
-
     this.state = {
       selectedContact: props.contacts.userContacts.length
         ? props.contacts.userContacts[0]
@@ -298,6 +335,42 @@ class ContactsViewComponent extends Component<Props, State> {
     }
   }
 
+  sendInvite = (contact: Contact) => {
+    const { user } = this.props
+    this.setState({ inviteError: null, invitingContact: contact.localID })
+    const input = {
+      userID: user.localID,
+      contactID: contact.localID,
+    }
+
+    const requestComplete = error => {
+      this.setState({
+        inviteError: error,
+        invitingContact: undefined,
+        foundPeer: undefined,
+      })
+    }
+
+    commitMutation(this.context, {
+      mutation: inviteContactMutation,
+      variables: { input, userID: user.localID },
+      onCompleted: (contact, errors) => {
+        if (errors && errors.length) {
+          requestComplete(errors[0].message)
+        } else {
+          requestComplete()
+        }
+      },
+      onError: err => {
+        requestComplete(err.message)
+      },
+    })
+
+    if (this.state.addModalOpen) {
+      this.setState({ addModalOpen: false })
+    }
+  }
+
   submitNewContact = (payload: FormSubmitPayload) => {
     const { user } = this.props
     if (payload.valid) {
@@ -350,6 +423,42 @@ class ContactsViewComponent extends Component<Props, State> {
 
   selectContact = (contact: Contact) => {
     this.setState({ selectedContact: contact })
+  }
+
+  acceptContact = (contact: Contact) => {
+    const { user } = this.props
+    this.setState({ error: null, addingContact: true })
+    const input = {
+      userID: user.localID,
+      peerID: contact.peerID,
+    }
+
+    const requestComplete = error => {
+      this.setState({
+        error,
+        addingContact: false,
+        foundPeer: undefined,
+      })
+    }
+
+    commitMutation(this.context, {
+      mutation: acceptContactRequestMutation,
+      variables: { input, userID: user.localID },
+      onCompleted: (contact, errors) => {
+        if (errors && errors.length) {
+          requestComplete(errors[0].message)
+        } else {
+          requestComplete()
+        }
+      },
+      onError: err => {
+        requestComplete(err.message)
+      },
+    })
+
+    if (this.state.addModalOpen) {
+      this.setState({ addModalOpen: false })
+    }
   }
 
   renderContactsList() {
@@ -448,7 +557,7 @@ class ContactsViewComponent extends Component<Props, State> {
         <Button
           variant={['no-border', 'xSmall', 'red']}
           title="ACCEPT"
-          onPress={() => this.props.acceptContact(contact)}
+          onPress={() => this.acceptContact(contact)}
         />
       </AcceptIgnore>
     )
@@ -563,6 +672,34 @@ class ContactsViewComponent extends Component<Props, State> {
     }
 
     const { selectedContact } = this.state
+    let inviteAction
+    if (
+      selectedContact &&
+      selectedContact.connectionState === 'SENT' &&
+      selectedContact.profile.ethAddress
+    ) {
+      if (this.state.invitingContact === selectedContact.localID) {
+        inviteAction = <Loader />
+      } else if (selectedContact.inviteTXHash) {
+        inviteAction = (
+          <Text>{`Invite request sent: ${selectedContact.inviteTXHash}`}</Text>
+        )
+      } else {
+        inviteAction = (
+          <Button
+            title="Send Invite"
+            variant={['marginTop10', 'redOutline']}
+            onPress={() => this.sendInvite(selectedContact)}
+          />
+        )
+      }
+    }
+    const inviteError = this.state.inviteError && (
+      <Text styles="margin-top:10px;" variant="error">
+        {this.state.inviteError}
+      </Text>
+    )
+
     return (
       selectedContact && (
         <RightContainer>
@@ -587,7 +724,7 @@ class ContactsViewComponent extends Component<Props, State> {
                 <Text variant="addressLarge">{selectedContact.publicFeed}</Text>
               </Column>
             </Row>
-            {selectedContact.ethAddress && (
+            {selectedContact.profile.ethAddress && (
               <Row size={1}>
                 <Column>
                   <Text
@@ -596,8 +733,10 @@ class ContactsViewComponent extends Component<Props, State> {
                     ETH Address
                   </Text>
                   <Text variant="addressLarge">
-                    {selectedContact.publicFeed}
+                    {selectedContact.profile.ethAddress}
                   </Text>
+                  {inviteAction}
+                  {inviteError}
                 </Column>
               </Row>
             )}
@@ -705,6 +844,7 @@ const ContactsView = createFragmentContainer(ContactsViewComponent, {
         localID
         connectionState
         publicFeed
+        inviteTXHash
         profile {
           name
           ethAddress

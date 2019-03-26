@@ -56,3 +56,12 @@ export const signTransaction = async (
   const path = HD_PATH + accountIndex
   return app.signTransaction(path, txHex)
 }
+
+export const signPersonalMessage = async (
+  accountIndex: number,
+  hexData: string,
+): Promise<{ r: string, s: string, v: number }> => {
+  const app = await getLedgerApp()
+  const path = HD_PATH + accountIndex
+  return app.signPersonalMessage(path, hexData)
+}

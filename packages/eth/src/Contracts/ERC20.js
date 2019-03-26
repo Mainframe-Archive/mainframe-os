@@ -44,7 +44,7 @@ export default class ERC20Contract extends BaseContract {
     return hexToString(res)
   }
 
-  async getBalance(accountAddress: string): Promise<Object> {
+  async getBalance(accountAddress: string): Promise<string> {
     const decimalsUnit = await this.getTokenDecimalsUnit()
     const data = this.encodeCall('balanceOf', [accountAddress])
     const mftBalanceReq = this.ethClient.createRequest('eth_call', [
@@ -61,5 +61,17 @@ export default class ERC20Contract extends BaseContract {
     const data = this.encodeCall('transfer', [params.to, valueWei])
     const txParams = { from: params.from, to: this.address, data }
     return this.ethClient.sendAndListen(txParams, params.confirmations)
+  }
+
+  async approve(
+    address: string,
+    amount: string | number,
+    options: { from: string },
+  ) {
+    const decimalsUnit = await this.getTokenDecimalsUnit()
+    const valueWei = toWei(String(amount), decimalsUnit)
+    const data = this.encodeCall('approve', [address, valueWei])
+    const txParams = { ...options, to: this.address, data }
+    return this.ethClient.sendAndListen(txParams)
   }
 }

@@ -38,11 +38,21 @@ export type TransactionEvent = {
   data?: string,
 }
 
+export type EventFilterParams = {
+  topics: Array<string>,
+  fromBlock?: ?number,
+  toBlock?: number | string,
+  address?: ?string | Array<string>,
+}
+
 export type TXEventEmitter = EventEmitter
 
 // Web3 JS provider interface
 export type AbstractProvider = {
-  +send: (payload: Object, cb: (?Error, ?any) => void) => Promise<any>,
+  +sendPayload: (payload: Object) => Promise<any>,
   +on?: (event: string, listener: Function) => any,
   +emit?: (event: string, ...args: Array<any>) => boolean,
+  connection?: {
+    readyState: number,
+  },
 }

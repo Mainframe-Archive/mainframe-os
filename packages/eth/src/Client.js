@@ -5,10 +5,12 @@ import type { Observable } from 'rxjs'
 
 import RequestManager from './RequestManager'
 import ERC20 from './Contracts/ERC20'
+import BaseContract from './Contracts/BaseContract'
 import type {
+  AbstractProvider,
+  EventFilterParams,
   SendParams,
   TXEventEmitter,
-  AbstractProvider,
   TXParams,
 } from './types'
 
@@ -18,6 +20,7 @@ export const NETWORKS = {
   '3': 'ropsten',
   '4': 'rinkeby',
   '42': 'kovan',
+  ganache: 'ganache',
 }
 
 type Subscriptions = {
@@ -25,8 +28,14 @@ type Subscriptions = {
   accountsChanged: () => Observable,
 }
 
+type SignDataParams = {
+  address: string,
+  data: string,
+}
+
 type WalletProvider = {
   +signTransaction: (params: TXParams) => Promise<Object>,
+  +sign: (params: SignDataParams) => Promise<string>,
   +getAccounts: () => Promise<Array<string>>,
 }
 
@@ -41,7 +50,7 @@ export default class EthClient extends RequestManager {
   _intervals = {}
 
   constructor(
-    provider: AbstractProvider, // TODO: - Allow string URL and setup provider
+    provider: AbstractProvider | string,
     walletProvider?: ?WalletProvider,
     subscriptions?: ?Subscriptions,
   ) {
@@ -69,8 +78,12 @@ export default class EthClient extends RequestManager {
 
   setNetworkID(id: string) {
     if (id !== this._networkID) {
+      if (Number(id) > 10000) {
+        this._networkName = NETWORKS['ganache']
+      } else {
+        this._networkName = NETWORKS[id] || 'Local Testnet'
+      }
       this._networkID = id
-      this._networkName = NETWORKS[id] || 'Local Testnet'
       this.emit('networkChanged', id)
     }
   }
@@ -116,6 +129,15 @@ export default class EthClient extends RequestManager {
     return fromWei(res, 'ether')
   }
 
+  getContract(abi: Array<Object>, address: string) {
+    if (this._contracts[address]) {
+      return this._contracts[address]
+    }
+    const contract = new BaseContract(this, abi, address)
+    this._contracts[address] = contract
+    return contract
+  }
+
   erc20Contract(address: string) {
     if (this._contracts[address]) {
       return this._contracts[address]
@@ -123,6 +145,29 @@ export default class EthClient extends RequestManager {
     const contract = new ERC20(this, address)
     this._contracts[address] = contract
     return contract
+  }
+
+  // Logs
+
+  async getPastEvents(params: EventFilterParams) {
+    if (params.fromBlock != null) {
+      params.fromBlock = toHex(params.fromBlock)
+    }
+    if (params.toBlock != null) {
+      params.toBlock = toHex(params.toBlock)
+    }
+    const request = this.createRequest('eth_getLogs', [params])
+    const res = await this.sendRequest(request)
+    return res
+  }
+
+  // Signing
+
+  async signData(params: SignDataParams) {
+    if (this._walletProvider != null) {
+      return this._walletProvider.sign(params)
+    }
+    throw new Error('No wallet provider found')
   }
 
   // Sending transactions
@@ -144,11 +189,15 @@ export default class EthClient extends RequestManager {
     if (!res) {
       return null
     }
+    const latestBlock = await this.getLatestBlock()
+    const txBlock = hexToNumber(res.blockNumber)
+    return latestBlock - txBlock
+  }
+
+  async getLatestBlock(): Promise<number> {
     const blockRequest = this.createRequest('eth_blockNumber', [])
     const blockRes = await this.sendRequest(blockRequest)
-    const txBlock = hexToNumber(res.blockNumber)
-    const latestBlock = hexToNumber(blockRes)
-    return latestBlock - txBlock
+    return hexToNumber(blockRes)
   }
 
   async confirmTransaction(
@@ -193,6 +242,8 @@ export default class EthClient extends RequestManager {
         // handle simple value transfer case
         if (err.message === 'no contract code at given address') {
           txParams.gas = '0xcf08'
+        } else {
+          throw err
         }
       }
     }
@@ -229,6 +280,7 @@ export default class EthClient extends RequestManager {
       method: 'eth_sendRawTransaction',
       params: [signedTx],
     }
+    // TODO: Check this is still needed for Ledger
     // if (requestData.params.length && !requestData.params[0].chainId) {
     //   requestData.params[0].chainId = Number(this.networkID)
     // }
@@ -237,7 +289,7 @@ export default class EthClient extends RequestManager {
 
   async sendAndListen(
     txParams: Object,
-    confirmations: ?number = 10,
+    confirmations: ?number,
   ): Promise<TXEventEmitter> {
     const eventEmitter = new EventEmitter()
     const request = await this.generateTXRequest(txParams)
@@ -246,7 +298,9 @@ export default class EthClient extends RequestManager {
         eventEmitter.emit('hash', res)
         return this.confirmTransaction(res, request.id, 0).then(() => {
           eventEmitter.emit('mined', res)
-          return this.confirmTransaction(res, request.id, confirmations)
+          if (confirmations) {
+            return this.confirmTransaction(res, request.id, confirmations)
+          }
         })
       })
       .then(res => {
@@ -257,49 +311,4 @@ export default class EthClient extends RequestManager {
       })
     return eventEmitter
   }
-
-  // Send function allows this to be used as
-  // a provider for Web3 JS like in Mainframe SDK
-
-  // async send(
-  //   payload: RequestPayload,
-  //   cb?: (error: ?Error, response: ?Object) => void,
-  // ) {
-  //   try {
-  //     let response
-  //     switch (payload.method) {
-  //       case 'eth_sendTransaction':
-  //         if (this.walletProvider) {
-  //           const request = await this.generateTXRequest(payload.params[0])
-  //           response = await this.sendRequest(request)
-  //         }
-  //         break
-  //       case 'eth_accounts':
-  //         if (this.walletProvider) {
-  //           response = await this.walletProvider.getAccounts()
-  //         }
-  //         break
-  //       case 'eth_signTransaction':
-  //         if (this.walletProvider) {
-  //           response = await this.walletProvider.signTransaction(
-  //             payload.params[0],
-  //           )
-  //         }
-  //         break
-  //       default:
-  //         response = await this.sendRequest(payload)
-  //     }
-  //     if (cb) {
-  //       cb(null, jsonRpcResponse(response, payload.id))
-  //     } else {
-  //       return response
-  //     }
-  //   } catch (err) {
-  //     if (cb) {
-  //       cb(err)
-  //     } else {
-  //       throw err
-  //     }
-  //   }
-  // }
 }

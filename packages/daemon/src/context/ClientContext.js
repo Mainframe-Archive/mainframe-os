@@ -12,6 +12,7 @@ import ContextIO from './ContextIO'
 import ContextMutations from './ContextMutations'
 import ContextQueries from './ContextQueries'
 import ContextSubscriptions from './ContextSubscriptions'
+import InvitesHandler from './InvitesHandler'
 import { ContactsFeedsHandler } from './FeedsHandler'
 import type { ContextEvent } from './types'
 
@@ -37,6 +38,7 @@ export default class ClientContext extends Subject<ContextEvent> {
   subscriptions: ContextSubscriptions
   vaults: VaultRegistry
   contactsFeeds: ContactsFeedsHandler
+  invitesHandler: InvitesHandler
 
   constructor(params: Params) {
     super()
@@ -51,6 +53,7 @@ export default class ClientContext extends Subject<ContextEvent> {
     this.queries = new ContextQueries(this)
     this.subscriptions = new ContextSubscriptions(this)
     this.contactsFeeds = new ContactsFeedsHandler(this)
+    this.invitesHandler = new InvitesHandler(this)
   }
 
   get openVault(): Vault {

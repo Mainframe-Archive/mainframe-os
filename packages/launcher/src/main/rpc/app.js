@@ -76,6 +76,12 @@ const sharedMethods = {
     }
     return accounts
   },
+  blockchain_web3Send: async (
+    ctx: AppContext,
+    params: BlockchainWeb3SendParams,
+  ): Promise<Object> => {
+    return ctx.client.blockchain.web3Send(params)
+  },
 }
 
 export const sandboxed = {
@@ -105,13 +111,6 @@ export const sandboxed = {
     params: BlockchainWeb3SendParams,
   ): Promise<Object> => {
     return ctx.client.blockchain.web3Unsubscribe(params)
-  },
-
-  blockchain_web3Send: async (
-    ctx: AppContext,
-    params: BlockchainWeb3SendParams,
-  ): Promise<Object> => {
-    return ctx.client.blockchain.web3Send(params)
   },
 
   blockchain_subscribeNetworkChanged: async (
@@ -282,13 +281,6 @@ export const trusted = {
     })
     ctx.setSubscription(sub)
     return { id: sub.id }
-  },
-
-  blockchain_web3Send: async (
-    ctx: AppContext,
-    params: BlockchainWeb3SendParams,
-  ): Promise<Object> => {
-    return ctx.client.blockchain.web3Send(params)
   },
 
   wallet_getUserEthWallets: async (

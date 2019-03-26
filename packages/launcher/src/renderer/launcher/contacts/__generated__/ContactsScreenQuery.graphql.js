@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash cbf1a505ac8695dfbeaca6e34a938050
+ * @relayHash b72af2f3862f2b6350ba574e3c2ec25d
  */
 
 /* eslint-disable */
@@ -49,6 +49,7 @@ fragment ContactsView_contacts_3iqrP on Contacts {
     localID
     connectionState
     publicFeed
+    inviteTXHash
     profile {
       name
       ethAddress
@@ -79,7 +80,7 @@ return {
   "operationKind": "query",
   "name": "ContactsScreenQuery",
   "id": null,
-  "text": "query ContactsScreenQuery(\n  $userID: String!\n) {\n  viewer {\n    contacts {\n      ...ContactsScreen_contacts_3iqrP\n    }\n    id\n  }\n}\n\nfragment ContactsScreen_contacts_3iqrP on Contacts {\n  ...ContactsView_contacts_3iqrP\n}\n\nfragment ContactsView_contacts_3iqrP on Contacts {\n  userContacts(userID: $userID) {\n    peerID\n    localID\n    connectionState\n    publicFeed\n    profile {\n      name\n      ethAddress\n    }\n    id\n  }\n}\n",
+  "text": "query ContactsScreenQuery(\n  $userID: String!\n) {\n  viewer {\n    contacts {\n      ...ContactsScreen_contacts_3iqrP\n    }\n    id\n  }\n}\n\nfragment ContactsScreen_contacts_3iqrP on Contacts {\n  ...ContactsView_contacts_3iqrP\n}\n\nfragment ContactsView_contacts_3iqrP on Contacts {\n  userContacts(userID: $userID) {\n    peerID\n    localID\n    connectionState\n    publicFeed\n    inviteTXHash\n    profile {\n      name\n      ethAddress\n    }\n    id\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -188,6 +189,13 @@ return {
                     "kind": "ScalarField",
                     "alias": null,
                     "name": "publicFeed",
+                    "args": null,
+                    "storageKey": null
+                  },
+                  {
+                    "kind": "ScalarField",
+                    "alias": null,
+                    "name": "inviteTXHash",
                     "args": null,
                     "storageKey": null
                   },

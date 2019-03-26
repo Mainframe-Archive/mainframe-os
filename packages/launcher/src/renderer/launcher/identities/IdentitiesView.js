@@ -7,6 +7,7 @@ import type { AppInstalledData } from '@mainframe/client'
 
 import { Text, Button } from '@morpheus-ui/core'
 
+import applyContext, { type CurrentUser } from '../LauncherContext'
 import Avatar from '../../UIComponents/Avatar'
 import IdentityEditModal from './IdentityEditModal'
 
@@ -25,7 +26,11 @@ export type Identities = {
   ownDevelopers: Array<User>,
 }
 
-type Props = {
+type RendererProps = {
+  user: CurrentUser,
+}
+
+type Props = RendererProps & {
   identities: Identities,
 }
 
@@ -105,12 +110,15 @@ class IdentitiesView extends Component<Props, State> {
   }
 
   render() {
+    const userData = this.props.identities.ownUsers.find(
+      u => u.localID === this.props.user.localID,
+    )
     return (
       <Container>
         {this.props.identities.ownDevelopers.length > 0 && (
           <Text variant={['smallTitle', 'blue', 'bold']}>Personal</Text>
         )}
-        {this.renderUser(this.props.identities.ownUsers[0])}
+        {userData && this.renderUser(userData)}
         <InfoBox>
           <Text theme={{ color: '#ffffff' }}>
             Share your Contact ID with your contacts so they can add you on
@@ -129,39 +137,44 @@ class IdentitiesView extends Component<Props, State> {
   }
 }
 
-export default createFragmentContainer(IdentitiesView, {
-  identities: graphql`
-    fragment IdentitiesView_identities on Identities {
-      ownUsers {
-        ...IdentityEditModal_ownUserIdentity
-        localID
-        feedHash
-        profile {
-          name
-        }
-        apps {
+export const IdentitiesViewRelayContainer = createFragmentContainer(
+  IdentitiesView,
+  {
+    identities: graphql`
+      fragment IdentitiesView_identities on Identities {
+        ownUsers {
+          ...IdentityEditModal_ownUserIdentity
           localID
-          manifest {
+          feedHash
+          profile {
             name
           }
-          users {
-            settings {
-              permissionsSettings {
-                permissionsChecked
-                grants {
-                  BLOCKCHAIN_SEND
+          apps {
+            localID
+            manifest {
+              name
+            }
+            users {
+              settings {
+                permissionsSettings {
+                  permissionsChecked
+                  grants {
+                    BLOCKCHAIN_SEND
+                  }
                 }
               }
             }
           }
         }
-      }
-      ownDevelopers {
-        localID
-        profile {
-          name
+        ownDevelopers {
+          localID
+          profile {
+            name
+          }
         }
       }
-    }
-  `,
-})
+    `,
+  },
+)
+
+export default applyContext(IdentitiesViewRelayContainer)

@@ -9,6 +9,8 @@ import type {
   AppFeedsPayload,
   SharedAppDataPayload,
 } from '../contact/SharedAppData'
+import type { InviteRequest } from '../identity/IdentitiesRepository'
+import type Contact from '../identity/Contact'
 import type ClientContext from './ClientContext'
 
 export type Wallet = {
@@ -16,6 +18,14 @@ export type Wallet = {
   name: ?string,
   type: string,
   accounts: Array<string>,
+}
+
+export type InviteRequestData = InviteRequest & {
+  profile: {
+    name: string,
+    ethAddress: string,
+  },
+  publicFeed: string,
 }
 
 export default class ContextQueries {
@@ -61,28 +71,57 @@ export default class ContextQueries {
 
   // Contacts
 
+  mergePeerContactData(contact: Contact): ContactResult {
+    const { identities } = this._context.openVault
+    const contactProfile = identities.getContactProfile(contact.localID)
+    const peer = identities.getPeerUser(idType(contact.peerID))
+    if (!peer) {
+      throw new Error(`Peer not found: ${contact.peerID}`)
+    }
+    const profile = { ...peer.profile, ...contactProfile }
+    return {
+      profile,
+      localID: contact.localID,
+      peerID: contact.peerID,
+      publicFeed: peer.publicFeed,
+      connectionState: contact.connectionState,
+      inviteTXHash: contact.invite && contact.invite.txHash,
+    }
+  }
+
   getUserContacts(userID: string): Array<ContactResult> {
     const { identities } = this._context.openVault
-    const result = []
+    const result = [...this.getContactsFromInvites(userID)]
     const contacts = identities.getContactsForUser(userID)
     if (contacts) {
       Object.keys(contacts).forEach(id => {
         const contact = contacts[id]
-        const peer = identities.getPeerUser(idType(contact.peerID))
-        if (peer) {
-          const contactProfile = identities.getContactProfile(contact.localID)
-          const profile = { ...peer.profile, ...contactProfile }
-          const contactRes = {
-            profile,
-            localID: id,
-            peerID: contact.peerID,
-            publicFeed: peer.publicFeed,
-            connectionState: contact.connectionState,
-          }
-          result.push(contactRes)
-        }
+        const contactRes = this.mergePeerContactData(contact)
+        result.push(contactRes)
       })
     }
+    // $FlowFixMe eth address always present
+    return result
+  }
+
+  getContactsFromInvites(userID: string): Array<ContactResult> {
+    const { identities } = this._context.openVault
+    const result = []
+    const invites = identities.getInvites(userID)
+    Object.keys(invites).forEach(feed => {
+      const invite = invites[feed]
+      const peer = identities.getPeerUser(idType(invite.peerID))
+      if (peer) {
+        const contactRes = {
+          profile: peer.profile,
+          localID: invite.peerID, // TODO: give local ID's
+          peerID: invite.peerID,
+          publicFeed: peer.publicFeed,
+          connectionState: 'received',
+        }
+        result.push(contactRes)
+      }
+    })
     return result
   }
 

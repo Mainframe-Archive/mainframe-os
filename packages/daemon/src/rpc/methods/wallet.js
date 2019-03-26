@@ -11,6 +11,7 @@ import {
   WALLET_GET_USER_ETH_ACCOUNTS_SCHEMA,
   WALLET_GET_USER_ETH_WALLETS_SCHEMA,
   WALLET_SET_USER_DEFAULT_SCHEMA,
+  WALLET_SIGN_SCHEMA,
   type WalletAddHDAccountParams,
   type WalletCreateHDParams,
   type WalletCreateHDResult,
@@ -28,6 +29,8 @@ import {
   type WalletSetUserDefaulParams,
   type WalletSignTxParams,
   type WalletSignTxResult,
+  type WalletSignParams,
+  type WalletSignResult,
 } from '@mainframe/client'
 import type { Subscription as RxSubscription, Observable } from 'rxjs'
 
@@ -144,6 +147,16 @@ export const signTransaction = {
       params.chain,
       params.transactionData,
     )
+  },
+}
+
+export const sign = {
+  params: WALLET_SIGN_SCHEMA,
+  handler: async (
+    ctx: ClientContext,
+    params: WalletSignParams,
+  ): Promise<WalletSignResult> => {
+    return ctx.openVault.wallets.signEthData(params)
   },
 }
 

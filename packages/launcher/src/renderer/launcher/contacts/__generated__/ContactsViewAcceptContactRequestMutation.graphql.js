@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 8121c90f4d41cc4d23aed79d248b9512
+ * @relayHash 9dfcee772845bb0b484457883908410e
  */
 
 /* eslint-disable */
@@ -10,19 +10,17 @@
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
 type ContactsView_contacts$ref = any;
-export type AddContactInput = {
+export type AcceptContactRequestInput = {
+  peerID: string,
   userID: string,
-  publicFeed: string,
-  aliasName?: ?string,
-  sendInvite?: ?boolean,
   clientMutationId?: ?string,
 };
-export type ContactsViewAddContactMutationVariables = {|
-  input: AddContactInput,
+export type ContactsViewAcceptContactRequestMutationVariables = {|
+  input: AcceptContactRequestInput,
   userID: string,
 |};
-export type ContactsViewAddContactMutationResponse = {|
-  +addContact: ?{|
+export type ContactsViewAcceptContactRequestMutationResponse = {|
+  +acceptContactRequest: ?{|
     +viewer: {|
       +contacts: {|
         +$fragmentRefs: ContactsView_contacts$ref
@@ -30,19 +28,19 @@ export type ContactsViewAddContactMutationResponse = {|
     |}
   |}
 |};
-export type ContactsViewAddContactMutation = {|
-  variables: ContactsViewAddContactMutationVariables,
-  response: ContactsViewAddContactMutationResponse,
+export type ContactsViewAcceptContactRequestMutation = {|
+  variables: ContactsViewAcceptContactRequestMutationVariables,
+  response: ContactsViewAcceptContactRequestMutationResponse,
 |};
 */
 
 
 /*
-mutation ContactsViewAddContactMutation(
-  $input: AddContactInput!
+mutation ContactsViewAcceptContactRequestMutation(
+  $input: AcceptContactRequestInput!
   $userID: String!
 ) {
-  addContact(input: $input) {
+  acceptContactRequest(input: $input) {
     viewer {
       contacts {
         ...ContactsView_contacts_3iqrP
@@ -73,7 +71,7 @@ var v0 = [
   {
     "kind": "LocalArgument",
     "name": "input",
-    "type": "AddContactInput!",
+    "type": "AcceptContactRequestInput!",
     "defaultValue": null
   },
   {
@@ -88,7 +86,7 @@ v1 = [
     "kind": "Variable",
     "name": "input",
     "variableName": "input",
-    "type": "AddContactInput!"
+    "type": "AcceptContactRequestInput!"
   }
 ],
 v2 = {
@@ -101,13 +99,13 @@ v2 = {
 return {
   "kind": "Request",
   "operationKind": "mutation",
-  "name": "ContactsViewAddContactMutation",
+  "name": "ContactsViewAcceptContactRequestMutation",
   "id": null,
-  "text": "mutation ContactsViewAddContactMutation(\n  $input: AddContactInput!\n  $userID: String!\n) {\n  addContact(input: $input) {\n    viewer {\n      contacts {\n        ...ContactsView_contacts_3iqrP\n      }\n      id\n    }\n  }\n}\n\nfragment ContactsView_contacts_3iqrP on Contacts {\n  userContacts(userID: $userID) {\n    peerID\n    localID\n    connectionState\n    publicFeed\n    inviteTXHash\n    profile {\n      name\n      ethAddress\n    }\n    id\n  }\n}\n",
+  "text": "mutation ContactsViewAcceptContactRequestMutation(\n  $input: AcceptContactRequestInput!\n  $userID: String!\n) {\n  acceptContactRequest(input: $input) {\n    viewer {\n      contacts {\n        ...ContactsView_contacts_3iqrP\n      }\n      id\n    }\n  }\n}\n\nfragment ContactsView_contacts_3iqrP on Contacts {\n  userContacts(userID: $userID) {\n    peerID\n    localID\n    connectionState\n    publicFeed\n    inviteTXHash\n    profile {\n      name\n      ethAddress\n    }\n    id\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
-    "name": "ContactsViewAddContactMutation",
+    "name": "ContactsViewAcceptContactRequestMutation",
     "type": "Mutation",
     "metadata": null,
     "argumentDefinitions": v0,
@@ -115,10 +113,10 @@ return {
       {
         "kind": "LinkedField",
         "alias": null,
-        "name": "addContact",
+        "name": "acceptContactRequest",
         "storageKey": null,
         "args": v1,
-        "concreteType": "AddContactPayload",
+        "concreteType": "AcceptContactRequestPayload",
         "plural": false,
         "selections": [
           {
@@ -161,16 +159,16 @@ return {
   },
   "operation": {
     "kind": "Operation",
-    "name": "ContactsViewAddContactMutation",
+    "name": "ContactsViewAcceptContactRequestMutation",
     "argumentDefinitions": v0,
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
-        "name": "addContact",
+        "name": "acceptContactRequest",
         "storageKey": null,
         "args": v1,
-        "concreteType": "AddContactPayload",
+        "concreteType": "AcceptContactRequestPayload",
         "plural": false,
         "selections": [
           {
@@ -282,5 +280,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '91c0e59898d874cbe2446b1dd502b48e';
+(node/*: any*/).hash = '63cc2fc8b126f4fb0749196d66b585e2';
 module.exports = node;

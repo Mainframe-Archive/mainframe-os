@@ -28,20 +28,24 @@ export const web3Send = async (
   ctx: ClientContext,
   params: BlockchainWeb3SendParams,
 ): Promise<BlockchainWeb3SendResult> => {
-  // TODO: Check ws connection
+  ctx.io.checkEthConnection() // Handle WS connection dropping
   return ctx.io.eth.sendRequest(params)
 }
 
 export const web3Subscribe = async (
   ctx: ClientContext,
-  params: BlockchainWeb3SendParams,
+  payload: BlockchainWeb3SendParams,
 ): Promise<BlockchainWeb3SendResult> => {
-  if (ctx.io.eth.web3Provider.on) {
-    const subID = await ctx.io.eth.sendRequest(params)
-    // $FlowFixMe checked 'on' func exists
-    ctx.io.eth.web3Provider.on('data', msg => {
-      if (msg.params.subscription === subID) {
-        ctx.notify(msg.method, msg.params)
+  if (ctx.io.eth.web3Provider.subscribe && ctx.io.eth.web3Provider.on) {
+    const method = payload.params[0]
+    const subID = await ctx.io.eth.web3Provider.subscribe(
+      'eth_subscribe',
+      method,
+      payload.params,
+    )
+    ctx.io.eth.web3Provider.on(subID, msg => {
+      if (msg.subscription === subID) {
+        ctx.notify('eth_subscription', msg)
       }
     })
     return subID
@@ -53,8 +57,7 @@ export const web3Unsubscribe = async (
   ctx: ClientContext,
   params: BlockchainWeb3SendParams,
 ): Promise<BlockchainWeb3SendResult> => {
-  const request = ctx.io.eth.createRequest('eth_unsubscribe', [params.id])
-  return ctx.io.eth.sendRequest(request)
+  await ctx.io.eth.web3Provider.unsubscribe(params.id, 'eth_unsubscribe')
 }
 
 export const subEthNetworkChanged = {

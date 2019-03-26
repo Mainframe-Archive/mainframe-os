@@ -332,3 +332,8 @@ export const WALLET_SET_USER_DEFAULT_SCHEMA = {
   userID: 'string',
   address: 'string',
 }
+
+export const WALLET_SIGN_SCHEMA = {
+  address: 'string',
+  data: 'string',
+}

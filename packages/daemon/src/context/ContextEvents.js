@@ -29,6 +29,7 @@ export default class ContextEvents {
 
   _context: ClientContext
   _subscriptions: { [key: string]: Subscription } = {}
+  _publishingContacts = new Set()
 
   constructor(context: ClientContext) {
     this._context = context
@@ -129,25 +130,31 @@ export default class ContextEvents {
         .pipe(
           filter((e: ContextEvent) => {
             return (
-              (e.type === 'contact_created' || e.type === 'contact_changed') &&
+              (e.type === 'contact_created' ||
+                (e.type === 'contact_changed' &&
+                  !this._publishingContacts.has(e.contact.localID))) &&
               e.contact.connectionState === 'sending'
             )
           }),
         )
         .subscribe(async (e: ContactCreatedEvent | ContactChangedEvent) => {
           const { contact, userID } = e
-          const user = this._context.openVault.identities.getOwnUser(
-            idType(userID),
-          )
-          const peer = this._context.openVault.identities.getPeerUser(
-            idType(contact.peerID),
-          )
+          const { identities } = this._context.openVault
+          const user = identities.getOwnUser(idType(userID))
+          const peer = identities.getPeerUser(idType(contact.peerID))
           if (!user || !peer) return
+
+          // Temp solution to handle possible situation where
+          // this event gets entered whilst already publishing
+
+          this._publishingContacts.add(contact.localID)
 
           await Promise.all([
             contact.sharedFeed.publishLocalData(this._context.io.bzz),
             contact.sharedFeed.syncManifest(this._context.io.bzz),
           ])
+
+          this._publishingContacts.delete(contact.localID)
 
           // Create ephemeral one-use feed from the first-contact keypair and peer-specific topic
           const firstContactFeed = OwnFeed.create(
@@ -159,7 +166,6 @@ export default class ContextEvents {
             contact.generatefirstContactPayload(),
           )
           contact.requestSent = true
-
           this._context.next({
             type: 'contact_changed',
             contact,

@@ -16,7 +16,6 @@ import type {
 } from '@mainframe/client'
 import { idType, type ID } from '@mainframe/utils-id'
 import { ensureDir } from 'fs-extra'
-import WebsocketProvider from 'web3-providers-ws'
 
 import { type App, OwnApp } from '../app'
 import type { ContactToApprove } from '../app/AbstractApp'
@@ -30,6 +29,7 @@ import type {
   OwnUserIdentity,
   PeerUserIdentity,
 } from '../identity'
+import type { CreateContactParams } from '../identity/IdentitiesRepository'
 import type { OwnDeveloperProfile } from '../identity/OwnDeveloperIdentity'
 import type { OwnUserProfile } from '../identity/OwnUserIdentity'
 import type { PeerUserProfile } from '../identity/PeerUserIdentity'
@@ -420,13 +420,27 @@ export default class ContextMutations {
     })
   }
 
-  createContactFromPeer(userID: ID, peerID: ID, aliasName?: string): Contact {
-    const contact = this._context.openVault.identities.createContactFromPeer(
-      userID,
-      peerID,
-      aliasName,
-    )
-    this._context.next({ type: 'contact_created', contact, userID })
+  async createContactFromPeer(
+    userID: string,
+    peerID: string,
+  ): Promise<Contact> {
+    const { identities } = this._context.openVault
+
+    const params: CreateContactParams = { userID, peerID }
+
+    const inviteRequest = identities.getInviteRequest(userID, peerID)
+    if (inviteRequest) {
+      params.acceptanceSignature = await this._context.invitesHandler.signAccepted(
+        inviteRequest,
+      )
+      identities.deleteInviteRequest(userID, peerID)
+    }
+    const contact = identities.createContactFromPeer(params)
+    this._context.next({
+      type: 'contact_created',
+      contact,
+      userID: params.userID,
+    })
     return contact
   }
 
@@ -475,7 +489,7 @@ export default class ContextMutations {
       contactID,
     )
     if (contact == null) {
-      throw new Error('Peer not found')
+      throw new Error('Contact not found')
     }
     contact.profile = profile
     this._context.next({
@@ -483,6 +497,29 @@ export default class ContextMutations {
       contact,
       userID,
       change: 'profile',
+    })
+  }
+
+  updateContactAccepted(userID: string, contactID: string, signature: string) {
+    const contact = this._context.openVault.identities.getContact(
+      userID,
+      contactID,
+    )
+    if (!contact) {
+      throw new Error('Contact not found')
+    }
+    if (!contact.invite) {
+      throw new Error('No invite data found for contact')
+    }
+    if (contact == null) {
+      throw new Error('Contact not found')
+    }
+    contact.invite.acceptedSignature = signature
+    this._context.next({
+      type: 'contact_changed',
+      contact,
+      userID,
+      change: 'inviteAccepted',
     })
   }
 
@@ -647,9 +684,8 @@ export default class ContextMutations {
 
   async setEthNetwork(url: string): Promise<void> {
     const { openVault, io } = this._context
-    const subProvider = new WebsocketProvider(url)
     openVault.setEthUrl(url)
-    io.eth._web3Provider = subProvider
+    io.eth.setProviderURL(url)
     await openVault.save()
     this._context.next({ type: 'eth_network_changed', change: 'network' })
   }

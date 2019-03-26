@@ -1,7 +1,20 @@
+input AcceptContactRequestInput {
+  peerID: String!
+  userID: String!
+  clientMutationId: String
+}
+
+type AcceptContactRequestPayload {
+  viewer: Viewer!
+  contact: Contact
+  clientMutationId: String
+}
+
 input AddContactInput {
   userID: String!
   publicFeed: String!
   aliasName: String
+  sendInvite: Boolean
   clientMutationId: String
 }
 
@@ -165,6 +178,7 @@ enum ConnectionState {
   CONNECTED
   SENDING
   SENT
+  RECEIVED
 }
 
 type Contact implements Node {
@@ -174,6 +188,7 @@ type Contact implements Node {
   peerID: ID!
   publicFeed: String!
   pubKey: String!
+  inviteTXHash: String
   profile: GenericProfile!
   connectionState: ConnectionState!
 }
@@ -286,6 +301,18 @@ type ImportHDWalletPayload {
   clientMutationId: String
 }
 
+input InviteContactInput {
+  userID: String!
+  contactID: String!
+  clientMutationId: String
+}
+
+type InviteContactPayload {
+  contact: Contact
+  viewer: Viewer!
+  clientMutationId: String
+}
+
 input ManifestAuthorInput {
   id: String!
   name: String!
@@ -297,6 +324,8 @@ type Mutation {
   setAppPermissionsRequirements(input: SetAppPermissionsRequirementsInput!): SetAppPermissionsRequirementsPayload
   publishAppVersion(input: PublishAppVersionInput!): PublishAppVersionPayload
   updateAppDetails(input: UpdateAppDetailsInput!): UpdateAppDetailsPayload
+  inviteContact(input: InviteContactInput!): InviteContactPayload
+  acceptContactRequest(input: AcceptContactRequestInput!): AcceptContactRequestPayload
   addContact(input: AddContactInput!): AddContactPayload
   createUserIdentity(input: CreateUserIdentityInput!): CreateUserIdentityPayload
   createDeveloperIdentity(input: CreateDeveloperIdentityInput!): CreateDeveloperIdentityPayload

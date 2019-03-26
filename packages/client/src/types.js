@@ -400,7 +400,7 @@ export type ContactsGetAppUserContactsResult = {
 export type ContactResult = {
   localID: string,
   peerID: string,
-  connectionState: 'connected' | 'sent' | 'sending',
+  connectionState: 'connected' | 'sent' | 'sending' | 'received',
   profile: ContactProfile,
 }
 
@@ -499,6 +499,13 @@ export type WalletSignTxParams = {
 }
 
 export type WalletSignTxResult = string
+
+export type WalletSignParams = {
+  address: string,
+  data: string,
+}
+
+export type WalletSignResult = string
 
 export type WalletGetLedgerEthAccountsParams = {
   pageNum: number,

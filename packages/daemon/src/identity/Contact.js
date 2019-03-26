@@ -25,6 +25,15 @@ export type ContactPayload = {
   version: string,
   profile?: ContactProfile,
   apps?: ContactAppsPayload,
+  acceptanceSignature?: string,
+}
+
+export type InviteData = {
+  chain?: number,
+  txHash: string,
+  fromAddress: string,
+  toAddress: string,
+  acceptedSignature?: string,
 }
 
 export type ContactSerialized = {
@@ -34,6 +43,8 @@ export type ContactSerialized = {
   aliasName: ?string,
   sharedFeed: BidirectionalFeedSerialized,
   requestSent: boolean,
+  invite?: ?InviteData,
+  acceptanceSignature?: ?string,
 }
 
 export type ConnectionState = 'connected' | 'sent' | 'sending'
@@ -46,12 +57,15 @@ export default class Contact {
       profile?: ContactProfile,
       contactFeed?: string,
       localID?: string,
+      acceptanceSignature?: string,
     },
   ): Contact => {
     const sharedFeed = BidirectionalFeed.create({
       remoteFeed: optional && optional.contactFeed,
     })
-    sharedFeed.localFeedData = Contact._generateContactPayload()
+    sharedFeed.localFeedData = Contact._generateContactPayload(
+      optional && optional.acceptanceSignature,
+    )
     return new Contact(
       (optional && optional.localID) || uniqueID(),
       peerID,
@@ -59,25 +73,35 @@ export default class Contact {
       optional && optional.aliasName,
       sharedFeed,
       false,
+      optional && optional.acceptanceSignature,
     )
   }
 
-  static _generateContactPayload(): ContactPayload {
-    return {
+  static _generateContactPayload(
+    acceptanceSignature?: ?string,
+  ): ContactPayload {
+    const payload: ContactPayload = {
       version: '1.0.0',
       apps: {},
     }
+    if (acceptanceSignature) {
+      payload.acceptanceSignature = acceptanceSignature
+    }
+    return payload
   }
 
-  static fromJSON = (contactSerialized: ContactSerialized): Contact =>
-    new Contact(
+  static fromJSON = (contactSerialized: ContactSerialized): Contact => {
+    return new Contact(
       contactSerialized.localID,
       contactSerialized.peerID,
       contactSerialized.profile,
       contactSerialized.aliasName,
       BidirectionalFeed.fromJSON(contactSerialized.sharedFeed),
       contactSerialized.requestSent,
+      contactSerialized.acceptanceSignature,
+      contactSerialized.invite,
     )
+  }
 
   static toJSON = (contact: Contact): ContactSerialized => ({
     localID: contact.localID,
@@ -86,6 +110,8 @@ export default class Contact {
     aliasName: contact._aliasName,
     sharedFeed: BidirectionalFeed.toJSON(contact.sharedFeed),
     requestSent: contact._requestSent,
+    acceptanceSignature: contact.acceptanceSignature,
+    invite: contact._invite,
   })
 
   _localID: string
@@ -93,6 +119,8 @@ export default class Contact {
   _sharedFeed: BidirectionalFeed
   _requestSent: boolean
   _aliasName: ?string
+  _acceptanceSignature: ?string
+  _invite: ?InviteData
   _profile: {
     name: ?string,
     avatar: ?string,
@@ -106,6 +134,8 @@ export default class Contact {
     aliasName: ?string,
     sharedFeed: BidirectionalFeed,
     requestSent?: boolean,
+    acceptanceSignature?: ?string,
+    invite?: ?InviteData,
   ) {
     this._localID = localID
     this._peerID = peerID
@@ -113,6 +143,8 @@ export default class Contact {
     this._aliasName = aliasName
     this._sharedFeed = sharedFeed
     this._requestSent = !!requestSent
+    this._acceptanceSignature = acceptanceSignature
+    this._invite = invite
   }
 
   get localID(): string {
@@ -150,6 +182,18 @@ export default class Contact {
   get connectionState(): ConnectionState {
     if (!this._requestSent) return 'sending'
     return this.sharedFeed.remoteFeed ? 'connected' : 'sent'
+  }
+
+  get acceptanceSignature(): ?string {
+    return this._acceptanceSignature
+  }
+
+  set acceptanceSignature(signature: ?string): void {
+    this._acceptanceSignature = signature
+  }
+
+  get invite(): ?InviteData {
+    return this._invite
   }
 
   generatefirstContactPayload(): FirstContactPayload {
