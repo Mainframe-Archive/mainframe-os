@@ -49,7 +49,6 @@
     "@morpheus-ui/core": "0.0.30",
     "@morpheus-ui/fonts": "0.0.1",
     "@morpheus-ui/icons": "0.0.16",
-    "@svgr/cli": "^4.1.0",
     "electron-store": "^2.0.0",
     "electron-util": "^0.11.0",
     "get-stream": "^4.1.0",
