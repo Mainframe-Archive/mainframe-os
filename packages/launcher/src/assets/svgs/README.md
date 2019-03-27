@@ -1,0 +1,1 @@
+Put SVG files here and use `yarn svg` to convert to React Components.

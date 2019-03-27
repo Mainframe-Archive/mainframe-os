@@ -15,6 +15,7 @@ import applyContext, { type CurrentUser } from '../LauncherContext'
 import ModalView from '../../UIComponents/ModalView'
 import AppIcon from '../apps/AppIcon'
 
+import SvgSelectedPointer from '../../UIComponents/SVGSelectedPointer'
 import EditAppDetailsModal, {
   type CompleteAppData,
 } from './EditAppDetailsModal'
@@ -79,15 +80,26 @@ const IconContainer = styled.View`
 const VersionsContainer = styled.View`
   width: 280;
   border-right-width: 1px;
-  border-color: ${colors.LIGHT_GREY_E8};
+  border-color: #f5f5f5;
+  padding-top: 10px;
 `
 
 const VersionRow = styled.View`
-  margin: 5px;
   padding-vertical: 15px;
   padding-horizontal: 10px;
-  background-color: ${props =>
-    props.selected ? colors.LIGHT_GREY_E5 : 'transparent'};
+  border-top-left-radius: 3px;
+  border-bottom-left-radius: 3px;
+  background-color: ${props => (props.selected ? '#E8EBEF' : 'transparent')};
+`
+
+const SelectedPointer = styled.View`
+  width: 21px;
+  height: 42px;
+  position: absolute;
+  right: -3px;
+  top: 50%;
+  margin-top: -21px;
+  z-index: 9;
 `
 
 const VersionDetailContainer = styled.View`
@@ -311,6 +323,11 @@ class OwnAppDetailView extends Component<Props, State> {
       return (
         <VersionRow selected={selected} key={v.version}>
           <Text variant="greyDark">Version {v.version}</Text>
+          {selected && (
+            <SelectedPointer>
+              <SvgSelectedPointer />
+            </SelectedPointer>
+          )}
         </VersionRow>
       )
     })
@@ -348,7 +365,7 @@ class OwnAppDetailView extends Component<Props, State> {
             onPress={this.onPressEdit}
           />
           <Button
-            variant={['mediumUppercase', 'red']}
+            variant={['mediumUppercase', 'redOutline']}
             title="PUBLISH APP"
             onPress={this.onPressPublishVersion}
           />
@@ -373,7 +390,7 @@ class OwnAppDetailView extends Component<Props, State> {
               onPress={this.onPressOpenApp}
             />
             <Button
-              variant={['mediumUppercase', 'red']}
+              variant={['mediumUppercase', 'redOutline']}
               title="SUBMIT TO MAINRAME APP STORE"
               onPress={this.onPressSubmitFoReview}
             />
@@ -440,7 +457,10 @@ class OwnAppDetailView extends Component<Props, State> {
 
     const updateHash = ownApp.updateFeedHash && (
       <Text variant="greyMed" size={12}>
-        App ID: {ownApp.updateFeedHash}
+        App ID:{' '}
+        <Text variant={['greyMed', 'mono']} size={12}>
+          {ownApp.updateFeedHash}
+        </Text>
       </Text>
     )
 
