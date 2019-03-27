@@ -137,6 +137,7 @@ const RequestContainer = styled.View`
   shadow-radius: 8;
   overflow: hidden;
   ${props => props.wallet && 'right: 5px'};
+  ${props => props.large && 'width: 340px'};
 `
 
 const ContentContainer = styled.View`
@@ -452,7 +453,7 @@ export default class UserAlertView extends Component<Props, State> {
       requestData.domain,
     )
 
-    let content, wallet
+    let content, wallet, large
     if (permissionLabel == null) {
       content = (
         <>
@@ -479,6 +480,7 @@ export default class UserAlertView extends Component<Props, State> {
     } else {
       switch (requestData.key) {
         case 'BLOCKCHAIN_SEND':
+          large = true
           content = this.renderTxSignRequest(id, requestData)
           break
         case 'CONTACTS_SELECT':
@@ -497,7 +499,9 @@ export default class UserAlertView extends Component<Props, State> {
     return (
       <>
         <Container onClick={this.onPressBG} />
-        <RequestContainer wallet={wallet || !this.props.multipleWallets}>
+        <RequestContainer
+          large={large}
+          wallet={wallet || !this.props.multipleWallets}>
           {content}
         </RequestContainer>
       </>

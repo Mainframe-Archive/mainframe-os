@@ -128,7 +128,7 @@ export default class WalletTxRequestView extends Component<Props, State> {
               From
             </Text>
             <Text variant="mono" color="#F9F9F9" size={10}>
-              {condenseAddress(from)}
+              {from}
             </Text>
           </ParamLabel>
           <ParamLabel>
@@ -136,7 +136,7 @@ export default class WalletTxRequestView extends Component<Props, State> {
               To
             </Text>
             <Text variant="mono" color="#F9F9F9" size={10}>
-              {condenseAddress(to)}
+              {to}
             </Text>
           </ParamLabel>
         </TransactionInfo>
@@ -220,7 +220,7 @@ export default class WalletTxRequestView extends Component<Props, State> {
           <Text color="#9A9A9A" size={10}>
             Gas limit{'   '}
           </Text>
-          <Text color="#F9F9F9" size={10}>
+          <Text variant="mono" color="#F9F9F9" size={10}>
             {gasLimit}
           </Text>
         </ParamLabel>
@@ -228,7 +228,7 @@ export default class WalletTxRequestView extends Component<Props, State> {
           <Text color="#9A9A9A" size={10}>
             Price{'   '}
           </Text>
-          <Text color="#F9F9F9" size={10}>
+          <Text variant="mono" color="#F9F9F9" size={10}>
             {gasPriceGwei} Gwei
           </Text>
         </ParamLabel>
