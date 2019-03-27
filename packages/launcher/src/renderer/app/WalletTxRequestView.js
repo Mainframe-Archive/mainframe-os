@@ -11,7 +11,6 @@ import {
 import styled from 'styled-components/native'
 import { Text } from '@morpheus-ui/core'
 
-import { condenseAddress } from './WalletPickerView'
 import rpc from './rpc'
 
 type Props = {
