@@ -109,7 +109,7 @@ export default class ContactPickerView extends Component<Props, State> {
       const selected = this.state.selectedContacts.has(c.localID)
       const content = (
         <ContactRow key={c.localID} last={i === this.state.contacts.length - 1}>
-          <Avatar id={c.publicFeed} size="xSmall" />
+          <Avatar id={c.publicFeed} size="x-small" />
           <ContactData selected={selected}>
             <Text size={13} color="#FFF">
               {c.profile.name}

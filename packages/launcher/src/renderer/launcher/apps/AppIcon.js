@@ -4,7 +4,8 @@ import React, { Component } from 'react'
 import styled from 'styled-components/native'
 import Blockies from 'react-blockies'
 
-type IconSize = 'small' | 'medium' | 'large' | 'x-large' | 'xx-large'
+import { type IconSize } from '../../UIComponents/Avatar'
+
 type Props = {
   url?: ?string,
   id?: ?string,
@@ -21,6 +22,7 @@ export const ICON_SIZE = {
   large: 96,
   medium: 72,
   small: 40,
+  'x-small': 32,
 }
 
 const Container = styled.View`

@@ -20,6 +20,8 @@ import SvgSelectedPointer from '../../UIComponents/SVGSelectedPointer'
 import FormModalView from '../../UIComponents/FormModalView'
 import Loader from '../../UIComponents/Loader'
 
+import type Identity from './__generated__/ContactsView_identities.graphql'
+
 const SvgSmallClose = props => (
   <svg width="10" height="10" viewBox="0 0 10 10" {...props}>
     <path
@@ -145,15 +147,6 @@ const AvatarWrapper = styled.View`
 const Blocky = styled.View`
   margin-right: 15px;
 `
-
-export type Identity = {
-  localID: string,
-  feedHash: string,
-  profile: {
-    name: string,
-    ethAddress?: ?string,
-  },
-}
 
 export type Contact = {
   localID: string,

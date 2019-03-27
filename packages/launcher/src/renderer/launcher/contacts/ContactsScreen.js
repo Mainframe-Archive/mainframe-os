@@ -6,7 +6,8 @@ import { graphql, createFragmentContainer, QueryRenderer } from 'react-relay'
 import { EnvironmentContext } from '../RelayEnvironment'
 import applyContext, { type CurrentUser } from '../LauncherContext'
 import RelayLoaderView from '../RelayLoaderView'
-import ContactsView, { type Contact, type Identity } from './ContactsView'
+import ContactsView, { type Contact } from './ContactsView'
+import type Identity from './__generated__/ContactsView_identities.graphql'
 
 type QueryProps = {
   user: CurrentUser,

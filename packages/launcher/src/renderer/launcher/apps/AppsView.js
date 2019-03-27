@@ -258,17 +258,21 @@ class AppsView extends Component<Props, State> {
     },
   )
 
-  getIcon = memoize((mfId?: ?string) => {
-    if (!mfId) return null
-
-    const icon = this.state.suggestedApps.filter(app => app.mfid === mfId)
-    return icon.length ? icon[0].icon : null
-  })
+  getIcon = memoize(
+    (
+      mfId?: ?string,
+      suggestedApps: Array<SuggestedAppData> = this.state.suggestedApps,
+    ) => {
+      if (!mfId) return null
+      const icon = suggestedApps.filter(app => app.mfid === mfId)
+      return icon.length ? icon[0].icon : null
+    },
+  )
 
   // RENDER
 
   renderApp(app: AppData) {
-    const icon = this.getIcon(app.mfid)
+    const icon = this.getIcon(app.mfid, this.state.suggestedApps)
     return (
       <InstalledAppItem
         icon={icon}
@@ -368,7 +372,7 @@ class AppsView extends Component<Props, State> {
         case 'accept_permissions': {
           // $FlowFixMe ignore undefined warning
           const { app } = this.state.showModal.data
-          const icon = this.getIcon(app.mfid)
+          const icon = this.getIcon(app.mfid, this.state.suggestedApps)
           modal = (
             <PermissionsView
               mfid={app.mfid}

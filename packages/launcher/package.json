@@ -13,7 +13,7 @@
     "dist:electron": "electron-builder",
     "build:flow": "flow-copy-source src lib",
     "relay": "relay-compiler --src ./src --schema ./schema.graphql",
-    "svg": "npx @svgr/cli -d ./src/renderer/UIComponents/Icons ./src/assets/svgs --icon --replace-attr-values \"#D3D3D3=currentColor\"",
+    "svg": "svgr -d ./src/renderer/UIComponents/Icons ./src/assets/svgs --icon --replace-attr-values \"#D3D3D3=currentColor\"",
     "test:types": "flow check",
     "test": "mocha"
   },
@@ -49,6 +49,7 @@
     "@morpheus-ui/core": "0.0.30",
     "@morpheus-ui/fonts": "0.0.1",
     "@morpheus-ui/icons": "0.0.16",
+    "@svgr/cli": "^4.1.0",
     "electron-store": "^2.0.0",
     "electron-util": "^0.11.0",
     "get-stream": "^4.1.0",

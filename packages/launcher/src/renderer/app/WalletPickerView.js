@@ -6,9 +6,11 @@ import styled from 'styled-components/native'
 import WalletIcon from '../launcher/wallets/WalletIcon'
 import rpc from './rpc'
 
-export const condenseAddress = (a?: ?string): string => {
+export const condenseAddress = (a?: ?string, len: number = 8): string => {
   if (!a) return ''
-  const len = 8
+  if (a.length < len + 2) {
+    return a
+  }
   return a.slice(0, len + 2) + '...' + a.slice(-len, a.length)
 }
 
