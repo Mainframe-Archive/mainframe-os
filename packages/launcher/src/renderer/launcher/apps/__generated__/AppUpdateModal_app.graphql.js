@@ -12,6 +12,7 @@ import type { FragmentReference } from "relay-runtime";
 declare export opaque type AppUpdateModal_app$ref: FragmentReference;
 export type AppUpdateModal_app = {|
   +localID: string,
+  +mfid: string,
   +name: string,
   +manifest: {|
     +version: string
@@ -91,6 +92,13 @@ return {
   "argumentDefinitions": [],
   "selections": [
     v0,
+    {
+      "kind": "ScalarField",
+      "alias": null,
+      "name": "mfid",
+      "args": null,
+      "storageKey": null
+    },
     {
       "kind": "ScalarField",
       "alias": null,
@@ -246,5 +254,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '280a95ec5dd059c8df9d9c195142bf18';
+(node/*: any*/).hash = 'fe6b6569666232747b6ba6e163eb2fcf';
 module.exports = node;

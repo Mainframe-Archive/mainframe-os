@@ -152,6 +152,7 @@ class AppUpdateModal extends Component<Props, State> {
 
     return app.update ? (
       <PermissionsView
+        mfid={app.mfid}
         name={app.name}
         // $FlowFixMe: type definition difference between Relay-generated and library-defined
         permissions={app.update.manifest.permissions}
@@ -193,6 +194,7 @@ export default createFragmentContainer(AppUpdateModal, {
   app: graphql`
     fragment AppUpdateModal_app on App {
       localID
+      mfid
       name
       manifest {
         version

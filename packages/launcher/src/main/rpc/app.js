@@ -1,15 +1,28 @@
 // @flow
 
+import { createReadStream } from 'fs'
+import { Readable } from 'stream'
+import type { ListResult } from '@erebos/api-bzz-base'
+import getStream from 'get-stream'
 import {
   LOCAL_ID_SCHEMA,
   type BlockchainWeb3SendParams,
   type ContactsGetUserContactsResult,
   type WalletGetEthWalletsResult,
 } from '@mainframe/client'
+import { dialog } from 'electron'
 import type { Subscription as RxSubscription } from 'rxjs'
+import * as mime from 'mime'
 
 import { type AppContext, ContextSubscription } from '../contexts'
 import { withPermission } from '../permissions'
+import {
+  getStorageManifestHash,
+  downloadStream,
+  uploadStream,
+} from '../storage'
+
+const STORAGE_KEY_PARAM = { type: 'string', pattern: /^([A-Za-z0-9_. =+-]+?)$/ }
 
 class CommsSubscription extends ContextSubscription<RxSubscription> {
   constructor() {
@@ -121,7 +134,7 @@ export const sandboxed = {
         key: 'CONTACTS_SELECT',
         params: { CONTACTS_SELECT: params },
       })
-      if (!res.granted || !res || !res.data || !res.data.selectedContactIDs) {
+      if (!res || !res.granted || !res.data || !res.data.selectedContactIDs) {
         return { contacts: [] }
       }
       const userID = ctx.appSession.user.id
@@ -175,6 +188,102 @@ export const sandboxed = {
       return contactsRes.contacts
     },
   ),
+
+  storage_promptUpload: {
+    params: {
+      key: STORAGE_KEY_PARAM,
+    },
+    handler: (ctx: AppContext, params: { key: string }): Promise<boolean> => {
+      return new Promise((resolve, reject) => {
+        dialog.showOpenDialog(
+          ctx.window,
+          { title: 'Select file to upload', buttonLabel: 'Upload' },
+          async filePaths => {
+            if (filePaths.length === 0) {
+              // No file selected
+              resolve(false)
+            } else {
+              try {
+                const filePath = filePaths[0]
+                await uploadStream(ctx, {
+                  contentType: mime.getType(filePath),
+                  key: params.key,
+                  stream: createReadStream(filePath),
+                })
+                resolve(true)
+              } catch (error) {
+                reject(new Error('Failed to access storage'))
+              }
+            }
+          },
+        )
+      })
+    },
+  },
+
+  storage_list: {
+    handler: async (
+      ctx: AppContext,
+    ): Promise<Array<{ contentType: string, key: string }>> => {
+      try {
+        const { manifestHash } = await getStorageManifestHash(ctx)
+        const list: ListResult = await ctx.bzz.list(manifestHash)
+        return list.entries == null
+          ? []
+          : list.entries.map(meta => {
+              return { contentType: meta.contentType, key: meta.path }
+            })
+      } catch (error) {
+        throw new Error('Failed to access storage')
+      }
+    },
+  },
+
+  storage_set: {
+    params: {
+      data: 'string',
+      key: STORAGE_KEY_PARAM,
+    },
+    handler: async (
+      ctx: AppContext,
+      params: {
+        data: string,
+        key: string,
+      },
+    ): Promise<void> => {
+      try {
+        const stream = new Readable()
+        stream.push(params.data)
+        stream.push(null)
+        await uploadStream(ctx, {
+          contentType: 'text/plain',
+          key: params.key,
+          stream,
+        })
+      } catch (error) {
+        throw new Error('Failed to access storage')
+      }
+    },
+  },
+
+  storage_get: {
+    params: {
+      key: STORAGE_KEY_PARAM,
+    },
+    handler: async (
+      ctx: AppContext,
+      params: { key: string },
+    ): Promise<?string> => {
+      try {
+        const stream = await downloadStream(ctx, params.key)
+        if (stream !== null) {
+          return await getStream(stream)
+        }
+      } catch (error) {
+        throw new Error('Failed to access storage')
+      }
+    },
+  },
 }
 
 export const trusted = {

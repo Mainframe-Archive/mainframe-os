@@ -363,6 +363,19 @@ class OwnAppDetailView extends Component<Props, State> {
       ownApp.currentVersionData.version !== ownApp.publishedVersion
     const hasPublishedVersion = ownApp.publishedVersion != null
 
+    const headerPublished = hasPublishedVersion ? (
+      <Text variant="greyMed" size={12}>
+        App ID:{' '}
+        <Text variant={['greyMed', 'mono']} size={12}>
+          {ownApp.updateFeedHash}
+        </Text>
+      </Text>
+    ) : (
+      <Text variant="greyMed" size={12}>
+        not published
+      </Text>
+    )
+
     const header = (
       <Header>
         <IconContainer>
@@ -370,11 +383,7 @@ class OwnAppDetailView extends Component<Props, State> {
         </IconContainer>
         <HeaderLabels>
           <Text variant={['mediumTitle', 'darkBlue']}>{ownApp.name}</Text>
-          <Text variant="greyMed" size={12}>
-            {hasPublishedVersion
-              ? `App ID: ${ownApp.updateFeedHash}`
-              : 'not published'}
-          </Text>
+          {headerPublished}
         </HeaderLabels>
       </Header>
     )

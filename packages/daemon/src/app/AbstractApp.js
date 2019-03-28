@@ -1,5 +1,6 @@
 // @flow
 
+import { createKeyPair } from '@erebos/secp256k1'
 import {
   createStrictPermissionGrants,
   type PermissionGrant,
@@ -8,28 +9,38 @@ import {
   type PermissionsGrants,
   type StrictPermissionsGrants,
 } from '@mainframe/app-permissions'
+import { encodeBase64 } from '@mainframe/utils-base64'
+import { createSecretStreamKey } from '@mainframe/utils-crypto'
 import type {
   AppUserPermissionsSettings,
   AppUserSettings,
+  StorageSettings,
 } from '@mainframe/client'
 import { idType, type ID, uniqueID } from '@mainframe/utils-id'
 
 import type Session from './Session'
 
-const DEFAULT_SETTINGS = {
-  permissionsSettings: {
-    grants: {
-      WEB_REQUEST: {
-        denied: [],
-        granted: [],
+const getDefaultSettings = () => {
+  return {
+    approvedContacts: {},
+    permissionsSettings: {
+      grants: {
+        WEB_REQUEST: {
+          denied: [],
+          granted: [],
+        },
       },
+      permissionsChecked: false,
     },
-    permissionsChecked: false,
-  },
-  walletSettings: {
-    defaultEthAccount: null,
-  },
-  approvedContacts: {},
+    storageSettings: {
+      feedHash: undefined,
+      feedKey: createKeyPair().getPrivate('hex'),
+      encryptionKey: encodeBase64(createSecretStreamKey()),
+    },
+    walletSettings: {
+      defaultEthAccount: null,
+    },
+  }
 }
 
 export type WalletSettings = {
@@ -41,6 +52,7 @@ export type SessionData = {
   session: Session,
   permissions: PermissionsDetails,
   isDev?: ?boolean,
+  storage: StorageSettings,
 }
 
 export type ContactToApprove = {
@@ -57,6 +69,7 @@ export type ApprovedContact = {
 export type AbstractAppParams = {
   appID: ID,
   settings?: { [ID]: AppUserSettings },
+  storage?: StorageSettings,
 }
 
 export type AbstractAppSerialized = AbstractAppParams
@@ -99,11 +112,10 @@ export default class AbstractApp {
     delete this._settings[userID]
   }
 
+  // Settings
+
   getSettings(userID: ID | string): AppUserSettings {
-    return (
-      this._settings[idType(userID)] ||
-      JSON.parse(JSON.stringify(DEFAULT_SETTINGS))
-    )
+    return this._settings[idType(userID)] || getDefaultSettings()
   }
 
   setSettings(userID: ID, settings: AppUserSettings): void {
@@ -163,6 +175,12 @@ export default class AbstractApp {
   setPermissionsChecked(userID: ID, checked: boolean) {
     const settings = this.getSettings(userID)
     settings.permissionsSettings.permissionsChecked = checked
+    this._settings[userID] = settings
+  }
+
+  setFeedHash(userID: ID, feedHash: string): void {
+    const settings = this.getSettings(userID)
+    settings.storageSettings.feedHash = feedHash
     this._settings[userID] = settings
   }
 

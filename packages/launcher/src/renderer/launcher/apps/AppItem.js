@@ -9,20 +9,47 @@ import type { AppItem_installedApp as InstalledApp } from './__generated__/AppIt
 import type { AppItem_ownApp as OwnApp } from './__generated__/AppItem_ownApp.graphql.js'
 import AppIcon from './AppIcon'
 
-const AppButtonContainer = styled.View`
-  padding: 15px 10px;
+export const AppShadow = styled.View`
+  margin-top: 2px;
+  width: 50px;
+  height: 1px;
+  margin-top: -1px;
+
+  ${props => props.small && `width: 35px;`}
+`
+
+const AppButtonContainer = styled.TouchableOpacity`
+  padding: 20px;
+  margin-left: 12px;
   flex-direction: column;
   align-items: center;
   width: 110px;
+  border-radius: 10px;
+
+  ${props =>
+    props.hover &&
+    `
+    shadow-color: #000;
+    shadow-offset: {width: 0, height: 0};
+    shadow-opacity: 0.1;
+    shadow-radius: 10;
+  `}
 `
 
-const IconContainer = styled.TouchableOpacity`
+const IconContainer = styled.View`
   width: 72px;
-  height: 72px;
-  margin-bottom: 10px;
+  align-items: center;
+  margin-bottom: 15px;
+  ${props =>
+    props.hover &&
+    `
+      margin-top: -3px;
+      margin-bottom: 18px;
+  `}
 `
 
 type SharedProps = {
+  icon?: ?string,
   onOpenApp: (appID: string, own: boolean) => any,
 }
 
@@ -35,14 +62,6 @@ type OwnProps = SharedProps & {
   ownApp: OwnApp,
 }
 
-type SuggestedProps = {
-  appID: string,
-  mfid: string,
-  appName: string,
-  devName: string,
-  onOpen: (appID: string) => void,
-}
-
 type Props = {
   appID: string,
   appName: string,
@@ -50,10 +69,12 @@ type Props = {
   onOpen: () => void,
   onUpdate?: ?() => void,
   testID: string,
+  icon?: ?string,
 }
 
 type State = {
   direction: string,
+  hover: boolean,
 }
 
 type MouseEvent = { clientX: number }
@@ -61,6 +82,7 @@ type MouseEvent = { clientX: number }
 export default class AppItem extends Component<Props, State> {
   state = {
     direction: 'no-skew',
+    hover: false,
   }
 
   mousePosition: number = 0
@@ -90,8 +112,20 @@ export default class AppItem extends Component<Props, State> {
     })
   }
 
+  toggleHover = () => {
+    this.setState({ hover: !this.state.hover })
+  }
+
   render() {
-    const { appID, appName, devName, onOpen, onUpdate, testID } = this.props
+    const {
+      appID,
+      appName,
+      devName,
+      icon,
+      onOpen,
+      onUpdate,
+      testID,
+    } = this.props
 
     let extra = null
     if (onUpdate != null) {
@@ -107,37 +141,32 @@ export default class AppItem extends Component<Props, State> {
     }
 
     return (
-      <AppButtonContainer key={appID}>
+      <AppButtonContainer
+        onPress={onOpen}
+        key={appID}
+        testID={testID}
+        className="transition"
+        hover={this.state.hover}
+        onMouseOver={this.toggleHover}
+        onMouseOut={this.toggleHover}>
         <IconContainer
+          hover={this.state.hover}
           className={this.state.direction}
           onMouseMove={this.setDirection}
           onMouseOver={this.startMoving}
-          onMouseOut={this.stopMoving}
-          onPress={onOpen}
-          testID={testID}>
-          <AppIcon id={appID} />
+          onMouseOut={this.stopMoving}>
+          <AppIcon url={icon} id={appID} />
+          <AppShadow
+            className={
+              this.state.hover ? 'app-shadow app-shadow-hover' : 'app-shadow'
+            }
+          />
         </IconContainer>
-        <Text variant="appButtonName">{appName}</Text>
+        <Text variant={['appButtonName', 'ellipsis']}>{appName}</Text>
         {extra}
       </AppButtonContainer>
     )
   }
-}
-
-export const SuggestedAppItem = (props: SuggestedProps) => {
-  const onOpen = () => {
-    props.onOpen(props.appID)
-  }
-
-  return (
-    <AppItem
-      appID={props.mfid}
-      appName={props.appName}
-      devName={props.devName}
-      onOpen={onOpen}
-      testID="suggested-app-item"
-    />
-  )
 }
 
 const InstalledView = (props: InstalledProps) => {
@@ -154,6 +183,7 @@ const InstalledView = (props: InstalledProps) => {
 
   return (
     <AppItem
+      icon={props.icon}
       appID={app.mfid}
       appName={app.name}
       devName={app.manifest.author.name}

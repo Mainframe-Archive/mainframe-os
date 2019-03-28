@@ -8,9 +8,9 @@ import {
 } from '@mainframe/app-permissions'
 import styled from 'styled-components/native'
 import { Text } from '@morpheus-ui/core'
-import PlusIcon from '@morpheus-ui/icons/PlusSymbolCircled'
 import { findIndex } from 'lodash'
 import memoize from 'memoize-one'
+import PlusIcon from '../../UIComponents/Icons/PlusIcon'
 
 import rpc from '../rpc'
 import PermissionsView from '../PermissionsView'
@@ -19,8 +19,10 @@ import applyContext, { type CurrentUser } from '../LauncherContext'
 import CompleteOnboardSession from './CompleteOnboardSession'
 
 import AppInstallModal from './AppInstallModal'
-import { InstalledAppItem, SuggestedAppItem } from './AppItem'
+import AppPreviewModal from './AppPreviewModal'
 import AppUpdateModal from './AppUpdateModal'
+import { InstalledAppItem } from './AppItem'
+import SuggestedAppItem, { type SuggestedAppData } from './SuggestedItem'
 import type { AppsView_apps as Apps } from './__generated__/AppsView_apps.graphql'
 
 type InstalledApps = $PropertyType<Apps, 'installed'>
@@ -36,15 +38,18 @@ const Header = styled.View`
 export const AppsGrid = styled.View`
   flex-direction: row;
   flex-wrap: wrap;
+  margin-left: -8px;
+  margin-top: 5px;
+  margin-bottom: 15px;
 `
 
 const AppInstallContainer = styled.TouchableOpacity`
-  padding: 15px 10px;
+  padding: 20px;
+  margin-left: 12px;
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
   width: 110px;
-  height: 150px;
 `
 
 const InstallIcon = styled.View`
@@ -60,30 +65,53 @@ const InstallIcon = styled.View`
 
 const ScrollView = styled.ScrollView``
 
-export const NewAppButton = (props: {
+type NewAppProps = {
   title: string,
   onPress: () => void,
   testID: string,
-}) => {
-  return (
-    <AppInstallContainer onPress={props.onPress} testID={props.testID}>
-      <InstallIcon>
-        <PlusIcon color="#808080" />
-      </InstallIcon>
-      <Text
-        theme={{
-          width: '72px',
-          fontSize: '11px',
-          padding: '5px 0',
-          color: '#808080',
-          border: '1px solid #a9a9a9',
-          borderRadius: '3px',
-          textAlign: 'center',
-        }}>
-        {props.title}
-      </Text>
-    </AppInstallContainer>
-  )
+}
+
+type NewAppState = {
+  hover: boolean,
+}
+
+export class NewAppButton extends Component<NewAppProps, NewAppState> {
+  state = {
+    hover: false,
+  }
+
+  toggleHover = () => {
+    this.setState({ hover: !this.state.hover })
+  }
+
+  render() {
+    return (
+      <AppInstallContainer
+        onPress={this.props.onPress}
+        testID={this.props.testID}
+        onMouseOver={this.toggleHover}
+        onMouseOut={this.toggleHover}>
+        <InstallIcon hover={this.state.hover}>
+          <PlusIcon color={this.state.hover ? '#DA1157' : '#808080'} />
+        </InstallIcon>
+        <Text
+          className="transition"
+          theme={{
+            width: '72px',
+            fontSize: '11px',
+            padding: '5px 0',
+            color: this.state.hover ? '#DA1157' : '#808080',
+            border: this.state.hover
+              ? '1px solid #DA1157'
+              : '1px solid #a9a9a9',
+            borderRadius: '3px',
+            textAlign: 'center',
+          }}>
+          {this.props.title}
+        </Text>
+      </AppInstallContainer>
+    )
+  }
 }
 
 type Props = {
@@ -93,15 +121,16 @@ type Props = {
 
 type State = {
   showModal: ?{
-    type: 'accept_permissions' | 'app_install' | 'app_update',
+    type: 'accept_permissions' | 'app_install' | 'app_preview' | 'app_update',
     appID?: ?string,
+    suggestedApp?: ?Object,
     data?: ?{
       app: AppData,
     },
   },
   hover: ?string,
   showOnboarding: boolean,
-  suggestedApps: Array<Object>,
+  suggestedApps: Array<SuggestedAppData>,
 }
 
 class AppsView extends Component<Props, State> {
@@ -119,7 +148,6 @@ class AppsView extends Component<Props, State> {
   fetchSuggested = async () => {
     try {
       const suggestedPromise = await fetch(SUGGESTED_APPS_URL)
-
       const suggestedApps = await suggestedPromise.json()
       this.setState({ suggestedApps })
     } catch (err) {
@@ -160,6 +188,12 @@ class AppsView extends Component<Props, State> {
         showModal: { type: 'app_update', appID },
       })
     }
+  }
+
+  previewSuggested = (app: Object) => {
+    this.setState({
+      showModal: { type: 'app_preview', suggestedApp: app, appID: app.hash },
+    })
   }
 
   onInstallComplete = () => {
@@ -225,10 +259,21 @@ class AppsView extends Component<Props, State> {
   }
 
   getSuggestedList = memoize(
-    (apps: InstalledApps, suggestedApps: Array<Object>) => {
+    (apps: InstalledApps, suggestedApps: Array<SuggestedAppData>) => {
       return suggestedApps.filter(
         item => findIndex(apps, { mfid: item.mfid }) < 0,
       )
+    },
+  )
+
+  getIcon = memoize(
+    (
+      mfId?: ?string,
+      suggestedApps: Array<SuggestedAppData> = this.state.suggestedApps,
+    ) => {
+      if (!mfId) return null
+      const icon = suggestedApps.filter(app => app.mfid === mfId)
+      return icon.length ? icon[0].icon : null
     },
   )
 
@@ -239,6 +284,7 @@ class AppsView extends Component<Props, State> {
     const installed = apps.map(app => (
       // $FlowFixMe: injected fragment type
       <InstalledAppItem
+        icon={this.getIcon(app.mfid, this.state.suggestedApps)}
         key={app.localID}
         installedApp={app}
         onOpenApp={this.onOpenApp}
@@ -249,31 +295,25 @@ class AppsView extends Component<Props, State> {
 
     return (
       <ScrollView>
-        <Text variant={['smallTitle', 'blue', 'bold']}>
-          Installed Applications
-        </Text>
+        <Text variant={['appsTitle', 'blue', 'bold']}>Installed</Text>
         <AppsGrid>
           {installed}
           <NewAppButton
-            title="Install"
+            title="ADD"
             onPress={this.onPressInstall}
             testID="launcher-install-app-button"
           />
         </AppsGrid>
         {suggested.length ? (
           <>
-            <Text variant={['smallTitle', 'blue', 'bold']}>
-              Suggested Applications
-            </Text>
+            <Text variant={['appsTitle', 'blue', 'bold']}>Suggestions</Text>
             <AppsGrid>
               {suggested.map(app => (
                 <SuggestedAppItem
                   key={app.hash}
-                  appID={app.hash}
-                  mfid={app.mfid}
-                  appName={app.name}
-                  devName="Mainframe"
-                  onOpen={this.installSuggested}
+                  appData={app}
+                  onPressInstall={this.installSuggested}
+                  onOpen={this.previewSuggested}
                 />
               ))}
             </AppsGrid>
@@ -320,14 +360,27 @@ class AppsView extends Component<Props, State> {
               appID={this.state.showModal.appID}
               onRequestClose={this.onCloseModal}
               onInstallComplete={this.onInstallComplete}
+              getIcon={this.getIcon}
             />
           )
+          break
+        case 'app_preview':
+          modal = this.state.showModal.suggestedApp ? (
+            <AppPreviewModal
+              appData={this.state.showModal.suggestedApp}
+              onRequestClose={this.onCloseModal}
+              onPressInstall={this.installSuggested}
+            />
+          ) : null
           break
         case 'accept_permissions': {
           // $FlowFixMe ignore undefined warning
           const { app } = this.state.showModal.data
+          const icon = this.getIcon(app.mfid, this.state.suggestedApps)
           modal = (
             <PermissionsView
+              mfid={app.mfid}
+              icon={icon}
               name={app.name}
               // $FlowFixMe: difference between Relay-generated and library-defined types
               permissions={app.manifest.permissions}
