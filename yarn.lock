@@ -1053,16 +1053,6 @@
     "@erebos/hex" "^0.7.0"
     js-sha3 "^0.8.0"
 
-"@erebos/secp256k1@^0.6.0":
-  version "0.6.0"
-  resolved "https://registry.yarnpkg.com/@erebos/secp256k1/-/secp256k1-0.6.0.tgz#176e3a825a842a002c048d0072360b65f804e876"
-  integrity sha512-jGJOiV3VwsxdgDXCh+K2itTTGDM8OC+h99t0cJpVSfX7WIWeNVyFuL6+YhbBsOrASXnfkrkjtg2dBpfCPc2SFw==
-  dependencies:
-    "@babel/runtime" "^7.0.0"
-    "@types/bn.js" "^4.11.3"
-    "@types/elliptic" "^6.4.1"
-    elliptic MainframeHQ/elliptic#circular-dependencies-fix
-
 "@erebos/secp256k1@^0.7.0":
   version "0.7.0"
   resolved "https://registry.yarnpkg.com/@erebos/secp256k1/-/secp256k1-0.7.0.tgz#f59e34a1368e56b8d5ed10c20cca80737129e3ab"
@@ -2371,7 +2361,7 @@
   dependencies:
     "@types/node" "*"
 
-"@types/elliptic@^6.4.1", "@types/elliptic@^6.4.5":
+"@types/elliptic@^6.4.5":
   version "6.4.5"
   resolved "https://registry.yarnpkg.com/@types/elliptic/-/elliptic-6.4.5.tgz#fb56657c32433a99b4d1fd789591f1080f5dccd3"
   integrity sha512-Bu5GHb9EM/nPlEtq3fkxUah2WfEw/JscJltgvjBMrbikEQIPRiZT1ze3Yh92QS/Xv8P0W0OpJHUYyvI26g9wTA==
@@ -8959,6 +8949,13 @@ get-stream@^4.0.0, get-stream@^4.1.0:
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/get-stream/-/get-stream-4.1.0.tgz#c1b255575f3dc21d59bfc79cd3d2b46b1c3a54b5"
   integrity sha512-GMat4EJ5161kIy2HevLlr4luNjBgvmj413KaQA7jt4V8B4RDsfpHk7WQ9GVqfYyyx8OS/L66Kox+rJRNklLK7w==
+  dependencies:
+    pump "^3.0.0"
+
+get-stream@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/get-stream/-/get-stream-5.0.0.tgz#7d1f137576da207fa83d843f44824a70ef999b5f"
+  integrity sha512-frc9F97ehylll1YI31eJRw5M21M86GCItj5U3S3hOEUa6JG6LtcvRKYDAtV/9E5lVasY8QJSPVsrMg/mbCSP5w==
   dependencies:
     pump "^3.0.0"
 
@@ -16488,6 +16485,11 @@ semver@5.5.0:
   version "5.5.0"
   resolved "https://registry.yarnpkg.com/semver/-/semver-5.5.0.tgz#dc4bbc7a6ca9d916dee5d43516f0092b58f7b8ab"
   integrity sha512-4SJ3dm0WAwWy/NVeioZh5AntkdJoWKxHxcmyP622fOkgHa4z3R0TdBJICINyaSDE6uNwVc8gZr+ZinwZAH4xIA==
+
+semver@^6.0.0:
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/semver/-/semver-6.0.0.tgz#05e359ee571e5ad7ed641a6eec1e547ba52dea65"
+  integrity sha512-0UewU+9rFapKFnlbirLi3byoOuhrSsli/z/ihNnvM24vgF+8sNBiI1LZPBSH9wJKUwaUbw+s3hToDLCXkrghrQ==
 
 semver@~5.3.0:
   version "5.3.0"
