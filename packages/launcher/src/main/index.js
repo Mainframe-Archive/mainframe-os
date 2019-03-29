@@ -267,15 +267,14 @@ const createLauncherWindow = async () => {
 }
 
 const shutdown = async () => {
-  await stopDaemon(daemonConfig)
   daemonConfig.runStatus = 'stopped'
+  await stopDaemon(daemonConfig)
 }
 
 app.on('ready', createLauncherWindow)
 
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {
-  shutdown()
   if (process.platform !== 'darwin') {
     app.quit()
   }
@@ -287,6 +286,10 @@ app.on('activate', () => {
   if (launcherWindow === null) {
     createLauncherWindow()
   }
+})
+
+app.on('before-quit', () => {
+  shutdown()
 })
 
 // Window lifecycle events

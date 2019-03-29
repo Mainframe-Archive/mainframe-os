@@ -18,7 +18,21 @@
   },
   "mac": {
     "icon": "./build/icon.png",
-    "target": ["dmg"]
+    "target": ["dmg", "dir"],
+  },
+  "dmg": {
+    "contents": [{
+      "type": "file",
+      "path": "build/pkg-scripts/preinstall.command",
+      "x": 100,
+      "y": 100
+    },
+      {
+        "type": "link",
+        "path": "/Applications",
+        "x": "400",
+        "y": "450"
+      }]
   },
   "win": {
     "icon": "./build/icon.png",

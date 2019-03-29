@@ -20,6 +20,12 @@ import UserAlertView from './UserAlertView'
 
 declare var __static: string
 
+const PRELOAD_URL = url.format({
+  pathname: path.join(__static, 'preload.bundle.js'),
+  protocol: 'file:',
+  slashes: true,
+})
+
 type User = {
   id: ID,
   profile: Object,
@@ -184,11 +190,6 @@ export default class AppContainer extends Component<Props, State> {
     if (!appSession) {
       return <View />
     }
-    const preloadPath = url.format({
-      pathname: path.join(__static, 'preload.js'),
-      protocol: 'file:',
-      slashes: true,
-    })
 
     const appUrl = this.state.contentsPath || this.state.bundleUrl
     const buttons = this.state.showUrlButtons ? (
@@ -253,7 +254,7 @@ export default class AppContainer extends Component<Props, State> {
           <webview
             id="sandbox-webview"
             src={appUrl}
-            preload={preloadPath}
+            preload={PRELOAD_URL}
             style={{ flex: 1 }} // eslint-disable-line react-native/no-inline-styles
             sandboxed="true"
             partition={this.props.partition}

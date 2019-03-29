@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "electron-webpack dev",
     "compile": "electron-webpack",
+    "compile:preload": "webpack --config webpack.preload.js",
     "dist": "npm run compile && electron-builder",
     "electron-builder": "electron-builder",
     "dist:ci": "npm run compile && npm run electron-builder -l --dir",

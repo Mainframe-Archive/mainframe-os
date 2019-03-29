@@ -131,7 +131,7 @@ export const stopDaemon = async (cfg: DaemonConfig): Promise<?ChildProcess> => {
     case 'running':
       // Return the child process as provided by execa
       cfg.runStatus = 'stopped'
-      return execStopDaemon(cfg.binPath, cfg.env.name, cfg)
+      return execStopDaemon(cfg.binPath, cfg.env.name)
     default:
       throw new Error(`Unhandled daemon status: ${status}`)
   }
