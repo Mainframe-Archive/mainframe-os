@@ -79,8 +79,8 @@ export default {
     return rpc.request('wallet_selectDefault')
   },
 
-  web3Send: async (params: Object) => {
-    return rpc.request('blockchain_web3Send', params)
+  ethSend: async (params: Object) => {
+    return rpc.request('blockchain_ethSend', params)
   },
 
   // Contacts

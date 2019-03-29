@@ -79,14 +79,20 @@ export default class ContextQueries {
       throw new Error(`Peer not found: ${contact.peerID}`)
     }
     const profile = { ...peer.profile, ...contactProfile }
-    return {
+    const contactRes: ContactResult = {
       profile,
       localID: contact.localID,
       peerID: contact.peerID,
       publicFeed: peer.publicFeed,
       connectionState: contact.connectionState,
-      inviteTXHash: contact.invite && contact.invite.txHash,
     }
+    if (contact.invite) {
+      contactRes.invite = {
+        inviteTX: contact.invite.inviteTX,
+        stake: contact.invite.stake,
+      }
+    }
+    return contactRes
   }
 
   getUserContacts(userID: string): Array<ContactResult> {

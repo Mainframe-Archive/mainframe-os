@@ -7,7 +7,7 @@ import { ipcRenderer } from 'electron'
 import React, { Component } from 'react'
 import { View, StyleSheet, Switch } from 'react-native-web'
 import type { Subscription } from 'rxjs'
-import type { WalletSignTxParams } from '@mainframe/client'
+import type { WalletEthSignTxParams } from '@mainframe/client'
 import { type EthClient } from '@mainframe/eth'
 
 import { APP_TRUSTED_REQUEST_CHANNEL } from '../../constants'
@@ -33,9 +33,9 @@ type GrantedData = {
 type Request = {
   key: string,
   domain?: string,
-  params?: WalletSignTxParams | ContactSelectParams,
+  params?: WalletEthSignTxParams | ContactSelectParams,
   params: {
-    BLOCKCHAIN_SEND?: WalletSignTxParams,
+    BLOCKCHAIN_SEND?: WalletEthSignTxParams,
     CONTACTS_SELECT?: ContactSelectParams,
   },
 }
@@ -267,7 +267,7 @@ export default class UserAlertView extends Component<Props, State> {
         <Text>Invalid transaction data</Text>
       ) : (
         <WalletTxRequestView
-          transaction={params.BLOCKCHAIN_SEND.transactionData}
+          transaction={params.BLOCKCHAIN_SEND}
           ethClient={this.props.ethClient}
         />
       )

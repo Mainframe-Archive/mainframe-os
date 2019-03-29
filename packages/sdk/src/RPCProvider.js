@@ -11,19 +11,19 @@ export default class RpcProvider extends EventEmitter {
   subscriptions = {}
 
   constructor(rpc: StreamRPC) {
-    super(rpc)
+    super()
     this._rpc = rpc
   }
 
   async sendPayload(payload: Object) {
     let result
     if (payload.method === 'eth_unsubscribe') {
-      result = await this._rpc.request('blockchain_web3Unsubscribe', {
+      result = await this._rpc.request('blockchain_ethUnsubscribe', {
         id: payload.params[0],
       })
     } else if (payload.method === 'eth_subscribe') {
       const subscription = await this._rpc.request(
-        'blockchain_web3Subscribe',
+        'blockchain_ethSubscribe',
         payload,
       )
       const unsubscribe = () => {
@@ -34,7 +34,7 @@ export default class RpcProvider extends EventEmitter {
           params: [subscription],
           method: 'eth_unsubscribe',
         }
-        return this._rpc.request('blockchain_web3Send', unsubPayload)
+        return this._rpc.request('blockchain_ethSend', unsubPayload)
       }
 
       const sub = Observable.create(observer => {
@@ -67,7 +67,7 @@ export default class RpcProvider extends EventEmitter {
       this.subscriptions[subscription] = unsub
       result = subscription
     } else {
-      result = await this._rpc.request('blockchain_web3Send', payload)
+      result = await this._rpc.request('blockchain_ethSend', payload)
     }
     const response = {
       result,

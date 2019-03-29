@@ -6,8 +6,9 @@ import type { ListResult } from '@erebos/api-bzz-base'
 import getStream from 'get-stream'
 import {
   LOCAL_ID_SCHEMA,
-  type BlockchainWeb3SendParams,
+  type BlockchainEthSendParams,
   type ContactsGetUserContactsResult,
+  type EthUnsubscribeParams,
   type WalletGetEthWalletsResult,
 } from '@mainframe/client'
 import { dialog } from 'electron'
@@ -89,11 +90,11 @@ const sharedMethods = {
     }
     return accounts
   },
-  blockchain_web3Send: async (
+  blockchain_ethSend: async (
     ctx: AppContext,
-    params: BlockchainWeb3SendParams,
+    params: BlockchainEthSendParams,
   ): Promise<Object> => {
-    return ctx.client.blockchain.web3Send(params)
+    return ctx.client.blockchain.ethSend(params)
   },
 }
 
@@ -104,11 +105,11 @@ export const sandboxed = {
 
   // Blockchain
 
-  blockchain_web3Subscribe: async (
+  blockchain_ethSubscribe: async (
     ctx: AppContext,
-    params: BlockchainWeb3SendParams,
+    params: BlockchainEthSendParams,
   ): Promise<Object> => {
-    const { subscription, id } = await ctx.client.blockchain.web3Subscribe(
+    const { subscription, id } = await ctx.client.blockchain.ethSubscribe(
       params,
     )
     const sub = new EthBlockchainSubscription(id)
@@ -119,11 +120,11 @@ export const sandboxed = {
     return sub.id
   },
 
-  blockchain_web3Unsubscribe: async (
+  blockchain_ethUnsubscribe: async (
     ctx: AppContext,
-    params: BlockchainWeb3SendParams,
+    params: EthUnsubscribeParams,
   ): Promise<Object> => {
-    return ctx.client.blockchain.web3Unsubscribe(params)
+    return ctx.client.blockchain.ethUnsubscribe(params)
   },
 
   blockchain_subscribeNetworkChanged: async (
@@ -150,11 +151,19 @@ export const sandboxed = {
 
   // Wallet
 
-  wallet_signTx: withPermission(
+  wallet_signEthTx: withPermission(
     'BLOCKCHAIN_SEND',
     (ctx: AppContext, params: any) => ctx.client.wallet.signTransaction(params),
     // TODO notify app if using ledger to feedback awaiting sign
   ),
+
+  // TODO: Implement signing messages with permission
+
+  // wallet_signEth: withPermission(
+  //   'BLOCKCHAIN_SIGN',
+  //   (ctx: AppContext, params: WalletEthSignParams) =>
+  //     ctx.client.wallet.sign(params),
+  // ),
 
   // Comms
 

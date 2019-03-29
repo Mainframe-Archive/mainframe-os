@@ -142,7 +142,14 @@ export type Contact = {
   peerID: string,
   publicFeed: string,
   ethAddress?: string,
-  inviteTXHash?: string,
+  invite?: {
+    inviteTX?: ?string,
+    stake: {
+      amount: string,
+      state: string,
+      reclaimedTX?: ?string,
+    },
+  },
   profile: {
     name?: string,
     ethAddress?: string,
@@ -176,6 +183,7 @@ type State = {
   queryInProgress?: ?boolean,
   addingContact?: ?boolean,
   invitingContact?: ?string,
+  withdrawingStake?: ?boolean,
   foundPeer?: {
     profile: {
       name: string,
@@ -193,8 +201,25 @@ export const inviteContactMutation = graphql`
   ) {
     inviteContact(input: $input) {
       contact {
-        inviteTXHash
+        invite {
+          inviteTX
+        }
       }
+      viewer {
+        contacts {
+          ...ContactsView_contacts @arguments(userID: $userID)
+        }
+      }
+    }
+  }
+`
+
+export const retrieveInviteStakeMutation = graphql`
+  mutation ContactsViewRetrieveInviteStakeMutation(
+    $input: RetrieveInviteStakeInput!
+    $userID: String!
+  ) {
+    retrieveInviteStake(input: $input) {
       viewer {
         contacts {
           ...ContactsView_contacts @arguments(userID: $userID)
@@ -437,7 +462,6 @@ class ContactsViewComponent extends Component<Props, State> {
       this.setState({
         error,
         addingContact: false,
-        foundPeer: undefined,
       })
     }
 
@@ -455,11 +479,40 @@ class ContactsViewComponent extends Component<Props, State> {
         requestComplete(err.message)
       },
     })
-
-    if (this.state.addModalOpen) {
-      this.setState({ addModalOpen: false })
-    }
   }
+
+  withdrawStake = (contact: Contact) => {
+    const { user } = this.props
+    this.setState({ error: null, withdrawingStake: true })
+    const input = {
+      userID: user.localID,
+      contactID: contact.localID,
+    }
+
+    const requestComplete = error => {
+      this.setState({
+        error,
+        withdrawingStake: false,
+      })
+    }
+
+    commitMutation(this.context, {
+      mutation: retrieveInviteStakeMutation,
+      variables: { input, userID: user.localID },
+      onCompleted: (contact, errors) => {
+        if (errors && errors.length) {
+          requestComplete(errors[0].message)
+        } else {
+          requestComplete()
+        }
+      },
+      onError: err => {
+        requestComplete(err.message)
+      },
+    })
+  }
+
+  // RENDER
 
   renderContactsList() {
     const { userContacts } = this.props.contacts
@@ -680,9 +733,11 @@ class ContactsViewComponent extends Component<Props, State> {
     ) {
       if (this.state.invitingContact === selectedContact.localID) {
         inviteAction = <Loader />
-      } else if (selectedContact.inviteTXHash) {
+      } else if (selectedContact.invite && selectedContact.invite.inviteTX) {
         inviteAction = (
-          <Text>{`Invite request sent: ${selectedContact.inviteTXHash}`}</Text>
+          <Text>{`Invite request sent: ${
+            selectedContact.invite.inviteTX
+          }`}</Text>
         )
       } else {
         inviteAction = (
@@ -692,6 +747,32 @@ class ContactsViewComponent extends Component<Props, State> {
             onPress={() => this.sendInvite(selectedContact)}
           />
         )
+      }
+    } else if (
+      selectedContact &&
+      selectedContact.connectionState === 'CONNECTED' &&
+      selectedContact.invite
+    ) {
+      if (selectedContact.invite.stake.reclaimedTX) {
+        inviteAction = (
+          <Text>{`Stake withdrawn: ${
+            selectedContact.invite.stake.reclaimedTX
+          }`}</Text>
+        )
+      } else if (selectedContact.invite.stake.state === 'RECLAIMING') {
+        inviteAction = <Text>Stake withdraw transaction processing...</Text>
+      } else {
+        if (this.state.withdrawingStake) {
+          inviteAction = <Loader />
+        } else {
+          inviteAction = (
+            <Button
+              title="Withdraw Stake"
+              variant={['marginTop10', 'redOutline']}
+              onPress={() => this.withdrawStake(selectedContact)}
+            />
+          )
+        }
       }
     }
     const inviteError = this.state.inviteError && (
@@ -844,7 +925,14 @@ const ContactsView = createFragmentContainer(ContactsViewComponent, {
         localID
         connectionState
         publicFeed
-        inviteTXHash
+        invite {
+          inviteTX
+          stake {
+            reclaimedTX
+            amount
+            state
+          }
+        }
         profile {
           name
           ethAddress

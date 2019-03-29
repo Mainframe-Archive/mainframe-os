@@ -1,8 +1,9 @@
 // @flow
 
 import type {
-  BlockchainWeb3SendParams,
-  BlockchainWeb3SendResult,
+  BlockchainEthSendParams,
+  BlockchainEthSendResult,
+  EthUnsubscribeParams,
 } from '@mainframe/client'
 import { type Subscription as RxSubscription, Observable } from 'rxjs'
 
@@ -24,18 +25,18 @@ class EthSubscription extends ContextSubscription<RxSubscription> {
   }
 }
 
-export const web3Send = async (
+export const ethSend = async (
   ctx: ClientContext,
-  params: BlockchainWeb3SendParams,
-): Promise<BlockchainWeb3SendResult> => {
+  params: BlockchainEthSendParams,
+): Promise<BlockchainEthSendResult> => {
   ctx.io.checkEthConnection() // Handle WS connection dropping
   return ctx.io.eth.sendRequest(params)
 }
 
-export const web3Subscribe = async (
+export const ethSubscribe = async (
   ctx: ClientContext,
-  payload: BlockchainWeb3SendParams,
-): Promise<BlockchainWeb3SendResult> => {
+  payload: BlockchainEthSendParams,
+): Promise<BlockchainEthSendResult> => {
   if (ctx.io.eth.web3Provider.subscribe && ctx.io.eth.web3Provider.on) {
     const method = payload.params[0]
     const subID = await ctx.io.eth.web3Provider.subscribe(
@@ -43,6 +44,7 @@ export const web3Subscribe = async (
       method,
       payload.params,
     )
+    // $FlowFixMe type checked
     ctx.io.eth.web3Provider.on(subID, msg => {
       if (msg.subscription === subID) {
         ctx.notify('eth_subscription', msg)
@@ -53,11 +55,13 @@ export const web3Subscribe = async (
   throw new Error('Subscriptions not supported')
 }
 
-export const web3Unsubscribe = async (
+export const ethUnsubscribe = async (
   ctx: ClientContext,
-  params: BlockchainWeb3SendParams,
-): Promise<BlockchainWeb3SendResult> => {
-  await ctx.io.eth.web3Provider.unsubscribe(params.id, 'eth_unsubscribe')
+  params: EthUnsubscribeParams,
+): Promise<void> => {
+  if (ctx.io.eth.web3Provider.unsubscribe) {
+    await ctx.io.eth.web3Provider.unsubscribe(params.id, 'eth_unsubscribe')
+  }
 }
 
 export const subEthNetworkChanged = {

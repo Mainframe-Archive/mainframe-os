@@ -130,6 +130,6 @@ export default {
     return rpc.request('wallet_getLedgerAccounts', { pageNum })
   },
   ethereumRequest: (params: Object) => {
-    return rpc.request('blockchain_web3Send', params)
+    return rpc.request('blockchain_ethSend', params)
   },
 }

@@ -49,6 +49,7 @@ export default class ContextEvents {
           e.type === 'contact_created' ||
           e.type === 'contact_changed' ||
           e.type === 'contact_deleted' ||
+          e.type === 'eth_accounts_changed' ||
           e.type === 'peer_created' ||
           e.type === 'peer_changed' ||
           e.type === 'peer_deleted' ||

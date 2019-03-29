@@ -2,7 +2,7 @@
 
 import {
   WALLET_CREATE_HD_SCHEMA,
-  WALLET_SIGN_TRANSACTION_SCHEMA,
+  WALLET_SIGN_ETH_TRANSACTION_SCHEMA,
   WALLET_IMPORT_MNEMONIC_SCHEMA,
   WALLET_DELETE_SCHEMA,
   WALLET_GET_LEDGER_ETH_ACCOUNTS_SCHEMA,
@@ -11,7 +11,7 @@ import {
   WALLET_GET_USER_ETH_ACCOUNTS_SCHEMA,
   WALLET_GET_USER_ETH_WALLETS_SCHEMA,
   WALLET_SET_USER_DEFAULT_SCHEMA,
-  WALLET_SIGN_SCHEMA,
+  WALLET_SIGN_ETH_SCHEMA,
   type WalletAddHDAccountParams,
   type WalletCreateHDParams,
   type WalletCreateHDResult,
@@ -27,9 +27,9 @@ import {
   type WalletAddLedgerEthAccountsParams,
   type WalletAddLedgerResult,
   type WalletSetUserDefaulParams,
-  type WalletSignTxParams,
+  type WalletEthSignTxParams,
   type WalletSignTxResult,
-  type WalletSignParams,
+  type WalletEthSignParams,
   type WalletSignResult,
 } from '@mainframe/client'
 import type { Subscription as RxSubscription, Observable } from 'rxjs'
@@ -138,23 +138,20 @@ export const getUserEthAccounts = {
 }
 
 export const signTransaction = {
-  params: WALLET_SIGN_TRANSACTION_SCHEMA,
+  params: WALLET_SIGN_ETH_TRANSACTION_SCHEMA,
   handler: async (
     ctx: ClientContext,
-    params: WalletSignTxParams,
+    params: WalletEthSignTxParams,
   ): Promise<WalletSignTxResult> => {
-    return ctx.openVault.wallets.signTransaction(
-      params.chain,
-      params.transactionData,
-    )
+    return ctx.openVault.wallets.signEthTransaction(params)
   },
 }
 
 export const sign = {
-  params: WALLET_SIGN_SCHEMA,
+  params: WALLET_SIGN_ETH_SCHEMA,
   handler: async (
     ctx: ClientContext,
-    params: WalletSignParams,
+    params: WalletEthSignParams,
   ): Promise<WalletSignResult> => {
     return ctx.openVault.wallets.signEthData(params)
   },

@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 40cf86cabf01e46ec7b0a7d1f8112caa
+ * @relayHash e8051c914a5435df66dc6a97bc54864a
  */
 
 /* eslint-disable */
@@ -10,17 +10,17 @@
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
 type ContactsView_contacts$ref = any;
-export type AcceptContactRequestInput = {
-  peerID: string,
+export type RetrieveInviteStakeInput = {
+  contactID: string,
   userID: string,
   clientMutationId?: ?string,
 };
-export type ContactsViewAcceptContactRequestMutationVariables = {|
-  input: AcceptContactRequestInput,
+export type ContactsViewRetrieveInviteStakeMutationVariables = {|
+  input: RetrieveInviteStakeInput,
   userID: string,
 |};
-export type ContactsViewAcceptContactRequestMutationResponse = {|
-  +acceptContactRequest: ?{|
+export type ContactsViewRetrieveInviteStakeMutationResponse = {|
+  +retrieveInviteStake: ?{|
     +viewer: {|
       +contacts: {|
         +$fragmentRefs: ContactsView_contacts$ref
@@ -28,19 +28,19 @@ export type ContactsViewAcceptContactRequestMutationResponse = {|
     |}
   |}
 |};
-export type ContactsViewAcceptContactRequestMutation = {|
-  variables: ContactsViewAcceptContactRequestMutationVariables,
-  response: ContactsViewAcceptContactRequestMutationResponse,
+export type ContactsViewRetrieveInviteStakeMutation = {|
+  variables: ContactsViewRetrieveInviteStakeMutationVariables,
+  response: ContactsViewRetrieveInviteStakeMutationResponse,
 |};
 */
 
 
 /*
-mutation ContactsViewAcceptContactRequestMutation(
-  $input: AcceptContactRequestInput!
+mutation ContactsViewRetrieveInviteStakeMutation(
+  $input: RetrieveInviteStakeInput!
   $userID: String!
 ) {
-  acceptContactRequest(input: $input) {
+  retrieveInviteStake(input: $input) {
     viewer {
       contacts {
         ...ContactsView_contacts_3iqrP
@@ -78,7 +78,7 @@ var v0 = [
   {
     "kind": "LocalArgument",
     "name": "input",
-    "type": "AcceptContactRequestInput!",
+    "type": "RetrieveInviteStakeInput!",
     "defaultValue": null
   },
   {
@@ -93,7 +93,7 @@ v1 = [
     "kind": "Variable",
     "name": "input",
     "variableName": "input",
-    "type": "AcceptContactRequestInput!"
+    "type": "RetrieveInviteStakeInput!"
   }
 ],
 v2 = {
@@ -106,13 +106,13 @@ v2 = {
 return {
   "kind": "Request",
   "operationKind": "mutation",
-  "name": "ContactsViewAcceptContactRequestMutation",
+  "name": "ContactsViewRetrieveInviteStakeMutation",
   "id": null,
-  "text": "mutation ContactsViewAcceptContactRequestMutation(\n  $input: AcceptContactRequestInput!\n  $userID: String!\n) {\n  acceptContactRequest(input: $input) {\n    viewer {\n      contacts {\n        ...ContactsView_contacts_3iqrP\n      }\n      id\n    }\n  }\n}\n\nfragment ContactsView_contacts_3iqrP on Contacts {\n  userContacts(userID: $userID) {\n    peerID\n    localID\n    connectionState\n    publicFeed\n    invite {\n      inviteTX\n      stake {\n        reclaimedTX\n        amount\n        state\n      }\n    }\n    profile {\n      name\n      ethAddress\n    }\n    id\n  }\n}\n",
+  "text": "mutation ContactsViewRetrieveInviteStakeMutation(\n  $input: RetrieveInviteStakeInput!\n  $userID: String!\n) {\n  retrieveInviteStake(input: $input) {\n    viewer {\n      contacts {\n        ...ContactsView_contacts_3iqrP\n      }\n      id\n    }\n  }\n}\n\nfragment ContactsView_contacts_3iqrP on Contacts {\n  userContacts(userID: $userID) {\n    peerID\n    localID\n    connectionState\n    publicFeed\n    invite {\n      inviteTX\n      stake {\n        reclaimedTX\n        amount\n        state\n      }\n    }\n    profile {\n      name\n      ethAddress\n    }\n    id\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
-    "name": "ContactsViewAcceptContactRequestMutation",
+    "name": "ContactsViewRetrieveInviteStakeMutation",
     "type": "Mutation",
     "metadata": null,
     "argumentDefinitions": v0,
@@ -120,10 +120,10 @@ return {
       {
         "kind": "LinkedField",
         "alias": null,
-        "name": "acceptContactRequest",
+        "name": "retrieveInviteStake",
         "storageKey": null,
         "args": v1,
-        "concreteType": "AcceptContactRequestPayload",
+        "concreteType": "RetrieveInviteStakePayload",
         "plural": false,
         "selections": [
           {
@@ -166,16 +166,16 @@ return {
   },
   "operation": {
     "kind": "Operation",
-    "name": "ContactsViewAcceptContactRequestMutation",
+    "name": "ContactsViewRetrieveInviteStakeMutation",
     "argumentDefinitions": v0,
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
-        "name": "acceptContactRequest",
+        "name": "retrieveInviteStake",
         "storageKey": null,
         "args": v1,
-        "concreteType": "AcceptContactRequestPayload",
+        "concreteType": "RetrieveInviteStakePayload",
         "plural": false,
         "selections": [
           {
@@ -330,5 +330,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '63cc2fc8b126f4fb0749196d66b585e2';
+(node/*: any*/).hash = '9b414a67c344aed12b6323f4256f25cb';
 module.exports = node;

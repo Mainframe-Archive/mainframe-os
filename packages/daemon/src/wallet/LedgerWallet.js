@@ -9,7 +9,7 @@ import {
   signPersonalMessage,
 } from './ledgerClient'
 import AbstractWallet, {
-  type WalletSignTXParams,
+  type WalletEthSignTxParams,
   type WalletSignDataParams,
 } from './AbstractWallet'
 
@@ -91,7 +91,7 @@ export default class LedgerWallet extends AbstractWallet {
     return newAddresses
   }
 
-  async signTransaction(params: WalletSignTXParams): Promise<string> {
+  async signTransaction(params: WalletEthSignTxParams): Promise<string> {
     if (!params.chainId) {
       throw new Error('ethereum chain id not set in tx params')
     }

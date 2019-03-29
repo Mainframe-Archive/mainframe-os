@@ -9,6 +9,7 @@ import {
   GraphQLObjectType,
   GraphQLNonNull,
   GraphQLString,
+  GraphQLInt,
 } from 'graphql'
 import { fromGlobalId, globalIdField, nodeDefinitions } from 'graphql-relay'
 
@@ -519,6 +520,38 @@ export const connectionState = new GraphQLEnumType({
   },
 })
 
+export const contactInviteData = new GraphQLObjectType({
+  name: 'ContactInviteData',
+  fields: () => ({
+    inviteTX: {
+      type: GraphQLString,
+    },
+    stake: {
+      type: new GraphQLObjectType({
+        name: 'InviteStake',
+        fields: () => ({
+          amount: {
+            type: GraphQLInt,
+          },
+          state: {
+            type: new GraphQLEnumType({
+              name: 'StakeState',
+              values: {
+                STAKED: { value: 'staked' },
+                RECLAIMING: { value: 'reclaiming' },
+                RECLAIMED: { value: 'reclaimed' },
+              },
+            }),
+          },
+          reclaimedTX: {
+            type: GraphQLString,
+          },
+        }),
+      }),
+    },
+  }),
+})
+
 export const contact = new GraphQLObjectType({
   name: 'Contact',
   interfaces: () => [nodeInterface],
@@ -536,8 +569,8 @@ export const contact = new GraphQLObjectType({
     pubKey: {
       type: new GraphQLNonNull(GraphQLString),
     },
-    inviteTXHash: {
-      type: GraphQLString,
+    invite: {
+      type: contactInviteData,
     },
     profile: {
       type: new GraphQLNonNull(genericProfile),

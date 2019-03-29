@@ -188,9 +188,14 @@ type Contact implements Node {
   peerID: ID!
   publicFeed: String!
   pubKey: String!
-  inviteTXHash: String
+  invite: ContactInviteData
   profile: GenericProfile!
   connectionState: ConnectionState!
+}
+
+type ContactInviteData {
+  inviteTX: String
+  stake: InviteStake
 }
 
 type Contacts {
@@ -233,12 +238,12 @@ type CreateUserIdentityPayload {
   clientMutationId: String
 }
 
-input DeletContactInput {
+input DeleteContactInput {
   contactID: String!
   clientMutationId: String
 }
 
-type DeletContactPayload {
+type DeleteContactPayload {
   viewer: Viewer!
   clientMutationId: String
 }
@@ -313,6 +318,12 @@ type InviteContactPayload {
   clientMutationId: String
 }
 
+type InviteStake {
+  amount: Int
+  state: StakeState
+  reclaimedTX: String
+}
+
 input ManifestAuthorInput {
   id: String!
   name: String!
@@ -326,10 +337,11 @@ type Mutation {
   updateAppDetails(input: UpdateAppDetailsInput!): UpdateAppDetailsPayload
   inviteContact(input: InviteContactInput!): InviteContactPayload
   acceptContactRequest(input: AcceptContactRequestInput!): AcceptContactRequestPayload
+  retrieveInviteStake(input: RetrieveInviteStakeInput!): RetrieveInviteStakePayload
   addContact(input: AddContactInput!): AddContactPayload
   createUserIdentity(input: CreateUserIdentityInput!): CreateUserIdentityPayload
   createDeveloperIdentity(input: CreateDeveloperIdentityInput!): CreateDeveloperIdentityPayload
-  deleteContact(input: DeletContactInput!): DeletContactPayload
+  deleteContact(input: DeleteContactInput!): DeleteContactPayload
   setDefaultWallet(input: SetDefaultWalletInput!): SetDefaultWalletPayload
   setUserProfileVisibility(input: SetUserProfileVisibilityInput!): SetUserProfileVisibilityPayload
   updateProfile(input: UpdateProfileInput!): UpdateProfilePayload
@@ -428,6 +440,17 @@ type Query {
   peers: Peers!
 }
 
+input RetrieveInviteStakeInput {
+  contactID: String!
+  userID: String!
+  clientMutationId: String
+}
+
+type RetrieveInviteStakePayload {
+  viewer: Viewer!
+  clientMutationId: String
+}
+
 input SetAppPermissionsRequirementsInput {
   appID: String!
   permissionsRequirements: AppPermissionsRequirementsInput!
@@ -473,6 +496,12 @@ input SetUserProfileVisibilityInput {
 type SetUserProfileVisibilityPayload {
   viewer: Viewer!
   clientMutationId: String
+}
+
+enum StakeState {
+  STAKED
+  RECLAIMING
+  RECLAIMED
 }
 
 type Subscription {

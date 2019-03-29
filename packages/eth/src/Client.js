@@ -46,7 +46,6 @@ type WalletProvider = {
 
 export default class EthClient extends EventEmitter {
   _polling = false
-  _defaultAccount: ?string
   _networkName: ?string
   _networkID: ?string
   _web3Provider: AbstractProvider
@@ -61,7 +60,7 @@ export default class EthClient extends EventEmitter {
     walletProvider?: ?WalletProvider,
     subscriptions?: ?Subscriptions,
   ) {
-    super(provider)
+    super()
     if (typeof provider === 'string') {
       // TODO: handle http endpoints
       this._web3Provider = new WebsocketProvider(provider, wsOptions)
@@ -79,7 +78,9 @@ export default class EthClient extends EventEmitter {
 
   set providerURL(url: string) {
     // TODO: handle http
-    // TODO: Cleanup websocket subs
+    if (this._web3Provider.clearSubscriptions) {
+      this._web3Provider.clearSubscriptions()
+    }
     this._web3Provider = new WebsocketProvider(url, wsOptions)
     this.fetchNetwork()
   }
@@ -90,10 +91,6 @@ export default class EthClient extends EventEmitter {
 
   get networkID(): ?string {
     return this._networkID
-  }
-
-  get defaultAccount(): ?string {
-    return this._defaultAccount
   }
 
   get walletProvider(): ?WalletProvider {
@@ -113,7 +110,7 @@ export default class EthClient extends EventEmitter {
   }
 
   async setup() {
-    const id = await this.fetchNetwork()
+    this.fetchNetwork()
     if (!this._subscriptions) {
       return
     }

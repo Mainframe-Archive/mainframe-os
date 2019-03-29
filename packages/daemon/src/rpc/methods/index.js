@@ -37,9 +37,9 @@ export default {
   app_uninstall: noop,
   app_update: noop, // TODO: similar to install
 
-  blockchain_web3Send: blockchain.web3Send,
-  blockchain_web3Subscribe: blockchain.web3Subscribe,
-  blockchain_web3Unsubscribe: blockchain.web3Unsubscribe,
+  blockchain_ethSend: blockchain.ethSend,
+  blockchain_ethSubscribe: blockchain.ethSubscribe,
+  blockchain_ethUnsubscribe: blockchain.ethUnsubscribe,
   blockchain_subEthNetworkChanged: blockchain.subEthNetworkChanged,
 
   comms_publish: comms.publish,
@@ -84,7 +84,7 @@ export default {
   wallet_ledgerGetEthAccounts: wallet.getLedgerEthAccounts,
   wallet_ledgerAddEthAccounts: wallet.addLedgerEthAccounts,
   wallet_setUserDefault: wallet.setUsersDefaultWallet,
-  wallet_sign: wallet.sign,
-  wallet_signTx: wallet.signTransaction,
+  wallet_signEth: wallet.sign,
+  wallet_signEthTx: wallet.signTransaction,
   wallet_subEthAccountsChanged: wallet.subEthAccountsChanged,
 }

@@ -31,11 +31,11 @@ class WalletProvider {
   }
 
   async signTransaction(params) {
-    const txParams = {
-      chain: 'ethereum',
-      transactionData: params,
-    }
-    return this._rpc.request('wallet_signTx', txParams)
+    return this._rpc.request('wallet_signEthTx', params)
+  }
+
+  async sign() {
+    throw new Error('Needs implementing')
   }
 }
 
@@ -132,10 +132,6 @@ export default class EthAPIs extends ClientAPIs {
 
   get web3Provider() {
     return this._web3Provider
-  }
-
-  get selectedAccount(): ?string {
-    return this._ethClient.defaultAccount
   }
 
   get networkVersion(): ?string {

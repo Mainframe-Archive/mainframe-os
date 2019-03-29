@@ -2,18 +2,18 @@
 import { Observable } from 'rxjs'
 
 import ClientAPIs from '../ClientAPIs'
-import type { BlockchainWeb3SendParams } from '../types'
+import type { BlockchainEthSendParams, EthUnsubscribeParams } from '../types'
 
 export default class BlockchainAPIs extends ClientAPIs {
-  web3Send(params: BlockchainWeb3SendParams): Promise<Object> {
-    return this._rpc.request('blockchain_web3Send', params)
+  ethSend(params: BlockchainEthSendParams): Promise<Object> {
+    return this._rpc.request('blockchain_ethSend', params)
   }
 
-  async web3Subscribe(params: BlockchainWeb3SendParams) {
-    const subID = await this._rpc.request('blockchain_web3Subscribe', params)
+  async ethSubscribe(params: BlockchainEthSendParams) {
+    const subID = await this._rpc.request('blockchain_ethSubscribe', params)
 
     const unsubscribe = () => {
-      return this._rpc.request('blockchain_web3Unsubscribe', { id: subID })
+      return this._rpc.request('blockchain_ethUnsubscribe', { id: subID })
     }
 
     const subscription = Observable.create(observer => {
@@ -45,8 +45,8 @@ export default class BlockchainAPIs extends ClientAPIs {
     }
   }
 
-  async web3Unsubscribe(params: BlockchainWeb3SendParams): Promise<Object> {
-    return this._rpc.request('blockchain_web3Unsubscribe', params)
+  async ethUnsubscribe(params: EthUnsubscribeParams): Promise<Object> {
+    return this._rpc.request('blockchain_ethUnsubscribe', params)
   }
 
   async subscribeNetworkChanged(): Promise<Observable<{ networkID: string }>> {

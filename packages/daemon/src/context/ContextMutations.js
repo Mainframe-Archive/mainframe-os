@@ -264,7 +264,6 @@ export default class ContextMutations {
       throw new Error('Wallet not found')
     }
     app.setDefaultEthAccount(idType(userID), idType(wallet.localID), address)
-    await openVault.save()
     this._context.next({
       type: 'eth_accounts_changed',
       userID,
@@ -673,13 +672,18 @@ export default class ContextMutations {
       wallet.localID,
       address,
     )
-    await openVault.save()
+    if (this.updateUser)
+      this._context.next({
+        type: 'eth_accounts_changed',
+        userID,
+        change: 'userDefault',
+      })
 
-    this._context.next({
-      type: 'eth_accounts_changed',
-      userID,
-      change: 'userDefault',
-    })
+    const user = openVault.identities.getOwnUser(userID)
+    if (user) {
+      user.profile.ethAddress = address
+      this._context.next({ type: 'user_changed', change: 'profile', user })
+    }
   }
 
   async setEthNetwork(url: string): Promise<void> {

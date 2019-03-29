@@ -32,6 +32,14 @@ const CONTACT_CHANGED_SUBSCRIPTION = graphql`
         name
         avatar
       }
+      invite {
+        inviteTX
+        stake {
+          reclaimedTX
+          amount
+          state
+        }
+      }
     }
   }
 `

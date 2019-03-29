@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash fa188b84724ae18c45f72e0513055ddf
+ * @relayHash 96cb010f7928ea410e57cbdd3be3745e
  */
 
 /* eslint-disable */
@@ -10,6 +10,7 @@
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
 export type ConnectionState = "CONNECTED" | "RECEIVED" | "SENDING" | "SENT" | "%future added value";
+export type StakeState = "RECLAIMED" | "RECLAIMING" | "STAKED" | "%future added value";
 export type LauncherContactChangedSubscriptionVariables = {||};
 export type LauncherContactChangedSubscriptionResponse = {|
   +contactChanged: {|
@@ -17,6 +18,14 @@ export type LauncherContactChangedSubscriptionResponse = {|
     +profile: {|
       +name: ?string,
       +avatar: ?string,
+    |},
+    +invite: ?{|
+      +inviteTX: ?string,
+      +stake: ?{|
+        +reclaimedTX: ?string,
+        +amount: ?number,
+        +state: ?StakeState,
+      |},
     |},
   |}
 |};
@@ -34,6 +43,14 @@ subscription LauncherContactChangedSubscription {
     profile {
       name
       avatar
+    }
+    invite {
+      inviteTX
+      stake {
+        reclaimedTX
+        amount
+        state
+      }
     }
     id
   }
@@ -72,13 +89,63 @@ v1 = {
       "storageKey": null
     }
   ]
+},
+v2 = {
+  "kind": "LinkedField",
+  "alias": null,
+  "name": "invite",
+  "storageKey": null,
+  "args": null,
+  "concreteType": "ContactInviteData",
+  "plural": false,
+  "selections": [
+    {
+      "kind": "ScalarField",
+      "alias": null,
+      "name": "inviteTX",
+      "args": null,
+      "storageKey": null
+    },
+    {
+      "kind": "LinkedField",
+      "alias": null,
+      "name": "stake",
+      "storageKey": null,
+      "args": null,
+      "concreteType": "InviteStake",
+      "plural": false,
+      "selections": [
+        {
+          "kind": "ScalarField",
+          "alias": null,
+          "name": "reclaimedTX",
+          "args": null,
+          "storageKey": null
+        },
+        {
+          "kind": "ScalarField",
+          "alias": null,
+          "name": "amount",
+          "args": null,
+          "storageKey": null
+        },
+        {
+          "kind": "ScalarField",
+          "alias": null,
+          "name": "state",
+          "args": null,
+          "storageKey": null
+        }
+      ]
+    }
+  ]
 };
 return {
   "kind": "Request",
   "operationKind": "subscription",
   "name": "LauncherContactChangedSubscription",
   "id": null,
-  "text": "subscription LauncherContactChangedSubscription {\n  contactChanged {\n    connectionState\n    profile {\n      name\n      avatar\n    }\n    id\n  }\n}\n",
+  "text": "subscription LauncherContactChangedSubscription {\n  contactChanged {\n    connectionState\n    profile {\n      name\n      avatar\n    }\n    invite {\n      inviteTX\n      stake {\n        reclaimedTX\n        amount\n        state\n      }\n    }\n    id\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -97,7 +164,8 @@ return {
         "plural": false,
         "selections": [
           v0,
-          v1
+          v1,
+          v2
         ]
       }
     ]
@@ -118,6 +186,7 @@ return {
         "selections": [
           v0,
           v1,
+          v2,
           {
             "kind": "ScalarField",
             "alias": null,
@@ -132,5 +201,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '39b178e29579a15f96e59416b67e9cf0';
+(node/*: any*/).hash = 'de1eb7120dddb8b4b4f169b3984dd09f';
 module.exports = node;

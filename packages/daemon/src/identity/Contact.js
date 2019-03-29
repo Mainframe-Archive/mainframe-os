@@ -30,10 +30,15 @@ export type ContactPayload = {
 
 export type InviteData = {
   chain?: number,
-  txHash: string,
+  inviteTX: string,
   fromAddress: string,
   toAddress: string,
   acceptedSignature?: string,
+  stake: {
+    amount: string,
+    state: 'sending' | 'staked' | 'reclaiming' | 'reclaimed',
+    reclaimedTX?: ?string,
+  },
 }
 
 export type ContactSerialized = {

@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash b0110d86fb14d7ee61c8a6f61cd3280f
+ * @relayHash 50ef2a4f0c6d1ac5131c747d2bbced52
  */
 
 /* eslint-disable */
@@ -22,7 +22,9 @@ export type ContactsViewInviteContactMutationVariables = {|
 export type ContactsViewInviteContactMutationResponse = {|
   +inviteContact: ?{|
     +contact: ?{|
-      +inviteTXHash: ?string
+      +invite: ?{|
+        +inviteTX: ?string
+      |}
     |},
     +viewer: {|
       +contacts: {|
@@ -45,7 +47,9 @@ mutation ContactsViewInviteContactMutation(
 ) {
   inviteContact(input: $input) {
     contact {
-      inviteTXHash
+      invite {
+        inviteTX
+      }
       id
     }
     viewer {
@@ -63,7 +67,14 @@ fragment ContactsView_contacts_3iqrP on Contacts {
     localID
     connectionState
     publicFeed
-    inviteTXHash
+    invite {
+      inviteTX
+      stake {
+        reclaimedTX
+        amount
+        state
+      }
+    }
     profile {
       name
       ethAddress
@@ -99,11 +110,23 @@ v1 = [
 v2 = {
   "kind": "ScalarField",
   "alias": null,
-  "name": "inviteTXHash",
+  "name": "inviteTX",
   "args": null,
   "storageKey": null
 },
 v3 = {
+  "kind": "LinkedField",
+  "alias": null,
+  "name": "invite",
+  "storageKey": null,
+  "args": null,
+  "concreteType": "ContactInviteData",
+  "plural": false,
+  "selections": [
+    v2
+  ]
+},
+v4 = {
   "kind": "ScalarField",
   "alias": null,
   "name": "id",
@@ -115,7 +138,7 @@ return {
   "operationKind": "mutation",
   "name": "ContactsViewInviteContactMutation",
   "id": null,
-  "text": "mutation ContactsViewInviteContactMutation(\n  $input: InviteContactInput!\n  $userID: String!\n) {\n  inviteContact(input: $input) {\n    contact {\n      inviteTXHash\n      id\n    }\n    viewer {\n      contacts {\n        ...ContactsView_contacts_3iqrP\n      }\n      id\n    }\n  }\n}\n\nfragment ContactsView_contacts_3iqrP on Contacts {\n  userContacts(userID: $userID) {\n    peerID\n    localID\n    connectionState\n    publicFeed\n    inviteTXHash\n    profile {\n      name\n      ethAddress\n    }\n    id\n  }\n}\n",
+  "text": "mutation ContactsViewInviteContactMutation(\n  $input: InviteContactInput!\n  $userID: String!\n) {\n  inviteContact(input: $input) {\n    contact {\n      invite {\n        inviteTX\n      }\n      id\n    }\n    viewer {\n      contacts {\n        ...ContactsView_contacts_3iqrP\n      }\n      id\n    }\n  }\n}\n\nfragment ContactsView_contacts_3iqrP on Contacts {\n  userContacts(userID: $userID) {\n    peerID\n    localID\n    connectionState\n    publicFeed\n    invite {\n      inviteTX\n      stake {\n        reclaimedTX\n        amount\n        state\n      }\n    }\n    profile {\n      name\n      ethAddress\n    }\n    id\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -142,7 +165,7 @@ return {
             "concreteType": "Contact",
             "plural": false,
             "selections": [
-              v2
+              v3
             ]
           },
           {
@@ -206,8 +229,8 @@ return {
             "concreteType": "Contact",
             "plural": false,
             "selections": [
-              v2,
-              v3
+              v3,
+              v4
             ]
           },
           {
@@ -272,7 +295,50 @@ return {
                         "args": null,
                         "storageKey": null
                       },
-                      v2,
+                      {
+                        "kind": "LinkedField",
+                        "alias": null,
+                        "name": "invite",
+                        "storageKey": null,
+                        "args": null,
+                        "concreteType": "ContactInviteData",
+                        "plural": false,
+                        "selections": [
+                          v2,
+                          {
+                            "kind": "LinkedField",
+                            "alias": null,
+                            "name": "stake",
+                            "storageKey": null,
+                            "args": null,
+                            "concreteType": "InviteStake",
+                            "plural": false,
+                            "selections": [
+                              {
+                                "kind": "ScalarField",
+                                "alias": null,
+                                "name": "reclaimedTX",
+                                "args": null,
+                                "storageKey": null
+                              },
+                              {
+                                "kind": "ScalarField",
+                                "alias": null,
+                                "name": "amount",
+                                "args": null,
+                                "storageKey": null
+                              },
+                              {
+                                "kind": "ScalarField",
+                                "alias": null,
+                                "name": "state",
+                                "args": null,
+                                "storageKey": null
+                              }
+                            ]
+                          }
+                        ]
+                      },
                       {
                         "kind": "LinkedField",
                         "alias": null,
@@ -298,12 +364,12 @@ return {
                           }
                         ]
                       },
-                      v3
+                      v4
                     ]
                   }
                 ]
               },
-              v3
+              v4
             ]
           }
         ]
@@ -313,5 +379,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = 'ee7fd3b41afe5e937ca0785f50cbb86b';
+(node/*: any*/).hash = '673d8cd6ec26e01d96e07787dc3450eb';
 module.exports = node;

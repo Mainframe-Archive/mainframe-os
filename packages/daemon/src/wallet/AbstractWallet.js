@@ -1,6 +1,6 @@
 // @flow
 
-export type WalletSignTXParams = {
+export type WalletEthSignTxParams = {
   nonce: number,
   from: string,
   to: string,

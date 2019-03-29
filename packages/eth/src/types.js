@@ -47,11 +47,17 @@ export type EventFilterParams = {
 
 export type TXEventEmitter = EventEmitter
 
-// Web3 JS provider interface
 export type AbstractProvider = {
   +sendPayload: (payload: Object) => Promise<any>,
   +on?: (event: string, listener: Function) => any,
   +emit?: (event: string, ...args: Array<any>) => boolean,
+  +unsubscribe?: (id: string, type: string) => void,
+  +clearSubscriptions?: () => void,
+  +subscribe?: (
+    name: string,
+    method: string,
+    params: Object,
+  ) => Promise<string>,
   connection?: {
     readyState: number,
   },

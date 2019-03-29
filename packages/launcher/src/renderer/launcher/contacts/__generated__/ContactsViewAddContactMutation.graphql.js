@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 8121c90f4d41cc4d23aed79d248b9512
+ * @relayHash 032b76f7eb30cddabdf56eca19526dba
  */
 
 /* eslint-disable */
@@ -58,7 +58,14 @@ fragment ContactsView_contacts_3iqrP on Contacts {
     localID
     connectionState
     publicFeed
-    inviteTXHash
+    invite {
+      inviteTX
+      stake {
+        reclaimedTX
+        amount
+        state
+      }
+    }
     profile {
       name
       ethAddress
@@ -103,7 +110,7 @@ return {
   "operationKind": "mutation",
   "name": "ContactsViewAddContactMutation",
   "id": null,
-  "text": "mutation ContactsViewAddContactMutation(\n  $input: AddContactInput!\n  $userID: String!\n) {\n  addContact(input: $input) {\n    viewer {\n      contacts {\n        ...ContactsView_contacts_3iqrP\n      }\n      id\n    }\n  }\n}\n\nfragment ContactsView_contacts_3iqrP on Contacts {\n  userContacts(userID: $userID) {\n    peerID\n    localID\n    connectionState\n    publicFeed\n    inviteTXHash\n    profile {\n      name\n      ethAddress\n    }\n    id\n  }\n}\n",
+  "text": "mutation ContactsViewAddContactMutation(\n  $input: AddContactInput!\n  $userID: String!\n) {\n  addContact(input: $input) {\n    viewer {\n      contacts {\n        ...ContactsView_contacts_3iqrP\n      }\n      id\n    }\n  }\n}\n\nfragment ContactsView_contacts_3iqrP on Contacts {\n  userContacts(userID: $userID) {\n    peerID\n    localID\n    connectionState\n    publicFeed\n    invite {\n      inviteTX\n      stake {\n        reclaimedTX\n        amount\n        state\n      }\n    }\n    profile {\n      name\n      ethAddress\n    }\n    id\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -236,11 +243,54 @@ return {
                         "storageKey": null
                       },
                       {
-                        "kind": "ScalarField",
+                        "kind": "LinkedField",
                         "alias": null,
-                        "name": "inviteTXHash",
+                        "name": "invite",
+                        "storageKey": null,
                         "args": null,
-                        "storageKey": null
+                        "concreteType": "ContactInviteData",
+                        "plural": false,
+                        "selections": [
+                          {
+                            "kind": "ScalarField",
+                            "alias": null,
+                            "name": "inviteTX",
+                            "args": null,
+                            "storageKey": null
+                          },
+                          {
+                            "kind": "LinkedField",
+                            "alias": null,
+                            "name": "stake",
+                            "storageKey": null,
+                            "args": null,
+                            "concreteType": "InviteStake",
+                            "plural": false,
+                            "selections": [
+                              {
+                                "kind": "ScalarField",
+                                "alias": null,
+                                "name": "reclaimedTX",
+                                "args": null,
+                                "storageKey": null
+                              },
+                              {
+                                "kind": "ScalarField",
+                                "alias": null,
+                                "name": "amount",
+                                "args": null,
+                                "storageKey": null
+                              },
+                              {
+                                "kind": "ScalarField",
+                                "alias": null,
+                                "name": "state",
+                                "args": null,
+                                "storageKey": null
+                              }
+                            ]
+                          }
+                        ]
                       },
                       {
                         "kind": "LinkedField",

@@ -1,27 +1,35 @@
 // @flow
 
 import { Web3EthAbi } from '@mainframe/eth'
-import { sha3, fromWei } from 'web3-utils'
+import { fromWei } from 'ethjs-unit'
 import { getFeedTopic } from '@erebos/api-bzz-base'
-import EthUtil from 'ethereumjs-util'
-import { ethers } from 'ethers'
+import createKeccakHash from 'keccak'
+import { utils } from 'ethers'
 
 import type { OwnUserIdentity, PeerUserIdentity } from '../identity'
 import type { InviteRequest } from '../identity/IdentitiesRepository'
 import type Contact from '../identity/Contact'
-import INVITE_ABI from './inviteABI.json'
 import type ClientContext from './ClientContext'
+
+const INVITE_ABI = require('./inviteABI.json')
 
 const inviteContracts = {
   mainnet: '0x',
   ropsten: '0x6687b03F6D7eeac45d98340c8243e6a0434f1284',
-  ganache: '0x474167fb5009454DF2d1E66537f43f7D52Daa131',
+  ganache: '0xC4f1E7458d26C58B4BB1765b0c163dD943EA8Fba',
 }
 
 const tokenContracts = {
   mainnet: '0x',
   ropsten: '0xa46f1563984209fe47f8236f8b01a03f03f957e4',
-  ganache: '0xa94b97E6327C59e7481910724276af96EF65cb8D',
+  ganache: '0x87b1183Fefb343f5dc294F285dD90ADD756e06ee',
+}
+
+const hash = (data: Buffer) => {
+  const bytes = createKeccakHash('keccak256')
+    .update(data)
+    .digest()
+  return '0x' + bytes.toString('hex')
 }
 
 export default class InvitesHandler {
@@ -60,12 +68,11 @@ export default class InvitesHandler {
     contractEvent: Object,
     user: OwnUserIdentity,
   ): Promise<?InviteRequest> {
+    const { identities } = this._context.openVault
     if (contractEvent.senderFeed) {
-      let peer = this._context.openVault.identities.getPeerByFeed(
-        contractEvent.senderFeed,
-      )
+      let peer = identities.getPeerByFeed(contractEvent.senderFeed)
       if (peer) {
-        const contact = this._context.openVault.identities.getContactByPeerID(
+        const contact = identities.getContactByPeerID(
           user.localID,
           peer.localID,
         )
@@ -122,15 +129,14 @@ export default class InvitesHandler {
         'address',
         user.profile.ethAddress,
       )
-      const encodedFeed = sha3(user.publicFeed.feedHash)
-
+      const hashedFeed = hash(Buffer.from(user.publicFeed.feedHash))
       const latest = await this._context.io.eth.getLatestBlock()
 
       const params = {
         address: this.invitesContract.address,
         fromBlock: latest - 10000,
         toBlock: latest,
-        topics: [encodedAddress, encodedFeed],
+        topics: [encodedAddress, hashedFeed],
       }
 
       const events = await this.invitesContract.getPastEvents('Invited', params)
@@ -211,22 +217,27 @@ export default class InvitesHandler {
       // $FlowFixMe address checked above
       user.profile.ethAddress,
     )
-    const stakeAmount = Number(fromWei(stake, 'ether'))
-    const balanceAmount = Number(mftBalance)
 
-    if (balanceAmount < stakeAmount) {
+    const stakeBN = utils.bigNumberify(fromWei(stake, 'ether'))
+    const balanceBN = utils.bigNumberify(mftBalance)
+
+    if (stakeBN.gt(balanceBN)) {
       throw new Error(
-        `Insufficient MFT balance of ${balanceAmount} for required stake ${stakeAmount}`,
+        `Insufficient MFT balance of ${balanceBN.toString()} for required stake ${stakeBN.toString()}`,
       )
     }
 
     const inviteTXHash = await this.sendInviteTX(user, peer)
     contact._invite = {
-      txHash: inviteTXHash,
+      inviteTX: inviteTXHash,
       // $FlowFixMe toAddress address checked above
       toAddress: peer.profile.ethAddress,
       // $FlowFixMe fromAddress address checked above
       fromAddress: user.profile.ethAddress,
+      stake: {
+        amount: stakeBN.toString(),
+        state: 'staked',
+      },
     }
     this._context.next({
       type: 'contact_changed',
@@ -246,33 +257,67 @@ export default class InvitesHandler {
       )
     }
 
-    // const hexString = EthUtil.bufferToHex(EthUtil.keccak(inviteRequest.receivedAddress))
-    // console.log('hex: ', hexString)
-    const messageHash = EthUtil.keccak(inviteRequest.receivedAddress)
-    const binMessage = ethers.utils.arrayify(messageHash)
-    const binHex = EthUtil.bufferToHex(new Buffer(binMessage))
+    const addr = inviteRequest.senderAddress.substr(2)
+    const messageHex = hash(Buffer.from(addr, 'hex'))
+
     const acceptanceSignature = await this._context.io.eth.signData({
       address: inviteRequest.receivedAddress,
-      data: binHex,
+      data: messageHex,
     })
     return acceptanceSignature
   }
 
-  async withdrawStake() {
-    // const signedMessage =
-    //   '0x75a923ab171774ba38fbb0f926d425b729b86f25dd113659092eb4f3c57212b8479ed339c9925f554f10d9859889bc4a2c4cc2493b790863eef83aa88123d7971b'
-    // const hexString = toHex('accepted')
-    // const sig = signedMessage.substr(2) //remove 0x
-    // const r = '0x' + sig.slice(0, 64)
-    // const s = '0x' + sig.slice(64, 128)
-    // const v = '0x' + sig.slice(128, 130)
-    // const vDecimal = toDecimal(v)
-    // const res = await this.invitesContract.call('recoverAddress', [
-    //   hexString,
-    //   vDecimal,
-    //   r,
-    //   s,
-    // ])
-    // console.log('address recover: ', res)
+  async retrieveStake(userID: string, contact: Contact) {
+    const peer = this._context.openVault.identities.getPeerUser(contact.peerID)
+    if (!peer) {
+      throw new Error('Peer not found')
+    }
+    const invite = contact._invite
+    if (invite != null && invite.stake && invite.acceptedSignature) {
+      const signature = invite.acceptedSignature.substr(2) //remove 0x
+      const r = '0x' + signature.slice(0, 64)
+      const s = '0x' + signature.slice(64, 128)
+      const v = '0x' + signature.slice(128, 130)
+      const vNum = utils.bigNumberify(v).toNumber()
+
+      const txOptions = { from: invite.fromAddress }
+      const res = await this.invitesContract.send(
+        'retrieveStake',
+        [invite.toAddress, peer.publicFeed, vNum, r, s],
+        txOptions,
+      )
+
+      const emitContactChange = (contact, change) => {
+        this._context.next({
+          contact,
+          type: 'contact_changed',
+          userID: userID,
+          change: change,
+        })
+      }
+
+      return new Promise((resolve, reject) => {
+        res
+          .on('hash', hash => {
+            // TODO: Also set from reading contract events
+            // in case reclaimed from outside of MFOS
+            invite.stake.state = 'reclaiming'
+            emitContactChange(contact, 'stakeReclaimProcessing')
+            resolve(hash)
+          })
+          .on('mined', hash => {
+            invite.stake.state = 'reclaimed'
+            invite.stake.reclaimedTX = hash
+            emitContactChange(contact, 'stakeReclaimMined')
+          })
+          .on('error', err => {
+            invite.stake.state = 'staked'
+            emitContactChange(contact, 'stakeError')
+            reject(err)
+          })
+      })
+    } else {
+      throw new Error('Invite approval signature not found')
+    }
   }
 }

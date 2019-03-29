@@ -247,14 +247,18 @@ export type EthTransactionParams = {
   chainId: number,
 }
 
-export type BlockchainWeb3SendParams = {
+export type BlockchainEthSendParams = {
   id: number,
   jsonrpc: string,
   method: string,
   params: Array<any>,
 }
 
-export type BlockchainWeb3SendResult = any
+export type BlockchainEthSendResult = any
+
+export type EthUnsubscribeParams = {
+  id: string,
+}
 
 // Comms
 
@@ -432,6 +436,14 @@ export type ContactResult = {
   peerID: string,
   connectionState: 'connected' | 'sent' | 'sending' | 'received',
   profile: ContactProfile,
+  invite?: {
+    inviteTX: string,
+    stake?: {
+      amount: string,
+      state: 'sending' | 'staked' | 'reclaiming' | 'reclaimed',
+      reclaimedTX?: ?string,
+    },
+  },
 }
 
 export type ContactsGetUserContactsParams = {
@@ -523,14 +535,11 @@ export type WalletEthSignDataParams = {
   data: string,
 }
 
-export type WalletSignTxParams = {
-  chain: WalletSupportedChains,
-  transactionData: EthTransactionParams,
-}
+export type WalletEthSignTxParams = EthTransactionParams
 
 export type WalletSignTxResult = string
 
-export type WalletSignParams = {
+export type WalletEthSignParams = {
   address: string,
   data: string,
 }

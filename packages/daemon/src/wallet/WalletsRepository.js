@@ -3,7 +3,10 @@
 import { uniqueID } from '@mainframe/utils-id'
 
 import { mapObject } from '../utils'
-import type { WalletSignTXParams, WalletSignDataParams } from './AbstractWallet'
+import type {
+  WalletEthSignTxParams,
+  WalletSignDataParams,
+} from './AbstractWallet'
 import HDWallet, { type HDWalletSerialized } from './HDWallet'
 import LedgerWallet, { type LedgerWalletSerialized } from './LedgerWallet'
 import { getAddressAtIndex } from './ledgerClient'
@@ -208,20 +211,7 @@ export default class WalletsRepository {
 
   // Signing
 
-  async signTransaction(
-    blockchain: string,
-    txParams: WalletSignTXParams,
-  ): Promise<string> {
-    switch (blockchain) {
-      case 'ethereum':
-        return this.signEthTransaction(txParams)
-      default:
-        throw new Error(`Unsupported blockchain type: ${blockchain}`)
-    }
-  }
-
-  async signEthTransaction(params: WalletSignTXParams): Promise<string> {
-    // TODO: set chain ID
+  async signEthTransaction(params: WalletEthSignTxParams): Promise<string> {
     const wallet = this.getEthWalletByAccount(params.from)
     if (!wallet) {
       throw new Error('Wallet not found')

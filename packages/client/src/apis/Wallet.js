@@ -16,9 +16,9 @@ import type {
   WalletGetUserEthAccountsParams,
   WalletGetEthAccountsResult,
   WalletSetUserDefaulParams,
-  WalletSignTxParams,
+  WalletEthSignTxParams,
   WalletSignTxResult,
-  WalletSignParams,
+  WalletEthSignParams,
   WalletSignResult,
 } from '../types'
 
@@ -58,13 +58,13 @@ export default class WalletAPIs extends ClientAPIs {
   }
 
   async signTransaction(
-    params: WalletSignTxParams,
+    params: WalletEthSignTxParams,
   ): Promise<WalletSignTxResult> {
-    return this._rpc.request('wallet_signTx', params)
+    return this._rpc.request('wallet_signEthTx', params)
   }
 
-  async sign(params: WalletSignParams): Promise<WalletSignResult> {
-    return this._rpc.request('wallet_sign', params)
+  async sign(params: WalletEthSignParams): Promise<WalletSignResult> {
+    return this._rpc.request('wallet_signEth', params)
   }
 
   async getLedgerEthAccounts(params: { pageNum: number }) {

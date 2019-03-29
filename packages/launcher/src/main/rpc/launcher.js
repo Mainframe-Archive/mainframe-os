@@ -15,7 +15,7 @@ import {
   type AppRemoveParams,
   type AppSetUserPermissionsSettingsParams,
   APP_SET_USER_PERMISSIONS_SETTINGS_SCHEMA,
-  type BlockchainWeb3SendParams,
+  type BlockchainEthSendParams,
   ETH_REQUEST_SCHEMA,
   type IdentityCreateResult,
   type IdentityCreateUserParams,
@@ -223,13 +223,13 @@ export default {
     },
   },
 
-  blockchain_web3Send: {
+  blockchain_ethSend: {
     params: ETH_REQUEST_SCHEMA,
     handler: (
       ctx: LauncherContext,
-      params: BlockchainWeb3SendParams,
+      params: BlockchainEthSendParams,
     ): Promise<any> => {
-      return ctx.client.blockchain.web3Send(params)
+      return ctx.client.blockchain.ethSend(params)
     },
   },
 }
