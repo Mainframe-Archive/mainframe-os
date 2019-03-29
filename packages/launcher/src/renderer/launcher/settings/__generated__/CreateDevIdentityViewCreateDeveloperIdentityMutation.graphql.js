@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 60de3998107083b9ead2a25fcc6e258f
+ * @relayHash 386bd9e83379831703ac3cffa59ae8de
  */
 
 /* eslint-disable */
@@ -24,7 +24,7 @@ export type CreateDevIdentityViewCreateDeveloperIdentityMutationResponse = {|
   +createDeveloperIdentity: ?{|
     +viewer: {|
       +identities: {|
-        +ownDevelopers: ?$ReadOnlyArray<?{|
+        +ownDevelopers: $ReadOnlyArray<{|
           +profile: {|
             +name: string
           |}

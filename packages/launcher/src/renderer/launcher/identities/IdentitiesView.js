@@ -72,12 +72,12 @@ class IdentitiesView extends Component<Props, State> {
   state = {}
 
   openEditModal = (user: User) => {
-    this.setState({
-      editUser: user,
-    })
+    this.setState({ editUser: user })
   }
 
-  closeModal = () => this.setState({ editUser: null })
+  closeModal = () => {
+    this.setState({ editUser: null })
+  }
 
   renderUser(user: User, hideEdit?: boolean) {
     const onPress = () => this.openEditModal(user)

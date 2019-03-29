@@ -45,7 +45,8 @@ type App implements Node {
   localID: ID!
   name: String!
   manifest: AppManifestData!
-  users: [AppUser]
+  update: AppUpdateData
+  users: [AppUser!]!
 }
 
 type AppAuthor {
@@ -63,7 +64,19 @@ input AppCreateMutationInput {
 }
 
 type AppCreateMutationPayload {
-  app: OwnApp
+  app: OwnApp!
+  viewer: Viewer!
+  clientMutationId: String
+}
+
+input AppCreateVersionMutationInput {
+  appID: String!
+  version: String!
+  clientMutationId: String
+}
+
+type AppCreateVersionMutationPayload {
+  app: OwnApp!
   viewer: Viewer!
   clientMutationId: String
 }
@@ -139,8 +152,32 @@ input AppPermissionsSettingsInput {
 }
 
 type Apps {
-  installed: [App]
-  own: [OwnApp]
+  installed: [App!]!
+  own: [OwnApp!]!
+  updatesCount: Int!
+}
+
+type AppUpdateData {
+  manifest: AppManifestData!
+  permissionsChanged: Boolean!
+}
+
+input AppUpdateMutationInput {
+  appID: String!
+  userID: String!
+  permissionsSettings: AppPermissionsSettingsInput
+  clientMutationId: String
+}
+
+type AppUpdateMutationPayload {
+  app: App
+  viewer: Viewer!
+  clientMutationId: String
+}
+
+type AppUpdatePayload {
+  app: App!
+  viewer: Viewer!
 }
 
 type AppUser {
@@ -178,8 +215,13 @@ type Contact implements Node {
   connectionState: ConnectionState!
 }
 
+type ContactChangedPayload {
+  contact: Contact!
+  viewer: Viewer!
+}
+
 type Contacts {
-  userContacts(userID: String!): [Contact]
+  userContacts(userID: String!): [Contact!]!
 }
 
 input CreateDeveloperIdentityInput {
@@ -257,8 +299,8 @@ type EthLedgerWallet implements Node {
 }
 
 type EthWallets {
-  hd: [EthHDWallet]
-  ledger: [EthLedgerWallet]
+  hd: [EthHDWallet!]!
+  ledger: [EthLedgerWallet!]!
 }
 
 type GenericProfile {
@@ -268,8 +310,8 @@ type GenericProfile {
 }
 
 type Identities {
-  ownUsers: [OwnUserIdentity]
-  ownDevelopers: [OwnDeveloperIdentity]
+  ownUsers: [OwnUserIdentity!]!
+  ownDevelopers: [OwnDeveloperIdentity!]!
 }
 
 input ImportHDWalletInput {
@@ -293,7 +335,9 @@ input ManifestAuthorInput {
 
 type Mutation {
   createApp(input: AppCreateMutationInput!): AppCreateMutationPayload
+  createAppVersion(input: AppCreateVersionMutationInput!): AppCreateVersionMutationPayload
   installApp(input: AppInstallMutationInput!): AppInstallMutationPayload
+  updateApp(input: AppUpdateMutationInput!): AppUpdateMutationPayload
   setAppPermissionsRequirements(input: SetAppPermissionsRequirementsInput!): SetAppPermissionsRequirementsPayload
   publishAppVersion(input: PublishAppVersionInput!): PublishAppVersionPayload
   updateAppDetails(input: UpdateAppDetailsInput!): UpdateAppDetailsPayload
@@ -331,10 +375,13 @@ type OwnApp implements Node {
   mfid: String!
   name: String!
   contentsPath: String!
-  updateFeedHash: String
+  updateFeedHash: String!
+  currentVersion: String!
+  currentVersionData: AppVersionData!
+  publishedVersion: String
   versions: [AppVersionData!]!
   developer: AppAuthor!
-  users: [AppUser]
+  users: [AppUser!]!
 }
 
 type OwnDeveloperIdentity implements Node {
@@ -352,7 +399,7 @@ type OwnUserIdentity implements Node {
   localID: ID!
   feedHash: String!
   mfid: ID!
-  apps: [App]
+  apps: [App!]!
   defaultEthAddress: String
   wallets: EthWallets!
   profile: NamedProfile!
@@ -447,7 +494,8 @@ type SetUserProfileVisibilityPayload {
 }
 
 type Subscription {
-  contactChanged: Contact!
+  appUpdateChanged: AppUpdatePayload!
+  contactChanged: ContactChangedPayload!
 }
 
 enum SupportedWallets {
@@ -519,6 +567,6 @@ input WebRequestGrantInput {
 }
 
 type WebRequestGrants {
-  granted: [String]
-  denied: [String]
+  granted: [String!]!
+  denied: [String!]!
 }

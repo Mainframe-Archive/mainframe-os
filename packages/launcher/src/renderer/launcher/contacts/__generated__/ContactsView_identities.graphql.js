@@ -11,7 +11,7 @@ import type { ConcreteFragment } from 'relay-runtime';
 import type { FragmentReference } from "relay-runtime";
 declare export opaque type ContactsView_identities$ref: FragmentReference;
 export type ContactsView_identities = {|
-  +ownUsers: ?$ReadOnlyArray<?{|
+  +ownUsers: $ReadOnlyArray<{|
     +localID: string,
     +feedHash: string,
     +profile: {|

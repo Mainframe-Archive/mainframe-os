@@ -18,13 +18,11 @@ export const getStorageManifestHash = async (
   let manifestHash
 
   if (feedHash) {
-    manifestHash = await ctx.bzz.getFeedValue(
-      feedHash,
-      {},
-      { mode: 'content-hash' },
-    )
+    manifestHash = await ctx.bzz.getFeedValue(feedHash, {
+      mode: 'content-hash',
+    })
   } else {
-    feedHash = await ctx.bzz.createFeedManifest(ctx.storage.address)
+    feedHash = await ctx.bzz.createFeedManifest({ user: ctx.storage.address })
     manifestHash = await ctx.bzz.uploadFeedValue(
       feedHash,
       STORAGE_EMPTY_MANIFEST,

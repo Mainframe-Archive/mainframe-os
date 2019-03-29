@@ -1,6 +1,6 @@
 // @flow
 
-import type { ManifestData } from '@mainframe/app-manifest'
+import { verifyManifest, type ManifestData } from '@mainframe/app-manifest'
 import {
   createWebRequestGrant,
   havePermissionsToGrant,
@@ -9,6 +9,8 @@ import {
   type StrictPermissionsGrants,
 } from '@mainframe/app-permissions'
 import type { AppInstallationState } from '@mainframe/client'
+import { MFID } from '@mainframe/data-types'
+import type { SignedContents } from '@mainframe/secure-file'
 import { uniqueID, type ID } from '@mainframe/utils-id'
 
 import type { bzzHash } from '../swarm/feed'
@@ -24,6 +26,8 @@ export type AppParams = AbstractAppParams & {
 }
 
 export type AppSerialized = AppParams
+
+export type AppUpdateData = { manifest: SignedContents }
 
 export default class App extends AbstractApp {
   static fromJSON = (params: AppSerialized): App => new App(params)
@@ -60,11 +64,15 @@ export default class App extends AbstractApp {
   }
 
   get mfid(): string {
-    return this.manifest.id
+    return this._manifest.id
+  }
+
+  get version(): string {
+    return this._manifest.version
   }
 
   get updateFeedHash(): bzzHash {
-    return this.manifest.updateHash
+    return this._manifest.updateHash
   }
 
   getPermissionsChecked(userID: ID): boolean {
@@ -72,6 +80,23 @@ export default class App extends AbstractApp {
       return true
     }
     return this.getSettings(userID).permissionsSettings.permissionsChecked
+  }
+
+  // Updates
+
+  verifyManifest(contents: SignedContents): ManifestData {
+    return verifyManifest(contents, [
+      MFID.from(this.mfid).data.toBuffer(),
+      MFID.from(this.manifest.author.id).data.toBuffer(),
+    ])
+  }
+
+  applyUpdate(
+    manifest: ManifestData,
+    installationState?: AppInstallationState = 'pending',
+  ): void {
+    this._manifest = manifest
+    this._installationState = installationState
   }
 
   // Session

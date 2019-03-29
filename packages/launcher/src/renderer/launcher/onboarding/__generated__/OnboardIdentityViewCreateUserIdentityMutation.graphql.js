@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash d8b1ac25de6dd962a74d9622396f32aa
+ * @relayHash 8d216c453a4d5a0a3b1a480e0ee48343
  */
 
 /* eslint-disable */
@@ -32,7 +32,7 @@ export type OnboardIdentityViewCreateUserIdentityMutationResponse = {|
     |},
     +viewer: {|
       +identities: {|
-        +ownUsers: ?$ReadOnlyArray<?{|
+        +ownUsers: $ReadOnlyArray<{|
           +defaultEthAddress: ?string,
           +localID: string,
         |}>,

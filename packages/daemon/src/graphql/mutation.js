@@ -431,13 +431,36 @@ const appCreateMutation = mutationWithClientMutationId({
   },
   outputFields: {
     app: {
-      type: ownApp,
+      type: new GraphQLNonNull(ownApp),
       resolve: payload => payload.app,
     },
     viewer: viewerOutput,
   },
   mutateAndGetPayload: async (args, ctx) => {
     const app = await ctx.mutations.createApp(args)
+    return { app }
+  },
+})
+
+const appCreateVersionMutation = mutationWithClientMutationId({
+  name: 'AppCreateVersionMutation',
+  inputFields: {
+    appID: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    version: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+  },
+  outputFields: {
+    app: {
+      type: new GraphQLNonNull(ownApp),
+      resolve: payload => payload.app,
+    },
+    viewer: viewerOutput,
+  },
+  mutateAndGetPayload: async (args, ctx) => {
+    const app = await ctx.mutations.createAppVersion(args)
     return { app }
   },
 })
@@ -566,6 +589,32 @@ const appInstallMutation = mutationWithClientMutationId({
   },
 })
 
+const appUpdateMutation = mutationWithClientMutationId({
+  name: 'AppUpdateMutation',
+  inputFields: {
+    appID: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    userID: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    permissionsSettings: {
+      type: appPermissionSettingsInput,
+    },
+  },
+  outputFields: {
+    app: {
+      type: app,
+      resolve: payload => payload.app,
+    },
+    viewer: viewerOutput,
+  },
+  mutateAndGetPayload: async (params, ctx) => {
+    const app = await ctx.mutations.updateApp(params)
+    return { app }
+  },
+})
+
 export const updateAppDetailsMutation = mutationWithClientMutationId({
   name: 'UpdateAppDetails',
   inputFields: {
@@ -618,7 +667,9 @@ export default new GraphQLObjectType({
   fields: () => ({
     // Apps
     createApp: appCreateMutation,
+    createAppVersion: appCreateVersionMutation,
     installApp: appInstallMutation,
+    updateApp: appUpdateMutation,
     setAppPermissionsRequirements: setAppPermissionsRequirementsMutation,
     publishAppVersion: publishAppVersionMutation,
     updateAppDetails: updateAppDetailsMutation,

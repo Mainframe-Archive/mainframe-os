@@ -12,7 +12,7 @@ import type { FragmentReference } from "relay-runtime";
 declare export opaque type WalletsView_wallets$ref: FragmentReference;
 export type WalletsView_wallets = {|
   +ethWallets: {|
-    +hd: ?$ReadOnlyArray<?{|
+    +hd: $ReadOnlyArray<{|
       +name: ?string,
       +localID: string,
       +accounts: ?$ReadOnlyArray<?{|
@@ -23,7 +23,7 @@ export type WalletsView_wallets = {|
         |},
       |}>,
     |}>,
-    +ledger: ?$ReadOnlyArray<?{|
+    +ledger: $ReadOnlyArray<{|
       +name: ?string,
       +localID: string,
       +accounts: ?$ReadOnlyArray<?{|

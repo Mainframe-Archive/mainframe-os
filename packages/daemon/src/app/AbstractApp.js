@@ -20,6 +20,29 @@ import { idType, type ID, uniqueID } from '@mainframe/utils-id'
 
 import type Session from './Session'
 
+const getDefaultSettings = () => {
+  return {
+    approvedContacts: {},
+    permissionsSettings: {
+      grants: {
+        WEB_REQUEST: {
+          denied: [],
+          granted: [],
+        },
+      },
+      permissionsChecked: false,
+    },
+    storageSettings: {
+      feedHash: undefined,
+      feedKey: createKeyPair().getPrivate('hex'),
+      encryptionKey: encodeBase64(createSecretStreamKey()),
+    },
+    walletSettings: {
+      defaultEthAccount: null,
+    },
+  }
+}
+
 export type WalletSettings = {
   defaultEthAccount: ?string,
 }
@@ -79,40 +102,20 @@ export default class AbstractApp {
     return Object.keys(this._settings).map(idType)
   }
 
+  // User settings
+
+  hasUser(userID: ID): boolean {
+    return this._settings[userID] != null
+  }
+
   removeUser(userID: ID) {
     delete this._settings[userID]
   }
 
   // Settings
 
-  getDefaultSettings = () => {
-    return {
-      approvedContacts: {},
-      permissionsSettings: {
-        grants: {
-          WEB_REQUEST: {
-            denied: [],
-            granted: [],
-          },
-        },
-        permissionsChecked: false,
-      },
-      storageSettings: {
-        feedHash: undefined,
-        feedKey: createKeyPair().getPrivate('hex'),
-        encryptionKey: encodeBase64(createSecretStreamKey()),
-      },
-      walletSettings: {
-        defaultEthAccount: null,
-      },
-    }
-  }
-
   getSettings(userID: ID | string): AppUserSettings {
-    return (
-      this._settings[idType(userID)] ||
-      JSON.parse(JSON.stringify(this.getDefaultSettings()))
-    )
+    return this._settings[idType(userID)] || getDefaultSettings()
   }
 
   setSettings(userID: ID, settings: AppUserSettings): void {

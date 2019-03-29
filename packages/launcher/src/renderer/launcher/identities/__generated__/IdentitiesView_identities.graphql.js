@@ -12,18 +12,18 @@ type IdentityEditModal_ownUserIdentity$ref = any;
 import type { FragmentReference } from "relay-runtime";
 declare export opaque type IdentitiesView_identities$ref: FragmentReference;
 export type IdentitiesView_identities = {|
-  +ownUsers: ?$ReadOnlyArray<?{|
+  +ownUsers: $ReadOnlyArray<{|
     +localID: string,
     +feedHash: string,
     +profile: {|
       +name: string
     |},
-    +apps: ?$ReadOnlyArray<?{|
+    +apps: $ReadOnlyArray<{|
       +localID: string,
       +manifest: {|
         +name: string
       |},
-      +users: ?$ReadOnlyArray<?{|
+      +users: $ReadOnlyArray<{|
         +settings: {|
           +permissionsSettings: {|
             +permissionsChecked: boolean,
@@ -36,7 +36,7 @@ export type IdentitiesView_identities = {|
     |}>,
     +$fragmentRefs: IdentityEditModal_ownUserIdentity$ref,
   |}>,
-  +ownDevelopers: ?$ReadOnlyArray<?{|
+  +ownDevelopers: $ReadOnlyArray<{|
     +localID: string,
     +profile: {|
       +name: string

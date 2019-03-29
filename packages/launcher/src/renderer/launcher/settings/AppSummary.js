@@ -56,10 +56,10 @@ const Section = styled.View`
 `
 
 export default class AppSummary extends Component<Props> {
-  renderPermissionsSummaryRows = (
+  renderPermissionsSummaryRows(
     requirements: StrictPermissionsRequirements,
     type: PermissionRequirement,
-  ): Array<Object> => {
+  ): Array<Object> {
     return Object.keys(requirements[type]).reduce((acc, key: PermissionKey) => {
       // @$FlowFixMe Missing keys
       const permission = requirements[type][key]
@@ -92,12 +92,9 @@ export default class AppSummary extends Component<Props> {
   }
 
   render() {
-    const { appData, permissionsRequirements } = this.props
+    const { appData, permissionsRequirements: requirements } = this.props
 
-    let permissionsContainer
-
-    const requirements = permissionsRequirements
-
+    let permissionsContainer = null
     if (requirements) {
       const optionalPermissionRequirements = this.renderPermissionsSummaryRows(
         requirements,

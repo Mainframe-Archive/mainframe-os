@@ -4,7 +4,8 @@ import { graphql, createFragmentContainer, QueryRenderer } from 'react-relay'
 
 import { EnvironmentContext } from '../RelayEnvironment'
 import RelayLoaderView from '../RelayLoaderView'
-import AppsView, { type Apps } from './AppsView'
+import AppsView from './AppsView'
+import type { AppsScreen_apps as Apps } from './__generated__/AppsScreen_apps.graphql'
 
 type RendererProps = {}
 
