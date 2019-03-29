@@ -1,5 +1,7 @@
 /* global getFixture, getTempFile */
 
+import '@babel/polyfill'
+
 import {
   PASSWORDHASH_ALG_ARGON2ID13,
   PASSWORDHASH_MEMLIMIT_SENSITIVE,

@@ -18,6 +18,7 @@ import {
 } from '@mainframe/utils-crypto'
 import { type ID } from '@mainframe/utils-id'
 import { INFURA_URLS } from '@mainframe/eth'
+import semver from 'semver'
 
 import type { SessionData } from '../app/AbstractApp'
 import type App from '../app/App'
@@ -174,7 +175,7 @@ export default class Vault {
       settings: {
         bzzURL: 'http://mainframe-gateways.net:8500',
         pssURL: 'ws://mainframe-gateways.net:8546',
-        ethURL: INFURA_URLS.mainnet,
+        ethURL: INFURA_URLS.ropsten,
       },
       identityWallets: new IdentityWallets(),
       contactAppData: new ContactAppData(),
@@ -235,8 +236,14 @@ export default class Vault {
       // Add app with user settings
       app = this.apps.add(manifest, userID, settings)
     } else {
-      // Set user settings for already existing app
-      this.apps.setUserPermissionsSettings(app.id, userID, settings)
+      // If manifest version is higher than current one, apply update
+      if (semver.gt(manifest.version, app.version)) {
+        app.applyUpdate(manifest)
+      }
+      // Set user settings for additional user
+      if (!app.hasUser(userID)) {
+        this.apps.setUserPermissionsSettings(app.id, userID, settings)
+      }
     }
     return app
   }

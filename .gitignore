@@ -7,8 +7,10 @@ flow-typed
 /packages/*/lib
 /packages/*/.flowconfig
 /packages/*/cjs
+/packages/launcher/src/assets/svgs/*.svg
 dist/
 *.log
 .DS_Store
 .idea
 shell.nix
+/website/build

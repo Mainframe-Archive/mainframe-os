@@ -17,6 +17,6 @@
     "multibase": "^0.6.0"
   },
   "devDependencies": {
-    "flow-bin": "^0.87.0"
+    "flow-bin": "^0.95.1"
   }
 }

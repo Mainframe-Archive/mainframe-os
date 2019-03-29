@@ -2,8 +2,7 @@
 
 import path from 'path'
 import url from 'url'
-// eslint-disable-next-line import/named
-import Client from '@mainframe/client'
+import Client, { type VaultSettings } from '@mainframe/client'
 import { Environment, DaemonConfig, VaultConfig } from '@mainframe/config'
 import StreamRPC from '@mainframe/rpc-stream'
 import {
@@ -20,6 +19,7 @@ import type { AppSession } from '../types'
 
 import { AppContext, LauncherContext } from './contexts'
 import { interceptWebRequests } from './permissions'
+import { registerStreamProtocol } from './storage'
 import createElectronTransport from './createElectronTransport'
 import createRPCChannels from './rpc/createChannels'
 
@@ -48,12 +48,15 @@ let launcherWindow
 type AppContexts = { [appID: string]: { [userID: string]: AppContext } }
 
 const appContexts: AppContexts = {}
+const contextsBySandbox: WeakMap<WebContents, AppContext> = new WeakMap()
 const contextsByWindow: WeakMap<BrowserWindow, AppContext> = new WeakMap()
 
 const newWindow = (params: Object = {}) => {
   const window = new BrowserWindow({
-    width: params.width || 800,
-    height: params.height || 600,
+    minWidth: 1020,
+    minHeight: 702,
+    width: params.width || 1020,
+    height: params.height || 702,
     show: false,
     titleBarStyle: 'hidden',
   })
@@ -154,7 +157,10 @@ if (process.platform === 'darwin') {
 
 // App Lifecycle
 
-const launchApp = async (appSession: AppSession) => {
+const launchApp = async (
+  appSession: AppSession,
+  vaultSettings: VaultSettings,
+) => {
   const appID = appSession.app.appID
   const userID = appSession.user.id
   const appOpen = appContexts[appID] && appContexts[appID][userID]
@@ -194,9 +200,19 @@ const launchApp = async (appSession: AppSession) => {
       createElectronTransport(appWindow, APP_TRUSTED_REQUEST_CHANNEL),
     ),
     window: appWindow,
+    settings: vaultSettings,
   })
   contextsByWindow.set(appWindow, appContext)
+
   appWindow.webContents.on('did-attach-webview', (event, webContents) => {
+    webContents.on('destroyed', () => {
+      contextsBySandbox.delete(webContents)
+      appContext.sandbox = null
+    })
+
+    contextsBySandbox.set(webContents, appContext)
+    appContext.sandbox = webContents
+
     interceptWebRequests(appContext, webContents.session)
   })
 
@@ -206,6 +222,27 @@ const launchApp = async (appSession: AppSession) => {
     // $FlowFixMe: can't assign ID type
     appContexts[appID] = { [userID]: appContext }
   }
+
+  appWindow.webContents.on('did-attach-webview', (event, webContents) => {
+    // Open a separate developer tools window for the app
+    appContext.sandbox = webContents
+    registerStreamProtocol(appContext)
+    if (is.development) {
+      appWindow.webContents.executeJavaScript(
+        `document.getElementById('sandbox-webview').openDevTools()`,
+      )
+    }
+  })
+
+  appWindow.on('closed', async () => {
+    await client.app.close({ sessID: appSession.session.sessID })
+    const ctx = contextsByWindow.get(appWindow)
+    if (ctx != null) {
+      await ctx.clear()
+      contextsByWindow.delete(appWindow)
+    }
+    delete appContexts[appID][userID]
+  })
 }
 
 // TODO: proper setup, this is just temporary logic to simplify development flow
@@ -227,12 +264,9 @@ const setupClient = async () => {
     daemonConfig.runStatus = 'stopped'
     console.log(`daemon status: ${daemonConfig.runStatus}`)
   }
-  console.log('starting daemon')
   await startDaemon(daemonConfig, true)
-  console.log(`daemon started`)
   daemonConfig.runStatus = 'running'
   client = new Client(daemonConfig.socketPath)
-  console.log(`client started`)
 
   // Simple check for API call, not proper versioning logic
   const version = await client.apiVersion()
@@ -252,7 +286,7 @@ const createLauncherWindow = async () => {
     vaultConfig,
     window: launcherWindow,
   })
-  createRPCChannels(launcherContext, contextsByWindow)
+  createRPCChannels(launcherContext, contextsBySandbox, contextsByWindow)
 
   // Emitted when the window is closed.
   launcherWindow.on('closed', async () => {

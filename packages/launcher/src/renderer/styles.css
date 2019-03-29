@@ -7,6 +7,16 @@ body,
   font-family: 'Poppins', sans-serif;
 }
 
+
+.app-shadow {
+  transition: all 0.3s;
+  box-shadow: 0px 0px 25px 2px rgba(0,0,0,0.6);
+}
+.app-shadow-hover {
+  transition: all 0.3s;
+  box-shadow: 0px 5px 25px 6px rgba(0,0,0,0.3);
+}
+
 .inner-modal {
   position: fixed !important;
   top: 0 !important;

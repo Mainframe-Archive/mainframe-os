@@ -12,7 +12,7 @@ export type ConnectionState = "CONNECTED" | "SENDING" | "SENT" | "%future added 
 import type { FragmentReference } from "relay-runtime";
 declare export opaque type ContactsView_contacts$ref: FragmentReference;
 export type ContactsView_contacts = {|
-  +userContacts: ?$ReadOnlyArray<?{|
+  +userContacts: $ReadOnlyArray<{|
     +peerID: string,
     +localID: string,
     +connectionState: ConnectionState,

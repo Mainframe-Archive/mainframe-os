@@ -4,8 +4,10 @@ import React, { Component } from 'react'
 import styled from 'styled-components/native'
 import Blockies from 'react-blockies'
 
-type IconSize = 'small' | 'medium' | 'large' | 'x-large' | 'xx-large'
+import { type IconSize } from '../../UIComponents/Avatar'
+
 type Props = {
+  url?: ?string,
   id?: ?string,
   size: IconSize,
 }
@@ -20,6 +22,7 @@ export const ICON_SIZE = {
   large: 96,
   medium: 72,
   small: 40,
+  'x-small': 32,
 }
 
 const Container = styled.View`
@@ -28,7 +31,7 @@ const Container = styled.View`
   position: relative;
   width: ${props => props.iconSize}px;
   height: ${props => props.iconSize}px;
-  background-color: #000;
+  z-index: 2;
 `
 
 export default class AppIcon extends Component<Props, State> {
@@ -37,11 +40,13 @@ export default class AppIcon extends Component<Props, State> {
   }
 
   render() {
-    const { id, size } = this.props
+    const { id, url, size } = this.props
     const iconSize = ICON_SIZE[size]
     return (
       <Container iconSize={iconSize}>
-        {id ? (
+        {url ? (
+          <img src={url} width={iconSize} height={iconSize} alt="" />
+        ) : id ? (
           <Blockies seed={id} size={8} scale={Math.ceil(iconSize / 8)} />
         ) : null}
       </Container>

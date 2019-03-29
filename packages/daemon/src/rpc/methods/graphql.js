@@ -34,7 +34,7 @@ class GraphQLSubscription<T = *> extends ContextSubscription<
   }
 
   async dispose() {
-    if (this.data != null) {
+    if (this.data != null && this.data.return != null) {
       await this.data.return()
     }
   }

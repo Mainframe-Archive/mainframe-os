@@ -3,7 +3,7 @@
 import React, { Component } from 'react'
 import { Text, Button, Checkbox, Row, Column } from '@morpheus-ui/core'
 import styled from 'styled-components/native'
-import QRCode from 'qrcode-react'
+import QRCode from 'qrcode.react'
 import { shell } from 'electron'
 
 import EtherscanIcon from '@morpheus-ui/icons/Etherscan'

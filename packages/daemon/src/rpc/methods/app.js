@@ -1,5 +1,6 @@
 // @flow
 
+import { Timeline } from '@erebos/timeline'
 import { verifyManifest } from '@mainframe/app-manifest'
 import {
   idType as toClientID,
@@ -37,10 +38,13 @@ import {
   type AppSetPermissionsRequirementsParams,
   APP_SET_USER_PERMISSIONS_SETTINGS_SCHEMA,
   type AppSetUserPermissionsSettingsParams,
+  APP_SET_FEED_HASH_SCHEMA,
+  type AppSetFeedHashParams,
 } from '@mainframe/client'
 import { idType as fromClientID, type ID } from '@mainframe/utils-id'
 
 import type { SessionData } from '../../app/AbstractApp'
+import type { AppUpdateData } from '../../app/App'
 import { getContentsPath } from '../../app/AppsRepository'
 import OwnApp from '../../app/OwnApp'
 import type ClientContext from '../../context/ClientContext'
@@ -101,6 +105,7 @@ const createClientSession = (
     defaultEthAccount,
     app: appData,
     isDev: session.isDev,
+    storage: session.storage,
   }
 }
 
@@ -210,15 +215,22 @@ export const loadManifest = {
     ctx: ClientContext,
     params: AppLoadManifestParams,
   ): Promise<AppLoadManifestResult> => {
-    const res = await ctx.io.bzz.download(params.hash)
-    const payload = await res.json()
-    const manifest = verifyManifest(payload)
-    const appID = ctx.openVault.apps.getID(manifest.id)
-    const isOwn = appID != null && !!ctx.openVault.apps.getOwnByID(appID)
-    return {
-      manifest,
-      isOwn,
-      appID: appID ? toClientID(appID) : undefined,
+    try {
+      const timeline = new Timeline({ bzz: ctx.io.bzz, feed: params.hash })
+      const chapter = await timeline.loadChapter<AppUpdateData>()
+      if (chapter == null) {
+        throw new Error('App not published')
+      }
+      const manifest = verifyManifest(chapter.content.manifest)
+      const appID = ctx.openVault.apps.getID(manifest.id)
+      const isOwn = appID != null && !!ctx.openVault.apps.getOwnByID(appID)
+      return {
+        manifest,
+        isOwn,
+        appID: appID ? toClientID(appID) : undefined,
+      }
+    } catch (err) {
+      throw new Error('App not found')
     }
   },
 }
@@ -315,6 +327,26 @@ export const setPermissionsRequirements = {
       throw new Error('App not found')
     }
     app.setPermissionsRequirements(params.permissions, params.version)
+    await ctx.openVault.save()
+  },
+}
+
+export const setFeedHash = {
+  params: APP_SET_FEED_HASH_SCHEMA,
+  handler: async (
+    ctx: ClientContext,
+    params: AppSetFeedHashParams,
+  ): Promise<void> => {
+    const session = ctx.openVault.getSession(fromClientID(params.sessID))
+    if (session == null) {
+      throw clientError('Invalid session')
+    }
+
+    const app = ctx.openVault.apps.getByID(session.appID)
+    if (app == null) {
+      throw sessionError('Invalid app')
+    }
+    app.setFeedHash(session.userID, params.feedHash)
     await ctx.openVault.save()
   },
 }
