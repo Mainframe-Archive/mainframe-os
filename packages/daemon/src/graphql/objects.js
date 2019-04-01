@@ -514,9 +514,10 @@ export const connectionState = new GraphQLEnumType({
   name: 'ConnectionState',
   values: {
     CONNECTED: { value: 'connected' },
+    DECLINED: { value: 'declined' },
+    RECEIVED: { value: 'received' },
     SENDING: { value: 'sending' },
     SENT: { value: 'sent' },
-    RECEIVED: { value: 'received' },
   },
 })
 
@@ -540,6 +541,7 @@ export const contactInviteData = new GraphQLObjectType({
                 STAKED: { value: 'staked' },
                 RECLAIMING: { value: 'reclaiming' },
                 RECLAIMED: { value: 'reclaimed' },
+                SEIZED: { value: 'seized' },
               },
             }),
           },

@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 96cb010f7928ea410e57cbdd3be3745e
+ * @relayHash 7b56aedfc8e0175615bf22bc37bb6db8
  */
 
 /* eslint-disable */
@@ -9,7 +9,7 @@
 
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
-export type ConnectionState = "CONNECTED" | "RECEIVED" | "SENDING" | "SENT" | "%future added value";
+export type ConnectionState = "CONNECTED" | "DECLINED" | "RECEIVED" | "SENDING" | "SENT" | "%future added value";
 export type StakeState = "RECLAIMED" | "RECLAIMING" | "STAKED" | "%future added value";
 export type LauncherContactChangedSubscriptionVariables = {||};
 export type LauncherContactChangedSubscriptionResponse = {|

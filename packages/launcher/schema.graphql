@@ -176,9 +176,10 @@ type AppVersionData {
 
 enum ConnectionState {
   CONNECTED
+  DECLINED
+  RECEIVED
   SENDING
   SENT
-  RECEIVED
 }
 
 type Contact implements Node {
@@ -338,6 +339,7 @@ type Mutation {
   inviteContact(input: InviteContactInput!): InviteContactPayload
   acceptContactRequest(input: AcceptContactRequestInput!): AcceptContactRequestPayload
   retrieveInviteStake(input: RetrieveInviteStakeInput!): RetrieveInviteStakePayload
+  rejectContact(input: RejectContactInput!): RejectContactPayload
   addContact(input: AddContactInput!): AddContactPayload
   createUserIdentity(input: CreateUserIdentityInput!): CreateUserIdentityPayload
   createDeveloperIdentity(input: CreateDeveloperIdentityInput!): CreateDeveloperIdentityPayload
@@ -440,6 +442,17 @@ type Query {
   peers: Peers!
 }
 
+input RejectContactInput {
+  peerID: String!
+  userID: String!
+  clientMutationId: String
+}
+
+type RejectContactPayload {
+  viewer: Viewer!
+  clientMutationId: String
+}
+
 input RetrieveInviteStakeInput {
   contactID: String!
   userID: String!
@@ -502,6 +515,7 @@ enum StakeState {
   STAKED
   RECLAIMING
   RECLAIMED
+  SEIZED
 }
 
 type Subscription {

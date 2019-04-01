@@ -347,7 +347,7 @@ export default class EthClient extends EventEmitter {
   async sendRequest(params: RequestPayload): Promise<any> {
     const res = await this.web3Provider.sendPayload(params)
     if (res.error) {
-      throw res.error
+      throw new Error(res.error.message)
     } else {
       return res.result
     }

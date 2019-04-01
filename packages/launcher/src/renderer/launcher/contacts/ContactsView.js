@@ -184,6 +184,7 @@ type State = {
   addingContact?: ?boolean,
   invitingContact?: ?string,
   withdrawingStake?: ?boolean,
+  rejectingInvite?: ?string,
   foundPeer?: {
     profile: {
       name: string,
@@ -220,6 +221,21 @@ export const retrieveInviteStakeMutation = graphql`
     $userID: String!
   ) {
     retrieveInviteStake(input: $input) {
+      viewer {
+        contacts {
+          ...ContactsView_contacts @arguments(userID: $userID)
+        }
+      }
+    }
+  }
+`
+
+export const rejectContactMutation = graphql`
+  mutation ContactsViewRejectContactMutation(
+    $input: RejectContactInput!
+    $userID: String!
+  ) {
+    rejectContact(input: $input) {
       viewer {
         contacts {
           ...ContactsView_contacts @arguments(userID: $userID)
@@ -512,6 +528,37 @@ class ContactsViewComponent extends Component<Props, State> {
     })
   }
 
+  rejectContact = (contact: Contact) => {
+    const { user } = this.props
+    this.setState({ error: null, rejectingInvite: contact.peerID })
+    const input = {
+      userID: user.localID,
+      peerID: contact.peerID,
+    }
+
+    const requestComplete = error => {
+      this.setState({
+        error,
+        rejectingInvite: undefined,
+      })
+    }
+
+    commitMutation(this.context, {
+      mutation: rejectContactMutation,
+      variables: { input, userID: user.localID },
+      onCompleted: (contact, errors) => {
+        if (errors && errors.length) {
+          requestComplete(errors[0].message)
+        } else {
+          requestComplete()
+        }
+      },
+      onError: err => {
+        requestComplete(err.message)
+      },
+    })
+  }
+
   // RENDER
 
   renderContactsList() {
@@ -585,6 +632,13 @@ class ContactsViewComponent extends Component<Props, State> {
                   {contact.connectionState === 'RECEIVED'
                     ? this.renderAcceptIgnore(contact)
                     : null}
+                  {contact.connectionState === 'DECLINED' ? (
+                    <ContactCardText>
+                      <Text variant={['red']} size={10}>
+                        Declined
+                      </Text>
+                    </ContactCardText>
+                  ) : null}
                   {selected && (
                     <SelectedPointer>
                       <SvgSelectedPointer />
@@ -605,7 +659,7 @@ class ContactsViewComponent extends Component<Props, State> {
         <Button
           variant={['no-border', 'xSmall', 'grey']}
           title="IGNORE"
-          onPress={() => this.props.ignoreContact(contact)}
+          onPress={() => this.rejectContact(contact)}
         />
         <Button
           variant={['no-border', 'xSmall', 'red']}

@@ -434,13 +434,13 @@ export type ContactsGetAppUserContactsResult = {
 export type ContactResult = {
   localID: string,
   peerID: string,
-  connectionState: 'connected' | 'sent' | 'sending' | 'received',
+  connectionState: 'connected' | 'sent' | 'sending' | 'received' | 'declined',
   profile: ContactProfile,
   invite?: {
     inviteTX: string,
     stake?: {
       amount: string,
-      state: 'sending' | 'staked' | 'reclaiming' | 'reclaimed',
+      state: 'sending' | 'staked' | 'reclaiming' | 'reclaimed' | 'seized',
       reclaimedTX?: ?string,
     },
   },

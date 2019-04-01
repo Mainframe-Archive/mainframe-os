@@ -466,6 +466,25 @@ const retrieveInviteStakeMutation = mutationWithClientMutationId({
   },
 })
 
+const rejectContactMutation = new mutationWithClientMutationId({
+  name: 'RejectContact',
+  inputFields: {
+    peerID: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    userID: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+  },
+  outputFields: {
+    viewer: viewerOutput,
+  },
+  mutateAndGetPayload: async (args, ctx) => {
+    await ctx.invitesHandler.rejectContactInvite(args.userID, args.peerID)
+    return {}
+  },
+})
+
 const appPermissionDefinitionsInput = new GraphQLInputObjectType({
   name: 'AppPermissionDefinitionsInput',
   fields: () => ({
@@ -712,6 +731,7 @@ export default new GraphQLObjectType({
     inviteContact: inviteContactMutation,
     acceptContactRequest: acceptContactRequestMutation,
     retrieveInviteStake: retrieveInviteStakeMutation,
+    rejectContact: rejectContactMutation,
     addContact: addContactMutation,
     createUserIdentity: createUserIdentityMutation,
     createDeveloperIdentity: createDeveloperIdentityMutation,

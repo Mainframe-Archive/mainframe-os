@@ -89,6 +89,8 @@ export default class Contract {
     } else {
       params.topics = [encodedSig]
     }
+    params.address = this.address
+
     const res = await this.ethClient.getPastEvents(params)
     const events = []
     res.forEach(log => {

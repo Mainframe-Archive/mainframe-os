@@ -60,6 +60,7 @@ export type InviteRequest = {
   privateFeed: string,
   receivedAddress: string,
   senderAddress: string,
+  rejectedTXHash?: string,
 }
 
 type InvitesRepositorySerialized = {

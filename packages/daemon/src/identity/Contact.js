@@ -36,7 +36,7 @@ export type InviteData = {
   acceptedSignature?: string,
   stake: {
     amount: string,
-    state: 'sending' | 'staked' | 'reclaiming' | 'reclaimed',
+    state: 'sending' | 'staked' | 'reclaiming' | 'reclaimed' | 'seized',
     reclaimedTX?: ?string,
   },
 }
@@ -52,7 +52,7 @@ export type ContactSerialized = {
   acceptanceSignature?: ?string,
 }
 
-export type ConnectionState = 'connected' | 'sent' | 'sending'
+export type ConnectionState = 'connected' | 'sent' | 'sending' | 'declined'
 
 export default class Contact {
   static create = (
@@ -186,6 +186,7 @@ export default class Contact {
 
   get connectionState(): ConnectionState {
     if (!this._requestSent) return 'sending'
+    if (this.invite && this.invite.stake.state === 'seized') return 'declined'
     return this.sharedFeed.remoteFeed ? 'connected' : 'sent'
   }
 

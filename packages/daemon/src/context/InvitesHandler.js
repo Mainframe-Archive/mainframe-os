@@ -16,13 +16,13 @@ const INVITE_ABI = require('./inviteABI.json')
 const inviteContracts = {
   mainnet: '0x',
   ropsten: '0x6687b03F6D7eeac45d98340c8243e6a0434f1284',
-  ganache: '0xC4f1E7458d26C58B4BB1765b0c163dD943EA8Fba',
+  ganache: '0xAaC2FeAbfe6e8c0de3851c527fFE4AcAaC98ad9D',
 }
 
 const tokenContracts = {
   mainnet: '0x',
   ropsten: '0xa46f1563984209fe47f8236f8b01a03f03f957e4',
-  ganache: '0x87b1183Fefb343f5dc294F285dD90ADD756e06ee',
+  ganache: '0x3C35b3c7d8Ab0E47B90Df587Dd8D33234340E10C',
 }
 
 const hash = (data: Buffer) => {
@@ -37,12 +37,13 @@ export default class InvitesHandler {
 
   constructor(context: ClientContext) {
     this._context = context
-    //TODO: use context sub with dispose
-    const sub = this._context.events.vaultOpened.subscribe(async () => {
-      this._context.subscriptions.set(sub)
-      await this._context.io.eth.fetchNetwork()
-      this.fetchInvites()
-    })
+    this._context.events.addSubscription(
+      'invitesVaultOpened',
+      this._context.events.vaultOpened.subscribe(async () => {
+        await this._context.io.eth.fetchNetwork()
+        this.fetchBlockchainEvents()
+      }),
+    )
   }
 
   get tokenContract() {
@@ -58,10 +59,58 @@ export default class InvitesHandler {
     )
   }
 
-  fetchInvites() {
-    Object.keys(this._context.openVault.identities.ownUsers).forEach(id => {
-      this.fetchInvitesForUser(id)
+  fetchBlockchainEvents() {
+    Object.keys(this._context.openVault.identities.ownUsers).forEach(
+      async id => {
+        await this.fetchInvitesForUser(id)
+        this.fetchRejectedEvents(id)
+      },
+    )
+  }
+
+  async fetchRejectedEvents(userID: string) {
+    const { identities } = this._context.openVault
+    const user = identities.getOwnUser(userID)
+    if (!user) {
+      throw new Error(`User not found: ${userID}`)
+    }
+
+    const creationBlock = await this.invitesContract.call('creationBlock')
+    const latestBlock = await this._context.io.eth.getLatestBlock()
+
+    if (!user.publicFeed.feedHash) {
+      throw new Error(`No public feed hash for user ${userID}`)
+    }
+    const hashedFeed = hash(Buffer.from(user.publicFeed.feedHash))
+
+    const params = {
+      fromBlock: creationBlock,
+      toBlock: latestBlock,
+      topics: [hashedFeed],
+    }
+
+    const events = await this.invitesContract.getPastEvents('Declined', params)
+    events.forEach(e => {
+      const peer = identities.getPeerByFeed(e.recipientFeed)
+      if (peer) {
+        const contact = identities.getContactByPeerID(userID, peer.localID)
+        if (contact && contact.invite) {
+          contact.invite.stake.state = 'seized'
+        }
+        this._context.next({
+          type: 'contact_changed',
+          contact,
+          userID: userID,
+          change: 'inviteDeclined',
+        })
+      }
     })
+  }
+
+  async checkInviteState(sender: string, recipient: string, feed: string) {
+    const params = [sender, recipient, feed]
+    const res = await this.invitesContract.call('getInviteState', params)
+    return utils.parseBytes32String(res)
   }
 
   async parseEvent(
@@ -97,13 +146,20 @@ export default class InvitesHandler {
         if (feedValue) {
           const feed = await feedValue.json()
           // TODO: Validation
-          const contactInvite = {
-            privateFeed: feed.privateFeed,
-            receivedAddress: contractEvent.recipientAddress,
-            senderAddress: contractEvent.sender,
-            peerID: peer.localID,
+          const inviteState = await this.checkInviteState(
+            contractEvent.senderAddress,
+            contractEvent.recipientAddress,
+            contractEvent.recipientFeed,
+          )
+          if (inviteState === 'PENDING') {
+            const contactInvite = {
+              privateFeed: feed.privateFeed,
+              receivedAddress: contractEvent.recipientAddress,
+              senderAddress: contractEvent.senderAddress,
+              peerID: peer.localID,
+            }
+            return contactInvite
           }
-          return contactInvite
         }
       } catch (err) {
         this._context.log(`Error fetching feed: ${err}`)
@@ -112,14 +168,11 @@ export default class InvitesHandler {
   }
 
   async fetchInvitesForUser(userID: string) {
-    // const contractAddress = contracts[this._context.io.eth.networkName]
     // TODO: Only check new blocks
-    // TODO: Don't allow adding self, maybe error in contract also
     const { identities } = this._context.openVault
 
     try {
       const user = identities.getOwnUser(userID)
-
       if (!user) {
         throw new Error(`User not found: ${userID}`)
       }
@@ -129,13 +182,17 @@ export default class InvitesHandler {
         'address',
         user.profile.ethAddress,
       )
+      if (!user.publicFeed.feedHash) {
+        throw new Error(`No public feed hash for user ${userID}`)
+      }
       const hashedFeed = hash(Buffer.from(user.publicFeed.feedHash))
-      const latest = await this._context.io.eth.getLatestBlock()
+      const latestBlock = await this._context.io.eth.getLatestBlock()
+      const creationBlock = await this.invitesContract.call('creationBlock')
 
       const params = {
         address: this.invitesContract.address,
-        fromBlock: latest - 10000,
-        toBlock: latest,
+        fromBlock: creationBlock,
+        toBlock: latestBlock,
         topics: [encodedAddress, hashedFeed],
       }
 
@@ -318,6 +375,48 @@ export default class InvitesHandler {
       })
     } else {
       throw new Error('Invite approval signature not found')
+    }
+  }
+
+  async rejectContactInvite(userID: string, peerID: string) {
+    const { identities } = this._context.openVault
+    const inviteRequest = identities.getInviteRequest(userID, peerID)
+    const peer = identities.getPeerUser(peerID)
+    const user = identities.getOwnUser(userID)
+    if (!peer) {
+      throw new Error('Peer not found')
+    }
+    if (!user) {
+      throw new Error(`User not found: ${userID}`)
+    }
+    if (!inviteRequest) {
+      throw new Error('Invite not found')
+    }
+    const txOptions = { from: inviteRequest.receivedAddress }
+    try {
+      const res = await this.invitesContract.send(
+        'declineAndWithdraw',
+        [
+          inviteRequest.senderAddress,
+          peer.publicFeed,
+          user.publicFeed.feedHash,
+        ],
+        txOptions,
+      )
+
+      return new Promise((resolve, reject) => {
+        res
+          .on('hash', async hash => {
+            inviteRequest.rejectedTXHash = hash
+            await this._context.openVault.save()
+            resolve(hash)
+          })
+          .on('error', err => {
+            reject(err)
+          })
+      })
+    } catch (err) {
+      throw err
     }
   }
 }

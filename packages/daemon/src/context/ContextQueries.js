@@ -117,7 +117,7 @@ export default class ContextQueries {
     Object.keys(invites).forEach(feed => {
       const invite = invites[feed]
       const peer = identities.getPeerUser(idType(invite.peerID))
-      if (peer) {
+      if (!invite.rejectedTXHash && peer) {
         const contactRes = {
           profile: peer.profile,
           localID: invite.peerID, // TODO: give local ID's
