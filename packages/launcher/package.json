@@ -53,6 +53,7 @@
     "@morpheus-ui/icons": "0.0.16",
     "electron-store": "^3.0.0",
     "electron-util": "^0.11.0",
+    "fix-path": "^2.1.0",
     "get-stream": "^5.0.0",
     "gsap": "^2.1.2",
     "mime": "^2.4.0",
