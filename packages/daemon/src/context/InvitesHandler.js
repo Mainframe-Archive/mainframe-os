@@ -20,7 +20,7 @@ const inviteContracts = {
 }
 
 const tokenContracts = {
-  mainnet: '0x',
+  mainnet: '0xdf2c7238198ad8b389666574f2d8bc411a4b7428',
   ropsten: '0xa46f1563984209fe47f8236f8b01a03f03f957e4',
   ganache: '0x3C35b3c7d8Ab0E47B90Df587Dd8D33234340E10C',
 }
