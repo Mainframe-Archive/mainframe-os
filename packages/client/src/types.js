@@ -1,6 +1,6 @@
 // @flow
 
-import type { SignFeedDigestFunc } from '@erebos/api-bzz-base'
+import type { SignBytesFunc } from '@erebos/api-bzz-base'
 import type { ManifestData, PartialManifestData } from '@mainframe/app-manifest'
 import type {
   PermissionCheckResult,
@@ -77,7 +77,7 @@ export type ContextStorageSettings = {
   encryptionKey: Buffer,
   contentHash: ?string,
   feedHash: ?string,
-  signFeedDigest: SignFeedDigestFunc,
+  signBytes: SignBytesFunc,
   manifestHash?: string,
 }
 

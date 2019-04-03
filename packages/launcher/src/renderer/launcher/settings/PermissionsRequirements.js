@@ -254,7 +254,7 @@ export default class PermissionsRequirementsView extends Component<
             )
           })
           return (
-            <WebRequestsContainer>
+            <WebRequestsContainer key={key}>
               <Text variant={['greyDark23', 'marginBottom10']} bold size={12}>
                 HTTPS Requests
               </Text>

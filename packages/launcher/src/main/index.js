@@ -44,8 +44,10 @@ const contextsByWindow: WeakMap<BrowserWindow, AppContext> = new WeakMap()
 
 const newWindow = (params: Object = {}) => {
   const window = new BrowserWindow({
-    width: params.width || 800,
-    height: params.height || 600,
+    minWidth: 1020,
+    minHeight: 702,
+    width: params.width || 1020,
+    height: params.height || 702,
     show: false,
     titleBarStyle: 'hidden',
   })

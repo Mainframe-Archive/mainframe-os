@@ -5,11 +5,11 @@ import {
   GraphQLBoolean,
   GraphQLEnumType,
   GraphQLID,
+  GraphQLInt,
   GraphQLList,
   GraphQLObjectType,
   GraphQLNonNull,
   GraphQLString,
-  GraphQLInt,
 } from 'graphql'
 import { fromGlobalId, globalIdField, nodeDefinitions } from 'graphql-relay'
 
@@ -104,8 +104,16 @@ export const idResolver = globalIdField(null, obj => obj.localID)
 export const webRequestGrants = new GraphQLObjectType({
   name: 'WebRequestGrants',
   fields: () => ({
-    granted: { type: new GraphQLList(GraphQLString) },
-    denied: { type: new GraphQLList(GraphQLString) },
+    granted: {
+      type: new GraphQLNonNull(
+        new GraphQLList(new GraphQLNonNull(GraphQLString)),
+      ),
+    },
+    denied: {
+      type: new GraphQLNonNull(
+        new GraphQLList(new GraphQLNonNull(GraphQLString)),
+      ),
+    },
   }),
 })
 
@@ -233,6 +241,20 @@ export const appVersionData = new GraphQLObjectType({
   }),
 })
 
+export const appUpdateData = new GraphQLObjectType({
+  name: 'AppUpdateData',
+  fields: () => ({
+    manifest: {
+      type: new GraphQLNonNull(appManifestData),
+      resolve: self => self.app.manifest,
+    },
+    permissionsChanged: {
+      type: new GraphQLNonNull(GraphQLBoolean),
+      resolve: self => self.hasRequiredPermissionsChanges,
+    },
+  }),
+})
+
 export const app = new GraphQLObjectType({
   name: 'App',
   interfaces: () => [nodeInterface],
@@ -252,8 +274,14 @@ export const app = new GraphQLObjectType({
     manifest: {
       type: new GraphQLNonNull(appManifestData),
     },
+    update: {
+      type: appUpdateData,
+      resolve: (self, args, ctx) => {
+        return ctx.openVault.apps.getUpdate(self.id)
+      },
+    },
     users: {
-      type: new GraphQLList(appUser),
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(appUser))),
       resolve: ({ settings }) => {
         return Object.keys(settings).map(id => ({
           localID: id,
@@ -278,25 +306,37 @@ export const ownApp = new GraphQLObjectType({
     },
     name: {
       type: new GraphQLNonNull(GraphQLString),
-      resolve: self => self.data.name,
     },
     contentsPath: {
       type: new GraphQLNonNull(GraphQLString),
-      resolve: self => self.data.contentsPath,
     },
     updateFeedHash: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    currentVersion: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    currentVersionData: {
+      type: new GraphQLNonNull(appVersionData),
+      resolve: self => ({
+        ...self.getVersionData(),
+        version: self.currentVersion,
+      }),
+    },
+    publishedVersion: {
       type: GraphQLString,
+      resolve: self => {
+        const found = self.getSortedVersions().find(v => v.versionHash != null)
+        if (found != null) {
+          return found.version
+        }
+      },
     },
     versions: {
       type: new GraphQLNonNull(
         new GraphQLList(new GraphQLNonNull(appVersionData)),
       ),
-      resolve: ({ versions }) => {
-        return Object.keys(versions).map(version => ({
-          version: version,
-          ...versions[version],
-        }))
-      },
+      resolve: self => self.getSortedVersions(),
     },
     developer: {
       type: new GraphQLNonNull(appAuthor),
@@ -311,7 +351,7 @@ export const ownApp = new GraphQLObjectType({
       },
     },
     users: {
-      type: new GraphQLList(appUser),
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(appUser))),
       resolve: ({ settings }) => {
         return Object.keys(settings).map(id => ({
           localID: id,
@@ -353,7 +393,7 @@ export const namedProfile = new GraphQLObjectType({
   name: 'NamedProfile',
   fields: () => ({
     name: {
-      type: GraphQLNonNull(GraphQLString),
+      type: new GraphQLNonNull(GraphQLString),
     },
     avatar: {
       type: GraphQLString,
@@ -421,7 +461,7 @@ export const ownUserIdentity = new GraphQLObjectType({
       resolve: self => self.id,
     },
     apps: {
-      type: new GraphQLList(app),
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(app))),
       resolve: (self, args, ctx: ClientContext) => {
         return ctx.openVault.apps.getAppsForUser(self.localID)
       },
@@ -590,7 +630,7 @@ export const contacts = new GraphQLObjectType({
   name: 'Contacts',
   fields: () => ({
     userContacts: {
-      type: new GraphQLList(contact),
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(contact))),
       args: {
         userID: { type: new GraphQLNonNull(GraphQLString) },
       },
@@ -605,15 +645,21 @@ export const apps = new GraphQLObjectType({
   name: 'Apps',
   fields: () => ({
     installed: {
-      type: new GraphQLList(app),
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(app))),
       resolve: (self, args, ctx: ClientContext) => {
         return Object.values(ctx.openVault.apps.apps)
       },
     },
     own: {
-      type: new GraphQLList(ownApp),
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(ownApp))),
       resolve: (self, args, ctx: ClientContext) => {
         return Object.values(ctx.openVault.apps.ownApps)
+      },
+    },
+    updatesCount: {
+      type: new GraphQLNonNull(GraphQLInt),
+      resolve: (self, args, ctx: ClientContext) => {
+        return ctx.openVault.apps.getUpdatesCount()
       },
     },
   }),
@@ -623,13 +669,17 @@ export const identities = new GraphQLObjectType({
   name: 'Identities',
   fields: () => ({
     ownUsers: {
-      type: new GraphQLList(ownUserIdentity),
+      type: new GraphQLNonNull(
+        new GraphQLList(new GraphQLNonNull(ownUserIdentity)),
+      ),
       resolve: (self, args, ctx: ClientContext) => {
         return Object.values(ctx.openVault.identities.ownUsers)
       },
     },
     ownDevelopers: {
-      type: new GraphQLList(ownDeveloperIdentity),
+      type: new GraphQLNonNull(
+        new GraphQLList(new GraphQLNonNull(ownDeveloperIdentity)),
+      ),
       resolve: (self, args, ctx: ClientContext) => {
         return Object.values(ctx.openVault.identities.ownDevelopers)
       },
@@ -749,13 +799,17 @@ export const ethWallets = new GraphQLObjectType({
   name: 'EthWallets',
   fields: () => ({
     hd: {
-      type: new GraphQLList(ethHdWallet),
+      type: new GraphQLNonNull(
+        new GraphQLList(new GraphQLNonNull(ethHdWallet)),
+      ),
       resolve: self => {
         return self.filter(w => w.type === 'hd')
       },
     },
     ledger: {
-      type: new GraphQLList(ethLedgerWallet),
+      type: new GraphQLNonNull(
+        new GraphQLList(new GraphQLNonNull(ethLedgerWallet)),
+      ),
       resolve: self => {
         return self.filter(w => w.type === 'ledger')
       },

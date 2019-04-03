@@ -8,6 +8,7 @@ import {
   type StrictPermissionsRequirements,
 } from '@mainframe/app-permissions'
 import { uniqueID, type ID } from '@mainframe/utils-id'
+import semver from 'semver'
 
 import { OwnFeed, type OwnFeedSerialized, type bzzHash } from '../swarm/feed'
 
@@ -30,6 +31,8 @@ export type AppVersion = {
   contentsHash?: ?string,
   versionHash?: string,
 }
+
+export type ListedAppVersion = AppVersion & { version: string }
 
 export type OwnAppParams = AbstractAppParams & {
   data: OwnAppData,
@@ -104,8 +107,16 @@ export default class OwnApp extends AbstractApp {
     return this._data
   }
 
+  get name(): string {
+    return this._data.name
+  }
+
   get contentsPath(): string {
     return this._data.contentsPath
+  }
+
+  get currentVersion(): string {
+    return this._data.version
   }
 
   get mfid(): string {
@@ -125,7 +136,13 @@ export default class OwnApp extends AbstractApp {
   }
 
   getVersionData(version?: ?string): ?AppVersion {
-    return this._versions[version || this._data.version]
+    return this._versions[version || this.currentVersion]
+  }
+
+  getSortedVersions(): Array<ListedAppVersion> {
+    return Object.keys(this._versions)
+      .sort(semver.rcompare)
+      .map(version => ({ ...this._versions[version], version }))
   }
 
   // Setters
@@ -139,17 +156,17 @@ export default class OwnApp extends AbstractApp {
   }
 
   editNextVersionNumber(version: string) {
-    if (version === this._data.version) {
+    if (version === this.currentVersion) {
       return
     }
     if (this._versions[version]) {
       throw new Error('Version already exists')
     }
-    const latestVersion = { ...this._versions[this._data.version] }
-    // $FlowFixMe Spread
-    latestVersion.version = version
-    delete this._versions[this._data.version]
-    this._versions[version] = latestVersion
+    this._versions[version] = {
+      ...this._versions[this.currentVersion],
+      version,
+    }
+    delete this._versions[this.currentVersion]
     this._data.version = version
   }
 
@@ -160,7 +177,10 @@ export default class OwnApp extends AbstractApp {
     if (this._versions[version] != null) {
       throw new Error('Version already exists')
     }
-    const latestVersion = this._versions[this._data.version]
+    if (semver.lte(version, this.currentVersion)) {
+      throw new Error('New version must be greater than current one')
+    }
+    const latestVersion = this._versions[this.currentVersion]
     this._versions[version] = {
       permissions: permissions || latestVersion.permissions,
     }
@@ -168,7 +188,7 @@ export default class OwnApp extends AbstractApp {
   }
 
   setContentsHash(hash: string, version?: ?string): void {
-    const v = version || this._data.version
+    const v = version || this.currentVersion
     const versionData = this._versions[v]
     if (versionData == null) {
       throw new Error('Invalid version')
@@ -181,7 +201,7 @@ export default class OwnApp extends AbstractApp {
   }
 
   setVersionHash(hash: string, version?: ?string): void {
-    const v = version || this._data.version
+    const v = version || this.currentVersion
     const versionData = this._versions[v]
     if (versionData == null) {
       throw new Error('Invalid version')
@@ -197,7 +217,7 @@ export default class OwnApp extends AbstractApp {
     permissions: PermissionsRequirements,
     version?: ?string,
   ): void {
-    const v = version || this._data.version
+    const v = version || this.currentVersion
     const versionData = this._versions[v]
     if (versionData == null) {
       throw new Error('Invalid version')
@@ -213,7 +233,7 @@ export default class OwnApp extends AbstractApp {
   // Session
 
   createSession(userID: ID): SessionData {
-    const versionData = this._versions[this._data.version]
+    const versionData = this.getVersionData()
     if (versionData == null) {
       throw new Error('Invalid version')
     }

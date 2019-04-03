@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 890bbdfb98c5dd68cb9127d7c1ff2c24
+ * @relayHash 36cd421319ea2e07aec9952b9289c735
  */
 
 /* eslint-disable */
@@ -14,19 +14,21 @@ export type StakeState = "RECLAIMED" | "RECLAIMING" | "SEIZED" | "STAKED" | "%fu
 export type LauncherContactChangedSubscriptionVariables = {||};
 export type LauncherContactChangedSubscriptionResponse = {|
   +contactChanged: {|
-    +connectionState: ConnectionState,
-    +profile: {|
-      +name: ?string,
-      +avatar: ?string,
-    |},
-    +invite: ?{|
-      +inviteTX: ?string,
-      +stake: ?{|
-        +reclaimedTX: ?string,
-        +amount: ?number,
-        +state: ?StakeState,
+    +contact: {|
+      +connectionState: ConnectionState,
+      +profile: {|
+        +name: ?string,
+        +avatar: ?string,
       |},
-    |},
+      +invite: ?{|
+        +inviteTX: ?string,
+        +stake: ?{|
+          +reclaimedTX: ?string,
+          +amount: ?number,
+          +state: ?StakeState,
+        |},
+      |},
+    |}
   |}
 |};
 export type LauncherContactChangedSubscription = {|
@@ -39,20 +41,22 @@ export type LauncherContactChangedSubscription = {|
 /*
 subscription LauncherContactChangedSubscription {
   contactChanged {
-    connectionState
-    profile {
-      name
-      avatar
-    }
-    invite {
-      inviteTX
-      stake {
-        reclaimedTX
-        amount
-        state
+    contact {
+      connectionState
+      profile {
+        name
+        avatar
       }
+      invite {
+        inviteTX
+        stake {
+          reclaimedTX
+          amount
+          state
+        }
+      }
+      id
     }
-    id
   }
 }
 */
@@ -145,7 +149,7 @@ return {
   "operationKind": "subscription",
   "name": "LauncherContactChangedSubscription",
   "id": null,
-  "text": "subscription LauncherContactChangedSubscription {\n  contactChanged {\n    connectionState\n    profile {\n      name\n      avatar\n    }\n    invite {\n      inviteTX\n      stake {\n        reclaimedTX\n        amount\n        state\n      }\n    }\n    id\n  }\n}\n",
+  "text": "subscription LauncherContactChangedSubscription {\n  contactChanged {\n    contact {\n      connectionState\n      profile {\n        name\n        avatar\n      }\n      invite {\n        inviteTX\n        stake {\n          reclaimedTX\n          amount\n          state\n        }\n      }\n      id\n    }\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -160,12 +164,23 @@ return {
         "name": "contactChanged",
         "storageKey": null,
         "args": null,
-        "concreteType": "Contact",
+        "concreteType": "ContactChangedPayload",
         "plural": false,
         "selections": [
-          v0,
-          v1,
-          v2
+          {
+            "kind": "LinkedField",
+            "alias": null,
+            "name": "contact",
+            "storageKey": null,
+            "args": null,
+            "concreteType": "Contact",
+            "plural": false,
+            "selections": [
+              v0,
+              v1,
+              v2
+            ]
+          }
         ]
       }
     ]
@@ -181,18 +196,29 @@ return {
         "name": "contactChanged",
         "storageKey": null,
         "args": null,
-        "concreteType": "Contact",
+        "concreteType": "ContactChangedPayload",
         "plural": false,
         "selections": [
-          v0,
-          v1,
-          v2,
           {
-            "kind": "ScalarField",
+            "kind": "LinkedField",
             "alias": null,
-            "name": "id",
+            "name": "contact",
+            "storageKey": null,
             "args": null,
-            "storageKey": null
+            "concreteType": "Contact",
+            "plural": false,
+            "selections": [
+              v0,
+              v1,
+              v2,
+              {
+                "kind": "ScalarField",
+                "alias": null,
+                "name": "id",
+                "args": null,
+                "storageKey": null
+              }
+            ]
           }
         ]
       }
@@ -201,5 +227,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = 'de1eb7120dddb8b4b4f169b3984dd09f';
+(node/*: any*/).hash = '8c61ea4b7e2b5571b29122aa4ee0a6fa';
 module.exports = node;

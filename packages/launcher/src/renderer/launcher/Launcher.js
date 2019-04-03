@@ -24,20 +24,40 @@ import ContactsScreen from './contacts/ContactsScreen'
 import NotificationsScreen from './notifications/NotificationsScreen'
 import SettingsScreen from './settings/SettingsScreen'
 
+import type { Launcher_apps as Apps } from './__generated__/Launcher_apps.graphql'
+import type { Launcher_identities as Identities } from './__generated__/Launcher_identities.graphql'
+
+const APP_UPDATE_CHANGED_SUBSCRIPTION = graphql`
+  subscription LauncherAppUpdateChangedSubscription {
+    appUpdateChanged {
+      app {
+        ...AppItem_installedApp
+      }
+      viewer {
+        apps {
+          updatesCount
+        }
+      }
+    }
+  }
+`
+
 const CONTACT_CHANGED_SUBSCRIPTION = graphql`
   subscription LauncherContactChangedSubscription {
     contactChanged {
-      connectionState
-      profile {
-        name
-        avatar
-      }
-      invite {
-        inviteTX
-        stake {
-          reclaimedTX
-          amount
-          state
+      contact {
+        connectionState
+        profile {
+          name
+          avatar
+        }
+        invite {
+          inviteTX
+          stake {
+            reclaimedTX
+            amount
+            state
+          }
         }
       }
     }
@@ -58,16 +78,8 @@ const ContentContainer = styled.View`
 `
 
 type Props = {
-  identities: {
-    ownUsers: Array<{
-      localID: string,
-      defaultEthAddress: ?string,
-      wallets: {
-        hd: Array<{ localID: string }>,
-        ledger: Array<{ localID: string }>,
-      },
-    }>,
-  },
+  apps: Apps,
+  identities: Identities,
   relay: {
     environment: Environment,
   },
@@ -81,7 +93,7 @@ type State = {
 }
 
 class Launcher extends Component<Props, State> {
-  _subscription: ?Disposable
+  _subscriptions: Array<Disposable> = []
 
   constructor(props: Props) {
     super(props)
@@ -102,15 +114,19 @@ class Launcher extends Component<Props, State> {
   }
 
   componentDidMount() {
-    this._subscription = requestSubscription(this.props.relay.environment, {
-      subscription: CONTACT_CHANGED_SUBSCRIPTION,
+    this._subscriptions = [
+      APP_UPDATE_CHANGED_SUBSCRIPTION,
+      CONTACT_CHANGED_SUBSCRIPTION,
+    ].map(subscription => {
+      return requestSubscription(this.props.relay.environment, { subscription })
     })
   }
 
   componentWillUnmount() {
-    if (this._subscription != null) {
-      this._subscription.dispose()
-    }
+    this._subscriptions.forEach(sub => {
+      sub.dispose()
+    })
+    this._subscriptions = []
   }
 
   setOpenScreen = (name: ScreenNames) => {
@@ -164,6 +180,7 @@ class Launcher extends Component<Props, State> {
           <SideMenu
             selected={this.state.openScreen}
             onSelectMenuItem={this.setOpenScreen}
+            notifications={this.props.apps.updatesCount > 0 ? ['apps'] : []}
           />
           <ContentContainer>{this.renderScreen()}</ContentContainer>
         </Container>
@@ -173,6 +190,11 @@ class Launcher extends Component<Props, State> {
 }
 
 const LauncherRelayContainer = createFragmentContainer(Launcher, {
+  apps: graphql`
+    fragment Launcher_apps on Apps {
+      updatesCount
+    }
+  `,
   identities: graphql`
     fragment Launcher_identities on Identities {
       ownUsers {
@@ -201,6 +223,9 @@ export default class LauncherQueryRenderer extends Component<{}> {
         query={graphql`
           query LauncherQuery {
             viewer {
+              apps {
+                ...Launcher_apps
+              }
               identities {
                 ...Launcher_identities
               }

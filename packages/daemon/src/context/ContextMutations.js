@@ -1,6 +1,7 @@
 // @flow
 
 import { hexValueType } from '@erebos/hex'
+import { Timeline, createChapter } from '@erebos/timeline'
 import {
   createSignedManifest,
   isValidSemver,
@@ -47,6 +48,25 @@ import type HDWallet from '../wallet/HDWallet'
 
 import type ClientContext from './ClientContext'
 
+const downloadAppContents = async (
+  ctx: ClientContext,
+  app: App,
+): Promise<void> => {
+  const contentsPath = getContentsPath(ctx.env, app.manifest)
+  try {
+    app.installationState = 'downloading'
+    await ensureDir(contentsPath)
+    await ctx.io.bzz.downloadDirectoryTo(
+      app.manifest.contentsHash,
+      contentsPath,
+    )
+    app.installationState = 'ready'
+  } catch (err) {
+    app.installationState = 'download_error'
+    throw new Error('Failed to download app contents')
+  }
+}
+
 export type Feeds = {
   [type: string]: bzzHash,
 }
@@ -57,12 +77,23 @@ export type InstallAppParams = {
   permissionsSettings: AppUserPermissionsSettings,
 }
 
+export type UpdateAppParams = {
+  appID: ID,
+  userID: ID,
+  permissionsSettings?: AppUserPermissionsSettings,
+}
+
 export type CreateAppParams = {
   contentsPath: string,
   developerID: ID,
   name?: ?string,
   version?: ?string,
   permissionsRequirements?: ?StrictPermissionsRequirements,
+}
+
+export type CreateAppVersionParams = {
+  appID: ID,
+  version: string,
 }
 
 export type PublishAppParams = {
@@ -92,7 +123,7 @@ export default class ContextMutations {
   // Apps
 
   async installApp(params: InstallAppParams): Promise<App> {
-    const { env, io, openVault } = this._context
+    const { openVault } = this._context
 
     const app = openVault.installApp(
       params.manifest,
@@ -101,21 +132,40 @@ export default class ContextMutations {
     )
 
     if (app.installationState !== 'ready') {
-      const contentsPath = getContentsPath(env, params.manifest)
-      try {
-        app.installationState = 'downloading'
-        await ensureDir(contentsPath)
-        await io.bzz.downloadDirectoryTo(
-          app.manifest.contentsHash,
-          contentsPath,
-        )
-        app.installationState = 'ready'
-      } catch (err) {
-        app.installationState = 'download_error'
-      }
+      await downloadAppContents(this._context, app)
     }
 
     this._context.next({ type: 'app_installed', app, userID: params.userID })
+    return app
+  }
+
+  async updateApp(params: UpdateAppParams): Promise<App> {
+    const { openVault } = this._context
+
+    const update = openVault.apps.getUpdate(params.appID)
+    if (update == null) {
+      throw new Error('Update not found')
+    }
+
+    const { app } = update
+    if (update.hasRequiredPermissionsChanges) {
+      if (params.permissionsSettings == null) {
+        throw new Error('Missing permissions settings')
+      }
+      app.setPermissionsSettings(params.userID, params.permissionsSettings)
+    }
+
+    if (app.installationState !== 'ready') {
+      await downloadAppContents(this._context, app)
+    }
+    openVault.apps.applyUpdate(app)
+
+    this._context.next({
+      type: 'app_update',
+      app,
+      version: app.version,
+      status: 'updateApplied',
+    })
     return app
   }
 
@@ -149,6 +199,17 @@ export default class ContextMutations {
     await app.updateFeed.syncManifest(io.bzz)
 
     this._context.next({ type: 'app_created', app })
+    return app
+  }
+
+  async createAppVersion(params: CreateAppVersionParams): Promise<OwnApp> {
+    const app = this._context.openVault.apps.getOwnByID(params.appID)
+    if (app == null) {
+      throw new Error('App not found')
+    }
+
+    app.createNextVersion(params.version)
+    this._context.next({ type: 'app_changed', app, change: 'versionCreated' })
     return app
   }
 
@@ -195,37 +256,45 @@ export default class ContextMutations {
     }
     await app.updateFeed.syncManifest(io.bzz)
 
-    const manifestData = {
-      id: app.mfid,
-      author: {
-        id: devIdentity.id,
-        name: devIdentity.profile.name,
-      },
-      name: app.data.name,
-      version: app.data.version,
-      contentsHash: versionData.contentsHash,
-      updateHash: app.updateFeed.feedHash,
-      permissions: versionData.permissions,
-    }
+    const { feedHash } = app.updateFeed
     // Sanity checks
-    if (manifestData.contentsHash == null) {
+    if (versionData.contentsHash == null) {
       throw new Error('Missing contents hash')
     }
-    if (manifestData.updateHash == null) {
+    if (feedHash == null) {
       throw new Error('Missing update hash')
     }
 
-    // $FlowFixMe: doesn't seem to detect sanity checks for hashes
-    const signedManifest = createSignedManifest(manifestData, [
-      appIdentity.keyPair,
-      devIdentity.keyPair,
-    ])
-    const versionHash = await app.updateFeed.publishJSON(io.bzz, signedManifest)
+    const manifest = createSignedManifest(
+      {
+        id: app.mfid,
+        author: {
+          id: devIdentity.id,
+          name: devIdentity.profile.name,
+        },
+        name: app.data.name,
+        version: app.data.version,
+        contentsHash: versionData.contentsHash,
+        updateHash: feedHash,
+        permissions: versionData.permissions,
+      },
+      [appIdentity.keyPair, devIdentity.keyPair],
+    )
+    const chapter = createChapter({
+      author: app.updateFeed.address,
+      content: { manifest },
+    })
+    const timeline = new Timeline({
+      bzz: io.bzz,
+      feed: feedHash,
+      signParams: app.updateFeed.keyPair.getPrivate(),
+    })
+
+    const versionHash = await timeline.addChapter(chapter)
     app.setVersionHash(versionHash, params.version)
 
     this._context.next({ type: 'app_changed', app, change: 'versionPublished' })
-    // $FlowFixMe: weird issue with return type not detected as Promise
-    return manifestData.updateHash
+    return feedHash
   }
 
   async appApproveContacts(

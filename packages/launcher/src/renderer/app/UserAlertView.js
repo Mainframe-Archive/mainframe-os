@@ -5,16 +5,21 @@ import createHandler from '@mainframe/rpc-handler'
 import { uniqueID } from '@mainframe/utils-id'
 import { ipcRenderer } from 'electron'
 import React, { Component } from 'react'
-import { View, StyleSheet, Switch } from 'react-native-web'
+import styled from 'styled-components/native'
+import { Text, Button, Checkbox } from '@morpheus-ui/core'
+
 import type { Subscription } from 'rxjs'
 import type { WalletEthSignTxParams } from '@mainframe/client'
 import { type EthClient } from '@mainframe/eth'
 
+import ContactsIcon from '@morpheus-ui/icons/ContactsFilledMd'
+
 import { APP_TRUSTED_REQUEST_CHANNEL } from '../../constants'
 
-import colors from '../colors'
-import Text from '../UIComponents/Text'
-import Button from '../UIComponents/Button'
+import BellIcon from '../UIComponents/Icons/BellIcon'
+import WalletIcon from '../UIComponents/Icons/Wallet'
+import LockerIcon from '../UIComponents/Icons/LockerIcon'
+
 import WalletTxRequestView from './WalletTxRequestView'
 import ContactPickerView, { type SelectedContactIDs } from './ContactPickerView'
 import WalletPickerView from './WalletPickerView'
@@ -55,6 +60,7 @@ type PermissionDeniedNotif = {
 type Props = {
   appSession: AppSessionData,
   ethClient: EthClient,
+  multipleWallets?: ?boolean,
 }
 
 type PendingRequest = {
@@ -109,11 +115,66 @@ const getPermissionDescription = (key: string, input?: ?string): ?string => {
   return null
 }
 
+const Container = styled.View`
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  position: fixed;
+  background-color: transparent;
+  height: 100%;
+`
+
+const RequestContainer = styled.View`
+  background-color: ${props => props.theme.colors.GREY_DARK_3C};
+  position: absolute;
+  top: 30px;
+  right: 102px;
+  width: 250px;
+  border-radius: 3px;
+  shadow-color: ${props => props.theme.colors.BLACK};
+  shadow-opacity: 0.2;
+  shadow-radius: 8;
+  overflow: hidden;
+  ${props => props.wallet && 'right: 5px'};
+  ${props => props.large && 'width: 340px'};
+`
+
+const ContentContainer = styled.View`
+  padding: 20px;
+`
+
+const TitleContainer = styled.Text`
+  display: flex;
+  color: #808080;
+  width: 100%;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #303030;
+  padding: 0 20px;
+  height: 47px;
+`
+
+const ButtonsContainer = styled.View`
+  margin-top: 20px;
+  flex-direction: row;
+  justify-content: center;
+`
+
+const PermissionDeniedAlert = styled.View`
+  top: 60px;
+  right: 0;
+  bottom: 0;
+  position: absolute;
+  max-width: 300px;
+`
 export default class UserAlertView extends Component<Props, State> {
   state = {
     permissionDeniedNotifs: [],
     requests: {},
     persistGrant: false,
+    multipleWallets: false,
   }
 
   _onRPCMessage: (Object, Object) => Promise<void>
@@ -250,13 +311,15 @@ export default class UserAlertView extends Component<Props, State> {
 
   renderDeniedNotifs() {
     const alerts = this.state.permissionDeniedNotifs.map((data, i) => (
-      <Text key={`alert${i}`} style={styles.permissionDeniedLabel}>
-        <Text style={styles.boldText}>Blocked:</Text>{' '}
+      <Text key={`alert${i}`} variant="TuiPermissionDeniedLabel">
+        <Text size={11} color="white" bold>
+          Blocked:
+        </Text>{' '}
         {getPermissionDescription(data.key, data.domain)}
       </Text>
     ))
     return alerts.length ? (
-      <View style={styles.permissionDeniedAlerts}>{alerts}</View>
+      <PermissionDeniedAlert>{alerts}</PermissionDeniedAlert>
     ) : null
   }
 
@@ -273,19 +336,25 @@ export default class UserAlertView extends Component<Props, State> {
       )
     return (
       <>
-        {txView}
-        <View style={styles.buttonsContainer}>
-          <Button
-            title="ACCEPT"
-            onPress={() => this.acceptPermission(requestID)}
-            style={styles.acceptButton}
-          />
-          <Button
-            title="DECLINE"
-            onPress={() => this.declinePermission(requestID)}
-            style={styles.declineButton}
-          />
-        </View>
+        <TitleContainer>
+          <Text variant="TuiHeader">Sign Transaction</Text>
+          <BellIcon width={24} height={24} />
+        </TitleContainer>
+        <ContentContainer>
+          {txView}
+          <ButtonsContainer>
+            <Button
+              variant={['TuiButton', 'TuiButtonDismiss']}
+              title="REJECT"
+              onPress={() => this.declinePermission(requestID)}
+            />
+            <Button
+              variant={['TuiButton']}
+              title="AUTHORIZE"
+              onPress={() => this.acceptPermission(requestID)}
+            />
+          </ButtonsContainer>
+        </ContentContainer>
       </>
     )
   }
@@ -296,24 +365,37 @@ export default class UserAlertView extends Component<Props, State> {
     const multi =
       params && params.CONTACTS_SELECT ? params.CONTACTS_SELECT.multi : false
     return (
-      <ContactPickerView
-        userID={id}
-        multiSelect={multi}
-        onSelectedContacts={contacts =>
-          this.onSelectedContacts(requestID, contacts)
-        }
-      />
+      <>
+        <TitleContainer>
+          <Text variant="TuiHeader">Contacts</Text>
+          <ContactsIcon width={26} height={24} />
+        </TitleContainer>
+        <ContactPickerView
+          userID={id}
+          multiSelect={multi}
+          onReject={() => this.declinePermission(requestID)}
+          onSelectedContacts={contacts =>
+            this.onSelectedContacts(requestID, contacts)
+          }
+        />
+      </>
     )
   }
 
   renderWalletPicker(requestID: string) {
-    return (
-      <WalletPickerView
-        onSelectedWalletAccount={address =>
-          this.onSelectedWalletAccount(requestID, address)
-        }
-      />
-    )
+    return this.props.multipleWallets ? (
+      <>
+        <TitleContainer>
+          <Text variant="TuiHeader">Wallets</Text>
+          <WalletIcon width={24} height={24} />
+        </TitleContainer>
+        <WalletPickerView
+          onSelectedWalletAccount={address =>
+            this.onSelectedWalletAccount(requestID, address)
+          }
+        />
+      </>
+    ) : null
   }
 
   renderPermission(
@@ -322,29 +404,37 @@ export default class UserAlertView extends Component<Props, State> {
     permissionLabel: string,
   ) {
     return (
-      <View>
-        <Text style={styles.headerText}>Permission Required</Text>
-        <Text
-          style={
-            styles.descriptionText
-          }>{`This app is asking permission to ${permissionLabel}.`}</Text>
-        <View style={styles.persistOption}>
-          <Text style={styles.persistLabel}>{`Don't ask me again?`}</Text>
-          <Switch value={persistGrant} onValueChange={this.onTogglePersist} />
-        </View>
-        <View style={styles.buttonsContainer}>
-          <Button
-            title="ACCEPT"
-            onPress={() => this.acceptPermission(requestID)}
-            style={styles.acceptButton}
+      <>
+        <TitleContainer>
+          <Text variant="TuiHeader">App Permissions</Text>
+          <LockerIcon width={17} height={24} color="#808080" />
+        </TitleContainer>
+        <ContentContainer>
+          <Text color="#FFF" size={13}>
+            {`${
+              this.props.appSession.app.manifest.name
+            } is requesting access to ${permissionLabel}.`}
+          </Text>
+          <Checkbox
+            variant="TrustedUI"
+            defaultValue={persistGrant}
+            onChange={this.onTogglePersist}
+            label="Don't ask me again?"
           />
-          <Button
-            title="DECLINE"
-            onPress={() => this.declinePermission(requestID)}
-            style={styles.declineButton}
-          />
-        </View>
-      </View>
+          <ButtonsContainer>
+            <Button
+              variant={['TuiButton', 'TuiButtonDismiss']}
+              title="REJECT"
+              onPress={() => this.declinePermission(requestID)}
+            />
+            <Button
+              variant={['TuiButton']}
+              title="AUTHORIZE"
+              onPress={() => this.acceptPermission(requestID)}
+            />
+          </ButtonsContainer>
+        </ContentContainer>
+      </>
     )
   }
 
@@ -363,46 +453,57 @@ export default class UserAlertView extends Component<Props, State> {
       requestData.domain,
     )
 
+    let content, wallet, large
     if (permissionLabel == null) {
-      return (
-        <View style={styles.container}>
-          <View style={styles.requestContainer}>
-            <Text style={styles.headerText}>Unknown Permission</Text>
-            <Text style={styles.descriptionText}>
-              This app is asking for permission to perform an unknown request
+      content = (
+        <>
+          <TitleContainer>
+            <Text variant="TuiHeader">App Permissions</Text>
+            <BellIcon width={24} height={24} color="#808080" />
+          </TitleContainer>
+          <ContentContainer>
+            <Text color="#FFF" size={13}>
+              {`${
+                this.props.appSession.app.manifest.name
+              } is asking for permission to perform an unknown request`}
             </Text>
-            <View style={styles.buttonsContainer}>
+            <ButtonsContainer>
               <Button
+                variant={['TuiButton']}
                 title="DECLINE"
                 onPress={() => this.declinePermission(id)}
-                style={styles.declineButton}
               />
-            </View>
-          </View>
-        </View>
+            </ButtonsContainer>
+          </ContentContainer>
+        </>
       )
-    }
-
-    let content
-    switch (requestData.key) {
-      case 'BLOCKCHAIN_SEND':
-        content = this.renderTxSignRequest(id, requestData)
-        break
-      case 'CONTACTS_SELECT':
-        content = this.renderContactPicker(id, requestData)
-        break
-      case 'WALLET_ACCOUNT_SELECT':
-        content = this.renderWalletPicker(id)
-        break
-      default:
-        content = this.renderPermission(id, persistGrant, permissionLabel)
-        break
+    } else {
+      switch (requestData.key) {
+        case 'BLOCKCHAIN_SEND':
+          large = true
+          content = this.renderTxSignRequest(id, requestData)
+          break
+        case 'CONTACTS_SELECT':
+          content = this.renderContactPicker(id, requestData)
+          break
+        case 'WALLET_ACCOUNT_SELECT':
+          content = this.renderWalletPicker(id)
+          wallet = true
+          break
+        default:
+          content = this.renderPermission(id, persistGrant, permissionLabel)
+          break
+      }
     }
 
     return (
       <>
-        <View style={styles.container} onClick={this.onPressBG} />
-        <View style={styles.requestContainer}>{content}</View>
+        <Container onClick={this.onPressBG} />
+        <RequestContainer
+          large={large}
+          wallet={wallet || !this.props.multipleWallets}>
+          {content}
+        </RequestContainer>
       </>
     )
   }
@@ -411,84 +512,10 @@ export default class UserAlertView extends Component<Props, State> {
     const deniedNotifs = this.renderDeniedNotifs()
     const permissionRequest = this.renderContent()
     return (
-      <View>
+      <>
         {permissionRequest}
         {deniedNotifs}
-      </View>
+      </>
     )
   }
 }
-
-const styles = StyleSheet.create({
-  acceptButton: {
-    backgroundColor: colors.PRIMARY_LIGHT_BLUE,
-    flex: 1,
-    marginRight: 10,
-  },
-  boldText: {
-    fontWeight: 'bold',
-  },
-  buttonsContainer: {
-    flexDirection: 'row',
-    marginTop: 10,
-  },
-  container: {
-    backgroundColor: colors.TRANSPARENT_BLACK_50,
-    bottom: 0,
-    height: '100%',
-    left: 0,
-    position: 'fixed',
-    right: 0,
-    top: 60,
-  },
-  declineButton: {
-    backgroundColor: colors.GREY_MED_81,
-    flex: 1,
-  },
-  descriptionText: {
-    color: colors.WHITE,
-    fontSize: 13,
-    marginVertical: 6,
-  },
-  headerText: {
-    color: colors.LIGHT_GREY_CC,
-    fontSize: 15,
-    fontWeight: 'bold',
-  },
-  permissionDeniedAlerts: {
-    bottom: 0,
-    maxWidth: 300,
-    position: 'absolute',
-    right: 0,
-    top: 0,
-  },
-  permissionDeniedLabel: {
-    backgroundColor: colors.TRANSPARENT_BLACK_80,
-    color: colors.LIGHT_GREY_E5,
-    fontSize: 11,
-    paddingHorizontal: 6,
-    paddingVertical: 4,
-  },
-  persistLabel: {
-    color: colors.LIGHT_GREY_CC,
-    marginRight: 15,
-  },
-  persistOption: {
-    flexDirection: 'row',
-    marginVertical: 8,
-  },
-  requestContainer: {
-    backgroundColor: colors.GREY_DARK_3C,
-    borderRadius: 3,
-    marginLeft: 40,
-    maxWidth: 360,
-    minWidth: 280,
-    padding: 20,
-    position: 'absolute',
-    right: 5,
-    shadowColor: colors.BLACK,
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    top: -35,
-  },
-})

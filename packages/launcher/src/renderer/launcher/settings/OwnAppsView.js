@@ -11,21 +11,18 @@ import { AppsGrid, NewAppButton } from '../apps/AppsView'
 import { OwnAppItem } from '../apps/AppItem'
 import CreateAppModal from './CreateAppModal'
 import CreateDevIdentityView from './CreateDevIdentityView'
-import OwnAppDetailView, { type OwnApp } from './OwnAppDetailView'
+import OwnAppDetailView from './OwnAppDetailView'
+
+import type { OwnAppsView_apps as Apps } from './__generated__/OwnAppsView_apps.graphql'
+import type { OwnAppsView_identities as Identities } from './__generated__/OwnAppsView_identities.graphql'
 
 type Props = {
-  identities: {
-    ownDevelopers: Array<{
-      localID: string,
-    }>,
-  },
-  apps: {
-    own: Array<OwnApp>,
-  },
+  identities: Identities,
+  apps: Apps,
 }
 
 type State = {
-  selectedApp?: ?OwnApp,
+  selectedAppID?: ?string,
   createModal?: boolean,
 }
 
@@ -46,16 +43,12 @@ class OwnAppsView extends Component<Props, State> {
     this.setState({ createModal: false })
   }
 
-  onOpenApp = app => {
-    this.setState({
-      selectedApp: app,
-    })
+  onOpenApp = (appID: string) => {
+    this.setState({ selectedAppID: appID })
   }
 
   onCloseAppDetail = () => {
-    this.setState({
-      selectedApp: undefined,
-    })
+    this.setState({ selectedAppID: undefined })
   }
 
   render() {
@@ -72,17 +65,18 @@ class OwnAppsView extends Component<Props, State> {
       )
     }
 
-    if (this.state.selectedApp) {
-      return (
-        <OwnAppDetailView
-          ownApp={this.state.selectedApp}
-          onClose={this.onCloseAppDetail}
-        />
+    if (this.state.selectedAppID) {
+      const app = this.props.apps.own.find(
+        app => app.localID === this.state.selectedAppID,
       )
+      if (app != null) {
+        return <OwnAppDetailView ownApp={app} onClose={this.onCloseAppDetail} />
+      }
     }
 
     const apps = this.props.apps.own.map(a => {
-      const onOpen = () => this.onOpenApp(a)
+      const onOpen = () => this.onOpenApp(a.localID)
+      // $FlowFixMe: injected fragment type
       return <OwnAppItem key={a.localID} ownApp={a} onOpenApp={onOpen} />
     })
 

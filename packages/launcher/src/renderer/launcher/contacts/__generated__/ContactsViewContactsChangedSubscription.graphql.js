@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 972e7d4226e5420bc2924af9ac4c2843
+ * @relayHash 6dae818cea90fc5e20c84e23ae421087
  */
 
 /* eslint-disable */
@@ -132,7 +132,7 @@ return {
         "name": "contactsChanged",
         "storageKey": null,
         "args": null,
-        "concreteType": "ContactsChangedPayload",
+        "concreteType": "ContactChangedPayload",
         "plural": false,
         "selections": [
           {
@@ -196,7 +196,7 @@ return {
         "name": "contactsChanged",
         "storageKey": null,
         "args": null,
-        "concreteType": "ContactsChangedPayload",
+        "concreteType": "ContactChangedPayload",
         "plural": false,
         "selections": [
           {

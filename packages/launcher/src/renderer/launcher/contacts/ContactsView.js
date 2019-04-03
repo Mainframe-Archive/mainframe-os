@@ -27,6 +27,8 @@ import SvgSelectedPointer from '../../UIComponents/SVGSelectedPointer'
 import FormModalView from '../../UIComponents/FormModalView'
 import Loader from '../../UIComponents/Loader'
 
+import type Identity from './__generated__/ContactsView_identities.graphql'
+
 const SvgSmallClose = props => (
   <svg width="10" height="10" viewBox="0 0 10 10" {...props}>
     <path
@@ -50,11 +52,14 @@ const Container = styled.View`
 `
 
 const ContactsListContainer = styled.View`
+  position: relative;
   width: 260px;
+  padding-top: 40px;
   border-right-width: 1px;
   border-right-style: solid;
   border-right-color: #f5f5f5;
   height: calc(100vh - 40px);
+  overflow-y: auto;
 `
 
 const ContactCard = styled.TouchableOpacity`
@@ -98,7 +103,10 @@ const RightContainer = styled.View`
 `
 
 const ContactsListHeader = styled.View`
-  padding: 0 0 10px 10px;
+  position: absolute;
+  top: 0;
+  padding: 3px 0 10px 10px;
+  width: 100%;
   height: 45px;
   flex-direction: row;
   ${props =>
@@ -118,7 +126,10 @@ const NoContacts = styled.View`
   margin-top: 30vh;
   margin-left: -40px;
 `
-const ScrollView = styled.ScrollView``
+const ScrollView = styled.View`
+  flex: 1;
+  overflow-y: auto;
+`
 
 const FormContainer = styled.View`
   margin-top: 20px;
@@ -159,7 +170,7 @@ export type Contact = {
   },
   profile: {
     name?: string,
-    ethAddress?: string,
+    ethAddress?: ?string,
   },
   connectionState: 'SENT' | 'RECEIVED' | 'CONNECTED',
 }
@@ -177,6 +188,9 @@ type Props = {
   contacts: {
     userContacts: Array<Contact>,
   },
+  identities: {
+    ownUsers: Array<Identity>,
+  },
   acceptContact: (contact: Contact) => void,
   ignoreContact: (contact: Contact) => void,
 }
@@ -184,7 +198,7 @@ type Props = {
 type State = {
   searching?: boolean,
   searchTerm?: ?string,
-  selectedContact?: ?Contact,
+  selectedContact?: Object,
   addModalOpen?: boolean,
   editModalOpen?: boolean,
   error?: ?string,
@@ -198,7 +212,7 @@ type State = {
   foundPeer?: {
     profile: {
       name: string,
-      ethAddress?: string,
+      ethAddress?: ?string,
     },
     publicFeed: string,
     publicKey: string,
@@ -324,7 +338,7 @@ class ContactsViewComponent extends Component<Props, State> {
     super(props)
     this.state = {
       selectedContact: props.contacts.userContacts.length
-        ? props.contacts.userContacts[0]
+        ? this.getIdentity()
         : null,
     }
   }
@@ -344,26 +358,14 @@ class ContactsViewComponent extends Component<Props, State> {
     }
   }
 
-  componentDidUpdate(prevProps: Props) {
-    if (this.props.contacts.userContacts.length) {
-      if (!prevProps.contacts.userContacts.length) {
-        this.setState({
-          selectedContact: this.props.contacts.userContacts[0],
-        })
-      } else if (
-        this.state.selectedContact != null &&
-        !this.props.contacts.userContacts.includes(this.state.selectedContact)
-      ) {
-        const { localID } = this.state.selectedContact
-        const updatedContact = this.props.contacts.userContacts.find(
-          contact => contact.localID === localID,
-        )
-        this.setState({
-          selectedContact: updatedContact
-            ? updatedContact
-            : this.props.contacts.userContacts[0],
-        })
-      }
+  componentDidUpdate() {
+    if (
+      !this.state.selectedContact &&
+      this.props.contacts.userContacts.length
+    ) {
+      this.setState({
+        selectedContact: this.getIdentity(),
+      })
     }
   }
 
@@ -602,21 +604,41 @@ class ContactsViewComponent extends Component<Props, State> {
     })
   }
 
+  getIdentity = () => {
+    const { ownUsers } = this.props.identities
+
+    if (ownUsers.length) {
+      const id = ownUsers[0]
+      return {
+        connectionState: 'CONNECTED',
+        localID: id.localID,
+        peerID: id.localID,
+        publicFeed: id.feedHash,
+        profile: {
+          name: `${id.profile.name} (Me)`,
+        },
+      }
+    } else {
+      return {}
+    }
+  }
+
   // RENDER
 
   renderContactsList() {
     const { userContacts } = this.props.contacts
 
+    const contacts = [this.getIdentity(), ...userContacts]
     const list = this.state.searchTerm
-      ? userContacts.filter(
+      ? contacts.filter(
           cont =>
             cont.profile.name &&
             cont.profile.name.indexOf(this.state.searchTerm || '') > -1,
         )
-      : userContacts
+      : contacts
     return (
       <ContactsListContainer>
-        <ContactsListHeader hascontacts={userContacts.length > 0}>
+        <ContactsListHeader hascontacts={contacts.length > 0}>
           <ButtonContainer>
             {this.state.searching ? (
               <TextField
@@ -642,55 +664,53 @@ class ContactsViewComponent extends Component<Props, State> {
             />
           </ButtonContainer>
         </ContactsListHeader>
-        {userContacts.length === 0 ? (
+        {contacts.length === 0 ? (
           <NoContacts>
             <Text variant={['grey', 'small']}>No Contacts</Text>
           </NoContacts>
         ) : list.length === 0 ? (
           <NoContacts>
-            <Text variant={['grey', 'small']}>No Matching</Text>
+            <Text variant={['grey', 'small']}>No Match</Text>
           </NoContacts>
         ) : (
-          <ScrollView>
-            {list.map(contact => {
-              const selected =
-                this.state.selectedContact &&
-                this.state.selectedContact.localID === contact.localID
-              return (
-                <ContactCard
-                  key={contact.localID}
-                  onPress={() => this.selectContact(contact)}
-                  selected={selected}>
-                  <ContactCardText>
-                    <Text variant={['greyMed', 'ellipsis']} bold size={13}>
-                      {contact.profile.name || contact.publicFeed}
+          list.map(contact => {
+            const selected =
+              this.state.selectedContact &&
+              this.state.selectedContact.localID === contact.localID
+            return (
+              <ContactCard
+                key={contact.localID}
+                onPress={() => this.selectContact(contact)}
+                selected={selected}>
+                <ContactCardText>
+                  <Text variant={['greyMed', 'ellipsis']} bold size={13}>
+                    {contact.profile.name || contact.publicFeed}
+                  </Text>
+                  {contact.connectionState === 'SENT' ||
+                  contact.connectionState === 'SENDING' ? (
+                    <Text variant={['grey']} size={10}>
+                      Pending
                     </Text>
-                    {contact.connectionState === 'SENT' ||
-                    contact.connectionState === 'SENDING' ? (
-                      <Text variant={['grey']} size={10}>
-                        Pending
-                      </Text>
-                    ) : null}
-                  </ContactCardText>
-                  {contact.connectionState === 'RECEIVED'
-                    ? this.renderAcceptIgnore(contact)
-                    : null}
-                  {contact.connectionState === 'DECLINED' ? (
-                    <ContactCardText>
-                      <Text variant={['red']} size={10}>
-                        Declined
-                      </Text>
-                    </ContactCardText>
                   ) : null}
-                  {selected && (
-                    <SelectedPointer>
-                      <SvgSelectedPointer />
-                    </SelectedPointer>
-                  )}
-                </ContactCard>
-              )
-            })}
-          </ScrollView>
+                </ContactCardText>
+                {contact.connectionState === 'RECEIVED'
+                  ? this.renderAcceptIgnore(contact)
+                  : null}
+                {contact.connectionState === 'DECLINED' ? (
+                  <ContactCardText>
+                    <Text variant={['red']} size={10}>
+                      Declined
+                    </Text>
+                  </ContactCardText>
+                ) : null}
+                {selected && (
+                  <SelectedPointer>
+                    <SvgSelectedPointer />
+                  </SelectedPointer>
+                )}
+              </ContactCard>
+            )
+          })
         )}
       </ContactsListContainer>
     )
@@ -797,8 +817,8 @@ class ContactsViewComponent extends Component<Props, State> {
   }
 
   renderRightSide() {
-    const { userContacts } = this.props.contacts
-    if (userContacts.length === 0) {
+    const { selectedContact } = this.state
+    if (!selectedContact) {
       return (
         <RightContainer>
           <Row size={1}>
@@ -821,7 +841,6 @@ class ContactsViewComponent extends Component<Props, State> {
       )
     }
 
-    const { selectedContact } = this.state
     let inviteAction
     if (
       selectedContact &&
@@ -879,46 +898,43 @@ class ContactsViewComponent extends Component<Props, State> {
     )
 
     return (
-      selectedContact && (
-        <RightContainer>
-          <ScrollView>
-            <Row size={1}>
-              <Column>
-                <AvatarWrapper>
-                  <Blocky>
-                    <Avatar id={selectedContact.publicFeed} size="large" />
-                  </Blocky>
-                  <Text bold size={24}>
-                    {selectedContact.profile.name}
-                  </Text>
-                </AvatarWrapper>
-              </Column>
-            </Row>
+      <RightContainer>
+        <ScrollView>
+          <Row size={1}>
+            <Column>
+              <AvatarWrapper>
+                <Blocky>
+                  <Avatar id={selectedContact.publicFeed} size="large" />
+                </Blocky>
+                <Text bold size={24}>
+                  {selectedContact.profile.name}
+                </Text>
+              </AvatarWrapper>
+            </Column>
+          </Row>
+          <Row size={1}>
+            <Column>
+              <Text variant="smallTitle" theme={{ padding: '20px 0 10px 0' }}>
+                Mainframe ID
+              </Text>
+              <Text variant="addressLarge">{selectedContact.publicFeed}</Text>
+            </Column>
+          </Row>
+          {selectedContact.profile.ethAddress && (
             <Row size={1}>
               <Column>
                 <Text variant="smallTitle" theme={{ padding: '20px 0 10px 0' }}>
-                  Mainframe Contact ID
+                  ETH Address
                 </Text>
-                <Text variant="addressLarge">{selectedContact.publicFeed}</Text>
+                <Text variant="addressLarge">
+                  {selectedContact.profile.ethAddress}
+                </Text>
+                {inviteAction}
+                {inviteError}
               </Column>
             </Row>
-            {selectedContact.profile.ethAddress && (
-              <Row size={1}>
-                <Column>
-                  <Text
-                    variant="smallTitle"
-                    theme={{ padding: '20px 0 10px 0' }}>
-                    ETH Address
-                  </Text>
-                  <Text variant="addressLarge">
-                    {selectedContact.profile.ethAddress}
-                  </Text>
-                  {inviteAction}
-                  {inviteError}
-                </Column>
-              </Row>
-            )}
-            {/* <Row size={1}>
+          )}
+          {/* <Row size={1}>
               <Column styles="margin-top: 10px;">
                 <Button
                   onPress={this.openEditModal}
@@ -927,9 +943,8 @@ class ContactsViewComponent extends Component<Props, State> {
                 />
               </Column>
             </Row> */}
-          </ScrollView>
-        </RightContainer>
-      )
+        </ScrollView>
+      </RightContainer>
     )
   }
 
@@ -1033,6 +1048,17 @@ const ContactsView = createFragmentContainer(ContactsViewComponent, {
         profile {
           name
           ethAddress
+        }
+      }
+    }
+  `,
+  identities: graphql`
+    fragment ContactsView_identities on Identities {
+      ownUsers {
+        localID
+        feedHash
+        profile {
+          name
         }
       }
     }

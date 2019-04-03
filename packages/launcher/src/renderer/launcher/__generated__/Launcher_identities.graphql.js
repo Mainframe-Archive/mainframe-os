@@ -11,14 +11,14 @@ import type { ConcreteFragment } from 'relay-runtime';
 import type { FragmentReference } from "relay-runtime";
 declare export opaque type Launcher_identities$ref: FragmentReference;
 export type Launcher_identities = {|
-  +ownUsers: ?$ReadOnlyArray<?{|
+  +ownUsers: $ReadOnlyArray<{|
     +defaultEthAddress: ?string,
     +localID: string,
     +wallets: {|
-      +hd: ?$ReadOnlyArray<?{|
+      +hd: $ReadOnlyArray<{|
         +localID: string
       |}>,
-      +ledger: ?$ReadOnlyArray<?{|
+      +ledger: $ReadOnlyArray<{|
         +localID: string
       |}>,
     |},

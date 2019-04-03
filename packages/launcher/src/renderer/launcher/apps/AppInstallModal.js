@@ -26,6 +26,7 @@ type Props = {
   appID?: ?string,
   onRequestClose: () => void,
   onInstallComplete: () => void,
+  getIcon?: (id?: ?string) => ?string,
 }
 
 type ViewProps = Props & {
@@ -177,9 +178,9 @@ class AppInstallModal extends Component<ViewProps, State> {
   // RENDER
 
   renderManifestImport() {
-    const errorMsg = this.state.errorMsg && (
+    const errorMsg = this.state.errorMsg ? (
       <Text variant="error">{this.state.errorMsg}</Text>
-    )
+    ) : null
     return (
       <FormModalView
         dismissButton="CANCEL"
@@ -204,15 +205,19 @@ class AppInstallModal extends Component<ViewProps, State> {
 
   renderPermissions() {
     const { manifest } = this.state
+    if (!manifest) return null
 
-    return manifest ? (
+    const icon = this.props.getIcon ? this.props.getIcon(manifest.id) : null
+    return (
       <PermissionsView
+        mfid={manifest.id}
+        icon={icon}
         name={manifest.name}
         permissions={manifest.permissions}
         onSubmit={this.onSubmitPermissions}
         onCancel={this.props.onRequestClose}
       />
-    ) : null
+    )
   }
 
   renderDownload() {
