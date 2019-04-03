@@ -224,8 +224,7 @@ export default class InvitesHandler {
         )
         const topic = getFeedTopic({ name: user.base64PublicKey() })
         const feedValue = await this._context.io.bzz.getFeedValue(
-          peer.firstContactAddress,
-          { topic },
+          { user: peer.firstContactAddress, topic },
           {
             mode: 'content-response',
           },
