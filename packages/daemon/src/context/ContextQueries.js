@@ -118,17 +118,27 @@ export default class ContextQueries {
       const invite = invites[feed]
       const peer = identities.getPeerUser(idType(invite.peerID))
       if (!invite.rejectedTXHash && peer) {
-        const contactRes = {
-          profile: peer.profile,
-          localID: invite.peerID, // TODO: give local ID's
-          peerID: invite.peerID,
-          publicFeed: peer.publicFeed,
-          connectionState: 'received',
+        const contact = this.getContactFromInvite(invite)
+        if (contact) {
+          result.push(contact)
         }
-        result.push(contactRes)
       }
     })
     return result
+  }
+
+  getContactFromInvite(invite: InviteRequest): ?ContactResult {
+    const { identities } = this._context.openVault
+    const peer = identities.getPeerUser(invite.peerID)
+    if (peer) {
+      return {
+        profile: peer.profile,
+        localID: invite.peerID,
+        peerID: invite.peerID,
+        publicFeed: peer.publicFeed,
+        connectionState: 'received',
+      }
+    }
   }
 
   getAppApprovedContacts(appID: string, userID: string) {

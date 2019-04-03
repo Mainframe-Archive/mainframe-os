@@ -34,7 +34,7 @@ contract ContactInvite is Ownable, Pausable {
   ) external view returns (bytes32) {
     bytes32 recipientHash = keccak256(abi.encodePacked(recipientAddr, recipientFeed));
     InviteState state = inviteRequests[senderAddr][recipientHash].state;
-    if  (state == InviteState.PENDING) {
+    if (state == InviteState.PENDING) {
       return 'PENDING';
     } else if (state == InviteState.REJECTED) {
       return 'REJECTED';

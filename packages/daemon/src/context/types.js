@@ -48,13 +48,22 @@ export type ContactDeletedEvent = {|
   userID: string,
 |}
 
-export type EthNetworkChanged = {|
+export type EthNetworkChangedEvent = {|
   type: 'eth_network_changed',
+  network: string,
 |}
 
-export type EthAccountsChanged = {|
+export type EthAccountsChangedEvent = {|
   type: 'eth_accounts_changed',
   userID: string,
+  change: 'userDefault' | 'accountAdded' | 'appUserDefault',
+|}
+
+export type InvitesChangedEvent = {|
+  type: 'invites_changed',
+  peerID: string,
+  userID: string,
+  change: 'inviteReceived',
 |}
 
 export type PeerCreatedEvent = {|
@@ -99,8 +108,9 @@ export type ContextEvent =
   | ContactCreatedEvent
   | ContactChangedEvent
   | ContactDeletedEvent
-  | EthAccountsChanged
-  | EthNetworkChanged
+  | EthAccountsChangedEvent
+  | EthNetworkChangedEvent
+  | InvitesChangedEvent
   | PeerCreatedEvent
   | PeerChangedEvent
   | PeerDeletedEvent

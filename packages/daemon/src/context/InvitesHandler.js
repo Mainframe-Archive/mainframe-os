@@ -1,28 +1,46 @@
 // @flow
 
-import { Web3EthAbi } from '@mainframe/eth'
+import { Web3EthAbi, type BaseContract } from '@mainframe/eth'
 import { fromWei } from 'ethjs-unit'
 import { getFeedTopic } from '@erebos/api-bzz-base'
 import createKeccakHash from 'keccak'
 import { utils } from 'ethers'
+import { filter } from 'rxjs/operators'
+import { type Observable } from 'rxjs'
+import type { bzzHash } from '../swarm/feed'
 
 import type { OwnUserIdentity, PeerUserIdentity } from '../identity'
 import type { InviteRequest } from '../identity/IdentitiesRepository'
 import type Contact from '../identity/Contact'
 import type ClientContext from './ClientContext'
+import type {
+  ContextEvent,
+  EthNetworkChangedEvent,
+  EthAccountsChangedEvent,
+  InvitesChangedEvent,
+  VaultOpenedEvent,
+} from './types'
+
+type ObserveInvites<T = Object> = {
+  dispose: () => void,
+  source: Observable<T>,
+}
 
 const INVITE_ABI = require('./inviteABI.json')
 
-const inviteContracts = {
-  mainnet: '0x',
-  ropsten: '0x6687b03F6D7eeac45d98340c8243e6a0434f1284',
-  ganache: '0xAaC2FeAbfe6e8c0de3851c527fFE4AcAaC98ad9D',
-}
-
-const tokenContracts = {
-  mainnet: '0xdf2c7238198ad8b389666574f2d8bc411a4b7428',
-  ropsten: '0xa46f1563984209fe47f8236f8b01a03f03f957e4',
-  ganache: '0x3C35b3c7d8Ab0E47B90Df587Dd8D33234340E10C',
+const contracts = {
+  // mainnet: {
+  //   token: '0xa46f1563984209fe47f8236f8b01a03f03f957e4',
+  //   invites: '0x6687b03F6D7eeac45d98340c8243e6a0434f1284',
+  // },
+  ropsten: {
+    token: '0xa46f1563984209fe47f8236f8b01a03f03f957e4',
+    invites: '0x6687b03F6D7eeac45d98340c8243e6a0434f1284',
+  },
+  ganache: {
+    token: '0xB3E555c3dB7B983E46bf5a530ce1dac4087D2d8D',
+    invites: '0x44aDa120A88555bfA4c485C9F72CB4F0AdFEE45A',
+  },
 }
 
 const hash = (data: Buffer) => {
@@ -32,109 +50,178 @@ const hash = (data: Buffer) => {
   return '0x' + bytes.toString('hex')
 }
 
+const encodeAddress = (address: string) => {
+  return Web3EthAbi.encodeParameter('address', address)
+}
+
 export default class InvitesHandler {
   _context: ClientContext
+  _observers = new Set()
+  _ethSubscriptions = new Set()
 
   constructor(context: ClientContext) {
     this._context = context
+    this.subscribeToStateChanges()
+  }
+
+  async subscribeToStateChanges() {
     this._context.events.addSubscription(
-      'invitesVaultOpened',
-      this._context.events.vaultOpened.subscribe(async () => {
-        await this._context.io.eth.fetchNetwork()
-        this.fetchBlockchainEvents()
-      }),
+      'invitesStateChanges',
+      this._context
+        .pipe(
+          filter((e: ContextEvent) => {
+            return (
+              e.type === 'vault_opened' ||
+              e.type === 'eth_network_changed' ||
+              (e.type === 'eth_accounts_changed' && e.change === 'userDefault')
+            )
+          }),
+        )
+        .subscribe(
+          async (
+            e:
+              | EthNetworkChangedEvent
+              | EthAccountsChangedEvent
+              | VaultOpenedEvent,
+          ) => {
+            if (e.type !== 'eth_network_changed') {
+              // Only need to clear subs if on the same network
+              this._ethSubscriptions.forEach(async subID => {
+                await this._context.io.eth.unsubscribe(subID)
+                this._ethSubscriptions.delete(subID)
+              })
+              // Ensure we have network when first opened
+              await this._context.io.eth.fetchNetwork()
+            }
+            if (contracts[this._context.io.eth.networkName]) {
+              this.setup()
+            } else {
+              this._context.log('Unsupported ethereum network')
+            }
+          },
+        ),
     )
   }
 
   get tokenContract() {
     return this._context.io.eth.erc20Contract(
-      tokenContracts[this._context.io.eth.networkName],
+      contracts[this._context.io.eth.networkName].token,
     )
   }
 
-  get invitesContract() {
+  get invitesContract(): BaseContract {
     return this._context.io.eth.getContract(
       INVITE_ABI.abi,
-      inviteContracts[this._context.io.eth.networkName],
+      contracts[this._context.io.eth.networkName].invites,
     )
   }
 
-  fetchBlockchainEvents() {
-    Object.keys(this._context.openVault.identities.ownUsers).forEach(
-      async id => {
-        await this.fetchInvitesForUser(id)
-        this.fetchRejectedEvents(id)
-      },
-    )
-  }
-
-  async fetchRejectedEvents(userID: string) {
+  setup() {
     const { identities } = this._context.openVault
-    const user = identities.getOwnUser(userID)
-    if (!user) {
-      throw new Error(`User not found: ${userID}`)
+    Object.keys(identities.ownUsers).forEach(async id => {
+      const user = identities.getOwnUser(id)
+      if (user) {
+        if (user.publicFeed.feedHash) {
+          const feedhash = hash(Buffer.from(user.publicFeed.feedHash))
+          await this.subscribeToEthEvents(user, feedhash)
+          await this.fetchInvitesForUser(user, feedhash)
+          this.fetchRejectedEvents(user, feedhash)
+        }
+      }
+    })
+  }
+
+  // FETCH BLOCKCHAIN STATE
+
+  async fetchInvitesForUser(user: OwnUserIdentity, userFeedHash: string) {
+    // TODO: Only check new blocks
+    try {
+      if (!user.profile.ethAddress) {
+        throw new Error(
+          `Unable to fetch invites, no eth address found for: ${user.localID}`,
+        )
+      }
+
+      const encodedAddress = encodeAddress(user.profile.ethAddress)
+      const latestBlock = await this._context.io.eth.getLatestBlock()
+      const creationBlock = await this.invitesContract.call('creationBlock')
+
+      const params = {
+        address: this.invitesContract.address,
+        fromBlock: creationBlock,
+        toBlock: latestBlock,
+        topics: [encodedAddress, userFeedHash],
+      }
+      const events = await this.invitesContract.getPastEvents('Invited', params)
+      for (let i = 0; i < events.length; i++) {
+        await this.parseInviteEvent(user, events[i])
+      }
+    } catch (err) {
+      this._context.log(`Error fetching blockchain invites: ${err}`)
+      return []
     }
+  }
+
+  async fetchRejectedEvents(user: OwnUserIdentity, userFeedHash: string) {
+    const { identities } = this._context.openVault
 
     const creationBlock = await this.invitesContract.call('creationBlock')
     const latestBlock = await this._context.io.eth.getLatestBlock()
 
-    if (!user.publicFeed.feedHash) {
-      throw new Error(`No public feed hash for user ${userID}`)
-    }
-    const hashedFeed = hash(Buffer.from(user.publicFeed.feedHash))
-
     const params = {
       fromBlock: creationBlock,
       toBlock: latestBlock,
-      topics: [hashedFeed],
+      topics: [userFeedHash],
     }
 
     const events = await this.invitesContract.getPastEvents('Declined', params)
     events.forEach(e => {
       const peer = identities.getPeerByFeed(e.recipientFeed)
       if (peer) {
-        const contact = identities.getContactByPeerID(userID, peer.localID)
+        const contact = identities.getContactByPeerID(
+          user.localID,
+          peer.localID,
+        )
         if (contact && contact.invite) {
           contact.invite.stake.state = 'seized'
         }
         this._context.next({
           type: 'contact_changed',
           contact,
-          userID: userID,
+          userID: user.localID,
           change: 'inviteDeclined',
         })
       }
     })
   }
 
-  async checkInviteState(sender: string, recipient: string, feed: string) {
+  async checkInviteState(sender: string, recipient: string, feed: ?bzzHash) {
     const params = [sender, recipient, feed]
     const res = await this.invitesContract.call('getInviteState', params)
     return utils.parseBytes32String(res)
   }
 
-  async parseEvent(
-    contractEvent: Object,
+  async parseInviteEvent(
     user: OwnUserIdentity,
+    contractEvent: Object,
   ): Promise<?InviteRequest> {
     const { identities } = this._context.openVault
     if (contractEvent.senderFeed) {
-      let peer = identities.getPeerByFeed(contractEvent.senderFeed)
-      if (peer) {
-        const contact = identities.getContactByPeerID(
-          user.localID,
-          peer.localID,
-        )
-        if (contact) {
-          // Already connected
-          return
-        }
-      }
-      peer = await this._context.mutations.addPeerByFeed(
-        contractEvent.senderFeed,
-      )
-
       try {
+        let peer = identities.getPeerByFeed(contractEvent.senderFeed)
+        if (peer) {
+          const contact = identities.getContactByPeerID(
+            user.localID,
+            peer.localID,
+          )
+          if (contact) {
+            // Already connected
+            return
+          }
+        }
+        peer = await this._context.mutations.addPeerByFeed(
+          contractEvent.senderFeed,
+        )
         const topic = getFeedTopic({ name: user.base64PublicKey() })
         const feedValue = await this._context.io.bzz.getFeedValue(
           peer.firstContactAddress,
@@ -145,20 +232,28 @@ export default class InvitesHandler {
         )
         if (feedValue) {
           const feed = await feedValue.json()
-          // TODO: Validation
           const inviteState = await this.checkInviteState(
             contractEvent.senderAddress,
             contractEvent.recipientAddress,
-            contractEvent.recipientFeed,
+            user.publicFeed.feedHash,
           )
-          if (inviteState === 'PENDING') {
+          const storedInvites = identities.getInvites(user.localID)
+          if (inviteState === 'PENDING' && !storedInvites[peer.localID]) {
             const contactInvite = {
               privateFeed: feed.privateFeed,
               receivedAddress: contractEvent.recipientAddress,
               senderAddress: contractEvent.senderAddress,
               peerID: peer.localID,
             }
-            return contactInvite
+            identities.setInviteRequest(user.localID, contactInvite)
+            this._context.next({
+              type: 'invites_changed',
+              userID: user.localID,
+              contact: this._context.queries.getContactFromInvite(
+                contactInvite,
+              ),
+              change: 'inviteReceived',
+            })
           }
         }
       } catch (err) {
@@ -167,50 +262,7 @@ export default class InvitesHandler {
     }
   }
 
-  async fetchInvitesForUser(userID: string) {
-    // TODO: Only check new blocks
-    const { identities } = this._context.openVault
-
-    try {
-      const user = identities.getOwnUser(userID)
-      if (!user) {
-        throw new Error(`User not found: ${userID}`)
-      }
-
-      const storedInvites = identities.getInvites(user.localID)
-      const encodedAddress = Web3EthAbi.encodeParameter(
-        'address',
-        user.profile.ethAddress,
-      )
-      if (!user.publicFeed.feedHash) {
-        throw new Error(`No public feed hash for user ${userID}`)
-      }
-      const hashedFeed = hash(Buffer.from(user.publicFeed.feedHash))
-      const latestBlock = await this._context.io.eth.getLatestBlock()
-      const creationBlock = await this.invitesContract.call('creationBlock')
-
-      const params = {
-        address: this.invitesContract.address,
-        fromBlock: creationBlock,
-        toBlock: latestBlock,
-        topics: [encodedAddress, hashedFeed],
-      }
-
-      const events = await this.invitesContract.getPastEvents('Invited', params)
-      for (let i = 0; i < events.length; i++) {
-        const pendingInvite = await this.parseEvent(events[i], user)
-        if (pendingInvite && !storedInvites[pendingInvite.peerID]) {
-          storedInvites[pendingInvite.peerID] = pendingInvite
-          identities.setInviteRequest(userID, pendingInvite)
-        }
-      }
-      // TODO: trigger event and save
-      await this._context.openVault.save()
-    } catch (err) {
-      this._context.log(`Error fetching blockchain invites: ${err}`)
-      return []
-    }
-  }
+  // INVITE ACTIONS
 
   async sendInviteTX(user: OwnUserIdentity, peer: PeerUserIdentity) {
     return new Promise((resolve, reject) => {
@@ -417,6 +469,55 @@ export default class InvitesHandler {
       })
     } catch (err) {
       throw err
+    }
+  }
+
+  // SUBSCRIPTIONS
+
+  async subscribeToEthEvents(user: OwnUserIdentity, userFeedHash: string) {
+    const { eth } = this._context.io
+    try {
+      if (!eth.web3Provider.on) {
+        this._context.log('Ethereum subscriptions not supported')
+        return
+      }
+      if (!user.profile.ethAddress) {
+        this._context.log('No ethereum address on profile to subscribe to')
+        return
+      }
+      const encodedAddress = encodeAddress(user.profile.ethAddress)
+      const subID = await this.invitesContract.subscribeToEvents('Invited', [
+        encodedAddress,
+        userFeedHash,
+      ])
+      this._ethSubscriptions.add(subID)
+      // $FlowFixMe subscription compatibility already checked
+      eth.web3Provider.on(subID, async msg => {
+        // TODO: forward events to ethClient from provider
+        try {
+          const event = this.invitesContract.decodeEventLog(
+            'Invited',
+            msg.result,
+          )
+          this.parseInviteEvent(user, event)
+        } catch (err) {
+          this._context.log('Error parsing eth event: ', err)
+        }
+      })
+    } catch (err) {
+      this._context.log(err.message)
+    }
+  }
+
+  observe(): ObserveInvites<InvitesChangedEvent> {
+    const source = this._context.pipe(filter(e => e.type === 'invites_changed'))
+    this._observers.add(source)
+
+    return {
+      dispose: () => {
+        this._observers.delete(source)
+      },
+      source,
     }
   }
 }

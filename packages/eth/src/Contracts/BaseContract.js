@@ -44,6 +44,9 @@ export default class Contract {
     if (!abi.outputs.length) {
       return result
     }
+    if (abi.outputs.length && !result) {
+      throw new Error('Expected outputs but none returned')
+    }
     if (abi.outputs.length > 1) {
       return Web3EthAbi.decodeParameters(abi.outputs, result)
     }
@@ -66,13 +69,59 @@ export default class Contract {
     return this.ethClient.sendAndListen(txParams)
   }
 
+  decodeEventLog(eventName: string, log: Object) {
+    const abi = this.abi.find(abi => {
+      return abi.type === 'event' && abi.name === eventName
+    })
+    if (!abi) {
+      throw new Error(`Event '${eventName}' not found in ABI`)
+    }
+    const inputs = [
+      {
+        indexed: true,
+        name: 'signature',
+        type: 'string',
+      },
+      ...abi.inputs,
+    ]
+    return this.ethClient.decodeLog(log, inputs)
+  }
+
+  async subscribeToEvents(
+    name: string,
+    topics: Array<string>,
+  ): Promise<string> {
+    if (!this.ethClient.web3Provider.subscribe) {
+      throw new Error('Subscriptions not supported')
+    }
+    const abi = this.abi.find(abi => {
+      return abi.type === 'event' && abi.name === name
+    })
+    if (!abi) {
+      throw new Error(`Event '${name}' not found in ABI`)
+    }
+    const encodedSig = Web3EthAbi.encodeEventSignature(abi)
+    if (topics) {
+      topics.unshift(encodedSig)
+    } else {
+      topics = [encodedSig]
+    }
+    const params = [
+      {
+        address: this.address,
+        topics: topics,
+      },
+    ]
+    return this.ethClient.subscribe('logs', params)
+  }
+
   async getPastEvents(name: string, params: Object): Promise<Array<Object>> {
     const abi = this.abi.find(abi => {
       return abi.type === 'event' && abi.name === name
     })
 
     if (!abi) {
-      throw new Error('Event not found in ABI')
+      throw new Error(`Event '${name}' not found in ABI`)
     }
 
     const encodedSig = Web3EthAbi.encodeEventSignature(abi)

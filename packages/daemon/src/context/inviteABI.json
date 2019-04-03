@@ -231,6 +231,11 @@
           "indexed": false,
           "name": "senderAddress",
           "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "stakeAmount",
+          "type": "uint256"
         }
       ],
       "name": "Invited",
@@ -279,72 +284,22 @@
       "anonymous": false,
       "inputs": [
         {
-          "indexed": false,
-          "name": "hash",
-          "type": "bytes32"
-        }
-      ],
-      "name": "Hashed",
-      "type": "event"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": false,
-          "name": "_address",
+          "indexed": true,
+          "name": "senderAddress",
           "type": "address"
-        }
-      ],
-      "name": "Address",
-      "type": "event"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
+        },
         {
           "indexed": false,
-          "name": "message",
-          "type": "bytes"
-        }
-      ],
-      "name": "MessageBytes",
-      "type": "event"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": false,
-          "name": "message",
+          "name": "recipientFeed",
           "type": "string"
-        }
-      ],
-      "name": "MessageString",
-      "type": "event"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
+        },
         {
           "indexed": false,
-          "name": "check",
-          "type": "bool"
+          "name": "amount",
+          "type": "uint256"
         }
       ],
-      "name": "IsTrue",
-      "type": "event"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": false,
-          "name": "value",
-          "type": "bytes1"
-        }
-      ],
-      "name": "Parsed",
+      "name": "AdminRefunded",
       "type": "event"
     },
     {
@@ -443,6 +398,10 @@
       "constant": true,
       "inputs": [
         {
+          "name": "senderAddress",
+          "type": "address"
+        },
+        {
           "name": "recipientAddr",
           "type": "address"
         },
@@ -531,6 +490,28 @@
         }
       ],
       "name": "retrieveStake",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "senderAddress",
+          "type": "address"
+        },
+        {
+          "name": "recipientAddress",
+          "type": "address"
+        },
+        {
+          "name": "recipientFeed",
+          "type": "string"
+        }
+      ],
+      "name": "adminRefund",
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",

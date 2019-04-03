@@ -74,8 +74,18 @@ contract('Token', accounts => {
       from: accounts[0],
     })
 
-    console.log('token.address: ', token.address)
-    console.log('invites.address: ', invites.address)
+    let inviteState = await invites.getInviteState(
+      accounts[0],
+      accounts[1],
+      recipientFeed,
+      { from: accounts[0] },
+    )
+
+    assert.equal(
+      web3.utils.toUtf8(inviteState),
+      'PENDING',
+      'Invalid invite state',
+    )
 
     const messagetoSign = accounts[0]
     const messageHash = EthUtil.keccak(messagetoSign)
@@ -98,7 +108,7 @@ contract('Token', accounts => {
       },
     )
 
-    const inviteState = await invites.getInviteState(
+    inviteState = await invites.getInviteState(
       accounts[0],
       accounts[1],
       recipientFeed,

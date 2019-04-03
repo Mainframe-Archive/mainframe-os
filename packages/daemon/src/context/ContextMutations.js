@@ -267,7 +267,7 @@ export default class ContextMutations {
     this._context.next({
       type: 'eth_accounts_changed',
       userID,
-      change: 'userDefault',
+      change: 'appUserDefault',
     })
   }
 
@@ -690,7 +690,9 @@ export default class ContextMutations {
     const { openVault, io } = this._context
     openVault.setEthUrl(url)
     io.eth.providerURL = url
-    await openVault.save()
-    this._context.next({ type: 'eth_network_changed', change: 'network' })
+    this._context.next({
+      type: 'eth_network_changed',
+      network: io.eth.networkName,
+    })
   }
 }

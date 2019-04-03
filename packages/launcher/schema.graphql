@@ -203,6 +203,11 @@ type Contacts {
   userContacts(userID: String!): [Contact]
 }
 
+type ContactsChangedPayload {
+  contact: Contact!
+  viewer: Viewer!
+}
+
 input CreateDeveloperIdentityInput {
   profile: UserProfileInput!
   clientMutationId: String
@@ -520,6 +525,7 @@ enum StakeState {
 
 type Subscription {
   contactChanged: Contact!
+  contactsChanged: ContactsChangedPayload!
 }
 
 enum SupportedWallets {

@@ -1,6 +1,7 @@
 // @flow
 
 export { default as ABI } from './abi'
+export { default as BaseContract } from './Contracts/BaseContract'
 export { default as EthClient } from './Client'
 export { default as Web3EthAbi } from 'web3-eth-abi'
 export * from './types'

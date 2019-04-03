@@ -51,7 +51,7 @@ export type AbstractProvider = {
   +sendPayload: (payload: Object) => Promise<any>,
   +on?: (event: string, listener: Function) => any,
   +emit?: (event: string, ...args: Array<any>) => boolean,
-  +unsubscribe?: (id: string, type: string) => void,
+  +unsubscribe?: (id: string, type?: string) => void,
   +clearSubscriptions?: () => void,
   +subscribe?: (
     name: string,

@@ -2,7 +2,14 @@
 
 import React, { Component } from 'react'
 import styled from 'styled-components/native'
-import { graphql, commitMutation, createFragmentContainer } from 'react-relay'
+import {
+  graphql,
+  commitMutation,
+  createFragmentContainer,
+  requestSubscription,
+  type Disposable,
+  type Environment,
+} from 'react-relay'
 import { fetchQuery } from 'relay-runtime'
 import { debounce } from 'lodash'
 import { Text, Button, Row, Column, TextField } from '@morpheus-ui/core'
@@ -163,6 +170,9 @@ export type SubmitContactInput = {
 }
 
 type Props = {
+  relay: {
+    environment: Environment,
+  },
   user: CurrentUser,
   contacts: {
     userContacts: Array<Contact>,
@@ -194,6 +204,23 @@ type State = {
     publicKey: string,
   },
 }
+
+const CONTACTS_CHANGED_SUBSCRIPTION = graphql`
+  subscription ContactsViewContactsChangedSubscription($userID: String!) {
+    contactsChanged {
+      contact {
+        invite {
+          inviteTX
+        }
+      }
+      viewer {
+        contacts {
+          ...ContactsView_contacts @arguments(userID: $userID)
+        }
+      }
+    }
+  }
+`
 
 export const inviteContactMutation = graphql`
   mutation ContactsViewInviteContactMutation(
@@ -291,6 +318,7 @@ const peerLookupQuery = graphql`
 
 class ContactsViewComponent extends Component<Props, State> {
   static contextType = EnvironmentContext
+  _subscription: ?Disposable
 
   constructor(props: Props) {
     super(props)
@@ -298,6 +326,21 @@ class ContactsViewComponent extends Component<Props, State> {
       selectedContact: props.contacts.userContacts.length
         ? props.contacts.userContacts[0]
         : null,
+    }
+  }
+
+  componentDidMount() {
+    this._subscription = requestSubscription(this.props.relay.environment, {
+      subscription: CONTACTS_CHANGED_SUBSCRIPTION,
+      variables: {
+        userID: this.props.user.localID,
+      },
+    })
+  }
+
+  componentWillUnmount() {
+    if (this._subscription != null) {
+      this._subscription.dispose()
     }
   }
 

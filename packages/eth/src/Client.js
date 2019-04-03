@@ -3,6 +3,7 @@ import EventEmitter from 'events'
 import { fromWei, toWei, toHex, hexToNumber, isAddress } from 'web3-utils'
 import type { Observable } from 'rxjs'
 import { WebsocketProvider } from 'web3-providers'
+import Web3EthAbi from 'web3-eth-abi'
 
 import ERC20 from './Contracts/ERC20'
 import BaseContract from './Contracts/BaseContract'
@@ -102,7 +103,7 @@ export default class EthClient extends EventEmitter {
       if (Number(id) > 10000) {
         this._networkName = NETWORKS['ganache']
       } else {
-        this._networkName = NETWORKS[id] || 'Local Testnet'
+        this._networkName = NETWORKS[id] || 'Unknown network'
       }
       this._networkID = id
       this.emit('networkChanged', id)
@@ -181,6 +182,33 @@ export default class EthClient extends EventEmitter {
     const request = this.createRequest('eth_getLogs', [params])
     const res = await this.sendRequest(request)
     return res
+  }
+
+  decodeLog(log: Object, inputs: Array<Object>) {
+    return Web3EthAbi.decodeLog(inputs, log.data, log.topics)
+  }
+
+  // Subscriptions
+
+  async subscribe(method: string, params: Array<string | Object>) {
+    if (!this.web3Provider.subscribe) {
+      throw new Error('subscriptions not supported')
+    }
+    return this.web3Provider.subscribe('eth_subscribe', method, params)
+  }
+
+  async unsubscribe(id: string) {
+    if (!this.web3Provider.unsubscribe) {
+      throw new Error('subscriptions not supported')
+    }
+    return this.web3Provider.unsubscribe(id)
+  }
+
+  async clearSubscriptions() {
+    if (!this.web3Provider.clearSubscriptions) {
+      throw new Error('subscriptions not supported')
+    }
+    return this.web3Provider.clearSubscriptions()
   }
 
   // Signing
