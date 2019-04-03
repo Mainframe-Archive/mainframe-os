@@ -247,7 +247,6 @@ const setupClient = async () => {
   const fixPath = require('fix-path')
   fixPath()
   if (daemonConfig.binPath == null) {
-    console.log('no daemonConfig so calling setup daemon')
     // Setup daemon
     await setupDaemon(daemonConfig, {
       binPath: DAEMON_BIN_PATH,
@@ -258,7 +257,6 @@ const setupClient = async () => {
   // Start daemon and connect local client to it
   if (daemonConfig.runStatus !== 'running') {
     daemonConfig.runStatus = 'stopped'
-    console.log(`daemon status: ${daemonConfig.runStatus}`)
   }
   await startDaemon(daemonConfig, true)
   daemonConfig.runStatus = 'running'
