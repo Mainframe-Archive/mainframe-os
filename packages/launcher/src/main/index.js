@@ -5,11 +5,7 @@ import url from 'url'
 import Client, { type VaultSettings } from '@mainframe/client'
 import { Environment, DaemonConfig, VaultConfig } from '@mainframe/config'
 import StreamRPC from '@mainframe/rpc-stream'
-import {
-  setupDaemon,
-  startDaemon,
-  stopDaemon,
-} from '@mainframe/toolbox'
+import { setupDaemon, startDaemon, stopDaemon } from '@mainframe/toolbox'
 // eslint-disable-next-line import/named
 import { app, BrowserWindow, ipcMain, Menu } from 'electron'
 import { is } from 'electron-util'

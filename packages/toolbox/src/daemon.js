@@ -12,14 +12,12 @@ const execStartDaemon = (
   detached: boolean = false,
 ): Promise<ChildProcess> => {
   return new Promise((resolve, reject) => {
-    console.log(`Daemon binpath is ${binPath}`)
     const proc = spawn(binPath, ['start', `--env=${envName}`], { detached })
     const stopOut = onDataMatch(
       proc.stdout,
       `${envName} server started`,
       () => {
         stopOut()
-        console.log(`${envName} server started`)
         resolve(proc)
       },
     )
@@ -29,7 +27,6 @@ const execStartDaemon = (
       () => {
         stopErr()
         reject(new Error('Server failed to start'))
-        console.log('daemon failed to start')
       },
     )
   })
@@ -76,22 +73,18 @@ export const startDaemon = async (
   switch (status) {
     case 'running':
       // OK, return without the process as it's been created elsewhere
-      console.log('daemon already running, stopping it')
       await stopDaemon(cfg)
       startDaemon(cfg)
       return
     case 'starting':
       // Already being started by another process, just need to wait for it
-      console.log('daemon already trying to start')
       return cfg.whenRunStatus('running')
     case 'stopping':
       // Wait for existing process to be stopped before starting again
-      console.log('daemon is stopping')
       await cfg.whenRunStatus('stopped')
     // eslint-disable-next-line no-fallthrough
     case 'stopped':
       // Return the child process as provided by execa
-      console.log('daemon stopped, starting it')
       cfg.runStatus = 'starting'
       return await execStartDaemon(cfg.binPath, cfg.env.name, detached)
     default:
