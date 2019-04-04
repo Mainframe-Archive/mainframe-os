@@ -188,7 +188,10 @@ export default class InvitesHandler {
     return utils.parseBytes32String(res)
   }
 
-  async handleRejectedEvent(user: OwnUserIdentity, event: Object): Promise<> {
+  handleRejectedEvent = async (
+    user: OwnUserIdentity,
+    event: Object,
+  ): Promise<> => {
     const { identities } = this._context.openVault
     const peer = identities.getPeerByFeed(event.recipientFeed)
     if (peer) {
@@ -205,10 +208,10 @@ export default class InvitesHandler {
     }
   }
 
-  async handleInviteEvent(
+  handleInviteEvent = async (
     user: OwnUserIdentity,
     contractEvent: Object,
-  ): Promise<void> {
+  ): Promise<void> => {
     const { identities } = this._context.openVault
     if (contractEvent.senderFeed) {
       try {
@@ -524,7 +527,6 @@ export default class InvitesHandler {
           this._context.log(err.message)
         }
       }
-      // TODO: forward events to ethClient from provider
       // $FlowFixMe subscription compatibility already checked
       eth.web3Provider.on(invitesSubID, async msg => {
         handleEvent('Invited', msg, this.handleInviteEvent)
@@ -532,7 +534,6 @@ export default class InvitesHandler {
 
       // $FlowFixMe subscription compatibility already checked
       eth.web3Provider.on(declinedSub, async msg => {
-        // TODO: forward events to ethClient from provider
         handleEvent('Declined', msg, this.handleRejectedEvent)
       })
     } catch (err) {
