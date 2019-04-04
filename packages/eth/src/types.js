@@ -48,7 +48,7 @@ export type EventFilterParams = {
 export type TXEventEmitter = EventEmitter
 
 export type AbstractProvider = {
-  +sendPayload: (payload: Object) => Promise<any>,
+  +send: (method: string, params: Array<*>) => Promise<*>,
   +on?: (event: string, listener: Function) => any,
   +emit?: (event: string, ...args: Array<any>) => boolean,
   +unsubscribe?: (id: string, type?: string) => void,

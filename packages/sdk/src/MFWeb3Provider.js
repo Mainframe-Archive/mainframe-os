@@ -14,6 +14,7 @@ export default class MFWeb3Provider extends EventEmitter {
     this._ethClient = ethClient
   }
 
+  // TODO make compatible with web3 1.0 send(method, params)
   async send(
     payload: RequestPayload,
     cb: (error: ?Error, response: ?Object) => void,
@@ -26,7 +27,10 @@ export default class MFWeb3Provider extends EventEmitter {
             const request = await this._ethClient.generateTXRequest(
               payload.params[0],
             )
-            response = await this._ethClient.sendRequest(request)
+            response = await this._ethClient.send(
+              request.method,
+              request.params,
+            )
           }
           break
         case 'eth_accounts':
@@ -42,7 +46,7 @@ export default class MFWeb3Provider extends EventEmitter {
           }
           break
         default:
-          response = await this._ethClient.sendRequest(payload)
+          response = await this._ethClient.send(payload.method, payload.params)
       }
       cb(null, jsonRpcResponse(response, payload.id))
     } catch (err) {

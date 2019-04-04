@@ -14,11 +14,10 @@ export default class ERC20Contract extends BaseContract {
 
   async getTokenDecimals(): Promise<number> {
     const data = this.encodeCall('decimals')
-    const request = this.ethClient.createRequest('eth_call', [
+    return this.ethClient.send('eth_call', [
       { data, to: this.address },
       'latest',
     ])
-    return this.ethClient.sendRequest(request)
   }
 
   async getTokenDecimalsUnit(): Promise<string> {
@@ -36,22 +35,20 @@ export default class ERC20Contract extends BaseContract {
 
   async getTicker(): Promise<string> {
     const data = this.encodeCall('symbol')
-    const request = this.ethClient.createRequest('eth_call', [
+    const res = await this.ethClient.send('eth_call', [
       { data, to: this.address },
       'latest',
     ])
-    const res = await this.ethClient.sendRequest(request)
     return hexToString(res)
   }
 
   async getBalance(accountAddress: string): Promise<string> {
     const decimalsUnit = await this.getTokenDecimalsUnit()
     const data = this.encodeCall('balanceOf', [accountAddress])
-    const mftBalanceReq = this.ethClient.createRequest('eth_call', [
+    const res = await this.ethClient.send('eth_call', [
       { data, to: this.address },
       'latest',
     ])
-    const res = await this.ethClient.sendRequest(mftBalanceReq)
     return fromWei(res, decimalsUnit)
   }
 

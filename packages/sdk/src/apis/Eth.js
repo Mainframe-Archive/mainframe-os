@@ -1,12 +1,7 @@
 // @flow
 
 import { Observable } from 'rxjs'
-import {
-  EthClient,
-  type SendParams,
-  type TXEventEmitter,
-  type AbstractProvider,
-} from '@mainframe/eth'
+import { EthClient, type SendParams, type TXEventEmitter } from '@mainframe/eth'
 import type StreamRPC from '@mainframe/rpc-stream'
 
 import RpcProvider from '../RPCProvider'
@@ -79,7 +74,7 @@ const subscribe = async (rpc, rpcMethod, subMethod) => {
 }
 
 export default class EthAPIs extends ClientAPIs {
-  _web3Provider: AbstractProvider
+  _web3Provider: Object
   _ethClient: EthClient
   _sdk: MainrameSDK
 
