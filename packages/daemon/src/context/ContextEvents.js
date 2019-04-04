@@ -136,7 +136,7 @@ export default class ContextEvents {
               (e.type === 'contact_created' ||
                 (e.type === 'contact_changed' &&
                   !this._publishingContacts.has(e.contact.localID))) &&
-              e.contact.connectionState === 'sending'
+              e.contact.connectionState === 'sending_feed'
             )
           }),
         )
@@ -168,12 +168,12 @@ export default class ContextEvents {
             this._context.io.bzz,
             contact.generatefirstContactPayload(),
           )
-          contact.requestSent = true
+          contact.feedRequestSent = true
           this._context.next({
             type: 'contact_changed',
             contact,
             userID,
-            change: 'requestSent',
+            change: 'feedRequestSent',
           })
         }),
     )

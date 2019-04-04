@@ -27,8 +27,6 @@ import SvgSelectedPointer from '../../UIComponents/SVGSelectedPointer'
 import FormModalView from '../../UIComponents/FormModalView'
 import Loader from '../../UIComponents/Loader'
 
-import type Identity from './__generated__/ContactsView_identities.graphql'
-
 const SvgSmallClose = props => (
   <svg width="10" height="10" viewBox="0 0 10 10" {...props}>
     <path
@@ -172,7 +170,13 @@ export type Contact = {
     name?: string,
     ethAddress?: ?string,
   },
-  connectionState: 'SENT' | 'RECEIVED' | 'CONNECTED',
+  connectionState:
+    | 'SENDING_FEED'
+    | 'SENT_FEED'
+    | 'SENDING_BLOCKCHAIN'
+    | 'SENT_BLOCKCHAIN'
+    | 'RECEIVED'
+    | 'CONNECTED',
 }
 
 export type SubmitContactInput = {
@@ -187,9 +191,6 @@ type Props = {
   user: CurrentUser,
   contacts: {
     userContacts: Array<Contact>,
-  },
-  identities: {
-    ownUsers: Array<Identity>,
   },
   acceptContact: (contact: Contact) => void,
   ignoreContact: (contact: Contact) => void,
@@ -369,6 +370,12 @@ class ContactsViewComponent extends Component<Props, State> {
     }
   }
 
+  getSelectedContact(): ?Contact {
+    return this.props.contacts.userContacts.find(
+      c => c.localID === this.state.selectedContact,
+    )
+  }
+
   startSearching = () => {
     this.setState({ searching: true })
   }
@@ -508,7 +515,11 @@ class ContactsViewComponent extends Component<Props, State> {
   )
 
   selectContact = (contact: Contact) => {
-    this.setState({ selectedContact: contact })
+    this.setState({
+      selectedContact: contact.localID,
+      error: null,
+      inviteError: null,
+    })
   }
 
   acceptContact = (contact: Contact) => {
@@ -544,7 +555,7 @@ class ContactsViewComponent extends Component<Props, State> {
 
   withdrawStake = (contact: Contact) => {
     const { user } = this.props
-    this.setState({ error: null, withdrawingStake: true })
+    this.setState({ inviteError: null, withdrawingStake: true })
     const input = {
       userID: user.localID,
       contactID: contact.localID,
@@ -552,7 +563,7 @@ class ContactsViewComponent extends Component<Props, State> {
 
     const requestComplete = error => {
       this.setState({
-        error,
+        inviteError: error,
         withdrawingStake: false,
       })
     }
@@ -605,21 +616,15 @@ class ContactsViewComponent extends Component<Props, State> {
   }
 
   getIdentity = () => {
-    const { ownUsers } = this.props.identities
-
-    if (ownUsers.length) {
-      const id = ownUsers[0]
-      return {
-        connectionState: 'CONNECTED',
-        localID: id.localID,
-        peerID: id.localID,
-        publicFeed: id.feedHash,
-        profile: {
-          name: `${id.profile.name} (Me)`,
-        },
-      }
-    } else {
-      return {}
+    const { user } = this.props
+    return {
+      connectionState: 'CONNECTED',
+      localID: user.localID,
+      peerID: user.localID,
+      publicFeed: user.feedHash,
+      profile: {
+        name: `${user.profile.name} (Me)`,
+      },
     }
   }
 
@@ -627,6 +632,7 @@ class ContactsViewComponent extends Component<Props, State> {
 
   renderContactsList() {
     const { userContacts } = this.props.contacts
+    const selectedContact = this.getSelectedContact()
 
     const contacts = [this.getIdentity(), ...userContacts]
     const list = this.state.searchTerm
@@ -675,8 +681,7 @@ class ContactsViewComponent extends Component<Props, State> {
         ) : (
           list.map(contact => {
             const selected =
-              this.state.selectedContact &&
-              this.state.selectedContact.localID === contact.localID
+              selectedContact && selectedContact.localID === contact.localID
             return (
               <ContactCard
                 key={contact.localID}
@@ -686,8 +691,8 @@ class ContactsViewComponent extends Component<Props, State> {
                   <Text variant={['greyMed', 'ellipsis']} bold size={13}>
                     {contact.profile.name || contact.publicFeed}
                   </Text>
-                  {contact.connectionState === 'SENT' ||
-                  contact.connectionState === 'SENDING' ? (
+                  {contact.connectionState === 'SENT_FEED' ||
+                  contact.connectionState === 'SENDING_FEED' ? (
                     <Text variant={['grey']} size={10}>
                       Pending
                     </Text>
@@ -816,8 +821,60 @@ class ContactsViewComponent extends Component<Props, State> {
     )
   }
 
+  renderInviteArea(contact) {
+    switch (contact.connectionState) {
+      case 'SENDING_FEED':
+        return <Loader />
+      case 'SENT_FEED': {
+        return (
+          <Button
+            title="Send Invite"
+            variant={['marginTop10', 'redOutline']}
+            onPress={() => this.sendInvite(contact)}
+          />
+        )
+      }
+      case 'SENDING_BLOCKCHAIN': {
+        return <Loader />
+      }
+      case 'SENT_BLOCKCHAIN': {
+        return <Text>{`Invite request sent: ${contact.invite.inviteTX}`}</Text>
+      }
+      case 'CONNECTED': {
+        if (
+          contact &&
+          contact.connectionState === 'CONNECTED' &&
+          contact.invite
+        ) {
+          if (contact.invite.stake.reclaimedTX) {
+            return (
+              <Text>{`Stake withdrawn: ${
+                contact.invite.stake.reclaimedTX
+              }`}</Text>
+            )
+          } else if (contact.invite.stake.state === 'RECLAIMING') {
+            return <Text>Stake withdraw transaction processing...</Text>
+          } else {
+            if (this.state.withdrawingStake) {
+              return <Loader />
+            } else {
+              return (
+                <Button
+                  title="Withdraw Stake"
+                  variant={['marginTop10', 'redOutline']}
+                  onPress={() => this.withdrawStake(contact)}
+                />
+              )
+            }
+          }
+        }
+      }
+    }
+  }
+
   renderRightSide() {
-    const { selectedContact } = this.state
+    const selectedContact = this.getSelectedContact()
+
     if (!selectedContact) {
       return (
         <RightContainer>
@@ -840,57 +897,8 @@ class ContactsViewComponent extends Component<Props, State> {
         </RightContainer>
       )
     }
+    const inviteAction = this.renderInviteArea(selectedContact)
 
-    let inviteAction
-    if (
-      selectedContact &&
-      selectedContact.connectionState === 'SENT' &&
-      selectedContact.profile.ethAddress
-    ) {
-      if (this.state.invitingContact === selectedContact.localID) {
-        inviteAction = <Loader />
-      } else if (selectedContact.invite && selectedContact.invite.inviteTX) {
-        inviteAction = (
-          <Text>{`Invite request sent: ${
-            selectedContact.invite.inviteTX
-          }`}</Text>
-        )
-      } else {
-        inviteAction = (
-          <Button
-            title="Send Invite"
-            variant={['marginTop10', 'redOutline']}
-            onPress={() => this.sendInvite(selectedContact)}
-          />
-        )
-      }
-    } else if (
-      selectedContact &&
-      selectedContact.connectionState === 'CONNECTED' &&
-      selectedContact.invite
-    ) {
-      if (selectedContact.invite.stake.reclaimedTX) {
-        inviteAction = (
-          <Text>{`Stake withdrawn: ${
-            selectedContact.invite.stake.reclaimedTX
-          }`}</Text>
-        )
-      } else if (selectedContact.invite.stake.state === 'RECLAIMING') {
-        inviteAction = <Text>Stake withdraw transaction processing...</Text>
-      } else {
-        if (this.state.withdrawingStake) {
-          inviteAction = <Loader />
-        } else {
-          inviteAction = (
-            <Button
-              title="Withdraw Stake"
-              variant={['marginTop10', 'redOutline']}
-              onPress={() => this.withdrawStake(selectedContact)}
-            />
-          )
-        }
-      }
-    }
     const inviteError = this.state.inviteError && (
       <Text styles="margin-top:10px;" variant="error">
         {this.state.inviteError}
@@ -967,7 +975,8 @@ class ContactsViewComponent extends Component<Props, State> {
   }
 
   renderEditModal() {
-    if (!this.state.editModalOpen || !this.state.selectedContact) {
+    const selectedContact = this.getSelectedContact()
+    if (!this.state.editModalOpen || !selectedContact) {
       return null
     }
 
@@ -990,12 +999,12 @@ class ContactsViewComponent extends Component<Props, State> {
         <FormContainer modal={true}>
           <Row size={1}>
             <Column styles="align-items:center; justify-content: center; flex-direction: row; margin-bottom: 30px;">
-              <Avatar id={this.state.selectedContact.publicFeed} size="large" />
+              <Avatar id={selectedContact.publicFeed} size="large" />
             </Column>
             <Column>
               <TextField
                 name="name"
-                defaultValue={this.state.selectedContact.profile.name}
+                defaultValue={selectedContact.profile.name}
                 required
                 label="Name"
               />
@@ -1004,8 +1013,7 @@ class ContactsViewComponent extends Component<Props, State> {
               <RevertNameButton>
                 <SvgSmallClose />
                 <Text size={11} theme={{ marginLeft: '5px' }}>
-                  Reset to the original name “
-                  {this.state.selectedContact.profile.name}”
+                  Reset to the original name “{selectedContact.profile.name}”
                 </Text>
               </RevertNameButton>
             </Column>
@@ -1048,17 +1056,6 @@ const ContactsView = createFragmentContainer(ContactsViewComponent, {
         profile {
           name
           ethAddress
-        }
-      }
-    }
-  `,
-  identities: graphql`
-    fragment ContactsView_identities on Identities {
-      ownUsers {
-        localID
-        feedHash
-        profile {
-          name
         }
       }
     }

@@ -8,7 +8,7 @@
 
 /*::
 import type { ConcreteFragment } from 'relay-runtime';
-export type ConnectionState = "CONNECTED" | "DECLINED" | "RECEIVED" | "SENDING" | "SENT" | "%future added value";
+export type ConnectionState = "CONNECTED" | "DECLINED" | "RECEIVED" | "SENDING_BLOCKCHAIN" | "SENDING_FEED" | "SENT_BLOCKCHAIN" | "SENT_FEED" | "%future added value";
 export type StakeState = "RECLAIMED" | "RECLAIMING" | "SEIZED" | "STAKED" | "%future added value";
 import type { FragmentReference } from "relay-runtime";
 declare export opaque type ContactsView_contacts$ref: FragmentReference;

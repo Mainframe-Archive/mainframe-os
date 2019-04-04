@@ -154,7 +154,7 @@ export default class InvitesHandler {
       }
       const events = await this.invitesContract.getPastEvents('Invited', params)
       for (let i = 0; i < events.length; i++) {
-        await this.parseInviteEvent(user, events[i])
+        await this.handleInviteEvent(user, events[i])
       }
     } catch (err) {
       this._context.log(`Error fetching blockchain invites: ${err}`)
@@ -163,8 +163,6 @@ export default class InvitesHandler {
   }
 
   async fetchRejectedEvents(user: OwnUserIdentity, userFeedHash: string) {
-    const { identities } = this._context.openVault
-
     const creationBlock = await this.invitesContract.call('creationBlock')
     const latestBlock = await this._context.io.eth.getLatestBlock()
 
@@ -176,21 +174,10 @@ export default class InvitesHandler {
 
     const events = await this.invitesContract.getPastEvents('Declined', params)
     events.forEach(e => {
-      const peer = identities.getPeerByFeed(e.recipientFeed)
-      if (peer) {
-        const contact = identities.getContactByPeerID(
-          user.localID,
-          peer.localID,
-        )
-        if (contact && contact.invite) {
-          contact.invite.stake.state = 'seized'
-        }
-        this._context.next({
-          type: 'contact_changed',
-          contact,
-          userID: user.localID,
-          change: 'inviteDeclined',
-        })
+      try {
+        this.handleRejectedEvent(user, e)
+      } catch (err) {
+        this._context.log(err)
       }
     })
   }
@@ -201,10 +188,27 @@ export default class InvitesHandler {
     return utils.parseBytes32String(res)
   }
 
-  async parseInviteEvent(
+  async handleRejectedEvent(user: OwnUserIdentity, event: Object): Promise<> {
+    const { identities } = this._context.openVault
+    const peer = identities.getPeerByFeed(event.recipientFeed)
+    if (peer) {
+      const contact = identities.getContactByPeerID(user.localID, peer.localID)
+      if (contact && contact.invite) {
+        contact.invite.stake.state = 'seized'
+      }
+      this._context.next({
+        type: 'contact_changed',
+        contact,
+        userID: user.localID,
+        change: 'inviteDeclined',
+      })
+    }
+  }
+
+  async handleInviteEvent(
     user: OwnUserIdentity,
     contractEvent: Object,
-  ): Promise<?InviteRequest> {
+  ): Promise<void> {
     const { identities } = this._context.openVault
     if (contractEvent.senderFeed) {
       try {
@@ -266,7 +270,6 @@ export default class InvitesHandler {
   async sendInviteTX(user: OwnUserIdentity, peer: PeerUserIdentity) {
     return new Promise((resolve, reject) => {
       // TODO: Notify launcher and request permission from user?
-      // TODO: check approved value
       if (!user.profile.ethAddress) {
         throw new Error('No eth address found for user')
       }
@@ -335,24 +338,41 @@ export default class InvitesHandler {
       )
     }
 
-    const inviteTXHash = await this.sendInviteTX(user, peer)
     contact._invite = {
-      inviteTX: inviteTXHash,
-      // $FlowFixMe toAddress address checked above
       toAddress: peer.profile.ethAddress,
-      // $FlowFixMe fromAddress address checked above
       fromAddress: user.profile.ethAddress,
       stake: {
         amount: stakeBN.toString(),
-        state: 'staked',
+        state: 'sending',
       },
     }
-    this._context.next({
-      type: 'contact_changed',
-      contact,
-      userID: userID,
-      change: 'invite',
-    })
+
+    const pushContactEvent = (contact, change) => {
+      this._context.next({
+        type: 'contact_changed',
+        userID: userID,
+        contact,
+        change,
+      })
+    }
+
+    pushContactEvent(contact, 'sendingInvite')
+
+    try {
+      const inviteTXHash = await this.sendInviteTX(user, peer)
+      contact._invite = {
+        ...contact._invite,
+        inviteTX: inviteTXHash,
+        stake: {
+          amount: stakeBN.toString(),
+          state: 'staked',
+        },
+      }
+      pushContactEvent(contact, 'inviteSent')
+    } catch (err) {
+      contact._invite = undefined
+      pushContactEvent(contact, 'inviteFailed')
+    }
   }
 
   async signAccepted(inviteRequest: InviteRequest): Promise<string> {
@@ -485,23 +505,35 @@ export default class InvitesHandler {
         return
       }
       const encodedAddress = encodeAddress(user.profile.ethAddress)
-      const subID = await this.invitesContract.subscribeToEvents('Invited', [
-        encodedAddress,
-        userFeedHash,
-      ])
-      this._ethSubscriptions.add(subID)
-      // $FlowFixMe subscription compatibility already checked
-      eth.web3Provider.on(subID, async msg => {
-        // TODO: forward events to ethClient from provider
+      const invitesSubID = await this.invitesContract.subscribeToEvents(
+        'Invited',
+        [encodedAddress, userFeedHash],
+      )
+      const declinedSub = await this.invitesContract.subscribeToEvents(
+        'Declined',
+        [userFeedHash],
+      )
+      this._ethSubscriptions.add(invitesSubID)
+      this._ethSubscriptions.add(declinedSub)
+
+      const handleEvent = (name, log, handler) => {
         try {
-          const event = this.invitesContract.decodeEventLog(
-            'Invited',
-            msg.result,
-          )
-          this.parseInviteEvent(user, event)
+          const event = this.invitesContract.decodeEventLog(name, log.result)
+          handler(user, event)
         } catch (err) {
-          this._context.log('Error parsing eth event: ', err)
+          this._context.log(err.message)
         }
+      }
+      // TODO: forward events to ethClient from provider
+      // $FlowFixMe subscription compatibility already checked
+      eth.web3Provider.on(invitesSubID, async msg => {
+        handleEvent('Invited', msg, this.handleInviteEvent)
+      })
+
+      // $FlowFixMe subscription compatibility already checked
+      eth.web3Provider.on(declinedSub, async msg => {
+        // TODO: forward events to ethClient from provider
+        handleEvent('Declined', msg, this.handleRejectedEvent)
       })
     } catch (err) {
       this._context.log(err.message)

@@ -43,7 +43,7 @@ export type ContactChangedEvent = {|
   userID: string,
   change:
     | 'peerChanged'
-    | 'requestSent'
+    | 'feedRequestSent'
     | 'remoteFeed'
     | 'localFeed'
     | 'profile',

@@ -434,7 +434,14 @@ export type ContactsGetAppUserContactsResult = {
 export type ContactResult = {
   localID: string,
   peerID: string,
-  connectionState: 'connected' | 'sent' | 'sending' | 'received' | 'declined',
+  connectionState:
+    | 'connected'
+    | 'sent_feed'
+    | 'sending_feed'
+    | 'received'
+    | 'declined'
+    | 'sending_blockchain'
+    | 'sent_blockchain',
   profile: ContactProfile,
   invite?: {
     inviteTX: string,

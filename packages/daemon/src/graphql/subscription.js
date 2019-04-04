@@ -36,6 +36,9 @@ const contactChangedPayload = new GraphQLObjectType({
   fields: () => ({
     contact: {
       type: new GraphQLNonNull(contact),
+      resolve: (self, args, ctx) => {
+        return ctx.queries.mergePeerContactData(self.contact)
+      },
     },
     viewer: {
       type: new GraphQLNonNull(viewer),
@@ -48,7 +51,12 @@ const contactChanged = {
   subscribe: (self, args, ctx: ClientContext) => {
     const { source, dispose } = ctx.contactsFeeds.observe()
     const observable = source.pipe(
-      map(e => ({ contactChanged: { contact: e.contact, viewer: {} } })),
+      map(e => ({
+        contactChanged: {
+          contact: e.contact,
+          viewer: {},
+        },
+      })),
     )
     return observableToAsyncIterator(observable, dispose)
   },
@@ -59,7 +67,12 @@ const contactsChanged = {
   subscribe: (self, args, ctx: ClientContext) => {
     const { source, dispose } = ctx.invitesHandler.observe()
     const contactsChanged = source.pipe(
-      map(e => ({ contactsChanged: { contact: e.contact, viewer: {} } })),
+      map(e => ({
+        contactsChanged: {
+          contact: e.contact,
+          viewer: {},
+        },
+      })),
     )
     return observableToAsyncIterator(contactsChanged, dispose)
   },

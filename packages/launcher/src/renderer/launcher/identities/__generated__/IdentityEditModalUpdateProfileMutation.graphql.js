@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash b2d2d32d4f00f5e989d188648dd90db6
+ * @relayHash 54e3095096b2dd4e98a6e0262d618cf9
  */
 
 /* eslint-disable */
@@ -60,6 +60,10 @@ fragment Launcher_identities on Identities {
   ownUsers {
     defaultEthAddress
     localID
+    profile {
+      name
+      ethAddress
+    }
     wallets {
       hd {
         localID
@@ -149,30 +153,30 @@ v2 = {
 v3 = {
   "kind": "ScalarField",
   "alias": null,
-  "name": "id",
-  "args": null,
-  "storageKey": null
-},
-v4 = [
-  v2,
-  v3
-],
-v5 = {
-  "kind": "ScalarField",
-  "alias": null,
   "name": "name",
   "args": null,
   "storageKey": null
 },
+v4 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "id",
+  "args": null,
+  "storageKey": null
+},
+v5 = [
+  v2,
+  v4
+],
 v6 = [
-  v5
+  v3
 ];
 return {
   "kind": "Request",
   "operationKind": "mutation",
   "name": "IdentityEditModalUpdateProfileMutation",
   "id": null,
-  "text": "mutation IdentityEditModalUpdateProfileMutation(\n  $input: UpdateProfileInput!\n) {\n  updateProfile(input: $input) {\n    viewer {\n      identities {\n        ...Launcher_identities\n        ...IdentitiesView_identities\n      }\n      id\n    }\n  }\n}\n\nfragment Launcher_identities on Identities {\n  ownUsers {\n    defaultEthAddress\n    localID\n    wallets {\n      hd {\n        localID\n        id\n      }\n      ledger {\n        localID\n        id\n      }\n    }\n    id\n  }\n}\n\nfragment IdentitiesView_identities on Identities {\n  ownUsers {\n    ...IdentityEditModal_ownUserIdentity\n    localID\n    feedHash\n    profile {\n      name\n    }\n    apps {\n      localID\n      manifest {\n        name\n      }\n      users {\n        settings {\n          permissionsSettings {\n            permissionsChecked\n            grants {\n              BLOCKCHAIN_SEND\n            }\n          }\n        }\n        id\n      }\n      id\n    }\n    id\n  }\n  ownDevelopers {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n}\n\nfragment IdentityEditModal_ownUserIdentity on OwnUserIdentity {\n  localID\n  feedHash\n  privateProfile\n  profile {\n    name\n    avatar\n  }\n}\n",
+  "text": "mutation IdentityEditModalUpdateProfileMutation(\n  $input: UpdateProfileInput!\n) {\n  updateProfile(input: $input) {\n    viewer {\n      identities {\n        ...Launcher_identities\n        ...IdentitiesView_identities\n      }\n      id\n    }\n  }\n}\n\nfragment Launcher_identities on Identities {\n  ownUsers {\n    defaultEthAddress\n    localID\n    profile {\n      name\n      ethAddress\n    }\n    wallets {\n      hd {\n        localID\n        id\n      }\n      ledger {\n        localID\n        id\n      }\n    }\n    id\n  }\n}\n\nfragment IdentitiesView_identities on Identities {\n  ownUsers {\n    ...IdentityEditModal_ownUserIdentity\n    localID\n    feedHash\n    profile {\n      name\n    }\n    apps {\n      localID\n      manifest {\n        name\n      }\n      users {\n        settings {\n          permissionsSettings {\n            permissionsChecked\n            grants {\n              BLOCKCHAIN_SEND\n            }\n          }\n        }\n        id\n      }\n      id\n    }\n    id\n  }\n  ownDevelopers {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n}\n\nfragment IdentityEditModal_ownUserIdentity on OwnUserIdentity {\n  localID\n  feedHash\n  privateProfile\n  profile {\n    name\n    avatar\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -278,6 +282,32 @@ return {
                       {
                         "kind": "LinkedField",
                         "alias": null,
+                        "name": "profile",
+                        "storageKey": null,
+                        "args": null,
+                        "concreteType": "NamedProfile",
+                        "plural": false,
+                        "selections": [
+                          v3,
+                          {
+                            "kind": "ScalarField",
+                            "alias": null,
+                            "name": "ethAddress",
+                            "args": null,
+                            "storageKey": null
+                          },
+                          {
+                            "kind": "ScalarField",
+                            "alias": null,
+                            "name": "avatar",
+                            "args": null,
+                            "storageKey": null
+                          }
+                        ]
+                      },
+                      {
+                        "kind": "LinkedField",
+                        "alias": null,
                         "name": "wallets",
                         "storageKey": null,
                         "args": null,
@@ -292,7 +322,7 @@ return {
                             "args": null,
                             "concreteType": "EthHDWallet",
                             "plural": true,
-                            "selections": v4
+                            "selections": v5
                           },
                           {
                             "kind": "LinkedField",
@@ -302,11 +332,11 @@ return {
                             "args": null,
                             "concreteType": "EthLedgerWallet",
                             "plural": true,
-                            "selections": v4
+                            "selections": v5
                           }
                         ]
                       },
-                      v3,
+                      v4,
                       {
                         "kind": "ScalarField",
                         "alias": null,
@@ -320,25 +350,6 @@ return {
                         "name": "privateProfile",
                         "args": null,
                         "storageKey": null
-                      },
-                      {
-                        "kind": "LinkedField",
-                        "alias": null,
-                        "name": "profile",
-                        "storageKey": null,
-                        "args": null,
-                        "concreteType": "NamedProfile",
-                        "plural": false,
-                        "selections": [
-                          v5,
-                          {
-                            "kind": "ScalarField",
-                            "alias": null,
-                            "name": "avatar",
-                            "args": null,
-                            "storageKey": null
-                          }
-                        ]
                       },
                       {
                         "kind": "LinkedField",
@@ -416,10 +427,10 @@ return {
                                   }
                                 ]
                               },
-                              v3
+                              v4
                             ]
                           },
-                          v3
+                          v4
                         ]
                       }
                     ]
@@ -444,12 +455,12 @@ return {
                         "plural": false,
                         "selections": v6
                       },
-                      v3
+                      v4
                     ]
                   }
                 ]
               },
-              v3
+              v4
             ]
           }
         ]

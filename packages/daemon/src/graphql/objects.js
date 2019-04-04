@@ -556,8 +556,10 @@ export const connectionState = new GraphQLEnumType({
     CONNECTED: { value: 'connected' },
     DECLINED: { value: 'declined' },
     RECEIVED: { value: 'received' },
-    SENDING: { value: 'sending' },
-    SENT: { value: 'sent' },
+    SENDING_FEED: { value: 'sending_feed' },
+    SENT_FEED: { value: 'sent_feed' },
+    SENDING_BLOCKCHAIN: { value: 'sending_blockchain' },
+    SENT_BLOCKCHAIN: { value: 'sent_blockchain' },
   },
 })
 

@@ -215,8 +215,10 @@ enum ConnectionState {
   CONNECTED
   DECLINED
   RECEIVED
-  SENDING
-  SENT
+  SENDING_FEED
+  SENT_FEED
+  SENDING_BLOCKCHAIN
+  SENT_BLOCKCHAIN
 }
 
 type Contact implements Node {

@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash c5220cc02fd1b0d1a4f22bc3169d35f1
+ * @relayHash 2163b4e515cad1d124773b80c7d64be2
  */
 
 /* eslint-disable */
@@ -58,6 +58,10 @@ fragment Launcher_identities on Identities {
   ownUsers {
     defaultEthAddress
     localID
+    profile {
+      name
+      ethAddress
+    }
     wallets {
       hd {
         localID
@@ -113,7 +117,7 @@ return {
   "operationKind": "mutation",
   "name": "OnboardWalletViewUpdateProfileMutation",
   "id": null,
-  "text": "mutation OnboardWalletViewUpdateProfileMutation(\n  $input: UpdateProfileInput!\n) {\n  updateProfile(input: $input) {\n    viewer {\n      identities {\n        ...Launcher_identities\n      }\n      id\n    }\n  }\n}\n\nfragment Launcher_identities on Identities {\n  ownUsers {\n    defaultEthAddress\n    localID\n    wallets {\n      hd {\n        localID\n        id\n      }\n      ledger {\n        localID\n        id\n      }\n    }\n    id\n  }\n}\n",
+  "text": "mutation OnboardWalletViewUpdateProfileMutation(\n  $input: UpdateProfileInput!\n) {\n  updateProfile(input: $input) {\n    viewer {\n      identities {\n        ...Launcher_identities\n      }\n      id\n    }\n  }\n}\n\nfragment Launcher_identities on Identities {\n  ownUsers {\n    defaultEthAddress\n    localID\n    profile {\n      name\n      ethAddress\n    }\n    wallets {\n      hd {\n        localID\n        id\n      }\n      ledger {\n        localID\n        id\n      }\n    }\n    id\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -211,6 +215,31 @@ return {
                         "storageKey": null
                       },
                       v2,
+                      {
+                        "kind": "LinkedField",
+                        "alias": null,
+                        "name": "profile",
+                        "storageKey": null,
+                        "args": null,
+                        "concreteType": "NamedProfile",
+                        "plural": false,
+                        "selections": [
+                          {
+                            "kind": "ScalarField",
+                            "alias": null,
+                            "name": "name",
+                            "args": null,
+                            "storageKey": null
+                          },
+                          {
+                            "kind": "ScalarField",
+                            "alias": null,
+                            "name": "ethAddress",
+                            "args": null,
+                            "storageKey": null
+                          }
+                        ]
+                      },
                       {
                         "kind": "LinkedField",
                         "alias": null,
