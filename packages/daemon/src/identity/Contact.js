@@ -57,8 +57,8 @@ export type ConnectionState =
   | 'sent_feed'
   | 'sending_feed'
   | 'declined'
-  | 'sending_blockcahin'
-  | 'sent_blockcahin'
+  | 'sending_blockchain'
+  | 'sent_blockchain'
 
 export default class Contact {
   static create = (

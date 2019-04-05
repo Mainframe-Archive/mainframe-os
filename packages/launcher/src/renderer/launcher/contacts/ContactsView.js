@@ -159,7 +159,7 @@ export type Contact = {
   publicFeed: string,
   ethAddress?: string,
   invite?: {
-    inviteTX?: ?string,
+    inviteTX?: string,
     stake: {
       amount: string,
       state: string,
@@ -826,19 +826,30 @@ class ContactsViewComponent extends Component<Props, State> {
       case 'SENDING_FEED':
         return <Loader />
       case 'SENT_FEED': {
-        return (
-          <Button
-            title="Send Invite"
-            variant={['marginTop10', 'redOutline']}
-            onPress={() => this.sendInvite(contact)}
-          />
-        )
+        if (contact.profile.ethAddress) {
+          if (this.state.invitingContact) {
+            return <Loader />
+          }
+          return (
+            <Button
+              title="Send Invite"
+              variant={['marginTop10', 'redOutline']}
+              onPress={() => this.sendInvite(contact)}
+            />
+          )
+        }
+        break
       }
       case 'SENDING_BLOCKCHAIN': {
         return <Loader />
       }
       case 'SENT_BLOCKCHAIN': {
-        return <Text>{`Invite request sent: ${contact.invite.inviteTX}`}</Text>
+        return (
+          contact.invite &&
+          contact.invite.inviteTX && (
+            <Text>{`Invite request sent: ${contact.invite.inviteTX}`}</Text>
+          )
+        )
       }
       case 'CONNECTED': {
         if (

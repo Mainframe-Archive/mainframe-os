@@ -364,7 +364,7 @@ type InviteContactPayload {
 }
 
 type InviteStake {
-  amount: Int
+  amount: String
   state: StakeState
   reclaimedTX: String
 }

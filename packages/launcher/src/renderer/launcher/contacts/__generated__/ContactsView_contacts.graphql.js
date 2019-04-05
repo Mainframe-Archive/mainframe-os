@@ -22,7 +22,7 @@ export type ContactsView_contacts = {|
       +inviteTX: ?string,
       +stake: ?{|
         +reclaimedTX: ?string,
-        +amount: ?number,
+        +amount: ?string,
         +state: ?StakeState,
       |},
     |},

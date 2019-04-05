@@ -463,7 +463,7 @@ export const ownUserIdentity = new GraphQLObjectType({
     apps: {
       type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(app))),
       resolve: (self, args, ctx: ClientContext) => {
-        return ctx.openVault.apps.getAppsForUser(self.localID)
+        return ctx.openVault.apps.getInstalledAppsForUser(self.localID)
       },
     },
     defaultEthAddress: {
@@ -574,7 +574,7 @@ export const contactInviteData = new GraphQLObjectType({
         name: 'InviteStake',
         fields: () => ({
           amount: {
-            type: GraphQLInt,
+            type: GraphQLString,
           },
           state: {
             type: new GraphQLEnumType({

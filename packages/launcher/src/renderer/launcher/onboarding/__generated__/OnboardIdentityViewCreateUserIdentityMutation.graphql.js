@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 778d42a475cd8cc8076fc7ae0473401a
+ * @relayHash 040c02c3bbaff3421e599609efdf397f
  */
 
 /* eslint-disable */
@@ -78,6 +78,7 @@ fragment Launcher_identities on Identities {
   ownUsers {
     defaultEthAddress
     localID
+    feedHash
     profile {
       name
       ethAddress
@@ -163,7 +164,7 @@ return {
   "operationKind": "mutation",
   "name": "OnboardIdentityViewCreateUserIdentityMutation",
   "id": null,
-  "text": "mutation OnboardIdentityViewCreateUserIdentityMutation(\n  $input: CreateUserIdentityInput!\n) {\n  createUserIdentity(input: $input) {\n    user {\n      localID\n      profile {\n        name\n      }\n      id\n    }\n    viewer {\n      identities {\n        ownUsers {\n          defaultEthAddress\n          localID\n          id\n        }\n        ...Launcher_identities\n      }\n      id\n    }\n  }\n}\n\nfragment Launcher_identities on Identities {\n  ownUsers {\n    defaultEthAddress\n    localID\n    profile {\n      name\n      ethAddress\n    }\n    wallets {\n      hd {\n        localID\n        id\n      }\n      ledger {\n        localID\n        id\n      }\n    }\n    id\n  }\n}\n",
+  "text": "mutation OnboardIdentityViewCreateUserIdentityMutation(\n  $input: CreateUserIdentityInput!\n) {\n  createUserIdentity(input: $input) {\n    user {\n      localID\n      profile {\n        name\n      }\n      id\n    }\n    viewer {\n      identities {\n        ownUsers {\n          defaultEthAddress\n          localID\n          id\n        }\n        ...Launcher_identities\n      }\n      id\n    }\n  }\n}\n\nfragment Launcher_identities on Identities {\n  ownUsers {\n    defaultEthAddress\n    localID\n    feedHash\n    profile {\n      name\n      ethAddress\n    }\n    wallets {\n      hd {\n        localID\n        id\n      }\n      ledger {\n        localID\n        id\n      }\n    }\n    id\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -296,6 +297,13 @@ return {
                       v5,
                       v2,
                       v6,
+                      {
+                        "kind": "ScalarField",
+                        "alias": null,
+                        "name": "feedHash",
+                        "args": null,
+                        "storageKey": null
+                      },
                       {
                         "kind": "LinkedField",
                         "alias": null,

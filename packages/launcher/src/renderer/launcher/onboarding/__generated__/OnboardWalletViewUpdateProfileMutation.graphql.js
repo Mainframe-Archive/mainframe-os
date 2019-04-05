@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 2163b4e515cad1d124773b80c7d64be2
+ * @relayHash 6f647bee8058a900f3e24946e0b83680
  */
 
 /* eslint-disable */
@@ -58,6 +58,7 @@ fragment Launcher_identities on Identities {
   ownUsers {
     defaultEthAddress
     localID
+    feedHash
     profile {
       name
       ethAddress
@@ -117,7 +118,7 @@ return {
   "operationKind": "mutation",
   "name": "OnboardWalletViewUpdateProfileMutation",
   "id": null,
-  "text": "mutation OnboardWalletViewUpdateProfileMutation(\n  $input: UpdateProfileInput!\n) {\n  updateProfile(input: $input) {\n    viewer {\n      identities {\n        ...Launcher_identities\n      }\n      id\n    }\n  }\n}\n\nfragment Launcher_identities on Identities {\n  ownUsers {\n    defaultEthAddress\n    localID\n    profile {\n      name\n      ethAddress\n    }\n    wallets {\n      hd {\n        localID\n        id\n      }\n      ledger {\n        localID\n        id\n      }\n    }\n    id\n  }\n}\n",
+  "text": "mutation OnboardWalletViewUpdateProfileMutation(\n  $input: UpdateProfileInput!\n) {\n  updateProfile(input: $input) {\n    viewer {\n      identities {\n        ...Launcher_identities\n      }\n      id\n    }\n  }\n}\n\nfragment Launcher_identities on Identities {\n  ownUsers {\n    defaultEthAddress\n    localID\n    feedHash\n    profile {\n      name\n      ethAddress\n    }\n    wallets {\n      hd {\n        localID\n        id\n      }\n      ledger {\n        localID\n        id\n      }\n    }\n    id\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -215,6 +216,13 @@ return {
                         "storageKey": null
                       },
                       v2,
+                      {
+                        "kind": "ScalarField",
+                        "alias": null,
+                        "name": "feedHash",
+                        "args": null,
+                        "storageKey": null
+                      },
                       {
                         "kind": "LinkedField",
                         "alias": null,

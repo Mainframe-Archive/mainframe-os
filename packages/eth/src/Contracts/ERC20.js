@@ -1,6 +1,7 @@
 // @flow
-import { fromWei, toWei, hexToString } from 'web3-utils'
+import { hexToString } from 'web3-utils'
 
+import { utils } from 'ethers'
 import { unitMap } from '../utils'
 import type { SendParams } from '../types'
 import type EthClient from '../Client'
@@ -52,12 +53,12 @@ export default class ERC20Contract extends BaseContract {
       'latest',
     ])
     const res = await this.ethClient.sendRequest(mftBalanceReq)
-    return fromWei(res, decimalsUnit)
+    return utils.formatUnits(res, decimalsUnit)
   }
 
   async transfer(params: SendParams) {
     const decimalsUnit = await this.getTokenDecimalsUnit()
-    const valueWei = toWei(String(params.value), decimalsUnit)
+    const valueWei = utils.parseUnits(params.value, decimalsUnit)
     const data = this.encodeCall('transfer', [params.to, valueWei])
     const txParams = { from: params.from, to: this.address, data }
     return this.ethClient.sendAndListen(txParams, params.confirmations)
@@ -69,7 +70,7 @@ export default class ERC20Contract extends BaseContract {
     options: { from: string },
   ) {
     const decimalsUnit = await this.getTokenDecimalsUnit()
-    const valueWei = toWei(String(amount), decimalsUnit)
+    const valueWei = utils.parseUnits(String(amount), decimalsUnit)
     const data = this.encodeCall('approve', [address, valueWei])
     const txParams = { ...options, to: this.address, data }
     return this.ethClient.sendAndListen(txParams)

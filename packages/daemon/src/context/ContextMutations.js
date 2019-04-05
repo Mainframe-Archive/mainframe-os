@@ -429,7 +429,7 @@ export default class ContextMutations {
     const { openVault } = this._context
     Object.keys(apps).forEach(sharedAppID => {
       const app = openVault.apps
-        .getAppsForUser(idType(userID))
+        .getInstalledAppsForUser(idType(userID))
         .find((a: App) => a.updateFeedHash === sharedAppID)
       if (!app) return
 

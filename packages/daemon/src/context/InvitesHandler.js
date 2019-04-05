@@ -1,7 +1,6 @@
 // @flow
 
 import { Web3EthAbi, type BaseContract } from '@mainframe/eth'
-import { fromWei } from 'ethjs-unit'
 import { getFeedTopic } from '@erebos/api-bzz-base'
 import createKeccakHash from 'keccak'
 import { utils } from 'ethers'
@@ -35,7 +34,7 @@ const contracts = {
   // },
   ropsten: {
     token: '0xa46f1563984209fe47f8236f8b01a03f03f957e4',
-    invites: '0x6687b03F6D7eeac45d98340c8243e6a0434f1284',
+    invites: '0x2bD359aE51EA91a1e1b21e986B1df3607e4476f8',
   },
   ganache: {
     token: '0xB3E555c3dB7B983E46bf5a530ce1dac4087D2d8D',
@@ -191,7 +190,7 @@ export default class InvitesHandler {
   handleRejectedEvent = async (
     user: OwnUserIdentity,
     event: Object,
-  ): Promise<> => {
+  ): Promise<void> => {
     const { identities } = this._context.openVault
     const peer = identities.getPeerByFeed(event.recipientFeed)
     if (peer) {
@@ -270,6 +269,22 @@ export default class InvitesHandler {
 
   // INVITE ACTIONS
 
+  async approveTransfer(fromAddress: string) {
+    const txOptions = { from: fromAddress }
+    return new Promise((resolve, reject) => {
+      this.tokenContract
+        .approve(this.invitesContract.address, 100, txOptions)
+        .then(res => {
+          res.on('mined', hash => {
+            resolve(hash)
+          })
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  }
+
   async sendInviteTX(user: OwnUserIdentity, peer: PeerUserIdentity) {
     return new Promise((resolve, reject) => {
       // TODO: Notify launcher and request permission from user?
@@ -277,32 +292,29 @@ export default class InvitesHandler {
         throw new Error('No eth address found for user')
       }
       const txOptions = { from: user.profile.ethAddress }
-      this.tokenContract
-        .approve(this.invitesContract.address, 100, txOptions)
-        .then(res => {
-          res.on('mined', () => {
-            this.invitesContract
-              .send(
-                'sendInvite',
-                [
-                  peer.profile.ethAddress,
-                  peer.publicFeed,
-                  user.publicFeed.feedHash,
-                ],
-                txOptions,
-              )
-              .then(inviteRes => {
-                inviteRes.on('hash', hash => {
-                  resolve(hash)
-                })
-                inviteRes.on('error', err => {
-                  reject(err)
-                })
+      this.approveTransfer(user.profile.ethAddress)
+        .then(() => {
+          this.invitesContract
+            .send(
+              'sendInvite',
+              [
+                peer.profile.ethAddress,
+                peer.publicFeed,
+                user.publicFeed.feedHash,
+              ],
+              txOptions,
+            )
+            .then(inviteRes => {
+              inviteRes.on('hash', hash => {
+                resolve(hash)
               })
-              .catch(err => {
+              inviteRes.on('error', err => {
                 reject(err)
               })
-          })
+            })
+            .catch(err => {
+              reject(err)
+            })
         })
         .catch(err => {
           reject(err)
@@ -331,23 +343,13 @@ export default class InvitesHandler {
       // $FlowFixMe address checked above
       user.profile.ethAddress,
     )
-
-    const stakeBN = utils.bigNumberify(fromWei(stake, 'ether'))
-    const balanceBN = utils.bigNumberify(mftBalance)
+    const stakeBN = utils.bigNumberify(stake)
+    const balanceBN = utils.parseUnits(mftBalance, 'ether')
 
     if (stakeBN.gt(balanceBN)) {
       throw new Error(
         `Insufficient MFT balance of ${balanceBN.toString()} for required stake ${stakeBN.toString()}`,
       )
-    }
-
-    contact._invite = {
-      toAddress: peer.profile.ethAddress,
-      fromAddress: user.profile.ethAddress,
-      stake: {
-        amount: stakeBN.toString(),
-        state: 'sending',
-      },
     }
 
     const pushContactEvent = (contact, change) => {
@@ -358,8 +360,6 @@ export default class InvitesHandler {
         change,
       })
     }
-
-    pushContactEvent(contact, 'sendingInvite')
 
     try {
       const inviteTXHash = await this.sendInviteTX(user, peer)
@@ -375,6 +375,7 @@ export default class InvitesHandler {
     } catch (err) {
       contact._invite = undefined
       pushContactEvent(contact, 'inviteFailed')
+      throw err
     }
   }
 
