@@ -463,7 +463,7 @@ export const ownUserIdentity = new GraphQLObjectType({
     apps: {
       type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(app))),
       resolve: (self, args, ctx: ClientContext) => {
-        return ctx.openVault.apps.getAppsForUser(self.localID)
+        return ctx.openVault.apps.getInstalledAppsForUser(self.localID)
       },
     },
     defaultEthAddress: {
@@ -556,8 +556,10 @@ export const connectionState = new GraphQLEnumType({
     CONNECTED: { value: 'connected' },
     DECLINED: { value: 'declined' },
     RECEIVED: { value: 'received' },
-    SENDING: { value: 'sending' },
-    SENT: { value: 'sent' },
+    SENDING_FEED: { value: 'sending_feed' },
+    SENT_FEED: { value: 'sent_feed' },
+    SENDING_BLOCKCHAIN: { value: 'sending_blockchain' },
+    SENT_BLOCKCHAIN: { value: 'sent_blockchain' },
   },
 })
 
@@ -572,7 +574,7 @@ export const contactInviteData = new GraphQLObjectType({
         name: 'InviteStake',
         fields: () => ({
           amount: {
-            type: GraphQLInt,
+            type: GraphQLString,
           },
           state: {
             type: new GraphQLEnumType({

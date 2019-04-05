@@ -200,6 +200,11 @@ const LauncherRelayContainer = createFragmentContainer(Launcher, {
       ownUsers {
         defaultEthAddress
         localID
+        feedHash
+        profile {
+          name
+          ethAddress
+        }
         wallets {
           hd {
             localID

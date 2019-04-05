@@ -176,6 +176,11 @@ const setDefaultWalletMutation = graphql`
   }
 `
 
+const roundNum = (number, precision) => {
+  precision = Math.pow(10, precision)
+  return Math.ceil(Number(number) * precision) / precision
+}
+
 const getWalletsArray = (props: Props): Array<Wallet> => {
   const { ethWallets } = props.wallets
   const wallets: Array<Wallet> = sortBy(
@@ -359,7 +364,7 @@ class WalletsView extends Component<Props, State> {
                 minWidth: 80,
               }}
               color="#232323">
-              {a.balances.eth} ETH
+              {roundNum(a.balances.eth, 5)} ETH
             </Text>
           </Ballance>
           <Ballance>
@@ -372,7 +377,7 @@ class WalletsView extends Component<Props, State> {
                 minWidth: 80,
               }}
               color="#232323">
-              {a.balances.mft} MFT
+              {roundNum(a.balances.mft, 5)} MFT
             </Text>
           </Ballance>
         </AccountView>

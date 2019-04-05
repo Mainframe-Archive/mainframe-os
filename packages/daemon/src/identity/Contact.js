@@ -47,12 +47,18 @@ export type ContactSerialized = {
   profile: ContactProfile,
   aliasName: ?string,
   sharedFeed: BidirectionalFeedSerialized,
-  requestSent: boolean,
+  feedRequestSent: boolean,
   invite?: ?InviteData,
   acceptanceSignature?: ?string,
 }
 
-export type ConnectionState = 'connected' | 'sent' | 'sending' | 'declined'
+export type ConnectionState =
+  | 'connected'
+  | 'sent_feed'
+  | 'sending_feed'
+  | 'declined'
+  | 'sending_blockchain'
+  | 'sent_blockchain'
 
 export default class Contact {
   static create = (
@@ -102,7 +108,7 @@ export default class Contact {
       contactSerialized.profile,
       contactSerialized.aliasName,
       BidirectionalFeed.fromJSON(contactSerialized.sharedFeed),
-      contactSerialized.requestSent,
+      contactSerialized.feedRequestSent,
       contactSerialized.acceptanceSignature,
       contactSerialized.invite,
     )
@@ -114,7 +120,7 @@ export default class Contact {
     profile: contact.profile,
     aliasName: contact._aliasName,
     sharedFeed: BidirectionalFeed.toJSON(contact.sharedFeed),
-    requestSent: contact._requestSent,
+    feedRequestSent: contact._feedRequestSent,
     acceptanceSignature: contact.acceptanceSignature,
     invite: contact._invite,
   })
@@ -122,7 +128,7 @@ export default class Contact {
   _localID: string
   _peerID: string
   _sharedFeed: BidirectionalFeed
-  _requestSent: boolean
+  _feedRequestSent: boolean
   _aliasName: ?string
   _acceptanceSignature: ?string
   _invite: ?InviteData
@@ -138,7 +144,7 @@ export default class Contact {
     profile: ContactProfile,
     aliasName: ?string,
     sharedFeed: BidirectionalFeed,
-    requestSent?: boolean,
+    feedRequestSent?: boolean,
     acceptanceSignature?: ?string,
     invite?: ?InviteData,
   ) {
@@ -147,7 +153,7 @@ export default class Contact {
     this._profile = profile
     this._aliasName = aliasName
     this._sharedFeed = sharedFeed
-    this._requestSent = !!requestSent
+    this._feedRequestSent = !!feedRequestSent
     this._acceptanceSignature = acceptanceSignature
     this._invite = invite
   }
@@ -180,14 +186,24 @@ export default class Contact {
     this._aliasName = aliasName
   }
 
-  set requestSent(requestSent: boolean): void {
-    this._requestSent = requestSent
+  set feedRequestSent(feedRequestSent: boolean): void {
+    this._feedRequestSent = feedRequestSent
   }
 
   get connectionState(): ConnectionState {
-    if (!this._requestSent) return 'sending'
-    if (this.invite && this.invite.stake.state === 'seized') return 'declined'
-    return this.sharedFeed.remoteFeed ? 'connected' : 'sent'
+    if (!this._feedRequestSent) return 'sending_feed'
+    if (this.sharedFeed.remoteFeed) return 'connected'
+    if (this.invite) {
+      switch (this.invite.stake.state) {
+        case 'sending':
+          return 'sending_blockchain'
+        case 'staked':
+          return 'sent_blockchain'
+        case 'seized':
+          return 'declined'
+      }
+    }
+    return 'sent_feed'
   }
 
   get acceptanceSignature(): ?string {

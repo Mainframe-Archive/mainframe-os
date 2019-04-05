@@ -1,7 +1,6 @@
 // @flow
 
 import { Web3EthAbi, type BaseContract } from '@mainframe/eth'
-import { fromWei } from 'ethjs-unit'
 import { getFeedTopic } from '@erebos/api-bzz-base'
 import createKeccakHash from 'keccak'
 import { utils } from 'ethers'
@@ -35,7 +34,7 @@ const contracts = {
   // },
   ropsten: {
     token: '0xa46f1563984209fe47f8236f8b01a03f03f957e4',
-    invites: '0x6687b03F6D7eeac45d98340c8243e6a0434f1284',
+    invites: '0x2bD359aE51EA91a1e1b21e986B1df3607e4476f8',
   },
   ganache: {
     token: '0xB3E555c3dB7B983E46bf5a530ce1dac4087D2d8D',
@@ -154,7 +153,7 @@ export default class InvitesHandler {
       }
       const events = await this.invitesContract.getPastEvents('Invited', params)
       for (let i = 0; i < events.length; i++) {
-        await this.parseInviteEvent(user, events[i])
+        await this.handleInviteEvent(user, events[i])
       }
     } catch (err) {
       this._context.log(`Error fetching blockchain invites: ${err}`)
@@ -163,8 +162,6 @@ export default class InvitesHandler {
   }
 
   async fetchRejectedEvents(user: OwnUserIdentity, userFeedHash: string) {
-    const { identities } = this._context.openVault
-
     const creationBlock = await this.invitesContract.call('creationBlock')
     const latestBlock = await this._context.io.eth.getLatestBlock()
 
@@ -176,21 +173,10 @@ export default class InvitesHandler {
 
     const events = await this.invitesContract.getPastEvents('Declined', params)
     events.forEach(e => {
-      const peer = identities.getPeerByFeed(e.recipientFeed)
-      if (peer) {
-        const contact = identities.getContactByPeerID(
-          user.localID,
-          peer.localID,
-        )
-        if (contact && contact.invite) {
-          contact.invite.stake.state = 'seized'
-        }
-        this._context.next({
-          type: 'contact_changed',
-          contact,
-          userID: user.localID,
-          change: 'inviteDeclined',
-        })
+      try {
+        this.handleRejectedEvent(user, e)
+      } catch (err) {
+        this._context.log(err)
       }
     })
   }
@@ -201,10 +187,30 @@ export default class InvitesHandler {
     return utils.parseBytes32String(res)
   }
 
-  async parseInviteEvent(
+  handleRejectedEvent = async (
+    user: OwnUserIdentity,
+    event: Object,
+  ): Promise<void> => {
+    const { identities } = this._context.openVault
+    const peer = identities.getPeerByFeed(event.recipientFeed)
+    if (peer) {
+      const contact = identities.getContactByPeerID(user.localID, peer.localID)
+      if (contact && contact.invite) {
+        contact.invite.stake.state = 'seized'
+      }
+      this._context.next({
+        type: 'contact_changed',
+        contact,
+        userID: user.localID,
+        change: 'inviteDeclined',
+      })
+    }
+  }
+
+  handleInviteEvent = async (
     user: OwnUserIdentity,
     contractEvent: Object,
-  ): Promise<?InviteRequest> {
+  ): Promise<void> => {
     const { identities } = this._context.openVault
     if (contractEvent.senderFeed) {
       try {
@@ -263,40 +269,52 @@ export default class InvitesHandler {
 
   // INVITE ACTIONS
 
+  async approveTransfer(fromAddress: string) {
+    const txOptions = { from: fromAddress }
+    return new Promise((resolve, reject) => {
+      this.tokenContract
+        .approve(this.invitesContract.address, 100, txOptions)
+        .then(res => {
+          res.on('mined', hash => {
+            resolve(hash)
+          })
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  }
+
   async sendInviteTX(user: OwnUserIdentity, peer: PeerUserIdentity) {
     return new Promise((resolve, reject) => {
       // TODO: Notify launcher and request permission from user?
-      // TODO: check approved value
       if (!user.profile.ethAddress) {
         throw new Error('No eth address found for user')
       }
       const txOptions = { from: user.profile.ethAddress }
-      this.tokenContract
-        .approve(this.invitesContract.address, 100, txOptions)
-        .then(res => {
-          res.on('mined', () => {
-            this.invitesContract
-              .send(
-                'sendInvite',
-                [
-                  peer.profile.ethAddress,
-                  peer.publicFeed,
-                  user.publicFeed.feedHash,
-                ],
-                txOptions,
-              )
-              .then(inviteRes => {
-                inviteRes.on('hash', hash => {
-                  resolve(hash)
-                })
-                inviteRes.on('error', err => {
-                  reject(err)
-                })
+      this.approveTransfer(user.profile.ethAddress)
+        .then(() => {
+          this.invitesContract
+            .send(
+              'sendInvite',
+              [
+                peer.profile.ethAddress,
+                peer.publicFeed,
+                user.publicFeed.feedHash,
+              ],
+              txOptions,
+            )
+            .then(inviteRes => {
+              inviteRes.on('hash', hash => {
+                resolve(hash)
               })
-              .catch(err => {
+              inviteRes.on('error', err => {
                 reject(err)
               })
-          })
+            })
+            .catch(err => {
+              reject(err)
+            })
         })
         .catch(err => {
           reject(err)
@@ -325,9 +343,8 @@ export default class InvitesHandler {
       // $FlowFixMe address checked above
       user.profile.ethAddress,
     )
-
-    const stakeBN = utils.bigNumberify(fromWei(stake, 'ether'))
-    const balanceBN = utils.bigNumberify(mftBalance)
+    const stakeBN = utils.bigNumberify(stake)
+    const balanceBN = utils.parseUnits(mftBalance, 'ether')
 
     if (stakeBN.gt(balanceBN)) {
       throw new Error(
@@ -335,24 +352,31 @@ export default class InvitesHandler {
       )
     }
 
-    const inviteTXHash = await this.sendInviteTX(user, peer)
-    contact._invite = {
-      inviteTX: inviteTXHash,
-      // $FlowFixMe toAddress address checked above
-      toAddress: peer.profile.ethAddress,
-      // $FlowFixMe fromAddress address checked above
-      fromAddress: user.profile.ethAddress,
-      stake: {
-        amount: stakeBN.toString(),
-        state: 'staked',
-      },
+    const pushContactEvent = (contact, change) => {
+      this._context.next({
+        type: 'contact_changed',
+        userID: userID,
+        contact,
+        change,
+      })
     }
-    this._context.next({
-      type: 'contact_changed',
-      contact,
-      userID: userID,
-      change: 'invite',
-    })
+
+    try {
+      const inviteTXHash = await this.sendInviteTX(user, peer)
+      contact._invite = {
+        ...contact._invite,
+        inviteTX: inviteTXHash,
+        stake: {
+          amount: stakeBN.toString(),
+          state: 'staked',
+        },
+      }
+      pushContactEvent(contact, 'inviteSent')
+    } catch (err) {
+      contact._invite = undefined
+      pushContactEvent(contact, 'inviteFailed')
+      throw err
+    }
   }
 
   async signAccepted(inviteRequest: InviteRequest): Promise<string> {
@@ -485,23 +509,33 @@ export default class InvitesHandler {
         return
       }
       const encodedAddress = encodeAddress(user.profile.ethAddress)
-      const subID = await this.invitesContract.subscribeToEvents('Invited', [
-        encodedAddress,
-        userFeedHash,
-      ])
-      this._ethSubscriptions.add(subID)
-      // $FlowFixMe subscription compatibility already checked
-      eth.web3Provider.on(subID, async msg => {
-        // TODO: forward events to ethClient from provider
+      const invitesSubID = await this.invitesContract.subscribeToEvents(
+        'Invited',
+        [encodedAddress, userFeedHash],
+      )
+      const declinedSub = await this.invitesContract.subscribeToEvents(
+        'Declined',
+        [userFeedHash],
+      )
+      this._ethSubscriptions.add(invitesSubID)
+      this._ethSubscriptions.add(declinedSub)
+
+      const handleEvent = (name, log, handler) => {
         try {
-          const event = this.invitesContract.decodeEventLog(
-            'Invited',
-            msg.result,
-          )
-          this.parseInviteEvent(user, event)
+          const event = this.invitesContract.decodeEventLog(name, log.result)
+          handler(user, event)
         } catch (err) {
-          this._context.log('Error parsing eth event: ', err)
+          this._context.log(err.message)
         }
+      }
+      // $FlowFixMe subscription compatibility already checked
+      eth.web3Provider.on(invitesSubID, async msg => {
+        handleEvent('Invited', msg, this.handleInviteEvent)
+      })
+
+      // $FlowFixMe subscription compatibility already checked
+      eth.web3Provider.on(declinedSub, async msg => {
+        handleEvent('Declined', msg, this.handleRejectedEvent)
       })
     } catch (err) {
       this._context.log(err.message)

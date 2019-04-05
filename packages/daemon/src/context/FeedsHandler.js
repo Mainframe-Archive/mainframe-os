@@ -400,7 +400,7 @@ export class ContactsFeedsHandler extends FeedsHandler {
       .pipe(
         filter(
           (e: ContextEvent) =>
-            e.type === 'contact_changed' && e.change === 'requestSent',
+            e.type === 'contact_changed' && e.change === 'feedRequestSent',
         ),
       )
       .subscribe((e: ContactCreatedEvent) => {

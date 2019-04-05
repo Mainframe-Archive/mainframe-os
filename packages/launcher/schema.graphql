@@ -215,8 +215,10 @@ enum ConnectionState {
   CONNECTED
   DECLINED
   RECEIVED
-  SENDING
-  SENT
+  SENDING_FEED
+  SENT_FEED
+  SENDING_BLOCKCHAIN
+  SENT_BLOCKCHAIN
 }
 
 type Contact implements Node {
@@ -362,7 +364,7 @@ type InviteContactPayload {
 }
 
 type InviteStake {
-  amount: Int
+  amount: String
   state: StakeState
   reclaimedTX: String
 }
