@@ -137,7 +137,10 @@ export default class EthClient extends EventEmitter {
   }
 
   async getAccounts(): Promise<Array<string>> {
-    return this.send('eth_accounts', [])
+    if (this._walletProvider != null) {
+      return this._walletProvider.getAccounts()
+    }
+    throw new Error('No wallet provider found')
   }
 
   async getETHBalance(address: string) {
