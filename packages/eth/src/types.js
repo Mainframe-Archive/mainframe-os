@@ -26,11 +26,18 @@ export type TXParams = {
   chainId: number,
 }
 
-export type RequestPayload = {
+export type JsonRpcRequest = {
   id: number,
   jsonrpc: string,
   method: string,
   params: Array<any>,
+}
+
+export type JsonRpcResponse = {
+  id: number,
+  jsonrpc: string,
+  result: any,
+  error: ?any,
 }
 
 export type TransactionEvent = {

@@ -1,7 +1,7 @@
 // @flow
 
 import Web3EthAbi from 'web3-eth-abi'
-import type { DecodedTxResult } from './types'
+import type { DecodedTxResult, JsonRpcResponse } from './types'
 
 export const unitMap = {
   noether: '0',
@@ -92,7 +92,7 @@ export const decodeTransactionData = async (
   }
 }
 
-export const jsonRpcResponse = (result: any, id: number) => {
+export const jsonRpcResponse = (result: any, id: number): JsonRpcResponse => {
   return {
     result,
     id,
