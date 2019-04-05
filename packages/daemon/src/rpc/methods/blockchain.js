@@ -30,9 +30,7 @@ export const ethSend = async (
   params: BlockchainEthSendParams,
 ): Promise<BlockchainEthSendResult> => {
   ctx.io.checkEthConnection() // Handle WS connection dropping
-  // TODO: Need to manage request id's at this level
-  // instead of just forwarding to prevent collisions
-  return ctx.io.eth.sendRequest(params)
+  return ctx.io.eth.send(params.method, params.params)
 }
 
 export const ethSubscribe = async (

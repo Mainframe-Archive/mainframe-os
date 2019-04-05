@@ -247,12 +247,10 @@ export type EthTransactionParams = {
   chainId: number,
 }
 
-export type BlockchainEthSendParams = {
-  id: number,
-  jsonrpc: string,
+export type BlockchainEthSendParams = {|
   method: string,
-  params: Array<any>,
-}
+  params: Array<*>,
+|}
 
 export type BlockchainEthSendResult = any
 

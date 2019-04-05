@@ -26,11 +26,18 @@ export type TXParams = {
   chainId: number,
 }
 
-export type RequestPayload = {
+export type JsonRpcRequest = {
   id: number,
   jsonrpc: string,
   method: string,
   params: Array<any>,
+}
+
+export type JsonRpcResponse = {
+  id: number,
+  jsonrpc: string,
+  result: any,
+  error: ?any,
 }
 
 export type TransactionEvent = {
@@ -48,7 +55,7 @@ export type EventFilterParams = {
 export type TXEventEmitter = EventEmitter
 
 export type AbstractProvider = {
-  +sendPayload: (payload: Object) => Promise<any>,
+  +send: (method: string, params: Array<*>) => Promise<*>,
   +on?: (event: string, listener: Function) => any,
   +emit?: (event: string, ...args: Array<any>) => boolean,
   +unsubscribe?: (id: string, type?: string) => void,
