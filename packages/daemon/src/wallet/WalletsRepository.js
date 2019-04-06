@@ -211,12 +211,15 @@ export default class WalletsRepository {
 
   // Signing
 
-  async signEthTransaction(params: WalletEthSignTxParams): Promise<string> {
+  async signEthTransaction(
+    params: WalletEthSignTxParams,
+    chainID: string,
+  ): Promise<string> {
     const wallet = this.getEthWalletByAccount(params.from)
     if (!wallet) {
       throw new Error('Wallet not found')
     }
-    return wallet.signTransaction(params)
+    return wallet.signTransaction(params, chainID)
   }
 
   async signEthData(params: WalletSignDataParams): Promise<string> {

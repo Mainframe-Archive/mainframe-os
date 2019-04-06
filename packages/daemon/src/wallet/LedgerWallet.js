@@ -91,9 +91,12 @@ export default class LedgerWallet extends AbstractWallet {
     return newAddresses
   }
 
-  async signTransaction(params: WalletEthSignTxParams): Promise<string> {
+  async signTransaction(
+    params: WalletEthSignTxParams,
+    chainID: string,
+  ): Promise<string> {
     if (!params.chainId) {
-      throw new Error('ethereum chain id not set in tx params')
+      params.chainid = chainID
     }
     const index = this.getIndexForAccount(params.from)
     if (!index) {

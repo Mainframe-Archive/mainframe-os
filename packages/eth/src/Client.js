@@ -293,9 +293,6 @@ export default class EthClient extends EventEmitter {
 
   async prepareAndSignTx(txParams: Object): Promise<string> {
     if (this._walletProvider != null) {
-      if (!txParams.chainId) {
-        txParams.chainId = Number(this.networkID)
-      }
       this.validateTransaction(txParams)
       const fullParams = await this.completeTxParams(txParams)
       // $FlowFixMe checked for wallet provider
@@ -317,11 +314,10 @@ export default class EthClient extends EventEmitter {
     txParams: Object,
   ): Promise<{| method: string, params: Array<*> |}> {
     const signedTx = await this.prepareAndSignTx(txParams)
-    const requestData = {
+    return {
       method: 'eth_sendRawTransaction',
       params: [signedTx],
     }
-    return this.createRequest(requestData.method, requestData.params)
   }
 
   async sendAndListen(

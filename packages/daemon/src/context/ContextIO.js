@@ -19,7 +19,8 @@ class WalletProvider {
     return Promise.resolve(this._context.queries.getUserEthAccounts(id))
   }
   signTransaction(params) {
-    return this._context.openVault.wallets.signEthTransaction(params)
+    const netID = this._context.io.eth.networkID
+    return this._context.openVault.wallets.signEthTransaction(params, netID)
   }
   sign(params) {
     return Promise.resolve(this._context.openVault.wallets.signEthData(params))
