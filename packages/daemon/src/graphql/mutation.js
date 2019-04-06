@@ -372,34 +372,6 @@ const addContactMutation = mutationWithClientMutationId({
   },
 })
 
-const inviteContactMutation = mutationWithClientMutationId({
-  name: 'InviteContact',
-  inputFields: {
-    userID: {
-      type: new GraphQLNonNull(GraphQLString),
-    },
-    contactID: {
-      type: new GraphQLNonNull(GraphQLString),
-    },
-  },
-  outputFields: {
-    contact: {
-      type: contact,
-      resolve: payload => payload.contact,
-    },
-    viewer: viewerOutput,
-  },
-  mutateAndGetPayload: async (args, ctx) => {
-    const contact = ctx.openVault.identities.getContact(
-      args.userID,
-      args.contactID,
-    )
-    await ctx.invitesHandler.sendInvite(args.userID, contact)
-    const contactData = ctx.queries.mergePeerContactData(contact)
-    return { contact: contactData }
-  },
-})
-
 const deleteContactMutation = mutationWithClientMutationId({
   name: 'DeleteContact',
   inputFields: {
@@ -779,7 +751,6 @@ export default new GraphQLObjectType({
     publishAppVersion: publishAppVersionMutation,
     updateAppDetails: updateAppDetailsMutation,
     // Users
-    inviteContact: inviteContactMutation,
     acceptContactRequest: acceptContactRequestMutation,
     retrieveInviteStake: retrieveInviteStakeMutation,
     rejectContact: rejectContactMutation,

@@ -4,6 +4,9 @@ import type {
   BlockchainEthSendParams,
   BlockchainEthSendResult,
   EthUnsubscribeParams,
+  GetInviteTXDetailsParams,
+  GetInviteTXDetailsResult,
+  SendInviteTXParams,
 } from '@mainframe/client'
 import { type Subscription as RxSubscription, Observable } from 'rxjs'
 
@@ -62,6 +65,35 @@ export const ethUnsubscribe = async (
   if (ctx.io.eth.web3Provider.unsubscribe) {
     await ctx.io.eth.unsubscribe(params.id)
   }
+}
+
+export const getInviteTXDetails = async (
+  ctx: ClientContext,
+  params: GetInviteTXDetailsParams,
+): Promise<GetInviteTXDetailsResult> => {
+  return ctx.invitesHandler.getInviteTXDetails(
+    params.type,
+    params.userID,
+    params.contactID,
+  )
+}
+
+export const sendInviteApprovalTX = async (
+  ctx: ClientContext,
+  params: SendInviteTXParams,
+): Promise<void> => {
+  return ctx.invitesHandler.sendInviteApprovalTX(
+    params.userID,
+    params.contactID,
+    params.gasPrice,
+  )
+}
+
+export const sendInviteTX = async (
+  ctx: ClientContext,
+  params: SendInviteTXParams,
+): Promise<void> => {
+  return ctx.invitesHandler.sendInviteTX(params.userID, params.contactID)
 }
 
 export const subEthNetworkChanged = {

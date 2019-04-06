@@ -18,6 +18,7 @@ import { Form, type FormSubmitPayload } from '@morpheus-ui/forms'
 import PlusIcon from '@morpheus-ui/icons/PlusSymbolSm'
 import SearchIcon from '@morpheus-ui/icons/SearchSm'
 import CircleArrowRight from '@morpheus-ui/icons/CircleArrowRight'
+import rpc from '../rpc'
 
 import { type CurrentUser } from '../LauncherContext'
 import { EnvironmentContext } from '../RelayEnvironment'
@@ -210,6 +211,14 @@ type State = {
   invitingContact?: ?string,
   withdrawingStake?: ?boolean,
   rejectingInvite?: ?string,
+  invitePending?: {
+    state: string,
+    error?: string,
+    txParams?: {
+      gasPriceGwei: string,
+      maxCost: string,
+    },
+  },
   foundPeer?: {
     profile: {
       name: string,
@@ -223,26 +232,6 @@ type State = {
 const CONTACTS_CHANGED_SUBSCRIPTION = graphql`
   subscription ContactsViewContactsChangedSubscription($userID: String!) {
     contactsChanged {
-      contact {
-        invite {
-          inviteTX
-        }
-      }
-      viewer {
-        contacts {
-          ...ContactsView_contacts @arguments(userID: $userID)
-        }
-      }
-    }
-  }
-`
-
-export const inviteContactMutation = graphql`
-  mutation ContactsViewInviteContactMutation(
-    $input: InviteContactInput!
-    $userID: String!
-  ) {
-    inviteContact(input: $input) {
       contact {
         invite {
           inviteTX
@@ -337,10 +326,9 @@ class ContactsViewComponent extends Component<Props, State> {
 
   constructor(props: Props) {
     super(props)
+    const { user } = this.props
     this.state = {
-      selectedContact: props.contacts.userContacts.length
-        ? this.getIdentity()
-        : null,
+      selectedContact: user.localID,
     }
   }
 
@@ -359,20 +347,11 @@ class ContactsViewComponent extends Component<Props, State> {
     }
   }
 
-  componentDidUpdate() {
-    if (
-      !this.state.selectedContact &&
-      this.props.contacts.userContacts.length
-    ) {
-      this.setState({
-        selectedContact: this.getIdentity(),
-      })
-    }
-  }
-
   getSelectedContact(): ?Contact {
-    return this.props.contacts.userContacts.find(
-      c => c.localID === this.state.selectedContact,
+    return (
+      this.props.contacts.userContacts.find(
+        c => c.localID === this.state.selectedContact,
+      ) || this.getIdentity()
     )
   }
 
@@ -428,39 +407,91 @@ class ContactsViewComponent extends Component<Props, State> {
     }
   }
 
-  sendInvite = (contact: Contact) => {
+  async getInviteApproveTXDetails(contact) {
     const { user } = this.props
-    this.setState({ inviteError: null, invitingContact: contact.localID })
-    const input = {
+    const res = await rpc.getInviteTXDetails({
+      type: 'approve',
       userID: user.localID,
       contactID: contact.localID,
-    }
-
-    const requestComplete = error => {
+    })
+    if (res.approved) {
+      this.getInviteSendTXDetails(contact)
+    } else {
       this.setState({
-        inviteError: error,
-        invitingContact: undefined,
-        foundPeer: undefined,
+        invitePending: {
+          state: 'awaiting_approval ',
+          txParams: res,
+        },
       })
     }
+  }
 
-    commitMutation(this.context, {
-      mutation: inviteContactMutation,
-      variables: { input, userID: user.localID },
-      onCompleted: (contact, errors) => {
-        if (errors && errors.length) {
-          requestComplete(errors[0].message)
-        } else {
-          requestComplete()
-        }
-      },
-      onError: err => {
-        requestComplete(err.message)
-      },
-    })
+  async sendApproveTX(contact) {
+    const { user } = this.props
+    try {
+      await rpc.sendInviteApprovalTX({
+        userID: user.localID,
+        contactID: contact.localID,
+      })
+      this.setState({
+        invitePending: {
+          state: 'approved',
+        },
+      })
+      this.getInviteSendTXDetails(contact)
+    } catch (err) {
+      this.setState({
+        invitePending: {
+          state: 'error ',
+          error: err.message,
+        },
+      })
+    }
+  }
 
-    if (this.state.addModalOpen) {
-      this.setState({ addModalOpen: false })
+  async getInviteSendTXDetails(contact) {
+    const { user } = this.props
+    try {
+      const res = await rpc.getInviteTXDetails({
+        type: 'sendInvite',
+        userID: user.localID,
+        contactID: contact.localID,
+      })
+      this.setState({
+        invitePending: {
+          state: 'approved',
+          txParams: res,
+        },
+      })
+    } catch (err) {
+      this.setState({
+        invitePending: {
+          state: 'error ',
+          error: err.message,
+        },
+      })
+    }
+  }
+
+  sendInvite = async contact => {
+    const { user } = this.props
+    try {
+      await rpc.sendInviteTX({
+        userID: user.localID,
+        contactID: contact.localID,
+      })
+      this.setState({
+        invitePending: {
+          state: 'invite_sent',
+        },
+      })
+    } catch (err) {
+      this.setState({
+        invitePending: {
+          state: 'error ',
+          error: err.message,
+        },
+      })
     }
   }
 
@@ -520,6 +551,7 @@ class ContactsViewComponent extends Component<Props, State> {
       error: null,
       inviteError: null,
     })
+    this.getInviteApproveTXDetails(contact)
   }
 
   acceptContact = (contact: Contact) => {
@@ -821,24 +853,43 @@ class ContactsViewComponent extends Component<Props, State> {
     )
   }
 
+  renderSendInviteState(contact) {
+    const { invitePending } = this.state
+    if (contact.profile.ethAddress) {
+      if (this.state.invitingContact) {
+        return <Loader />
+      }
+      let txDetails
+      if (invitePending && invitePending.txParams) {
+        txDetails = (
+          <Text>
+            {`Gas price: ${invitePending.txParams.gasPriceGwei}, max
+            cost: ${invitePending.txParams.maxCost}`}
+          </Text>
+        )
+      }
+      const approved = invitePending && invitePending.state === 'approved'
+      return (
+        <>
+          {txDetails}
+          <Button
+            title={approved ? 'Send Invite' : 'Approve Invite'}
+            variant={['marginTop10', 'redOutline']}
+            onPress={() =>
+              approved ? this.sendInvite(contact) : this.sendApproveTX(contact)
+            }
+          />
+        </>
+      )
+    }
+  }
+
   renderInviteArea(contact) {
     switch (contact.connectionState) {
       case 'SENDING_FEED':
         return <Loader />
       case 'SENT_FEED': {
-        if (contact.profile.ethAddress) {
-          if (this.state.invitingContact) {
-            return <Loader />
-          }
-          return (
-            <Button
-              title="Send Invite"
-              variant={['marginTop10', 'redOutline']}
-              onPress={() => this.sendInvite(contact)}
-            />
-          )
-        }
-        break
+        return this.renderSendInviteState(contact)
       }
       case 'SENDING_BLOCKCHAIN': {
         return <Loader />

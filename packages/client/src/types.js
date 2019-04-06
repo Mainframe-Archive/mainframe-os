@@ -244,7 +244,7 @@ export type EthTransactionParams = {
   data: string,
   gas: string,
   gasPrice: string,
-  chainId: number,
+  chainid?: ?string,
 }
 
 export type BlockchainEthSendParams = {|
@@ -256,6 +256,24 @@ export type BlockchainEthSendResult = any
 
 export type EthUnsubscribeParams = {
   id: string,
+}
+
+export type GetInviteTXDetailsParams = {
+  type: 'approve' | 'sendInvite',
+  userID: string,
+  contactID: string,
+}
+
+export type GetInviteTXDetailsResult = {
+  approved?: ?boolean,
+  gasPriceGwei?: string,
+  maxCost?: string,
+}
+
+export type SendInviteTXParams = {
+  userID: string,
+  contactID: string,
+  gasPrice?: string,
 }
 
 // Comms

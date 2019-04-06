@@ -442,7 +442,7 @@ type OwnUserIdentity implements Node {
   """The ID of an object"""
   id: ID!
   localID: ID!
-  feedHash: String!
+  feedHash: String
   mfid: ID!
   apps: [App!]!
   defaultEthAddress: String

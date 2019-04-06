@@ -319,6 +319,20 @@ export const ETH_REQUEST_SCHEMA = {
   params: { type: 'array', items: 'any' },
 }
 
+export const INVITE_TX_DETAILS_SCHEMA = {
+  type: {
+    type: 'enum',
+    values: ['approve', 'sendInvite'],
+  },
+  userID: 'string',
+  contactID: 'string',
+}
+
+export const INVITE_SEND_SCHEMA = {
+  userID: 'string',
+  contactID: 'string',
+}
+
 export const WALLET_SIGN_ETH_TRANSACTION_SCHEMA = ETH_TRANSACTION_SCHEMA
 
 export const WALLET_GET_USER_ETH_ACCOUNTS_SCHEMA = {

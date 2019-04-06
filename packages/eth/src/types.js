@@ -23,7 +23,7 @@ export type TXParams = {
   data: string,
   gas: string,
   gasPrice: string,
-  chainId: number,
+  chainid?: ?string,
 }
 
 export type JsonRpcRequest = {

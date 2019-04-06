@@ -213,12 +213,13 @@ export default class WalletsRepository {
 
   async signEthTransaction(
     params: WalletEthSignTxParams,
-    chainID: string,
+    chainID?: ?string,
   ): Promise<string> {
     const wallet = this.getEthWalletByAccount(params.from)
     if (!wallet) {
       throw new Error('Wallet not found')
     }
+    // $FlowFixMe chainID extra param for ledger wallets
     return wallet.signTransaction(params, chainID)
   }
 

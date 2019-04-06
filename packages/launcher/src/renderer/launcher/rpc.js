@@ -132,4 +132,14 @@ export default {
   ethereumRequest: (params: Object) => {
     return rpc.request('blockchain_ethSend', params)
   },
+  getInviteTXDetails: (params: Object) => {
+    return rpc.request('blockchain_getInviteTXDetails', params)
+  },
+  sendInviteApprovalTX: (params: Object) => {
+    return rpc.request('blockchain_sendInviteApprovalTX', params)
+  },
+
+  sendInviteTX: (params: Object) => {
+    return rpc.request('blockchain_sendInviteTX', params)
+  },
 }

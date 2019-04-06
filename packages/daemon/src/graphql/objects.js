@@ -26,11 +26,6 @@ import type ClientContext from '../context/ClientContext'
 import LedgerWallet from '../wallet/LedgerWallet'
 import HDWallet from '../wallet/HDWallet'
 
-const MFT_TOKEN_ADDRESSES = {
-  ropsten: '0xa46f1563984209fe47f8236f8b01a03f03f957e4',
-  mainnet: '0xdf2c7238198ad8b389666574f2d8bc411a4b7428',
-}
-
 export const { nodeInterface, nodeField } = nodeDefinitions<ClientContext>(
   (globalId: string, ctx: ClientContext) => {
     if (globalId === 'viewer') {
@@ -453,7 +448,7 @@ export const ownUserIdentity = new GraphQLObjectType({
       type: new GraphQLNonNull(GraphQLID),
     },
     feedHash: {
-      type: new GraphQLNonNull(GraphQLString),
+      type: GraphQLString,
       resolve: self => self.publicFeed.feedHash,
     },
     mfid: {
@@ -733,10 +728,7 @@ export const walletBalances = new GraphQLObjectType({
       type: new GraphQLNonNull(GraphQLString),
       resolve: async (self, args, ctx) => {
         try {
-          const contract = ctx.io.eth.erc20Contract(
-            MFT_TOKEN_ADDRESSES[ctx.io.eth._networkName],
-          )
-          return await contract.getBalance(self)
+          return await ctx.io.tokenContract.getBalance(self)
         } catch (err) {
           ctx.log(err)
           return 0

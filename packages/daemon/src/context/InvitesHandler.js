@@ -267,7 +267,99 @@ export default class InvitesHandler {
     }
   }
 
+  getUserObjects(
+    userID: string,
+    contactID: string,
+  ): { user: OwnUserIdentity, peer: PeerUserIdentity, contact: Contact } {
+    const { identities } = this._context.openVault
+    const contact = identities.getContact(userID, contactID)
+    if (!contact) {
+      throw new Error('Contact not found')
+    }
+    const user = identities.getOwnUser(userID)
+    if (!user) {
+      throw new Error('User not found')
+    }
+    const peer = identities.getPeerUser(contact.peerID)
+    if (!peer) {
+      throw new Error('Peer not found')
+    }
+    if (!peer.profile.ethAddress) {
+      throw new Error('No public eth address found for Contact')
+    }
+    return { user, peer, contact }
+  }
+
   // INVITE ACTIONS
+
+  async checkAllowance(address: string) {
+    const stake = await this.invitesContract.call('requiredStake')
+    const allowance = await this.tokenContract.call('allowance', [
+      address,
+      this.invitesContract.address,
+    ])
+    const allowanceBN = utils.bigNumberify(allowance)
+    const stakeBN = utils.bigNumberify(stake)
+    return allowanceBN.gte(stakeBN)
+  }
+
+  formatGasValues(txParams: {
+    gas: string,
+    gasPrice: string,
+  }): {
+    maxCost: string,
+    gasPriceGwei: string,
+  } {
+    const gasPriceBN = utils.bigNumberify(txParams.gasPrice)
+    const gasLimitBN = utils.bigNumberify(txParams.gas)
+
+    const maxCost = gasPriceBN.mul(gasLimitBN)
+    return {
+      maxCost: utils.formatUnits(maxCost, 'ether'),
+      gasPriceGwei: utils.formatUnits(txParams.gasPrice, 'gwei'),
+    }
+  }
+
+  async getApproveTXDetails(user: OwnUserIdentity) {
+    const { tokenContract, eth } = this._context.io
+    const stake = await this.invitesContract.call('requiredStake')
+    const data = tokenContract.encodeCall('approve', [
+      user.profile.ethAddress,
+      stake,
+    ])
+    const txOptions = {
+      from: user.profile.ethAddress,
+      to: tokenContract.address,
+      data,
+    }
+    const params = await eth.completeTxParams(txOptions)
+    const formattedParams = this.formatGasValues(params)
+    return { ...params, ...formattedParams }
+  }
+
+  async getSendInviteTXDetails(user: OwnUserIdentity, peer: PeerUserIdentity) {
+    const { eth } = this._context.io
+    const data = this.invitesContract.encodeCall('sendInvite', [
+      peer.profile.ethAddress,
+      peer.publicFeed,
+      user.publicFeed.feedHash,
+    ])
+    const txOptions = {
+      from: user.profile.ethAddress,
+      to: this.invitesContract.address,
+      data,
+    }
+    const params = await eth.completeTxParams(txOptions)
+    const formattedParams = this.formatGasValues(params)
+    return { ...params, ...formattedParams }
+  }
+
+  async getInviteTXDetails(type: string, userID: string, contactID: string) {
+    const { user, peer } = this.getUserObjects(userID, contactID)
+    return type === 'approve'
+      ? this.getApproveTXDetails(user)
+      : this.getSendInviteTXDetails(user, peer)
+  }
 
   async approveTransfer(fromAddress: string) {
     const txOptions = { from: fromAddress }
@@ -285,7 +377,66 @@ export default class InvitesHandler {
     })
   }
 
-  async sendInviteTX(user: OwnUserIdentity, peer: PeerUserIdentity) {
+  async sendInviteApprovalTX(
+    userID: string,
+    contactID: string,
+    gasPrice?: string,
+  ) {
+    const { user } = this.getUserObjects(userID, contactID)
+    if (!user.profile.ethAddress) {
+      throw new Error('No public eth address found on profile')
+    }
+
+    const hasAllowance = await this.checkAllowance(user.profile.ethAddress)
+    if (hasAllowance) {
+      return
+    }
+
+    const stake = await this.invitesContract.call('requiredStake')
+    const stakeBN = utils.bigNumberify(stake)
+    const mftBalance = await this.tokenContract.getBalance(
+      // $FlowFixMe address checked above
+      user.profile.ethAddress,
+    )
+
+    const balanceBN = utils.parseUnits(mftBalance, 'ether')
+
+    if (stakeBN.gt(balanceBN)) {
+      throw new Error(
+        `Insufficient MFT balance of ${balanceBN.toString()} for required stake ${stakeBN.toString()}`,
+      )
+    }
+
+    const txOptions: Object = { from: user.profile.ethAddress }
+    // TODO: check high gasPrice
+
+    const approveValue = utils.formatUnits(stake, 'ether')
+
+    if (gasPrice) {
+      txOptions.gasPrice = gasPrice
+    }
+    return new Promise((resolve, reject) => {
+      this.tokenContract
+        .approve(
+          this.invitesContract.address,
+          approveValue.toString(),
+          txOptions,
+        )
+        .then(res => {
+          res.on('mined', hash => {
+            resolve(hash)
+          })
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  }
+
+  async processInviteTransaction(
+    user: OwnUserIdentity,
+    peer: PeerUserIdentity,
+  ) {
     return new Promise((resolve, reject) => {
       // TODO: Notify launcher and request permission from user?
       if (!user.profile.ethAddress) {
@@ -322,17 +473,10 @@ export default class InvitesHandler {
     })
   }
 
-  async sendInvite(userID: string, contact: Contact): Promise<void> {
-    const user = this._context.openVault.identities.getOwnUser(userID)
-    if (!user) {
-      throw new Error('User not found')
-    }
+  async sendInviteTX(userID: string, contactID: string): Promise<void> {
+    const { user, peer, contact } = this.getUserObjects(userID, contactID)
     if (!user.profile.ethAddress) {
       throw new Error('No public eth address found on profile')
-    }
-    const peer = this._context.openVault.identities.getPeerUser(contact.peerID)
-    if (!peer) {
-      throw new Error('Peer not found')
     }
     if (!peer.profile.ethAddress) {
       throw new Error('No public eth address found for Contact')
@@ -362,7 +506,7 @@ export default class InvitesHandler {
     }
 
     try {
-      const inviteTXHash = await this.sendInviteTX(user, peer)
+      const inviteTXHash = await this.processInviteTransaction(user, peer)
       contact._invite = {
         ...contact._invite,
         inviteTX: inviteTXHash,

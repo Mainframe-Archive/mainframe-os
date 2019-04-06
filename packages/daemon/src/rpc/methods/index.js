@@ -40,6 +40,9 @@ export default {
   blockchain_ethSend: blockchain.ethSend,
   blockchain_ethSubscribe: blockchain.ethSubscribe,
   blockchain_ethUnsubscribe: blockchain.ethUnsubscribe,
+  blockchain_getInviteTXDetails: blockchain.getInviteTXDetails,
+  blockchain_sendInviteApprovalTX: blockchain.sendInviteApprovalTX,
+  blockchain_sendInviteTX: blockchain.sendInviteTX,
   blockchain_subEthNetworkChanged: blockchain.subEthNetworkChanged,
 
   comms_publish: comms.publish,

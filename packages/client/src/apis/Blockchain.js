@@ -9,6 +9,22 @@ export default class BlockchainAPIs extends ClientAPIs {
     return this._rpc.request('blockchain_ethSend', params)
   }
 
+  getInviteTXDetails(params: {
+    type: 'approve' | 'sendInvite',
+    userID: string,
+    contactID: string,
+  }) {
+    return this._rpc.request('blockchain_getInviteTXDetails', params)
+  }
+
+  sendInviteTX(params: { userID: string, contactID: string }) {
+    return this._rpc.request('blockchain_sendInviteTX', params)
+  }
+
+  sendInviteApprovalTX(params: { userID: string, contactID: string }) {
+    return this._rpc.request('blockchain_sendInviteApprovalTX', params)
+  }
+
   async ethSubscribe(params: BlockchainEthSendParams) {
     const subID = await this._rpc.request('blockchain_ethSubscribe', params)
 

@@ -16,6 +16,8 @@ import {
   type AppSetUserPermissionsSettingsParams,
   APP_SET_USER_PERMISSIONS_SETTINGS_SCHEMA,
   type BlockchainEthSendParams,
+  type GetInviteTXDetailsParams,
+  type SendInviteTXParams,
   ETH_REQUEST_SCHEMA,
   type IdentityCreateResult,
   type IdentityCreateUserParams,
@@ -24,6 +26,8 @@ import {
   type IdentityGetOwnDevelopersResult,
   IDENTITY_CREATE_OWN_USER_SCHEMA,
   IDENTITY_CREATE_OWN_DEVELOPER_SCHEMA,
+  INVITE_TX_DETAILS_SCHEMA,
+  INVITE_SEND_SCHEMA,
   LOCAL_ID_SCHEMA,
   GRAPHQL_QUERY_SCHEMA,
   type GraphQLQueryParams,
@@ -230,6 +234,36 @@ export default {
       params: BlockchainEthSendParams,
     ): Promise<any> => {
       return ctx.client.blockchain.ethSend(params)
+    },
+  },
+
+  blockchain_getInviteTXDetails: {
+    params: INVITE_TX_DETAILS_SCHEMA,
+    handler: (
+      ctx: LauncherContext,
+      params: GetInviteTXDetailsParams,
+    ): Promise<any> => {
+      return ctx.client.blockchain.getInviteTXDetails(params)
+    },
+  },
+
+  blockchain_sendInviteApprovalTX: {
+    params: INVITE_SEND_SCHEMA,
+    handler: (
+      ctx: LauncherContext,
+      params: SendInviteTXParams,
+    ): Promise<any> => {
+      return ctx.client.blockchain.sendInviteApprovalTX(params)
+    },
+  },
+
+  blockchain_sendInviteTX: {
+    params: INVITE_SEND_SCHEMA,
+    handler: (
+      ctx: LauncherContext,
+      params: SendInviteTXParams,
+    ): Promise<any> => {
+      return ctx.client.blockchain.sendInviteTX(params)
     },
   },
 }
