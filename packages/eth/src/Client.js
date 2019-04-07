@@ -265,6 +265,12 @@ export default class EthClient extends EventEmitter {
   }
 
   async completeTxParams(txParams: Object): Promise<Object> {
+    if (!txParams.to) {
+      throw new Error('Transaction "to" address required')
+    }
+    if (!txParams.from) {
+      throw new Error('Transaction "from" address required')
+    }
     if (!txParams.nonce) {
       txParams.nonce = await this.send('eth_getTransactionCount', [
         txParams.from,

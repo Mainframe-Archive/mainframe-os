@@ -14,7 +14,7 @@ export type Launcher_identities = {|
   +ownUsers: $ReadOnlyArray<{|
     +defaultEthAddress: ?string,
     +localID: string,
-    +feedHash: string,
+    +feedHash: ?string,
     +profile: {|
       +name: string,
       +ethAddress: ?string,

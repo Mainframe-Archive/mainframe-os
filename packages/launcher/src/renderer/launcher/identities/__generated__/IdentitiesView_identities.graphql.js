@@ -14,7 +14,7 @@ declare export opaque type IdentitiesView_identities$ref: FragmentReference;
 export type IdentitiesView_identities = {|
   +ownUsers: $ReadOnlyArray<{|
     +localID: string,
-    +feedHash: string,
+    +feedHash: ?string,
     +profile: {|
       +name: string
     |},

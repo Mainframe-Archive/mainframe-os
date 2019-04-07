@@ -268,6 +268,7 @@ export type GetInviteTXDetailsResult = {
   approved?: ?boolean,
   gasPriceGwei?: string,
   maxCost?: string,
+  stakeAmount: string,
 }
 
 export type SendInviteTXParams = {

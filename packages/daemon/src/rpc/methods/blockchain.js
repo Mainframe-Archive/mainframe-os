@@ -32,7 +32,6 @@ export const ethSend = async (
   ctx: ClientContext,
   params: BlockchainEthSendParams,
 ): Promise<BlockchainEthSendResult> => {
-  ctx.io.checkEthConnection() // Handle WS connection dropping
   return ctx.io.eth.send(params.method, params.params)
 }
 

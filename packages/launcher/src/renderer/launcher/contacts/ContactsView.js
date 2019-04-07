@@ -18,7 +18,6 @@ import { Form, type FormSubmitPayload } from '@morpheus-ui/forms'
 import PlusIcon from '@morpheus-ui/icons/PlusSymbolSm'
 import SearchIcon from '@morpheus-ui/icons/SearchSm'
 import CircleArrowRight from '@morpheus-ui/icons/CircleArrowRight'
-import rpc from '../rpc'
 
 import { type CurrentUser } from '../LauncherContext'
 import { EnvironmentContext } from '../RelayEnvironment'
@@ -27,6 +26,7 @@ import SvgSelectedPointer from '../../UIComponents/SVGSelectedPointer'
 
 import FormModalView from '../../UIComponents/FormModalView'
 import Loader from '../../UIComponents/Loader'
+import InviteContactModal from './InviteContactModal'
 
 const SvgSmallClose = props => (
   <svg width="10" height="10" viewBox="0 0 10 10" {...props}>
@@ -211,14 +211,7 @@ type State = {
   invitingContact?: ?string,
   withdrawingStake?: ?boolean,
   rejectingInvite?: ?string,
-  invitePending?: {
-    state: string,
-    error?: string,
-    txParams?: {
-      gasPriceGwei: string,
-      maxCost: string,
-    },
-  },
+  inviteModalOpen?: ?Contact,
   foundPeer?: {
     profile: {
       name: string,
@@ -351,6 +344,7 @@ class ContactsViewComponent extends Component<Props, State> {
     return (
       this.props.contacts.userContacts.find(
         c => c.localID === this.state.selectedContact,
+        // $FlowFixMe feedHash
       ) || this.getIdentity()
     )
   }
@@ -376,7 +370,11 @@ class ContactsViewComponent extends Component<Props, State> {
   }
 
   closeModal = () => {
-    this.setState({ addModalOpen: false, editModalOpen: false })
+    this.setState({
+      addModalOpen: false,
+      editModalOpen: false,
+      inviteModalOpen: undefined,
+    })
   }
 
   lookupPeer = async (feedHash: string) => {
@@ -407,92 +405,16 @@ class ContactsViewComponent extends Component<Props, State> {
     }
   }
 
-  async getInviteApproveTXDetails(contact) {
-    const { user } = this.props
-    const res = await rpc.getInviteTXDetails({
-      type: 'approve',
-      userID: user.localID,
-      contactID: contact.localID,
-    })
-    if (res.approved) {
-      this.getInviteSendTXDetails(contact)
-    } else {
-      this.setState({
-        invitePending: {
-          state: 'awaiting_approval ',
-          txParams: res,
-        },
-      })
-    }
-  }
-
   async sendApproveTX(contact) {
-    const { user } = this.props
-    try {
-      await rpc.sendInviteApprovalTX({
-        userID: user.localID,
-        contactID: contact.localID,
-      })
-      this.setState({
-        invitePending: {
-          state: 'approved',
-        },
-      })
-      this.getInviteSendTXDetails(contact)
-    } catch (err) {
-      this.setState({
-        invitePending: {
-          state: 'error ',
-          error: err.message,
-        },
-      })
-    }
+    this.setState({
+      inviteModalOpen: contact,
+    })
   }
 
-  async getInviteSendTXDetails(contact) {
-    const { user } = this.props
-    try {
-      const res = await rpc.getInviteTXDetails({
-        type: 'sendInvite',
-        userID: user.localID,
-        contactID: contact.localID,
-      })
-      this.setState({
-        invitePending: {
-          state: 'approved',
-          txParams: res,
-        },
-      })
-    } catch (err) {
-      this.setState({
-        invitePending: {
-          state: 'error ',
-          error: err.message,
-        },
-      })
-    }
-  }
-
-  sendInvite = async contact => {
-    const { user } = this.props
-    try {
-      await rpc.sendInviteTX({
-        userID: user.localID,
-        contactID: contact.localID,
-      })
-      this.setState({
-        invitePending: {
-          state: 'invite_sent',
-        },
-      })
-    } catch (err) {
-      this.setState({
-        invitePending: {
-          state: 'error ',
-          error: err.message,
-        },
-      })
-    }
+  sendInvite = async (contact: Contact) => {
+    this.setState({
+      inviteModalOpen: contact,
+    })
   }
 
   submitNewContact = (payload: FormSubmitPayload) => {
@@ -551,7 +473,6 @@ class ContactsViewComponent extends Component<Props, State> {
       error: null,
       inviteError: null,
     })
-    this.getInviteApproveTXDetails(contact)
   }
 
   acceptContact = (contact: Contact) => {
@@ -853,38 +774,23 @@ class ContactsViewComponent extends Component<Props, State> {
     )
   }
 
-  renderSendInviteState(contact) {
-    const { invitePending } = this.state
+  renderSendInviteState(contact: Contact) {
     if (contact.profile.ethAddress) {
       if (this.state.invitingContact) {
         return <Loader />
       }
-      let txDetails
-      if (invitePending && invitePending.txParams) {
-        txDetails = (
-          <Text>
-            {`Gas price: ${invitePending.txParams.gasPriceGwei}, max
-            cost: ${invitePending.txParams.maxCost}`}
-          </Text>
-        )
-      }
-      const approved = invitePending && invitePending.state === 'approved'
+
       return (
-        <>
-          {txDetails}
-          <Button
-            title={approved ? 'Send Invite' : 'Approve Invite'}
-            variant={['marginTop10', 'redOutline']}
-            onPress={() =>
-              approved ? this.sendInvite(contact) : this.sendApproveTX(contact)
-            }
-          />
-        </>
+        <Button
+          title={'Send Invite'}
+          variant={['marginTop10', 'redOutline']}
+          onPress={() => this.sendInvite(contact)}
+        />
       )
     }
   }
 
-  renderInviteArea(contact) {
+  renderInviteArea(contact: Contact) {
     switch (contact.connectionState) {
       case 'SENDING_FEED':
         return <Loader />
@@ -1036,6 +942,18 @@ class ContactsViewComponent extends Component<Props, State> {
     )
   }
 
+  renderInviteModal() {
+    return (
+      this.state.inviteModalOpen && (
+        <InviteContactModal
+          closeModal={this.closeModal}
+          contact={this.getSelectedContact()}
+          user={this.props.user}
+        />
+      )
+    )
+  }
+
   renderEditModal() {
     const selectedContact = this.getSelectedContact()
     if (!this.state.editModalOpen || !selectedContact) {
@@ -1093,6 +1011,7 @@ class ContactsViewComponent extends Component<Props, State> {
         {this.renderRightSide()}
         {this.renderAddModal()}
         {this.renderEditModal()}
+        {this.renderInviteModal()}
       </Container>
     )
   }
@@ -1103,6 +1022,7 @@ const ContactsView = createFragmentContainer(ContactsViewComponent, {
     fragment ContactsView_contacts on Contacts
       @argumentDefinitions(userID: { type: "String!" }) {
       userContacts(userID: $userID) {
+        ...InviteContactModal_contact
         peerID
         localID
         connectionState

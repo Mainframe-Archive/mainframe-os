@@ -25,6 +25,7 @@ type ObserveInvites<T = Object> = {
   source: Observable<T>,
 }
 
+//$FlowFixMe Cannot resolve module ./inviteABI.
 const INVITE_ABI = require('./inviteABI.json')
 
 const contracts = {
@@ -303,37 +304,41 @@ export default class InvitesHandler {
     return allowanceBN.gte(stakeBN)
   }
 
-  formatGasValues(txParams: {
+  async formatGasValues(txParams: {
     gas: string,
     gasPrice: string,
-  }): {
+  }): Promise<{
     maxCost: string,
     gasPriceGwei: string,
-  } {
+    stakeAmount: string,
+  }> {
+    const stake = await this.invitesContract.call('requiredStake')
+
     const gasPriceBN = utils.bigNumberify(txParams.gasPrice)
     const gasLimitBN = utils.bigNumberify(txParams.gas)
 
     const maxCost = gasPriceBN.mul(gasLimitBN)
     return {
+      stakeAmount: utils.formatUnits(stake, 'ether').toString(),
       maxCost: utils.formatUnits(maxCost, 'ether'),
       gasPriceGwei: utils.formatUnits(txParams.gasPrice, 'gwei'),
     }
   }
 
   async getApproveTXDetails(user: OwnUserIdentity) {
-    const { tokenContract, eth } = this._context.io
+    const { eth } = this._context.io
     const stake = await this.invitesContract.call('requiredStake')
-    const data = tokenContract.encodeCall('approve', [
-      user.profile.ethAddress,
+    const data = this.tokenContract.encodeCall('approve', [
+      this.invitesContract.address,
       stake,
     ])
     const txOptions = {
       from: user.profile.ethAddress,
-      to: tokenContract.address,
+      to: this.tokenContract.address,
       data,
     }
     const params = await eth.completeTxParams(txOptions)
-    const formattedParams = this.formatGasValues(params)
+    const formattedParams = await this.formatGasValues(params)
     return { ...params, ...formattedParams }
   }
 
@@ -350,7 +355,7 @@ export default class InvitesHandler {
       data,
     }
     const params = await eth.completeTxParams(txOptions)
-    const formattedParams = this.formatGasValues(params)
+    const formattedParams = await this.formatGasValues(params)
     return { ...params, ...formattedParams }
   }
 
@@ -363,9 +368,10 @@ export default class InvitesHandler {
 
   async approveTransfer(fromAddress: string) {
     const txOptions = { from: fromAddress }
+    const stake = await this.invitesContract.call('requiredStake')
     return new Promise((resolve, reject) => {
       this.tokenContract
-        .approve(this.invitesContract.address, 100, txOptions)
+        .approve(this.invitesContract.address, stake, txOptions)
         .then(res => {
           res.on('mined', hash => {
             resolve(hash)
@@ -508,8 +514,11 @@ export default class InvitesHandler {
     try {
       const inviteTXHash = await this.processInviteTransaction(user, peer)
       contact._invite = {
-        ...contact._invite,
         inviteTX: inviteTXHash,
+        // $FlowFixMe address already checked
+        fromAddress: user.profile.ethAddress,
+        // $FlowFixMe address already checked
+        toAddress: peer.profile.ethAddress,
         stake: {
           amount: stakeBN.toString(),
           state: 'staked',

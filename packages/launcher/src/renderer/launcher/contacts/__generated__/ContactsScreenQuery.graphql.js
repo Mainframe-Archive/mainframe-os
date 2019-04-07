@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash d09f9f2aa13d3b72518318b2ed6077ed
+ * @relayHash 003e035e2ff836a2d596d4a4c83e32b5
  */
 
 /* eslint-disable */
@@ -45,6 +45,7 @@ fragment ContactsScreen_contacts_3iqrP on Contacts {
 
 fragment ContactsView_contacts_3iqrP on Contacts {
   userContacts(userID: $userID) {
+    ...InviteContactModal_contact
     peerID
     localID
     connectionState
@@ -62,6 +63,25 @@ fragment ContactsView_contacts_3iqrP on Contacts {
       ethAddress
     }
     id
+  }
+}
+
+fragment InviteContactModal_contact on Contact {
+  peerID
+  localID
+  connectionState
+  publicFeed
+  invite {
+    inviteTX
+    stake {
+      reclaimedTX
+      amount
+      state
+    }
+  }
+  profile {
+    name
+    ethAddress
   }
 }
 */
@@ -87,7 +107,7 @@ return {
   "operationKind": "query",
   "name": "ContactsScreenQuery",
   "id": null,
-  "text": "query ContactsScreenQuery(\n  $userID: String!\n) {\n  viewer {\n    contacts {\n      ...ContactsScreen_contacts_3iqrP\n    }\n    id\n  }\n}\n\nfragment ContactsScreen_contacts_3iqrP on Contacts {\n  ...ContactsView_contacts_3iqrP\n}\n\nfragment ContactsView_contacts_3iqrP on Contacts {\n  userContacts(userID: $userID) {\n    peerID\n    localID\n    connectionState\n    publicFeed\n    invite {\n      inviteTX\n      stake {\n        reclaimedTX\n        amount\n        state\n      }\n    }\n    profile {\n      name\n      ethAddress\n    }\n    id\n  }\n}\n",
+  "text": "query ContactsScreenQuery(\n  $userID: String!\n) {\n  viewer {\n    contacts {\n      ...ContactsScreen_contacts_3iqrP\n    }\n    id\n  }\n}\n\nfragment ContactsScreen_contacts_3iqrP on Contacts {\n  ...ContactsView_contacts_3iqrP\n}\n\nfragment ContactsView_contacts_3iqrP on Contacts {\n  userContacts(userID: $userID) {\n    ...InviteContactModal_contact\n    peerID\n    localID\n    connectionState\n    publicFeed\n    invite {\n      inviteTX\n      stake {\n        reclaimedTX\n        amount\n        state\n      }\n    }\n    profile {\n      name\n      ethAddress\n    }\n    id\n  }\n}\n\nfragment InviteContactModal_contact on Contact {\n  peerID\n  localID\n  connectionState\n  publicFeed\n  invite {\n    inviteTX\n    stake {\n      reclaimedTX\n      amount\n      state\n    }\n  }\n  profile {\n    name\n    ethAddress\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",

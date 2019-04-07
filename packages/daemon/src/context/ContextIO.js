@@ -80,7 +80,10 @@ export default class ContextIO {
         this._context.openVault.settings.ethURL,
         walletProvider,
       )
+    } else {
+      this.checkEthConnection() // Handle WS connection dropping
     }
+    // $FlowFixMe null checked above
     return this._ethClient
   }
 
@@ -98,8 +101,9 @@ export default class ContextIO {
   checkEthConnection() {
     // Handle WS disconnects
     if (
-      this.eth.web3Provider.connection &&
-      this.eth.web3Provider.connection.readyState !== 1
+      this._ethClient &&
+      this._ethClient.web3Provider.connection &&
+      this._ethClient.web3Provider.connection.readyState !== 1
     ) {
       const walletProvider = new WalletProvider(this._context)
       this._ethClient = new EthClient(
