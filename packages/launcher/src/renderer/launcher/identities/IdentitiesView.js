@@ -36,6 +36,7 @@ type State = {
 
 const Container = styled.View`
   flex: 1;
+  padding: 40px 50px 20px 50px;
 `
 
 const UserItem = styled.View`
