@@ -29,8 +29,8 @@ const wsOptions = {
 }
 
 type Subscriptions = {
-  networkChanged: () => Observable,
-  accountsChanged: () => Observable,
+  networkChanged: () => Promise<Observable<*>>,
+  accountsChanged: () => Promise<Observable<*>>,
 }
 
 type SignDataParams = {

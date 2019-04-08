@@ -6,6 +6,7 @@ import {
   graphql,
   commitMutation,
   createFragmentContainer,
+  // $FlowFixMe: requestSubscription not present in Flow definition but exported by library
   requestSubscription,
   type Disposable,
   type Environment,
@@ -193,8 +194,6 @@ type Props = {
   contacts: {
     userContacts: Array<Contact>,
   },
-  acceptContact: (contact: Contact) => void,
-  ignoreContact: (contact: Contact) => void,
 }
 
 type State = {

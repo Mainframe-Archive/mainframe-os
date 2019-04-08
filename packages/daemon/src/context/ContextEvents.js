@@ -1,11 +1,6 @@
 // @flow
 
-import {
-  type ConnectableObservable,
-  type Observable,
-  type Subscription,
-  Subject,
-} from 'rxjs'
+import { type Observable, type Subscription, Subject } from 'rxjs'
 import {
   debounceTime,
   filter,
@@ -66,7 +61,7 @@ export default class ContextEvents {
         )
       }),
     )
-    // $FlowFixMe refcount type
+    // $FlowFixMe: ConnectableObservable pipe
     this.ethNetworkChanged = this._context.pipe(
       filter((e: ContextEvent) => {
         return e.type === 'eth_network_changed'
@@ -78,7 +73,7 @@ export default class ContextEvents {
       multicast(new Subject()),
       refCount(),
     )
-    // $FlowFixMe refcount type
+    // $FlowFixMe: ConnectableObservable pipe
     this.ethAccountsChanged = this._context.pipe(
       filter((e: ContextEvent) => {
         return e.type === 'eth_accounts_changed'

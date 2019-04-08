@@ -1,16 +1,3 @@
-// @flow
-
-declare function contract(
-  name: string,
-  callback: (accounts: Array<string>) => void,
-): void
-declare function beforeEach(name: string, callback: () => Promise<void>): void
-declare function it(name: string, callback: () => Promise<void>): void
-
-declare var artifacts: Object
-declare var web3: Object
-declare function assert(): void
-
 const Token = artifacts.require('Token.sol')
 const ContactInvite = artifacts.require('ContactInvite.sol')
 const EthUtil = require('ethereumjs-util')
@@ -28,8 +15,8 @@ const acc1PrivateKey =
   '1c5a7303b5ecbb14a38753aeffeb70a7794a475b84de472077e25b5fa3e9ae56'
 
 contract('Token', accounts => {
-  let token: Token
-  let invites: ContactInvite
+  let token
+  let invites
 
   beforeEach('setup contract for each test', async () => {
     token = await Token.new()
