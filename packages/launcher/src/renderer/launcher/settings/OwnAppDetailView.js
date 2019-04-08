@@ -4,17 +4,19 @@ import React, { Component } from 'react'
 import { ActivityIndicator } from 'react-native'
 import styled from 'styled-components/native'
 import { Text, Button } from '@morpheus-ui/core'
+
 import { graphql, createFragmentContainer, commitMutation } from 'react-relay'
 import type { StrictPermissionsRequirements } from '@mainframe/app-permissions'
 import { shell } from 'electron'
+import PlusIcon from '../../UIComponents/Icons/PlusIcon'
 
 import colors from '../../colors'
 import rpc from '../rpc'
 import { EnvironmentContext } from '../RelayEnvironment'
 import applyContext, { type CurrentUser } from '../LauncherContext'
-import ModalView from '../../UIComponents/ModalView'
 import AppIcon from '../apps/AppIcon'
 
+import ArrowLeft from '../../UIComponents/Icons/ArrowLeft'
 import EditAppDetailsModal, {
   type CompleteAppData,
 } from './EditAppDetailsModal'
@@ -26,16 +28,26 @@ import type { OwnAppDetailView_ownApp as OwnApp } from './__generated__/OwnAppDe
 
 const Container = styled.View`
   flex: 1;
-  width: 100%;
   flex-direction: column;
-  padding: 20px 25px;
 `
 
 const Header = styled.View`
   flex-direction: row;
-  width: 100%;
-  padding-left: 15px;
   align-items: center;
+  border-top-width: 1px;
+  border-bottom-width: 1px;
+  border-bottom-color: #f5f5f5;
+  border-top-color: #f5f5f5;
+  margin-top: 30px;
+  padding: 15px 30px 15px 9px;
+`
+
+const BackButton = styled.TouchableOpacity`
+  width: 30px;
+  height: 30px;
+  align-items: center;
+  justify-content: center;
+  margin-right: 15px;
 `
 
 const HeaderLabels = styled.View`
@@ -48,18 +60,28 @@ const IconContainer = styled.View`
   background-color: #232323;
   border-radius: 5px;
 `
-
-const VersionDetailRow = styled.View`
-  margin-bottom: 20px;
-`
-
 const ButtonsContainer = styled.View`
-  margin-top: 10px;
+  margin-top: 20px;
   flex-direction: row;
 `
 
 const ErrorView = styled.View`
   padding-vertical: 15px;
+`
+
+const ContentContainer = styled.View`
+  flex: 1;
+  border-left-width: 1px;
+  border-left-color: #f5f5f5;
+  margin-left: 48px;
+`
+
+const VersionContainer = styled.View`
+  padding: 0 30px 30px 30px;
+  margin-bottom: 10px;
+  border-bottom-color: #f5f5f5;
+
+  ${props => props.border && `border-bottom-width: 1px;`}
 `
 
 const detailTextStyle = { color: colors.GREY_DARK_38, paddingTop: 5 }
@@ -364,20 +386,20 @@ class OwnAppDetailView extends Component<Props, State> {
     const hasPublishedVersion = ownApp.publishedVersion != null
 
     const headerPublished = hasPublishedVersion ? (
-      <Text variant="greyMed" size={12}>
-        App ID:{' '}
-        <Text variant={['greyMed', 'mono']} size={12}>
-          {ownApp.updateFeedHash}
-        </Text>
+      <Text variant="mono" color="#00A7E7" size={10}>
+        App ID: {ownApp.updateFeedHash}
       </Text>
     ) : (
-      <Text variant="greyMed" size={12}>
-        not published
+      <Text color="#da1157" size={12}>
+        Not published
       </Text>
     )
 
     const header = (
       <Header>
+        <BackButton onPress={this.props.onClose}>
+          <ArrowLeft />
+        </BackButton>
         <IconContainer>
           <AppIcon size="small" id={ownApp.mfid} />
         </IconContainer>
@@ -391,12 +413,14 @@ class OwnAppDetailView extends Component<Props, State> {
     let contents
     if (this.state.publishing) {
       contents = (
-        <>
-          <Text variant={['smallTitle', 'blue', 'bold']}>
-            Publishing {hasPublishedVersion ? 'update' : 'app'}...
-          </Text>
-          <ActivityIndicator />
-        </>
+        <ContentContainer>
+          <VersionContainer>
+            <Text variant="smallLabel">
+              Publishing {hasPublishedVersion ? 'update' : 'app'}...
+            </Text>
+            <ActivityIndicator />
+          </VersionContainer>
+        </ContentContainer>
       )
     } else {
       const openButton = (
@@ -408,26 +432,41 @@ class OwnAppDetailView extends Component<Props, State> {
       )
 
       const publishedVersionInfo = hasPublishedVersion ? (
-        <>
-          <Text variant={['smallTitle', 'blue', 'bold']}>
-            Published version ({ownApp.publishedVersion})
+        <VersionContainer border={hasDraftVersion}>
+          <Text variant="smallLabel">Published version</Text>
+          <Text theme={detailTextStyle}>{ownApp.publishedVersion}</Text>
+
+          <Text variant="smallLabel">App Id</Text>
+          <Text theme={detailTextStyle}>
+            Share this app ID to allow users to install your app in Mainframe
+            OS.
           </Text>
-          <Text>
-            Users can install your application in Mainframe OS using its app ID:{' '}
+          <Text variant={['addressLarge', 'marginTop10']}>
             {ownApp.updateFeedHash}
           </Text>
-        </>
+          {!hasDraftVersion && (
+            <ButtonsContainer>
+              {openButton}
+              <Button
+                variant={['mediumUppercase', 'redOutline']}
+                title="NEW VERSION"
+                Icon={PlusIcon}
+                onPress={this.onPressNewVersion}
+              />
+            </ButtonsContainer>
+          )}
+        </VersionContainer>
       ) : null
 
       const versionContents = hasDraftVersion ? (
-        <>
-          <Text variant={['smallTitle', 'blue', 'bold']}>
-            Draft version ({ownApp.currentVersionData.version})
+        <VersionContainer>
+          <Text variant="smallLabel">Draft version</Text>
+          <Text theme={detailTextStyle}>
+            {ownApp.currentVersionData.version}
           </Text>
-          <VersionDetailRow>
-            <Text variant="smallLabel">CONTENT PATH</Text>
-            <Text theme={detailTextStyle}>{ownApp.contentsPath}</Text>
-          </VersionDetailRow>
+
+          <Text variant="smallLabel">CONTENT PATH</Text>
+          <Text theme={detailTextStyle}>{ownApp.contentsPath}</Text>
           <ButtonsContainer>
             {openButton}
             <Button
@@ -436,22 +475,13 @@ class OwnAppDetailView extends Component<Props, State> {
               onPress={this.onPressEdit}
             />
             <Button
-              variant={['mediumUppercase', 'red']}
+              variant={['mediumUppercase', 'redOutline']}
               title={hasPublishedVersion ? 'PUBLISH UPDATE' : 'PUBLISH APP'}
               onPress={this.onPressPublishVersion}
             />
           </ButtonsContainer>
-        </>
-      ) : (
-        <ButtonsContainer>
-          {openButton}
-          <Button
-            variant={['mediumUppercase', 'red']}
-            title="CREATE NEW VERSION"
-            onPress={this.onPressNewVersion}
-          />
-        </ButtonsContainer>
-      )
+        </VersionContainer>
+      ) : null
 
       const errorView = this.state.errorMsg ? (
         <ErrorView>
@@ -460,21 +490,19 @@ class OwnAppDetailView extends Component<Props, State> {
       ) : null
 
       contents = (
-        <>
+        <ContentContainer>
           {publishedVersionInfo}
           {versionContents}
           {errorView}
-        </>
+        </ContentContainer>
       )
     }
 
     return (
-      <ModalView
-        title={ownApp.name}
-        headerView={header}
-        onRequestClose={this.props.onClose}>
-        <Container>{contents}</Container>
-      </ModalView>
+      <Container>
+        {header}
+        {contents}
+      </Container>
     )
   }
 }

@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 0a7cd7c4cbffa09c559bdc70e4795665
+ * @relayHash 45bf4b55e2397e2c58860f45faf3575b
  */
 
 /* eslint-disable */
@@ -50,6 +50,7 @@ fragment AppItem_installedApp on App {
   mfid
   localID
   name
+  installationState
   manifest {
     author {
       id
@@ -102,7 +103,7 @@ return {
   "operationKind": "subscription",
   "name": "LauncherAppUpdateChangedSubscription",
   "id": null,
-  "text": "subscription LauncherAppUpdateChangedSubscription {\n  appUpdateChanged {\n    app {\n      ...AppItem_installedApp\n      id\n    }\n    viewer {\n      apps {\n        updatesCount\n      }\n      id\n    }\n  }\n}\n\nfragment AppItem_installedApp on App {\n  mfid\n  localID\n  name\n  manifest {\n    author {\n      id\n      name\n    }\n  }\n  update {\n    manifest {\n      version\n    }\n  }\n}\n",
+  "text": "subscription LauncherAppUpdateChangedSubscription {\n  appUpdateChanged {\n    app {\n      ...AppItem_installedApp\n      id\n    }\n    viewer {\n      apps {\n        updatesCount\n      }\n      id\n    }\n  }\n}\n\nfragment AppItem_installedApp on App {\n  mfid\n  localID\n  name\n  installationState\n  manifest {\n    author {\n      id\n      name\n    }\n  }\n  update {\n    manifest {\n      version\n    }\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -190,6 +191,13 @@ return {
                 "storageKey": null
               },
               v1,
+              {
+                "kind": "ScalarField",
+                "alias": null,
+                "name": "installationState",
+                "args": null,
+                "storageKey": null
+              },
               {
                 "kind": "LinkedField",
                 "alias": null,

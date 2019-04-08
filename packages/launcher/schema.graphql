@@ -59,6 +59,7 @@ type App implements Node {
   name: String!
   manifest: AppManifestData!
   update: AppUpdateData
+  installationState: InstallationState
   users: [AppUser!]!
 }
 
@@ -349,6 +350,12 @@ type ImportHDWalletPayload {
   hdWallet: EthHDWallet
   viewer: Viewer!
   clientMutationId: String
+}
+
+enum InstallationState {
+  READY
+  DOWNLOADING
+  ERROR
 }
 
 input InviteContactInput {

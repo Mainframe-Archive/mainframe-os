@@ -255,6 +255,15 @@ export const appUpdateData = new GraphQLObjectType({
   }),
 })
 
+export const installationState = new GraphQLEnumType({
+  name: 'InstallationState',
+  values: {
+    READY: { value: 'ready' },
+    DOWNLOADING: { value: 'downloading' },
+    ERROR: { value: 'download_error' },
+  },
+})
+
 export const app = new GraphQLObjectType({
   name: 'App',
   interfaces: () => [nodeInterface],
@@ -279,6 +288,9 @@ export const app = new GraphQLObjectType({
       resolve: (self, args, ctx) => {
         return ctx.openVault.apps.getUpdate(self.id)
       },
+    },
+    installationState: {
+      type: installationState,
     },
     users: {
       type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(appUser))),
