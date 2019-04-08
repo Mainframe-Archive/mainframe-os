@@ -6,7 +6,6 @@ import Client, { type VaultSettings } from '@mainframe/client'
 import { Environment, DaemonConfig, VaultConfig } from '@mainframe/config'
 import StreamRPC from '@mainframe/rpc-stream'
 import { setupDaemon, startDaemon, stopDaemon } from '@mainframe/toolbox'
-// eslint-disable-next-line import/named
 import { app, BrowserWindow, ipcMain, Menu } from 'electron'
 import { is } from 'electron-util'
 
@@ -274,6 +273,9 @@ const createLauncherWindow = async () => {
 
   launcherWindow = newWindow({ width: 900, height: 600 })
 
+  const menu = Menu.buildFromTemplate(template)
+  Menu.setApplicationMenu(menu)
+
   const launcherContext = new LauncherContext({
     client,
     launchApp,
@@ -342,6 +344,4 @@ ipcMain.on('init-window', event => {
 
 ipcMain.on('ready-window', event => {
   BrowserWindow.fromWebContents(event.sender).show()
-  const menu = Menu.buildFromTemplate(template)
-  Menu.setApplicationMenu(menu)
 })

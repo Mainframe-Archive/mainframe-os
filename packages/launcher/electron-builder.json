@@ -8,40 +8,33 @@
   "linux": {
     "category": "Network",
     "target": ["AppImage", "dir"],
-    "icon": "./build/icon.png",
-    "extraResources": [
-      {
-        "from": "./bin/swarm-linux",
-        "to": "bin/swarm"
-      }
-    ]
+    "icon": "./build/icon.png"
   },
   "mac": {
     "icon": "./build/icon.png",
-    "target": ["dmg", "dir"],
+    "target": ["dmg", "dir"]
   },
   "dmg": {
-    "contents": [{
-      "type": "file",
-      "path": "build/pkg-scripts/preinstall.command",
-      "x": 100,
-      "y": 100
-    },
+    "contents": [
+      {
+        "x": "275",
+        "y": "310"
+      },
+      {
+        "type": "file",
+        "path": "build/pkg-scripts/preinstall.command",
+        "x": "275",
+        "y": "160"
+      },
       {
         "type": "link",
         "path": "/Applications",
-        "x": "400",
-        "y": "450"
+        "x": "490",
+        "y": "310"
       }]
   },
   "win": {
     "icon": "./build/icon.png",
-    "target": "nsis",
-    "extraResources": [
-      {
-        "from": "./bin/swarm-win.exe",
-        "to": "bin/swarm.exe"
-      }
-    ]
+    "target": "nsis"
   }
 }

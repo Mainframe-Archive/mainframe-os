@@ -31,7 +31,8 @@ checkBrew() {
 checkDaemon() {
     dependencies;
     if hash mainframed 2>/dev/null; then
-        DAEMON_EXISTS=true
+        echo "The Mainframe Daemon is installed, will try to upgrade."
+        DAEMON_EXISTS=false
     else
         echo "No local Mainframe Daemon installations were found."
         DAEMON_EXISTS=false
