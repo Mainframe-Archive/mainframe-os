@@ -56,8 +56,8 @@ export type TXEventEmitter = EventEmitter
 
 export type AbstractProvider = {
   +send: (method: string, params: Array<*>) => Promise<*>,
-  +on?: (event: string, listener: Function) => any,
-  +emit?: (event: string, ...args: Array<any>) => boolean,
+  +on?: (event: string, listener: Function) => *,
+  +emit?: (event: string, ...args: Array<any>) => *,
   +unsubscribe?: (id: string, type?: string) => void,
   +clearSubscriptions?: () => void,
   +subscribe?: (

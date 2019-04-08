@@ -25,22 +25,10 @@ type State = {
 class ContactsScreenComponent extends Component<Props, State> {
   static contextType = EnvironmentContext
 
-  acceptContact = () => {
-    // TODO needs implementing
-  }
-
-  ignoreContact = () => {
-    // TODO needs implementing
-  }
-
   render() {
     return (
-      <ContactsView
-        user={this.props.user}
-        contacts={this.props.contacts}
-        ignoreContact={this.ignoreContact}
-        acceptContact={this.acceptContact}
-      />
+      // $FlowFixMe: injected fragment type
+      <ContactsView user={this.props.user} contacts={this.props.contacts} />
     )
   }
 }
