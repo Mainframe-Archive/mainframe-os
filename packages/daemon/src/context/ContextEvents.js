@@ -1,6 +1,11 @@
 // @flow
 
-import { type Observable, type Subscription, Subject } from 'rxjs'
+import {
+  type ConnectableObservable,
+  type Observable,
+  type Subscription,
+  Subject,
+} from 'rxjs'
 import {
   debounceTime,
   filter,
@@ -24,12 +29,12 @@ import type {
 export default class ContextEvents {
   vaultOpened: Observable<ContextEvent>
   vaultModified: Observable<ContextEvent>
-  ethNetworkChanged: Observable<ContextEvent>
-  ethAccountsChanged: Observable<ContextEvent>
+  ethNetworkChanged: Observable<{ networkID: string }>
+  ethAccountsChanged: Observable<{ accounts: Array<string> }>
 
   _context: ClientContext
   _subscriptions: { [key: string]: Subscription } = {}
-  _publishingContacts = new Set()
+  _publishingContacts: Set<string> = new Set()
 
   constructor(context: ClientContext) {
     this._context = context
@@ -61,6 +66,7 @@ export default class ContextEvents {
         )
       }),
     )
+    // $FlowFixMe refcount type
     this.ethNetworkChanged = this._context.pipe(
       filter((e: ContextEvent) => {
         return e.type === 'eth_network_changed'
@@ -72,6 +78,7 @@ export default class ContextEvents {
       multicast(new Subject()),
       refCount(),
     )
+    // $FlowFixMe refcount type
     this.ethAccountsChanged = this._context.pipe(
       filter((e: ContextEvent) => {
         return e.type === 'eth_accounts_changed'

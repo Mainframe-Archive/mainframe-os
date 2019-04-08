@@ -56,8 +56,8 @@ const encodeAddress = (address: string) => {
 
 export default class InvitesHandler {
   _context: ClientContext
-  _observers = new Set()
-  _ethSubscriptions = new Set()
+  _observers: Set<Observable<any>> = new Set()
+  _ethSubscriptions: Set<string> = new Set()
 
   constructor(context: ClientContext) {
     this._context = context
@@ -202,13 +202,13 @@ export default class InvitesHandler {
       const contact = identities.getContactByPeerID(user.localID, peer.localID)
       if (contact && contact.invite) {
         contact.invite.stake.state = 'seized'
+        this._context.next({
+          type: 'contact_changed',
+          contact,
+          userID: user.localID,
+          change: 'inviteDeclined',
+        })
       }
-      this._context.next({
-        type: 'contact_changed',
-        contact,
-        userID: user.localID,
-        change: 'inviteDeclined',
-      })
     }
   }
 
@@ -256,14 +256,17 @@ export default class InvitesHandler {
               peerID: peer.localID,
             }
             identities.setInviteRequest(user.localID, contactInvite)
-            this._context.next({
-              type: 'invites_changed',
-              userID: user.localID,
-              contact: this._context.queries.getContactFromInvite(
-                contactInvite,
-              ),
-              change: 'inviteReceived',
-            })
+            const eventContact = this._context.queries.getContactFromInvite(
+              contactInvite,
+            )
+            if (eventContact) {
+              this._context.next({
+                type: 'invites_changed',
+                userID: user.localID,
+                contact: eventContact,
+                change: 'inviteReceived',
+              })
+            }
           }
         }
       } catch (err) {
