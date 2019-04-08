@@ -26,7 +26,7 @@ import SvgSelectedPointer from '../../UIComponents/SVGSelectedPointer'
 
 import FormModalView from '../../UIComponents/FormModalView'
 import Loader from '../../UIComponents/Loader'
-import InviteContactModal from './InviteContactModal'
+import InviteContactModal, { type TransactionType } from './InviteContactModal'
 
 const SvgSmallClose = props => (
   <svg width="10" height="10" viewBox="0 0 10 10" {...props}>
@@ -211,7 +211,10 @@ type State = {
   invitingContact?: ?string,
   withdrawingStake?: ?boolean,
   rejectingInvite?: ?string,
-  inviteModalOpen?: ?Contact,
+  inviteModalOpen?: ?{
+    type: TransactionType,
+    contact: Contact,
+  },
   foundPeer?: {
     profile: {
       name: string,
@@ -230,36 +233,6 @@ const CONTACTS_CHANGED_SUBSCRIPTION = graphql`
           inviteTX
         }
       }
-      viewer {
-        contacts {
-          ...ContactsView_contacts @arguments(userID: $userID)
-        }
-      }
-    }
-  }
-`
-
-export const retrieveInviteStakeMutation = graphql`
-  mutation ContactsViewRetrieveInviteStakeMutation(
-    $input: RetrieveInviteStakeInput!
-    $userID: String!
-  ) {
-    retrieveInviteStake(input: $input) {
-      viewer {
-        contacts {
-          ...ContactsView_contacts @arguments(userID: $userID)
-        }
-      }
-    }
-  }
-`
-
-export const rejectContactMutation = graphql`
-  mutation ContactsViewRejectContactMutation(
-    $input: RejectContactInput!
-    $userID: String!
-  ) {
-    rejectContact(input: $input) {
       viewer {
         contacts {
           ...ContactsView_contacts @arguments(userID: $userID)
@@ -405,15 +378,12 @@ class ContactsViewComponent extends Component<Props, State> {
     }
   }
 
-  async sendApproveTX(contact) {
-    this.setState({
-      inviteModalOpen: contact,
-    })
-  }
-
   sendInvite = async (contact: Contact) => {
     this.setState({
-      inviteModalOpen: contact,
+      inviteModalOpen: {
+        contact,
+        type: 'invite',
+      },
     })
   }
 
@@ -507,63 +477,19 @@ class ContactsViewComponent extends Component<Props, State> {
   }
 
   withdrawStake = (contact: Contact) => {
-    const { user } = this.props
-    this.setState({ inviteError: null, withdrawingStake: true })
-    const input = {
-      userID: user.localID,
-      contactID: contact.localID,
-    }
-
-    const requestComplete = error => {
-      this.setState({
-        inviteError: error,
-        withdrawingStake: false,
-      })
-    }
-
-    commitMutation(this.context, {
-      mutation: retrieveInviteStakeMutation,
-      variables: { input, userID: user.localID },
-      onCompleted: (contact, errors) => {
-        if (errors && errors.length) {
-          requestComplete(errors[0].message)
-        } else {
-          requestComplete()
-        }
-      },
-      onError: err => {
-        requestComplete(err.message)
+    this.setState({
+      inviteModalOpen: {
+        contact,
+        type: 'retrieveStake',
       },
     })
   }
 
   rejectContact = (contact: Contact) => {
-    const { user } = this.props
-    this.setState({ error: null, rejectingInvite: contact.peerID })
-    const input = {
-      userID: user.localID,
-      peerID: contact.peerID,
-    }
-
-    const requestComplete = error => {
-      this.setState({
-        error,
-        rejectingInvite: undefined,
-      })
-    }
-
-    commitMutation(this.context, {
-      mutation: rejectContactMutation,
-      variables: { input, userID: user.localID },
-      onCompleted: (contact, errors) => {
-        if (errors && errors.length) {
-          requestComplete(errors[0].message)
-        } else {
-          requestComplete()
-        }
-      },
-      onError: err => {
-        requestComplete(err.message)
+    this.setState({
+      inviteModalOpen: {
+        contact,
+        type: 'declineInvite',
       },
     })
   }
@@ -947,8 +873,9 @@ class ContactsViewComponent extends Component<Props, State> {
       this.state.inviteModalOpen && (
         <InviteContactModal
           closeModal={this.closeModal}
-          contact={this.getSelectedContact()}
+          contact={this.state.inviteModalOpen.contact}
           user={this.props.user}
+          type={this.state.inviteModalOpen.type}
         />
       )
     )

@@ -25,6 +25,10 @@ export default class BlockchainAPIs extends ClientAPIs {
     return this._rpc.request('blockchain_sendInviteApprovalTX', params)
   }
 
+  sendDeclineInviteTX(params: { userID: string, peerID: string }) {
+    return this._rpc.request('blockchain_sendDeclineInviteTX', params)
+  }
+
   async ethSubscribe(params: BlockchainEthSendParams) {
     const subID = await this._rpc.request('blockchain_ethSubscribe', params)
 

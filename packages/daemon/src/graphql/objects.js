@@ -614,7 +614,8 @@ export const contact = new GraphQLObjectType({
     profile: {
       type: new GraphQLNonNull(genericProfile),
       resolve: (self, args, ctx: ClientContext) => {
-        return ctx.openVault.identities.getContactProfile(self.localID)
+        const profile = ctx.openVault.identities.getContactProfile(self.localID)
+        return { ...self.profile, ...profile }
       },
     },
     connectionState: {

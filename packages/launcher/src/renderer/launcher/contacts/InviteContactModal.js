@@ -2,24 +2,39 @@
 import React, { Component } from 'react'
 import styled from 'styled-components/native'
 import { Text } from '@morpheus-ui/core'
-import { graphql, createFragmentContainer } from 'react-relay'
+import { graphql, createFragmentContainer, commitMutation } from 'react-relay'
 import Loader from '../../UIComponents/Loader'
 
 import rpc from '../rpc'
-import { type CurrentUser } from '../LauncherContext'
 import FormModalView from '../../UIComponents/FormModalView'
+import { EnvironmentContext } from '../RelayEnvironment'
+import applyContext, { type ContextProps } from '../LauncherContext'
 
 import type { InviteContactModal_contact as Contact } from './__generated__/InviteContactModal_contact.graphql.js'
 
-type Props = {
+export type TransactionType = 'invite' | 'retrieveStake' | 'declineInvite'
+
+type Props = ContextProps & {
   closeModal: () => void,
-  user: CurrentUser,
   contact: Contact,
+  type: TransactionType,
+}
+
+type TXParams = {
+  gasPriceGwei: string,
+  maxCost: string,
+  stakeAmount: string,
 }
 
 type State = {
   txProcessing: boolean,
   error?: ?string,
+  txParams?: ?TXParams,
+  declinedTXHash?: ?string,
+  balances?: {
+    eth: string,
+    mft: string,
+  },
   invitePending?: {
     error?: string,
     state:
@@ -29,12 +44,12 @@ type State = {
       | 'sending_invite'
       | 'invite_sent'
       | 'error',
-    txParams?: {
-      gasPriceGwei: string,
-      maxCost: string,
-      stakeAmount: string,
-    },
   },
+}
+
+const MFT_TOKEN_ADDRESSES = {
+  ropsten: '0xa46f1563984209fe47f8236f8b01a03f03f957e4',
+  mainnet: '0xdf2c7238198ad8b389666574f2d8bc411a4b7428',
 }
 
 const FormContainer = styled.View`
@@ -51,11 +66,66 @@ const Section = styled.View`
   margin-bottom: 20px;
 `
 
+export const retrieveInviteStakeMutation = graphql`
+  mutation ContactsViewRetrieveInviteStakeMutation(
+    $input: RetrieveInviteStakeInput!
+    $userID: String!
+  ) {
+    retrieveInviteStake(input: $input) {
+      viewer {
+        contacts {
+          ...ContactsView_contacts @arguments(userID: $userID)
+        }
+      }
+    }
+  }
+`
+
 export class InviteContactModal extends Component<Props, State> {
+  static contextType = EnvironmentContext
+
   state = {}
 
   componentDidMount() {
-    this.getInviteApproveTXDetails()
+    if (this.props.type === 'invite') {
+      this.getInviteApproveTXDetails()
+    } else {
+      this.getTXDetails(this.props.type)
+    }
+    this.getBalances()
+  }
+
+  async getBalances() {
+    const { ethAddress } = this.props.user.profile
+    const address = MFT_TOKEN_ADDRESSES[this.props.ethClient.networkName]
+    const balances = {
+      mft: '0',
+      eth: '0',
+    }
+    if (address && ethAddress) {
+      const token = this.props.ethClient.erc20Contract(address)
+      balances.mft = await token.getBalance(ethAddress)
+      balances.eth = await this.props.ethClient.getETHBalance(ethAddress)
+    }
+    this.setState({ balances })
+  }
+
+  async getTXDetails(type: string) {
+    const { user, contact } = this.props
+    try {
+      const res = await rpc.getInviteTXDetails({
+        type: type,
+        userID: user.localID,
+        contactID: contact.localID,
+      })
+      this.setState({
+        txParams: res,
+      })
+    } catch (err) {
+      this.setState({
+        error: err.message,
+      })
+    }
   }
 
   async getInviteApproveTXDetails() {
@@ -67,9 +137,9 @@ export class InviteContactModal extends Component<Props, State> {
         contactID: contact.localID,
       })
       this.setState({
+        txParams: res,
         invitePending: {
           state: 'awaiting_approval',
-          txParams: res,
         },
       })
     } catch (err) {
@@ -141,20 +211,72 @@ export class InviteContactModal extends Component<Props, State> {
     } catch (err) {
       this.setState({
         error: err.message,
+        txProcessing: false,
         invitePending: {
           state: 'approved',
-          txProcessing: false,
         },
       })
     }
   }
 
+  sendDeclineTX = async () => {
+    const { user, contact } = this.props
+    try {
+      this.setState({ txProcessing: true, error: null })
+      const res = await rpc.sendDeclineInviteTX({
+        userID: user.localID,
+        peerID: contact.localID,
+      })
+      this.setState({
+        txProcessing: false,
+        declinedTXHash: res,
+      })
+      this.props.closeModal()
+    } catch (err) {
+      this.setState({
+        txProcessing: false,
+        error: err.message,
+      })
+    }
+  }
+
+  withdrawStake = () => {
+    const { user, contact } = this.props
+    this.setState({ error: null, txProcessing: true })
+    const input = {
+      userID: user.localID,
+      contactID: contact.localID,
+    }
+
+    const requestComplete = errorMsg => {
+      this.setState({
+        error: errorMsg,
+        txProcessing: false,
+      })
+    }
+
+    commitMutation(this.context, {
+      mutation: retrieveInviteStakeMutation,
+      variables: { input, userID: user.localID },
+      onCompleted: (contact, errors) => {
+        if (errors && errors.length) {
+          requestComplete(errors[0].message)
+        } else {
+          requestComplete()
+        }
+      },
+      onError: err => {
+        requestComplete(err.message)
+      },
+    })
+  }
+
   // RENDER
 
   renderGasData() {
-    const { invitePending } = this.state
-    if (invitePending && invitePending.txParams) {
-      const { gasPriceGwei, maxCost, stakeAmount } = invitePending.txParams
+    const { txParams } = this.state
+    if (txParams) {
+      const { gasPriceGwei, maxCost, stakeAmount } = txParams
       const gasLabel = `Gas price: ${gasPriceGwei}`
       const costlabel = `Max Cost: ${maxCost} ETH`
       const mftLabel = `Stake: ${stakeAmount} MFT`
@@ -166,80 +288,172 @@ export class InviteContactModal extends Component<Props, State> {
     }
   }
 
-  renderContent() {
-    const activity = this.state.txProcessing && <Loader />
-    const error = this.state.error && (
-      <Text variant={['error']}>{this.state.error}</Text>
+  renderContactSection(title: string) {
+    return (
+      <Section>
+        <Text variant={['smallTitle', 'bold']}>{title}</Text>
+        <Text>{this.props.contact.profile.name}</Text>
+        <Text>{this.props.contact.profile.ethAddress}</Text>
+      </Section>
     )
+  }
+
+  renderTransactionSection(title: string) {
+    const { balances } = this.state
+    const balanceLabel = balances ? (
+      <Text>{`MFT: ${balances.mft}, ETH: ${balances.eth}`}</Text>
+    ) : null
+    return (
+      <Section>
+        <Text variant={['smallTitle', 'bold']}>{title}</Text>
+        <Text>{this.props.user.profile.ethAddress}</Text>
+        {balanceLabel}
+        {this.renderGasData()}
+      </Section>
+    )
+  }
+
+  renderRetrieveStake() {
+    const { invite } = this.props.contact
+    const activity = this.state.txProcessing && <Loader />
+    const reclaimedTX =
+      invite && invite.stake && invite.stake.reclaimedTX ? (
+        <Text>TX hash: {invite.stake.reclaimedTX}</Text>
+      ) : null
+    return (
+      <>
+        {this.renderContactSection('SEND BLOCKCHAIN INVITATION TO')}
+        {this.renderTransactionSection('APPROVE AND STAKE 10 MFT FROM')}
+        {reclaimedTX}
+        {activity}
+      </>
+    )
+  }
+
+  renderDeclineInvite() {
+    const activity = this.state.txProcessing && <Loader />
+    const declinedTXHash = this.state.declinedTXHash ? (
+      <Text>TX hash: {this.state.declinedTXHash}</Text>
+    ) : null
+    return (
+      <>
+        {this.renderContactSection('DECLINE INVITATION FROM')}
+        {this.renderTransactionSection('CLAIM 10 MFT ON')}
+        {declinedTXHash}
+        {activity}
+      </>
+    )
+  }
+
+  renderInvite() {
+    const activity = this.state.txProcessing && <Loader />
 
     return (
       <>
-        <Section>
-          <Text variant={['smallTitle', 'bold']}>
-            SEND BLOCKCHAIN INVITATION TO
-          </Text>
-          <Text>{this.props.contact.profile.name}</Text>
-          <Text>{this.props.contact.profile.ethAddress}</Text>
-        </Section>
-        <Section>
-          <Text variant={['smallTitle', 'bold']}>
-            {`APPROVE AND SEND 10 MFT FROM`}
-          </Text>
-          <Text>{this.props.user.profile.ethAddress}</Text>
-          {this.renderGasData()}
-        </Section>
+        {this.renderContactSection('SEND BLOCKCHAIN INVITATION TO')}
+        {this.renderTransactionSection('APPROVE AND STAKE 10 MFT FROM')}
         {activity}
-        {error}
       </>
     )
   }
 
   render() {
-    let action
-    let title
     const { invitePending } = this.state
-    if (!this.state.txProcessing) {
-      if (invitePending && invitePending.state === 'awaiting_approval') {
-        action = this.sendApproveTX
-        title = 'Approve Invite'
-      } else if (invitePending && invitePending.state === 'approved') {
-        action = this.sendInvite
-        title = 'Send Invite'
-      }
+    const { invite } = this.props.contact
+    let content
+    let btnTitle
+    let action
+    let screenTitle
+    switch (this.props.type) {
+      case 'invite':
+        content = this.renderInvite()
+        screenTitle = 'SEND BLOCKCHAIN INVITATION'
+        if (!this.state.txProcessing) {
+          if (invitePending && invitePending.state === 'awaiting_approval') {
+            action = this.sendApproveTX
+            btnTitle = 'Approve Invite'
+          } else if (invitePending && invitePending.state === 'approved') {
+            action = this.sendInvite
+            btnTitle = 'Send Invite'
+          }
+        }
+        break
+      case 'retrieveStake':
+        content = this.renderRetrieveStake()
+        screenTitle = 'WITHDRAW YOUR MFT'
+        if (!this.state.txProcessing) {
+          if (invite && invite.stake && invite.stake.reclaimedTX) {
+            action = this.props.closeModal
+            btnTitle = 'Done'
+          } else {
+            action = this.withdrawStake
+            btnTitle = 'Withdraw'
+          }
+        }
+        break
+      case 'declineInvite':
+        content = this.renderDeclineInvite()
+        screenTitle = 'DECLINE AND CLAIM MFT'
+        if (!this.state.txProcessing) {
+          if (this.state.declinedTXHash) {
+            action = this.props.closeModal
+            btnTitle = 'Done'
+          } else {
+            action = this.sendDeclineTX
+            btnTitle = 'Decline & Withdraw'
+          }
+        }
+        break
+      default:
     }
+
+    const error = this.state.error && (
+      <Text variant={['error']}>{this.state.error}</Text>
+    )
+    const render = (
+      <>
+        {content}
+        {error}
+      </>
+    )
 
     return (
       <FormModalView
-        title="SEND BLOCKCHAIN INVITATION"
-        confirmButton={title}
+        title={screenTitle}
+        confirmButton={btnTitle}
         dismissButton="CANCEL"
         onRequestClose={this.props.closeModal}
         onSubmitForm={action}>
-        <FormContainer modal>{this.renderContent()}</FormContainer>
+        <FormContainer modal>{render}</FormContainer>
       </FormModalView>
     )
   }
 }
 
-export default createFragmentContainer(InviteContactModal, {
-  contact: graphql`
-    fragment InviteContactModal_contact on Contact {
-      peerID
-      localID
-      connectionState
-      publicFeed
-      invite {
-        inviteTX
-        stake {
-          reclaimedTX
-          amount
-          state
+const InviteContactRelayContainer = createFragmentContainer(
+  InviteContactModal,
+  {
+    contact: graphql`
+      fragment InviteContactModal_contact on Contact {
+        peerID
+        localID
+        connectionState
+        publicFeed
+        invite {
+          inviteTX
+          stake {
+            reclaimedTX
+            amount
+            state
+          }
+        }
+        profile {
+          name
+          ethAddress
         }
       }
-      profile {
-        name
-        ethAddress
-      }
-    }
-  `,
-})
+    `,
+  },
+)
+
+export default applyContext(InviteContactRelayContainer)

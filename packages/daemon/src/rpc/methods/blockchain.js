@@ -6,6 +6,7 @@ import type {
   EthUnsubscribeParams,
   GetInviteTXDetailsParams,
   GetInviteTXDetailsResult,
+  SendDeclineTXParams,
   SendInviteTXParams,
 } from '@mainframe/client'
 import { type Subscription as RxSubscription, Observable } from 'rxjs'
@@ -93,6 +94,13 @@ export const sendInviteTX = async (
   params: SendInviteTXParams,
 ): Promise<void> => {
   return ctx.invitesHandler.sendInviteTX(params.userID, params.contactID)
+}
+
+export const sendDeclineInviteTX = async (
+  ctx: ClientContext,
+  params: SendDeclineTXParams,
+) => {
+  return ctx.invitesHandler.declineContactInvite(params.userID, params.peerID)
 }
 
 export const subEthNetworkChanged = {

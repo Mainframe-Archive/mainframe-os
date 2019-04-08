@@ -43,6 +43,7 @@ export default {
   blockchain_getInviteTXDetails: blockchain.getInviteTXDetails,
   blockchain_sendInviteApprovalTX: blockchain.sendInviteApprovalTX,
   blockchain_sendInviteTX: blockchain.sendInviteTX,
+  blockchain_sendDeclineInviteTX: blockchain.sendDeclineInviteTX,
   blockchain_subEthNetworkChanged: blockchain.subEthNetworkChanged,
 
   comms_publish: comms.publish,

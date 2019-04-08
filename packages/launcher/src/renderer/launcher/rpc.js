@@ -126,6 +126,9 @@ export default {
   },
 
   // Wallets & Blockchain
+  ethSend: async (params: Object) => {
+    return rpc.request('blockchain_ethSend', params)
+  },
   getLedgerAccounts: (pageNum: number) => {
     return rpc.request('wallet_getLedgerAccounts', { pageNum })
   },
@@ -141,5 +144,9 @@ export default {
 
   sendInviteTX: (params: Object) => {
     return rpc.request('blockchain_sendInviteTX', params)
+  },
+
+  sendDeclineInviteTX: (params: { userID: string, peerID: string }) => {
+    return rpc.request('blockchain_sendDeclineInviteTX', params)
   },
 }

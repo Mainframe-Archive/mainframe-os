@@ -96,7 +96,11 @@ export default class InvitesHandler {
             if (contracts[this._context.io.eth.networkName]) {
               this.setup()
             } else {
-              this._context.log('Unsupported ethereum network')
+              this._context.log(
+                `Failed blockchain sub, unsupported ethereum network: ${
+                  this._context.io.eth.networkName
+                }`,
+              )
             }
           },
         ),
@@ -304,85 +308,6 @@ export default class InvitesHandler {
     return allowanceBN.gte(stakeBN)
   }
 
-  async formatGasValues(txParams: {
-    gas: string,
-    gasPrice: string,
-  }): Promise<{
-    maxCost: string,
-    gasPriceGwei: string,
-    stakeAmount: string,
-  }> {
-    const stake = await this.invitesContract.call('requiredStake')
-
-    const gasPriceBN = utils.bigNumberify(txParams.gasPrice)
-    const gasLimitBN = utils.bigNumberify(txParams.gas)
-
-    const maxCost = gasPriceBN.mul(gasLimitBN)
-    return {
-      stakeAmount: utils.formatUnits(stake, 'ether').toString(),
-      maxCost: utils.formatUnits(maxCost, 'ether'),
-      gasPriceGwei: utils.formatUnits(txParams.gasPrice, 'gwei'),
-    }
-  }
-
-  async getApproveTXDetails(user: OwnUserIdentity) {
-    const { eth } = this._context.io
-    const stake = await this.invitesContract.call('requiredStake')
-    const data = this.tokenContract.encodeCall('approve', [
-      this.invitesContract.address,
-      stake,
-    ])
-    const txOptions = {
-      from: user.profile.ethAddress,
-      to: this.tokenContract.address,
-      data,
-    }
-    const params = await eth.completeTxParams(txOptions)
-    const formattedParams = await this.formatGasValues(params)
-    return { ...params, ...formattedParams }
-  }
-
-  async getSendInviteTXDetails(user: OwnUserIdentity, peer: PeerUserIdentity) {
-    const { eth } = this._context.io
-    const data = this.invitesContract.encodeCall('sendInvite', [
-      peer.profile.ethAddress,
-      peer.publicFeed,
-      user.publicFeed.feedHash,
-    ])
-    const txOptions = {
-      from: user.profile.ethAddress,
-      to: this.invitesContract.address,
-      data,
-    }
-    const params = await eth.completeTxParams(txOptions)
-    const formattedParams = await this.formatGasValues(params)
-    return { ...params, ...formattedParams }
-  }
-
-  async getInviteTXDetails(type: string, userID: string, contactID: string) {
-    const { user, peer } = this.getUserObjects(userID, contactID)
-    return type === 'approve'
-      ? this.getApproveTXDetails(user)
-      : this.getSendInviteTXDetails(user, peer)
-  }
-
-  async approveTransfer(fromAddress: string) {
-    const txOptions = { from: fromAddress }
-    const stake = await this.invitesContract.call('requiredStake')
-    return new Promise((resolve, reject) => {
-      this.tokenContract
-        .approve(this.invitesContract.address, stake, txOptions)
-        .then(res => {
-          res.on('mined', hash => {
-            resolve(hash)
-          })
-        })
-        .catch(err => {
-          reject(err)
-        })
-    })
-  }
-
   async sendInviteApprovalTX(
     userID: string,
     contactID: string,
@@ -449,29 +374,20 @@ export default class InvitesHandler {
         throw new Error('No eth address found for user')
       }
       const txOptions = { from: user.profile.ethAddress }
-      this.approveTransfer(user.profile.ethAddress)
-        .then(() => {
-          this.invitesContract
-            .send(
-              'sendInvite',
-              [
-                peer.profile.ethAddress,
-                peer.publicFeed,
-                user.publicFeed.feedHash,
-              ],
-              txOptions,
-            )
-            .then(inviteRes => {
-              inviteRes.on('hash', hash => {
-                resolve(hash)
-              })
-              inviteRes.on('error', err => {
-                reject(err)
-              })
-            })
-            .catch(err => {
-              reject(err)
-            })
+
+      this.invitesContract
+        .send(
+          'sendInvite',
+          [peer.profile.ethAddress, peer.publicFeed, user.publicFeed.feedHash],
+          txOptions,
+        )
+        .then(inviteRes => {
+          inviteRes.on('hash', hash => {
+            resolve(hash)
+          })
+          inviteRes.on('error', err => {
+            reject(err)
+          })
         })
         .catch(err => {
           reject(err)
@@ -552,6 +468,15 @@ export default class InvitesHandler {
     return acceptanceSignature
   }
 
+  signatureParams(signature: string) {
+    const sig = signature.substr(2) //remove 0x
+    const r = '0x' + sig.slice(0, 64)
+    const s = '0x' + sig.slice(64, 128)
+    const v = '0x' + sig.slice(128, 130)
+    const vNum = utils.bigNumberify(v).toNumber()
+    return { vNum, r, s }
+  }
+
   async retrieveStake(userID: string, contact: Contact) {
     const peer = this._context.openVault.identities.getPeerUser(contact.peerID)
     if (!peer) {
@@ -559,16 +484,18 @@ export default class InvitesHandler {
     }
     const invite = contact._invite
     if (invite != null && invite.stake && invite.acceptedSignature) {
-      const signature = invite.acceptedSignature.substr(2) //remove 0x
-      const r = '0x' + signature.slice(0, 64)
-      const s = '0x' + signature.slice(64, 128)
-      const v = '0x' + signature.slice(128, 130)
-      const vNum = utils.bigNumberify(v).toNumber()
+      const sigParams = this.signatureParams(invite.acceptedSignature)
 
       const txOptions = { from: invite.fromAddress }
       const res = await this.invitesContract.send(
         'retrieveStake',
-        [invite.toAddress, peer.publicFeed, vNum, r, s],
+        [
+          invite.toAddress,
+          peer.publicFeed,
+          sigParams.vNum,
+          sigParams.r,
+          sigParams.s,
+        ],
         txOptions,
       )
 
@@ -606,7 +533,7 @@ export default class InvitesHandler {
     }
   }
 
-  async rejectContactInvite(userID: string, peerID: string) {
+  async declineContactInvite(userID: string, peerID: string): Promise<string> {
     const { identities } = this._context.openVault
     const inviteRequest = identities.getInviteRequest(userID, peerID)
     const peer = identities.getPeerUser(peerID)
@@ -634,7 +561,7 @@ export default class InvitesHandler {
 
       return new Promise((resolve, reject) => {
         res
-          .on('hash', async hash => {
+          .on('mined', async hash => {
             inviteRequest.rejectedTXHash = hash
             await this._context.openVault.save()
             resolve(hash)
@@ -704,6 +631,138 @@ export default class InvitesHandler {
         this._observers.delete(source)
       },
       source,
+    }
+  }
+
+  // ESTIMATE TX GAS
+
+  async formatGasValues(txParams: {
+    gas: string,
+    gasPrice: string,
+  }): Promise<{
+    maxCost: string,
+    gasPriceGwei: string,
+    stakeAmount: string,
+  }> {
+    const stake = await this.invitesContract.call('requiredStake')
+
+    const gasPriceBN = utils.bigNumberify(txParams.gasPrice)
+    const gasLimitBN = utils.bigNumberify(txParams.gas)
+
+    const maxCost = gasPriceBN.mul(gasLimitBN)
+    return {
+      stakeAmount: utils.formatUnits(stake, 'ether').toString(),
+      maxCost: utils.formatUnits(maxCost, 'ether'),
+      gasPriceGwei: utils.formatUnits(txParams.gasPrice, 'gwei'),
+    }
+  }
+
+  async getDeclineTXDetails(userID: string, peerID: string) {
+    const { identities } = this._context.openVault
+    const user = identities.getOwnUser(userID)
+    if (!user) throw new Error('User not found')
+    const peer = identities.getPeerUser(peerID)
+    if (!peer) throw new Error('Peer not found')
+    const inviteRequest = identities.getInviteRequest(userID, peerID)
+    if (!inviteRequest) throw new Error('Invite request not found')
+
+    const data = this.invitesContract.encodeCall('declineAndWithdraw', [
+      inviteRequest.senderAddress,
+      peer.publicFeed,
+      user.publicFeed.feedHash,
+    ])
+
+    const txOptions = {
+      from: inviteRequest.receivedAddress,
+      to: this.invitesContract.address,
+      data,
+    }
+    const params = await this._context.io.eth.completeTxParams(txOptions)
+    const formattedParams = await this.formatGasValues(params)
+    return { ...params, ...formattedParams }
+  }
+
+  async getRetrieveStakeTXDetails(
+    user: OwnUserIdentity,
+    peer: PeerUserIdentity,
+    contact: Contact,
+  ) {
+    const invite = contact._invite
+    if (invite != null && invite.stake && invite.acceptedSignature) {
+      const sigParams = this.signatureParams(invite.acceptedSignature)
+
+      const txParams = [
+        invite.toAddress,
+        peer.publicFeed,
+        sigParams.vNum,
+        sigParams.r,
+        sigParams.s,
+      ]
+      const data = this.invitesContract.encodeCall('retrieveStake', txParams)
+      const txOptions = {
+        from: invite.fromAddress,
+        to: this.invitesContract.address,
+        data,
+      }
+      const params = await this._context.io.eth.completeTxParams(txOptions)
+      const formattedParams = await this.formatGasValues(params)
+      return { ...params, ...formattedParams }
+    }
+    throw new Error('Accepted signature not found')
+  }
+
+  async getApproveTXDetails(user: OwnUserIdentity) {
+    const { eth } = this._context.io
+    const stake = await this.invitesContract.call('requiredStake')
+    const data = this.tokenContract.encodeCall('approve', [
+      this.invitesContract.address,
+      stake,
+    ])
+    const txOptions = {
+      from: user.profile.ethAddress,
+      to: this.tokenContract.address,
+      data,
+    }
+    const params = await eth.completeTxParams(txOptions)
+    const formattedParams = await this.formatGasValues(params)
+    return { ...params, ...formattedParams }
+  }
+
+  async getSendInviteTXDetails(user: OwnUserIdentity, peer: PeerUserIdentity) {
+    const { eth } = this._context.io
+    const data = this.invitesContract.encodeCall('sendInvite', [
+      peer.profile.ethAddress,
+      peer.publicFeed,
+      user.publicFeed.feedHash,
+    ])
+    const txOptions = {
+      from: user.profile.ethAddress,
+      to: this.invitesContract.address,
+      data,
+    }
+    const params = await eth.completeTxParams(txOptions)
+    const formattedParams = await this.formatGasValues(params)
+    return { ...params, ...formattedParams }
+  }
+
+  async getInviteTXDetails(
+    type: string,
+    userID: string,
+    contactOrPeerID: string,
+  ) {
+    if (type === 'declineInvite') {
+      return this.getDeclineTXDetails(userID, contactOrPeerID)
+    }
+    const { user, peer, contact } = this.getUserObjects(userID, contactOrPeerID)
+    switch (type) {
+      case 'approve':
+        return this.getApproveTXDetails(user)
+      case 'sendInvite':
+        return this.getSendInviteTXDetails(user, peer)
+      case 'retrieveStake':
+        return this.getRetrieveStakeTXDetails(user, peer, contact)
+      default:
+        throw new Error('Unknown transaction type')
     }
   }
 }
