@@ -154,6 +154,24 @@ class AppInstallModal extends Component<ViewProps, State> {
     commitMutation(this.context, {
       mutation: appInstallMutation,
       variables: { input: params },
+      onCompleted: (res, errors) => {
+        if (errors && errors.length) {
+          this.setState({
+            errorMsg: `Error: ${errors[0].message}`,
+            installStep: 'manifest',
+          })
+        } else {
+          this.props.onInstallComplete()
+        }
+      },
+      onError: err => {
+        const msg =
+          err.message || 'Sorry, there was a problem installing this app.'
+        this.setState({
+          errorMsg: msg,
+          installStep: 'manifest',
+        })
+      },
     })
 
     this.props.onInstallComplete()
