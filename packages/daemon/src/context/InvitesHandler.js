@@ -1,7 +1,6 @@
 // @flow
 
-import { Web3EthAbi, type BaseContract } from '@mainframe/eth'
-import { fromWei } from 'ethjs-unit'
+import { type BaseContract } from '@mainframe/eth'
 import { getFeedTopic } from '@erebos/api-bzz-base'
 import createKeccakHash from 'keccak'
 import { utils } from 'ethers'
@@ -26,6 +25,7 @@ type ObserveInvites<T = Object> = {
   source: Observable<T>,
 }
 
+//$FlowFixMe Cannot resolve module ./inviteABI.
 const INVITE_ABI = require('./inviteABI.json')
 
 const contracts = {
@@ -35,7 +35,7 @@ const contracts = {
   // },
   ropsten: {
     token: '0xa46f1563984209fe47f8236f8b01a03f03f957e4',
-    invites: '0x6687b03F6D7eeac45d98340c8243e6a0434f1284',
+    invites: '0x33e16EFEA57968BC91fd5D9Db20068d5E4af5515',
   },
   ganache: {
     token: '0xB3E555c3dB7B983E46bf5a530ce1dac4087D2d8D',
@@ -50,14 +50,10 @@ const hash = (data: Buffer) => {
   return '0x' + bytes.toString('hex')
 }
 
-const encodeAddress = (address: string) => {
-  return Web3EthAbi.encodeParameter('address', address)
-}
-
 export default class InvitesHandler {
   _context: ClientContext
-  _observers = new Set()
-  _ethSubscriptions = new Set()
+  _observers: Set<Observable<any>> = new Set()
+  _ethSubscriptions: Set<string> = new Set()
 
   constructor(context: ClientContext) {
     this._context = context
@@ -70,11 +66,7 @@ export default class InvitesHandler {
       this._context
         .pipe(
           filter((e: ContextEvent) => {
-            return (
-              e.type === 'vault_opened' ||
-              e.type === 'eth_network_changed' ||
-              (e.type === 'eth_accounts_changed' && e.change === 'userDefault')
-            )
+            return e.type === 'vault_opened' || e.type === 'eth_network_changed'
           }),
         )
         .subscribe(
@@ -96,7 +88,11 @@ export default class InvitesHandler {
             if (contracts[this._context.io.eth.networkName]) {
               this.setup()
             } else {
-              this._context.log('Unsupported ethereum network')
+              this._context.log(
+                `Failed blockchain sub, unsupported ethereum network: ${
+                  this._context.io.eth.networkName
+                }`,
+              )
             }
           },
         ),
@@ -136,13 +132,6 @@ export default class InvitesHandler {
   async fetchInvitesForUser(user: OwnUserIdentity, userFeedHash: string) {
     // TODO: Only check new blocks
     try {
-      if (!user.profile.ethAddress) {
-        throw new Error(
-          `Unable to fetch invites, no eth address found for: ${user.localID}`,
-        )
-      }
-
-      const encodedAddress = encodeAddress(user.profile.ethAddress)
       const latestBlock = await this._context.io.eth.getLatestBlock()
       const creationBlock = await this.invitesContract.call('creationBlock')
 
@@ -150,7 +139,7 @@ export default class InvitesHandler {
         address: this.invitesContract.address,
         fromBlock: creationBlock,
         toBlock: latestBlock,
-        topics: [encodedAddress, userFeedHash],
+        topics: [userFeedHash],
       }
       const events = await this.invitesContract.getPastEvents('Invited', params)
       for (let i = 0; i < events.length; i++) {
@@ -191,20 +180,20 @@ export default class InvitesHandler {
   handleRejectedEvent = async (
     user: OwnUserIdentity,
     event: Object,
-  ): Promise<> => {
+  ): Promise<void> => {
     const { identities } = this._context.openVault
     const peer = identities.getPeerByFeed(event.recipientFeed)
     if (peer) {
       const contact = identities.getContactByPeerID(user.localID, peer.localID)
       if (contact && contact.invite) {
         contact.invite.stake.state = 'seized'
+        this._context.next({
+          type: 'contact_changed',
+          contact,
+          userID: user.localID,
+          change: 'inviteDeclined',
+        })
       }
-      this._context.next({
-        type: 'contact_changed',
-        contact,
-        userID: user.localID,
-        change: 'inviteDeclined',
-      })
     }
   }
 
@@ -246,20 +235,24 @@ export default class InvitesHandler {
           const storedInvites = identities.getInvites(user.localID)
           if (inviteState === 'PENDING' && !storedInvites[peer.localID]) {
             const contactInvite = {
+              ethNetwork: this._context.io.eth.networkName,
               privateFeed: feed.privateFeed,
               receivedAddress: contractEvent.recipientAddress,
               senderAddress: contractEvent.senderAddress,
               peerID: peer.localID,
             }
             identities.setInviteRequest(user.localID, contactInvite)
-            this._context.next({
-              type: 'invites_changed',
-              userID: user.localID,
-              contact: this._context.queries.getContactFromInvite(
-                contactInvite,
-              ),
-              change: 'inviteReceived',
-            })
+            const eventContact = this._context.queries.getContactFromInvite(
+              contactInvite,
+            )
+            if (eventContact) {
+              this._context.next({
+                type: 'invites_changed',
+                userID: user.localID,
+                contact: eventContact,
+                change: 'inviteReceived',
+              })
+            }
           }
         }
       } catch (err) {
@@ -268,40 +261,90 @@ export default class InvitesHandler {
     }
   }
 
+  getUserObjects(
+    userID: string,
+    contactID: string,
+  ): { user: OwnUserIdentity, peer: PeerUserIdentity, contact: Contact } {
+    const { identities } = this._context.openVault
+    const contact = identities.getContact(userID, contactID)
+    if (!contact) {
+      throw new Error('Contact not found')
+    }
+    const user = identities.getOwnUser(userID)
+    if (!user) {
+      throw new Error('User not found')
+    }
+    const peer = identities.getPeerUser(contact.peerID)
+    if (!peer) {
+      throw new Error('Peer not found')
+    }
+    if (!peer.profile.ethAddress) {
+      throw new Error('No public eth address found for Contact')
+    }
+    return { user, peer, contact }
+  }
+
   // INVITE ACTIONS
 
-  async sendInviteTX(user: OwnUserIdentity, peer: PeerUserIdentity) {
+  async checkAllowance(address: string) {
+    const stake = await this.invitesContract.call('requiredStake')
+    const allowance = await this.tokenContract.call('allowance', [
+      address,
+      this.invitesContract.address,
+    ])
+    const allowanceBN = utils.bigNumberify(allowance)
+    const stakeBN = utils.bigNumberify(stake)
+    return allowanceBN.gte(stakeBN)
+  }
+
+  async sendInviteApprovalTX(
+    userID: string,
+    contactID: string,
+    gasPrice?: string,
+  ) {
+    const { user } = this.getUserObjects(userID, contactID)
+    if (!user.profile.ethAddress) {
+      throw new Error('No public eth address found on profile')
+    }
+
+    const hasAllowance = await this.checkAllowance(user.profile.ethAddress)
+    if (hasAllowance) {
+      return
+    }
+
+    const stake = await this.invitesContract.call('requiredStake')
+    const stakeBN = utils.bigNumberify(stake)
+    const mftBalance = await this.tokenContract.getBalance(
+      // $FlowFixMe address checked above
+      user.profile.ethAddress,
+    )
+
+    const balanceBN = utils.parseUnits(mftBalance, 'ether')
+
+    if (stakeBN.gt(balanceBN)) {
+      throw new Error(
+        `Insufficient MFT balance of ${balanceBN.toString()} for required stake ${stakeBN.toString()}`,
+      )
+    }
+
+    const txOptions: Object = { from: user.profile.ethAddress }
+    // TODO: check high gasPrice
+
+    const approveValue = utils.formatUnits(stake, 'ether')
+
+    if (gasPrice) {
+      txOptions.gasPrice = gasPrice
+    }
     return new Promise((resolve, reject) => {
-      // TODO: Notify launcher and request permission from user?
-      if (!user.profile.ethAddress) {
-        throw new Error('No eth address found for user')
-      }
-      const txOptions = { from: user.profile.ethAddress }
       this.tokenContract
-        .approve(this.invitesContract.address, 100, txOptions)
+        .approve(
+          this.invitesContract.address,
+          approveValue.toString(),
+          txOptions,
+        )
         .then(res => {
-          res.on('mined', () => {
-            this.invitesContract
-              .send(
-                'sendInvite',
-                [
-                  peer.profile.ethAddress,
-                  peer.publicFeed,
-                  user.publicFeed.feedHash,
-                ],
-                txOptions,
-              )
-              .then(inviteRes => {
-                inviteRes.on('hash', hash => {
-                  resolve(hash)
-                })
-                inviteRes.on('error', err => {
-                  reject(err)
-                })
-              })
-              .catch(err => {
-                reject(err)
-              })
+          res.on('mined', hash => {
+            resolve(hash)
           })
         })
         .catch(err => {
@@ -310,17 +353,41 @@ export default class InvitesHandler {
     })
   }
 
-  async sendInvite(userID: string, contact: Contact): Promise<void> {
-    const user = this._context.openVault.identities.getOwnUser(userID)
-    if (!user) {
-      throw new Error('User not found')
-    }
+  async processInviteTransaction(
+    user: OwnUserIdentity,
+    peer: PeerUserIdentity,
+  ) {
+    return new Promise((resolve, reject) => {
+      // TODO: Notify launcher and request permission from user?
+      if (!user.profile.ethAddress) {
+        throw new Error('No eth address found for user')
+      }
+      const txOptions = { from: user.profile.ethAddress }
+
+      this.invitesContract
+        .send(
+          'sendInvite',
+          [peer.profile.ethAddress, peer.publicFeed, user.publicFeed.feedHash],
+          txOptions,
+        )
+        .then(inviteRes => {
+          inviteRes.on('hash', hash => {
+            resolve(hash)
+          })
+          inviteRes.on('error', err => {
+            reject(err)
+          })
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  }
+
+  async sendInviteTX(userID: string, contactID: string): Promise<void> {
+    const { user, peer, contact } = this.getUserObjects(userID, contactID)
     if (!user.profile.ethAddress) {
       throw new Error('No public eth address found on profile')
-    }
-    const peer = this._context.openVault.identities.getPeerUser(contact.peerID)
-    if (!peer) {
-      throw new Error('Peer not found')
     }
     if (!peer.profile.ethAddress) {
       throw new Error('No public eth address found for Contact')
@@ -331,23 +398,13 @@ export default class InvitesHandler {
       // $FlowFixMe address checked above
       user.profile.ethAddress,
     )
-
-    const stakeBN = utils.bigNumberify(fromWei(stake, 'ether'))
-    const balanceBN = utils.bigNumberify(mftBalance)
+    const stakeBN = utils.bigNumberify(stake)
+    const balanceBN = utils.parseUnits(mftBalance, 'ether')
 
     if (stakeBN.gt(balanceBN)) {
       throw new Error(
         `Insufficient MFT balance of ${balanceBN.toString()} for required stake ${stakeBN.toString()}`,
       )
-    }
-
-    contact._invite = {
-      toAddress: peer.profile.ethAddress,
-      fromAddress: user.profile.ethAddress,
-      stake: {
-        amount: stakeBN.toString(),
-        state: 'sending',
-      },
     }
 
     const pushContactEvent = (contact, change) => {
@@ -359,13 +416,15 @@ export default class InvitesHandler {
       })
     }
 
-    pushContactEvent(contact, 'sendingInvite')
-
     try {
-      const inviteTXHash = await this.sendInviteTX(user, peer)
+      const inviteTXHash = await this.processInviteTransaction(user, peer)
       contact._invite = {
-        ...contact._invite,
         inviteTX: inviteTXHash,
+        ethNetwork: this._context.io.eth.networkName,
+        // $FlowFixMe address already checked
+        fromAddress: user.profile.ethAddress,
+        // $FlowFixMe address already checked
+        toAddress: peer.profile.ethAddress,
         stake: {
           amount: stakeBN.toString(),
           state: 'staked',
@@ -375,6 +434,7 @@ export default class InvitesHandler {
     } catch (err) {
       contact._invite = undefined
       pushContactEvent(contact, 'inviteFailed')
+      throw err
     }
   }
 
@@ -398,23 +458,32 @@ export default class InvitesHandler {
     return acceptanceSignature
   }
 
-  async retrieveStake(userID: string, contact: Contact) {
-    const peer = this._context.openVault.identities.getPeerUser(contact.peerID)
-    if (!peer) {
-      throw new Error('Peer not found')
-    }
+  signatureParams(signature: string) {
+    const sig = signature.substr(2) //remove 0x
+    const r = '0x' + sig.slice(0, 64)
+    const s = '0x' + sig.slice(64, 128)
+    const v = '0x' + sig.slice(128, 130)
+    const vNum = utils.bigNumberify(v).toNumber()
+    return { vNum, r, s }
+  }
+
+  async retrieveStake(userID: string, contactID: string) {
+    const { peer, contact } = this.getUserObjects(userID, contactID)
     const invite = contact._invite
     if (invite != null && invite.stake && invite.acceptedSignature) {
-      const signature = invite.acceptedSignature.substr(2) //remove 0x
-      const r = '0x' + signature.slice(0, 64)
-      const s = '0x' + signature.slice(64, 128)
-      const v = '0x' + signature.slice(128, 130)
-      const vNum = utils.bigNumberify(v).toNumber()
+      const sigParams = this.signatureParams(invite.acceptedSignature)
 
       const txOptions = { from: invite.fromAddress }
+      this.validateInviteNetwork(invite.ethNetwork)
       const res = await this.invitesContract.send(
         'retrieveStake',
-        [invite.toAddress, peer.publicFeed, vNum, r, s],
+        [
+          invite.toAddress,
+          peer.publicFeed,
+          sigParams.vNum,
+          sigParams.r,
+          sigParams.s,
+        ],
         txOptions,
       )
 
@@ -429,17 +498,17 @@ export default class InvitesHandler {
 
       return new Promise((resolve, reject) => {
         res
-          .on('hash', hash => {
+          .on('hash', () => {
             // TODO: Also set from reading contract events
             // in case reclaimed from outside of MFOS
             invite.stake.state = 'reclaiming'
             emitContactChange(contact, 'stakeReclaimProcessing')
-            resolve(hash)
           })
           .on('mined', hash => {
             invite.stake.state = 'reclaimed'
             invite.stake.reclaimedTX = hash
             emitContactChange(contact, 'stakeReclaimMined')
+            resolve(hash)
           })
           .on('error', err => {
             invite.stake.state = 'staked'
@@ -452,7 +521,7 @@ export default class InvitesHandler {
     }
   }
 
-  async rejectContactInvite(userID: string, peerID: string) {
+  async declineContactInvite(userID: string, peerID: string): Promise<string> {
     const { identities } = this._context.openVault
     const inviteRequest = identities.getInviteRequest(userID, peerID)
     const peer = identities.getPeerUser(peerID)
@@ -466,6 +535,7 @@ export default class InvitesHandler {
     if (!inviteRequest) {
       throw new Error('Invite not found')
     }
+    this.validateInviteNetwork(inviteRequest.ethNetwork)
     const txOptions = { from: inviteRequest.receivedAddress }
     try {
       const res = await this.invitesContract.send(
@@ -480,7 +550,7 @@ export default class InvitesHandler {
 
       return new Promise((resolve, reject) => {
         res
-          .on('hash', async hash => {
+          .on('mined', async hash => {
             inviteRequest.rejectedTXHash = hash
             await this._context.openVault.save()
             resolve(hash)
@@ -494,6 +564,14 @@ export default class InvitesHandler {
     }
   }
 
+  validateInviteNetwork(ethNetwork: string) {
+    if (ethNetwork !== this._context.io.eth.networkName) {
+      throw new Error(
+        `Please connect to the eth network (${ethNetwork}) this invite was originally sent from to withdraw this stake.`,
+      )
+    }
+  }
+
   // SUBSCRIPTIONS
 
   async subscribeToEthEvents(user: OwnUserIdentity, userFeedHash: string) {
@@ -503,14 +581,9 @@ export default class InvitesHandler {
         this._context.log('Ethereum subscriptions not supported')
         return
       }
-      if (!user.profile.ethAddress) {
-        this._context.log('No ethereum address on profile to subscribe to')
-        return
-      }
-      const encodedAddress = encodeAddress(user.profile.ethAddress)
       const invitesSubID = await this.invitesContract.subscribeToEvents(
         'Invited',
-        [encodedAddress, userFeedHash],
+        [userFeedHash],
       )
       const declinedSub = await this.invitesContract.subscribeToEvents(
         'Declined',
@@ -550,6 +623,140 @@ export default class InvitesHandler {
         this._observers.delete(source)
       },
       source,
+    }
+  }
+
+  // ESTIMATE TX GAS
+
+  async formatGasValues(txParams: {
+    gas: string,
+    gasPrice: string,
+  }): Promise<{
+    maxCost: string,
+    gasPriceGwei: string,
+    stakeAmount: string,
+  }> {
+    const stake = await this.invitesContract.call('requiredStake')
+
+    const gasPriceBN = utils.bigNumberify(txParams.gasPrice)
+    const gasLimitBN = utils.bigNumberify(txParams.gas)
+
+    const maxCost = gasPriceBN.mul(gasLimitBN)
+    return {
+      stakeAmount: utils.formatUnits(stake, 'ether').toString(),
+      maxCost: utils.formatUnits(maxCost, 'ether'),
+      gasPriceGwei: utils.formatUnits(txParams.gasPrice, 'gwei'),
+    }
+  }
+
+  async getDeclineTXDetails(userID: string, peerID: string) {
+    const { identities } = this._context.openVault
+    const user = identities.getOwnUser(userID)
+    if (!user) throw new Error('User not found')
+    const peer = identities.getPeerUser(peerID)
+    if (!peer) throw new Error('Peer not found')
+    const inviteRequest = identities.getInviteRequest(userID, peerID)
+    if (!inviteRequest) throw new Error('Invite request not found')
+    this.validateInviteNetwork(inviteRequest.ethNetwork)
+
+    const data = this.invitesContract.encodeCall('declineAndWithdraw', [
+      inviteRequest.senderAddress,
+      peer.publicFeed,
+      user.publicFeed.feedHash,
+    ])
+
+    const txOptions = {
+      from: inviteRequest.receivedAddress,
+      to: this.invitesContract.address,
+      data,
+    }
+    const params = await this._context.io.eth.completeTxParams(txOptions)
+    const formattedParams = await this.formatGasValues(params)
+    return { ...params, ...formattedParams }
+  }
+
+  async getRetrieveStakeTXDetails(
+    user: OwnUserIdentity,
+    peer: PeerUserIdentity,
+    contact: Contact,
+  ) {
+    const invite = contact._invite
+    if (invite != null && invite.stake && invite.acceptedSignature) {
+      const sigParams = this.signatureParams(invite.acceptedSignature)
+
+      const txParams = [
+        invite.toAddress,
+        peer.publicFeed,
+        sigParams.vNum,
+        sigParams.r,
+        sigParams.s,
+      ]
+      this.validateInviteNetwork(invite.ethNetwork)
+      const data = this.invitesContract.encodeCall('retrieveStake', txParams)
+      const txOptions = {
+        from: invite.fromAddress,
+        to: this.invitesContract.address,
+        data,
+      }
+      const params = await this._context.io.eth.completeTxParams(txOptions)
+      const formattedParams = await this.formatGasValues(params)
+      return { ...params, ...formattedParams }
+    }
+    throw new Error('Accepted signature not found')
+  }
+
+  async getApproveTXDetails(user: OwnUserIdentity) {
+    const { eth } = this._context.io
+    const stake = await this.invitesContract.call('requiredStake')
+    const data = this.tokenContract.encodeCall('approve', [
+      this.invitesContract.address,
+      stake,
+    ])
+    const txOptions = {
+      from: user.profile.ethAddress,
+      to: this.tokenContract.address,
+      data,
+    }
+    const params = await eth.completeTxParams(txOptions)
+    const formattedParams = await this.formatGasValues(params)
+    return { ...params, ...formattedParams }
+  }
+
+  async getSendInviteTXDetails(user: OwnUserIdentity, peer: PeerUserIdentity) {
+    const { eth } = this._context.io
+    const data = this.invitesContract.encodeCall('sendInvite', [
+      peer.profile.ethAddress,
+      peer.publicFeed,
+      user.publicFeed.feedHash,
+    ])
+    const txOptions = {
+      from: user.profile.ethAddress,
+      to: this.invitesContract.address,
+      data,
+    }
+    const params = await eth.completeTxParams(txOptions)
+    const formattedParams = await this.formatGasValues(params)
+    return { ...params, ...formattedParams }
+  }
+
+  async getInviteTXDetails(
+    type: string,
+    userID: string,
+    contactOrPeerID: string,
+  ) {
+    if (type === 'declineInvite') {
+      return this.getDeclineTXDetails(userID, contactOrPeerID)
+    }
+    const { user, peer, contact } = this.getUserObjects(userID, contactOrPeerID)
+    switch (type) {
+      case 'approve':
+        return this.getApproveTXDetails(user)
+      case 'sendInvite':
+        return this.getSendInviteTXDetails(user, peer)
+      case 'retrieveStake':
+        return this.getRetrieveStakeTXDetails(user, peer, contact)
+      default:
+        throw new Error('Unknown transaction type')
     }
   }
 }

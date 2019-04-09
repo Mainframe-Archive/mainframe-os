@@ -23,14 +23,21 @@ export type TXParams = {
   data: string,
   gas: string,
   gasPrice: string,
-  chainId: number,
+  chainid?: ?string,
 }
 
-export type RequestPayload = {
+export type JsonRpcRequest = {
   id: number,
   jsonrpc: string,
   method: string,
   params: Array<any>,
+}
+
+export type JsonRpcResponse = {
+  id: number,
+  jsonrpc: string,
+  result: any,
+  error: ?any,
 }
 
 export type TransactionEvent = {
@@ -48,9 +55,9 @@ export type EventFilterParams = {
 export type TXEventEmitter = EventEmitter
 
 export type AbstractProvider = {
-  +sendPayload: (payload: Object) => Promise<any>,
-  +on?: (event: string, listener: Function) => any,
-  +emit?: (event: string, ...args: Array<any>) => boolean,
+  +send: (method: string, params: Array<*>) => Promise<*>,
+  +on?: (event: string, listener: Function) => *,
+  +emit?: (event: string, ...args: Array<any>) => *,
   +unsubscribe?: (id: string, type?: string) => void,
   +clearSubscriptions?: () => void,
   +subscribe?: (

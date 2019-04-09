@@ -6,6 +6,7 @@ import {
   graphql,
   commitMutation,
   createFragmentContainer,
+  // $FlowFixMe: requestSubscription not present in Flow definition but exported by library
   requestSubscription,
   type Disposable,
   type Environment,
@@ -37,8 +38,8 @@ import SvgSelectedPointer from '../../UIComponents/SVGSelectedPointer'
 
 import FormModalView from '../../UIComponents/FormModalView'
 import Loader from '../../UIComponents/Loader'
-
 import { InformationBox } from '../identities/IdentitiesView'
+import InviteContactModal, { type TransactionType } from './InviteContactModal'
 
 import type { ContactsView_wallets as Wallets } from './__generated__/ContactsView_wallets.graphql.js'
 
@@ -200,7 +201,7 @@ export type Contact = {
   publicFeed: string,
   ethAddress?: string,
   invite?: {
-    inviteTX?: ?string,
+    inviteTX?: string,
     stake: {
       amount: string,
       state: string,
@@ -233,9 +234,6 @@ type Props = {
   contacts: {
     userContacts: Array<Contact>,
   },
-  wallets: Wallets,
-  acceptContact: (contact: Contact) => void,
-  ignoreContact: (contact: Contact) => void,
 }
 
 type State = {
@@ -253,6 +251,10 @@ type State = {
   invitingContact?: ?string,
   withdrawingStake?: ?boolean,
   rejectingInvite?: ?string,
+  inviteModalOpen?: ?{
+    type: TransactionType,
+    contact: Contact,
+  },
   foundPeer?: {
     mainframeID: string,
     profile: {
@@ -281,62 +283,15 @@ const CONTACTS_CHANGED_SUBSCRIPTION = graphql`
   }
 `
 
-export const inviteContactMutation = graphql`
-  mutation ContactsViewInviteContactMutation(
-    $input: InviteContactInput!
-    $userID: String!
-  ) {
-    inviteContact(input: $input) {
-      contact {
-        invite {
-          inviteTX
-        }
-      }
-      viewer {
-        contacts {
-          ...ContactsView_contacts @arguments(userID: $userID)
-        }
-      }
-    }
-  }
-`
-
-export const retrieveInviteStakeMutation = graphql`
-  mutation ContactsViewRetrieveInviteStakeMutation(
-    $input: RetrieveInviteStakeInput!
-    $userID: String!
-  ) {
-    retrieveInviteStake(input: $input) {
-      viewer {
-        contacts {
-          ...ContactsView_contacts @arguments(userID: $userID)
-        }
-      }
-    }
-  }
-`
-
-export const rejectContactMutation = graphql`
-  mutation ContactsViewRejectContactMutation(
-    $input: RejectContactInput!
-    $userID: String!
-  ) {
-    rejectContact(input: $input) {
-      viewer {
-        contacts {
-          ...ContactsView_contacts @arguments(userID: $userID)
-        }
-      }
-    }
-  }
-`
-
 export const addContactMutation = graphql`
   mutation ContactsViewAddContactMutation(
     $input: AddContactInput!
     $userID: String!
   ) {
     addContact(input: $input) {
+      contact {
+        ...InviteContactModal_contact
+      }
       viewer {
         contacts {
           ...ContactsView_contacts @arguments(userID: $userID)
@@ -381,8 +336,9 @@ class ContactsViewComponent extends Component<Props, State> {
 
   constructor(props: Props) {
     super(props)
+    const { user } = this.props
     this.state = {
-      selectedContact: this.props.user.localID,
+      selectedContact: user.localID,
     }
   }
 
@@ -401,25 +357,12 @@ class ContactsViewComponent extends Component<Props, State> {
     }
   }
 
-  componentDidUpdate() {
-    if (
-      !this.state.selectedContact &&
-      this.props.contacts.userContacts.length
-    ) {
-      this.setState({
-        selectedContact: this.getIdentity(),
-      })
-    }
+  getSelectedContact(): ?Contact {
+    return this.getContact(this.state.selectedContact) || this.getIdentity()
   }
 
-  getSelectedContact(): ?Contact {
-    if (this.isIdentitySelected()) {
-      return this.getIdentity()
-    }
-
-    return this.props.contacts.userContacts.find(
-      c => c.localID === this.state.selectedContact,
-    )
+  getContact = (id: string) => {
+    return this.props.contacts.userContacts.find(c => c.localID === id)
   }
 
   startSearching = () => {
@@ -443,7 +386,11 @@ class ContactsViewComponent extends Component<Props, State> {
   }
 
   closeModal = () => {
-    this.setState({ addModalState: 0, editModalOpen: false })
+    this.setState({
+      addModalState: 0,
+      editModalOpen: false,
+      inviteModalOpen: undefined,
+    })
   }
 
   lookupPeer = async (feedHash: string) => {
@@ -474,34 +421,11 @@ class ContactsViewComponent extends Component<Props, State> {
     }
   }
 
-  sendInvite = (contact: Contact) => {
-    const { user } = this.props
-    this.setState({ inviteError: null, invitingContact: contact.localID })
-    const input = {
-      userID: user.localID,
-      contactID: contact.localID,
-    }
-
-    const requestComplete = error => {
-      this.setState({
-        inviteError: error,
-        invitingContact: undefined,
-        foundPeer: undefined,
-      })
-    }
-
-    commitMutation(this.context, {
-      mutation: inviteContactMutation,
-      variables: { input, userID: user.localID },
-      onCompleted: (contact, errors) => {
-        if (errors && errors.length) {
-          requestComplete(errors[0].message)
-        } else {
-          requestComplete()
-        }
-      },
-      onError: err => {
-        requestComplete(err.message)
+  sendInvite = async (contact: Contact) => {
+    this.setState({
+      inviteModalOpen: {
+        contact,
+        type: 'invite',
       },
     })
 
@@ -514,54 +438,10 @@ class ContactsViewComponent extends Component<Props, State> {
     const { user } = this.props
 
     if (payload.valid) {
-      if (this.state.radio === 'blockchain') {
-        this.setState({ addModalState: 2 })
-      } else {
-        this.setState({ error: null, addingContact: true })
-        const input = {
-          userID: user.localID,
-          publicFeed: payload.fields.peerLookupHash,
-        }
-
-        const requestComplete = error => {
-          this.setState({
-            error,
-            addingContact: false,
-            foundPeer: undefined,
-          })
-        }
-
-        commitMutation(this.context, {
-          mutation: addContactMutation,
-          variables: { input, userID: user.localID },
-          onCompleted: (contact, errors) => {
-            if (errors && errors.length) {
-              requestComplete(errors[0].message)
-            } else {
-              requestComplete()
-            }
-          },
-          onError: err => {
-            requestComplete(err.message)
-          },
-        })
-
-        if (this.state.addModalState) {
-          this.setState({ addModalState: 0 })
-        }
-      }
-    }
-  }
-
-  inviteBlockchainNewContact = (payload: FormSubmitPayload) => {
-    const { user } = this.props
-    const { foundPeer } = this.state
-
-    if (payload.valid) {
       this.setState({ error: null, addingContact: true })
       const input = {
         userID: user.localID,
-        publicFeed: foundPeer.publicFeed,
+        publicFeed: payload.fields.peerLookupHash,
       }
 
       const requestComplete = error => {
@@ -569,22 +449,28 @@ class ContactsViewComponent extends Component<Props, State> {
           error,
           addingContact: false,
           foundPeer: undefined,
-          selectedContact: foundPeer.publicFeed,
         })
-        if (!error) {
-          this.selectContact({ localID: foundPeer.publicFeed })
-          this.inviteContact({ localID: foundPeer.publicFeed })
-        }
       }
 
       commitMutation(this.context, {
         mutation: addContactMutation,
         variables: { input, userID: user.localID },
-        onCompleted: (contact, errors) => {
+        onCompleted: (response, errors) => {
+          console.log(response)
           if (errors && errors.length) {
             requestComplete(errors[0].message)
           } else {
-            requestComplete()
+            if (this.state.radio === 'blockchain') {
+              this.setState({
+                addModalState: 2,
+                inviteModalOpen: {
+                  contact: response.addContact.contact,
+                  type: 'invite',
+                },
+              })
+            } else {
+              requestComplete()
+            }
           }
         },
         onError: err => {
@@ -592,7 +478,7 @@ class ContactsViewComponent extends Component<Props, State> {
         },
       })
 
-      if (this.state.addModalState) {
+      if (this.state.radio !== 'blockchain') {
         this.setState({ addModalState: 0 })
       }
     }
@@ -650,63 +536,19 @@ class ContactsViewComponent extends Component<Props, State> {
   }
 
   withdrawStake = (contact: Contact) => {
-    const { user } = this.props
-    this.setState({ inviteError: null, withdrawingStake: true })
-    const input = {
-      userID: user.localID,
-      contactID: contact.localID,
-    }
-
-    const requestComplete = error => {
-      this.setState({
-        inviteError: error,
-        withdrawingStake: false,
-      })
-    }
-
-    commitMutation(this.context, {
-      mutation: retrieveInviteStakeMutation,
-      variables: { input, userID: user.localID },
-      onCompleted: (contact, errors) => {
-        if (errors && errors.length) {
-          requestComplete(errors[0].message)
-        } else {
-          requestComplete()
-        }
-      },
-      onError: err => {
-        requestComplete(err.message)
+    this.setState({
+      inviteModalOpen: {
+        contact,
+        type: 'retrieveStake',
       },
     })
   }
 
   rejectContact = (contact: Contact) => {
-    const { user } = this.props
-    this.setState({ error: null, rejectingInvite: contact.peerID })
-    const input = {
-      userID: user.localID,
-      peerID: contact.peerID,
-    }
-
-    const requestComplete = error => {
-      this.setState({
-        error,
-        rejectingInvite: undefined,
-      })
-    }
-
-    commitMutation(this.context, {
-      mutation: rejectContactMutation,
-      variables: { input, userID: user.localID },
-      onCompleted: (contact, errors) => {
-        if (errors && errors.length) {
-          requestComplete(errors[0].message)
-        } else {
-          requestComplete()
-        }
-      },
-      onError: err => {
-        requestComplete(err.message)
+    this.setState({
+      inviteModalOpen: {
+        contact,
+        type: 'declineInvite',
       },
     })
   }
@@ -903,7 +745,7 @@ class ContactsViewComponent extends Component<Props, State> {
       case 1:
         return this.renderAddNewContactFormStep1()
       case 2:
-        return this.renderAddNewContactFormStep2()
+        return this.renderInviteModal()
       default:
         return null
     }
@@ -1104,24 +946,39 @@ class ContactsViewComponent extends Component<Props, State> {
     )
   }
 
-  renderInviteArea(contact) {
+  renderSendInviteState(contact: Contact) {
+    if (contact.profile.ethAddress) {
+      if (this.state.invitingContact) {
+        return <Loader />
+      }
+
+      return (
+        <Button
+          title={'Send Invite'}
+          variant={['marginTop10', 'redOutline']}
+          onPress={() => this.sendInvite(contact)}
+        />
+      )
+    }
+  }
+
+  renderInviteArea(contact: Contact) {
     switch (contact.connectionState) {
       case 'SENDING_FEED':
         return <Loader />
       case 'SENT_FEED': {
-        return (
-          <Button
-            title="Send Invite"
-            variant={['marginTop10', 'redOutline']}
-            onPress={() => this.sendInvite(contact)}
-          />
-        )
+        return this.renderSendInviteState(contact)
       }
       case 'SENDING_BLOCKCHAIN': {
         return <Loader />
       }
       case 'SENT_BLOCKCHAIN': {
-        return <Text>{`Invite request sent: ${contact.invite.inviteTX}`}</Text>
+        return (
+          contact.invite &&
+          contact.invite.inviteTX && (
+            <Text>{`Invite request sent: ${contact.invite.inviteTX}`}</Text>
+          )
+        )
       }
       case 'CONNECTED': {
         if (
@@ -1222,6 +1079,37 @@ class ContactsViewComponent extends Component<Props, State> {
     )
   }
 
+  renderAddModal() {
+    return (
+      this.state.addModalOpen && (
+        <FormModalView
+          title="ADD A NEW CONTACT"
+          confirmButton="ADD"
+          dismissButton="CANCEL"
+          onRequestClose={this.closeModal}
+          onChangeForm={this.onFormChange}
+          onSubmitForm={this.submitNewContact}>
+          <FormContainer modal>
+            {this.renderAddNewContactForm(true)}
+          </FormContainer>
+        </FormModalView>
+      )
+    )
+  }
+
+  renderInviteModal() {
+    return (
+      this.state.inviteModalOpen && (
+        <InviteContactModal
+          closeModal={this.closeModal}
+          contact={this.state.inviteModalOpen.contact}
+          user={this.props.user}
+          type={this.state.inviteModalOpen.type}
+        />
+      )
+    )
+  }
+
   renderEditModal() {
     const selectedContact = this.getSelectedContact()
     if (!this.state.editModalOpen || !selectedContact) {
@@ -1279,6 +1167,7 @@ class ContactsViewComponent extends Component<Props, State> {
         {this.renderRightSide()}
         {this.renderAddNewContactForm()}
         {this.renderEditModal()}
+        {this.renderInviteModal()}
       </Container>
     )
   }
@@ -1289,6 +1178,7 @@ const ContactsView = createFragmentContainer(ContactsViewComponent, {
     fragment ContactsView_contacts on Contacts
       @argumentDefinitions(userID: { type: "String!" }) {
       userContacts(userID: $userID) {
+        ...InviteContactModal_contact
         peerID
         localID
         connectionState

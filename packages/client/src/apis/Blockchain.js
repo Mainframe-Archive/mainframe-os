@@ -2,14 +2,46 @@
 import { Observable } from 'rxjs'
 
 import ClientAPIs from '../ClientAPIs'
-import type { BlockchainEthSendParams, EthUnsubscribeParams } from '../types'
+import type {
+  BlockchainEthSendParams,
+  EthUnsubscribeParams,
+  SendDeclineTXParams,
+  SendWithdrawInviteTXParams,
+  SendInviteTXParams,
+} from '../types'
 
 export default class BlockchainAPIs extends ClientAPIs {
   ethSend(params: BlockchainEthSendParams): Promise<Object> {
     return this._rpc.request('blockchain_ethSend', params)
   }
 
-  async ethSubscribe(params: BlockchainEthSendParams) {
+  getInviteTXDetails(params: {
+    type: 'approve' | 'sendInvite',
+    userID: string,
+    contactID: string,
+  }) {
+    return this._rpc.request('blockchain_getInviteTXDetails', params)
+  }
+
+  sendInviteTX(params: SendInviteTXParams) {
+    return this._rpc.request('blockchain_sendInviteTX', params)
+  }
+
+  sendInviteApprovalTX(params: SendInviteTXParams) {
+    return this._rpc.request('blockchain_sendInviteApprovalTX', params)
+  }
+
+  sendDeclineInviteTX(params: SendDeclineTXParams) {
+    return this._rpc.request('blockchain_sendDeclineInviteTX', params)
+  }
+
+  sendWithdrawInviteTX(params: SendWithdrawInviteTXParams) {
+    return this._rpc.request('blockchain_sendWithdrawInviteTX', params)
+  }
+
+  async ethSubscribe(
+    params: BlockchainEthSendParams,
+  ): Promise<{ subscription: Observable<*>, id: string }> {
     const subID = await this._rpc.request('blockchain_ethSubscribe', params)
 
     const unsubscribe = () => {

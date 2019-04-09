@@ -97,7 +97,7 @@ export default class ContextQueries {
 
   getUserContacts(userID: string): Array<ContactResult> {
     const { identities } = this._context.openVault
-    const result = [...this.getContactsFromInvites(userID)]
+    const result = this.getContactsFromInvites(userID)
     const contacts = identities.getContactsForUser(userID)
     if (contacts) {
       Object.keys(contacts).forEach(id => {

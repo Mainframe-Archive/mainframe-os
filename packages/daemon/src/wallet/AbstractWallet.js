@@ -8,7 +8,7 @@ export type WalletEthSignTxParams = {
   data: string,
   gas: string,
   gasPrice: string,
-  chainId: number,
+  chainid?: ?string,
 }
 
 export type WalletSignDataParams = {

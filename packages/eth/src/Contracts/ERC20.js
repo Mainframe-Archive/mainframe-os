@@ -1,6 +1,7 @@
 // @flow
-import { fromWei, toWei, hexToString } from 'web3-utils'
+import { hexToString } from 'web3-utils'
 
+import { utils } from 'ethers'
 import { unitMap } from '../utils'
 import type { SendParams } from '../types'
 import type EthClient from '../Client'
@@ -14,11 +15,10 @@ export default class ERC20Contract extends BaseContract {
 
   async getTokenDecimals(): Promise<number> {
     const data = this.encodeCall('decimals')
-    const request = this.ethClient.createRequest('eth_call', [
+    return this.ethClient.send('eth_call', [
       { data, to: this.address },
       'latest',
     ])
-    return this.ethClient.sendRequest(request)
   }
 
   async getTokenDecimalsUnit(): Promise<string> {
@@ -36,28 +36,26 @@ export default class ERC20Contract extends BaseContract {
 
   async getTicker(): Promise<string> {
     const data = this.encodeCall('symbol')
-    const request = this.ethClient.createRequest('eth_call', [
+    const res = await this.ethClient.send('eth_call', [
       { data, to: this.address },
       'latest',
     ])
-    const res = await this.ethClient.sendRequest(request)
     return hexToString(res)
   }
 
   async getBalance(accountAddress: string): Promise<string> {
     const decimalsUnit = await this.getTokenDecimalsUnit()
     const data = this.encodeCall('balanceOf', [accountAddress])
-    const mftBalanceReq = this.ethClient.createRequest('eth_call', [
+    const res = await this.ethClient.send('eth_call', [
       { data, to: this.address },
       'latest',
     ])
-    const res = await this.ethClient.sendRequest(mftBalanceReq)
-    return fromWei(res, decimalsUnit)
+    return utils.formatUnits(res, decimalsUnit)
   }
 
   async transfer(params: SendParams) {
     const decimalsUnit = await this.getTokenDecimalsUnit()
-    const valueWei = toWei(String(params.value), decimalsUnit)
+    const valueWei = utils.parseUnits(params.value, decimalsUnit)
     const data = this.encodeCall('transfer', [params.to, valueWei])
     const txParams = { from: params.from, to: this.address, data }
     return this.ethClient.sendAndListen(txParams, params.confirmations)
@@ -69,7 +67,7 @@ export default class ERC20Contract extends BaseContract {
     options: { from: string },
   ) {
     const decimalsUnit = await this.getTokenDecimalsUnit()
-    const valueWei = toWei(String(amount), decimalsUnit)
+    const valueWei = utils.parseUnits(String(amount), decimalsUnit)
     const data = this.encodeCall('approve', [address, valueWei])
     const txParams = { ...options, to: this.address, data }
     return this.ethClient.sendAndListen(txParams)

@@ -244,20 +244,49 @@ export type EthTransactionParams = {
   data: string,
   gas: string,
   gasPrice: string,
-  chainId: number,
+  chainid?: ?string,
 }
 
-export type BlockchainEthSendParams = {
-  id: number,
-  jsonrpc: string,
+export type BlockchainEthSendParams = {|
   method: string,
-  params: Array<any>,
-}
+  params: Array<*>,
+|}
 
 export type BlockchainEthSendResult = any
 
 export type EthUnsubscribeParams = {
   id: string,
+}
+
+export type GetInviteTXDetailsParams = {
+  type: 'approve' | 'sendInvite',
+  userID: string,
+  contactID: string,
+}
+
+export type GetInviteTXDetailsResult = {
+  approved?: ?boolean,
+  gasPriceGwei?: string,
+  maxCost?: string,
+  stakeAmount: string,
+}
+
+export type SendInviteTXParams = {
+  userID: string,
+  contactID: string,
+  gasPrice?: string,
+}
+
+export type SendDeclineTXParams = {
+  userID: string,
+  peerID: string,
+  gasPrice?: string,
+}
+
+export type SendWithdrawInviteTXParams = {
+  userID: string,
+  contactID: string,
+  gasPrice?: string,
 }
 
 // Comms

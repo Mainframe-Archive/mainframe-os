@@ -3,10 +3,9 @@ import EventEmitter from 'eventemitter3'
 import { Observable } from 'rxjs'
 import type StreamRPC from '@mainframe/rpc-stream'
 
-let unsubCounter = 1
-
 export default class RpcProvider extends EventEmitter {
   _rpc: StreamRPC
+  _requestId: number = 1
 
   subscriptions = {}
 
@@ -15,21 +14,26 @@ export default class RpcProvider extends EventEmitter {
     this._rpc = rpc
   }
 
-  async sendPayload(payload: Object) {
+  async send(method: string, params: Array<*>): Promise<Object> {
     let result
-    if (payload.method === 'eth_unsubscribe') {
+    const payload = {
+      id: this._requestId++,
+      jsonrpc: '2.0',
+      params,
+      method,
+    }
+    if (method === 'eth_unsubscribe') {
       result = await this._rpc.request('blockchain_ethUnsubscribe', {
-        id: payload.params[0],
+        id: params[0],
       })
-    } else if (payload.method === 'eth_subscribe') {
+    } else if (method === 'eth_subscribe') {
       const subscription = await this._rpc.request(
         'blockchain_ethSubscribe',
         payload,
       )
       const unsubscribe = () => {
-        unsubCounter += 1
         const unsubPayload = {
-          id: unsubCounter,
+          id: this._requestId++,
           jsonrpc: '2.0',
           params: [subscription],
           method: 'eth_unsubscribe',
@@ -69,12 +73,7 @@ export default class RpcProvider extends EventEmitter {
     } else {
       result = await this._rpc.request('blockchain_ethSend', payload)
     }
-    const response = {
-      result,
-      id: payload.id,
-      jsonrpc: '2.0',
-      error: null,
-    }
-    return response
+
+    return result
   }
 }

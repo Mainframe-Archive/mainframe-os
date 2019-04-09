@@ -11,6 +11,7 @@ import {
   type Disposable,
   type Environment,
 } from 'react-relay'
+import { EthClient } from '@mainframe/eth'
 
 import OnboardView from './onboarding/OnboardView'
 import { EnvironmentContext } from './RelayEnvironment'
@@ -23,6 +24,7 @@ import WalletsScreen from './wallets/WalletsScreen'
 import ContactsScreen from './contacts/ContactsScreen'
 import NotificationsScreen from './notifications/NotificationsScreen'
 import SettingsScreen from './settings/SettingsScreen'
+import rpc from './rpc'
 
 import type { Launcher_apps as Apps } from './__generated__/Launcher_apps.graphql'
 import type { Launcher_identities as Identities } from './__generated__/Launcher_identities.graphql'
@@ -64,6 +66,12 @@ const CONTACT_CHANGED_SUBSCRIPTION = graphql`
   }
 `
 
+const ethClientProvider = {
+  send: async (method: string, params: Array<*>): Promise<*> => {
+    return rpc.ethSend({ method, params })
+  },
+}
+
 const Container = styled.View`
   flex-direction: row;
   width: 100vw;
@@ -93,6 +101,7 @@ type State = {
 
 class Launcher extends Component<Props, State> {
   _subscriptions: Array<Disposable> = []
+  _ethClient: EthClient
 
   constructor(props: Props) {
     super(props)
@@ -110,6 +119,7 @@ class Launcher extends Component<Props, State> {
       onboardRequired,
       openScreen: 'contacts',
     }
+    this._ethClient = new EthClient(ethClientProvider)
   }
 
   componentDidMount() {
@@ -174,7 +184,7 @@ class Launcher extends Component<Props, State> {
     }
 
     return (
-      <Provider value={{ user: ownUsers[0] }}>
+      <Provider value={{ user: ownUsers[0], ethClient: this._ethClient }}>
         <Container testID="launcher-view">
           <SideMenu
             selected={this.state.openScreen}

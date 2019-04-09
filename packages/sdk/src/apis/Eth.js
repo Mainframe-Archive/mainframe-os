@@ -39,7 +39,7 @@ class WalletProvider {
   }
 }
 
-const subscribe = async (rpc, rpcMethod, subMethod) => {
+const subscribe = async (rpc, rpcMethod, subMethod): Promise<Observable<*>> => {
   const subscription = await rpc.request(rpcMethod)
   const unsubscribe = () => {
     return rpc.request('sub_unsubscribe', { id: subscription })

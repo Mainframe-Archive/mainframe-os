@@ -8,6 +8,7 @@
 
 /*::
 import type { ConcreteFragment } from 'relay-runtime';
+type InviteContactModal_contact$ref = any;
 export type ConnectionState = "CONNECTED" | "DECLINED" | "RECEIVED" | "SENDING_BLOCKCHAIN" | "SENDING_FEED" | "SENT_BLOCKCHAIN" | "SENT_FEED" | "%future added value";
 export type StakeState = "RECLAIMED" | "RECLAIMING" | "SEIZED" | "STAKED" | "%future added value";
 import type { FragmentReference } from "relay-runtime";
@@ -22,7 +23,7 @@ export type ContactsView_contacts = {|
       +inviteTX: ?string,
       +stake: ?{|
         +reclaimedTX: ?string,
-        +amount: ?number,
+        +amount: ?string,
         +state: ?StakeState,
       |},
     |},
@@ -30,6 +31,7 @@ export type ContactsView_contacts = {|
       +name: ?string,
       +ethAddress: ?string,
     |},
+    +$fragmentRefs: InviteContactModal_contact$ref,
   |}>,
   +$refType: ContactsView_contacts$ref,
 |};
@@ -66,6 +68,11 @@ const node/*: ConcreteFragment*/ = {
       "concreteType": "Contact",
       "plural": true,
       "selections": [
+        {
+          "kind": "FragmentSpread",
+          "name": "InviteContactModal_contact",
+          "args": null
+        },
         {
           "kind": "ScalarField",
           "alias": null,
@@ -174,5 +181,5 @@ const node/*: ConcreteFragment*/ = {
   ]
 };
 // prettier-ignore
-(node/*: any*/).hash = 'acbac0abf4f1a2f9f5a7cd87a7ba55ca';
+(node/*: any*/).hash = '79081c2e12032ee8714137977bbf1756';
 module.exports = node;

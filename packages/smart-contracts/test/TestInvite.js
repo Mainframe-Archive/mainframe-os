@@ -1,5 +1,3 @@
-/* global artifacts contract assert web3 invites */
-
 const Token = artifacts.require('Token.sol')
 const ContactInvite = artifacts.require('ContactInvite.sol')
 const EthUtil = require('ethereumjs-util')
@@ -18,6 +16,7 @@ const acc1PrivateKey =
 
 contract('Token', accounts => {
   let token
+  let invites
 
   beforeEach('setup contract for each test', async () => {
     token = await Token.new()

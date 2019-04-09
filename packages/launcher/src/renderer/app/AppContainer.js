@@ -115,16 +115,9 @@ const EthNetwork = styled.View`
   margin-left: 10px;
 `
 
-// TODO: Refactor various web3 providers
 const ethClientProvider = {
-  sendPayload: async payload => {
-    const res = await rpc.ethSend(payload)
-    const jsonResponse = {
-      jsonrpc: '2.0',
-      id: payload.id,
-      result: res,
-    }
-    return jsonResponse
+  send: async (method: string, params: Array<*>): Promise<*> => {
+    return rpc.ethSend({ method, params })
   },
 }
 

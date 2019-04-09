@@ -55,11 +55,10 @@ export default class Contract {
 
   async call(method: string, params?: Array<any>) {
     const data = this.encodeCall(method, params)
-    const request = this.ethClient.createRequest('eth_call', [
+    const res = await this.ethClient.send('eth_call', [
       { data, to: this.address },
       'latest',
     ])
-    const res = await this.ethClient.sendRequest(request)
     return this.decodeCallResult(method, res)
   }
 

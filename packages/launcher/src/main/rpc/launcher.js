@@ -16,7 +16,11 @@ import {
   type AppSetUserPermissionsSettingsParams,
   APP_SET_USER_PERMISSIONS_SETTINGS_SCHEMA,
   type BlockchainEthSendParams,
-  ETH_REQUEST_SCHEMA,
+  type GetInviteTXDetailsParams,
+  GRAPHQL_QUERY_SCHEMA,
+  type GraphQLQueryParams,
+  type GraphQLQueryResult,
+  DECLINE_INVITE_SCHEMA,
   type IdentityCreateResult,
   type IdentityCreateUserParams,
   type IdentityCreateDeveloperParams,
@@ -24,10 +28,12 @@ import {
   type IdentityGetOwnDevelopersResult,
   IDENTITY_CREATE_OWN_USER_SCHEMA,
   IDENTITY_CREATE_OWN_DEVELOPER_SCHEMA,
+  INVITE_TX_DETAILS_SCHEMA,
+  INVITE_SEND_SCHEMA,
   LOCAL_ID_SCHEMA,
-  GRAPHQL_QUERY_SCHEMA,
-  type GraphQLQueryParams,
-  type GraphQLQueryResult,
+  type SendInviteTXParams,
+  type SendDeclineTXParams,
+  type SendWithdrawInviteTXParams,
   VAULT_SCHEMA,
   type VaultParams,
   type WalletGetLedgerEthAccountsParams,
@@ -223,13 +229,60 @@ export default {
     },
   },
 
-  blockchain_ethSend: {
-    params: ETH_REQUEST_SCHEMA,
+  blockchain_ethSend: async (
+    ctx: LauncherContext,
+    params: BlockchainEthSendParams,
+  ): Promise<Object> => {
+    return ctx.client.blockchain.ethSend(params)
+  },
+
+  blockchain_getInviteTXDetails: {
+    params: INVITE_TX_DETAILS_SCHEMA,
     handler: (
       ctx: LauncherContext,
-      params: BlockchainEthSendParams,
+      params: GetInviteTXDetailsParams,
     ): Promise<any> => {
-      return ctx.client.blockchain.ethSend(params)
+      return ctx.client.blockchain.getInviteTXDetails(params)
+    },
+  },
+
+  blockchain_sendInviteApprovalTX: {
+    params: INVITE_SEND_SCHEMA,
+    handler: (
+      ctx: LauncherContext,
+      params: SendInviteTXParams,
+    ): Promise<any> => {
+      return ctx.client.blockchain.sendInviteApprovalTX(params)
+    },
+  },
+
+  blockchain_sendInviteTX: {
+    params: INVITE_SEND_SCHEMA,
+    handler: (
+      ctx: LauncherContext,
+      params: SendInviteTXParams,
+    ): Promise<any> => {
+      return ctx.client.blockchain.sendInviteTX(params)
+    },
+  },
+
+  blockchain_sendDeclineInviteTX: {
+    params: DECLINE_INVITE_SCHEMA,
+    handler: (
+      ctx: LauncherContext,
+      params: SendDeclineTXParams,
+    ): Promise<any> => {
+      return ctx.client.blockchain.sendDeclineInviteTX(params)
+    },
+  },
+
+  blockchain_sendWithdrawInviteTX: {
+    params: INVITE_SEND_SCHEMA,
+    handler: (
+      ctx: LauncherContext,
+      params: SendWithdrawInviteTXParams,
+    ): Promise<any> => {
+      return ctx.client.blockchain.sendWithdrawInviteTX(params)
     },
   },
 }

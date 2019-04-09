@@ -34,6 +34,7 @@ export type InviteData = {
   fromAddress: string,
   toAddress: string,
   acceptedSignature?: string,
+  ethNetwork: string,
   stake: {
     amount: string,
     state: 'sending' | 'staked' | 'reclaiming' | 'reclaimed' | 'seized',
@@ -57,8 +58,8 @@ export type ConnectionState =
   | 'sent_feed'
   | 'sending_feed'
   | 'declined'
-  | 'sending_blockcahin'
-  | 'sent_blockcahin'
+  | 'sending_blockchain'
+  | 'sent_blockchain'
 
 export default class Contact {
   static create = (

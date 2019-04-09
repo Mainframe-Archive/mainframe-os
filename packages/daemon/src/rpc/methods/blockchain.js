@@ -4,6 +4,11 @@ import type {
   BlockchainEthSendParams,
   BlockchainEthSendResult,
   EthUnsubscribeParams,
+  GetInviteTXDetailsParams,
+  GetInviteTXDetailsResult,
+  SendDeclineTXParams,
+  SendInviteTXParams,
+  SendWithdrawInviteTXParams,
 } from '@mainframe/client'
 import { type Subscription as RxSubscription, Observable } from 'rxjs'
 
@@ -29,10 +34,7 @@ export const ethSend = async (
   ctx: ClientContext,
   params: BlockchainEthSendParams,
 ): Promise<BlockchainEthSendResult> => {
-  ctx.io.checkEthConnection() // Handle WS connection dropping
-  // TODO: Need to manage request id's at this level
-  // instead of just forwarding to prevent collisions
-  return ctx.io.eth.sendRequest(params)
+  return ctx.io.eth.send(params.method, params.params)
 }
 
 export const ethSubscribe = async (
@@ -64,6 +66,49 @@ export const ethUnsubscribe = async (
   if (ctx.io.eth.web3Provider.unsubscribe) {
     await ctx.io.eth.unsubscribe(params.id)
   }
+}
+
+export const getInviteTXDetails = async (
+  ctx: ClientContext,
+  params: GetInviteTXDetailsParams,
+): Promise<GetInviteTXDetailsResult> => {
+  return ctx.invitesHandler.getInviteTXDetails(
+    params.type,
+    params.userID,
+    params.contactID,
+  )
+}
+
+export const sendInviteApprovalTX = async (
+  ctx: ClientContext,
+  params: SendInviteTXParams,
+): Promise<void> => {
+  return ctx.invitesHandler.sendInviteApprovalTX(
+    params.userID,
+    params.contactID,
+    params.gasPrice,
+  )
+}
+
+export const sendInviteTX = async (
+  ctx: ClientContext,
+  params: SendInviteTXParams,
+): Promise<void> => {
+  return ctx.invitesHandler.sendInviteTX(params.userID, params.contactID)
+}
+
+export const sendDeclineInviteTX = async (
+  ctx: ClientContext,
+  params: SendDeclineTXParams,
+) => {
+  return ctx.invitesHandler.declineContactInvite(params.userID, params.peerID)
+}
+
+export const sendWithdrawInviteTX = async (
+  ctx: ClientContext,
+  params: SendWithdrawInviteTXParams,
+) => {
+  return ctx.invitesHandler.retrieveStake(params.userID, params.contactID)
 }
 
 export const subEthNetworkChanged = {

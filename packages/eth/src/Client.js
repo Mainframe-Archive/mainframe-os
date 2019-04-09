@@ -9,7 +9,6 @@ import ERC20 from './Contracts/ERC20'
 import BaseContract from './Contracts/BaseContract'
 import type {
   AbstractProvider,
-  RequestPayload,
   EventFilterParams,
   SendParams,
   TXEventEmitter,
@@ -30,8 +29,8 @@ const wsOptions = {
 }
 
 type Subscriptions = {
-  networkChanged: () => Observable,
-  accountsChanged: () => Observable,
+  networkChanged: () => Promise<Observable<*>>,
+  accountsChanged: () => Promise<Observable<*>>,
 }
 
 type SignDataParams = {
@@ -132,23 +131,20 @@ export default class EthClient extends EventEmitter {
   }
 
   async fetchNetwork(): Promise<string> {
-    const req = this.createRequest('net_version', [])
-    const id = await this.sendRequest(req)
+    const id = await this.send('net_version', [])
     this.setNetworkID(id)
     return id
   }
 
   async getAccounts(): Promise<Array<string>> {
-    const accountsReq = this.createRequest('eth_accounts', [])
-    return this.sendRequest(accountsReq)
+    if (this._walletProvider != null) {
+      return this._walletProvider.getAccounts()
+    }
+    throw new Error('No wallet provider found')
   }
 
   async getETHBalance(address: string) {
-    const ethBalanceReq = this.createRequest('eth_getBalance', [
-      address,
-      'latest',
-    ])
-    const res = await this.sendRequest(ethBalanceReq)
+    const res = await this.send('eth_getBalance', [address, 'latest'])
     return fromWei(res, 'ether')
   }
 
@@ -179,8 +175,7 @@ export default class EthClient extends EventEmitter {
     if (params.toBlock != null) {
       params.toBlock = toHex(params.toBlock)
     }
-    const request = this.createRequest('eth_getLogs', [params])
-    const res = await this.sendRequest(request)
+    const res = await this.send('eth_getLogs', [params])
     return res
   }
 
@@ -234,8 +229,7 @@ export default class EthClient extends EventEmitter {
   }
 
   async getConfirmations(txHash: string): Promise<?number> {
-    const request = this.createRequest('eth_getTransactionReceipt', [txHash])
-    const res = await this.sendRequest(request)
+    const res = await this.send('eth_getTransactionReceipt', [txHash])
     if (!res) {
       return null
     }
@@ -245,18 +239,16 @@ export default class EthClient extends EventEmitter {
   }
 
   async getLatestBlock(): Promise<number> {
-    const blockRequest = this.createRequest('eth_blockNumber', [])
-    const blockRes = await this.sendRequest(blockRequest)
+    const blockRes = await this.send('eth_blockNumber', [])
     return hexToNumber(blockRes)
   }
 
   async confirmTransaction(
     txHash: string,
-    requestID: number,
     confirmationsRequired: ?number = 10,
   ): Promise<boolean> {
     return new Promise((resolve, reject) => {
-      this._intervals[requestID] = setInterval(async () => {
+      this._intervals[txHash] = setInterval(async () => {
         try {
           // $FlowFixMe comparison type
           const confirmations = await this.getConfirmations(txHash)
@@ -264,8 +256,8 @@ export default class EthClient extends EventEmitter {
             confirmations !== null &&
             confirmations >= confirmationsRequired
           ) {
-            clearInterval(this._intervals[requestID])
-            this._intervals[requestID] = undefined
+            clearInterval(this._intervals[txHash])
+            this._intervals[txHash] = undefined
             resolve(true)
           }
         } catch (err) {
@@ -276,18 +268,22 @@ export default class EthClient extends EventEmitter {
   }
 
   async completeTxParams(txParams: Object): Promise<Object> {
+    if (!txParams.to) {
+      throw new Error('Transaction "to" address required')
+    }
+    if (!txParams.from) {
+      throw new Error('Transaction "from" address required')
+    }
     if (!txParams.nonce) {
-      const nonceReq = this.createRequest('eth_getTransactionCount', [
+      txParams.nonce = await this.send('eth_getTransactionCount', [
         txParams.from,
         'pending',
       ])
-      txParams.nonce = await this.sendRequest(nonceReq)
     }
 
     if (!txParams.gas) {
-      const gasReq = this.createRequest('eth_estimateGas', [txParams])
       try {
-        txParams.gas = await this.sendRequest(gasReq)
+        txParams.gas = await this.send('eth_estimateGas', [txParams])
       } catch (err) {
         // handle simple value transfer case
         if (err.message === 'no contract code at given address') {
@@ -299,8 +295,7 @@ export default class EthClient extends EventEmitter {
     }
 
     if (!txParams.gasPrice) {
-      const gasPriceReq = this.createRequest('eth_gasPrice', [])
-      txParams.gasPrice = await this.sendRequest(gasPriceReq)
+      txParams.gasPrice = await this.send('eth_gasPrice', [])
     }
     return txParams
   }
@@ -324,17 +319,14 @@ export default class EthClient extends EventEmitter {
     }
   }
 
-  async generateTXRequest(txParams: Object) {
+  async generateTXRequest(
+    txParams: Object,
+  ): Promise<{| method: string, params: Array<*> |}> {
     const signedTx = await this.prepareAndSignTx(txParams)
-    const requestData = {
+    return {
       method: 'eth_sendRawTransaction',
       params: [signedTx],
     }
-    // TODO: Check this is still needed for Ledger
-    // if (requestData.params.length && !requestData.params[0].chainId) {
-    //   requestData.params[0].chainId = Number(this.networkID)
-    // }
-    return this.createRequest(requestData.method, requestData.params)
   }
 
   async sendAndListen(
@@ -343,13 +335,13 @@ export default class EthClient extends EventEmitter {
   ): Promise<TXEventEmitter> {
     const eventEmitter = new EventEmitter()
     const request = await this.generateTXRequest(txParams)
-    this.sendRequest(request)
+    this.send(request.method, request.params)
       .then(res => {
         eventEmitter.emit('hash', res)
-        return this.confirmTransaction(res, request.id, 0).then(() => {
+        return this.confirmTransaction(res, 0).then(() => {
           eventEmitter.emit('mined', res)
           if (confirmations) {
-            return this.confirmTransaction(res, request.id, confirmations)
+            return this.confirmTransaction(res, confirmations)
           }
         })
       })
@@ -362,22 +354,7 @@ export default class EthClient extends EventEmitter {
     return eventEmitter
   }
 
-  createRequest(method: string, params: Array<any>): RequestPayload {
-    this._requestCount += 1
-    return {
-      id: this._requestCount,
-      jsonrpc: '2.0',
-      method: method,
-      params: params,
-    }
-  }
-
-  async sendRequest(params: RequestPayload): Promise<any> {
-    const res = await this.web3Provider.sendPayload(params)
-    if (res.error) {
-      throw new Error(res.error.message)
-    } else {
-      return res.result
-    }
+  async send(method: string, params: Array<*>): Promise<*> {
+    return this.web3Provider.send(method, params)
   }
 }

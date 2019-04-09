@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash d30a2a55bd9cb95d388e4c6f65f33b91
+ * @relayHash 9b499eaa59afe104ad9d0ff3c811e18e
  */
 
 /* eslint-disable */
@@ -85,6 +85,7 @@ fragment ContactsView_wallets_3iqrP on Wallets {
 
 fragment ContactsView_contacts_3iqrP on Contacts {
   userContacts(userID: $userID) {
+    ...InviteContactModal_contact
     peerID
     localID
     connectionState
@@ -102,6 +103,25 @@ fragment ContactsView_contacts_3iqrP on Contacts {
       ethAddress
     }
     id
+  }
+}
+
+fragment InviteContactModal_contact on Contact {
+  peerID
+  localID
+  connectionState
+  publicFeed
+  invite {
+    inviteTX
+    stake {
+      reclaimedTX
+      amount
+      state
+    }
+  }
+  profile {
+    name
+    ethAddress
   }
 }
 */
@@ -205,7 +225,7 @@ return {
   "operationKind": "query",
   "name": "ContactsScreenQuery",
   "id": null,
-  "text": "query ContactsScreenQuery(\n  $userID: String!\n) {\n  viewer {\n    contacts {\n      ...ContactsScreen_contacts_3iqrP\n    }\n    wallets {\n      ...ContactsScreen_wallets_3iqrP\n    }\n    id\n  }\n}\n\nfragment ContactsScreen_contacts_3iqrP on Contacts {\n  ...ContactsView_contacts_3iqrP\n}\n\nfragment ContactsScreen_wallets_3iqrP on Wallets {\n  ...ContactsView_wallets_3iqrP\n}\n\nfragment ContactsView_wallets_3iqrP on Wallets {\n  ethWallets(userID: $userID) {\n    hd {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n    ledger {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n  }\n}\n\nfragment ContactsView_contacts_3iqrP on Contacts {\n  userContacts(userID: $userID) {\n    peerID\n    localID\n    connectionState\n    publicFeed\n    invite {\n      inviteTX\n      stake {\n        reclaimedTX\n        amount\n        state\n      }\n    }\n    profile {\n      name\n      ethAddress\n    }\n    id\n  }\n}\n",
+  "text": "query ContactsScreenQuery(\n  $userID: String!\n) {\n  viewer {\n    contacts {\n      ...ContactsScreen_contacts_3iqrP\n    }\n    wallets {\n      ...ContactsScreen_wallets_3iqrP\n    }\n    id\n  }\n}\n\nfragment ContactsScreen_contacts_3iqrP on Contacts {\n  ...ContactsView_contacts_3iqrP\n}\n\nfragment ContactsScreen_wallets_3iqrP on Wallets {\n  ...ContactsView_wallets_3iqrP\n}\n\nfragment ContactsView_wallets_3iqrP on Wallets {\n  ethWallets(userID: $userID) {\n    hd {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n    ledger {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n  }\n}\n\nfragment ContactsView_contacts_3iqrP on Contacts {\n  userContacts(userID: $userID) {\n    ...InviteContactModal_contact\n    peerID\n    localID\n    connectionState\n    publicFeed\n    invite {\n      inviteTX\n      stake {\n        reclaimedTX\n        amount\n        state\n      }\n    }\n    profile {\n      name\n      ethAddress\n    }\n    id\n  }\n}\n\nfragment InviteContactModal_contact on Contact {\n  peerID\n  localID\n  connectionState\n  publicFeed\n  invite {\n    inviteTX\n    stake {\n      reclaimedTX\n      amount\n      state\n    }\n  }\n  profile {\n    name\n    ethAddress\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",

@@ -214,13 +214,13 @@
       "inputs": [
         {
           "indexed": true,
-          "name": "recipientAddress",
-          "type": "address"
-        },
-        {
-          "indexed": true,
           "name": "recipientFeed",
           "type": "string"
+        },
+        {
+          "indexed": false,
+          "name": "recipientAddress",
+          "type": "address"
         },
         {
           "indexed": false,

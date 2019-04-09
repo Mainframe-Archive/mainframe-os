@@ -26,11 +26,6 @@ import type ClientContext from '../context/ClientContext'
 import LedgerWallet from '../wallet/LedgerWallet'
 import HDWallet from '../wallet/HDWallet'
 
-const MFT_TOKEN_ADDRESSES = {
-  ropsten: '0xa46f1563984209fe47f8236f8b01a03f03f957e4',
-  mainnet: '0xdf2c7238198ad8b389666574f2d8bc411a4b7428',
-}
-
 export const { nodeInterface, nodeField } = nodeDefinitions<ClientContext>(
   (globalId: string, ctx: ClientContext) => {
     if (globalId === 'viewer') {
@@ -465,7 +460,7 @@ export const ownUserIdentity = new GraphQLObjectType({
       type: new GraphQLNonNull(GraphQLID),
     },
     feedHash: {
-      type: new GraphQLNonNull(GraphQLString),
+      type: GraphQLString,
       resolve: self => self.publicFeed.feedHash,
     },
     mfid: {
@@ -475,7 +470,7 @@ export const ownUserIdentity = new GraphQLObjectType({
     apps: {
       type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(app))),
       resolve: (self, args, ctx: ClientContext) => {
-        return ctx.openVault.apps.getAppsForUser(self.localID)
+        return ctx.openVault.apps.getInstalledAppsForUser(self.localID)
       },
     },
     defaultEthAddress: {
@@ -586,7 +581,7 @@ export const contactInviteData = new GraphQLObjectType({
         name: 'InviteStake',
         fields: () => ({
           amount: {
-            type: GraphQLInt,
+            type: GraphQLString,
           },
           state: {
             type: new GraphQLEnumType({
@@ -631,7 +626,8 @@ export const contact = new GraphQLObjectType({
     profile: {
       type: new GraphQLNonNull(genericProfile),
       resolve: (self, args, ctx: ClientContext) => {
-        return ctx.openVault.identities.getContactProfile(self.localID)
+        const profile = ctx.openVault.identities.getContactProfile(self.localID)
+        return { ...self.profile, ...profile }
       },
     },
     connectionState: {
@@ -745,10 +741,7 @@ export const walletBalances = new GraphQLObjectType({
       type: new GraphQLNonNull(GraphQLString),
       resolve: async (self, args, ctx) => {
         try {
-          const contract = ctx.io.eth.erc20Contract(
-            MFT_TOKEN_ADDRESSES[ctx.io.eth._networkName],
-          )
-          return await contract.getBalance(self)
+          return await ctx.io.tokenContract.getBalance(self)
         } catch (err) {
           ctx.log(err)
           return 0

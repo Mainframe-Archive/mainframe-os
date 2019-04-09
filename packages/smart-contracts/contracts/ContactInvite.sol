@@ -70,7 +70,7 @@ contract ContactInvite is Ownable, Pausable {
     inviteRequests[msg.sender][recipientHash].stake = requiredStake;
     inviteRequests[msg.sender][recipientHash].block = block.number;
     inviteRequests[msg.sender][recipientHash].state = InviteState.PENDING;
-    emit Invited(recipientAddr, recipientFeed, senderFeed, msg.sender, requiredStake);
+    emit Invited(recipientFeed, recipientAddr, senderFeed, msg.sender, requiredStake);
   }
 
   function declineAndWithdraw(
@@ -126,8 +126,8 @@ contract ContactInvite is Ownable, Pausable {
   // EVENTS
 
   event Invited(
-    address indexed recipientAddress,
     string indexed recipientFeed,
+    address recipientAddress,
     string senderFeed,
     address senderAddress,
     uint stakeAmount
