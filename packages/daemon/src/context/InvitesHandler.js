@@ -1,6 +1,6 @@
 // @flow
 
-import { Web3EthAbi, type BaseContract } from '@mainframe/eth'
+import { type BaseContract } from '@mainframe/eth'
 import { getFeedTopic } from '@erebos/api-bzz-base'
 import createKeccakHash from 'keccak'
 import { utils } from 'ethers'
@@ -35,7 +35,7 @@ const contracts = {
   // },
   ropsten: {
     token: '0xa46f1563984209fe47f8236f8b01a03f03f957e4',
-    invites: '0x2bD359aE51EA91a1e1b21e986B1df3607e4476f8',
+    invites: '0x33e16EFEA57968BC91fd5D9Db20068d5E4af5515',
   },
   ganache: {
     token: '0xB3E555c3dB7B983E46bf5a530ce1dac4087D2d8D',
@@ -48,10 +48,6 @@ const hash = (data: Buffer) => {
     .update(data)
     .digest()
   return '0x' + bytes.toString('hex')
-}
-
-const encodeAddress = (address: string) => {
-  return Web3EthAbi.encodeParameter('address', address)
 }
 
 export default class InvitesHandler {
@@ -70,11 +66,7 @@ export default class InvitesHandler {
       this._context
         .pipe(
           filter((e: ContextEvent) => {
-            return (
-              e.type === 'vault_opened' ||
-              e.type === 'eth_network_changed' ||
-              (e.type === 'eth_accounts_changed' && e.change === 'userDefault')
-            )
+            return e.type === 'vault_opened' || e.type === 'eth_network_changed'
           }),
         )
         .subscribe(
@@ -140,13 +132,6 @@ export default class InvitesHandler {
   async fetchInvitesForUser(user: OwnUserIdentity, userFeedHash: string) {
     // TODO: Only check new blocks
     try {
-      if (!user.profile.ethAddress) {
-        throw new Error(
-          `Unable to fetch invites, no eth address found for: ${user.localID}`,
-        )
-      }
-
-      const encodedAddress = encodeAddress(user.profile.ethAddress)
       const latestBlock = await this._context.io.eth.getLatestBlock()
       const creationBlock = await this.invitesContract.call('creationBlock')
 
@@ -154,7 +139,7 @@ export default class InvitesHandler {
         address: this.invitesContract.address,
         fromBlock: creationBlock,
         toBlock: latestBlock,
-        topics: [encodedAddress, userFeedHash],
+        topics: [userFeedHash],
       }
       const events = await this.invitesContract.getPastEvents('Invited', params)
       for (let i = 0; i < events.length; i++) {
@@ -587,14 +572,9 @@ export default class InvitesHandler {
         this._context.log('Ethereum subscriptions not supported')
         return
       }
-      if (!user.profile.ethAddress) {
-        this._context.log('No ethereum address on profile to subscribe to')
-        return
-      }
-      const encodedAddress = encodeAddress(user.profile.ethAddress)
       const invitesSubID = await this.invitesContract.subscribeToEvents(
         'Invited',
-        [encodedAddress, userFeedHash],
+        [userFeedHash],
       )
       const declinedSub = await this.invitesContract.subscribeToEvents(
         'Declined',
