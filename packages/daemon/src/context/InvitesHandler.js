@@ -578,6 +578,17 @@ export default class InvitesHandler {
           .on('mined', async hash => {
             inviteRequest.rejectedTXHash = hash
             await this._context.openVault.save()
+            const contactRes = this._context.queries.getContactFromInvite(
+              inviteRequest,
+            )
+            if (contactRes) {
+              this._context.next({
+                type: 'invites_changed',
+                userID: user.localID,
+                contact: contactRes,
+                change: 'inviteRejected',
+              })
+            }
             resolve(hash)
           })
           .on('error', err => {

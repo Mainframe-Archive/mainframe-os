@@ -78,7 +78,7 @@ export type InvitesChangedEvent = {|
   type: 'invites_changed',
   userID: string,
   contact: ContactResult,
-  change: 'inviteReceived',
+  change: 'inviteReceived' | 'inviteRejected',
 |}
 
 export type PeerCreatedEvent = {|
