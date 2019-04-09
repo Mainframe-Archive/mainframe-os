@@ -28,6 +28,8 @@ type ObserveInvites<T = Object> = {
 //$FlowFixMe Cannot resolve module ./inviteABI.
 const INVITE_ABI = require('./inviteABI.json')
 
+const EVENT_BATCH_SIZE = 1000
+
 const contracts = {
   // mainnet: {
   //   token: '0xa46f1563984209fe47f8236f8b01a03f03f957e4',
@@ -76,20 +78,14 @@ export default class InvitesHandler {
               | EthAccountsChangedEvent
               | VaultOpenedEvent,
           ) => {
-            if (e.type !== 'eth_network_changed') {
-              // Only need to clear subs if on the same network
-              this._ethSubscriptions.forEach(async subID => {
-                await this._context.io.eth.unsubscribe(subID)
-                this._ethSubscriptions.delete(subID)
-              })
-              // Ensure we have network when first opened
+            if (e.type === 'vault_opened') {
               await this._context.io.eth.fetchNetwork()
             }
             if (contracts[this._context.io.eth.networkName]) {
               this.setup()
             } else {
               this._context.log(
-                `Failed blockchain sub, unsupported ethereum network: ${
+                `Failed fetching blockchain invites, unsupported ethereum network: ${
                   this._context.io.eth.networkName
                 }`,
               )
@@ -120,8 +116,18 @@ export default class InvitesHandler {
         if (user.publicFeed.feedHash) {
           const feedhash = hash(Buffer.from(user.publicFeed.feedHash))
           await this.subscribeToEthEvents(user, feedhash)
-          await this.fetchInvitesForUser(user, feedhash)
-          this.fetchRejectedEvents(user, feedhash)
+          await this.readEvents(
+            user,
+            feedhash,
+            'Invited',
+            this.handleInviteEvent,
+          )
+          await this.readEvents(
+            user,
+            feedhash,
+            'Declined',
+            this.handleRejectedEvent,
+          )
         }
       }
     })
@@ -129,46 +135,65 @@ export default class InvitesHandler {
 
   // FETCH BLOCKCHAIN STATE
 
-  async fetchInvitesForUser(user: OwnUserIdentity, userFeedHash: string) {
-    // TODO: Only check new blocks
-    try {
-      const latestBlock = await this._context.io.eth.getLatestBlock()
-      const creationBlock = await this.invitesContract.call('creationBlock')
+  batchBlocks(from: number, to: number): Array<{ from: string, to: string }> {
+    let blockDiff = to - from
+    let fromBlock = from
+    const toBlock = blockDiff > EVENT_BATCH_SIZE ? from + EVENT_BATCH_SIZE : to
 
-      const params = {
-        address: this.invitesContract.address,
-        fromBlock: creationBlock,
-        toBlock: latestBlock,
-        topics: [userFeedHash],
+    const batches = []
+    if (blockDiff > EVENT_BATCH_SIZE) {
+      while (blockDiff > EVENT_BATCH_SIZE) {
+        batches.push({
+          from: String(fromBlock),
+          to: String(fromBlock + EVENT_BATCH_SIZE),
+        })
+        fromBlock = fromBlock + EVENT_BATCH_SIZE + 1
+        blockDiff = to - fromBlock
+        if (blockDiff <= EVENT_BATCH_SIZE) {
+          // Fill the final range
+          batches.push({ from: String(fromBlock), to: String(to) })
+        }
       }
-      const events = await this.invitesContract.getPastEvents('Invited', params)
-      for (let i = 0; i < events.length; i++) {
-        await this.handleInviteEvent(user, events[i])
-      }
-    } catch (err) {
-      this._context.log(`Error fetching blockchain invites: ${err}`)
-      return []
+    } else {
+      batches.push({ from: String(fromBlock), to: String(toBlock) })
     }
+    return batches
   }
 
-  async fetchRejectedEvents(user: OwnUserIdentity, userFeedHash: string) {
-    const creationBlock = await this.invitesContract.call('creationBlock')
-    const latestBlock = await this._context.io.eth.getLatestBlock()
+  async readEvents(
+    user: OwnUserIdentity,
+    userFeedHash: string,
+    type: 'Declined' | 'Invited',
+    handler: (user: OwnUserIdentity, events: Array<Object>) => Promise<void>,
+  ) {
+    const { eventBlocksRead } = this._context.openVault.blockchainData
+    const { eth } = this._context.io
+    const lastCheckedBlock = eventBlocksRead[type][eth.networkID] || 0
+    try {
+      const latestBlock = await eth.getLatestBlock()
+      const creationBlock = await this.invitesContract.call('creationBlock')
 
-    const params = {
-      fromBlock: creationBlock,
-      toBlock: latestBlock,
-      topics: [userFeedHash],
+      const latestNum = Number(latestBlock)
+      const startNum = Math.max(lastCheckedBlock, Number(creationBlock))
+
+      const batches = this.batchBlocks(startNum, latestNum)
+      batches.forEach(async batch => {
+        const params = {
+          fromBlock: batch.from,
+          toBlock: batch.to,
+          topics: [userFeedHash],
+        }
+        const events = await this.invitesContract.getPastEvents(type, params)
+        for (let i = 0; i < events.length; i++) {
+          await handler(user, events[i])
+        }
+      })
+      eventBlocksRead[type][eth.networkID] = latestBlock
+      await this._context.openVault.save()
+    } catch (err) {
+      this._context.log(`Error reading blockchain events: ${err}`)
+      return []
     }
-
-    const events = await this.invitesContract.getPastEvents('Declined', params)
-    events.forEach(e => {
-      try {
-        this.handleRejectedEvent(user, e)
-      } catch (err) {
-        this._context.log(err)
-      }
-    })
   }
 
   async checkInviteState(sender: string, recipient: string, feed: ?bzzHash) {
@@ -589,8 +614,6 @@ export default class InvitesHandler {
         'Declined',
         [userFeedHash],
       )
-      this._ethSubscriptions.add(invitesSubID)
-      this._ethSubscriptions.add(declinedSub)
 
       const handleEvent = (name, log, handler) => {
         try {
