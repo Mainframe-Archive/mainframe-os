@@ -11,21 +11,36 @@ import {
   type Environment,
 } from 'react-relay'
 import { fetchQuery } from 'relay-runtime'
-import { debounce } from 'lodash'
-import { Text, Button, Row, Column, TextField } from '@morpheus-ui/core'
-import { Form, type FormSubmitPayload } from '@morpheus-ui/forms'
+import { debounce, flattenDeep } from 'lodash'
+import memoize from 'memoize-one'
+
+import {
+  Text,
+  Button,
+  Row,
+  Column,
+  TextField,
+  RadioGroup,
+  Radio,
+  DropDown,
+} from '@morpheus-ui/core'
+import { type FormSubmitPayload } from '@morpheus-ui/forms'
 
 import PlusIcon from '@morpheus-ui/icons/PlusSymbolSm'
 import SearchIcon from '@morpheus-ui/icons/SearchSm'
-import CircleArrowRight from '@morpheus-ui/icons/CircleArrowRight'
 
 import { type CurrentUser } from '../LauncherContext'
 import { EnvironmentContext } from '../RelayEnvironment'
 import Avatar from '../../UIComponents/Avatar'
+import WalletIcon from '../wallets/WalletIcon'
 import SvgSelectedPointer from '../../UIComponents/SVGSelectedPointer'
 
 import FormModalView from '../../UIComponents/FormModalView'
 import Loader from '../../UIComponents/Loader'
+
+import { InformationBox } from '../identities/IdentitiesView'
+
+import type { ContactsView_wallets as Wallets } from './__generated__/ContactsView_wallets.graphql.js'
 
 const SvgSmallClose = props => (
   <svg width="10" height="10" viewBox="0 0 10 10" {...props}>
@@ -145,17 +160,38 @@ const FormContainer = styled.View`
     width: 100%;
     align-self: center;
     align-items: center;
-    justify-content: space-between;
-    margin-top: 15vh;`}
+    justify-content: center;
+    `}
 `
 
 const AvatarWrapper = styled.View`
   flex-direction: row;
   align-items: center;
+  margin-bottom: 20px;
 `
 
 const Blocky = styled.View`
   margin-right: 15px;
+`
+
+const RadioContainer = styled.View`
+  width: 350px;
+`
+
+const AddContactDetail = styled.View`
+  padding: 5px;
+  width: 440px;
+  border-radius: 3px;
+  border-color: #efefef;
+  flex-direction: row;
+  align-items: center;
+  ${props => props.border && `border-width: 1px;`}
+`
+
+const AddContactDetailText = styled.View`
+  flex: 1;
+  overflow: hidden;
+  padding-right: 20px;
 `
 
 export type Contact = {
@@ -197,6 +233,7 @@ type Props = {
   contacts: {
     userContacts: Array<Contact>,
   },
+  wallets: Wallets,
   acceptContact: (contact: Contact) => void,
   ignoreContact: (contact: Contact) => void,
 }
@@ -205,7 +242,8 @@ type State = {
   searching?: boolean,
   searchTerm?: ?string,
   selectedContact?: Object,
-  addModalOpen?: boolean,
+  selectedWallet?: string,
+  addModalState?: number,
   editModalOpen?: boolean,
   error?: ?string,
   inviteError?: ?string,
@@ -216,6 +254,7 @@ type State = {
   withdrawingStake?: ?boolean,
   rejectingInvite?: ?string,
   foundPeer?: {
+    mainframeID: string,
     profile: {
       name: string,
       ethAddress?: ?string,
@@ -343,9 +382,7 @@ class ContactsViewComponent extends Component<Props, State> {
   constructor(props: Props) {
     super(props)
     this.state = {
-      selectedContact: props.contacts.userContacts.length
-        ? this.getIdentity()
-        : null,
+      selectedContact: this.props.user.localID,
     }
   }
 
@@ -376,6 +413,10 @@ class ContactsViewComponent extends Component<Props, State> {
   }
 
   getSelectedContact(): ?Contact {
+    if (this.isIdentitySelected()) {
+      return this.getIdentity()
+    }
+
     return this.props.contacts.userContacts.find(
       c => c.localID === this.state.selectedContact,
     )
@@ -394,7 +435,7 @@ class ContactsViewComponent extends Component<Props, State> {
   }
 
   openAddModal = () => {
-    this.setState({ addModalOpen: true })
+    this.setState({ addModalState: 1, radio: null, foundPeer: null })
   }
 
   openEditModal = () => {
@@ -402,7 +443,7 @@ class ContactsViewComponent extends Component<Props, State> {
   }
 
   closeModal = () => {
-    this.setState({ addModalOpen: false, editModalOpen: false })
+    this.setState({ addModalState: 0, editModalOpen: false })
   }
 
   lookupPeer = async (feedHash: string) => {
@@ -464,18 +505,63 @@ class ContactsViewComponent extends Component<Props, State> {
       },
     })
 
-    if (this.state.addModalOpen) {
-      this.setState({ addModalOpen: false })
+    if (this.state.addModalState) {
+      this.setState({ addModalState: 0 })
     }
   }
 
   submitNewContact = (payload: FormSubmitPayload) => {
     const { user } = this.props
+
+    if (payload.valid) {
+      if (this.state.radio === 'blockchain') {
+        this.setState({ addModalState: 2 })
+      } else {
+        this.setState({ error: null, addingContact: true })
+        const input = {
+          userID: user.localID,
+          publicFeed: payload.fields.peerLookupHash,
+        }
+
+        const requestComplete = error => {
+          this.setState({
+            error,
+            addingContact: false,
+            foundPeer: undefined,
+          })
+        }
+
+        commitMutation(this.context, {
+          mutation: addContactMutation,
+          variables: { input, userID: user.localID },
+          onCompleted: (contact, errors) => {
+            if (errors && errors.length) {
+              requestComplete(errors[0].message)
+            } else {
+              requestComplete()
+            }
+          },
+          onError: err => {
+            requestComplete(err.message)
+          },
+        })
+
+        if (this.state.addModalState) {
+          this.setState({ addModalState: 0 })
+        }
+      }
+    }
+  }
+
+  inviteBlockchainNewContact = (payload: FormSubmitPayload) => {
+    const { user } = this.props
+    const { foundPeer } = this.state
+
     if (payload.valid) {
       this.setState({ error: null, addingContact: true })
       const input = {
         userID: user.localID,
-        publicFeed: payload.fields.peerLookupHash,
+        publicFeed: foundPeer.publicFeed,
       }
 
       const requestComplete = error => {
@@ -483,7 +569,12 @@ class ContactsViewComponent extends Component<Props, State> {
           error,
           addingContact: false,
           foundPeer: undefined,
+          selectedContact: foundPeer.publicFeed,
         })
+        if (!error) {
+          this.selectContact({ localID: foundPeer.publicFeed })
+          this.inviteContact({ localID: foundPeer.publicFeed })
+        }
       }
 
       commitMutation(this.context, {
@@ -501,18 +592,18 @@ class ContactsViewComponent extends Component<Props, State> {
         },
       })
 
-      if (this.state.addModalOpen) {
-        this.setState({ addModalOpen: false })
+      if (this.state.addModalState) {
+        this.setState({ addModalState: 0 })
       }
     }
   }
 
-  onFormChange = debounce(
-    (payload: FormSubmitPayload) => {
+  onFieldIDChange = debounce(
+    (payload: string) => {
       //TODO: should fetch the user data.
-      this.lookupPeer(payload.fields.peerLookupHash)
+      this.lookupPeer(payload)
       this.setState({
-        peerLookupHash: payload.fields.peerLookupHash,
+        peerLookupHash: payload,
       })
     },
     250,
@@ -629,9 +720,42 @@ class ContactsViewComponent extends Component<Props, State> {
       publicFeed: user.feedHash,
       profile: {
         name: `${user.profile.name} (Me)`,
+        ethAddress: user.defaultEthAddress,
       },
     }
   }
+
+  isIdentitySelected = () => {
+    return this.state.selectedContact === this.props.user.localID
+  }
+
+  validateHash = () => {
+    return !this.state.foundPeer ? 'Invalid Mainframe ID' : null
+  }
+
+  onChangeRadio = (value: string) => {
+    this.setState({ radio: value })
+  }
+
+  getWallets = memoize(wallets => {
+    return flattenDeep([
+      ...wallets.ethWallets.hd.map(item => item.accounts),
+      ...wallets.ethWallets.ledger.map(item => item.accounts),
+    ])
+  })
+
+  isWalletDropDownValid = () => {
+    const addresses = this.getWallets(this.props.wallets)
+
+    const wallet =
+      this.state.selectedWallet || this.props.user.defaultEthAddress
+
+    const item = addresses.find(item => item.address === wallet)
+
+    return item && (item.balances.eth > 0 && item.balances.mft >= 10)
+  }
+
+  selectWallet = (item: string) => this.setState({ selectedWallet: item })
 
   // RENDER
 
@@ -669,7 +793,12 @@ class ContactsViewComponent extends Component<Props, State> {
           </ButtonContainer>
           <ButtonContainer>
             <Button
-              variant={['xSmallIconOnly', 'completeOnboarding', 'noTitle']}
+              variant={[
+                'completeOnboarding',
+                'redOutline',
+                'xSmallIconOnly',
+                'noTitle',
+              ]}
               Icon={PlusIcon}
               onPress={this.openAddModal}
             />
@@ -767,8 +896,22 @@ class ContactsViewComponent extends Component<Props, State> {
     )
   }
 
-  renderAddNewContactForm(modal: boolean) {
-    const { error, addingContact } = this.state
+  renderAddNewContactForm() {
+    const { addModalState } = this.state
+
+    switch (addModalState) {
+      case 1:
+        return this.renderAddNewContactFormStep1()
+      case 2:
+        return this.renderAddNewContactFormStep2()
+      default:
+        return null
+    }
+  }
+
+  renderAddNewContactFormStep1() {
+    const { error, radio } = this.state
+
     const errorMsg = error ? (
       <Row size={1}>
         <Column>
@@ -777,10 +920,43 @@ class ContactsViewComponent extends Component<Props, State> {
       </Row>
     ) : null
 
-    const innerContent = (
-      <>
-        <Row size={1}>
-          {modal && (
+    const MutualOption = (
+      <RadioContainer>
+        <Text size={12} color="#232323">
+          Mutual invitation .{' '}
+          <Text size={12} color="#DA1157">
+            Free
+          </Text>
+        </Text>
+        <Text color="#585858" size={11}>
+          Both users need to add each other
+        </Text>
+      </RadioContainer>
+    )
+
+    const BlockchainOption = (
+      <RadioContainer>
+        <Text size={12} color="#232323">
+          Blockchain invitation .{' '}
+          <Text size={12} color="#DA1157">
+            Stake 10 MFT
+          </Text>
+        </Text>
+        <Text color="#585858" size={11}>
+          The invitee needs to accept the invitation to retrieve your MFT
+        </Text>
+      </RadioContainer>
+    )
+
+    return (
+      <FormModalView
+        title="ADD A NEW CONTACT"
+        confirmButton={radio === 'blockchain' ? 'NEXT' : 'ADD'}
+        dismissButton="CANCEL"
+        onRequestClose={this.closeModal}
+        onSubmitForm={this.submitNewContact}>
+        <FormContainer modal>
+          <Row size={1}>
             <Column>
               <Text
                 variant="greyMid"
@@ -792,37 +968,139 @@ class ContactsViewComponent extends Component<Props, State> {
                 {/*  or scanning their QR code */}
               </Text>
             </Column>
-          )}
-          <Column>
-            <TextField name="peerLookupHash" required label="Contact ID" />
-          </Column>
-          {this.renderPeerLookup()}
-        </Row>
-        <Row>{errorMsg}</Row>
-      </>
-    )
-
-    if (modal) {
-      return innerContent
-    }
-
-    return (
-      <FormContainer modal={modal}>
-        <Form onChange={this.onFormChange} onSubmit={this.submitNewContact}>
-          {innerContent}
-          <Row size={2} top>
-            <Column styles="align-items:flex-end;" smOffset={1}>
-              <Button
-                disabled={addingContact}
-                title="ADD"
-                variant="onboarding"
-                Icon={CircleArrowRight}
-                submit
+            <Column>
+              <TextField
+                name="peerLookupHash"
+                onChange={this.onFieldIDChange}
+                required
+                validation={this.validateHash}
+                label="Mainframe ID"
               />
             </Column>
+            {this.renderPeerLookup()}
           </Row>
-        </Form>
-      </FormContainer>
+
+          {this.state.foundPeer && (
+            <RadioGroup
+              onChange={this.onChangeRadio}
+              required
+              name="inviteType">
+              <Row size={1}>
+                <Column>
+                  <Radio value="mutual" label={MutualOption} />
+                </Column>
+              </Row>
+              <Row size={1}>
+                <Column>
+                  <Radio value="blockchain" label={BlockchainOption} />
+                </Column>
+              </Row>
+            </RadioGroup>
+          )}
+          <Row>{errorMsg}</Row>
+        </FormContainer>
+      </FormModalView>
+    )
+  }
+
+  getDropDownItems() {
+    const { wallets } = this.props
+
+    const addresses = this.getWallets(wallets)
+    return addresses.map(item => ({
+      display: (
+        <AddContactDetail>
+          <Blocky>
+            <WalletIcon address={item.address} size="small" />
+          </Blocky>
+          <AddContactDetailText>
+            <Text variant={['greyDark23', 'ellipsis', 'mono']} size={12}>
+              {item.address}
+            </Text>
+            <Text variant="greyDark23" size={11}>
+              {item.balances.eth} ETH{'   '}
+              {item.balances.mft} MFT
+            </Text>
+          </AddContactDetailText>
+        </AddContactDetail>
+      ),
+      value: item.address,
+    }))
+  }
+
+  renderAddNewContactFormStep2() {
+    const { error, foundPeer } = this.state
+    const hasName = foundPeer && foundPeer.profile.name
+
+    const dropDownItems = this.getDropDownItems()
+
+    const errorMsg = error ? (
+      <Row size={1}>
+        <Column>
+          <Text variant="error">{error}</Text>
+        </Column>
+      </Row>
+    ) : null
+
+    return (
+      <FormModalView
+        title="ADD A NEW CONTACT"
+        confirmButton="INVITE"
+        dismissButton="CANCEL"
+        confirmButtonDisabled={!this.isWalletDropDownValid()}
+        onRequestClose={this.closeModal}
+        onSubmitForm={this.inviteBlockchainNewContact}>
+        <FormContainer modal>
+          <Row size={1}>
+            <Column>
+              <Text bold variant="smallTitle" color="#585858">
+                Send a blockchain invitation to
+              </Text>
+              <AddContactDetail border>
+                <Blocky>
+                  <Avatar id={foundPeer.publicFeed} size="small" />
+                </Blocky>
+                <AddContactDetailText>
+                  <Text
+                    bold
+                    variant="greyDark23"
+                    theme={{ fontStyle: hasName ? 'normal' : 'italic' }}
+                    size={13}>
+                    {foundPeer.profile.name ||
+                      'This user has a private profile'}
+                  </Text>
+                  <Text variant={['greyDark23', 'ellipsis']} size={12}>
+                    {foundPeer.publicFeed}
+                  </Text>
+                </AddContactDetailText>
+              </AddContactDetail>
+            </Column>
+          </Row>
+          <Row size={1}>
+            <Column>
+              <Text bold variant="smallTitle" color="#585858">
+                Stake 10 MFT from
+              </Text>
+
+              <DropDown
+                options={dropDownItems}
+                displayKey="display"
+                valueKey="value"
+                defaultValue={
+                  this.state.selectedWallet || this.props.user.defaultEthAddress
+                }
+                label="Wallet"
+                onChange={this.selectWallet}
+              />
+
+              <Text color="#303030" variant="marginTop10" size={11}>
+                Gas fees: 6 GWei
+              </Text>
+            </Column>
+          </Row>
+          {errorMsg}
+        </FormContainer>
+      </FormModalView>
     )
   }
 
@@ -880,28 +1158,6 @@ class ContactsViewComponent extends Component<Props, State> {
   renderRightSide() {
     const selectedContact = this.getSelectedContact()
 
-    if (!selectedContact) {
-      return (
-        <RightContainer>
-          <Row size={1}>
-            <Column>
-              <Text variant={['smallTitle', 'blue', 'noPadding', 'bold']}>
-                ADD A NEW CONTACT
-              </Text>
-            </Column>
-          </Row>
-          <Row size={1}>
-            <Column>
-              <Text variant="greyMed" size={12}>
-                You have no contacts in your address book. Add a contact by
-                entering their Mainframe Contact ID below.
-              </Text>
-            </Column>
-          </Row>
-          {this.renderAddNewContactForm(false)}
-        </RightContainer>
-      )
-    }
     const inviteAction = this.renderInviteArea(selectedContact)
 
     const inviteError = this.state.inviteError && (
@@ -932,6 +1188,11 @@ class ContactsViewComponent extends Component<Props, State> {
               </Text>
               <Text variant="addressLarge">{selectedContact.publicFeed}</Text>
             </Column>
+            {this.isIdentitySelected() && (
+              <Column>
+                <InformationBox full />
+              </Column>
+            )}
           </Row>
           {selectedContact.profile.ethAddress && (
             <Row size={1}>
@@ -958,24 +1219,6 @@ class ContactsViewComponent extends Component<Props, State> {
             </Row> */}
         </ScrollView>
       </RightContainer>
-    )
-  }
-
-  renderAddModal() {
-    return (
-      this.state.addModalOpen && (
-        <FormModalView
-          title="ADD A NEW CONTACT"
-          confirmButton="ADD"
-          dismissButton="CANCEL"
-          onRequestClose={this.closeModal}
-          onChangeForm={this.onFormChange}
-          onSubmitForm={this.submitNewContact}>
-          <FormContainer modal>
-            {this.renderAddNewContactForm(true)}
-          </FormContainer>
-        </FormModalView>
-      )
     )
   }
 
@@ -1034,7 +1277,7 @@ class ContactsViewComponent extends Component<Props, State> {
       <Container>
         {this.renderContactsList()}
         {this.renderRightSide()}
-        {this.renderAddModal()}
+        {this.renderAddNewContactForm()}
         {this.renderEditModal()}
       </Container>
     )
@@ -1061,6 +1304,35 @@ const ContactsView = createFragmentContainer(ContactsViewComponent, {
         profile {
           name
           ethAddress
+        }
+      }
+    }
+  `,
+  wallets: graphql`
+    fragment ContactsView_wallets on Wallets
+      @argumentDefinitions(userID: { type: "String!" }) {
+      ethWallets(userID: $userID) {
+        hd {
+          name
+          localID
+          accounts {
+            address
+            balances {
+              eth
+              mft
+            }
+          }
+        }
+        ledger {
+          name
+          localID
+          accounts {
+            address
+            balances {
+              eth
+              mft
+            }
+          }
         }
       }
     }

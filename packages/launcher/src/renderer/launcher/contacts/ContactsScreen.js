@@ -8,6 +8,8 @@ import applyContext, { type CurrentUser } from '../LauncherContext'
 import RelayLoaderView from '../RelayLoaderView'
 import ContactsView, { type Contact } from './ContactsView'
 
+import type { ContactsScreen_wallets as Wallets } from './__generated__/ContactsScreen_wallets.graphql.js'
+
 type QueryProps = {
   user: CurrentUser,
 }
@@ -16,6 +18,7 @@ type Props = QueryProps & {
   contacts: {
     userContacts: Array<Contact>,
   },
+  wallets: Wallets,
 }
 
 type State = {
@@ -38,6 +41,7 @@ class ContactsScreenComponent extends Component<Props, State> {
       <ContactsView
         user={this.props.user}
         contacts={this.props.contacts}
+        wallets={this.props.wallets}
         ignoreContact={this.ignoreContact}
         acceptContact={this.acceptContact}
       />
@@ -52,6 +56,12 @@ const ContactsScreenRelayContainer = createFragmentContainer(
       fragment ContactsScreen_contacts on Contacts
         @argumentDefinitions(userID: { type: "String!" }) {
         ...ContactsView_contacts @arguments(userID: $userID)
+      }
+    `,
+    wallets: graphql`
+      fragment ContactsScreen_wallets on Wallets
+        @argumentDefinitions(userID: { type: "String!" }) {
+        ...ContactsView_wallets @arguments(userID: $userID)
       }
     `,
   },
@@ -69,6 +79,9 @@ export class ContactsScreenRenderer extends Component<QueryProps> {
             viewer {
               contacts {
                 ...ContactsScreen_contacts @arguments(userID: $userID)
+              }
+              wallets {
+                ...ContactsScreen_wallets @arguments(userID: $userID)
               }
             }
           }

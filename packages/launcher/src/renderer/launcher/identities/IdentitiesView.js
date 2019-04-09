@@ -72,7 +72,21 @@ const InfoBox = styled.View`
   flex-direction: row;
   align-items: center;
   justify-content: center;
+
+  ${props => props.full && `max-width: auto;`}
 `
+
+export const InformationBox = ({ full }: { full?: boolean }) => {
+  return (
+    <InfoBox full={full}>
+      <InfoIcon width={36} height={18} color="#00A7E7" />
+      <Text size={12} color="#00A7E7" variant="marginLeft15">
+        Share your Mainframe ID with your contacts and let your friends add you
+        on Mainframe OS
+      </Text>
+    </InfoBox>
+  )
+}
 
 class IdentitiesView extends Component<Props, State> {
   state = {}
@@ -133,13 +147,7 @@ class IdentitiesView extends Component<Props, State> {
           <Text variant={['smallTitle', 'blue', 'bold']}>Personal</Text>
         )}
         {userData && this.renderUser(userData)}
-        <InfoBox>
-          <InfoIcon width={36} height={18} color="#00A7E7" />
-          <Text size={12} color="#00A7E7" variant="marginLeft15">
-            Share your Mainframe ID with your contacts and let your friends add
-            you on Mainframe OS
-          </Text>
-        </InfoBox>
+        <InformationBox />
         {this.props.identities.ownDevelopers.length > 0 && (
           <>
             <Text variant={['smallTitle', 'blue', 'bold']}>Developer</Text>

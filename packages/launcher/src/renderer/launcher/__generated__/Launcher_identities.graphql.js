@@ -14,6 +14,7 @@ export type Launcher_identities = {|
   +ownUsers: $ReadOnlyArray<{|
     +defaultEthAddress: ?string,
     +localID: string,
+    +feedHash: string,
     +profile: {|
       +name: string,
       +ethAddress: ?string,
@@ -67,6 +68,13 @@ return {
           "storageKey": null
         },
         v0,
+        {
+          "kind": "ScalarField",
+          "alias": null,
+          "name": "feedHash",
+          "args": null,
+          "storageKey": null
+        },
         {
           "kind": "LinkedField",
           "alias": null,
@@ -129,5 +137,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '11c8686f43023143beaaaa5bad7a95a1';
+(node/*: any*/).hash = '9e57560542bfc36c2f6ca9a9fbd50678';
 module.exports = node;

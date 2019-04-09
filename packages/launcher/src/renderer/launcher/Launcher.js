@@ -108,7 +108,7 @@ class Launcher extends Component<Props, State> {
     }
     this.state = {
       onboardRequired,
-      openScreen: 'apps',
+      openScreen: 'contacts',
     }
   }
 
@@ -199,6 +199,7 @@ const LauncherRelayContainer = createFragmentContainer(Launcher, {
       ownUsers {
         defaultEthAddress
         localID
+        feedHash
         profile {
           name
           ethAddress
