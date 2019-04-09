@@ -149,4 +149,8 @@ export default {
   sendDeclineInviteTX: (params: { userID: string, peerID: string }) => {
     return rpc.request('blockchain_sendDeclineInviteTX', params)
   },
+
+  sendWithdrawInviteTX: (params: { userID: string, contactID: string }) => {
+    return rpc.request('blockchain_sendWithdrawInviteTX', params)
+  },
 }

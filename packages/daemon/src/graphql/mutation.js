@@ -415,29 +415,6 @@ const acceptContactRequestMutation = mutationWithClientMutationId({
   },
 })
 
-const retrieveInviteStakeMutation = mutationWithClientMutationId({
-  name: 'RetrieveInviteStake',
-  inputFields: {
-    contactID: {
-      type: new GraphQLNonNull(GraphQLString),
-    },
-    userID: {
-      type: new GraphQLNonNull(GraphQLString),
-    },
-  },
-  outputFields: {
-    viewer: viewerOutput,
-  },
-  mutateAndGetPayload: async (args, ctx) => {
-    const contact = ctx.openVault.identities.getContact(
-      args.userID,
-      args.contactID,
-    )
-    await ctx.invitesHandler.retrieveStake(args.userID, contact)
-    return {}
-  },
-})
-
 const appPermissionDefinitionsInput = new GraphQLInputObjectType({
   name: 'AppPermissionDefinitionsInput',
   fields: () => ({
@@ -733,7 +710,6 @@ export default new GraphQLObjectType({
     updateAppDetails: updateAppDetailsMutation,
     // Users
     acceptContactRequest: acceptContactRequestMutation,
-    retrieveInviteStake: retrieveInviteStakeMutation,
     addContact: addContactMutation,
     createUserIdentity: createUserIdentityMutation,
     createDeveloperIdentity: createDeveloperIdentityMutation,

@@ -465,11 +465,8 @@ export default class InvitesHandler {
     return { vNum, r, s }
   }
 
-  async retrieveStake(userID: string, contact: Contact) {
-    const peer = this._context.openVault.identities.getPeerUser(contact.peerID)
-    if (!peer) {
-      throw new Error('Peer not found')
-    }
+  async retrieveStake(userID: string, contactID: string) {
+    const { peer, contact } = this.getUserObjects(userID, contactID)
     const invite = contact._invite
     if (invite != null && invite.stake && invite.acceptedSignature) {
       const sigParams = this.signatureParams(invite.acceptedSignature)
@@ -498,17 +495,17 @@ export default class InvitesHandler {
 
       return new Promise((resolve, reject) => {
         res
-          .on('hash', hash => {
+          .on('hash', () => {
             // TODO: Also set from reading contract events
             // in case reclaimed from outside of MFOS
             invite.stake.state = 'reclaiming'
             emitContactChange(contact, 'stakeReclaimProcessing')
-            resolve(hash)
           })
           .on('mined', hash => {
             invite.stake.state = 'reclaimed'
             invite.stake.reclaimedTX = hash
             emitContactChange(contact, 'stakeReclaimMined')
+            resolve(hash)
           })
           .on('error', err => {
             invite.stake.state = 'staked'

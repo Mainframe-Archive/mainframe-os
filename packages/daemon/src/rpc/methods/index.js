@@ -42,6 +42,7 @@ export default {
   blockchain_ethUnsubscribe: blockchain.ethUnsubscribe,
   blockchain_getInviteTXDetails: blockchain.getInviteTXDetails,
   blockchain_sendInviteApprovalTX: blockchain.sendInviteApprovalTX,
+  blockchain_sendWithdrawInviteTX: blockchain.sendWithdrawInviteTX,
   blockchain_sendInviteTX: blockchain.sendInviteTX,
   blockchain_sendDeclineInviteTX: blockchain.sendDeclineInviteTX,
   blockchain_subEthNetworkChanged: blockchain.subEthNetworkChanged,

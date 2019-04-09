@@ -2,7 +2,7 @@
 import React, { Component } from 'react'
 import styled from 'styled-components/native'
 import { Text } from '@morpheus-ui/core'
-import { graphql, createFragmentContainer, commitMutation } from 'react-relay'
+import { graphql, createFragmentContainer } from 'react-relay'
 import Loader from '../../UIComponents/Loader'
 
 import rpc from '../rpc'
@@ -31,6 +31,7 @@ type State = {
   error?: ?string,
   txParams?: ?TXParams,
   declinedTXHash?: ?string,
+  withdrawTXHash?: ?string,
   balances?: {
     eth: string,
     mft: string,
@@ -64,21 +65,6 @@ const FormContainer = styled.View`
 
 const Section = styled.View`
   margin-bottom: 20px;
-`
-
-export const retrieveInviteStakeMutation = graphql`
-  mutation ContactsViewRetrieveInviteStakeMutation(
-    $input: RetrieveInviteStakeInput!
-    $userID: String!
-  ) {
-    retrieveInviteStake(input: $input) {
-      viewer {
-        contacts {
-          ...ContactsView_contacts @arguments(userID: $userID)
-        }
-      }
-    }
-  }
 `
 
 export class InviteContactModal extends Component<Props, State> {
@@ -240,35 +226,25 @@ export class InviteContactModal extends Component<Props, State> {
     }
   }
 
-  withdrawStake = () => {
+  withdrawStake = async () => {
     const { user, contact } = this.props
-    this.setState({ error: null, txProcessing: true })
-    const input = {
-      userID: user.localID,
-      contactID: contact.localID,
-    }
-
-    const requestComplete = errorMsg => {
+    try {
+      this.setState({ txProcessing: true, error: null })
+      const res = await rpc.sendWithdrawInviteTX({
+        userID: user.localID,
+        contactID: contact.localID,
+      })
       this.setState({
-        error: errorMsg,
         txProcessing: false,
+        withdrawTXHash: res,
+      })
+      this.props.closeModal()
+    } catch (err) {
+      this.setState({
+        txProcessing: false,
+        error: err.message,
       })
     }
-
-    commitMutation(this.context, {
-      mutation: retrieveInviteStakeMutation,
-      variables: { input, userID: user.localID },
-      onCompleted: (contact, errors) => {
-        if (errors && errors.length) {
-          requestComplete(errors[0].message)
-        } else {
-          requestComplete()
-        }
-      },
-      onError: err => {
-        requestComplete(err.message)
-      },
-    })
   }
 
   // RENDER
@@ -359,7 +335,6 @@ export class InviteContactModal extends Component<Props, State> {
 
   render() {
     const { invitePending } = this.state
-    const { invite } = this.props.contact
     let content
     let btnTitle
     let action
@@ -382,7 +357,7 @@ export class InviteContactModal extends Component<Props, State> {
         content = this.renderRetrieveStake()
         screenTitle = 'WITHDRAW YOUR MFT'
         if (!this.state.txProcessing) {
-          if (invite && invite.stake && invite.stake.reclaimedTX) {
+          if (this.state.withdrawTXHash) {
             action = this.props.closeModal
             btnTitle = 'Done'
           } else {
