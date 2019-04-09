@@ -235,6 +235,7 @@ export default class InvitesHandler {
           const storedInvites = identities.getInvites(user.localID)
           if (inviteState === 'PENDING' && !storedInvites[peer.localID]) {
             const contactInvite = {
+              ethNetwork: this._context.io.eth.networkName,
               privateFeed: feed.privateFeed,
               receivedAddress: contractEvent.recipientAddress,
               senderAddress: contractEvent.senderAddress,
@@ -419,6 +420,7 @@ export default class InvitesHandler {
       const inviteTXHash = await this.processInviteTransaction(user, peer)
       contact._invite = {
         inviteTX: inviteTXHash,
+        ethNetwork: this._context.io.eth.networkName,
         // $FlowFixMe address already checked
         fromAddress: user.profile.ethAddress,
         // $FlowFixMe address already checked
@@ -472,6 +474,7 @@ export default class InvitesHandler {
       const sigParams = this.signatureParams(invite.acceptedSignature)
 
       const txOptions = { from: invite.fromAddress }
+      this.validateInviteNetwork(invite.ethNetwork)
       const res = await this.invitesContract.send(
         'retrieveStake',
         [
@@ -532,6 +535,7 @@ export default class InvitesHandler {
     if (!inviteRequest) {
       throw new Error('Invite not found')
     }
+    this.validateInviteNetwork(inviteRequest.ethNetwork)
     const txOptions = { from: inviteRequest.receivedAddress }
     try {
       const res = await this.invitesContract.send(
@@ -557,6 +561,14 @@ export default class InvitesHandler {
       })
     } catch (err) {
       throw err
+    }
+  }
+
+  validateInviteNetwork(ethNetwork: string) {
+    if (ethNetwork !== this._context.io.eth.networkName) {
+      throw new Error(
+        `Please connect to the eth network (${ethNetwork}) this invite was originally sent from to withdraw this stake.`,
+      )
     }
   }
 
@@ -645,6 +657,7 @@ export default class InvitesHandler {
     if (!peer) throw new Error('Peer not found')
     const inviteRequest = identities.getInviteRequest(userID, peerID)
     if (!inviteRequest) throw new Error('Invite request not found')
+    this.validateInviteNetwork(inviteRequest.ethNetwork)
 
     const data = this.invitesContract.encodeCall('declineAndWithdraw', [
       inviteRequest.senderAddress,
@@ -678,6 +691,7 @@ export default class InvitesHandler {
         sigParams.r,
         sigParams.s,
       ]
+      this.validateInviteNetwork(invite.ethNetwork)
       const data = this.invitesContract.encodeCall('retrieveStake', txParams)
       const txOptions = {
         from: invite.fromAddress,
