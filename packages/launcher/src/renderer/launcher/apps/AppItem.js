@@ -5,6 +5,7 @@ import { createFragmentContainer, graphql } from 'react-relay'
 import styled from 'styled-components/native'
 import { Button, Text } from '@morpheus-ui/core'
 
+import CircleLoader from '../../UIComponents/CircleLoader'
 import type { AppItem_installedApp as InstalledApp } from './__generated__/AppItem_installedApp.graphql.js'
 import type { AppItem_ownApp as OwnApp } from './__generated__/AppItem_ownApp.graphql.js'
 import AppIcon from './AppIcon'
@@ -17,16 +18,18 @@ export const AppShadow = styled.View`
 
   ${props => props.small && `width: 35px;`}
 `
-
 const AppButtonContainer = styled.TouchableOpacity`
+  position: relative;
   padding: 20px;
   margin-left: 12px;
   flex-direction: column;
   align-items: center;
   width: 110px;
+  height: 155px;
   border-radius: 10px;
 
   ${props =>
+    !props.disabled &&
     props.hover &&
     `
     shadow-color: #000;
@@ -34,18 +37,67 @@ const AppButtonContainer = styled.TouchableOpacity`
     shadow-opacity: 0.1;
     shadow-radius: 10;
   `}
+
+  ${props => props.disabled && 'cursor: not-allowed;'}
 `
 
 const IconContainer = styled.View`
+  position: relative;
   width: 72px;
   align-items: center;
   margin-bottom: 15px;
   ${props =>
+    !props.disabled &&
     props.hover &&
     `
       margin-top: -3px;
       margin-bottom: 18px;
   `}
+
+  ${props => props.disabled && 'opacity: 0.3;'}
+`
+
+const LoaderContainer = styled.View`
+  width: 72px;
+  height: 72px;
+  border-radius: 3px;
+  background-color: #0000009e;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 20px;
+  left: 19px;
+`
+
+const CircleContainer = styled.View`
+  width: 45px;
+  height: 45px;
+  border-radius: 100%;
+  background-color: #1b1b1b;
+  align-items: center;
+  justify-content: center;
+`
+
+const UpdateBadge = styled.View`
+  position: absolute;
+  z-index: 2;
+  top: -8px;
+  right: -8px;
+  width: 19px;
+  height: 19px;
+  background-color: #da1157;
+  border-radius: 100%;
+  shadow-color: #000;
+  shadow-offset: {width: 0, height: 0};
+  shadow-opacity: 0.1;
+  shadow-radius: 10;
+`
+
+const UpdateButton = styled.View`
+  opacity: 0;
+  position: absolute;
+  bottom: 15px;
+  ${props => props.hover && 'opacity: 1;'}
 `
 
 type SharedProps = {
@@ -70,6 +122,7 @@ type Props = {
   onUpdate?: ?() => void,
   testID: string,
   icon?: ?string,
+  installing?: ?boolean,
 }
 
 type State = {
@@ -112,8 +165,12 @@ export default class AppItem extends Component<Props, State> {
     })
   }
 
-  toggleHover = () => {
-    this.setState({ hover: !this.state.hover })
+  setHover = () => {
+    this.setState({ hover: true })
+  }
+
+  releaseHover = () => {
+    this.setState({ hover: false })
   }
 
   render() {
@@ -125,31 +182,20 @@ export default class AppItem extends Component<Props, State> {
       onOpen,
       onUpdate,
       testID,
+      installing,
     } = this.props
-
-    let extra = null
-    if (onUpdate != null) {
-      extra = (
-        <Button
-          onPress={onUpdate}
-          title="UPDATE"
-          variant={['marginTop5', 'mediumUppercase', 'red']}
-        />
-      )
-    } else if (devName != null) {
-      extra = <Text variant="appButtonId">{devName}</Text>
-    }
 
     return (
       <AppButtonContainer
+        disabled={installing}
         onPress={onOpen}
         key={appID}
         testID={testID}
-        className="transition"
         hover={this.state.hover}
-        onMouseOver={this.toggleHover}
-        onMouseOut={this.toggleHover}>
+        onMouseOver={this.setHover}
+        onMouseOut={this.releaseHover}>
         <IconContainer
+          disabled={installing}
           hover={this.state.hover}
           className={this.state.direction}
           onMouseMove={this.setDirection}
@@ -161,9 +207,33 @@ export default class AppItem extends Component<Props, State> {
               this.state.hover ? 'app-shadow app-shadow-hover' : 'app-shadow'
             }
           />
+          {onUpdate && <UpdateBadge />}
         </IconContainer>
-        <Text variant={['appButtonName', 'ellipsis']}>{appName}</Text>
-        {extra}
+        <Text
+          variant={[
+            'appButtonName',
+            'ellipsis',
+            installing ? 'opacity50' : '',
+          ]}>
+          {appName}
+        </Text>
+        <Text variant="appButtonId">{devName}</Text>
+        {onUpdate && (
+          <UpdateButton className="transition" hover={this.state.hover}>
+            <Button
+              onPress={onUpdate}
+              title="UPDATE"
+              variant={['updateButton']}
+            />
+          </UpdateButton>
+        )}
+        {installing ? (
+          <LoaderContainer>
+            <CircleContainer>
+              <CircleLoader />
+            </CircleContainer>
+          </LoaderContainer>
+        ) : null}
       </AppButtonContainer>
     )
   }
@@ -171,6 +241,7 @@ export default class AppItem extends Component<Props, State> {
 
 const InstalledView = (props: InstalledProps) => {
   const app = props.installedApp
+
   const onOpen = () => {
     props.onOpenApp(app.localID, false)
   }
@@ -183,6 +254,7 @@ const InstalledView = (props: InstalledProps) => {
 
   return (
     <AppItem
+      installing={app.installationState === 'DOWNLOADING'}
       icon={props.icon}
       appID={app.mfid}
       appName={app.name}
@@ -217,6 +289,7 @@ export const InstalledAppItem = createFragmentContainer(InstalledView, {
       mfid
       localID
       name
+      installationState
       manifest {
         author {
           id

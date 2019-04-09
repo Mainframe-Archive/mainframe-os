@@ -292,6 +292,11 @@ export default {
       borderColor: COLORS.PRIMARY_RED,
       borderHoverColor: 'transparent',
       hoverShadow: true,
+      iconPadding: '6px 10px 6px 0',
+      iconWidth: 10,
+      iconHeight: 10,
+      iconColor: COLORS.PRIMARY_RED,
+      iconHoverColor: COLORS.PRIMARY_RED,
     },
     modalButton: {
       titlePadding: '10px 30px',
@@ -339,6 +344,19 @@ export default {
     full: {
       minWidth: '100%',
     },
+    updateButton: {
+      minWidth: '84px',
+      titlePadding: '2px 0',
+      backgroundColor: COLORS.PRIMARY_RED,
+      backgroundHoverColor: COLORS.PRIMARY_DARK_RED,
+      titleHoverColor: COLORS.WHITE,
+      titleColor: COLORS.WHITE,
+      borderColor: 'transparent',
+      borderHoverColor: 'transparent',
+      fontSize: 9,
+      fontWeight: 'bold',
+      margin: '5px 0 0 0',
+    },
     ...MARGINS,
   },
   Text: {
@@ -354,6 +372,9 @@ export default {
     error: {
       paddingBottom: 10,
       color: COLORS.PRIMARY_RED,
+    },
+    opacity50: {
+      opacity: '0.5',
     },
     requiredLabel: {
       margin: '0 0 6px 20px',
@@ -384,6 +405,7 @@ export default {
       color: COLORS.LIGHT_GREY_C0,
       fontSize: 10,
       letterSpacing: '1.5px',
+      marginTop: '20px',
     },
     suggestedAppButtonName: {
       fontSize: '12px',
@@ -452,6 +474,7 @@ export default {
       textAlign: 'center',
       color: '#303030',
       fontSize: 13,
+      borderRadius: '3px',
     },
     center: {
       textAlign: 'center',
@@ -505,6 +528,9 @@ export default {
     ...PADDING,
   },
   TextField: {
+    default: {
+      iconPadding: '5px',
+    },
     search: {
       padding: '5px',
       fontSize: 13,

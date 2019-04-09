@@ -21,6 +21,7 @@ type State = {
 
 const Container = styled.View`
   margin-top: 20px;
+  padding-left: 48px;
   flex: 1;
 `
 
