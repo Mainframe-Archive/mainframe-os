@@ -372,4 +372,66 @@ contract('ContactInvite', accounts => {
     const stateString = web3.utils.toUtf8(inviteState)
     assert.equal(stateString, 'ACCEPTED', 'Invalid invite state')
   })
+
+  it('Should allow changes to the staking amount', async () => {
+    const bnStake = await invites.requiredStake()
+    const stake = bnStake.toString()
+    await token.approve(invites.address, stake, {
+      from: accounts[0],
+    })
+    await invites.sendInvite(accounts[1], recipientFeed, senderFeed, {
+      from: accounts[0],
+    })
+
+    await truffleAssert.fails(
+      invites.setStake(ethers.utils.parseEther('1000'), { from: accounts[1] }),
+      truffleAssert.ErrorType.REVERT,
+    )
+    const res = await invites.setStake(ethers.utils.parseEther('1000'), { from: accounts[0] })
+
+    truffleAssert.eventEmitted(res, 'StakeChanged', ev => {
+      return ev.oldStake.toString() === ethers.utils.parseEther('10').toString() &&
+        ev.newStake.toString() === ethers.utils.parseEther('1000').toString()
+    })
+
+    const bnStake2 = await invites.requiredStake()
+    const stake2 = bnStake2.toString()
+
+    assert.notEqual(
+      bnStake,
+      bnStake2,
+      'Stake did not change',
+    )
+
+    await token.approve(invites.address, stake2, {
+      from: accounts[0],
+    })
+    await invites.sendInvite(accounts[2], recipient2Feed, senderFeed, {
+      from: accounts[0],
+    })
+
+    const pendingStake = await invites.pendingInviteStake(
+      accounts[0],
+      accounts[1],
+      recipientFeed,
+    )
+
+    assert.equal(
+      ethers.utils.formatEther(pendingStake.toString()),
+      '10.0',
+      'Incorrect staked value',
+    )
+
+    const pendingStake2 = await invites.pendingInviteStake(
+      accounts[0],
+      accounts[2],
+      recipient2Feed,
+    )
+
+    assert.equal(
+      ethers.utils.formatEther(pendingStake2.toString()),
+      '1000.0',
+      'Incorrect staked value',
+    )
+  })
 })

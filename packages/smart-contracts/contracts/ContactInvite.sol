@@ -123,6 +123,14 @@ contract ContactInvite is Ownable, Pausable {
     emit AdminRefunded(senderAddress, recipientFeed, stake);
   }
 
+  function setStake(
+    uint newStake
+  ) external onlyOwner {
+    uint oldStake = requiredStake;
+    requiredStake = newStake;
+    emit StakeChanged(oldStake, newStake);
+  }
+
   // EVENTS
 
   event Invited(
@@ -145,5 +153,9 @@ contract ContactInvite is Ownable, Pausable {
     address indexed senderAddress,
     string recipientFeed,
     uint amount
+  );
+  event StakeChanged(
+    uint oldStake,
+    uint newStake
   );
 }
