@@ -24,10 +24,12 @@ const senderFeed =
   '09bab720214dce6dee41c53144bb955d107d8415def419b6582422f495586f38'
 const recipientFeed =
   '9a97a59bf7d46574c5907daeb07e9f70965e7e102fe016fdf0631d627c89a9b4'
+const recipient2Feed =
+  '9a97a59bf7d46574c5907daeb07e9f70965e7e102fe016fdf0631d627c89a9b4'
 const acc1PrivateKey =
   '1c5a7303b5ecbb14a38753aeffeb70a7794a475b84de472077e25b5fa3e9ae56'
 
-contract('Token', accounts => {
+contract('ContactInvite', accounts => {
   let token: Token
   let invites: ContactInvite
 
@@ -285,5 +287,89 @@ contract('Token', accounts => {
       }),
       truffleAssert.ErrorType.REVERT,
     )
+  })
+
+  it('Should disable user interaction when paused', async () => {
+    const bnStake = await invites.requiredStake()
+    const stake = (2 * bnStake).toString()
+    await token.approve(invites.address, stake, {
+      from: accounts[0],
+    })
+    await invites.sendInvite(accounts[1], recipientFeed, senderFeed, {
+      from: accounts[0],
+    })
+
+    const messagetoSign = accounts[0]
+    const messageHash = EthUtil.keccak(messagetoSign)
+
+    // To have a consistent message hash with the one generated on chain
+    // we must convert the 66 byte string to it's 32 byte binary Array
+
+    const messageHashBytes = ethers.utils.arrayify(messageHash)
+    const msgHash = EthUtil.hashPersonalMessage(messageHashBytes)
+    const signature = EthUtil.ecsign(msgHash, new Buffer(acc1PrivateKey, 'hex'))
+
+    await invites.pause({ from: accounts[0] })
+
+    await truffleAssert.fails(
+      invites.retrieveStake(
+        accounts[1],
+        recipientFeed,
+        signature.v,
+        signature.r,
+        signature.s,
+        {
+          from: accounts[0],
+        },
+      ),
+      truffleAssert.ErrorType.REVERT,
+    )
+
+    await truffleAssert.fails(
+      invites.declineAndWithdraw(
+        accounts[0],
+        senderFeed,
+        recipientFeed,
+        {
+          from: accounts[1],
+        },
+      ),
+      truffleAssert.ErrorType.REVERT,
+    )
+
+    await truffleAssert.fails(
+      invites.sendInvite(
+        accounts[2],
+        recipient2Feed,
+        senderFeed,
+        {
+          from: accounts[0],
+        }
+      ),
+      truffleAssert.ErrorType.REVERT,
+    )
+
+    await invites.unpause({ from: accounts[0] })
+
+    await invites.retrieveStake(
+      accounts[1],
+      recipientFeed,
+      signature.v,
+      signature.r,
+      signature.s,
+      {
+        from: accounts[0],
+      },
+    )
+
+    inviteState = await invites.getInviteState(
+      accounts[0],
+      accounts[1],
+      recipientFeed,
+      { from: accounts[0] },
+    )
+
+    const stateString = web3.utils.toUtf8(inviteState)
+    assert.equal(stateString, 'ACCEPTED', 'Invalid invite state')
   })
 })
