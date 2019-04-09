@@ -173,8 +173,6 @@ class AppInstallModal extends Component<ViewProps, State> {
         })
       },
     })
-
-    this.props.onInstallComplete()
   }
 
   // RENDER
