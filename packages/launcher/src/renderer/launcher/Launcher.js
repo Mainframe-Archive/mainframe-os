@@ -64,7 +64,6 @@ const Container = styled.View`
 `
 
 const ContentContainer = styled.View`
-  padding: 40px 50px 20px 50px;
   min-width: 600px;
   flex: 1;
 `

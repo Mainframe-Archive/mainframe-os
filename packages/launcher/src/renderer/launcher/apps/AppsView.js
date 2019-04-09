@@ -29,7 +29,11 @@ type InstalledApps = $PropertyType<Apps, 'installed'>
 type AppData = $Call<<T>($ReadOnlyArray<T>) => T, InstalledApps>
 
 const SUGGESTED_APPS_URL =
-  'https://s3-us-west-2.amazonaws.com/suggested-apps/suggested-apps.json'
+  'https://s3-us-west-2.amazonaws.com/suggested-apps/suggested-apps-v2.json'
+
+const Container = styled.View`
+  padding: 40px 50px 20px 50px;
+`
 
 const Header = styled.View`
   height: 50px;
@@ -410,7 +414,7 @@ class AppsView extends Component<Props, State> {
       }
     }
     return (
-      <>
+      <Container>
         <Header>
           <OSLogo />
         </Header>
@@ -422,7 +426,7 @@ class AppsView extends Component<Props, State> {
         )}
         {this.renderApps()}
         {modal}
-      </>
+      </Container>
     )
   }
 }

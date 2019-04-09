@@ -60,6 +60,7 @@ type State = {
 
 const Container = styled.View`
   flex: 1;
+  padding: 54px 54px 40px 54px;
 `
 
 const Buttons = styled.View`

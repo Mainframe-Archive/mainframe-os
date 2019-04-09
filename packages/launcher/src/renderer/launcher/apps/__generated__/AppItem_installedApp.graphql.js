@@ -8,12 +8,14 @@
 
 /*::
 import type { ConcreteFragment } from 'relay-runtime';
+export type InstallationState = "DOWNLOADING" | "ERROR" | "READY" | "%future added value";
 import type { FragmentReference } from "relay-runtime";
 declare export opaque type AppItem_installedApp$ref: FragmentReference;
 export type AppItem_installedApp = {|
   +mfid: string,
   +localID: string,
   +name: string,
+  +installationState: ?InstallationState,
   +manifest: {|
     +author: {|
       +id: ?string,
@@ -60,6 +62,13 @@ return {
       "storageKey": null
     },
     v0,
+    {
+      "kind": "ScalarField",
+      "alias": null,
+      "name": "installationState",
+      "args": null,
+      "storageKey": null
+    },
     {
       "kind": "LinkedField",
       "alias": null,
@@ -123,5 +132,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '0b26e7f39f035d0af3c125dee9460847';
+(node/*: any*/).hash = 'eea58a87c34a7e1418a63e02edebd047';
 module.exports = node;

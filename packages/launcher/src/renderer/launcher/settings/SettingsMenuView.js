@@ -29,7 +29,7 @@ type State = {
 
 const Container = styled.View`
   flex: 1;
-  padding: 0 5px;
+  padding: 40px 50px;
 `
 const ScrollView = styled.ScrollView``
 

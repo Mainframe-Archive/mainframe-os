@@ -50,10 +50,11 @@ const newWindow = (params: Object = {}) => {
   const window = new BrowserWindow({
     minWidth: 1020,
     minHeight: 702,
-    width: params.width || 1020,
-    height: params.height || 702,
+    width: 1020,
+    height: 702,
     show: false,
     titleBarStyle: 'hidden',
+    ...params,
   })
 
   if (is.development) {
@@ -271,7 +272,12 @@ const setupClient = async () => {
 const createLauncherWindow = async () => {
   await setupClient()
 
-  launcherWindow = newWindow({ width: 900, height: 600 })
+  launcherWindow = newWindow({
+    width: 900,
+    height: 600,
+    minWidth: 900,
+    minHeight: 600,
+  })
 
   const menu = Menu.buildFromTemplate(template)
   Menu.setApplicationMenu(menu)
