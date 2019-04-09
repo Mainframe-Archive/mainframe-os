@@ -1,6 +1,6 @@
 // @flow
-
-import type { EventEmitter } from 'events'
+// $FlowFixMe
+import { EventEmitter } from 'events'
 
 export const onDataMatch = (
   emitter: EventEmitter,

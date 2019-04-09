@@ -6,7 +6,7 @@ import Client, { type VaultSettings } from '@mainframe/client'
 import { Environment, DaemonConfig, VaultConfig } from '@mainframe/config'
 import StreamRPC from '@mainframe/rpc-stream'
 import { setupDaemon, startDaemon, stopDaemon } from '@mainframe/toolbox'
-import { app, BrowserWindow, ipcMain, Menu } from 'electron'
+import { app, BrowserWindow, WebContents, ipcMain, Menu } from 'electron'
 import { is } from 'electron-util'
 
 import { APP_TRUSTED_REQUEST_CHANNEL } from '../constants'
