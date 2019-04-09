@@ -229,7 +229,7 @@ tx.on('hash', hash => ... )
 
 Will show a file upload window to the user, they can select one file they wish to upload.
 
-**returns:** Promise<?String>
+**returns:** Promise<boolean>
 
 **Example:**
 
@@ -243,7 +243,7 @@ await sdk.storage.promptUpload(key)
 
 Fetches keys for all the files your app has previously uploaded.
 
-**returns:** Promise<Array<?String>>
+**returns:** Promise<Array<{ contentType: string, key: string }>>
 
 **Example:**
 
@@ -255,22 +255,22 @@ const list = await sdk.storage.list()
 
 Sets a string value for a given key.
 
-**returns:** Promise<?String>
+**returns:** Promise<?string>
 
 **Example:**
 
 ```
-const data = 'example data'
 const key = 'my-key'
+const data = 'example data'
 
-await sdk.storage.set(data, key)
+await sdk.storage.set(key, data)
 ```
 
 ### storage.get()
 
 Fetches a string value for a given key.
 
-**returns:** Promise<?String>
+**returns:** Promise<?string>
 
 **Example:**
 
