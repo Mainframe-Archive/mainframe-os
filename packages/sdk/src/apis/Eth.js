@@ -138,6 +138,15 @@ export default class EthAPIs extends ClientAPIs {
     return this._ethClient.networkID
   }
 
+  getAccounts(): Promise<Array<string>> {
+    return this._ethClient.getAccounts()
+  }
+
+  async getDefaultAccount(): Promise<?string> {
+    const accounts = await this._ethClient.getAccounts()
+    return accounts ? accounts[0] : undefined
+  }
+
   sendETH(params: SendParams): Promise<TXEventEmitter> {
     return this._ethClient.sendETH(params)
   }
@@ -154,9 +163,5 @@ export default class EthAPIs extends ClientAPIs {
     }
     const contract = this._ethClient.erc20Contract(tokenAddress)
     return contract.transfer(params)
-  }
-
-  getAccounts(): Promise<Array<string>> {
-    return this._ethClient.getAccounts()
   }
 }

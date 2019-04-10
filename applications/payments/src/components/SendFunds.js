@@ -140,30 +140,20 @@ class SendFunds extends Component<ContextProps, State> {
     if (!this.validateSend()) {
       return
     }
-    const accounts = await web3.eth.getAccounts()
     this.setState({
       processingTransaction: true,
       currentTX: undefined,
       errorMsg: undefined,
     })
+
+    const account = await sdk.ethereum.getDefaultAccount()
+
     const params = {
-      from: accounts[0],
+      from: account,
       to: this.state.recipient,
       value: this.state.amount,
     }
-    // web3.eth
-    //   .sendTransaction({
-    //     from: accounts[0],
-    //     to: this.state.recipient,
-    //     value: 100000,
-    //   })
-    //   .on('transactionHash', function(hash) {
-    //     console.log('GOT HASH: ', hash)
-    //   })
-    //   .on('receipt', function(receipt) {
-    //     console.log('receipt', receipt)
-    //   })
-    //   .on('error', console.error) // If a out of gas error, the second parameter is the receipt.
+
     const txSub = mft
       ? await sdk.ethereum.sendMFT(params)
       : await sdk.ethereum.sendETH(params)
