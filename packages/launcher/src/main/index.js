@@ -244,8 +244,14 @@ const launchApp = async (
 // TODO: proper setup, this is just temporary logic to simplify development flow
 const setupClient = async () => {
   // First launch flow: initial setup
-  const fixPath = require('fix-path')
-  fixPath()
+
+  const isMac = process.platform === 'darwin'
+
+  if (isMac) {
+    const fixPath = require('fix-path')
+    fixPath()
+  }
+
   if (daemonConfig.binPath == null) {
     // Setup daemon
     await setupDaemon(daemonConfig, {
