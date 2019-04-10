@@ -88,6 +88,7 @@ export default class ContextQueries {
     }
     if (contact.invite) {
       contactRes.invite = {
+        ethNetwork: contact.invite.ethNetwork,
         inviteTX: contact.invite.inviteTX,
         stake: contact.invite.stake,
       }

@@ -13,12 +13,20 @@ import {
 } from 'react-relay'
 import { fetchQuery } from 'relay-runtime'
 import { debounce } from 'lodash'
-import { Text, Button, Row, Column, TextField } from '@morpheus-ui/core'
-import { Form, type FormSubmitPayload } from '@morpheus-ui/forms'
+import { shell } from 'electron'
+import {
+  Text,
+  Button,
+  Row,
+  Column,
+  TextField,
+  RadioGroup,
+  Radio,
+} from '@morpheus-ui/core'
+import { type FormSubmitPayload } from '@morpheus-ui/forms'
 
 import PlusIcon from '@morpheus-ui/icons/PlusSymbolSm'
 import SearchIcon from '@morpheus-ui/icons/SearchSm'
-import CircleArrowRight from '@morpheus-ui/icons/CircleArrowRight'
 
 import { type CurrentUser } from '../LauncherContext'
 import { EnvironmentContext } from '../RelayEnvironment'
@@ -27,6 +35,7 @@ import SvgSelectedPointer from '../../UIComponents/SVGSelectedPointer'
 
 import FormModalView from '../../UIComponents/FormModalView'
 import Loader from '../../UIComponents/Loader'
+import { InformationBox } from '../identities/IdentitiesView'
 import InviteContactModal, { type TransactionType } from './InviteContactModal'
 
 const SvgSmallClose = props => (
@@ -89,12 +98,7 @@ const ContactCardText = styled.View`
   justify-content: space-around;
 `
 
-const AcceptIgnore = styled.View`
-  padding-left: 10px;
-  width: 110px;
-  flex-direction: row;
-  justify-content: space-between;
-`
+const ViewTransaction = styled.TouchableOpacity``
 
 const RightContainer = styled.View`
   flex: 1;
@@ -147,17 +151,24 @@ const FormContainer = styled.View`
     width: 100%;
     align-self: center;
     align-items: center;
-    justify-content: space-between;
-    margin-top: 15vh;`}
+    justify-content: center;
+    `}
 `
 
 const AvatarWrapper = styled.View`
   flex-direction: row;
   align-items: center;
+  margin-bottom: 20px;
 `
+
+const ContactName = styled.View``
 
 const Blocky = styled.View`
   margin-right: 15px;
+`
+
+const RadioContainer = styled.View`
+  width: 350px;
 `
 
 export type Contact = {
@@ -166,7 +177,8 @@ export type Contact = {
   publicFeed: string,
   ethAddress?: string,
   invite?: {
-    inviteTX?: string,
+    ethNetwork: string,
+    inviteTX: string,
     stake: {
       amount: string,
       state: string,
@@ -183,6 +195,7 @@ export type Contact = {
     | 'SENDING_BLOCKCHAIN'
     | 'SENT_BLOCKCHAIN'
     | 'RECEIVED'
+    | 'DECLINED'
     | 'CONNECTED',
 }
 
@@ -204,22 +217,21 @@ type Props = {
 type State = {
   searching?: boolean,
   searchTerm?: ?string,
-  selectedContact?: Object,
-  addModalOpen?: boolean,
+  selectedContact: Object,
+  addModalState?: number,
   editModalOpen?: boolean,
+  radio?: ?string,
   error?: ?string,
   inviteError?: ?string,
   peerLookupHash?: ?string,
   queryInProgress?: ?boolean,
   addingContact?: ?boolean,
-  invitingContact?: ?string,
-  withdrawingStake?: ?boolean,
-  rejectingInvite?: ?string,
   inviteModalOpen?: ?{
     type: TransactionType,
     contact: Contact,
   },
   foundPeer?: {
+    mainframeID: string,
     profile: {
       name: string,
       ethAddress?: ?string,
@@ -252,6 +264,9 @@ export const addContactMutation = graphql`
     $userID: String!
   ) {
     addContact(input: $input) {
+      contact {
+        ...InviteContactModal_contact
+      }
       viewer {
         contacts {
           ...ContactsView_contacts @arguments(userID: $userID)
@@ -317,13 +332,12 @@ class ContactsViewComponent extends Component<Props, State> {
     }
   }
 
-  getSelectedContact(): ?Contact {
-    return (
-      this.props.contacts.userContacts.find(
-        c => c.localID === this.state.selectedContact,
-        // $FlowFixMe feedHash
-      ) || this.getIdentity()
-    )
+  getSelectedContact(): Contact {
+    return this.getContact(this.state.selectedContact) || this.getIdentity()
+  }
+
+  getContact = (id: string) => {
+    return this.props.contacts.userContacts.find(c => c.localID === id)
   }
 
   startSearching = () => {
@@ -339,7 +353,7 @@ class ContactsViewComponent extends Component<Props, State> {
   }
 
   openAddModal = () => {
-    this.setState({ addModalOpen: true })
+    this.setState({ addModalState: 1, radio: null, foundPeer: undefined })
   }
 
   openEditModal = () => {
@@ -348,7 +362,8 @@ class ContactsViewComponent extends Component<Props, State> {
 
   closeModal = () => {
     this.setState({
-      addModalOpen: false,
+      addModalState: 0,
+      foundPeer: undefined,
       editModalOpen: false,
       inviteModalOpen: undefined,
     })
@@ -389,10 +404,15 @@ class ContactsViewComponent extends Component<Props, State> {
         type: 'invite',
       },
     })
+
+    if (this.state.addModalState) {
+      this.setState({ addModalState: 0 })
+    }
   }
 
   submitNewContact = (payload: FormSubmitPayload) => {
     const { user } = this.props
+
     if (payload.valid) {
       this.setState({ error: null, addingContact: true })
       const input = {
@@ -411,11 +431,21 @@ class ContactsViewComponent extends Component<Props, State> {
       commitMutation(this.context, {
         mutation: addContactMutation,
         variables: { input, userID: user.localID },
-        onCompleted: (contact, errors) => {
+        onCompleted: (response, errors) => {
           if (errors && errors.length) {
             requestComplete(errors[0].message)
           } else {
-            requestComplete()
+            if (this.state.radio === 'blockchain') {
+              this.setState({
+                addModalState: 2,
+                inviteModalOpen: {
+                  contact: response.addContact.contact,
+                  type: 'invite',
+                },
+              })
+            } else {
+              requestComplete()
+            }
           }
         },
         onError: err => {
@@ -423,18 +453,18 @@ class ContactsViewComponent extends Component<Props, State> {
         },
       })
 
-      if (this.state.addModalOpen) {
-        this.setState({ addModalOpen: false })
+      if (this.state.radio !== 'blockchain') {
+        this.setState({ addModalState: 0 })
       }
     }
   }
 
-  onFormChange = debounce(
-    (payload: FormSubmitPayload) => {
+  onFieldIDChange = debounce(
+    (payload: string) => {
       //TODO: should fetch the user data.
-      this.lookupPeer(payload.fields.peerLookupHash)
+      this.lookupPeer(payload)
       this.setState({
-        peerLookupHash: payload.fields.peerLookupHash,
+        peerLookupHash: payload,
       })
     },
     250,
@@ -504,11 +534,24 @@ class ContactsViewComponent extends Component<Props, State> {
       connectionState: 'CONNECTED',
       localID: user.localID,
       peerID: user.localID,
-      publicFeed: user.feedHash,
+      publicFeed: user.feedHash || user.localID,
       profile: {
-        name: `${user.profile.name} (Me)`,
+        name: `${user.profile.name}`,
+        ethAddress: user.defaultEthAddress,
       },
     }
+  }
+
+  isIdentitySelected = () => {
+    return this.state.selectedContact === this.props.user.localID
+  }
+
+  validateHash = () => {
+    return !this.state.foundPeer ? 'Invalid Mainframe ID' : null
+  }
+
+  onChangeRadio = (value: string) => {
+    this.setState({ radio: value })
   }
 
   // RENDER
@@ -547,7 +590,12 @@ class ContactsViewComponent extends Component<Props, State> {
           </ButtonContainer>
           <ButtonContainer>
             <Button
-              variant={['xSmallIconOnly', 'completeOnboarding', 'noTitle']}
+              variant={[
+                'completeOnboarding',
+                'redOutline',
+                'xSmallIconOnly',
+                'noTitle',
+              ]}
               Icon={PlusIcon}
               onPress={this.openAddModal}
             />
@@ -573,24 +621,12 @@ class ContactsViewComponent extends Component<Props, State> {
                 <ContactCardText>
                   <Text variant={['greyMed', 'ellipsis']} bold size={13}>
                     {contact.profile.name || contact.publicFeed}
+                    {this.props.user.localID === contact.localID
+                      ? ' (me)'
+                      : null}
                   </Text>
-                  {contact.connectionState === 'SENT_FEED' ||
-                  contact.connectionState === 'SENDING_FEED' ? (
-                    <Text variant={['grey']} size={10}>
-                      Pending
-                    </Text>
-                  ) : null}
+                  {this.renderConnectionStateLabel(contact, true)}
                 </ContactCardText>
-                {contact.connectionState === 'RECEIVED'
-                  ? this.renderAcceptIgnore(contact)
-                  : null}
-                {contact.connectionState === 'DECLINED' ? (
-                  <ContactCardText>
-                    <Text variant={['red']} size={10}>
-                      Declined
-                    </Text>
-                  </ContactCardText>
-                ) : null}
                 {selected && (
                   <SelectedPointer>
                     <SvgSelectedPointer />
@@ -605,20 +641,46 @@ class ContactsViewComponent extends Component<Props, State> {
   }
 
   renderAcceptIgnore = (contact: Contact) => {
-    return (
-      <AcceptIgnore>
-        <Button
-          variant={['no-border', 'xSmall', 'grey']}
-          title="IGNORE"
-          onPress={() => this.rejectContact(contact)}
-        />
-        <Button
-          variant={['no-border', 'xSmall', 'red']}
-          title="ACCEPT"
-          onPress={() => this.acceptContact(contact)}
-        />
-      </AcceptIgnore>
-    )
+    if (contact.connectionState === 'RECEIVED') {
+      return (
+        <Row size={2}>
+          <Column>
+            <Button
+              variant={['mediumUppercase', 'redOutline']}
+              theme={{ minWidth: '100%' }}
+              title="ACCEPT"
+              onPress={() => this.acceptContact(contact)}
+            />
+          </Column>
+          <Column>
+            <Button
+              variant={['mediumUppercase', 'marginLeftt10']}
+              theme={{ minWidth: '100%' }}
+              title="DECLINE & CLAIM MFT"
+              onPress={() => this.rejectContact(contact)}
+            />
+          </Column>
+        </Row>
+      )
+    }
+    return null
+  }
+
+  renderDelete = (contact: Contact) => {
+    if (contact.connectionState === 'DECLINED') {
+      return (
+        <Row size={1}>
+          <Column>
+            <Button
+              variant={['mediumUppercase', 'redOutline']}
+              theme={{ minWidth: '100%' }}
+              title="DELETE CONTACT"
+            />
+          </Column>
+        </Row>
+      )
+    }
+    return null
   }
 
   renderPeerLookup() {
@@ -645,8 +707,22 @@ class ContactsViewComponent extends Component<Props, State> {
     )
   }
 
-  renderAddNewContactForm(modal: boolean) {
-    const { error, addingContact } = this.state
+  renderAddNewContactForm() {
+    const { addModalState } = this.state
+
+    switch (addModalState) {
+      case 1:
+        return this.renderAddNewContactFormStep1()
+      case 2:
+        return this.renderInviteModal()
+      default:
+        return null
+    }
+  }
+
+  renderAddNewContactFormStep1() {
+    const { error, radio } = this.state
+
     const errorMsg = error ? (
       <Row size={1}>
         <Column>
@@ -655,10 +731,43 @@ class ContactsViewComponent extends Component<Props, State> {
       </Row>
     ) : null
 
-    const innerContent = (
-      <>
-        <Row size={1}>
-          {modal && (
+    const MutualOption = (
+      <RadioContainer>
+        <Text size={12} color="#232323">
+          Mutual invitation .{' '}
+          <Text size={12} color="#DA1157">
+            Free
+          </Text>
+        </Text>
+        <Text color="#585858" size={11}>
+          Both users need to add each other
+        </Text>
+      </RadioContainer>
+    )
+
+    const BlockchainOption = (
+      <RadioContainer>
+        <Text size={12} color="#232323">
+          Blockchain invitation .{' '}
+          <Text size={12} color="#DA1157">
+            Stake 10 MFT
+          </Text>
+        </Text>
+        <Text color="#585858" size={11}>
+          The invitee needs to accept the invitation to retrieve your MFT
+        </Text>
+      </RadioContainer>
+    )
+
+    return (
+      <FormModalView
+        title="ADD A NEW CONTACT"
+        confirmButton={radio === 'blockchain' ? 'NEXT' : 'ADD'}
+        dismissButton="CANCEL"
+        onRequestClose={this.closeModal}
+        onSubmitForm={this.submitNewContact}>
+        <FormContainer modal>
+          <Row size={1}>
             <Column>
               <Text
                 variant="greyMid"
@@ -670,52 +779,56 @@ class ContactsViewComponent extends Component<Props, State> {
                 {/*  or scanning their QR code */}
               </Text>
             </Column>
-          )}
-          <Column>
-            <TextField name="peerLookupHash" required label="Contact ID" />
-          </Column>
-          {this.renderPeerLookup()}
-        </Row>
-        <Row>{errorMsg}</Row>
-      </>
-    )
-
-    if (modal) {
-      return innerContent
-    }
-
-    return (
-      <FormContainer modal={modal}>
-        <Form onChange={this.onFormChange} onSubmit={this.submitNewContact}>
-          {innerContent}
-          <Row size={2} top>
-            <Column styles="align-items:flex-end;" smOffset={1}>
-              <Button
-                disabled={addingContact}
-                title="ADD"
-                variant="onboarding"
-                Icon={CircleArrowRight}
-                submit
+            <Column>
+              <TextField
+                name="peerLookupHash"
+                onChange={this.onFieldIDChange}
+                required
+                validation={this.validateHash}
+                label="Mainframe ID"
               />
             </Column>
+            {this.renderPeerLookup()}
           </Row>
-        </Form>
-      </FormContainer>
+
+          {this.state.foundPeer && (
+            <RadioGroup
+              onChange={this.onChangeRadio}
+              required
+              name="inviteType">
+              <Row size={1}>
+                <Column>
+                  {/*$FlowFixMe */}
+                  <Radio value="mutual" label={MutualOption} />
+                </Column>
+              </Row>
+              <Row size={1}>
+                <Column>
+                  {/*$FlowFixMe */}
+                  <Radio value="blockchain" label={BlockchainOption} />
+                </Column>
+              </Row>
+            </RadioGroup>
+          )}
+          <Row>{errorMsg}</Row>
+        </FormContainer>
+      </FormModalView>
     )
   }
 
   renderSendInviteState(contact: Contact) {
     if (contact.profile.ethAddress) {
-      if (this.state.invitingContact) {
-        return <Loader />
-      }
-
       return (
-        <Button
-          title={'Send Invite'}
-          variant={['marginTop10', 'redOutline']}
-          onPress={() => this.sendInvite(contact)}
-        />
+        <Row size={1}>
+          <Column>
+            <Button
+              title={'SEND BLOCKCHAIN INVITE'}
+              variant={['mediumUppercase', 'redOutline']}
+              theme={{ minWidth: '100%' }}
+              onPress={() => this.sendInvite(contact)}
+            />
+          </Column>
+        </Row>
       )
     }
   }
@@ -730,12 +843,112 @@ class ContactsViewComponent extends Component<Props, State> {
       case 'SENDING_BLOCKCHAIN': {
         return <Loader />
       }
+      case 'CONNECTED': {
+        if (
+          contact &&
+          contact.connectionState === 'CONNECTED' &&
+          contact.invite
+        ) {
+          if (contact.invite.stake.state === 'STAKED') {
+            return (
+              <Row size={1}>
+                <Column>
+                  <Button
+                    title={'WITHDRAW YOUR MFT'}
+                    variant={['mediumUppercase', 'redOutline']}
+                    theme={{ minWidth: '100%' }}
+                    onPress={() => this.withdrawStake(contact)}
+                  />
+                </Column>
+              </Row>
+            )
+          } else if (contact.invite.stake.state === 'RECLAIMING') {
+            return (
+              <Row size={1}>
+                <Column>
+                  <Text color="#303030">
+                    Stake withdraw transaction processing...
+                  </Text>
+                </Column>
+              </Row>
+            )
+          }
+        }
+        return null
+      }
+      default:
+        return null
+    }
+  }
+
+  openTransaction = (inviteTX: ?string, ethNetwork: ?string) => {
+    if (inviteTX && ethNetwork) {
+      const url =
+        ethNetwork === 'mainnet'
+          ? `https://etherscan.io/tx/${inviteTX}`
+          : `https://ropsten.etherscan.io/tx/${inviteTX}`
+      shell.openExternal(url)
+    }
+  }
+
+  renderConnectionStateLabel(contact: Contact, forListItem: boolean) {
+    switch (contact.connectionState) {
+      case 'DECLINED':
+        return (
+          <Text color="#DA1157" size={10}>
+            Has declined your invitation
+          </Text>
+        )
+      case 'SENDING_FEED':
+        return (
+          <Text color="#DA1157" size={10}>
+            Pending
+          </Text>
+        )
+      case 'SENT_FEED': {
+        return (
+          <Text color="#DA1157" size={10}>
+            Pending
+          </Text>
+        )
+      }
+      case 'SENDING_BLOCKCHAIN': {
+        return (
+          <Text color="#DA1157" size={10}>
+            Pending confirmation
+          </Text>
+        )
+      }
       case 'SENT_BLOCKCHAIN': {
         return (
           contact.invite &&
           contact.invite.inviteTX && (
-            <Text>{`Invite request sent: ${contact.invite.inviteTX}`}</Text>
+            <Text color="#DA1157" size={10}>
+              Pending confirmation
+              {!forListItem ? (
+                <ViewTransaction
+                  onPress={() =>
+                    this.openTransaction(
+                      // $FlowFixMe already checked
+                      contact.invite.inviteTX,
+                      // $FlowFixMe already checked
+                      contact.invite.ethNetwork,
+                    )
+                  }>
+                  <Text color="#303030" size={10}>
+                    {'  '}(view transaction)
+                  </Text>
+                </ViewTransaction>
+              ) : null}
+            </Text>
           )
+        )
+      }
+      case 'RECEIVED': {
+        return (
+          <Text color="#DA1157" size={10}>
+            Request
+          </Text>
         )
       }
       case 'CONNECTED': {
@@ -744,58 +957,55 @@ class ContactsViewComponent extends Component<Props, State> {
           contact.connectionState === 'CONNECTED' &&
           contact.invite
         ) {
-          if (contact.invite.stake.reclaimedTX) {
+          if (
+            !contact.invite.stake.reclaimedTX &&
+            contact.invite.stake.state !== 'RECLAIMING'
+          ) {
             return (
-              <Text>{`Stake withdrawn: ${
-                contact.invite.stake.reclaimedTX
-              }`}</Text>
+              <Text color="#DA1157" size={10}>
+                Has accepted your invitation
+              </Text>
             )
-          } else if (contact.invite.stake.state === 'RECLAIMING') {
-            return <Text>Stake withdraw transaction processing...</Text>
-          } else {
-            if (this.state.withdrawingStake) {
-              return <Loader />
-            } else {
-              return (
-                <Button
-                  title="Withdraw Stake"
-                  variant={['marginTop10', 'redOutline']}
-                  onPress={() => this.withdrawStake(contact)}
-                />
+          } else if (contact.invite.stake.reclaimedTX && !forListItem) {
+            return (
+              contact.invite &&
+              contact.invite.inviteTX && (
+                <Text color="#DA1157" size={10}>
+                  Stake Retrieved
+                  <ViewTransaction
+                    onPress={() =>
+                      this.openTransaction(
+                        // $FlowFixMe already checked
+                        contact.invite.stake.reclaimedTX,
+                        // $FlowFixMe already checked
+                        contact.invite.ethNetwork,
+                      )
+                    }>
+                    <Text color="#303030" size={10}>
+                      {'  '}(view transaction)
+                    </Text>
+                  </ViewTransaction>
+                </Text>
               )
-            }
+            )
           }
         }
+        return null
       }
+      default:
+        return null
     }
   }
 
   renderRightSide() {
     const selectedContact = this.getSelectedContact()
 
-    if (!selectedContact) {
-      return (
-        <RightContainer>
-          <Row size={1}>
-            <Column>
-              <Text variant={['smallTitle', 'blue', 'noPadding', 'bold']}>
-                ADD A NEW CONTACT
-              </Text>
-            </Column>
-          </Row>
-          <Row size={1}>
-            <Column>
-              <Text variant="greyMed" size={12}>
-                You have no contacts in your address book. Add a contact by
-                entering their Mainframe Contact ID below.
-              </Text>
-            </Column>
-          </Row>
-          {this.renderAddNewContactForm(false)}
-        </RightContainer>
-      )
-    }
     const inviteAction = this.renderInviteArea(selectedContact)
+
+    const connectionStateLabel = this.renderConnectionStateLabel(
+      selectedContact,
+      false,
+    )
 
     const inviteError = this.state.inviteError && (
       <Text styles="margin-top:10px;" variant="error">
@@ -812,12 +1022,45 @@ class ContactsViewComponent extends Component<Props, State> {
                 <Blocky>
                   <Avatar id={selectedContact.publicFeed} size="large" />
                 </Blocky>
-                <Text bold size={24}>
-                  {selectedContact.profile.name}
-                </Text>
+                <ContactName>
+                  <Text bold size={24}>
+                    {selectedContact.profile.name}
+                  </Text>
+                  {connectionStateLabel}
+                </ContactName>
               </AvatarWrapper>
             </Column>
           </Row>
+          {this.renderAcceptIgnore(selectedContact)}
+          {this.renderDelete(selectedContact)}
+          {inviteAction}
+
+          {selectedContact.connectionState === 'SENT_BLOCKCHAIN' &&
+            selectedContact.invite &&
+            selectedContact.invite.inviteTX && (
+              <Row size={1}>
+                <Column>
+                  <InformationBox
+                    content={
+                      'This person needs to accept your request in order to confirm your invitation and to retrieve your MFT.'
+                    }
+                    full
+                  />
+                </Column>
+              </Row>
+            )}
+          {selectedContact.connectionState === 'SENT_FEED' && (
+            <Row size={1}>
+              <Column>
+                <InformationBox
+                  content={
+                    'This person needs to add you back to confirm the invitation. Make sure to give out your Mainframe ID.'
+                  }
+                  full
+                />
+              </Column>
+            </Row>
+          )}
           <Row size={1}>
             <Column>
               <Text variant="smallTitle" theme={{ padding: '20px 0 10px 0' }}>
@@ -826,20 +1069,37 @@ class ContactsViewComponent extends Component<Props, State> {
               <Text variant="addressLarge">{selectedContact.publicFeed}</Text>
             </Column>
           </Row>
-          {selectedContact.profile.ethAddress && (
+          {this.isIdentitySelected() && (
             <Row size={1}>
               <Column>
-                <Text variant="smallTitle" theme={{ padding: '20px 0 10px 0' }}>
-                  ETH Address
-                </Text>
-                <Text variant="addressLarge">
-                  {selectedContact.profile.ethAddress}
-                </Text>
-                {inviteAction}
-                {inviteError}
+                <InformationBox
+                  content={
+                    'Share your Mainframe ID with your contacts and let your friends add you on Mainframe OS'
+                  }
+                  full
+                />
               </Column>
             </Row>
           )}
+          {(this.isIdentitySelected() ||
+            selectedContact.connectionState === 'CONNECTED') &&
+            selectedContact.profile.ethAddress && (
+              <Row size={1}>
+                <Column>
+                  <Text
+                    variant="smallTitle"
+                    theme={{ padding: '20px 0 10px 0' }}>
+                    ETH Address
+                  </Text>
+                  <Text variant="addressLarge">
+                    {selectedContact.profile.ethAddress}
+                  </Text>
+                </Column>
+              </Row>
+            )}
+          <Row size={1}>
+            <Column>{inviteError}</Column>
+          </Row>
           {/* <Row size={1}>
               <Column styles="margin-top: 10px;">
                 <Button
@@ -851,24 +1111,6 @@ class ContactsViewComponent extends Component<Props, State> {
             </Row> */}
         </ScrollView>
       </RightContainer>
-    )
-  }
-
-  renderAddModal() {
-    return (
-      this.state.addModalOpen && (
-        <FormModalView
-          title="ADD A NEW CONTACT"
-          confirmButton="ADD"
-          dismissButton="CANCEL"
-          onRequestClose={this.closeModal}
-          onChangeForm={this.onFormChange}
-          onSubmitForm={this.submitNewContact}>
-          <FormContainer modal>
-            {this.renderAddNewContactForm(true)}
-          </FormContainer>
-        </FormModalView>
-      )
     )
   }
 
@@ -940,7 +1182,7 @@ class ContactsViewComponent extends Component<Props, State> {
       <Container>
         {this.renderContactsList()}
         {this.renderRightSide()}
-        {this.renderAddModal()}
+        {this.renderAddNewContactForm()}
         {this.renderEditModal()}
         {this.renderInviteModal()}
       </Container>
@@ -959,6 +1201,7 @@ const ContactsView = createFragmentContainer(ContactsViewComponent, {
         connectionState
         publicFeed
         invite {
+          ethNetwork
           inviteTX
           stake {
             reclaimedTX

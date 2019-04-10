@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 5e7c4e73813c1d81c8b7cbe2d643c111
+ * @relayHash a087ceea5c0e146c14657eec54927b55
  */
 
 /* eslint-disable */
@@ -58,6 +58,7 @@ fragment ContactsView_contacts_3iqrP on Contacts {
     connectionState
     publicFeed
     invite {
+      ethNetwork
       inviteTX
       stake {
         reclaimedTX
@@ -128,7 +129,7 @@ return {
   "operationKind": "mutation",
   "name": "ContactsViewAcceptContactRequestMutation",
   "id": null,
-  "text": "mutation ContactsViewAcceptContactRequestMutation(\n  $input: AcceptContactRequestInput!\n  $userID: String!\n) {\n  acceptContactRequest(input: $input) {\n    viewer {\n      contacts {\n        ...ContactsView_contacts_3iqrP\n      }\n      id\n    }\n  }\n}\n\nfragment ContactsView_contacts_3iqrP on Contacts {\n  userContacts(userID: $userID) {\n    ...InviteContactModal_contact\n    peerID\n    localID\n    connectionState\n    publicFeed\n    invite {\n      inviteTX\n      stake {\n        reclaimedTX\n        amount\n        state\n      }\n    }\n    profile {\n      name\n      ethAddress\n    }\n    id\n  }\n}\n\nfragment InviteContactModal_contact on Contact {\n  peerID\n  localID\n  connectionState\n  publicFeed\n  invite {\n    inviteTX\n    stake {\n      reclaimedTX\n      amount\n      state\n    }\n  }\n  profile {\n    name\n    ethAddress\n  }\n}\n",
+  "text": "mutation ContactsViewAcceptContactRequestMutation(\n  $input: AcceptContactRequestInput!\n  $userID: String!\n) {\n  acceptContactRequest(input: $input) {\n    viewer {\n      contacts {\n        ...ContactsView_contacts_3iqrP\n      }\n      id\n    }\n  }\n}\n\nfragment ContactsView_contacts_3iqrP on Contacts {\n  userContacts(userID: $userID) {\n    ...InviteContactModal_contact\n    peerID\n    localID\n    connectionState\n    publicFeed\n    invite {\n      ethNetwork\n      inviteTX\n      stake {\n        reclaimedTX\n        amount\n        state\n      }\n    }\n    profile {\n      name\n      ethAddress\n    }\n    id\n  }\n}\n\nfragment InviteContactModal_contact on Contact {\n  peerID\n  localID\n  connectionState\n  publicFeed\n  invite {\n    inviteTX\n    stake {\n      reclaimedTX\n      amount\n      state\n    }\n  }\n  profile {\n    name\n    ethAddress\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -307,6 +308,13 @@ return {
                                 "storageKey": null
                               }
                             ]
+                          },
+                          {
+                            "kind": "ScalarField",
+                            "alias": null,
+                            "name": "ethNetwork",
+                            "args": null,
+                            "storageKey": null
                           }
                         ]
                       },
