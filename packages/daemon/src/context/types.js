@@ -1,5 +1,6 @@
 // @flow
 
+import type { ContactResult } from '@mainframe/client'
 import type { App, OwnApp } from '../app'
 import type { SharedAppData } from '../contact'
 import type { Contact, OwnUserIdentity, PeerUserIdentity } from '../identity'
@@ -76,8 +77,8 @@ export type EthAccountsChangedEvent = {|
 export type InvitesChangedEvent = {|
   type: 'invites_changed',
   userID: string,
-  contact: Contact,
-  change: 'inviteReceived',
+  contact: ContactResult,
+  change: 'inviteReceived' | 'inviteRejected',
 |}
 
 export type PeerCreatedEvent = {|

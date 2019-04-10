@@ -1,11 +1,6 @@
 // @flow
 
-import {
-  type ConnectableObservable,
-  type Observable,
-  type Subscription,
-  Subject,
-} from 'rxjs'
+import { type Observable, type Subscription, Subject } from 'rxjs'
 import {
   debounceTime,
   filter,
@@ -34,7 +29,6 @@ export default class ContextEvents {
 
   _context: ClientContext
   _subscriptions: { [key: string]: Subscription } = {}
-  _publishingContacts: Set<string> = new Set()
 
   constructor(context: ClientContext) {
     this._context = context
@@ -66,7 +60,7 @@ export default class ContextEvents {
         )
       }),
     )
-    // $FlowFixMe refcount type
+    // $FlowFixMe: ConnectableObservable pipe
     this.ethNetworkChanged = this._context.pipe(
       filter((e: ContextEvent) => {
         return e.type === 'eth_network_changed'
@@ -78,7 +72,7 @@ export default class ContextEvents {
       multicast(new Subject()),
       refCount(),
     )
-    // $FlowFixMe refcount type
+    // $FlowFixMe: ConnectableObservable pipe
     this.ethAccountsChanged = this._context.pipe(
       filter((e: ContextEvent) => {
         return e.type === 'eth_accounts_changed'
@@ -140,9 +134,7 @@ export default class ContextEvents {
         .pipe(
           filter((e: ContextEvent) => {
             return (
-              (e.type === 'contact_created' ||
-                (e.type === 'contact_changed' &&
-                  !this._publishingContacts.has(e.contact.localID))) &&
+              (e.type === 'contact_created' || e.type === 'contact_changed') &&
               e.contact.connectionState === 'sending_feed'
             )
           }),
@@ -154,17 +146,10 @@ export default class ContextEvents {
           const peer = identities.getPeerUser(idType(contact.peerID))
           if (!user || !peer) return
 
-          // Temp solution to handle possible situation where
-          // this event gets entered whilst already publishing
-
-          this._publishingContacts.add(contact.localID)
-
           await Promise.all([
             contact.sharedFeed.publishLocalData(this._context.io.bzz),
             contact.sharedFeed.syncManifest(this._context.io.bzz),
           ])
-
-          this._publishingContacts.delete(contact.localID)
 
           // Create ephemeral one-use feed from the first-contact keypair and peer-specific topic
           const firstContactFeed = OwnFeed.create(

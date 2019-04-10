@@ -33,6 +33,7 @@ import {
   LOCAL_ID_SCHEMA,
   type SendInviteTXParams,
   type SendDeclineTXParams,
+  type SendWithdrawInviteTXParams,
   VAULT_SCHEMA,
   type VaultParams,
   type WalletGetLedgerEthAccountsParams,
@@ -272,6 +273,16 @@ export default {
       params: SendDeclineTXParams,
     ): Promise<any> => {
       return ctx.client.blockchain.sendDeclineInviteTX(params)
+    },
+  },
+
+  blockchain_sendWithdrawInviteTX: {
+    params: INVITE_SEND_SCHEMA,
+    handler: (
+      ctx: LauncherContext,
+      params: SendWithdrawInviteTXParams,
+    ): Promise<any> => {
+      return ctx.client.blockchain.sendWithdrawInviteTX(params)
     },
   },
 }

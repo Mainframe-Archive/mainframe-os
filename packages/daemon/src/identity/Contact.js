@@ -34,6 +34,7 @@ export type InviteData = {
   fromAddress: string,
   toAddress: string,
   acceptedSignature?: string,
+  ethNetwork: string,
   stake: {
     amount: string,
     state: 'sending' | 'staked' | 'reclaiming' | 'reclaimed' | 'seized',

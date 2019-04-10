@@ -1,16 +1,3 @@
-// @flow
-
-declare function contract(
-  name: string,
-  callback: (accounts: Array<string>) => void,
-): void
-declare function beforeEach(name: string, callback: () => Promise<void>): void
-declare function it(name: string, callback: () => Promise<void>): void
-
-declare var artifacts: Object
-declare var web3: Object
-declare function assert(): void
-
 const Token = artifacts.require('Token.sol')
 const ContactInvite = artifacts.require('ContactInvite.sol')
 const EthUtil = require('ethereumjs-util')
@@ -30,8 +17,8 @@ const acc1PrivateKey =
   '1c5a7303b5ecbb14a38753aeffeb70a7794a475b84de472077e25b5fa3e9ae56'
 
 contract('ContactInvite', accounts => {
-  let token: Token
-  let invites: ContactInvite
+  let token
+  let invites
 
   beforeEach('setup contract for each test', async () => {
     token = await Token.new()
@@ -326,26 +313,16 @@ contract('ContactInvite', accounts => {
     )
 
     await truffleAssert.fails(
-      invites.declineAndWithdraw(
-        accounts[0],
-        senderFeed,
-        recipientFeed,
-        {
-          from: accounts[1],
-        },
-      ),
+      invites.declineAndWithdraw(accounts[0], senderFeed, recipientFeed, {
+        from: accounts[1],
+      }),
       truffleAssert.ErrorType.REVERT,
     )
 
     await truffleAssert.fails(
-      invites.sendInvite(
-        accounts[2],
-        recipient2Feed,
-        senderFeed,
-        {
-          from: accounts[0],
-        }
-      ),
+      invites.sendInvite(accounts[2], recipient2Feed, senderFeed, {
+        from: accounts[0],
+      }),
       truffleAssert.ErrorType.REVERT,
     )
 
@@ -387,21 +364,21 @@ contract('ContactInvite', accounts => {
       invites.setStake(ethers.utils.parseEther('1000'), { from: accounts[1] }),
       truffleAssert.ErrorType.REVERT,
     )
-    const res = await invites.setStake(ethers.utils.parseEther('1000'), { from: accounts[0] })
+    const res = await invites.setStake(ethers.utils.parseEther('1000'), {
+      from: accounts[0],
+    })
 
     truffleAssert.eventEmitted(res, 'StakeChanged', ev => {
-      return ev.oldStake.toString() === ethers.utils.parseEther('10').toString() &&
+      return (
+        ev.oldStake.toString() === ethers.utils.parseEther('10').toString() &&
         ev.newStake.toString() === ethers.utils.parseEther('1000').toString()
+      )
     })
 
     const bnStake2 = await invites.requiredStake()
     const stake2 = bnStake2.toString()
 
-    assert.notEqual(
-      bnStake,
-      bnStake2,
-      'Stake did not change',
-    )
+    assert.notEqual(bnStake, bnStake2, 'Stake did not change')
 
     await token.approve(invites.address, stake2, {
       from: accounts[0],

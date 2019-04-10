@@ -29,8 +29,8 @@ const wsOptions = {
 }
 
 type Subscriptions = {
-  networkChanged: () => Observable,
-  accountsChanged: () => Observable,
+  networkChanged: () => Promise<Observable<*>>,
+  accountsChanged: () => Promise<Observable<*>>,
 }
 
 type SignDataParams = {
@@ -89,8 +89,8 @@ export default class EthClient extends EventEmitter {
     return this._networkName || 'Awaiting network'
   }
 
-  get networkID(): ?string {
-    return this._networkID
+  get networkID(): string {
+    return this._networkID || '0'
   }
 
   get walletProvider(): ?WalletProvider {
@@ -137,7 +137,10 @@ export default class EthClient extends EventEmitter {
   }
 
   async getAccounts(): Promise<Array<string>> {
-    return this.send('eth_accounts', [])
+    if (this._walletProvider != null) {
+      return this._walletProvider.getAccounts()
+    }
+    throw new Error('No wallet provider found')
   }
 
   async getETHBalance(address: string) {

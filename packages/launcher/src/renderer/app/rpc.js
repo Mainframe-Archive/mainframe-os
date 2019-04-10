@@ -7,7 +7,10 @@ import { APP_TRUSTED_CHANNEL } from '../../constants'
 
 const rpc = electronRPC(APP_TRUSTED_CHANNEL)
 
-const createSubscription = async (rpcMethod, subMethod) => {
+const createSubscription = async (
+  rpcMethod,
+  subMethod,
+): Promise<Observable<*>> => {
   const { id } = await rpc.request(rpcMethod)
   const unsubscribe = () => {
     return rpc.request('sub_unsubscribe', { id })

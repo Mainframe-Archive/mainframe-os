@@ -57,6 +57,7 @@ type ContactsRepositorySerialized = {
 
 export type InviteRequest = {
   peerID: string,
+  ethNetwork: string,
   privateFeed: string,
   receivedAddress: string,
   senderAddress: string,

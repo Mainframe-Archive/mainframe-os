@@ -759,6 +759,7 @@ export default class ContextMutations {
     const { openVault, io } = this._context
     openVault.setEthUrl(url)
     io.eth.providerURL = url
+    await io.eth.fetchNetwork()
     this._context.next({
       type: 'eth_network_changed',
       network: io.eth.networkName,
