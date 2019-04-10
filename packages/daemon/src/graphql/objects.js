@@ -285,7 +285,7 @@ export const app = new GraphQLObjectType({
       },
     },
     installationState: {
-      type: installationState,
+      type: new GraphQLNonNull(installationState),
     },
     users: {
       type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(appUser))),

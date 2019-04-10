@@ -65,6 +65,8 @@ export type AbstractProvider = {
     method: string,
     params: Object,
   ) => Promise<string>,
+  isConnecting?: () => boolean,
+  connected?: boolean,
   connection?: {
     readyState: number,
   },

@@ -71,7 +71,7 @@ export default class CreateVaultView extends Component<Props, State> {
       // eslint-disable-next-line no-console
       console.warn(err)
       this.setState({
-        error: 'Error creating vault',
+        error: 'Error creating vault.',
         awaitingResponse: false,
       })
     }

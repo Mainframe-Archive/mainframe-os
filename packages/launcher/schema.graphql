@@ -59,7 +59,7 @@ type App implements Node {
   name: String!
   manifest: AppManifestData!
   update: AppUpdateData
-  installationState: InstallationState
+  installationState: InstallationState!
   users: [AppUser!]!
 }
 
@@ -358,18 +358,6 @@ enum InstallationState {
   ERROR
 }
 
-input InviteContactInput {
-  userID: String!
-  contactID: String!
-  clientMutationId: String
-}
-
-type InviteContactPayload {
-  contact: Contact
-  viewer: Viewer!
-  clientMutationId: String
-}
-
 type InviteStake {
   amount: String
   state: StakeState
@@ -389,10 +377,7 @@ type Mutation {
   setAppPermissionsRequirements(input: SetAppPermissionsRequirementsInput!): SetAppPermissionsRequirementsPayload
   publishAppVersion(input: PublishAppVersionInput!): PublishAppVersionPayload
   updateAppDetails(input: UpdateAppDetailsInput!): UpdateAppDetailsPayload
-  inviteContact(input: InviteContactInput!): InviteContactPayload
   acceptContactRequest(input: AcceptContactRequestInput!): AcceptContactRequestPayload
-  retrieveInviteStake(input: RetrieveInviteStakeInput!): RetrieveInviteStakePayload
-  rejectContact(input: RejectContactInput!): RejectContactPayload
   addContact(input: AddContactInput!): AddContactPayload
   createUserIdentity(input: CreateUserIdentityInput!): CreateUserIdentityPayload
   createDeveloperIdentity(input: CreateDeveloperIdentityInput!): CreateDeveloperIdentityPayload
@@ -496,28 +481,6 @@ type Query {
   ): Node
   viewer: Viewer!
   peers: Peers!
-}
-
-input RejectContactInput {
-  peerID: String!
-  userID: String!
-  clientMutationId: String
-}
-
-type RejectContactPayload {
-  viewer: Viewer!
-  clientMutationId: String
-}
-
-input RetrieveInviteStakeInput {
-  contactID: String!
-  userID: String!
-  clientMutationId: String
-}
-
-type RetrieveInviteStakePayload {
-  viewer: Viewer!
-  clientMutationId: String
 }
 
 input SetAppPermissionsRequirementsInput {

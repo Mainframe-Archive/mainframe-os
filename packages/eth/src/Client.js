@@ -89,8 +89,8 @@ export default class EthClient extends EventEmitter {
     return this._networkName || 'Awaiting network'
   }
 
-  get networkID(): ?string {
-    return this._networkID
+  get networkID(): string {
+    return this._networkID || '0'
   }
 
   get walletProvider(): ?WalletProvider {

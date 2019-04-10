@@ -59,7 +59,7 @@ contract ContactInvite is Ownable, Pausable {
     address recipientAddr,
     string calldata recipientFeed,
     string calldata senderFeed
-  ) external {
+  ) external whenNotPaused {
     bytes32 recipientHash = keccak256(abi.encodePacked(recipientAddr, recipientFeed));
     InviteState state = inviteRequests[msg.sender][recipientHash].state;
     require(token.allowance(msg.sender, address(this)) >= requiredStake, 'Insufficient balance to stake');
@@ -77,7 +77,7 @@ contract ContactInvite is Ownable, Pausable {
     address senderAddress,
     string calldata senderFeed,
     string calldata recipientFeed
-  ) external {
+  ) external whenNotPaused {
     bytes32 recipientHash = keccak256(abi.encodePacked(msg.sender, recipientFeed));
     require(inviteRequests[senderAddress][recipientHash].stake > 0, 'No stake to withdraw');
     token.transfer(msg.sender, inviteRequests[senderAddress][recipientHash].stake);
@@ -92,7 +92,7 @@ contract ContactInvite is Ownable, Pausable {
     uint8 v,
     bytes32 r,
     bytes32 s
-  ) external {
+  ) external whenNotPaused {
     bytes32 recipientHash = keccak256(abi.encodePacked(recipientAddr, recipientFeed));
     require(inviteRequests[msg.sender][recipientHash].stake > 0, 'No stake to withdraw');
     require(verifySig(v,r,s) == recipientAddr, 'Unable to verify recipient signature');
@@ -123,6 +123,14 @@ contract ContactInvite is Ownable, Pausable {
     emit AdminRefunded(senderAddress, recipientFeed, stake);
   }
 
+  function setStake(
+    uint newStake
+  ) external onlyOwner {
+    uint oldStake = requiredStake;
+    requiredStake = newStake;
+    emit StakeChanged(oldStake, newStake);
+  }
+
   // EVENTS
 
   event Invited(
@@ -145,5 +153,9 @@ contract ContactInvite is Ownable, Pausable {
     address indexed senderAddress,
     string recipientFeed,
     uint amount
+  );
+  event StakeChanged(
+    uint oldStake,
+    uint newStake
   );
 }

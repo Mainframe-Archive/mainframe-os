@@ -329,14 +329,14 @@ export const sandboxed = {
 
   storage_set: {
     params: {
-      data: 'string',
       key: STORAGE_KEY_PARAM,
+      data: 'string',
     },
     handler: async (
       ctx: AppContext,
       params: {
-        data: string,
         key: string,
+        data: string,
       },
     ): Promise<void> => {
       try {

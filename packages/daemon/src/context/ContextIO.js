@@ -75,11 +75,7 @@ export default class ContextIO {
 
   get eth(): EthClient {
     if (this._ethClient == null) {
-      const walletProvider = new WalletProvider(this._context)
-      this._ethClient = new EthClient(
-        this._context.openVault.settings.ethURL,
-        walletProvider,
-      )
+      this._ethClient = this.initEthClient()
     } else {
       this.checkEthConnection() // Handle WS connection dropping
     }
@@ -98,18 +94,23 @@ export default class ContextIO {
     return contract
   }
 
+  initEthClient() {
+    const walletProvider = new WalletProvider(this._context)
+    return new EthClient(
+      this._context.openVault.settings.ethURL,
+      walletProvider,
+    )
+  }
+
   checkEthConnection() {
     // Handle WS disconnects
     if (
       this._ethClient &&
-      this._ethClient.web3Provider.connection &&
-      this._ethClient.web3Provider.connection.readyState !== 1
+      this._ethClient.web3Provider.isConnecting &&
+      !this._ethClient.web3Provider.isConnecting() &&
+      !this._ethClient.web3Provider.connected
     ) {
-      const walletProvider = new WalletProvider(this._context)
-      this._ethClient = new EthClient(
-        this._context.openVault.settings.ethURL,
-        walletProvider,
-      )
+      this._ethClient = this.initEthClient()
     }
   }
 
