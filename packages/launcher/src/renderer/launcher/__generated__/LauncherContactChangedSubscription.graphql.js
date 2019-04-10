@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 88a6ffac47b48124c617061cf0e3f785
+ * @relayHash 0adde722ad859d9ffd793e3df8020429
  */
 
 /* eslint-disable */
@@ -22,10 +22,10 @@ export type LauncherContactChangedSubscriptionResponse = {|
       |},
       +invite: ?{|
         +inviteTX: ?string,
-        +stake: ?{|
+        +stake: {|
           +reclaimedTX: ?string,
           +amount: ?string,
-          +state: ?StakeState,
+          +state: StakeState,
         |},
       |},
     |}

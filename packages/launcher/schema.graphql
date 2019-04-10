@@ -242,7 +242,7 @@ type ContactChangedPayload {
 type ContactInviteData {
   inviteTX: String
   ethNetwork: String
-  stake: InviteStake
+  stake: InviteStake!
 }
 
 type Contacts {
@@ -361,7 +361,7 @@ enum InstallationState {
 
 type InviteStake {
   amount: String
-  state: StakeState
+  state: StakeState!
   reclaimedTX: String
 }
 

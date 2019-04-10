@@ -570,6 +570,31 @@ export const connectionState = new GraphQLEnumType({
   },
 })
 
+export const stakeState = new GraphQLEnumType({
+  name: 'StakeState',
+  values: {
+    STAKED: { value: 'staked' },
+    RECLAIMING: { value: 'reclaiming' },
+    RECLAIMED: { value: 'reclaimed' },
+    SEIZED: { value: 'seized' },
+  },
+})
+
+export const stake = new GraphQLObjectType({
+  name: 'InviteStake',
+  fields: () => ({
+    amount: {
+      type: GraphQLString,
+    },
+    state: {
+      type: new GraphQLNonNull(stakeState),
+    },
+    reclaimedTX: {
+      type: GraphQLString,
+    },
+  }),
+})
+
 export const contactInviteData = new GraphQLObjectType({
   name: 'ContactInviteData',
   fields: () => ({
@@ -580,28 +605,7 @@ export const contactInviteData = new GraphQLObjectType({
       type: GraphQLString,
     },
     stake: {
-      type: new GraphQLObjectType({
-        name: 'InviteStake',
-        fields: () => ({
-          amount: {
-            type: GraphQLString,
-          },
-          state: {
-            type: new GraphQLEnumType({
-              name: 'StakeState',
-              values: {
-                STAKED: { value: 'staked' },
-                RECLAIMING: { value: 'reclaiming' },
-                RECLAIMED: { value: 'reclaimed' },
-                SEIZED: { value: 'seized' },
-              },
-            }),
-          },
-          reclaimedTX: {
-            type: GraphQLString,
-          },
-        }),
-      }),
+      type: new GraphQLNonNull(stake),
     },
   }),
 })

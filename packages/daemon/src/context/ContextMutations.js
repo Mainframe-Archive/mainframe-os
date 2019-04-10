@@ -579,9 +579,6 @@ export default class ContextMutations {
     if (!contact.invite) {
       throw new Error('No invite data found for contact')
     }
-    if (contact == null) {
-      throw new Error('Contact not found')
-    }
     contact.invite.acceptedSignature = signature
     this._context.next({
       type: 'contact_changed',

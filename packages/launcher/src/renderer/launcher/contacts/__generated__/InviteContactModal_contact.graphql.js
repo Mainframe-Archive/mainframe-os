@@ -19,10 +19,10 @@ export type InviteContactModal_contact = {|
   +publicFeed: string,
   +invite: ?{|
     +inviteTX: ?string,
-    +stake: ?{|
+    +stake: {|
       +reclaimedTX: ?string,
       +amount: ?string,
-      +state: ?StakeState,
+      +state: StakeState,
     |},
   |},
   +profile: {|

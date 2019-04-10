@@ -22,10 +22,10 @@ export type ContactsView_contacts = {|
     +invite: ?{|
       +ethNetwork: ?string,
       +inviteTX: ?string,
-      +stake: ?{|
+      +stake: {|
         +reclaimedTX: ?string,
         +amount: ?string,
-        +state: ?StakeState,
+        +state: StakeState,
       |},
     |},
     +profile: {|

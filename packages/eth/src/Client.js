@@ -62,6 +62,10 @@ export default class EthClient extends EventEmitter {
   ) {
     super()
     if (typeof provider === 'string') {
+      const url = new URL(provider)
+      if (url.protocol !== 'ws:' && url.protocol !== 'wss:') {
+        throw new Error('rpc url must be a websocket endpoint')
+      }
       // TODO: handle http endpoints
       this._web3Provider = new WebsocketProvider(provider, wsOptions)
     } else {

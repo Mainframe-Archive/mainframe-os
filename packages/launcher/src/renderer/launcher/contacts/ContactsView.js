@@ -38,6 +38,11 @@ import Loader from '../../UIComponents/Loader'
 import { InformationBox } from '../identities/IdentitiesView'
 import InviteContactModal, { type TransactionType } from './InviteContactModal'
 
+import type { ContactsView_contacts as Contacts } from './__generated__/ContactsView_contacts.graphql'
+
+type UserContacts = $PropertyType<Contacts, 'userContacts'>
+type Contact = $Call<<T>($ReadOnlyArray<T>) => T, UserContacts>
+
 const SvgSmallClose = props => (
   <svg width="10" height="10" viewBox="0 0 10 10" {...props}>
     <path
@@ -171,34 +176,6 @@ const RadioContainer = styled.View`
   width: 350px;
 `
 
-export type Contact = {
-  localID: string,
-  peerID: string,
-  publicFeed: string,
-  ethAddress?: string,
-  invite?: {
-    ethNetwork: string,
-    inviteTX: string,
-    stake: {
-      amount: string,
-      state: string,
-      reclaimedTX?: ?string,
-    },
-  },
-  profile: {
-    name?: string,
-    ethAddress?: ?string,
-  },
-  connectionState:
-    | 'SENDING_FEED'
-    | 'SENT_FEED'
-    | 'SENDING_BLOCKCHAIN'
-    | 'SENT_BLOCKCHAIN'
-    | 'RECEIVED'
-    | 'DECLINED'
-    | 'CONNECTED',
-}
-
 export type SubmitContactInput = {
   feedHash: string,
   name: String,
@@ -244,11 +221,6 @@ type State = {
 const CONTACTS_CHANGED_SUBSCRIPTION = graphql`
   subscription ContactsViewContactsChangedSubscription($userID: String!) {
     contactsChanged {
-      contact {
-        invite {
-          inviteTX
-        }
-      }
       viewer {
         contacts {
           ...ContactsView_contacts @arguments(userID: $userID)
@@ -530,6 +502,7 @@ class ContactsViewComponent extends Component<Props, State> {
 
   getIdentity = () => {
     const { user } = this.props
+    // $FlowFixMe Contact type
     return {
       connectionState: 'CONNECTED',
       localID: user.localID,
@@ -958,6 +931,7 @@ class ContactsViewComponent extends Component<Props, State> {
           contact.invite
         ) {
           if (
+            contact.invite.stake &&
             !contact.invite.stake.reclaimedTX &&
             contact.invite.stake.state !== 'RECLAIMING'
           ) {

@@ -154,7 +154,6 @@ export const sandboxed = {
   wallet_signEthTx: withPermission(
     'BLOCKCHAIN_SEND',
     (ctx: AppContext, params: any) => ctx.client.wallet.signTransaction(params),
-    // TODO notify app if using ledger to feedback awaiting sign
   ),
 
   // TODO: Implement signing messages with permission

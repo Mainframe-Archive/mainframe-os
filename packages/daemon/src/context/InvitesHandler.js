@@ -15,7 +15,6 @@ import type ClientContext from './ClientContext'
 import type {
   ContextEvent,
   EthNetworkChangedEvent,
-  EthAccountsChangedEvent,
   InvitesChangedEvent,
   VaultOpenedEvent,
 } from './types'
@@ -71,27 +70,20 @@ export default class InvitesHandler {
             return e.type === 'vault_opened' || e.type === 'eth_network_changed'
           }),
         )
-        .subscribe(
-          async (
-            e:
-              | EthNetworkChangedEvent
-              | EthAccountsChangedEvent
-              | VaultOpenedEvent,
-          ) => {
-            if (e.type === 'vault_opened') {
-              await this._context.io.eth.fetchNetwork()
-            }
-            if (contracts[this._context.io.eth.networkName]) {
-              this.setup()
-            } else {
-              this._context.log(
-                `Failed fetching blockchain invites, unsupported ethereum network: ${
-                  this._context.io.eth.networkName
-                }`,
-              )
-            }
-          },
-        ),
+        .subscribe(async (e: EthNetworkChangedEvent | VaultOpenedEvent) => {
+          if (e.type === 'vault_opened') {
+            await this._context.io.eth.fetchNetwork()
+          }
+          if (contracts[this._context.io.eth.networkName]) {
+            this.setup()
+          } else {
+            this._context.log(
+              `Failed fetching blockchain invites, unsupported ethereum network: ${
+                this._context.io.eth.networkName
+              }`,
+            )
+          }
+        }),
     )
   }
 
@@ -177,7 +169,8 @@ export default class InvitesHandler {
       const startNum = Math.max(lastCheckedBlock, Number(creationBlock))
 
       const batches = this.batchBlocks(startNum, latestNum)
-      batches.forEach(async batch => {
+      // $FlowFixMe iterator type
+      for await (const batch of batches) {
         const params = {
           fromBlock: batch.from,
           toBlock: batch.to,
@@ -187,7 +180,7 @@ export default class InvitesHandler {
         for (let i = 0; i < events.length; i++) {
           await handler(user, events[i])
         }
-      })
+      }
       eventBlocksRead[type][eth.networkID] = latestBlock
       await this._context.openVault.save()
     } catch (err) {
@@ -562,42 +555,34 @@ export default class InvitesHandler {
     }
     this.validateInviteNetwork(inviteRequest.ethNetwork)
     const txOptions = { from: inviteRequest.receivedAddress }
-    try {
-      const res = await this.invitesContract.send(
-        'declineAndWithdraw',
-        [
-          inviteRequest.senderAddress,
-          peer.publicFeed,
-          user.publicFeed.feedHash,
-        ],
-        txOptions,
-      )
+    const res = await this.invitesContract.send(
+      'declineAndWithdraw',
+      [inviteRequest.senderAddress, peer.publicFeed, user.publicFeed.feedHash],
+      txOptions,
+    )
 
-      return new Promise((resolve, reject) => {
-        res
-          .on('mined', async hash => {
-            inviteRequest.rejectedTXHash = hash
-            await this._context.openVault.save()
-            const contactRes = this._context.queries.getContactFromInvite(
-              inviteRequest,
-            )
-            if (contactRes) {
-              this._context.next({
-                type: 'invites_changed',
-                userID: user.localID,
-                contact: contactRes,
-                change: 'inviteRejected',
-              })
-            }
-            resolve(hash)
-          })
-          .on('error', err => {
-            reject(err)
-          })
-      })
-    } catch (err) {
-      throw err
-    }
+    return new Promise((resolve, reject) => {
+      res
+        .on('mined', async hash => {
+          inviteRequest.rejectedTXHash = hash
+          await this._context.openVault.save()
+          const contactRes = this._context.queries.getContactFromInvite(
+            inviteRequest,
+          )
+          if (contactRes) {
+            this._context.next({
+              type: 'invites_changed',
+              userID: user.localID,
+              contact: contactRes,
+              change: 'inviteRejected',
+            })
+          }
+          resolve(hash)
+        })
+        .on('error', err => {
+          reject(err)
+        })
+    })
   }
 
   validateInviteNetwork(ethNetwork: string) {

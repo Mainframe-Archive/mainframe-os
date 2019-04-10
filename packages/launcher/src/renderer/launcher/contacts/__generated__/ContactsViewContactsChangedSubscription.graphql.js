@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 10baef415e7bd01a958ac333b280f1a3
+ * @relayHash 32d5e199adf84e35232c331a1a2ba40e
  */
 
 /* eslint-disable */
@@ -15,16 +15,11 @@ export type ContactsViewContactsChangedSubscriptionVariables = {|
 |};
 export type ContactsViewContactsChangedSubscriptionResponse = {|
   +contactsChanged: {|
-    +contact: {|
-      +invite: ?{|
-        +inviteTX: ?string
-      |}
-    |},
     +viewer: {|
       +contacts: {|
         +$fragmentRefs: ContactsView_contacts$ref
       |}
-    |},
+    |}
   |}
 |};
 export type ContactsViewContactsChangedSubscription = {|
@@ -39,12 +34,6 @@ subscription ContactsViewContactsChangedSubscription(
   $userID: String!
 ) {
   contactsChanged {
-    contact {
-      invite {
-        inviteTX
-      }
-      id
-    }
     viewer {
       contacts {
         ...ContactsView_contacts_3iqrP
@@ -110,25 +99,6 @@ var v0 = [
 v1 = {
   "kind": "ScalarField",
   "alias": null,
-  "name": "inviteTX",
-  "args": null,
-  "storageKey": null
-},
-v2 = {
-  "kind": "LinkedField",
-  "alias": null,
-  "name": "invite",
-  "storageKey": null,
-  "args": null,
-  "concreteType": "ContactInviteData",
-  "plural": false,
-  "selections": [
-    v1
-  ]
-},
-v3 = {
-  "kind": "ScalarField",
-  "alias": null,
   "name": "id",
   "args": null,
   "storageKey": null
@@ -138,7 +108,7 @@ return {
   "operationKind": "subscription",
   "name": "ContactsViewContactsChangedSubscription",
   "id": null,
-  "text": "subscription ContactsViewContactsChangedSubscription(\n  $userID: String!\n) {\n  contactsChanged {\n    contact {\n      invite {\n        inviteTX\n      }\n      id\n    }\n    viewer {\n      contacts {\n        ...ContactsView_contacts_3iqrP\n      }\n      id\n    }\n  }\n}\n\nfragment ContactsView_contacts_3iqrP on Contacts {\n  userContacts(userID: $userID) {\n    ...InviteContactModal_contact\n    peerID\n    localID\n    connectionState\n    publicFeed\n    invite {\n      ethNetwork\n      inviteTX\n      stake {\n        reclaimedTX\n        amount\n        state\n      }\n    }\n    profile {\n      name\n      ethAddress\n    }\n    id\n  }\n}\n\nfragment InviteContactModal_contact on Contact {\n  peerID\n  localID\n  connectionState\n  publicFeed\n  invite {\n    inviteTX\n    stake {\n      reclaimedTX\n      amount\n      state\n    }\n  }\n  profile {\n    name\n    ethAddress\n  }\n}\n",
+  "text": "subscription ContactsViewContactsChangedSubscription(\n  $userID: String!\n) {\n  contactsChanged {\n    viewer {\n      contacts {\n        ...ContactsView_contacts_3iqrP\n      }\n      id\n    }\n  }\n}\n\nfragment ContactsView_contacts_3iqrP on Contacts {\n  userContacts(userID: $userID) {\n    ...InviteContactModal_contact\n    peerID\n    localID\n    connectionState\n    publicFeed\n    invite {\n      ethNetwork\n      inviteTX\n      stake {\n        reclaimedTX\n        amount\n        state\n      }\n    }\n    profile {\n      name\n      ethAddress\n    }\n    id\n  }\n}\n\nfragment InviteContactModal_contact on Contact {\n  peerID\n  localID\n  connectionState\n  publicFeed\n  invite {\n    inviteTX\n    stake {\n      reclaimedTX\n      amount\n      state\n    }\n  }\n  profile {\n    name\n    ethAddress\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -156,18 +126,6 @@ return {
         "concreteType": "ContactChangedPayload",
         "plural": false,
         "selections": [
-          {
-            "kind": "LinkedField",
-            "alias": null,
-            "name": "contact",
-            "storageKey": null,
-            "args": null,
-            "concreteType": "Contact",
-            "plural": false,
-            "selections": [
-              v2
-            ]
-          },
           {
             "kind": "LinkedField",
             "alias": null,
@@ -220,19 +178,6 @@ return {
         "concreteType": "ContactChangedPayload",
         "plural": false,
         "selections": [
-          {
-            "kind": "LinkedField",
-            "alias": null,
-            "name": "contact",
-            "storageKey": null,
-            "args": null,
-            "concreteType": "Contact",
-            "plural": false,
-            "selections": [
-              v2,
-              v3
-            ]
-          },
           {
             "kind": "LinkedField",
             "alias": null,
@@ -304,7 +249,13 @@ return {
                         "concreteType": "ContactInviteData",
                         "plural": false,
                         "selections": [
-                          v1,
+                          {
+                            "kind": "ScalarField",
+                            "alias": null,
+                            "name": "inviteTX",
+                            "args": null,
+                            "storageKey": null
+                          },
                           {
                             "kind": "LinkedField",
                             "alias": null,
@@ -371,12 +322,12 @@ return {
                           }
                         ]
                       },
-                      v3
+                      v1
                     ]
                   }
                 ]
               },
-              v3
+              v1
             ]
           }
         ]
@@ -386,5 +337,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '1db897ee9168cc4d4c87b310b78976bb';
+(node/*: any*/).hash = '59de1511c82ba2088de5e9ecfa71761a';
 module.exports = node;

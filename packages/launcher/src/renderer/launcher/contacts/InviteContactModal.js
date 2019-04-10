@@ -11,8 +11,8 @@ import Avatar from '../../UIComponents/Avatar'
 
 import WalletIcon from '../wallets/WalletIcon'
 
-import { EnvironmentContext } from '../RelayEnvironment'
 import applyContext, { type ContextProps } from '../LauncherContext'
+import { MFT_TOKEN_ADDRESSES } from '../../../constants'
 
 import type { InviteContactModal_contact as Contact } from './__generated__/InviteContactModal_contact.graphql.js'
 
@@ -52,11 +52,6 @@ type State = {
   },
 }
 
-const MFT_TOKEN_ADDRESSES = {
-  ropsten: '0xa46f1563984209fe47f8236f8b01a03f03f957e4',
-  mainnet: '0xdf2c7238198ad8b389666574f2d8bc411a4b7428',
-}
-
 const FormContainer = styled.View`
   margin-top: 20px;
   max-width: 450px;
@@ -93,8 +88,6 @@ const Blocky = styled.View`
 `
 
 export class InviteContactModal extends Component<Props, State> {
-  static contextType = EnvironmentContext
-
   state = {}
 
   componentDidMount() {
@@ -109,14 +102,17 @@ export class InviteContactModal extends Component<Props, State> {
   async getBalances() {
     const { ethAddress } = this.props.user.profile
     const address = MFT_TOKEN_ADDRESSES[this.props.ethClient.networkName]
-    const balances = {
+    let balances = {
       mft: '0',
       eth: '0',
     }
     if (address && ethAddress) {
       const token = this.props.ethClient.erc20Contract(address)
-      balances.mft = await token.getBalance(ethAddress)
-      balances.eth = await this.props.ethClient.getETHBalance(ethAddress)
+      const [mft, eth] = await Promise.all([
+        token.getBalance(ethAddress),
+        this.props.ethClient.getETHBalance(ethAddress),
+      ])
+      balances = { mft, eth }
     }
     this.setState({ balances })
   }

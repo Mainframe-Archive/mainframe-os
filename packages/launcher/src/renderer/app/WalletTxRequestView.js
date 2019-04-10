@@ -100,8 +100,10 @@ export default class WalletTxRequestView extends Component<Props, State> {
 
         if (txInfo.contractType === 'ERC20') {
           const contract = ethClient.erc20Contract(transaction.to)
-          const symbol = await contract.getTicker()
-          const decimalsUnit = await contract.getTokenDecimalsUnit()
+          const [symbol, decimalsUnit] = await Promise.all([
+            contract.getTicker(),
+            contract.getTokenDecimalsUnit(),
+          ])
           tokenInfo = {
             decimalsUnit,
             symbol,

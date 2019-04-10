@@ -67,9 +67,8 @@ const contactsChanged = {
   subscribe: (self, args, ctx: ClientContext) => {
     const { source, dispose } = ctx.invitesHandler.observe()
     const contactsChanged = source.pipe(
-      map(e => ({
+      map(() => ({
         contactsChanged: {
-          contact: e.contact,
           viewer: {},
         },
       })),
