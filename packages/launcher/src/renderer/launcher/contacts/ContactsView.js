@@ -12,9 +12,8 @@ import {
   type Environment,
 } from 'react-relay'
 import { fetchQuery } from 'relay-runtime'
-import { debounce, flattenDeep } from 'lodash'
-import memoize from 'memoize-one'
-
+import { debounce } from 'lodash'
+import { shell } from 'electron'
 import {
   Text,
   Button,
@@ -23,7 +22,6 @@ import {
   TextField,
   RadioGroup,
   Radio,
-  DropDown,
 } from '@morpheus-ui/core'
 import { type FormSubmitPayload } from '@morpheus-ui/forms'
 
@@ -33,15 +31,12 @@ import SearchIcon from '@morpheus-ui/icons/SearchSm'
 import { type CurrentUser } from '../LauncherContext'
 import { EnvironmentContext } from '../RelayEnvironment'
 import Avatar from '../../UIComponents/Avatar'
-import WalletIcon from '../wallets/WalletIcon'
 import SvgSelectedPointer from '../../UIComponents/SVGSelectedPointer'
 
 import FormModalView from '../../UIComponents/FormModalView'
 import Loader from '../../UIComponents/Loader'
 import { InformationBox } from '../identities/IdentitiesView'
 import InviteContactModal, { type TransactionType } from './InviteContactModal'
-
-import type { ContactsView_wallets as Wallets } from './__generated__/ContactsView_wallets.graphql.js'
 
 const SvgSmallClose = props => (
   <svg width="10" height="10" viewBox="0 0 10 10" {...props}>
@@ -103,12 +98,7 @@ const ContactCardText = styled.View`
   justify-content: space-around;
 `
 
-const AcceptIgnore = styled.View`
-  padding-left: 10px;
-  width: 110px;
-  flex-direction: row;
-  justify-content: space-between;
-`
+const ViewTransaction = styled.TouchableOpacity``
 
 const RightContainer = styled.View`
   flex: 1;
@@ -171,28 +161,14 @@ const AvatarWrapper = styled.View`
   margin-bottom: 20px;
 `
 
+const ContactName = styled.View``
+
 const Blocky = styled.View`
   margin-right: 15px;
 `
 
 const RadioContainer = styled.View`
   width: 350px;
-`
-
-const AddContactDetail = styled.View`
-  padding: 5px;
-  width: 440px;
-  border-radius: 3px;
-  border-color: #efefef;
-  flex-direction: row;
-  align-items: center;
-  ${props => props.border && `border-width: 1px;`}
-`
-
-const AddContactDetailText = styled.View`
-  flex: 1;
-  overflow: hidden;
-  padding-right: 20px;
 `
 
 export type Contact = {
@@ -240,9 +216,9 @@ type State = {
   searching?: boolean,
   searchTerm?: ?string,
   selectedContact?: Object,
-  selectedWallet?: string,
   addModalState?: number,
   editModalOpen?: boolean,
+  ratio?: ?string,
   error?: ?string,
   inviteError?: ?string,
   peerLookupHash?: ?string,
@@ -388,6 +364,7 @@ class ContactsViewComponent extends Component<Props, State> {
   closeModal = () => {
     this.setState({
       addModalState: 0,
+      foundPeer: null,
       editModalOpen: false,
       inviteModalOpen: undefined,
     })
@@ -456,7 +433,6 @@ class ContactsViewComponent extends Component<Props, State> {
         mutation: addContactMutation,
         variables: { input, userID: user.localID },
         onCompleted: (response, errors) => {
-          console.log(response)
           if (errors && errors.length) {
             requestComplete(errors[0].message)
           } else {
@@ -561,7 +537,7 @@ class ContactsViewComponent extends Component<Props, State> {
       peerID: user.localID,
       publicFeed: user.feedHash,
       profile: {
-        name: `${user.profile.name} (Me)`,
+        name: `${user.profile.name}`,
         ethAddress: user.defaultEthAddress,
       },
     }
@@ -578,26 +554,6 @@ class ContactsViewComponent extends Component<Props, State> {
   onChangeRadio = (value: string) => {
     this.setState({ radio: value })
   }
-
-  getWallets = memoize(wallets => {
-    return flattenDeep([
-      ...wallets.ethWallets.hd.map(item => item.accounts),
-      ...wallets.ethWallets.ledger.map(item => item.accounts),
-    ])
-  })
-
-  isWalletDropDownValid = () => {
-    const addresses = this.getWallets(this.props.wallets)
-
-    const wallet =
-      this.state.selectedWallet || this.props.user.defaultEthAddress
-
-    const item = addresses.find(item => item.address === wallet)
-
-    return item && (item.balances.eth > 0 && item.balances.mft >= 10)
-  }
-
-  selectWallet = (item: string) => this.setState({ selectedWallet: item })
 
   // RENDER
 
@@ -666,24 +622,12 @@ class ContactsViewComponent extends Component<Props, State> {
                 <ContactCardText>
                   <Text variant={['greyMed', 'ellipsis']} bold size={13}>
                     {contact.profile.name || contact.publicFeed}
+                    {this.props.user.localID === contact.localID
+                      ? ' (me)'
+                      : null}
                   </Text>
-                  {contact.connectionState === 'SENT_FEED' ||
-                  contact.connectionState === 'SENDING_FEED' ? (
-                    <Text variant={['grey']} size={10}>
-                      Pending
-                    </Text>
-                  ) : null}
+                  {this.renderConnectionStateLabel(contact)}
                 </ContactCardText>
-                {contact.connectionState === 'RECEIVED'
-                  ? this.renderAcceptIgnore(contact)
-                  : null}
-                {contact.connectionState === 'DECLINED' ? (
-                  <ContactCardText>
-                    <Text variant={['red']} size={10}>
-                      Declined
-                    </Text>
-                  </ContactCardText>
-                ) : null}
                 {selected && (
                   <SelectedPointer>
                     <SvgSelectedPointer />
@@ -698,20 +642,46 @@ class ContactsViewComponent extends Component<Props, State> {
   }
 
   renderAcceptIgnore = (contact: Contact) => {
-    return (
-      <AcceptIgnore>
-        <Button
-          variant={['no-border', 'xSmall', 'grey']}
-          title="IGNORE"
-          onPress={() => this.rejectContact(contact)}
-        />
-        <Button
-          variant={['no-border', 'xSmall', 'red']}
-          title="ACCEPT"
-          onPress={() => this.acceptContact(contact)}
-        />
-      </AcceptIgnore>
-    )
+    if (contact.connectionState === 'RECEIVED') {
+      return (
+        <Row size={2}>
+          <Column>
+            <Button
+              variant={['mediumUppercase', 'redOutline']}
+              theme={{ minWidth: '100%' }}
+              title="ACCEPT"
+              onPress={() => this.acceptContact(contact)}
+            />
+          </Column>
+          <Column>
+            <Button
+              variant={['mediumUppercase', 'marginLeftt10']}
+              theme={{ minWidth: '100%' }}
+              title="DECLINE & CLAIM MFT"
+              onPress={() => this.rejectContact(contact)}
+            />
+          </Column>
+        </Row>
+      )
+    }
+    return null
+  }
+
+  renderDelete = (contact: Contact) => {
+    if (contact.connectionState === 'DECLINED') {
+      return (
+        <Row size={1}>
+          <Column>
+            <Button
+              variant={['mediumUppercase', 'redOutline']}
+              theme={{ minWidth: '100%' }}
+              title="DELETE CONTACT"
+            />
+          </Column>
+        </Row>
+      )
+    }
+    return null
   }
 
   renderPeerLookup() {
@@ -845,107 +815,6 @@ class ContactsViewComponent extends Component<Props, State> {
     )
   }
 
-  getDropDownItems() {
-    const { wallets } = this.props
-
-    const addresses = this.getWallets(wallets)
-    return addresses.map(item => ({
-      display: (
-        <AddContactDetail>
-          <Blocky>
-            <WalletIcon address={item.address} size="small" />
-          </Blocky>
-          <AddContactDetailText>
-            <Text variant={['greyDark23', 'ellipsis', 'mono']} size={12}>
-              {item.address}
-            </Text>
-            <Text variant="greyDark23" size={11}>
-              {item.balances.eth} ETH{'   '}
-              {item.balances.mft} MFT
-            </Text>
-          </AddContactDetailText>
-        </AddContactDetail>
-      ),
-      value: item.address,
-    }))
-  }
-
-  renderAddNewContactFormStep2() {
-    const { error, foundPeer } = this.state
-    const hasName = foundPeer && foundPeer.profile.name
-
-    const dropDownItems = this.getDropDownItems()
-
-    const errorMsg = error ? (
-      <Row size={1}>
-        <Column>
-          <Text variant="error">{error}</Text>
-        </Column>
-      </Row>
-    ) : null
-
-    return (
-      <FormModalView
-        title="ADD A NEW CONTACT"
-        confirmButton="INVITE"
-        dismissButton="CANCEL"
-        confirmButtonDisabled={!this.isWalletDropDownValid()}
-        onRequestClose={this.closeModal}
-        onSubmitForm={this.inviteBlockchainNewContact}>
-        <FormContainer modal>
-          <Row size={1}>
-            <Column>
-              <Text bold variant="smallTitle" color="#585858">
-                Send a blockchain invitation to
-              </Text>
-              <AddContactDetail border>
-                <Blocky>
-                  <Avatar id={foundPeer.publicFeed} size="small" />
-                </Blocky>
-                <AddContactDetailText>
-                  <Text
-                    bold
-                    variant="greyDark23"
-                    theme={{ fontStyle: hasName ? 'normal' : 'italic' }}
-                    size={13}>
-                    {foundPeer.profile.name ||
-                      'This user has a private profile'}
-                  </Text>
-                  <Text variant={['greyDark23', 'ellipsis']} size={12}>
-                    {foundPeer.publicFeed}
-                  </Text>
-                </AddContactDetailText>
-              </AddContactDetail>
-            </Column>
-          </Row>
-          <Row size={1}>
-            <Column>
-              <Text bold variant="smallTitle" color="#585858">
-                Stake 10 MFT from
-              </Text>
-
-              <DropDown
-                options={dropDownItems}
-                displayKey="display"
-                valueKey="value"
-                defaultValue={
-                  this.state.selectedWallet || this.props.user.defaultEthAddress
-                }
-                label="Wallet"
-                onChange={this.selectWallet}
-              />
-
-              <Text color="#303030" variant="marginTop10" size={11}>
-                Gas fees: 6 GWei
-              </Text>
-            </Column>
-          </Row>
-          {errorMsg}
-        </FormContainer>
-      </FormModalView>
-    )
-  }
-
   renderSendInviteState(contact: Contact) {
     if (contact.profile.ethAddress) {
       if (this.state.invitingContact) {
@@ -953,11 +822,16 @@ class ContactsViewComponent extends Component<Props, State> {
       }
 
       return (
-        <Button
-          title={'Send Invite'}
-          variant={['marginTop10', 'redOutline']}
-          onPress={() => this.sendInvite(contact)}
-        />
+        <Row size={1}>
+          <Column>
+            <Button
+              title={'SEND BLOCKCHAIN INVITE'}
+              variant={['mediumUppercase', 'redOutline']}
+              theme={{ minWidth: '100%' }}
+              onPress={() => this.sendInvite(contact)}
+            />
+          </Column>
+        </Row>
       )
     }
   }
@@ -972,14 +846,6 @@ class ContactsViewComponent extends Component<Props, State> {
       case 'SENDING_BLOCKCHAIN': {
         return <Loader />
       }
-      case 'SENT_BLOCKCHAIN': {
-        return (
-          contact.invite &&
-          contact.invite.inviteTX && (
-            <Text>{`Invite request sent: ${contact.invite.inviteTX}`}</Text>
-          )
-        )
-      }
       case 'CONNECTED': {
         if (
           contact &&
@@ -988,27 +854,129 @@ class ContactsViewComponent extends Component<Props, State> {
         ) {
           if (contact.invite.stake.reclaimedTX) {
             return (
-              <Text>{`Stake withdrawn: ${
-                contact.invite.stake.reclaimedTX
-              }`}</Text>
+              <Row size={1}>
+                <Column>
+                  <Text color="#303030">{`Stake withdrawn: ${
+                    contact.invite.stake.reclaimedTX
+                  }`}</Text>
+                </Column>
+              </Row>
             )
           } else if (contact.invite.stake.state === 'RECLAIMING') {
-            return <Text>Stake withdraw transaction processing...</Text>
+            return (
+              <Row size={1}>
+                <Column>
+                  <Text color="#303030">
+                    Stake withdraw transaction processing...
+                  </Text>
+                </Column>
+              </Row>
+            )
           } else {
             if (this.state.withdrawingStake) {
               return <Loader />
             } else {
               return (
-                <Button
-                  title="Withdraw Stake"
-                  variant={['marginTop10', 'redOutline']}
-                  onPress={() => this.withdrawStake(contact)}
-                />
+                <Row size={1}>
+                  <Column>
+                    <Button
+                      title={'WITHDRAW YOUR MFT'}
+                      variant={['mediumUppercase', 'redOutline']}
+                      theme={{ minWidth: '100%' }}
+                      onPress={() => this.withdrawStake(contact)}
+                    />
+                  </Column>
+                </Row>
               )
             }
           }
         }
+        return null
       }
+      default:
+        return null
+    }
+  }
+
+  openTransaction = (tx: string) => {
+    shell.openExternal(`https://etherscan.io/tx/${tx}`)
+  }
+
+  renderConnectionStateLabel(contact: Contact, showTransaction: boolean) {
+    switch (contact.connectionState) {
+      case 'DECLINED':
+        return (
+          <Text color="#DA1157" size={10}>
+            Has declined your invitation
+          </Text>
+        )
+      case 'SENDING_FEED':
+        return (
+          <Text color="#DA1157" size={10}>
+            Pending
+          </Text>
+        )
+      case 'SENT_FEED': {
+        return (
+          <Text color="#DA1157" size={10}>
+            Pending
+          </Text>
+        )
+      }
+      case 'SENDING_BLOCKCHAIN': {
+        return (
+          <Text color="#DA1157" size={10}>
+            Pending confirmation
+          </Text>
+        )
+      }
+      case 'SENT_BLOCKCHAIN': {
+        return (
+          contact.invite &&
+          contact.invite.inviteTX && (
+            <Text color="#DA1157" size={10}>
+              Pending confirmation
+              {showTransaction ? (
+                <ViewTransaction
+                  onPress={() => this.openTransaction(contact.invite.inviteTX)}>
+                  <Text color="#303030" size={10}>
+                    {'  '}(view transaction)
+                  </Text>
+                </ViewTransaction>
+              ) : null}
+            </Text>
+          )
+        )
+      }
+      case 'RECEIVED': {
+        return (
+          <Text color="#DA1157" size={10}>
+            Request
+          </Text>
+        )
+      }
+      case 'CONNECTED': {
+        if (
+          contact &&
+          contact.connectionState === 'CONNECTED' &&
+          contact.invite
+        ) {
+          if (
+            !contact.invite.stake.reclaimedTX &&
+            !this.state.withdrawingStake &&
+            contact.invite.stake.state !== 'RECLAIMING'
+          ) {
+            return (
+              <Text color="#DA1157" size={10}>
+                Has accepted your invitation
+              </Text>
+            )
+          }
+        }
+        return null
+      }
+      default:
+        return null
     }
   }
 
@@ -1016,6 +984,11 @@ class ContactsViewComponent extends Component<Props, State> {
     const selectedContact = this.getSelectedContact()
 
     const inviteAction = this.renderInviteArea(selectedContact)
+
+    const connectionStateLabel = this.renderConnectionStateLabel(
+      selectedContact,
+      true,
+    )
 
     const inviteError = this.state.inviteError && (
       <Text styles="margin-top:10px;" variant="error">
@@ -1032,12 +1005,45 @@ class ContactsViewComponent extends Component<Props, State> {
                 <Blocky>
                   <Avatar id={selectedContact.publicFeed} size="large" />
                 </Blocky>
-                <Text bold size={24}>
-                  {selectedContact.profile.name}
-                </Text>
+                <ContactName>
+                  <Text bold size={24}>
+                    {selectedContact.profile.name}
+                  </Text>
+                  {connectionStateLabel}
+                </ContactName>
               </AvatarWrapper>
             </Column>
           </Row>
+          {this.renderAcceptIgnore(selectedContact)}
+          {this.renderDelete(selectedContact)}
+          {inviteAction}
+
+          {selectedContact.connectionState === 'SENT_BLOCKCHAIN' &&
+            selectedContact.invite &&
+            selectedContact.invite.inviteTX && (
+              <Row size={1}>
+                <Column>
+                  <InformationBox
+                    content={
+                      'This person needs to accept your request in order to confirm your invitation and to retrieve your MFT.'
+                    }
+                    full
+                  />
+                </Column>
+              </Row>
+            )}
+          {selectedContact.connectionState === 'SENT_FEED' && (
+            <Row size={1}>
+              <Column>
+                <InformationBox
+                  content={
+                    'This person needs to add you back to confirm the invitation. Make sure to give out your Mainframe ID.'
+                  }
+                  full
+                />
+              </Column>
+            </Row>
+          )}
           <Row size={1}>
             <Column>
               <Text variant="smallTitle" theme={{ padding: '20px 0 10px 0' }}>
@@ -1045,26 +1051,38 @@ class ContactsViewComponent extends Component<Props, State> {
               </Text>
               <Text variant="addressLarge">{selectedContact.publicFeed}</Text>
             </Column>
-            {this.isIdentitySelected() && (
-              <Column>
-                <InformationBox full />
-              </Column>
-            )}
           </Row>
-          {selectedContact.profile.ethAddress && (
+          {this.isIdentitySelected() && (
             <Row size={1}>
               <Column>
-                <Text variant="smallTitle" theme={{ padding: '20px 0 10px 0' }}>
-                  ETH Address
-                </Text>
-                <Text variant="addressLarge">
-                  {selectedContact.profile.ethAddress}
-                </Text>
-                {inviteAction}
-                {inviteError}
+                <InformationBox
+                  content={
+                    'Share your Mainframe ID with your contacts and let your friends add you on Mainframe OS'
+                  }
+                  full
+                />
               </Column>
             </Row>
           )}
+          {(this.isIdentitySelected() ||
+            selectedContact.connectionState === 'CONNECTED') &&
+            selectedContact.profile.ethAddress && (
+              <Row size={1}>
+                <Column>
+                  <Text
+                    variant="smallTitle"
+                    theme={{ padding: '20px 0 10px 0' }}>
+                    ETH Address
+                  </Text>
+                  <Text variant="addressLarge">
+                    {selectedContact.profile.ethAddress}
+                  </Text>
+                </Column>
+              </Row>
+            )}
+          <Row size={1}>
+            <Column>{inviteError}</Column>
+          </Row>
           {/* <Row size={1}>
               <Column styles="margin-top: 10px;">
                 <Button
@@ -1194,35 +1212,6 @@ const ContactsView = createFragmentContainer(ContactsViewComponent, {
         profile {
           name
           ethAddress
-        }
-      }
-    }
-  `,
-  wallets: graphql`
-    fragment ContactsView_wallets on Wallets
-      @argumentDefinitions(userID: { type: "String!" }) {
-      ethWallets(userID: $userID) {
-        hd {
-          name
-          localID
-          accounts {
-            address
-            balances {
-              eth
-              mft
-            }
-          }
-        }
-        ledger {
-          name
-          localID
-          accounts {
-            address
-            balances {
-              eth
-              mft
-            }
-          }
         }
       }
     }

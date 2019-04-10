@@ -7,6 +7,10 @@ import Loader from '../../UIComponents/Loader'
 
 import rpc from '../rpc'
 import FormModalView from '../../UIComponents/FormModalView'
+import Avatar from '../../UIComponents/Avatar'
+
+import WalletIcon from '../wallets/WalletIcon'
+
 import { EnvironmentContext } from '../RelayEnvironment'
 import applyContext, { type ContextProps } from '../LauncherContext'
 
@@ -65,6 +69,27 @@ const FormContainer = styled.View`
 
 const Section = styled.View`
   margin-bottom: 20px;
+`
+
+const AddContactDetail = styled.View`
+  padding: 10px;
+  margin-top: -10px;
+  width: 440px;
+  border-radius: 3px;
+  border-color: #efefef;
+  flex-direction: row;
+  align-items: center;
+  ${props => props.border && `border-width: 1px;`}
+`
+
+const AddContactDetailText = styled.View`
+  flex: 1;
+  overflow: hidden;
+  padding-right: 20px;
+`
+
+const Blocky = styled.View`
+  margin-right: 15px;
 `
 
 export class InviteContactModal extends Component<Props, State> {
@@ -257,7 +282,7 @@ export class InviteContactModal extends Component<Props, State> {
       const costlabel = `Max Cost: ${maxCost} ETH`
       const mftLabel = `Stake: ${stakeAmount} MFT`
       return (
-        <Text variant={['small']}>
+        <Text color="#303030" variant="marginTop10" size={11}>
           {`${gasLabel}, ${costlabel}, ${mftLabel}`}
         </Text>
       )
@@ -267,9 +292,23 @@ export class InviteContactModal extends Component<Props, State> {
   renderContactSection(title: string) {
     return (
       <Section>
-        <Text variant={['smallTitle', 'bold']}>{title}</Text>
-        <Text>{this.props.contact.profile.name}</Text>
-        <Text>{this.props.contact.profile.ethAddress}</Text>
+        <Text bold variant="smallTitle" color="#585858">
+          {title}
+        </Text>
+        <AddContactDetail border>
+          <Blocky>
+            <Avatar id={this.props.contact.publicFeed} size="small" />
+          </Blocky>
+          <AddContactDetailText>
+            <Text bold variant="greyDark23" size={13}>
+              {this.props.contact.profile.name ||
+                'This user has a private profile'}
+            </Text>
+            <Text variant={['greyDark23', 'ellipsis']} size={12}>
+              {this.props.contact.publicFeed}
+            </Text>
+          </AddContactDetailText>
+        </AddContactDetail>
       </Section>
     )
   }
@@ -277,13 +316,29 @@ export class InviteContactModal extends Component<Props, State> {
   renderTransactionSection(title: string) {
     const { balances } = this.state
     const balanceLabel = balances ? (
-      <Text>{`MFT: ${balances.mft}, ETH: ${balances.eth}`}</Text>
+      <Text variant="greyDark23" size={11}>{`MFT: ${balances.mft}, ETH: ${
+        balances.eth
+      }`}</Text>
     ) : null
     return (
       <Section>
-        <Text variant={['smallTitle', 'bold']}>{title}</Text>
-        <Text>{this.props.user.profile.ethAddress}</Text>
-        {balanceLabel}
+        <Text bold variant="smallTitle" color="#585858">
+          {title}
+        </Text>
+        <AddContactDetail border>
+          <Blocky>
+            <WalletIcon
+              address={this.props.user.profile.ethAddress}
+              size="small"
+            />
+          </Blocky>
+          <AddContactDetailText>
+            <Text variant={['greyDark23', 'ellipsis', 'mono']} size={12}>
+              {this.props.user.profile.ethAddress}
+            </Text>
+            {balanceLabel}
+          </AddContactDetailText>
+        </AddContactDetail>
         {this.renderGasData()}
       </Section>
     )
@@ -333,8 +388,83 @@ export class InviteContactModal extends Component<Props, State> {
     )
   }
 
+  // renderAddNewContactFormStep2() {
+  //   const { error, foundPeer } = this.state
+  //   const hasName = foundPeer && foundPeer.profile.name
+
+  //   const dropDownItems = this.getDropDownItems()
+
+  //   const errorMsg = error ? (
+  //     <Row size={1}>
+  //       <Column>
+  //         <Text variant="error">{error}</Text>
+  //       </Column>
+  //     </Row>
+  //   ) : null
+
+  //   return (
+  //     <FormModalView
+  //       title="ADD A NEW CONTACT"
+  //       confirmButton="INVITE"
+  //       dismissButton="CANCEL"
+  //       confirmButtonDisabled={!this.isWalletDropDownValid()}
+  //       onRequestClose={this.closeModal}
+  //       onSubmitForm={this.inviteBlockchainNewContact}>
+  //       <FormContainer modal>
+  //         <Row size={1}>
+  //           <Column>
+  //             <Text bold variant="smallTitle" color="#585858">
+  //               Send a blockchain invitation to
+  //             </Text>
+  //             <AddContactDetail border>
+  //               <Blocky>
+  //                 <Avatar id={foundPeer.publicFeed} size="small" />
+  //               </Blocky>
+  //               <AddContactDetailText>
+  //                 <Text
+  //                   bold
+  //                   variant="greyDark23"
+  //                   theme={{ fontStyle: hasName ? 'normal' : 'italic' }}
+  //                   size={13}>
+  //                   {foundPeer.profile.name ||
+  //                     'This user has a private profile'}
+  //                 </Text>
+  //                 <Text variant={['greyDark23', 'ellipsis']} size={12}>
+  //                   {foundPeer.publicFeed}
+  //                 </Text>
+  //               </AddContactDetailText>
+  //             </AddContactDetail>
+  //           </Column>
+  //         </Row>
+  //         <Row size={1}>
+  //           <Column>
+  //             <Text bold variant="smallTitle" color="#585858">
+  //               Stake 10 MFT from
+  //             </Text>
+
+  //             <DropDown
+  //               options={dropDownItems}
+  //               displayKey="display"
+  //               valueKey="value"
+  //               defaultValue={
+  //                 this.state.selectedWallet || this.props.user.defaultEthAddress
+  //               }
+  //               label="Wallet"
+  //               onChange={this.selectWallet}
+  //             />
+
+  //             <Text color="#303030" variant="marginTop10" size={11}>
+  //               Gas fees: 6 GWei
+  //             </Text>
+  //           </Column>
+  //         </Row>
+  //         {errorMsg}
+  //       </FormContainer>
+  //     </FormModalView>
+  //   )
+  // }
+
   render() {
-    console.log(this.props)
     const { invitePending } = this.state
     let content
     let btnTitle
@@ -347,10 +477,10 @@ export class InviteContactModal extends Component<Props, State> {
         if (!this.state.txProcessing) {
           if (invitePending && invitePending.state === 'awaiting_approval') {
             action = this.sendApproveTX
-            btnTitle = 'Approve Invite'
+            btnTitle = 'APPROVE INVITE'
           } else if (invitePending && invitePending.state === 'approved') {
             action = this.sendInvite
-            btnTitle = 'Send Invite'
+            btnTitle = 'SEND INVITE'
           }
         }
         break

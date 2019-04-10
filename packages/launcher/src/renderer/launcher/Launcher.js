@@ -117,7 +117,7 @@ class Launcher extends Component<Props, State> {
     }
     this.state = {
       onboardRequired,
-      openScreen: 'contacts',
+      openScreen: 'apps',
     }
     this._ethClient = new EthClient(ethClientProvider)
   }

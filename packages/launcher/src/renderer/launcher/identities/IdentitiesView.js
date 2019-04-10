@@ -62,8 +62,6 @@ const Profile = styled.View`
 `
 
 const InfoBox = styled.View`
-  margin-top: 20px;
-  margin-bottom: 30px;
   padding: 10px 15px;
   max-width: 340px;
   border-width: 1px;
@@ -74,15 +72,23 @@ const InfoBox = styled.View`
   justify-content: center;
 
   ${props => props.full && `max-width: auto;`}
+  ${props => props.margin && `margin-top: 20px; margin-bottom: 30px;`}
 `
 
-export const InformationBox = ({ full }: { full?: boolean }) => {
+export const InformationBox = ({
+  full,
+  margin,
+  content,
+}: {
+  full?: boolean,
+  margin?: boolean,
+  content: any,
+}) => {
   return (
-    <InfoBox full={full}>
+    <InfoBox full={full} margin={margin}>
       <InfoIcon width={36} height={18} color="#00A7E7" />
       <Text size={12} color="#00A7E7" variant="marginLeft15">
-        Share your Mainframe ID with your contacts and let your friends add you
-        on Mainframe OS
+        {content}
       </Text>
     </InfoBox>
   )
@@ -147,7 +153,12 @@ class IdentitiesView extends Component<Props, State> {
           <Text variant={['smallTitle', 'blue', 'bold']}>Personal</Text>
         )}
         {userData && this.renderUser(userData)}
-        <InformationBox />
+        <InformationBox
+          margin
+          content={
+            'Share your Mainframe ID with your contacts and let your friends add you on Mainframe OS'
+          }
+        />
         {this.props.identities.ownDevelopers.length > 0 && (
           <>
             <Text variant={['smallTitle', 'blue', 'bold']}>Developer</Text>

@@ -78,7 +78,11 @@ export default class ContactPickerView extends Component<Props, State> {
 
   async fetchContacts() {
     const { contacts } = await rpc.getUserContacts(this.props.userID)
-    this.setState({ contacts })
+    this.setState({
+      contacts: contacts.filter(
+        item => item.connectionState.toLowerCase() === 'connected',
+      ),
+    })
   }
 
   checkContact(contact: Contact) {
