@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 7580b52e802c9325fab0425c2d82ede6
+ * @relayHash 2f5a28b8982fe1efe3ca29c518376765
  */
 
 /* eslint-disable */
@@ -87,6 +87,7 @@ fragment ContactsView_contacts_3iqrP on Contacts {
     connectionState
     publicFeed
     invite {
+      ethNetwork
       inviteTX
       stake {
         reclaimedTX
@@ -129,122 +130,108 @@ v1 = [
 v2 = {
   "kind": "ScalarField",
   "alias": null,
-  "name": "id",
+  "name": "peerID",
   "args": null,
   "storageKey": null
 },
-v3 = [
-  {
-    "kind": "ScalarField",
-    "alias": null,
-    "name": "peerID",
-    "args": null,
-    "storageKey": null
-  },
-  {
-    "kind": "ScalarField",
-    "alias": null,
-    "name": "localID",
-    "args": null,
-    "storageKey": null
-  },
-  {
-    "kind": "ScalarField",
-    "alias": null,
-    "name": "connectionState",
-    "args": null,
-    "storageKey": null
-  },
-  {
-    "kind": "ScalarField",
-    "alias": null,
-    "name": "publicFeed",
-    "args": null,
-    "storageKey": null
-  },
-  {
-    "kind": "LinkedField",
-    "alias": null,
-    "name": "invite",
-    "storageKey": null,
-    "args": null,
-    "concreteType": "ContactInviteData",
-    "plural": false,
-    "selections": [
-      {
-        "kind": "ScalarField",
-        "alias": null,
-        "name": "inviteTX",
-        "args": null,
-        "storageKey": null
-      },
-      {
-        "kind": "LinkedField",
-        "alias": null,
-        "name": "stake",
-        "storageKey": null,
-        "args": null,
-        "concreteType": "InviteStake",
-        "plural": false,
-        "selections": [
-          {
-            "kind": "ScalarField",
-            "alias": null,
-            "name": "reclaimedTX",
-            "args": null,
-            "storageKey": null
-          },
-          {
-            "kind": "ScalarField",
-            "alias": null,
-            "name": "amount",
-            "args": null,
-            "storageKey": null
-          },
-          {
-            "kind": "ScalarField",
-            "alias": null,
-            "name": "state",
-            "args": null,
-            "storageKey": null
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "LinkedField",
-    "alias": null,
-    "name": "profile",
-    "storageKey": null,
-    "args": null,
-    "concreteType": "GenericProfile",
-    "plural": false,
-    "selections": [
-      {
-        "kind": "ScalarField",
-        "alias": null,
-        "name": "name",
-        "args": null,
-        "storageKey": null
-      },
-      {
-        "kind": "ScalarField",
-        "alias": null,
-        "name": "ethAddress",
-        "args": null,
-        "storageKey": null
-      }
-    ]
-  },
-  v2
-];
+v3 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "localID",
+  "args": null,
+  "storageKey": null
+},
+v4 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "connectionState",
+  "args": null,
+  "storageKey": null
+},
+v5 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "publicFeed",
+  "args": null,
+  "storageKey": null
+},
+v6 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "inviteTX",
+  "args": null,
+  "storageKey": null
+},
+v7 = {
+  "kind": "LinkedField",
+  "alias": null,
+  "name": "stake",
+  "storageKey": null,
+  "args": null,
+  "concreteType": "InviteStake",
+  "plural": false,
+  "selections": [
+    {
+      "kind": "ScalarField",
+      "alias": null,
+      "name": "reclaimedTX",
+      "args": null,
+      "storageKey": null
+    },
+    {
+      "kind": "ScalarField",
+      "alias": null,
+      "name": "amount",
+      "args": null,
+      "storageKey": null
+    },
+    {
+      "kind": "ScalarField",
+      "alias": null,
+      "name": "state",
+      "args": null,
+      "storageKey": null
+    }
+  ]
+},
+v8 = {
+  "kind": "LinkedField",
+  "alias": null,
+  "name": "profile",
+  "storageKey": null,
+  "args": null,
+  "concreteType": "GenericProfile",
+  "plural": false,
+  "selections": [
+    {
+      "kind": "ScalarField",
+      "alias": null,
+      "name": "name",
+      "args": null,
+      "storageKey": null
+    },
+    {
+      "kind": "ScalarField",
+      "alias": null,
+      "name": "ethAddress",
+      "args": null,
+      "storageKey": null
+    }
+  ]
+},
+v9 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "id",
+  "args": null,
+  "storageKey": null
+};
 return {
   "kind": "Request",
   "operationKind": "mutation",
   "name": "ContactsViewAddContactMutation",
   "id": null,
-  "text": "mutation ContactsViewAddContactMutation(\n  $input: AddContactInput!\n  $userID: String!\n) {\n  addContact(input: $input) {\n    contact {\n      ...InviteContactModal_contact\n      id\n    }\n    viewer {\n      contacts {\n        ...ContactsView_contacts_3iqrP\n      }\n      id\n    }\n  }\n}\n\nfragment InviteContactModal_contact on Contact {\n  peerID\n  localID\n  connectionState\n  publicFeed\n  invite {\n    inviteTX\n    stake {\n      reclaimedTX\n      amount\n      state\n    }\n  }\n  profile {\n    name\n    ethAddress\n  }\n}\n\nfragment ContactsView_contacts_3iqrP on Contacts {\n  userContacts(userID: $userID) {\n    ...InviteContactModal_contact\n    peerID\n    localID\n    connectionState\n    publicFeed\n    invite {\n      inviteTX\n      stake {\n        reclaimedTX\n        amount\n        state\n      }\n    }\n    profile {\n      name\n      ethAddress\n    }\n    id\n  }\n}\n",
+  "text": "mutation ContactsViewAddContactMutation(\n  $input: AddContactInput!\n  $userID: String!\n) {\n  addContact(input: $input) {\n    contact {\n      ...InviteContactModal_contact\n      id\n    }\n    viewer {\n      contacts {\n        ...ContactsView_contacts_3iqrP\n      }\n      id\n    }\n  }\n}\n\nfragment InviteContactModal_contact on Contact {\n  peerID\n  localID\n  connectionState\n  publicFeed\n  invite {\n    inviteTX\n    stake {\n      reclaimedTX\n      amount\n      state\n    }\n  }\n  profile {\n    name\n    ethAddress\n  }\n}\n\nfragment ContactsView_contacts_3iqrP on Contacts {\n  userContacts(userID: $userID) {\n    ...InviteContactModal_contact\n    peerID\n    localID\n    connectionState\n    publicFeed\n    invite {\n      ethNetwork\n      inviteTX\n      stake {\n        reclaimedTX\n        amount\n        state\n      }\n    }\n    profile {\n      name\n      ethAddress\n    }\n    id\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -338,7 +325,27 @@ return {
             "args": null,
             "concreteType": "Contact",
             "plural": false,
-            "selections": v3
+            "selections": [
+              v2,
+              v3,
+              v4,
+              v5,
+              {
+                "kind": "LinkedField",
+                "alias": null,
+                "name": "invite",
+                "storageKey": null,
+                "args": null,
+                "concreteType": "ContactInviteData",
+                "plural": false,
+                "selections": [
+                  v6,
+                  v7
+                ]
+              },
+              v8,
+              v9
+            ]
           },
           {
             "kind": "LinkedField",
@@ -373,11 +380,38 @@ return {
                     ],
                     "concreteType": "Contact",
                     "plural": true,
-                    "selections": v3
+                    "selections": [
+                      v2,
+                      v3,
+                      v4,
+                      v5,
+                      {
+                        "kind": "LinkedField",
+                        "alias": null,
+                        "name": "invite",
+                        "storageKey": null,
+                        "args": null,
+                        "concreteType": "ContactInviteData",
+                        "plural": false,
+                        "selections": [
+                          v6,
+                          v7,
+                          {
+                            "kind": "ScalarField",
+                            "alias": null,
+                            "name": "ethNetwork",
+                            "args": null,
+                            "storageKey": null
+                          }
+                        ]
+                      },
+                      v8,
+                      v9
+                    ]
                   }
                 ]
               },
-              v2
+              v9
             ]
           }
         ]

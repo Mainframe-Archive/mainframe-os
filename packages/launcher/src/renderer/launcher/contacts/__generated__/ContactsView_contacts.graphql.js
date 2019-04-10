@@ -20,6 +20,7 @@ export type ContactsView_contacts = {|
     +connectionState: ConnectionState,
     +publicFeed: string,
     +invite: ?{|
+      +ethNetwork: ?string,
       +inviteTX: ?string,
       +stake: ?{|
         +reclaimedTX: ?string,
@@ -113,6 +114,13 @@ const node/*: ConcreteFragment*/ = {
             {
               "kind": "ScalarField",
               "alias": null,
+              "name": "ethNetwork",
+              "args": null,
+              "storageKey": null
+            },
+            {
+              "kind": "ScalarField",
+              "alias": null,
               "name": "inviteTX",
               "args": null,
               "storageKey": null
@@ -181,5 +189,5 @@ const node/*: ConcreteFragment*/ = {
   ]
 };
 // prettier-ignore
-(node/*: any*/).hash = '79081c2e12032ee8714137977bbf1756';
+(node/*: any*/).hash = 'c22cf4752d0f607334d15ac0152fdc7c';
 module.exports = node;

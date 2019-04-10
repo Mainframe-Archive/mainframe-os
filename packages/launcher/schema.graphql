@@ -241,6 +241,7 @@ type ContactChangedPayload {
 
 type ContactInviteData {
   inviteTX: String
+  ethNetwork: String
   stake: InviteStake
 }
 

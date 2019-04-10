@@ -177,7 +177,8 @@ export type Contact = {
   publicFeed: string,
   ethAddress?: string,
   invite?: {
-    inviteTX?: string,
+    ethNetwork: string,
+    inviteTX: string,
     stake: {
       amount: string,
       state: string,
@@ -225,9 +226,6 @@ type State = {
   peerLookupHash?: ?string,
   queryInProgress?: ?boolean,
   addingContact?: ?boolean,
-  invitingContact?: ?string,
-  withdrawingStake?: ?boolean,
-  rejectingInvite?: ?string,
   inviteModalOpen?: ?{
     type: TransactionType,
     contact: Contact,
@@ -627,7 +625,7 @@ class ContactsViewComponent extends Component<Props, State> {
                       ? ' (me)'
                       : null}
                   </Text>
-                  {this.renderConnectionStateLabel(contact, false)}
+                  {this.renderConnectionStateLabel(contact, true)}
                 </ContactCardText>
                 {selected && (
                   <SelectedPointer>
@@ -820,10 +818,6 @@ class ContactsViewComponent extends Component<Props, State> {
 
   renderSendInviteState(contact: Contact) {
     if (contact.profile.ethAddress) {
-      if (this.state.invitingContact) {
-        return <Loader />
-      }
-
       return (
         <Row size={1}>
           <Column>
@@ -855,13 +849,16 @@ class ContactsViewComponent extends Component<Props, State> {
           contact.connectionState === 'CONNECTED' &&
           contact.invite
         ) {
-          if (contact.invite.stake.reclaimedTX) {
+          if (contact.invite.stake.state === 'STAKED') {
             return (
               <Row size={1}>
                 <Column>
-                  <Text color="#303030">{`Stake withdrawn: ${
-                    contact.invite.stake.reclaimedTX
-                  }`}</Text>
+                  <Button
+                    title={'WITHDRAW YOUR MFT'}
+                    variant={['mediumUppercase', 'redOutline']}
+                    theme={{ minWidth: '100%' }}
+                    onPress={() => this.withdrawStake(contact)}
+                  />
                 </Column>
               </Row>
             )
@@ -875,23 +872,6 @@ class ContactsViewComponent extends Component<Props, State> {
                 </Column>
               </Row>
             )
-          } else {
-            if (this.state.withdrawingStake) {
-              return <Loader />
-            } else {
-              return (
-                <Row size={1}>
-                  <Column>
-                    <Button
-                      title={'WITHDRAW YOUR MFT'}
-                      variant={['mediumUppercase', 'redOutline']}
-                      theme={{ minWidth: '100%' }}
-                      onPress={() => this.withdrawStake(contact)}
-                    />
-                  </Column>
-                </Row>
-              )
-            }
           }
         }
         return null
@@ -901,13 +881,17 @@ class ContactsViewComponent extends Component<Props, State> {
     }
   }
 
-  openTransaction = (tx?: string) => {
-    if (tx) {
-      shell.openExternal(`https://etherscan.io/tx/${tx}`)
+  openTransaction = (inviteTX: ?string, ethNetwork: ?string) => {
+    if (inviteTX && ethNetwork) {
+      const url =
+        ethNetwork === 'mainnet'
+          ? `https://etherscan.io/tx/${inviteTX}`
+          : `https://ropsten.etherscan.io/tx/${inviteTX}`
+      shell.openExternal(url)
     }
   }
 
-  renderConnectionStateLabel(contact: Contact, showTransaction: boolean) {
+  renderConnectionStateLabel(contact: Contact, forListItem: boolean) {
     switch (contact.connectionState) {
       case 'DECLINED':
         return (
@@ -941,13 +925,14 @@ class ContactsViewComponent extends Component<Props, State> {
           contact.invite.inviteTX && (
             <Text color="#DA1157" size={10}>
               Pending confirmation
-              {showTransaction ? (
+              {!forListItem ? (
                 <ViewTransaction
                   onPress={() =>
                     this.openTransaction(
-                      contact.invite &&
-                        contact.invite.inviteTX &&
-                        contact.invite.inviteTX,
+                      // $FlowFixMe already checked
+                      contact.invite.inviteTX,
+                      // $FlowFixMe already checked
+                      contact.invite.ethNetwork,
                     )
                   }>
                   <Text color="#303030" size={10}>
@@ -974,13 +959,34 @@ class ContactsViewComponent extends Component<Props, State> {
         ) {
           if (
             !contact.invite.stake.reclaimedTX &&
-            !this.state.withdrawingStake &&
             contact.invite.stake.state !== 'RECLAIMING'
           ) {
             return (
               <Text color="#DA1157" size={10}>
                 Has accepted your invitation
               </Text>
+            )
+          } else if (contact.invite.stake.reclaimedTX && !forListItem) {
+            return (
+              contact.invite &&
+              contact.invite.inviteTX && (
+                <Text color="#DA1157" size={10}>
+                  Stake Retrieved
+                  <ViewTransaction
+                    onPress={() =>
+                      this.openTransaction(
+                        // $FlowFixMe already checked
+                        contact.invite.stake.reclaimedTX,
+                        // $FlowFixMe already checked
+                        contact.invite.ethNetwork,
+                      )
+                    }>
+                    <Text color="#303030" size={10}>
+                      {'  '}(view transaction)
+                    </Text>
+                  </ViewTransaction>
+                </Text>
+              )
             )
           }
         }
@@ -998,7 +1004,7 @@ class ContactsViewComponent extends Component<Props, State> {
 
     const connectionStateLabel = this.renderConnectionStateLabel(
       selectedContact,
-      true,
+      false,
     )
 
     const inviteError = this.state.inviteError && (
@@ -1195,6 +1201,7 @@ const ContactsView = createFragmentContainer(ContactsViewComponent, {
         connectionState
         publicFeed
         invite {
+          ethNetwork
           inviteTX
           stake {
             reclaimedTX

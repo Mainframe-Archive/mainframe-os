@@ -576,6 +576,9 @@ export const contactInviteData = new GraphQLObjectType({
     inviteTX: {
       type: GraphQLString,
     },
+    ethNetwork: {
+      type: GraphQLString,
+    },
     stake: {
       type: new GraphQLObjectType({
         name: 'InviteStake',
