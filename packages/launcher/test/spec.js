@@ -13,7 +13,7 @@ describe('Application launch', function() {
   before(function() {
     const binPath =
       os.platform() === 'darwin'
-        ? 'dist/mac/Mainframe.app/Contents/MacOS/Mainframe'
+        ? 'dist/mac/MainframeOS.app/Contents/MacOS/MainframeOS'
         : 'dist/linux-unpacked/mainframe'
     this.app = new Application({
       path: path.join(__dirname, '..', binPath),
