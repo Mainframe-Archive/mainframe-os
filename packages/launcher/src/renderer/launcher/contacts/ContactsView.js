@@ -194,6 +194,7 @@ export type Contact = {
     | 'SENDING_BLOCKCHAIN'
     | 'SENT_BLOCKCHAIN'
     | 'RECEIVED'
+    | 'DECLINED'
     | 'CONNECTED',
 }
 
@@ -215,10 +216,10 @@ type Props = {
 type State = {
   searching?: boolean,
   searchTerm?: ?string,
-  selectedContact?: Object,
+  selectedContact: Object,
   addModalState?: number,
   editModalOpen?: boolean,
-  ratio?: ?string,
+  radio?: ?string,
   error?: ?string,
   inviteError?: ?string,
   peerLookupHash?: ?string,
@@ -333,7 +334,7 @@ class ContactsViewComponent extends Component<Props, State> {
     }
   }
 
-  getSelectedContact(): ?Contact {
+  getSelectedContact(): Contact {
     return this.getContact(this.state.selectedContact) || this.getIdentity()
   }
 
@@ -354,7 +355,7 @@ class ContactsViewComponent extends Component<Props, State> {
   }
 
   openAddModal = () => {
-    this.setState({ addModalState: 1, radio: null, foundPeer: null })
+    this.setState({ addModalState: 1, radio: null, foundPeer: undefined })
   }
 
   openEditModal = () => {
@@ -364,7 +365,7 @@ class ContactsViewComponent extends Component<Props, State> {
   closeModal = () => {
     this.setState({
       addModalState: 0,
-      foundPeer: null,
+      foundPeer: undefined,
       editModalOpen: false,
       inviteModalOpen: undefined,
     })
@@ -535,7 +536,7 @@ class ContactsViewComponent extends Component<Props, State> {
       connectionState: 'CONNECTED',
       localID: user.localID,
       peerID: user.localID,
-      publicFeed: user.feedHash,
+      publicFeed: user.feedHash || user.localID,
       profile: {
         name: `${user.profile.name}`,
         ethAddress: user.defaultEthAddress,
@@ -626,7 +627,7 @@ class ContactsViewComponent extends Component<Props, State> {
                       ? ' (me)'
                       : null}
                   </Text>
-                  {this.renderConnectionStateLabel(contact)}
+                  {this.renderConnectionStateLabel(contact, false)}
                 </ContactCardText>
                 {selected && (
                   <SelectedPointer>
@@ -799,11 +800,13 @@ class ContactsViewComponent extends Component<Props, State> {
               name="inviteType">
               <Row size={1}>
                 <Column>
+                  {/*$FlowFixMe */}
                   <Radio value="mutual" label={MutualOption} />
                 </Column>
               </Row>
               <Row size={1}>
                 <Column>
+                  {/*$FlowFixMe */}
                   <Radio value="blockchain" label={BlockchainOption} />
                 </Column>
               </Row>
@@ -898,8 +901,10 @@ class ContactsViewComponent extends Component<Props, State> {
     }
   }
 
-  openTransaction = (tx: string) => {
-    shell.openExternal(`https://etherscan.io/tx/${tx}`)
+  openTransaction = (tx?: string) => {
+    if (tx) {
+      shell.openExternal(`https://etherscan.io/tx/${tx}`)
+    }
   }
 
   renderConnectionStateLabel(contact: Contact, showTransaction: boolean) {
@@ -938,7 +943,13 @@ class ContactsViewComponent extends Component<Props, State> {
               Pending confirmation
               {showTransaction ? (
                 <ViewTransaction
-                  onPress={() => this.openTransaction(contact.invite.inviteTX)}>
+                  onPress={() =>
+                    this.openTransaction(
+                      contact.invite &&
+                        contact.invite.inviteTX &&
+                        contact.invite.inviteTX,
+                    )
+                  }>
                   <Text color="#303030" size={10}>
                     {'  '}(view transaction)
                   </Text>
@@ -1094,24 +1105,6 @@ class ContactsViewComponent extends Component<Props, State> {
             </Row> */}
         </ScrollView>
       </RightContainer>
-    )
-  }
-
-  renderAddModal() {
-    return (
-      this.state.addModalOpen && (
-        <FormModalView
-          title="ADD A NEW CONTACT"
-          confirmButton="ADD"
-          dismissButton="CANCEL"
-          onRequestClose={this.closeModal}
-          onChangeForm={this.onFormChange}
-          onSubmitForm={this.submitNewContact}>
-          <FormContainer modal>
-            {this.renderAddNewContactForm(true)}
-          </FormContainer>
-        </FormModalView>
-      )
     )
   }
 

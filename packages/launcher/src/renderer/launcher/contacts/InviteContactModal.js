@@ -328,7 +328,7 @@ export class InviteContactModal extends Component<Props, State> {
         <AddContactDetail border>
           <Blocky>
             <WalletIcon
-              address={this.props.user.profile.ethAddress}
+              address={this.props.user.profile.ethAddress || ''}
               size="small"
             />
           </Blocky>
