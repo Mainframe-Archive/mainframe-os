@@ -5,7 +5,9 @@
   "author": "Mainframe",
   "license": "MIT",
   "scripts": {
-    "build": "yarn run truffle build"
+    "build": "yarn run truffle build",
+    "ganache": "ganache-cli -m=\"canyon shaft mirror vital twin father surprise live nasty grain awesome boring\"",
+    "test": "truffle test"
   },
   "dependencies": {
     "openzeppelin-solidity": "^2.1.3"
