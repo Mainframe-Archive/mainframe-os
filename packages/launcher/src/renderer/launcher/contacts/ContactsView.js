@@ -49,16 +49,16 @@ const RevertNameButton = styled.TouchableOpacity`
 const Container = styled.View`
   position: relative;
   flex-direction: row;
+  padding: 0;
 `
 
 const ContactsListContainer = styled.View`
   position: relative;
   width: 260px;
-  padding-top: 40px;
-  border-right-width: 1px;
-  border-right-style: solid;
-  border-right-color: #f5f5f5;
-  height: calc(100vh - 40px);
+  padding: 60px 0 0 10px;
+  height: 100vh;
+  position: absolute;
+  z-index: 1;
   overflow-y: auto;
 `
 
@@ -98,16 +98,21 @@ const AcceptIgnore = styled.View`
 
 const RightContainer = styled.View`
   flex: 1;
-  height: calc(100vh - 40px);
-  padding-left: 40px;
+  padding: 25px 25px 25px 40px;
+  border-left-width: 1px;
+  border-left-style: solid;
+  border-left-color: #f5f5f5;
+  height: 100vh;
+  width: 100%;
+  margin-left: 259px;
 `
 
 const ContactsListHeader = styled.View`
   position: absolute;
   top: 0;
-  padding: 3px 0 10px 10px;
+  padding: 18px 3px;
   width: 100%;
-  height: 45px;
+  height: 60px;
   flex-direction: row;
   ${props =>
     props.hascontacts &&
