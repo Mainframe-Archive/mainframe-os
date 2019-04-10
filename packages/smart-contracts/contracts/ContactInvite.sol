@@ -1,7 +1,7 @@
 pragma solidity >=0.4.21 <0.6.0;
 import 'openzeppelin-solidity/contracts/lifecycle/Pausable.sol';
 import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
-import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
+import 'openzeppelin-solidity/contracts/token/ERC20/ERC20.sol';
 
 contract ContactInvite is Ownable, Pausable {
 
@@ -15,11 +15,12 @@ contract ContactInvite is Ownable, Pausable {
     uint stake;
     uint block;
     InviteState state;
+    address senderAddress;
   }
 
   // Invites mapped to keys of recipient feed and eth address hashes
 
-  mapping (address => mapping (bytes32 => InviteRequest)) public inviteRequests;
+  mapping (bytes32 => mapping (bytes32 => InviteRequest)) public inviteRequests;
 
   constructor(address _tokenAddress) public {
     token = ERC20(_tokenAddress);
@@ -28,12 +29,14 @@ contract ContactInvite is Ownable, Pausable {
   }
 
   function getInviteState(
-    address senderAddr,
-    address recipientAddr,
-    string calldata recipientFeed
+    bytes32 senderAddressHash,
+    bytes32 senderFeedHash,
+    bytes32 recipientAddressHash,
+    bytes32 recipientFeedHash
   ) external view returns (bytes32) {
-    bytes32 recipientHash = keccak256(abi.encodePacked(recipientAddr, recipientFeed));
-    InviteState state = inviteRequests[senderAddr][recipientHash].state;
+    bytes32 senderHash = keccak256(abi.encodePacked(senderAddressHash, senderFeedHash));
+    bytes32 recipientHash = keccak256(abi.encodePacked(recipientAddressHash, recipientFeedHash));
+    InviteState state = inviteRequests[senderHash][recipientHash].state;
     if (state == InviteState.PENDING) {
       return 'PENDING';
     } else if (state == InviteState.REJECTED) {
@@ -45,82 +48,93 @@ contract ContactInvite is Ownable, Pausable {
   }
 
   function pendingInviteStake(
-    address senderAddress,
-    address recipientAddr,
-    string calldata recipientFeed
+    bytes32 senderAddressHash,
+    bytes32 senderFeedHash,
+    bytes32 recipientAddressHash,
+    bytes32 recipientFeedHash
   ) external view returns (uint256) {
-    bytes32 recipientHash = keccak256(
-      abi.encodePacked(recipientAddr, recipientFeed)
-    );
-    return inviteRequests[senderAddress][recipientHash].stake;
+    bytes32 senderHash = keccak256(abi.encodePacked(senderAddressHash, senderFeedHash));
+    bytes32 recipientHash = keccak256(abi.encodePacked(recipientAddressHash, recipientFeedHash));
+    return inviteRequests[senderHash][recipientHash].stake;
   }
 
   function sendInvite(
-    address recipientAddr,
-    string calldata recipientFeed,
-    string calldata senderFeed
+    bytes32 recipientAddressHash,
+    bytes32 recipientFeedHash,
+    bytes32 senderFeedHash
   ) external whenNotPaused {
-    bytes32 recipientHash = keccak256(abi.encodePacked(recipientAddr, recipientFeed));
-    InviteState state = inviteRequests[msg.sender][recipientHash].state;
+    bytes32 senderAddressHash = keccak256(abi.encodePacked(msg.sender));
+    bytes32 senderHash = keccak256(abi.encodePacked(senderAddressHash, senderFeedHash));
+    bytes32 recipientHash = keccak256(abi.encodePacked(recipientAddressHash, recipientFeedHash));
+    InviteState state = inviteRequests[senderHash][recipientHash].state;
     require(token.allowance(msg.sender, address(this)) >= requiredStake, 'Insufficient balance to stake');
     require(state != InviteState.PENDING, 'Invite to this user already pending');
     require(state != InviteState.REJECTED, 'Invite to this user has been rejected');
     require(state != InviteState.ACCEPTED, 'Invite to this user has already been accepted');
     token.transferFrom(msg.sender, address(this), requiredStake);
-    inviteRequests[msg.sender][recipientHash].stake = requiredStake;
-    inviteRequests[msg.sender][recipientHash].block = block.number;
-    inviteRequests[msg.sender][recipientHash].state = InviteState.PENDING;
-    emit Invited(recipientFeed, recipientAddr, senderFeed, msg.sender, requiredStake);
+    inviteRequests[senderHash][recipientHash].stake = requiredStake;
+    inviteRequests[senderHash][recipientHash].block = block.number;
+    inviteRequests[senderHash][recipientHash].state = InviteState.PENDING;
+    inviteRequests[senderHash][recipientHash].senderAddress = msg.sender;
+    emit Invited(recipientFeedHash, recipientAddressHash, senderFeedHash, senderAddressHash, requiredStake);
   }
 
   function declineAndWithdraw(
-    address senderAddress,
-    string calldata senderFeed,
-    string calldata recipientFeed
+    bytes32 senderAddressHash,
+    bytes32 senderFeedHash,
+    bytes32 recipientFeedHash
   ) external whenNotPaused {
-    bytes32 recipientHash = keccak256(abi.encodePacked(msg.sender, recipientFeed));
-    require(inviteRequests[senderAddress][recipientHash].stake > 0, 'No stake to withdraw');
-    token.transfer(msg.sender, inviteRequests[senderAddress][recipientHash].stake);
-    inviteRequests[senderAddress][recipientHash].stake = 0;
-    inviteRequests[senderAddress][recipientHash].state = InviteState.REJECTED;
-    emit Declined(senderFeed, senderAddress, recipientFeed);
+    bytes32 recipientAddressHash = keccak256(abi.encodePacked(msg.sender));
+    bytes32 recipientHash = keccak256(abi.encodePacked(recipientAddressHash, recipientFeedHash));
+    bytes32 senderHash = keccak256(abi.encodePacked(senderAddressHash, senderFeedHash));
+    require(inviteRequests[senderHash][recipientHash].stake > 0, 'No stake to withdraw');
+    uint stake = inviteRequests[senderHash][recipientHash].stake;
+    inviteRequests[senderHash][recipientHash].stake = 0;
+    inviteRequests[senderHash][recipientHash].state = InviteState.REJECTED;
+    token.transfer(msg.sender, stake);
+    emit Declined(senderFeedHash, senderAddressHash, recipientFeedHash);
   }
 
   function retrieveStake(
-    address recipientAddr,
-    string calldata recipientFeed,
+    bytes32 recipientAddressHash,
+    bytes32 recipientFeedHash,
+    bytes32 senderFeedHash,
     uint8 v,
     bytes32 r,
     bytes32 s
   ) external whenNotPaused {
-    bytes32 recipientHash = keccak256(abi.encodePacked(recipientAddr, recipientFeed));
-    require(inviteRequests[msg.sender][recipientHash].stake > 0, 'No stake to withdraw');
-    require(verifySig(v,r,s) == recipientAddr, 'Unable to verify recipient signature');
-    token.transfer(msg.sender, inviteRequests[msg.sender][recipientHash].stake);
-    inviteRequests[msg.sender][recipientHash].stake = 0;
-    inviteRequests[msg.sender][recipientHash].state = InviteState.ACCEPTED;
-    emit StakeRetrieved(msg.sender, recipientAddr);
+    bytes32 senderAddressHash = keccak256(abi.encodePacked(msg.sender));
+    bytes32 senderHash = keccak256(abi.encodePacked(senderAddressHash, senderFeedHash));
+    bytes32 recipientHash = keccak256(abi.encodePacked(recipientAddressHash, recipientFeedHash));
+    require(inviteRequests[senderHash][recipientHash].stake > 0, 'No stake to withdraw');
+    require(verifySig(senderAddressHash, v, r, s) == recipientAddressHash, 'Unable to verify recipient signature');
+    uint stake = inviteRequests[senderHash][recipientHash].stake;
+    inviteRequests[senderHash][recipientHash].stake = 0;
+    inviteRequests[senderHash][recipientHash].state = InviteState.ACCEPTED;
+    token.transfer(msg.sender, stake);
+    emit StakeRetrieved(msg.sender, recipientFeedHash);
   }
 
-  function verifySig(uint8 v, bytes32 r, bytes32 s) internal view returns (address) {
-    bytes32 hashedAddress = keccak256(abi.encodePacked(msg.sender));
-    bytes32 messageDigest = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", hashedAddress));
+  function verifySig(bytes32 addressHash, uint8 v, bytes32 r, bytes32 s) internal view returns (bytes32) {
+    bytes32 messageDigest = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", addressHash));
     address _address = ecrecover(messageDigest, v, r, s);
-    return _address;
+    return keccak256(abi.encodePacked(_address));
   }
 
   function adminRefund(
-    address senderAddress,
-    address recipientAddress,
-    string calldata recipientFeed
+    bytes32 senderAddressHash,
+    bytes32 senderFeedHash,
+    bytes32 recipientAddressHash,
+    bytes32 recipientFeedHash
   ) external onlyOwner {
-    bytes32 recipientHash = keccak256(abi.encodePacked(recipientAddress, recipientFeed));
-    uint stake = inviteRequests[senderAddress][recipientHash].stake;
+    bytes32 senderHash = keccak256(abi.encodePacked(senderAddressHash, senderFeedHash));
+    bytes32 recipientHash = keccak256(abi.encodePacked(recipientAddressHash, recipientFeedHash));
+    uint stake = inviteRequests[senderHash][recipientHash].stake;
     require(stake > 0, 'No stake to refund');
-    token.transfer(senderAddress, inviteRequests[senderAddress][recipientHash].stake);
-    inviteRequests[senderAddress][recipientHash].stake = 0;
-    inviteRequests[senderAddress][recipientHash].state = InviteState.NONE;
-    emit AdminRefunded(senderAddress, recipientFeed, stake);
+    inviteRequests[senderHash][recipientHash].stake = 0;
+    inviteRequests[senderHash][recipientHash].state = InviteState.NONE;
+    token.transfer(inviteRequests[senderHash][recipientHash].senderAddress, stake);
+    emit AdminRefunded(inviteRequests[senderHash][recipientHash].senderAddress, recipientFeedHash, stake);
   }
 
   function setStake(
@@ -134,24 +148,24 @@ contract ContactInvite is Ownable, Pausable {
   // EVENTS
 
   event Invited(
-    string indexed recipientFeed,
-    address recipientAddress,
-    string senderFeed,
-    address senderAddress,
+    bytes32 indexed recipientFeedHash,
+    bytes32 recipientAddressHash,
+    bytes32 senderFeedHash,
+    bytes32 senderAddressHash,
     uint stakeAmount
   );
   event Declined(
-    string indexed senderFeed,
-    address indexed senderAddress,
-    string recipientFeed
+    bytes32 indexed senderFeedHash,
+    bytes32 indexed senderAddressHash,
+    bytes32 recipientFeedHash
   );
   event StakeRetrieved(
-    address indexed sender,
-    address recipient
+    address indexed senderAddress,
+    bytes32 recipientFeedHash
   );
   event AdminRefunded(
     address indexed senderAddress,
-    string recipientFeed,
+    bytes32 recipientFeedHash,
     uint amount
   );
   event StakeChanged(
