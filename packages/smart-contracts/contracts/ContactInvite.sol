@@ -61,8 +61,9 @@ contract ContactInvite is Ownable, Pausable {
   function sendInvite(
     bytes32 recipientAddressHash,
     bytes32 recipientFeedHash,
-    bytes32 senderFeedHash
+    string calldata senderFeed
   ) external whenNotPaused {
+    bytes32 senderFeedHash = keccak256(abi.encodePacked(senderFeed));
     bytes32 senderAddressHash = keccak256(abi.encodePacked(msg.sender));
     bytes32 senderHash = keccak256(abi.encodePacked(senderAddressHash, senderFeedHash));
     bytes32 recipientHash = keccak256(abi.encodePacked(recipientAddressHash, recipientFeedHash));
@@ -76,7 +77,7 @@ contract ContactInvite is Ownable, Pausable {
     inviteRequests[senderHash][recipientHash].block = block.number;
     inviteRequests[senderHash][recipientHash].state = InviteState.PENDING;
     inviteRequests[senderHash][recipientHash].senderAddress = msg.sender;
-    emit Invited(recipientFeedHash, recipientAddressHash, senderFeedHash, senderAddressHash, requiredStake);
+    emit Invited(recipientFeedHash, recipientAddressHash, senderFeed, senderAddressHash, requiredStake);
   }
 
   function declineAndWithdraw(
@@ -115,7 +116,7 @@ contract ContactInvite is Ownable, Pausable {
     emit StakeRetrieved(msg.sender, recipientFeedHash);
   }
 
-  function verifySig(bytes32 addressHash, uint8 v, bytes32 r, bytes32 s) internal view returns (bytes32) {
+  function verifySig(bytes32 addressHash, uint8 v, bytes32 r, bytes32 s) internal pure returns (bytes32) {
     bytes32 messageDigest = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", addressHash));
     address _address = ecrecover(messageDigest, v, r, s);
     return keccak256(abi.encodePacked(_address));
@@ -150,7 +151,7 @@ contract ContactInvite is Ownable, Pausable {
   event Invited(
     bytes32 indexed recipientFeedHash,
     bytes32 recipientAddressHash,
-    bytes32 senderFeedHash,
+    string senderFeed,
     bytes32 senderAddressHash,
     uint stakeAmount
   );

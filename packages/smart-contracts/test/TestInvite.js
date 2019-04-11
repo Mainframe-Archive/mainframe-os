@@ -7,22 +7,73 @@ const truffleAssert = require('truffle-assertions')
 // Ganache mnemonic:
 // canyon shaft mirror vital twin father surprise live nasty grain awesome boring
 
-const senderFeed =
-  '09bab720214dce6dee41c53144bb955d107d8415def419b6582422f495586f38'
-const recipientFeed =
-  '9a97a59bf7d46574c5907daeb07e9f70965e7e102fe016fdf0631d627c89a9b4'
-const recipient2Feed =
-  '9a97a59bf7d46574c5907daeb07e9f70965e7e102fe016fdf0631d627c89a9b4'
-const acc1PrivateKey =
-  '1c5a7303b5ecbb14a38753aeffeb70a7794a475b84de472077e25b5fa3e9ae56'
+const senderFeed = '09bab720214dce6dee41c53144bb955d107d8415def419b6582422f495586f38'
+const senderFeedHash = EthUtil.keccak(senderFeed)
+const recipientFeed = '9a97a59bf7d46574c5907daeb07e9f70965e7e102fe016fdf0631d627c89a9b4'
+const recipientFeedHash = EthUtil.keccak(recipientFeed)
+const recipient2Feed = '9a97a59bf7d46574c5907daeb07e9f70965e7e102fe016fdf0631d627c89a9b4'
+const recipient2FeedHash = EthUtil.keccak(recipient2Feed)
+const acc1PrivateKey = '1c5a7303b5ecbb14a38753aeffeb70a7794a475b84de472077e25b5fa3e9ae56'
 
 contract('ContactInvite', accounts => {
   let token
   let invites
+  const accountHashes = accounts.map((a) => EthUtil.keccak(a))
 
   beforeEach('setup contract for each test', async () => {
     token = await Token.new()
     invites = await ContactInvite.new(token.address)
+  })
+
+  it('Should allow sending invites with recipient data in events', async() => {
+    const bnStake = await invites.requiredStake()
+    const stake = bnStake.toString()
+
+    let inviteState = await invites.getInviteState(
+      accountHashes[0],
+      senderFeedHash,
+      accountHashes[1],
+      recipientFeedHash,
+      {}
+    )
+
+    assert.equal(
+      web3.utils.toUtf8(inviteState),
+      'NONE',
+      'Invalid invite state',
+    )
+
+    await token.approve(invites.address, stake, {
+      from: accounts[0],
+    })
+    const res = await invites.sendInvite(
+      accountHashes[1],
+      recipientFeedHash,
+      senderFeed,
+      {
+        from: accounts[0],
+      }
+    )
+
+    inviteState = await invites.getInviteState(
+      accountHashes[0],
+      senderFeedHash,
+      accountHashes[1],
+      recipientFeedHash,
+      {}
+    )
+
+    assert.equal(
+      web3.utils.toUtf8(inviteState),
+      'PENDING',
+      'Invalid invite state',
+    )
+
+    truffleAssert.eventEmitted(res, 'Invited', ev => {
+      return ev.recipientFeedHash === EthUtil.bufferToHex(recipientFeedHash) &&
+        ev.recipientAddressHash === EthUtil.bufferToHex(accountHashes[1]) &&
+        ev.senderFeed === senderFeed
+    })
   })
 
   it('Should fail to retrieve stake when submitting invalid siganture', async () => {
@@ -40,20 +91,24 @@ contract('ContactInvite', accounts => {
       from: accounts[0],
     })
 
-    await invites.sendInvite(accounts[1], recipientFeed, senderFeed, {
-      from: accounts[0],
-    })
+    await invites.sendInvite(
+      accountHashes[1],
+      recipientFeedHash,
+      senderFeed,
+      {
+        from: accounts[0],
+      }
+    )
 
-    const invalidMessageHash = EthUtil.keccak('fail')
-    const invalidHashBytes = ethers.utils.arrayify(invalidMessageHash)
-
-    const msgHash = EthUtil.hashPersonalMessage(invalidHashBytes)
+    const messageBytes = EthUtil.toBuffer('fail')
+    const msgHash = EthUtil.hashPersonalMessage(messageBytes)
     const signature = EthUtil.ecsign(msgHash, new Buffer(acc1PrivateKey, 'hex'))
 
     await truffleAssert.fails(
-      invites.retrieveStake(
-        accounts[1],
-        recipientFeed,
+        invites.retrieveStake(
+        accountHashes[1],
+        recipientFeedHash,
+        senderFeedHash,
         signature.v,
         signature.r,
         signature.s,
@@ -71,15 +126,21 @@ contract('ContactInvite', accounts => {
     await token.approve(invites.address, stake, {
       from: accounts[0],
     })
-    await invites.sendInvite(accounts[1], recipientFeed, senderFeed, {
-      from: accounts[0],
-    })
+    await invites.sendInvite(
+      accountHashes[1],
+      recipientFeedHash,
+      senderFeed,
+      {
+        from: accounts[0],
+      }
+    )
 
     let inviteState = await invites.getInviteState(
-      accounts[0],
-      accounts[1],
-      recipientFeed,
-      { from: accounts[0] },
+      accountHashes[0],
+      senderFeedHash,
+      accountHashes[1],
+      recipientFeedHash,
+      {}
     )
 
     assert.equal(
@@ -88,19 +149,19 @@ contract('ContactInvite', accounts => {
       'Invalid invite state',
     )
 
-    const messagetoSign = accounts[0]
-    const messageHash = EthUtil.keccak(messagetoSign)
+    const messagetoSign = accountHashes[0]
 
     // To have a consistent message hash with the one generated on chain
     // we must convert the 66 byte string to it's 32 byte binary Array
 
-    const messageHashBytes = ethers.utils.arrayify(messageHash)
-    const msgHash = EthUtil.hashPersonalMessage(messageHashBytes)
+    const messageBytes = EthUtil.toBuffer(messagetoSign)
+    const msgHash = EthUtil.hashPersonalMessage(messageBytes)
     const signature = EthUtil.ecsign(msgHash, new Buffer(acc1PrivateKey, 'hex'))
 
     const res = await invites.retrieveStake(
-      accounts[1],
-      recipientFeed,
+      accountHashes[1],
+      recipientFeedHash,
+      senderFeedHash,
       signature.v,
       signature.r,
       signature.s,
@@ -110,16 +171,19 @@ contract('ContactInvite', accounts => {
     )
 
     inviteState = await invites.getInviteState(
-      accounts[0],
-      accounts[1],
-      recipientFeed,
-      { from: accounts[0] },
+      accountHashes[0],
+      senderFeedHash,
+      accountHashes[1],
+      recipientFeedHash,
+      {},
     )
 
     const pendingStake = await invites.pendingInviteStake(
-      accounts[0],
-      accounts[1],
-      recipientFeed,
+      accountHashes[0],
+      senderFeedHash,
+      accountHashes[1],
+      recipientFeedHash,
+      {},
     )
 
     assert.equal(
@@ -132,7 +196,8 @@ contract('ContactInvite', accounts => {
     assert.equal(stateString, 'ACCEPTED', 'Invalid invite state')
 
     truffleAssert.eventEmitted(res, 'StakeRetrieved', ev => {
-      return ev.sender === accounts[0] && ev.recipient === accounts[1]
+      return ev.senderAddress === accounts[0] &&
+        ev.recipientFeedHash === EthUtil.bufferToHex(recipientFeedHash)
     })
   })
 
@@ -142,12 +207,17 @@ contract('ContactInvite', accounts => {
     await token.approve(invites.address, stake, {
       from: accounts[0],
     })
-    await invites.sendInvite(accounts[1], recipientFeed, senderFeed, {
-      from: accounts[0],
-    })
+    await invites.sendInvite(
+      accountHashes[1],
+      recipientFeedHash,
+      senderFeed,
+      {
+        from: accounts[0],
+      }
+    )
 
     await truffleAssert.fails(
-      invites.sendInvite(accounts[1], recipientFeed, senderFeed, {
+      invites.sendInvite(accountHashes[1], recipientFeedHash, senderFeed, {
         from: accounts[0],
       }),
       truffleAssert.ErrorType.REVERT,
@@ -160,14 +230,21 @@ contract('ContactInvite', accounts => {
     await token.approve(invites.address, stake, {
       from: accounts[0],
     })
-    await invites.sendInvite(accounts[1], recipientFeed, senderFeed, {
-      from: accounts[0],
-    })
+    await invites.sendInvite(
+      accountHashes[1],
+      recipientFeedHash,
+      senderFeed,
+      {
+        from: accounts[0],
+      }
+    )
 
     let pendingStake = await invites.pendingInviteStake(
-      accounts[0],
-      accounts[1],
-      recipientFeed,
+      accountHashes[0],
+      senderFeedHash,
+      accountHashes[1],
+      recipientFeedHash,
+      {},
     )
 
     assert.equal(
@@ -177,18 +254,20 @@ contract('ContactInvite', accounts => {
     )
 
     const res = await invites.declineAndWithdraw(
-      accounts[0],
-      senderFeed,
-      recipientFeed,
+      accountHashes[0],
+      senderFeedHash,
+      recipientFeedHash,
       {
         from: accounts[1],
       },
     )
 
     pendingStake = await invites.pendingInviteStake(
-      accounts[0],
-      accounts[1],
-      recipientFeed,
+      accountHashes[0],
+      senderFeedHash,
+      accountHashes[1],
+      recipientFeedHash,
+      {},
     )
 
     assert.equal(
@@ -198,17 +277,18 @@ contract('ContactInvite', accounts => {
     )
 
     const inviteState = await invites.getInviteState(
-      accounts[0],
-      accounts[1],
-      recipientFeed,
-      { from: accounts[0] },
+      accountHashes[0],
+      senderFeedHash,
+      accountHashes[1],
+      recipientFeedHash,
+      {},
     )
 
     const stateString = web3.utils.toUtf8(inviteState)
     assert.equal(stateString, 'REJECTED', 'Invalid invite state')
 
     truffleAssert.eventEmitted(res, 'Declined', ev => {
-      return ev.senderAddress === accounts[0]
+      return ev.senderFeedHash === EthUtil.bufferToHex(senderFeedHash)
     })
   })
 
@@ -218,23 +298,31 @@ contract('ContactInvite', accounts => {
     await token.approve(invites.address, stake, {
       from: accounts[0],
     })
-    await invites.sendInvite(accounts[1], recipientFeed, senderFeed, {
-      from: accounts[0],
-    })
+    await invites.sendInvite(
+      accountHashes[1],
+      recipientFeedHash,
+      senderFeed,
+      {
+        from: accounts[0],
+      }
+    )
 
     const res = await invites.adminRefund(
-      accounts[0],
-      accounts[1],
-      recipientFeed,
+      accountHashes[0],
+      senderFeedHash,
+      accountHashes[1],
+      recipientFeedHash,
       {
         from: accounts[0],
       },
     )
 
     const pendingStake = await invites.pendingInviteStake(
-      accounts[0],
-      accounts[1],
-      recipientFeed,
+      accountHashes[0],
+      senderFeedHash,
+      accountHashes[1],
+      recipientFeedHash,
+      {},
     )
 
     assert.equal(
@@ -244,10 +332,11 @@ contract('ContactInvite', accounts => {
     )
 
     const inviteState = await invites.getInviteState(
-      accounts[0],
-      accounts[1],
-      recipientFeed,
-      { from: accounts[0] },
+      accountHashes[0],
+      senderFeedHash,
+      accountHashes[1],
+      recipientFeedHash,
+      {},
     )
 
     const stateString = web3.utils.toUtf8(inviteState)
@@ -264,14 +353,25 @@ contract('ContactInvite', accounts => {
     await token.approve(invites.address, stake, {
       from: accounts[0],
     })
-    await invites.sendInvite(accounts[1], recipientFeed, senderFeed, {
-      from: accounts[0],
-    })
+    await invites.sendInvite(
+      accountHashes[1],
+      recipientFeedHash,
+      senderFeed,
+      {
+        from: accounts[0],
+      }
+    )
 
     await truffleAssert.fails(
-      invites.adminRefund(accounts[0], accounts[1], recipientFeed, {
-        from: accounts[2],
-      }),
+      invites.adminRefund(
+        accountHashes[0],
+        senderFeedHash,
+        accountHashes[1],
+        recipientFeedHash,
+        {
+          from: accounts[2],
+        },
+    ),
       truffleAssert.ErrorType.REVERT,
     )
   })
@@ -282,26 +382,27 @@ contract('ContactInvite', accounts => {
     await token.approve(invites.address, stake, {
       from: accounts[0],
     })
-    await invites.sendInvite(accounts[1], recipientFeed, senderFeed, {
-      from: accounts[0],
-    })
+    await invites.sendInvite(
+      accountHashes[1],
+      recipientFeedHash,
+      senderFeed,
+      {
+        from: accounts[0],
+      }
+    )
 
-    const messagetoSign = accounts[0]
-    const messageHash = EthUtil.keccak(messagetoSign)
-
-    // To have a consistent message hash with the one generated on chain
-    // we must convert the 66 byte string to it's 32 byte binary Array
-
-    const messageHashBytes = ethers.utils.arrayify(messageHash)
-    const msgHash = EthUtil.hashPersonalMessage(messageHashBytes)
+    const messagetoSign = accountHashes[0]
+    const messageBytes = EthUtil.toBuffer(messagetoSign)
+    const msgHash = EthUtil.hashPersonalMessage(messageBytes)
     const signature = EthUtil.ecsign(msgHash, new Buffer(acc1PrivateKey, 'hex'))
 
     await invites.pause({ from: accounts[0] })
 
     await truffleAssert.fails(
       invites.retrieveStake(
-        accounts[1],
-        recipientFeed,
+        accountHashes[1],
+        recipientFeedHash,
+        senderFeedHash,
         signature.v,
         signature.r,
         signature.s,
@@ -313,24 +414,35 @@ contract('ContactInvite', accounts => {
     )
 
     await truffleAssert.fails(
-      invites.declineAndWithdraw(accounts[0], senderFeed, recipientFeed, {
-        from: accounts[1],
-      }),
+      invites.declineAndWithdraw(
+        accountHashes[0],
+        senderFeedHash,
+        recipientFeedHash,
+        {
+          from: accounts[1],
+        },
+      ),
       truffleAssert.ErrorType.REVERT,
     )
 
     await truffleAssert.fails(
-      invites.sendInvite(accounts[2], recipient2Feed, senderFeed, {
-        from: accounts[0],
-      }),
+      invites.sendInvite(
+        accountHashes[2],
+        recipient2FeedHash,
+        senderFeed,
+        {
+          from: accounts[0],
+        }
+      ),
       truffleAssert.ErrorType.REVERT,
     )
 
     await invites.unpause({ from: accounts[0] })
 
     await invites.retrieveStake(
-      accounts[1],
-      recipientFeed,
+      accountHashes[1],
+      recipientFeedHash,
+      senderFeedHash,
       signature.v,
       signature.r,
       signature.s,
@@ -339,11 +451,12 @@ contract('ContactInvite', accounts => {
       },
     )
 
-    inviteState = await invites.getInviteState(
-      accounts[0],
-      accounts[1],
-      recipientFeed,
-      { from: accounts[0] },
+    const inviteState = await invites.getInviteState(
+      accountHashes[0],
+      senderFeedHash,
+      accountHashes[1],
+      recipientFeedHash,
+      {},
     )
 
     const stateString = web3.utils.toUtf8(inviteState)
@@ -356,9 +469,14 @@ contract('ContactInvite', accounts => {
     await token.approve(invites.address, stake, {
       from: accounts[0],
     })
-    await invites.sendInvite(accounts[1], recipientFeed, senderFeed, {
-      from: accounts[0],
-    })
+    await invites.sendInvite(
+      accountHashes[1],
+      recipientFeedHash,
+      senderFeed,
+      {
+        from: accounts[0],
+      }
+    )
 
     await truffleAssert.fails(
       invites.setStake(ethers.utils.parseEther('1000'), { from: accounts[1] }),
@@ -383,14 +501,21 @@ contract('ContactInvite', accounts => {
     await token.approve(invites.address, stake2, {
       from: accounts[0],
     })
-    await invites.sendInvite(accounts[2], recipient2Feed, senderFeed, {
-      from: accounts[0],
-    })
+    await invites.sendInvite(
+      accountHashes[2],
+      recipient2FeedHash,
+      senderFeed,
+      {
+        from: accounts[0],
+      }
+    )
 
     const pendingStake = await invites.pendingInviteStake(
-      accounts[0],
-      accounts[1],
-      recipientFeed,
+      accountHashes[0],
+      senderFeedHash,
+      accountHashes[1],
+      recipientFeedHash,
+      {},
     )
 
     assert.equal(
@@ -400,9 +525,11 @@ contract('ContactInvite', accounts => {
     )
 
     const pendingStake2 = await invites.pendingInviteStake(
-      accounts[0],
-      accounts[2],
-      recipient2Feed,
+      accountHashes[0],
+      senderFeedHash,
+      accountHashes[2],
+      recipient2FeedHash,
+      {},
     )
 
     assert.equal(
