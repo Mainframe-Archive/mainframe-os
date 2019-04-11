@@ -149,12 +149,7 @@ contract('ContactInvite', accounts => {
       'Invalid invite state',
     )
 
-    const messagetoSign = accountHashes[0]
-
-    // To have a consistent message hash with the one generated on chain
-    // we must convert the 66 byte string to it's 32 byte binary Array
-
-    const messageBytes = EthUtil.toBuffer(messagetoSign)
+    const messageBytes = Buffer.concat([EthUtil.toBuffer('MFOS Contact Accept:'), accountHashes[0]])
     const msgHash = EthUtil.hashPersonalMessage(messageBytes)
     const signature = EthUtil.ecsign(msgHash, new Buffer(acc1PrivateKey, 'hex'))
 
@@ -391,8 +386,7 @@ contract('ContactInvite', accounts => {
       }
     )
 
-    const messagetoSign = accountHashes[0]
-    const messageBytes = EthUtil.toBuffer(messagetoSign)
+    const messageBytes = Buffer.concat([EthUtil.toBuffer('MFOS Contact Accept:'), accountHashes[0]])
     const msgHash = EthUtil.hashPersonalMessage(messageBytes)
     const signature = EthUtil.ecsign(msgHash, new Buffer(acc1PrivateKey, 'hex'))
 

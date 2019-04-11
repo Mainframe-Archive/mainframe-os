@@ -117,7 +117,7 @@ contract ContactInvite is Ownable, Pausable {
   }
 
   function verifySig(bytes32 addressHash, uint8 v, bytes32 r, bytes32 s) internal pure returns (bytes32) {
-    bytes32 messageDigest = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", addressHash));
+    bytes32 messageDigest = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n52MFOS Contact Accept:", addressHash));
     address _address = ecrecover(messageDigest, v, r, s);
     return keccak256(abi.encodePacked(_address));
   }
