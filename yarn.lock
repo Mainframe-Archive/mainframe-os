@@ -1715,53 +1715,6 @@
     npmlog "^4.1.2"
     write-file-atomic "^2.3.0"
 
-"@mainframe/app-manifest@^0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@mainframe/app-manifest/-/app-manifest-0.2.0.tgz#8109e8eb8c13446a0ed454557eb3e61ea3c7d0b6"
-  dependencies:
-    "@mainframe/data-types" "^0.2.0"
-    "@mainframe/secure-file" "^0.1.3"
-    "@mainframe/utils-base64" "^0.1.1"
-    es6-error "^4.1.1"
-    fastest-validator "^0.6.13"
-    semver "^5.5.1"
-
-"@mainframe/app-permissions@^0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@mainframe/app-permissions/-/app-permissions-0.2.0.tgz#28eff864c3c388c18f0e05b11363d2e7a752741d"
-
-"@mainframe/client@^0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@mainframe/client/-/client-0.2.0.tgz#31343cb3fdd0efe22cae657910ceaf0a0f76d72c"
-  dependencies:
-    "@mainframe/rpc-ipc" "^0.2.3"
-    graphql "^0.13.2"
-    rxjs "^6.3.3"
-
-"@mainframe/config@^0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@mainframe/config/-/config-0.2.0.tgz#4931aa69ee01601b1573bfd0ab1095f68c9ea8f8"
-  dependencies:
-    "@mainframe/data-types" "^0.2.0"
-    "@mainframe/utils-id" "^0.1.0"
-    conf "^2.0.0"
-    env-paths "^2.0.0"
-    esm "3.0.84"
-    fs-extra "^7.0.0"
-
-"@mainframe/data-types@^0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@mainframe/data-types/-/data-types-0.2.0.tgz#f9138a8407526473087e64fab02cbd0cdea1e906"
-  dependencies:
-    multibase "^0.6.0"
-
-"@mainframe/rpc-base@^0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@mainframe/rpc-base/-/rpc-base-0.2.0.tgz#9f7b57288d14d1289f6bc292c737ce0784aca700"
-  dependencies:
-    "@babel/runtime" "^7.0.0"
-    "@mainframe/utils-id" "^0.1.1"
-
 "@mainframe/rpc-base@^0.3.0":
   version "0.3.0"
   resolved "https://registry.yarnpkg.com/@mainframe/rpc-base/-/rpc-base-0.3.0.tgz#e779e9e3d6150f746f6fa8ec58f9380447b60de6"
@@ -1777,14 +1730,6 @@
     "@babel/runtime" "^7.0.0"
     "@mainframe/rpc-stream" "^0.3.0"
     "@mainframe/transport-electron" "^0.2.1"
-
-"@mainframe/rpc-error@^0.3.0":
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/@mainframe/rpc-error/-/rpc-error-0.3.0.tgz#888c5af9dfa31809e2162bc50dbac3dde528cb31"
-  dependencies:
-    "@babel/runtime" "^7.0.0"
-    "@mainframe/rpc-base" "^0.2.0"
-    es6-error "^4.1.1"
 
 "@mainframe/rpc-error@^0.4.0":
   version "0.4.0"
@@ -1802,13 +1747,6 @@
     "@mainframe/rpc-error" "^0.4.0"
     fastest-validator "0.6.15"
 
-"@mainframe/rpc-ipc@^0.2.3":
-  version "0.2.3"
-  resolved "https://registry.yarnpkg.com/@mainframe/rpc-ipc/-/rpc-ipc-0.2.3.tgz#7b2ab6f64a6ef53a4cc962f7945cdb093919efc7"
-  dependencies:
-    "@mainframe/rpc-stream" "^0.2.4"
-    "@mainframe/transport-ipc" "^0.2.3"
-
 "@mainframe/rpc-ipc@^0.3.0":
   version "0.3.0"
   resolved "https://registry.yarnpkg.com/@mainframe/rpc-ipc/-/rpc-ipc-0.3.0.tgz#bcef0c3f53ce3f25bd04fd053d8ab26b7ca1e73f"
@@ -1816,15 +1754,6 @@
     "@babel/runtime" "^7.0.0"
     "@mainframe/rpc-stream" "^0.3.0"
     "@mainframe/transport-ipc" "^0.3.0"
-    rxjs "^6.3.3"
-
-"@mainframe/rpc-stream@^0.2.4":
-  version "0.2.5"
-  resolved "https://registry.yarnpkg.com/@mainframe/rpc-stream/-/rpc-stream-0.2.5.tgz#9845913dd2874423f5d6362cc8f76756b6817de7"
-  dependencies:
-    "@babel/runtime" "^7.0.0"
-    "@mainframe/rpc-base" "^0.2.0"
-    "@mainframe/rpc-error" "^0.3.0"
     rxjs "^6.3.3"
 
 "@mainframe/rpc-stream@^0.3.0":
@@ -1844,15 +1773,6 @@
     "@mainframe/rpc-stream" "^0.3.0"
     "@mainframe/transport-ws-node" "^0.4.0"
 
-"@mainframe/secure-file@^0.1.3":
-  version "0.1.3"
-  resolved "https://registry.yarnpkg.com/@mainframe/secure-file/-/secure-file-0.1.3.tgz#48ff81da05e561ff5182606b2f59edf6780fd965"
-  dependencies:
-    "@babel/runtime" "^7.0.0"
-    "@mainframe/utils-base64" "^0.1.1"
-    "@mainframe/utils-crypto" "^0.2.2"
-    fs-extra "^7.0.0"
-
 "@mainframe/secure-file@^0.2.0":
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/@mainframe/secure-file/-/secure-file-0.2.0.tgz#11a283e56a148df25afa184ab457cf55f41598a7"
@@ -1868,14 +1788,6 @@
   dependencies:
     "@babel/runtime" "^7.0.0"
     rxjs "^6.0.0"
-
-"@mainframe/transport-ipc@^0.2.3":
-  version "0.2.4"
-  resolved "https://registry.yarnpkg.com/@mainframe/transport-ipc/-/transport-ipc-0.2.4.tgz#e2bc993fba8adf58aafcc9b7ef59f382952cca5b"
-  dependencies:
-    "@babel/runtime" "^7.0.0"
-    rx-socket "^0.4.1"
-    rxjs "^6.3.3"
 
 "@mainframe/transport-ipc@^0.3.0":
   version "0.3.0"
@@ -1898,12 +1810,6 @@
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/@mainframe/utils-base64/-/utils-base64-0.1.1.tgz#ac0d5a4453e2597b81bb5bd0f2afc76ce6eb1186"
 
-"@mainframe/utils-crypto@^0.2.2":
-  version "0.2.2"
-  resolved "https://registry.yarnpkg.com/@mainframe/utils-crypto/-/utils-crypto-0.2.2.tgz#43b726a449fe9c627fa916c40c0e04e1034e4567"
-  dependencies:
-    sodium-universal "^2.0.0"
-
 "@mainframe/utils-crypto@^0.4.0":
   version "0.4.0"
   resolved "https://registry.yarnpkg.com/@mainframe/utils-crypto/-/utils-crypto-0.4.0.tgz#f759755de8df1e2bda1493ca4968bd30306e0700"
@@ -1915,7 +1821,7 @@
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/@mainframe/utils-hex/-/utils-hex-0.1.1.tgz#2ec97e3b7358960c1b39ee60fc5a17986a3921ae"
 
-"@mainframe/utils-id@^0.1.0", "@mainframe/utils-id@^0.1.1":
+"@mainframe/utils-id@^0.1.0":
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/@mainframe/utils-id/-/utils-id-0.1.1.tgz#5d17ab69b4af712b98b35e331a5627f7fcb700fb"
   dependencies:
@@ -4831,16 +4737,6 @@ concat-stream@1.6.2, concat-stream@^1.5.0, concat-stream@^1.6.0:
     readable-stream "^2.2.2"
     typedarray "^0.0.6"
 
-conf@^2.0.0:
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/conf/-/conf-2.2.0.tgz#ee282efafc1450b61e205372041ad7d866802d9a"
-  dependencies:
-    dot-prop "^4.1.0"
-    env-paths "^1.0.0"
-    make-dir "^1.0.0"
-    pkg-up "^2.0.0"
-    write-file-atomic "^2.3.0"
-
 conf@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/conf/-/conf-3.0.0.tgz#9b788f897e208684952058c38f01ddb1dff0c40b"
@@ -6302,19 +6198,7 @@ elliptic@6.3.3:
     hash.js "^1.0.0"
     inherits "^2.0.1"
 
-elliptic@^6.0.0, elliptic@^6.2.3, elliptic@^6.4.0:
-  version "6.4.1"
-  resolved "https://registry.yarnpkg.com/elliptic/-/elliptic-6.4.1.tgz#c2d0b7776911b86722c632c3c06c60f2f819939a"
-  dependencies:
-    bn.js "^4.4.0"
-    brorand "^1.0.1"
-    hash.js "^1.0.0"
-    hmac-drbg "^1.0.0"
-    inherits "^2.0.1"
-    minimalistic-assert "^1.0.0"
-    minimalistic-crypto-utils "^1.0.0"
-
-"elliptic@github:MainframeHQ/elliptic#circular-dependencies-fix":
+elliptic@MainframeHQ/elliptic#circular-dependencies-fix, elliptic@^6.0.0, elliptic@^6.2.3, elliptic@^6.4.0:
   version "6.4.1"
   resolved "https://codeload.github.com/MainframeHQ/elliptic/tar.gz/11299b673d219dc67eb1d9c22e3006ffdea6fd42"
   dependencies:
@@ -6380,7 +6264,7 @@ env-paths@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/env-paths/-/env-paths-1.0.0.tgz#4168133b42bb05c38a35b1ae4397c8298ab369e0"
 
-env-paths@^2.0.0, env-paths@^2.1.0, env-paths@^2.2.0:
+env-paths@^2.1.0, env-paths@^2.2.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/env-paths/-/env-paths-2.2.0.tgz#cdca557dc009152917d6166e2febe1f039685e43"
 
@@ -6714,10 +6598,6 @@ eslint@^5.15.3:
     strip-json-comments "^2.0.1"
     table "^5.2.3"
     text-table "^0.2.0"
-
-esm@3.0.84:
-  version "3.0.84"
-  resolved "https://registry.yarnpkg.com/esm/-/esm-3.0.84.tgz#bb108989f4673b32d4f62406869c28eed3815a63"
 
 esm@^3.0.82:
   version "3.2.22"
@@ -7218,7 +7098,7 @@ fastest-validator@0.6.15:
   version "0.6.15"
   resolved "https://registry.yarnpkg.com/fastest-validator/-/fastest-validator-0.6.15.tgz#7b82f319658d9138c10fefd0127412c5930e60ca"
 
-fastest-validator@^0.6.13, fastest-validator@^0.6.17:
+fastest-validator@^0.6.17:
   version "0.6.17"
   resolved "https://registry.yarnpkg.com/fastest-validator/-/fastest-validator-0.6.17.tgz#15a8eef2c7c5a3268e4689dfd4a4b6553f0ff8b1"
 
@@ -8060,12 +7940,6 @@ graphql-relay@^0.6.0:
   resolved "https://registry.yarnpkg.com/graphql-relay/-/graphql-relay-0.6.0.tgz#18ec36b772cfcb3dbb9bd369c3f8004cf42c7b93"
   dependencies:
     prettier "^1.16.0"
-
-graphql@^0.13.2:
-  version "0.13.2"
-  resolved "https://registry.yarnpkg.com/graphql/-/graphql-0.13.2.tgz#4c740ae3c222823e7004096f832e7b93b2108270"
-  dependencies:
-    iterall "^1.2.1"
 
 graphql@^14.1.1:
   version "14.2.1"
@@ -9328,7 +9202,7 @@ isurl@^1.0.0-alpha5:
     has-to-string-tag-x "^1.2.0"
     is-object "^1.0.1"
 
-iterall@^1.2.1, iterall@^1.2.2:
+iterall@^1.2.2:
   version "1.2.2"
   resolved "https://registry.yarnpkg.com/iterall/-/iterall-1.2.2.tgz#92d70deb8028e0c39ff3164fdbf4d8b088130cd7"
 
@@ -14130,12 +14004,6 @@ rx-lite-aggregates@^4.0.8:
 rx-lite@*, rx-lite@^4.0.8:
   version "4.0.8"
   resolved "https://registry.yarnpkg.com/rx-lite/-/rx-lite-4.0.8.tgz#0b1e11af8bc44836f04a6407e92da42467b79444"
-
-rx-socket@^0.4.1:
-  version "0.4.1"
-  resolved "https://registry.yarnpkg.com/rx-socket/-/rx-socket-0.4.1.tgz#c20471ba3a6dbe2810793003a5b7b096632fad7e"
-  dependencies:
-    oboe "^2.1.4"
 
 rx-socket@^0.5.0:
   version "0.5.0"
