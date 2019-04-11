@@ -448,6 +448,11 @@ class OwnAppDetailView extends Component<Props, State> {
             <ButtonsContainer>
               {openButton}
               <Button
+                variant={['mediumUppercase', 'marginRight10']}
+                title="SUBMIT TO MAINFRAME APP STORE"
+                onPress={this.onPressSubmitFoReview}
+              />
+              <Button
                 variant={['mediumUppercase', 'redOutline']}
                 title="NEW VERSION"
                 Icon={PlusIcon}
