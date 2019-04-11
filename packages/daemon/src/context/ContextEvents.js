@@ -129,6 +129,21 @@ export default class ContextEvents {
         }),
     )
     this.addSubscription(
+      'contactCreated',
+      this._context
+        .pipe(
+          filter((e: ContextEvent) => {
+            return e.type === 'contact_created'
+          }),
+        )
+        .subscribe(async (e: ContactCreatedEvent) => {
+          this._context.next({
+            type: 'contacts_changed',
+            userID: e.userID,
+          })
+        }),
+    )
+    this.addSubscription(
       'contactRequestSending',
       this._context
         .pipe(

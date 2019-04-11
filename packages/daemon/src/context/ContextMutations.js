@@ -504,6 +504,7 @@ export default class ContextMutations {
       identities.deleteInviteRequest(userID, peerID)
     }
     const contact = identities.createContactFromPeer(params)
+
     this._context.next({
       type: 'contact_created',
       contact,
@@ -574,10 +575,14 @@ export default class ContextMutations {
       contactID,
     )
     if (!contact) {
-      throw new Error('Contact not found')
+      this._context.log('Contact not found when trying to add peer')
+      return
     }
     if (!contact.invite) {
-      throw new Error('No invite data found for contact')
+      this._context.log(
+        'No invite data found for contact when updating accepted',
+      )
+      return
     }
     contact.invite.acceptedSignature = signature
     this._context.next({

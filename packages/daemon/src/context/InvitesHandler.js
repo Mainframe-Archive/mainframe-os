@@ -67,7 +67,11 @@ export default class InvitesHandler {
       this._context
         .pipe(
           filter((e: ContextEvent) => {
-            return e.type === 'vault_opened' || e.type === 'eth_network_changed'
+            return (
+              e.type === 'vault_opened' ||
+              e.type === 'eth_network_changed' ||
+              e.type === 'vault_created'
+            )
           }),
         )
         .subscribe(async (e: EthNetworkChangedEvent | VaultOpenedEvent) => {
@@ -206,6 +210,11 @@ export default class InvitesHandler {
       if (contact && contact.invite) {
         contact.invite.stake.state = 'seized'
         this._context.next({
+          type: 'invites_changed',
+          userID: user.localID,
+          change: 'inviteDeclined',
+        })
+        this._context.next({
           type: 'contact_changed',
           contact,
           userID: user.localID,
@@ -267,7 +276,6 @@ export default class InvitesHandler {
               this._context.next({
                 type: 'invites_changed',
                 userID: user.localID,
-                contact: eventContact,
                 change: 'inviteReceived',
               })
             }
@@ -566,17 +574,12 @@ export default class InvitesHandler {
         .on('mined', async hash => {
           inviteRequest.rejectedTXHash = hash
           await this._context.openVault.save()
-          const contactRes = this._context.queries.getContactFromInvite(
-            inviteRequest,
-          )
-          if (contactRes) {
-            this._context.next({
-              type: 'invites_changed',
-              userID: user.localID,
-              contact: contactRes,
-              change: 'inviteRejected',
-            })
-          }
+
+          this._context.next({
+            type: 'invites_changed',
+            userID: user.localID,
+            change: 'inviteDeclined',
+          })
           resolve(hash)
         })
         .on('error', err => {
@@ -634,7 +637,11 @@ export default class InvitesHandler {
   }
 
   observe(): ObserveInvites<InvitesChangedEvent> {
-    const source = this._context.pipe(filter(e => e.type === 'invites_changed'))
+    const source = this._context.pipe(
+      filter(
+        e => e.type === 'invites_changed' || e.type === 'contacts_changed',
+      ),
+    )
     this._observers.add(source)
 
     return {
