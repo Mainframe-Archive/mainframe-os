@@ -31,7 +31,7 @@
   },
   "dependencies": {
     "@mainframe/client": "^0.2.0",
-    "@mainframe/config": "^0.2.0",
+    "@mainframe/config": "^0.3.0",
     "@mainframe/toolbox": "^0.2.0",
     "@oclif/command": "^1.5.12",
     "@oclif/config": "^1.12.11",
