@@ -134,7 +134,8 @@ export class MFID {
 
   constructor(input: string) {
     this._value = decodeMFID(input)
-    const [check, type, data] = this._value.split('/')
+    const [check, type, ...rest] = this._value.split('/')
+    const data = rest.join('/')
 
     const [mf, versionString] = check.split(':')
     if (mf !== 'mf') {
