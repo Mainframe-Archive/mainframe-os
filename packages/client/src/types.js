@@ -244,7 +244,7 @@ export type EthTransactionParams = {
   data: string,
   gas: string,
   gasPrice: string,
-  chainid?: ?string,
+  chainId?: ?number,
 }
 
 export type BlockchainEthSendParams = {|

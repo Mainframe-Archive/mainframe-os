@@ -143,7 +143,10 @@ export const signTransaction = {
     ctx: ClientContext,
     params: WalletEthSignTxParams,
   ): Promise<WalletSignTxResult> => {
-    return ctx.openVault.wallets.signEthTransaction(params)
+    return ctx.openVault.wallets.signEthTransaction(
+      params,
+      ctx.io.eth.networkID,
+    )
   },
 }
 

@@ -95,8 +95,10 @@ export default class LedgerWallet extends AbstractWallet {
     params: WalletEthSignTxParams,
     chainId: string,
   ): Promise<string> {
-    if (!params.chainId) {
+    if (!params.chainId && chainId) {
       params.chainId = Number(chainId)
+    } else if (!params.chainId) {
+      throw new Error('chainId missing in Ledger tx params')
     }
     const index = this.getIndexForAccount(params.from)
     if (!index) {
@@ -125,7 +127,9 @@ export default class LedgerWallet extends AbstractWallet {
     // TODO: Needs testing, based on:
     // https://github.com/LedgerHQ/ledgerjs/tree/master/packages/hw-app-eth#examples-4
     const index = this.getIndexForAccount(params.address)
-    const result = await signPersonalMessage(Number(index), params.data)
+    const messageHex = Buffer.from(params.data).toString('hex')
+    const result = await signPersonalMessage(Number(index), messageHex)
+
     let v = result['v'] - 27
     v = v.toString(16)
     if (v.length < 2) {

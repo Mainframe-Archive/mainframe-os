@@ -397,7 +397,7 @@ export default class InvitesHandler {
           txOptions,
         )
         .then(inviteRes => {
-          inviteRes.on('hash', hash => {
+          inviteRes.on('mined', hash => {
             resolve(hash)
           })
           inviteRes.on('error', err => {
