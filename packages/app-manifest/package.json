@@ -22,7 +22,7 @@
     "semver": "^6.0.0"
   },
   "devDependencies": {
-    "@mainframe/app-permissions": "*",
+    "@mainframe/app-permissions": ">=0.3.0",
     "@mainframe/utils-crypto": "^0.4.0",
     "flow-bin": "^0.95.1"
   }
