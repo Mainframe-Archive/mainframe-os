@@ -93,10 +93,10 @@ export default class LedgerWallet extends AbstractWallet {
 
   async signTransaction(
     params: WalletEthSignTxParams,
-    chainID: string,
+    chainId: string,
   ): Promise<string> {
-    if (!params.chainid) {
-      params.chainid = chainID
+    if (!params.chainId) {
+      params.chainId = Number(chainId)
     }
     const index = this.getIndexForAccount(params.from)
     if (!index) {
