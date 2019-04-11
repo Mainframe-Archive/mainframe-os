@@ -1903,6 +1903,42 @@
     npmlog "^4.1.2"
     write-file-atomic "^2.3.0"
 
+"@mainframe/client@^0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@mainframe/client/-/client-0.2.0.tgz#31343cb3fdd0efe22cae657910ceaf0a0f76d72c"
+  integrity sha512-lVcyj+yineFzMQRimxdpfdACc2UswpHsfEDfROL1eMzbpZwQdN1vtHqfls0zmKO5AqNX1NMn8SneYvClmMg7Cg==
+  dependencies:
+    "@mainframe/rpc-ipc" "^0.2.3"
+    graphql "^0.13.2"
+    rxjs "^6.3.3"
+
+"@mainframe/config@^0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@mainframe/config/-/config-0.2.0.tgz#4931aa69ee01601b1573bfd0ab1095f68c9ea8f8"
+  integrity sha512-RXPWw596wtJvUuWDzT/TngHEXXE3ir9Zvwqxbh+HMzWyda6lIOw2r5eO74PGCvJBezqtscXtmTeDQY/uPgqsDw==
+  dependencies:
+    "@mainframe/data-types" "^0.2.0"
+    "@mainframe/utils-id" "^0.1.0"
+    conf "^2.0.0"
+    env-paths "^2.0.0"
+    esm "3.0.84"
+    fs-extra "^7.0.0"
+
+"@mainframe/data-types@^0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@mainframe/data-types/-/data-types-0.2.0.tgz#f9138a8407526473087e64fab02cbd0cdea1e906"
+  integrity sha512-l8wVSWqWGSsiP16XxjlOezKiblAQuQ4QIVNa0bY8pvU2P2XyA1Webc0qmGEKzhaD7e5v4feZF/NtaRYxBd43WQ==
+  dependencies:
+    multibase "^0.6.0"
+
+"@mainframe/rpc-base@^0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@mainframe/rpc-base/-/rpc-base-0.2.0.tgz#9f7b57288d14d1289f6bc292c737ce0784aca700"
+  integrity sha512-AZzfiJPkm36yEsLzQvq2cd5G5hlKzXqmwyMMf6JOwQgs16yWa+0jWUVW94ixqOPQ5idw/9662rqKDDd7BEcVXg==
+  dependencies:
+    "@babel/runtime" "^7.0.0"
+    "@mainframe/utils-id" "^0.1.1"
+
 "@mainframe/rpc-base@^0.3.0":
   version "0.3.0"
   resolved "https://registry.yarnpkg.com/@mainframe/rpc-base/-/rpc-base-0.3.0.tgz#e779e9e3d6150f746f6fa8ec58f9380447b60de6"
@@ -1920,6 +1956,15 @@
     "@babel/runtime" "^7.0.0"
     "@mainframe/rpc-stream" "^0.3.0"
     "@mainframe/transport-electron" "^0.2.1"
+
+"@mainframe/rpc-error@^0.3.0":
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/@mainframe/rpc-error/-/rpc-error-0.3.0.tgz#888c5af9dfa31809e2162bc50dbac3dde528cb31"
+  integrity sha512-AuUJjXklvOUsGN63EJeDfZmeSdRPH3ZaRc6QpUIGDOQg9T4eWLZYXqfJq34710AcZT1XGazp8mpdHBiB7KsSJQ==
+  dependencies:
+    "@babel/runtime" "^7.0.0"
+    "@mainframe/rpc-base" "^0.2.0"
+    es6-error "^4.1.1"
 
 "@mainframe/rpc-error@^0.4.0":
   version "0.4.0"
@@ -1939,6 +1984,14 @@
     "@mainframe/rpc-error" "^0.4.0"
     fastest-validator "0.6.15"
 
+"@mainframe/rpc-ipc@^0.2.3":
+  version "0.2.3"
+  resolved "https://registry.yarnpkg.com/@mainframe/rpc-ipc/-/rpc-ipc-0.2.3.tgz#7b2ab6f64a6ef53a4cc962f7945cdb093919efc7"
+  integrity sha512-x8rU5zykjlGelP6c9pvQY4bq/30wIqw+U3grEz8T+6/WcJRwgitXlq5e1ImnQmw6KGFystGtJ3KrP51Y3PF4JQ==
+  dependencies:
+    "@mainframe/rpc-stream" "^0.2.4"
+    "@mainframe/transport-ipc" "^0.2.3"
+
 "@mainframe/rpc-ipc@^0.3.0":
   version "0.3.0"
   resolved "https://registry.yarnpkg.com/@mainframe/rpc-ipc/-/rpc-ipc-0.3.0.tgz#bcef0c3f53ce3f25bd04fd053d8ab26b7ca1e73f"
@@ -1947,6 +2000,16 @@
     "@babel/runtime" "^7.0.0"
     "@mainframe/rpc-stream" "^0.3.0"
     "@mainframe/transport-ipc" "^0.3.0"
+    rxjs "^6.3.3"
+
+"@mainframe/rpc-stream@^0.2.4":
+  version "0.2.5"
+  resolved "https://registry.yarnpkg.com/@mainframe/rpc-stream/-/rpc-stream-0.2.5.tgz#9845913dd2874423f5d6362cc8f76756b6817de7"
+  integrity sha512-Cay6MhoA40wI8GmpCfmYMPKf9LjN32sWejGXcIq5/RFR9DqxuSR23g2WWWmdREJ62RjcCHoO3xMm0bMEbK6t6g==
+  dependencies:
+    "@babel/runtime" "^7.0.0"
+    "@mainframe/rpc-base" "^0.2.0"
+    "@mainframe/rpc-error" "^0.3.0"
     rxjs "^6.3.3"
 
 "@mainframe/rpc-stream@^0.3.0":
@@ -1986,6 +2049,15 @@
     "@babel/runtime" "^7.0.0"
     rxjs "^6.0.0"
 
+"@mainframe/transport-ipc@^0.2.3":
+  version "0.2.4"
+  resolved "https://registry.yarnpkg.com/@mainframe/transport-ipc/-/transport-ipc-0.2.4.tgz#e2bc993fba8adf58aafcc9b7ef59f382952cca5b"
+  integrity sha512-8FsFon9kJqUOqRauE8+9CWoxNM16NgZSPvGCqUVjguBHIfRRdEr41RJtLzYC7i9NJMnTa2OXfSaT34nhXo6kzg==
+  dependencies:
+    "@babel/runtime" "^7.0.0"
+    rx-socket "^0.4.1"
+    rxjs "^6.3.3"
+
 "@mainframe/transport-ipc@^0.3.0":
   version "0.3.0"
   resolved "https://registry.yarnpkg.com/@mainframe/transport-ipc/-/transport-ipc-0.3.0.tgz#ac5a9e51e01b57e8cdb96b2fd190342acafa1afb"
@@ -2023,7 +2095,7 @@
   resolved "https://registry.yarnpkg.com/@mainframe/utils-hex/-/utils-hex-0.1.1.tgz#2ec97e3b7358960c1b39ee60fc5a17986a3921ae"
   integrity sha512-LzER+Vzd2WOdNE2+8n0HE9UfMntq3bCRokbyJ9fNMqse+qN374r5RaZpstWwm13IDKSbwUOvFIxYyYl/8eYlZg==
 
-"@mainframe/utils-id@^0.1.0":
+"@mainframe/utils-id@^0.1.0", "@mainframe/utils-id@^0.1.1":
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/@mainframe/utils-id/-/utils-id-0.1.1.tgz#5d17ab69b4af712b98b35e331a5627f7fcb700fb"
   integrity sha512-KXZM6sVaxWzvMe+dMfMq/JgGvCXu07sdAP+p6RBo1PvHdLsTm+qfQjR9pt03A8Z1Aed73f8K/1rrMM5tERt4Ig==
@@ -2426,9 +2498,9 @@
     "@types/node" "*"
 
 "@types/node-fetch@^2.1.6":
-  version "2.3.1"
-  resolved "https://registry.yarnpkg.com/@types/node-fetch/-/node-fetch-2.3.1.tgz#a453be56b53ff74e5e3603fe5f9a7e3d7b673efc"
-  integrity sha512-ZEiga4pDXtViK6SZKEXZ/86tiyI3tV8BJWvI9aj2WiRvs0TbX38aLFe9WecMhBmMF3BQpOJJGJM1Cvd7W2y2yg==
+  version "2.3.2"
+  resolved "https://registry.yarnpkg.com/@types/node-fetch/-/node-fetch-2.3.2.tgz#e01893b176c6fa1367743726380d65bce5d6576b"
+  integrity sha512-yW0EOebSsQme9yKu09XbdDfle4/SmWZMK4dfteWcSLCYNQQcF+YOv0kIrvm+9pO11/ghA4E6A+RNQqvYj4Nr3A==
   dependencies:
     "@types/node" "*"
 
@@ -5384,6 +5456,17 @@ concat-stream@1.6.2, concat-stream@^1.5.0, concat-stream@^1.6.0:
     readable-stream "^2.2.2"
     typedarray "^0.0.6"
 
+conf@^2.0.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/conf/-/conf-2.2.0.tgz#ee282efafc1450b61e205372041ad7d866802d9a"
+  integrity sha512-93Kz74FOMo6aWRVpAZsonOdl2I57jKtHrNmxhumehFQw4X8Sk37SohNY11PG7Q8Okta+UnrVaI006WLeyp8/XA==
+  dependencies:
+    dot-prop "^4.1.0"
+    env-paths "^1.0.0"
+    make-dir "^1.0.0"
+    pkg-up "^2.0.0"
+    write-file-atomic "^2.3.0"
+
 conf@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/conf/-/conf-3.0.0.tgz#9b788f897e208684952058c38f01ddb1dff0c40b"
@@ -7164,7 +7247,7 @@ env-paths@^1.0.0:
   resolved "https://registry.yarnpkg.com/env-paths/-/env-paths-1.0.0.tgz#4168133b42bb05c38a35b1ae4397c8298ab369e0"
   integrity sha1-QWgTO0K7BcOKNbGuQ5fIKYqzaeA=
 
-env-paths@^2.1.0, env-paths@^2.2.0:
+env-paths@^2.0.0, env-paths@^2.1.0, env-paths@^2.2.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/env-paths/-/env-paths-2.2.0.tgz#cdca557dc009152917d6166e2febe1f039685e43"
   integrity sha512-6u0VYSCo/OW6IoD5WCLLy9JUGARbamfSavcNXry/eu8aHVFei6CD3Sw+VGX5alea1i9pgPHW0mbu6Xj0uBh7gA==
@@ -7534,6 +7617,11 @@ eslint@^5.15.3:
     strip-json-comments "^2.0.1"
     table "^5.2.3"
     text-table "^0.2.0"
+
+esm@3.0.84:
+  version "3.0.84"
+  resolved "https://registry.yarnpkg.com/esm/-/esm-3.0.84.tgz#bb108989f4673b32d4f62406869c28eed3815a63"
+  integrity sha512-SzSGoZc17S7P+12R9cg21Bdb7eybX25RnIeRZ80xZs+VZ3kdQKzqTp2k4hZJjR7p9l0186TTXSgrxzlMDBktlw==
 
 esm@^3.0.82:
   version "3.2.22"
@@ -9087,6 +9175,13 @@ graphql-relay@^0.6.0:
   dependencies:
     prettier "^1.16.0"
 
+graphql@^0.13.2:
+  version "0.13.2"
+  resolved "https://registry.yarnpkg.com/graphql/-/graphql-0.13.2.tgz#4c740ae3c222823e7004096f832e7b93b2108270"
+  integrity sha512-QZ5BL8ZO/B20VA8APauGBg3GyEgZ19eduvpLWoq5x7gMmWnHoy8rlQWPLmWgFvo1yNgjSEFMesmS4R6pPr7xog==
+  dependencies:
+    iterall "^1.2.1"
+
 graphql@^14.1.1:
   version "14.2.1"
   resolved "https://registry.yarnpkg.com/graphql/-/graphql-14.2.1.tgz#779529bf9a01e7207b977a54c20670b48ca6e95c"
@@ -10561,7 +10656,7 @@ isurl@^1.0.0-alpha5:
     has-to-string-tag-x "^1.2.0"
     is-object "^1.0.1"
 
-iterall@^1.2.2:
+iterall@^1.2.1, iterall@^1.2.2:
   version "1.2.2"
   resolved "https://registry.yarnpkg.com/iterall/-/iterall-1.2.2.tgz#92d70deb8028e0c39ff3164fdbf4d8b088130cd7"
   integrity sha512-yynBb1g+RFUPY64fTrFv7nsjRrENBQJaX2UL+2Szc9REFrSNm1rpSXHGzhmAy7a9uv3vlvgBlXnf9RqmPH1/DA==
@@ -16043,6 +16138,13 @@ rx-lite@*, rx-lite@^4.0.8:
   version "4.0.8"
   resolved "https://registry.yarnpkg.com/rx-lite/-/rx-lite-4.0.8.tgz#0b1e11af8bc44836f04a6407e92da42467b79444"
   integrity sha1-Cx4Rr4vESDbwSmQH6S2kJGe3lEQ=
+
+rx-socket@^0.4.1:
+  version "0.4.1"
+  resolved "https://registry.yarnpkg.com/rx-socket/-/rx-socket-0.4.1.tgz#c20471ba3a6dbe2810793003a5b7b096632fad7e"
+  integrity sha512-JNGRA1UttGLlvhFKWvr7f0zJa8Rbq8PopTPa4KSrhyNuCGYz/AvQBCfY/HyNx4HuR1GvC/BmAkO//pe+d2Q+FQ==
+  dependencies:
+    oboe "^2.1.4"
 
 rx-socket@^0.5.0:
   version "0.5.0"
