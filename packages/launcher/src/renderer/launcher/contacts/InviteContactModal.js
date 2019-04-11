@@ -1,7 +1,7 @@
 //@flow
 import React, { Component } from 'react'
 import styled from 'styled-components/native'
-import { Text } from '@morpheus-ui/core'
+import { Text, Tooltip } from '@morpheus-ui/core'
 import { graphql, createFragmentContainer } from 'react-relay'
 import Loader from '../../UIComponents/Loader'
 
@@ -288,8 +288,30 @@ export class InviteContactModal extends Component<Props, State> {
   renderContactSection(title: string) {
     return (
       <Section>
-        <Text bold variant="smallTitle" color="#585858">
-          {title}
+        <Text
+          bold
+          variant="smallTitle"
+          color="#585858"
+          theme={{
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+          }}>
+          {title}{' '}
+          <Tooltip>
+            <Text variant="tooltipTitle">Where will my data be stored?</Text>
+            <Text variant="tooltipText">
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin
+              consectetur mi in malesuada porttitor.
+            </Text>
+            <Text variant="tooltipTitle">
+              Why should I make my name discoverable?
+            </Text>
+            <Text variant="tooltipText">
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin
+              consectetur mi in malesuada porttitor.
+            </Text>
+          </Tooltip>
         </Text>
         <AddContactDetail border>
           <Blocky>
@@ -318,8 +340,30 @@ export class InviteContactModal extends Component<Props, State> {
     ) : null
     return (
       <Section>
-        <Text bold variant="smallTitle" color="#585858">
-          {title}
+        <Text
+          bold
+          variant="smallTitle"
+          color="#585858"
+          theme={{
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+          }}>
+          {title}{' '}
+          <Tooltip>
+            <Text variant="tooltipTitle">Where will my data be stored?</Text>
+            <Text variant="tooltipText">
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin
+              consectetur mi in malesuada porttitor.
+            </Text>
+            <Text variant="tooltipTitle">
+              Why should I make my name discoverable?
+            </Text>
+            <Text variant="tooltipText">
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin
+              consectetur mi in malesuada porttitor.
+            </Text>
+          </Tooltip>
         </Text>
         <AddContactDetail border>
           <Blocky>

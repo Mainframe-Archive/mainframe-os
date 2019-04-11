@@ -1827,9 +1827,10 @@
   dependencies:
     nanoid "^1.0.7"
 
-"@morpheus-ui/core@^0.0.39":
-  version "0.0.39"
-  resolved "https://registry.yarnpkg.com/@morpheus-ui/core/-/core-0.0.39.tgz#8938c0ad6efce4ab65da5a913104c64531627782"
+"@morpheus-ui/core@^0.0.41":
+  version "0.0.41"
+  resolved "https://registry.yarnpkg.com/@morpheus-ui/core/-/core-0.0.41.tgz#6b5d23455c56649fc1ca59238f68a015f1017099"
+  integrity sha512-03p3+UwdR8VcGSHy0Rc22kvhqaMJ+U89eoEYoIDtFt0n+DdJatyIjy/v8F7lM8VDkGM8e8kYj8oRlh0Z2Z+7zg==
   dependencies:
     "@babel/runtime" "^7.0.0"
     "@morpheus-ui/forms" "0.0.6"
@@ -6191,19 +6192,7 @@ elliptic@6.3.3:
     hash.js "^1.0.0"
     inherits "^2.0.1"
 
-elliptic@^6.0.0, elliptic@^6.2.3, elliptic@^6.4.0:
-  version "6.4.1"
-  resolved "https://registry.yarnpkg.com/elliptic/-/elliptic-6.4.1.tgz#c2d0b7776911b86722c632c3c06c60f2f819939a"
-  dependencies:
-    bn.js "^4.4.0"
-    brorand "^1.0.1"
-    hash.js "^1.0.0"
-    hmac-drbg "^1.0.0"
-    inherits "^2.0.1"
-    minimalistic-assert "^1.0.0"
-    minimalistic-crypto-utils "^1.0.0"
-
-"elliptic@github:MainframeHQ/elliptic#circular-dependencies-fix":
+elliptic@MainframeHQ/elliptic#circular-dependencies-fix, elliptic@^6.0.0, elliptic@^6.2.3, elliptic@^6.4.0:
   version "6.4.1"
   resolved "https://codeload.github.com/MainframeHQ/elliptic/tar.gz/11299b673d219dc67eb1d9c22e3006ffdea6fd42"
   dependencies:

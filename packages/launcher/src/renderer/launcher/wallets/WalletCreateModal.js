@@ -2,7 +2,14 @@
 
 import React, { Component } from 'react'
 import { graphql, commitMutation } from 'react-relay'
-import { Button, TextField, Row, Column, Text } from '@morpheus-ui/core'
+import {
+  Button,
+  TextField,
+  Row,
+  Column,
+  Text,
+  Tooltip,
+} from '@morpheus-ui/core'
 import {
   type FormSubmitPayload,
   type FieldValidateFunctionParams,
@@ -267,8 +274,26 @@ export default class WalletCreateModal extends Component<Props, State> {
           <Text
             size={12}
             variant={['greyMed', 'center']}
-            theme={{ marginBottom: '30px' }}>
-            {backupDescription}
+            theme={{
+              marginBottom: '30px',
+              display: 'flex',
+              alignItems: 'center',
+            }}>
+            {backupDescription}{' '}
+            <Tooltip theme={{ margin: '10px 0 0 10px' }}>
+              <Text variant="tooltipTitle">Where will my data be stored?</Text>
+              <Text variant="tooltipText">
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin
+                consectetur mi in malesuada porttitor.
+              </Text>
+              <Text variant="tooltipTitle">
+                Why should I make my name discoverable?
+              </Text>
+              <Text variant="tooltipText">
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin
+                consectetur mi in malesuada porttitor.
+              </Text>
+            </Tooltip>
           </Text>
           <HorizontalView>
             <VerticalView>

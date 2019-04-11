@@ -5,7 +5,14 @@ import React, { Component } from 'react'
 import { graphql, commitMutation } from 'react-relay'
 
 import styled from 'styled-components/native'
-import { Button, Row, Column, TextField, Text } from '@morpheus-ui/core'
+import {
+  Button,
+  Row,
+  Column,
+  TextField,
+  Text,
+  Tooltip,
+} from '@morpheus-ui/core'
 import { Form, type FormSubmitPayload } from '@morpheus-ui/forms'
 import CircleArrowRight from '@morpheus-ui/icons/CircleArrowRight'
 
@@ -28,6 +35,11 @@ const Container = styled.View`
 const FormContainer = styled.View`
   margin-top: 10px;
   max-width: 450px;
+`
+
+const DescriptionContainer = styled.View`
+  flex-direction: row;
+  align-items: center;
 `
 
 export const createDeveloperMutation = graphql`
@@ -101,9 +113,27 @@ export default class CreateDevIdentityView extends Component<Props, State> {
         </Row>
         <Row size={1}>
           <Column>
-            <Text variant="greyMed" size={12}>
-              Please create your developer identity in order to create apps.
-            </Text>
+            <DescriptionContainer>
+              <Text variant="greyMed" size={12}>
+                Please create your developer identity in order to create apps.
+              </Text>
+              <Tooltip>
+                <Text variant="tooltipTitle">
+                  Where will my data be stored?
+                </Text>
+                <Text variant="tooltipText">
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin
+                  consectetur mi in malesuada porttitor.
+                </Text>
+                <Text variant="tooltipTitle">
+                  Why should I make my name discoverable?
+                </Text>
+                <Text variant="tooltipText">
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin
+                  consectetur mi in malesuada porttitor.
+                </Text>
+              </Tooltip>
+            </DescriptionContainer>
           </Column>
         </Row>
         <FormContainer>

@@ -38,6 +38,21 @@ const passwordValidation = ({ value }: FieldValidateFunctionParams) => {
   }
 }
 
+const ToolTipContent = (
+  <>
+    <Text variant="tooltipTitle">Where will my data be stored?</Text>
+    <Text variant="tooltipText">
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin consectetur
+      mi in malesuada porttitor.
+    </Text>
+    <Text variant="tooltipTitle">Why should I make my name discoverable?</Text>
+    <Text variant="tooltipText">
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin consectetur
+      mi in malesuada porttitor.
+    </Text>
+  </>
+)
+
 const confirmPasswordValidation = ({
   value,
   values,
@@ -101,7 +116,8 @@ export default class CreateVaultView extends Component<Props, State> {
       <OnboardContainer
         step={1}
         title="Welcome"
-        description="Let’s quickly secure your data.">
+        description="Let’s quickly secure your data."
+        tooltipContent={ToolTipContent}>
         <FormContainer>
           <Form onSubmit={this.onSubmit}>
             <Row size={1} top>

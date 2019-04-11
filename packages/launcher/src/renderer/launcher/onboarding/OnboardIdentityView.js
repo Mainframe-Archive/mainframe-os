@@ -2,7 +2,15 @@
 
 import React, { Component } from 'react'
 import { graphql, commitMutation } from 'react-relay'
-import { Button, TextField, Row, Column, Text, Switch } from '@morpheus-ui/core'
+import {
+  Button,
+  TextField,
+  Row,
+  Column,
+  Text,
+  Switch,
+  Tooltip,
+} from '@morpheus-ui/core'
 import CircleArrowRight from '@morpheus-ui/icons/CircleArrowRight'
 import { Form, type FormSubmitPayload } from '@morpheus-ui/forms'
 import styled from 'styled-components/native'
@@ -47,6 +55,21 @@ export const createUserMutation = graphql`
     }
   }
 `
+
+const ToolTipContent = (
+  <>
+    <Text variant="tooltipTitle">Where will my data be stored?</Text>
+    <Text variant="tooltipText">
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin consectetur
+      mi in malesuada porttitor.
+    </Text>
+    <Text variant="tooltipTitle">Why should I make my name discoverable?</Text>
+    <Text variant="tooltipText">
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin consectetur
+      mi in malesuada porttitor.
+    </Text>
+  </>
+)
 
 export default class OnboardIdentityView extends Component<Props, State> {
   static contextType = EnvironmentContext
@@ -120,7 +143,8 @@ export default class OnboardIdentityView extends Component<Props, State> {
         id
         step={2}
         title="Identity"
-        description="Create your Mainframe identity">
+        description="Create your Mainframe identity"
+        tooltipContent={ToolTipContent}>
         <FormContainer>
           <Form onSubmit={this.onSubmit}>
             <Row size={1} top>
@@ -133,11 +157,27 @@ export default class OnboardIdentityView extends Component<Props, State> {
                   testID="onboard-create-identity-input-name"
                 />
               </Column>
-              <Column>
+              <Column styles="flex-direction:row;">
                 <Switch
                   label="Make my identity discoverable to other users"
                   name="discoverable"
                 />
+                <Tooltip theme={{ margin: '10px 0 0 10px' }}>
+                  <Text variant="tooltipTitle">
+                    Where will my data be stored?
+                  </Text>
+                  <Text variant="tooltipText">
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    Proin consectetur mi in malesuada porttitor.
+                  </Text>
+                  <Text variant="tooltipTitle">
+                    Why should I make my name discoverable?
+                  </Text>
+                  <Text variant="tooltipText">
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    Proin consectetur mi in malesuada porttitor.
+                  </Text>
+                </Tooltip>
               </Column>
             </Row>
 

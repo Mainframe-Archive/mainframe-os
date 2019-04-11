@@ -20,6 +20,7 @@ import {
   Row,
   Column,
   TextField,
+  Tooltip,
   RadioGroup,
   Radio,
 } from '@morpheus-ui/core'
@@ -174,6 +175,12 @@ const Blocky = styled.View`
 
 const RadioContainer = styled.View`
   width: 350px;
+  flex-direction: row;
+  align-items: center;
+`
+
+const RadioTextContainer = styled.View`
+  flex: 1;
 `
 
 export type SubmitContactInput = {
@@ -706,29 +713,61 @@ class ContactsViewComponent extends Component<Props, State> {
 
     const MutualOption = (
       <RadioContainer>
-        <Text size={12} color="#232323">
-          Mutual invitation .{' '}
-          <Text size={12} color="#DA1157">
-            Free
+        <RadioTextContainer>
+          <Text size={12} color="#232323">
+            Mutual invitation .{' '}
+            <Text size={12} color="#DA1157">
+              Free
+            </Text>
           </Text>
-        </Text>
-        <Text color="#585858" size={11}>
-          Both users need to add each other
-        </Text>
+          <Text color="#585858" size={11}>
+            Both users need to add each other
+          </Text>
+        </RadioTextContainer>
+        <Tooltip top>
+          <Text variant="tooltipTitle">Where will my data be stored?</Text>
+          <Text variant="tooltipText">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin
+            consectetur mi in malesuada porttitor.
+          </Text>
+          <Text variant="tooltipTitle">
+            Why should I make my name discoverable?
+          </Text>
+          <Text variant="tooltipText">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin
+            consectetur mi in malesuada porttitor.
+          </Text>
+        </Tooltip>
       </RadioContainer>
     )
 
     const BlockchainOption = (
       <RadioContainer>
-        <Text size={12} color="#232323">
-          Blockchain invitation .{' '}
-          <Text size={12} color="#DA1157">
-            Stake 10 MFT
+        <RadioTextContainer>
+          <Text size={12} color="#232323">
+            Blockchain invitation .{' '}
+            <Text size={12} color="#DA1157">
+              Stake 10 MFT
+            </Text>
           </Text>
-        </Text>
-        <Text color="#585858" size={11}>
-          The invitee needs to accept the invitation to retrieve your MFT
-        </Text>
+          <Text color="#585858" size={11}>
+            The invitee needs to accept the invitation to retrieve your MFT
+          </Text>
+        </RadioTextContainer>
+        <Tooltip top>
+          <Text variant="tooltipTitle">Where will my data be stored?</Text>
+          <Text variant="tooltipText">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin
+            consectetur mi in malesuada porttitor.
+          </Text>
+          <Text variant="tooltipTitle">
+            Why should I make my name discoverable?
+          </Text>
+          <Text variant="tooltipText">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin
+            consectetur mi in malesuada porttitor.
+          </Text>
+        </Tooltip>
       </RadioContainer>
     )
 

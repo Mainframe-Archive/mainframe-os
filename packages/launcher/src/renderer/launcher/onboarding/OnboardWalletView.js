@@ -1,7 +1,7 @@
 // @flow
 
 import React, { Component } from 'react'
-import { Button, Row } from '@morpheus-ui/core'
+import { Button, Row, Text } from '@morpheus-ui/core'
 import { graphql, commitMutation } from 'react-relay'
 import styled from 'styled-components/native'
 
@@ -40,6 +40,21 @@ const updateProfileMutation = graphql`
     }
   }
 `
+
+const ToolTipContent = (
+  <>
+    <Text variant="tooltipTitle">Where will my data be stored?</Text>
+    <Text variant="tooltipText">
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin consectetur
+      mi in malesuada porttitor.
+    </Text>
+    <Text variant="tooltipTitle">Why should I make my name discoverable?</Text>
+    <Text variant="tooltipText">
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin consectetur
+      mi in malesuada porttitor.
+    </Text>
+  </>
+)
 
 export default class OnboardWalletView extends Component<Props, State> {
   static contextType = EnvironmentContext
@@ -194,6 +209,7 @@ export default class OnboardWalletView extends Component<Props, State> {
         title="Wallet"
         description="Create or import your Ethereum wallet."
         step={3}
+        tooltipContent={ToolTipContent}
         wallet>
         {this.renderContent()}
       </OnboardContainer>
