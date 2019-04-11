@@ -350,6 +350,13 @@ export class ContactsFeedsHandler extends FeedsHandler {
                 data.profile,
               )
             }
+            if (data.acceptanceSignature != null) {
+              this._context.mutations.updateContactAccepted(
+                userID,
+                contact.localID,
+                data.acceptanceSignature,
+              )
+            }
             if (data.apps != null) {
               this._context.mutations.updateContactApps(
                 userID,
@@ -388,9 +395,14 @@ export class ContactsFeedsHandler extends FeedsHandler {
         }
       })
 
-    // Subscribe to contact created event to start polling new contacts
+    // Subscribe to contact request sent event to start polling new contacts
     this._contactCreatedSubscription = this._context
-      .pipe(filter((e: ContextEvent) => e.type === 'contact_created'))
+      .pipe(
+        filter(
+          (e: ContextEvent) =>
+            e.type === 'contact_changed' && e.change === 'feedRequestSent',
+        ),
+      )
       .subscribe((e: ContactCreatedEvent) => {
         this.add(e.userID, e.contact)
       })

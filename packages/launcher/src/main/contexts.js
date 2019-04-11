@@ -32,8 +32,8 @@ export class ContextSubscription<T = ?mixed> {
   _method: string
   data: ?T
 
-  constructor(method: string, data?: T) {
-    this._id = uniqueID()
+  constructor(method: string, data?: ?T, id?: string) {
+    this._id = id || uniqueID()
     this._method = method
     this.data = data
   }

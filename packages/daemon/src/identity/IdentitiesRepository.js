@@ -30,6 +30,13 @@ import PeerUserIdentity, {
 } from './PeerUserIdentity'
 import Contact, { type ContactSerialized, type ContactProfile } from './Contact'
 
+export type CreateContactParams = {
+  userID: string,
+  peerID: string,
+  aliasName?: string,
+  acceptanceSignature?: string,
+}
+
 type PeerIdentitiesRepositoryGroupSerialized = {
   apps?: { [id: string]: AppIdentitySerialized },
   developers?: { [id: string]: DeveloperIdentitySerialized },
@@ -48,10 +55,26 @@ type ContactsRepositorySerialized = {
   },
 }
 
+export type InviteRequest = {
+  peerID: string,
+  ethNetwork: string,
+  privateFeed: string,
+  receivedAddress: string,
+  senderAddress: string,
+  rejectedTXHash?: string,
+}
+
+type InvitesRepositorySerialized = {
+  [ownUserId: string]: {
+    [peerID: string]: InviteRequest,
+  },
+}
+
 export type IdentitiesRepositorySerialized = {
   own?: OwnIdentitiesRepositoryGroupSerialized,
   peers?: PeerIdentitiesRepositoryGroupSerialized,
   contacts?: ContactsRepositorySerialized,
+  invites?: InvitesRepositorySerialized,
 }
 
 type PeerIdentitiesRepositoryGroupParams = {
@@ -72,10 +95,17 @@ type ContactsRepositoryParams = {
   },
 }
 
+type InvitesRepositoryParams = {
+  [ownUserId: string]: {
+    [peerID: string]: InviteRequest,
+  },
+}
+
 export type IdentitiesRepositoryParams = {
   own?: OwnIdentitiesRepositoryGroupParams,
   peers?: PeerIdentitiesRepositoryGroupParams,
   contacts?: ContactsRepositoryParams,
+  invites?: InvitesRepositoryParams,
 }
 
 type PeerIdentitiesRepositoryGroup = {
@@ -96,10 +126,17 @@ type ContactsRepository = {
   },
 }
 
+type InvitesRepository = {
+  [ownUserId: string]: {
+    [peerID: string]: InviteRequest,
+  },
+}
+
 type IdentitiesData = {
   own: OwnIdentitiesRepositoryGroup,
   peers: PeerIdentitiesRepositoryGroup,
   contacts: ContactsRepository,
+  invites: InvitesRepository,
 }
 
 type Domain = 'apps' | 'developers' | 'users'
@@ -227,6 +264,7 @@ export default class IdentitiesRepository {
       // $FlowFixMe: mapper type
       peers: serialized.peers ? toPeersGroup(serialized.peers) : {},
       contacts: serialized.contacts ? toContacts(serialized.contacts) : {},
+      invites: serialized.invites ? serialized.invites : {},
     })
   }
 
@@ -238,6 +276,7 @@ export default class IdentitiesRepository {
     // $FlowFixMe: mapper type
     peers: fromPeersGroup(repository.peerIdentities),
     contacts: fromContacts(repository.contacts),
+    invites: repository.invites,
   })
 
   _byMFID: { [mfid: string]: ID } = {}
@@ -251,6 +290,7 @@ export default class IdentitiesRepository {
       own: createOwnGroup(identities.own),
       peers: createPeersGroup(identities.peers),
       contacts: identities.contacts || {},
+      invites: identities.invites || {},
     }
 
     Object.keys(this._identities).forEach(ownership => {
@@ -261,7 +301,7 @@ export default class IdentitiesRepository {
             this._userByContact[idType(cid)] = idType(ownId)
           })
         })
-      } else {
+      } else if (ownership !== 'invites') {
         // Add references so an identity can be retrieved by local ID or Mainframe ID lookup
         // $FlowFixMe: key type lost
         Object.keys(this._identities[ownership]).forEach((domain: Domain) => {
@@ -315,6 +355,10 @@ export default class IdentitiesRepository {
 
   get contacts(): { [uid: string]: { [cid: string]: Contact } } {
     return this._identities.contacts
+  }
+
+  get invites(): { [uid: string]: { [peerID: string]: InviteRequest } } {
+    return this._identities.invites
   }
 
   getContactsForUser(userID: ID | string): { [id: string]: Contact } {
@@ -379,7 +423,11 @@ export default class IdentitiesRepository {
 
   getIdentity(id: ID): ?Identity {
     const ref = this._refs[id]
-    if (ref != null && ref.ownership !== 'contacts') {
+    if (
+      ref != null &&
+      ref.ownership !== 'contacts' &&
+      ref.ownership !== 'invites'
+    ) {
       return this._identities[ref.ownership][ref.domain][id]
     }
   }
@@ -392,6 +440,24 @@ export default class IdentitiesRepository {
     const id = this.getID(mfid)
     if (id != null) {
       return this.getIdentity(id)
+    }
+  }
+
+  getContactByPeerID(userID: string, peerID: string): ?Contact {
+    if (this._identities.contacts[userID]) {
+      const keys = Object.keys(this._identities.contacts[userID])
+      const contacts = keys.map(id => this._identities.contacts[userID][id])
+      return contacts.find(c => c.peerID === peerID)
+    }
+  }
+
+  getInvites(userID: string): { [string]: InviteRequest } {
+    return this._identities.invites[userID] || {}
+  }
+
+  getInviteRequest(userID: string, peerID: string): ?InviteRequest {
+    if (this._identities.invites[userID]) {
+      return this._identities.invites[userID][peerID]
     }
   }
 
@@ -485,29 +551,32 @@ export default class IdentitiesRepository {
     return peer
   }
 
-  createContactFromPeer(
-    ownUserId: ID,
-    peerID: ID,
-    aliasName?: string,
-  ): Contact {
-    const peer = this.getPeerUser(idType(peerID))
+  createContactFromPeer(params: CreateContactParams): Contact {
+    const peer = this.getPeerUser(idType(params.peerID))
     if (!peer) throw new Error('Peer not found')
 
-    if (this._identities.contacts[ownUserId]) {
-      const keys = Object.keys(this._identities.contacts[ownUserId])
-      const contacts = keys.map(id => this._identities.contacts[ownUserId][id])
-      const existing = contacts.find(c => c.peerID === peerID)
+    if (this._identities.contacts[params.userID]) {
+      const keys = Object.keys(this._identities.contacts[params.userID])
+      const contacts = keys.map(
+        id => this._identities.contacts[params.userID][id],
+      )
+      const existing = contacts.find(c => c.peerID === params.peerID)
       if (existing) {
         return existing
       }
     }
-    const contact = Contact.create(peerID, { aliasName })
-    if (this._identities.contacts[ownUserId]) {
-      this._identities.contacts[ownUserId][contact.localID] = contact
+    const contact = Contact.create(params.peerID, {
+      aliasName: params.aliasName,
+      acceptanceSignature: params.acceptanceSignature,
+    })
+    if (this._identities.contacts[params.userID]) {
+      this._identities.contacts[params.userID][contact.localID] = contact
     } else {
-      this._identities.contacts[ownUserId] = { [contact.localID]: contact }
+      this._identities.contacts[params.userID] = {
+        [contact.localID]: contact,
+      }
     }
-    this._userByContact[contact.localID] = ownUserId
+    this._userByContact[contact.localID] = params.userID
     return contact
   }
 
@@ -555,5 +624,19 @@ export default class IdentitiesRepository {
     if (contact == null) return
 
     return { userID, contact }
+  }
+
+  setInviteRequest(userID: string, invite: InviteRequest) {
+    if (!this._identities.invites[userID]) {
+      this._identities.invites[userID] = { [invite.peerID]: invite }
+    } else if (!this._identities.invites[userID][invite.peerID]) {
+      this._identities.invites[userID][invite.peerID] = invite
+    }
+  }
+
+  deleteInviteRequest(userID: string, peerID: string) {
+    if (this._identities.invites[userID]) {
+      delete this._identities.invites[userID][peerID]
+    }
   }
 }

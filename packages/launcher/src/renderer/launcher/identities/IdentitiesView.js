@@ -7,6 +7,7 @@ import type { AppInstalledData } from '@mainframe/client'
 
 import { Text, Button } from '@morpheus-ui/core'
 
+import applyContext, { type CurrentUser } from '../LauncherContext'
 import Avatar from '../../UIComponents/Avatar'
 import InfoIcon from '../../UIComponents/Icons/InfoIcon'
 import IdentityEditModal from './IdentityEditModal'
@@ -26,7 +27,11 @@ export type Identities = {
   ownDevelopers: Array<User>,
 }
 
-type Props = {
+type RendererProps = {
+  user: CurrentUser,
+}
+
+type Props = RendererProps & {
   identities: Identities,
 }
 
@@ -57,8 +62,6 @@ const Profile = styled.View`
 `
 
 const InfoBox = styled.View`
-  margin-top: 20px;
-  margin-bottom: 30px;
   padding: 10px 15px;
   max-width: 340px;
   border-width: 1px;
@@ -67,7 +70,29 @@ const InfoBox = styled.View`
   flex-direction: row;
   align-items: center;
   justify-content: center;
+
+  ${props => props.full && `max-width: auto;`}
+  ${props => props.margin && `margin-top: 20px; margin-bottom: 30px;`}
 `
+
+export const InformationBox = ({
+  full,
+  margin,
+  content,
+}: {
+  full?: boolean,
+  margin?: boolean,
+  content: any,
+}) => {
+  return (
+    <InfoBox full={full} margin={margin}>
+      <InfoIcon width={36} height={18} color="#00A7E7" />
+      <Text size={12} color="#00A7E7" variant="marginLeft15">
+        {content}
+      </Text>
+    </InfoBox>
+  )
+}
 
 class IdentitiesView extends Component<Props, State> {
   state = {}
@@ -119,19 +144,21 @@ class IdentitiesView extends Component<Props, State> {
   }
 
   render() {
+    const userData = this.props.identities.ownUsers.find(
+      u => u.localID === this.props.user.localID,
+    )
     return (
       <Container>
         {this.props.identities.ownUsers.length > 0 && (
           <Text variant={['smallTitle', 'blue', 'bold']}>Personal</Text>
         )}
-        {this.renderUser(this.props.identities.ownUsers[0])}
-        <InfoBox>
-          <InfoIcon width={36} height={18} color="#00A7E7" />
-          <Text size={12} color="#00A7E7" variant="marginLeft15">
-            Share your Mainframe ID with your contacts and let your friends add
-            you on Mainframe OS
-          </Text>
-        </InfoBox>
+        {userData && this.renderUser(userData)}
+        <InformationBox
+          margin
+          content={
+            'Share your Mainframe ID with your contacts and let your friends add you on Mainframe OS'
+          }
+        />
         {this.props.identities.ownDevelopers.length > 0 && (
           <>
             <Text variant={['smallTitle', 'blue', 'bold']}>Developer</Text>
@@ -144,39 +171,44 @@ class IdentitiesView extends Component<Props, State> {
   }
 }
 
-export default createFragmentContainer(IdentitiesView, {
-  identities: graphql`
-    fragment IdentitiesView_identities on Identities {
-      ownUsers {
-        ...IdentityEditModal_ownUserIdentity
-        localID
-        feedHash
-        profile {
-          name
-        }
-        apps {
+export const IdentitiesViewRelayContainer = createFragmentContainer(
+  IdentitiesView,
+  {
+    identities: graphql`
+      fragment IdentitiesView_identities on Identities {
+        ownUsers {
+          ...IdentityEditModal_ownUserIdentity
           localID
-          manifest {
+          feedHash
+          profile {
             name
           }
-          users {
-            settings {
-              permissionsSettings {
-                permissionsChecked
-                grants {
-                  BLOCKCHAIN_SEND
+          apps {
+            localID
+            manifest {
+              name
+            }
+            users {
+              settings {
+                permissionsSettings {
+                  permissionsChecked
+                  grants {
+                    BLOCKCHAIN_SEND
+                  }
                 }
               }
             }
           }
         }
-      }
-      ownDevelopers {
-        localID
-        profile {
-          name
+        ownDevelopers {
+          localID
+          profile {
+            name
+          }
         }
       }
-    }
-  `,
-})
+    `,
+  },
+)
+
+export default applyContext(IdentitiesViewRelayContainer)

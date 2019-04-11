@@ -6,8 +6,9 @@ import type { ListResult } from '@erebos/api-bzz-base'
 import getStream from 'get-stream'
 import {
   LOCAL_ID_SCHEMA,
-  type BlockchainWeb3SendParams,
+  type BlockchainEthSendParams,
   type ContactsGetUserContactsResult,
+  type EthUnsubscribeParams,
   type WalletGetEthWalletsResult,
 } from '@mainframe/client'
 import { dialog } from 'electron'
@@ -36,6 +37,42 @@ class CommsSubscription extends ContextSubscription<RxSubscription> {
   }
 }
 
+class EthNetworkSubscription extends ContextSubscription<RxSubscription> {
+  constructor() {
+    super('eth_network_subscription')
+  }
+
+  async dispose() {
+    if (this.data != null) {
+      this.data.unsubscribe()
+    }
+  }
+}
+
+class EthWalletSubscription extends ContextSubscription<RxSubscription> {
+  constructor() {
+    super('eth_accounts_subscription')
+  }
+
+  async dispose() {
+    if (this.data != null) {
+      this.data.unsubscribe()
+    }
+  }
+}
+
+class EthBlockchainSubscription extends ContextSubscription<RxSubscription> {
+  constructor(id: string) {
+    super('eth_blockchain_subscription', null, id)
+  }
+
+  async dispose() {
+    if (this.data != null) {
+      this.data.unsubscribe()
+    }
+  }
+}
+
 const sharedMethods = {
   wallet_getEthAccounts: async (ctx: AppContext): Promise<Array<string>> => {
     // $FlowFixMe indexer property
@@ -53,6 +90,12 @@ const sharedMethods = {
     }
     return accounts
   },
+  blockchain_ethSend: async (
+    ctx: AppContext,
+    params: BlockchainEthSendParams,
+  ): Promise<Object> => {
+    return ctx.client.blockchain.ethSend(params)
+  },
 }
 
 export const sandboxed = {
@@ -62,20 +105,64 @@ export const sandboxed = {
 
   // Blockchain
 
-  blockchain_web3Send: async (
+  blockchain_ethSubscribe: async (
     ctx: AppContext,
-    params: BlockchainWeb3SendParams,
+    params: BlockchainEthSendParams,
   ): Promise<Object> => {
-    return ctx.client.blockchain.web3Send(params)
+    const { subscription, id } = await ctx.client.blockchain.ethSubscribe(
+      params,
+    )
+    const sub = new EthBlockchainSubscription(id)
+    sub.data = subscription.subscribe(msg => {
+      ctx.notifySandboxed(sub.id, msg.result)
+    })
+    ctx.setSubscription(sub)
+    return sub.id
+  },
+
+  blockchain_ethUnsubscribe: async (
+    ctx: AppContext,
+    params: EthUnsubscribeParams,
+  ): Promise<Object> => {
+    return ctx.client.blockchain.ethUnsubscribe(params)
+  },
+
+  blockchain_subscribeNetworkChanged: async (
+    ctx: AppContext,
+  ): Promise<Object> => {
+    const subscription = await ctx.client.blockchain.subscribeNetworkChanged()
+    const sub = new EthNetworkSubscription()
+    sub.data = subscription.subscribe(msg => {
+      ctx.notifySandboxed(sub.id, msg)
+    })
+    ctx.setSubscription(sub)
+    return { id: sub.id }
+  },
+
+  wallet_subEthAccountsChanged: async (ctx: AppContext): Promise<Object> => {
+    const subscription = await ctx.client.wallet.subscribeEthAccountsChanged()
+    const sub = new EthWalletSubscription()
+    sub.data = subscription.subscribe(msg => {
+      ctx.notifySandboxed(sub.id, msg)
+    })
+    ctx.setSubscription(sub)
+    return { id: sub.id }
   },
 
   // Wallet
 
-  wallet_signTx: withPermission(
+  wallet_signEthTx: withPermission(
     'BLOCKCHAIN_SEND',
     (ctx: AppContext, params: any) => ctx.client.wallet.signTransaction(params),
-    // TODO notify app if using ledger to feedback awaiting sign
   ),
+
+  // TODO: Implement signing messages with permission
+
+  // wallet_signEth: withPermission(
+  //   'BLOCKCHAIN_SIGN',
+  //   (ctx: AppContext, params: WalletEthSignParams) =>
+  //     ctx.client.wallet.sign(params),
+  // ),
 
   // Comms
 
@@ -301,11 +388,16 @@ export const trusted = {
     },
   },
 
-  blockchain_web3Send: async (
+  blockchain_subscribeNetworkChanged: async (
     ctx: AppContext,
-    params: BlockchainWeb3SendParams,
   ): Promise<Object> => {
-    return ctx.client.blockchain.web3Send(params)
+    const subscription = await ctx.client.blockchain.subscribeNetworkChanged()
+    const sub = new EthNetworkSubscription()
+    sub.data = subscription.subscribe(msg => {
+      ctx.notifyTrusted(sub.id, msg)
+    })
+    ctx.setSubscription(sub)
+    return { id: sub.id }
   },
 
   wallet_getUserEthWallets: async (
@@ -336,6 +428,16 @@ export const trusted = {
       })
     }
     return { address }
+  },
+
+  wallet_subEthAccountsChanged: async (ctx: AppContext): Promise<Object> => {
+    const subscription = await ctx.client.wallet.subscribeEthAccountsChanged()
+    const sub = new EthWalletSubscription()
+    sub.data = subscription.subscribe(msg => {
+      ctx.notifyTrusted(sub.id, msg)
+    })
+    ctx.setSubscription(sub)
+    return { id: sub.id }
   },
 
   contacts_getUserContacts: (

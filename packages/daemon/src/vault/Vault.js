@@ -17,7 +17,7 @@ import {
   createSecretBoxKeyFromPassword,
 } from '@mainframe/utils-crypto'
 import { type ID } from '@mainframe/utils-id'
-import { INFURA_URLS } from '@mainframe/eth'
+import { ETH_RPC_URLS } from '@mainframe/eth'
 import semver from 'semver'
 
 import type { SessionData } from '../app/AbstractApp'
@@ -76,6 +76,13 @@ export const createVaultKeyParams = async (
   return { kdf, key }
 }
 
+const defaultBlockchainData = () => ({
+  eventBlocksRead: {
+    Invited: {},
+    Declined: {},
+  },
+})
+
 export const readVaultFile = async (
   path: string,
   password: Buffer,
@@ -117,6 +124,17 @@ export const readVaultFile = async (
   }
 }
 
+export type BlockchainData = {
+  eventBlocksRead: {
+    Invited: {
+      [network: string]: number,
+    },
+    Declined: {
+      [network: string]: number,
+    },
+  },
+}
+
 export type UserSettings = {
   bzzURL: string,
   pssURL: string,
@@ -130,6 +148,7 @@ export type VaultData = {
   wallets: WalletsRepository,
   identityWallets: IdentityWallets,
   contactAppData: ContactAppData,
+  blockchainData: BlockchainData,
 }
 
 export type VaultSerialized = {
@@ -139,6 +158,7 @@ export type VaultSerialized = {
   wallets?: WalletsRepositorySerialized,
   identityWallets?: IdentityWalletsSerialized,
   contactAppData?: ContactAppDataSerialized,
+  blockchainData?: BlockchainData,
 }
 
 export default class Vault {
@@ -158,6 +178,7 @@ export default class Vault {
       identityWallets: IdentityWallets.fromJSON(data.identityWallets),
       contactAppData: ContactAppData.fromJSON(data.contactAppData),
       settings: data.settings,
+      blockchainData: data.blockchainData || defaultBlockchainData(),
     })
   }
 
@@ -175,11 +196,12 @@ export default class Vault {
       settings: {
         bzzURL: 'http://mainframe-gateways.net:8500',
         pssURL: 'ws://mainframe-gateways.net:8546',
-        ethURL: INFURA_URLS.ropsten,
+        ethURL: ETH_RPC_URLS.WS.ropsten,
       },
       identityWallets: new IdentityWallets(),
       contactAppData: new ContactAppData(),
       wallets: new WalletsRepository(),
+      blockchainData: defaultBlockchainData(),
     }
     this._data = data ? Object.assign(vaultData, data) : vaultData
   }
@@ -212,6 +234,10 @@ export default class Vault {
 
   get contactAppData(): ContactAppData {
     return this._data.contactAppData
+  }
+
+  get blockchainData(): BlockchainData {
+    return this._data.blockchainData
   }
 
   // App lifecycle
@@ -316,6 +342,7 @@ export default class Vault {
           identityWallets: IdentityWallets.toJSON(this._data.identityWallets),
           contactAppData: ContactAppData.toJSON(this._data.contactAppData),
           settings: this._data.settings,
+          blockchainData: this._data.blockchainData,
         }
       : {}
   }

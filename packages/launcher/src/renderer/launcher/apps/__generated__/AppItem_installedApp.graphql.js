@@ -15,7 +15,7 @@ export type AppItem_installedApp = {|
   +mfid: string,
   +localID: string,
   +name: string,
-  +installationState: ?InstallationState,
+  +installationState: InstallationState,
   +manifest: {|
     +author: {|
       +id: ?string,

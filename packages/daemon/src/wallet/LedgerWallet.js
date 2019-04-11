@@ -1,11 +1,15 @@
 // @flow
 import EthereumTx from 'ethereumjs-tx'
-import ethUtil from 'ethereumjs-util'
+import { bufferToHex, addHexPrefix } from 'ethereumjs-util'
 import { toChecksumAddress } from 'web3-utils'
 
-import { getAddressAtIndex, signTransaction } from './ledgerClient'
+import {
+  getAddressAtIndex,
+  signTransaction,
+  signPersonalMessage,
+} from './ledgerClient'
 import AbstractWallet, {
-  type WalletSignTXParams,
+  type WalletEthSignTxParams,
   type WalletSignDataParams,
 } from './AbstractWallet'
 
@@ -87,36 +91,50 @@ export default class LedgerWallet extends AbstractWallet {
     return newAddresses
   }
 
-  async signTransaction(params: WalletSignTXParams): Promise<string> {
-    if (!params.chainId) {
-      throw new Error('ethereum chain id not set in tx params')
+  async signTransaction(
+    params: WalletEthSignTxParams,
+    chainId: string,
+  ): Promise<string> {
+    if (!params.chainId && chainId) {
+      params.chainId = Number(chainId)
+    } else if (!params.chainId) {
+      throw new Error('chainId missing in Ledger tx params')
     }
     const index = this.getIndexForAccount(params.from)
     if (!index) {
       throw new Error('account not registered with this device')
     }
     const tx = new EthereumTx(params)
-    tx.v = ethUtil.bufferToHex(tx.getChainId())
+    tx.v = bufferToHex(tx.getChainId())
     tx.r = '0x00'
     tx.s = '0x00'
     const txHex = tx.serialize().toString('hex')
 
     const res = await signTransaction(Number(index), txHex)
-
     tx.v = Buffer.from(res.v, 'hex')
     tx.r = Buffer.from(res.r, 'hex')
     tx.s = Buffer.from(res.s, 'hex')
     const valid = tx.verifySignature()
 
     if (valid) {
-      return ethUtil.addHexPrefix(tx.serialize().toString('hex'))
+      return addHexPrefix(tx.serialize().toString('hex'))
     } else {
       throw new Error('invalid transaction signature')
     }
   }
 
-  sign(params: WalletSignDataParams) {
-    params
-    // TODO: Needs implementing
+  async sign(params: WalletSignDataParams): Promise<string> {
+    // TODO: Needs testing, based on:
+    // https://github.com/LedgerHQ/ledgerjs/tree/master/packages/hw-app-eth#examples-4
+    const index = this.getIndexForAccount(params.address)
+    const messageHex = Buffer.from(params.data).toString('hex')
+    const result = await signPersonalMessage(Number(index), messageHex)
+
+    let v = result['v'] - 27
+    v = v.toString(16)
+    if (v.length < 2) {
+      v = '0' + v
+    }
+    return '0x' + result['r'] + result['s'] + v
   }
 }
