@@ -268,7 +268,7 @@ export default class PermissionsRequirementsView extends Component<
                 <TextField
                   name="domain"
                   value={this.state.hostInput}
-                  onChangeText={this.onChangeHostInput}
+                  onChange={this.onChangeHostInput}
                   label="Add domain"
                   placeholder="(e.g. mainframe.com)"
                   validation={domainValidation}
