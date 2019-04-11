@@ -25,12 +25,12 @@ export default class MFTextInput extends Component<Props> {
 
 const styles = StyleSheet.create({
   input: {
-    padding: 10,
-    flex: 1,
+    borderColor: colors.LIGHT_GREY_E8,
     borderRadius: 3,
     borderWidth: 1,
-    borderColor: colors.LIGHT_GREY_E8,
+    flex: 1,
     fontFamily: 'Poppins',
     fontWeight: '300',
+    padding: 10,
   },
 })

@@ -11,6 +11,7 @@ import {
   type Disposable,
   type Environment,
 } from 'react-relay'
+import { EthClient } from '@mainframe/eth'
 
 import OnboardView from './onboarding/OnboardView'
 import { EnvironmentContext } from './RelayEnvironment'
@@ -23,20 +24,20 @@ import WalletsScreen from './wallets/WalletsScreen'
 import ContactsScreen from './contacts/ContactsScreen'
 import NotificationsScreen from './notifications/NotificationsScreen'
 import SettingsScreen from './settings/SettingsScreen'
+import rpc from './rpc'
 
-import type { Launcher_apps as Apps } from './__generated__/Launcher_apps.graphql'
 import type { Launcher_identities as Identities } from './__generated__/Launcher_identities.graphql'
 
 const APP_UPDATE_CHANGED_SUBSCRIPTION = graphql`
   subscription LauncherAppUpdateChangedSubscription {
     appUpdateChanged {
-      app {
-        ...AppItem_installedApp
-      }
       viewer {
         apps {
-          updatesCount
+          ...SideMenu_apps
         }
+      }
+      app {
+        ...AppItem_installedApp
       }
     }
   }
@@ -51,10 +52,24 @@ const CONTACT_CHANGED_SUBSCRIPTION = graphql`
           name
           avatar
         }
+        invite {
+          inviteTX
+          stake {
+            reclaimedTX
+            amount
+            state
+          }
+        }
       }
     }
   }
 `
+
+const ethClientProvider = {
+  send: async (method: string, params: Array<*>): Promise<*> => {
+    return rpc.ethSend({ method, params })
+  },
+}
 
 const Container = styled.View`
   flex-direction: row;
@@ -69,7 +84,6 @@ const ContentContainer = styled.View`
 `
 
 type Props = {
-  apps: Apps,
   identities: Identities,
   relay: {
     environment: Environment,
@@ -85,6 +99,7 @@ type State = {
 
 class Launcher extends Component<Props, State> {
   _subscriptions: Array<Disposable> = []
+  _ethClient: EthClient
 
   constructor(props: Props) {
     super(props)
@@ -102,6 +117,7 @@ class Launcher extends Component<Props, State> {
       onboardRequired,
       openScreen: 'apps',
     }
+    this._ethClient = new EthClient(ethClientProvider)
   }
 
   componentDidMount() {
@@ -166,12 +182,11 @@ class Launcher extends Component<Props, State> {
     }
 
     return (
-      <Provider value={{ user: ownUsers[0] }}>
+      <Provider value={{ user: ownUsers[0], ethClient: this._ethClient }}>
         <Container testID="launcher-view">
           <SideMenu
             selected={this.state.openScreen}
             onSelectMenuItem={this.setOpenScreen}
-            notifications={this.props.apps.updatesCount > 0 ? ['apps'] : []}
           />
           <ContentContainer>{this.renderScreen()}</ContentContainer>
         </Container>
@@ -181,16 +196,16 @@ class Launcher extends Component<Props, State> {
 }
 
 const LauncherRelayContainer = createFragmentContainer(Launcher, {
-  apps: graphql`
-    fragment Launcher_apps on Apps {
-      updatesCount
-    }
-  `,
   identities: graphql`
     fragment Launcher_identities on Identities {
       ownUsers {
         defaultEthAddress
         localID
+        feedHash
+        profile {
+          name
+          ethAddress
+        }
         wallets {
           hd {
             localID
@@ -214,9 +229,6 @@ export default class LauncherQueryRenderer extends Component<{}> {
         query={graphql`
           query LauncherQuery {
             viewer {
-              apps {
-                ...Launcher_apps
-              }
               identities {
                 ...Launcher_identities
               }

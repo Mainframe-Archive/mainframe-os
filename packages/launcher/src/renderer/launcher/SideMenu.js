@@ -1,9 +1,17 @@
 //@flow
 
 import React, { Component } from 'react'
+import {
+  graphql,
+  QueryRenderer,
+  createFragmentContainer,
+  // $FlowFixMe: requestSubscription not present in Flow definition but exported by library
+  requestSubscription,
+  type Disposable,
+  type Environment,
+} from 'react-relay'
 
 import { Button } from '@morpheus-ui/core'
-
 import styled from 'styled-components/native'
 
 //import Icons
@@ -21,6 +29,12 @@ import NotificationsIcon from '@morpheus-ui/icons/NotificationsMd'
 import NotificationsFilledIcon from '@morpheus-ui/icons/NotificationsFilledMd'
 
 import SvgSelectedPointer from '../UIComponents/SVGSelectedPointer'
+import RelayLoaderView from './RelayLoaderView'
+import { EnvironmentContext } from './RelayEnvironment'
+import applyContext, { type CurrentUser } from './LauncherContext'
+
+import type { SideMenu_contacts as Contacts } from './__generated__/SideMenu_contacts.graphql'
+import type { SideMenu_apps as Apps } from './__generated__/SideMenu_apps.graphql'
 
 export type ScreenNames =
   | 'apps'
@@ -30,10 +44,18 @@ export type ScreenNames =
   | 'settings'
   | 'notifications'
 
-type Props = {
+type QueryProps = {
+  user: CurrentUser,
   onSelectMenuItem: (name: ScreenNames) => void,
   selected: ScreenNames,
-  notifications: Array<ScreenNames>,
+}
+
+type Props = QueryProps & {
+  contacts: Contacts,
+  apps: Apps,
+  relay: {
+    environment: Environment,
+  },
 }
 
 type State = {
@@ -114,9 +136,39 @@ const SelectedPointer = styled.View`
   margin-top: -8px;
 `
 
-export default class SideMenu extends Component<Props, State> {
+const CONTACTS_CHANGED_SUBSCRIPTION = graphql`
+  subscription SideMenuContactsChangedSubscription($userID: String!) {
+    contactsChanged {
+      viewer {
+        contacts {
+          invitesCount(userID: $userID)
+        }
+      }
+    }
+  }
+`
+
+export class SideMenu extends Component<Props, State> {
+  _contactsChangedSub: Disposable
+
   static defaultProps = {
     notifications: [],
+  }
+
+  componentDidMount() {
+    this._contactsChangedSub = requestSubscription(
+      this.props.relay.environment,
+      {
+        subscription: CONTACTS_CHANGED_SUBSCRIPTION,
+        variables: {
+          userID: this.props.user.localID,
+        },
+      },
+    )
+  }
+
+  componentWillUnmount() {
+    this._contactsChangedSub.dispose()
   }
 
   onPressMenuItem = (name: ScreenNames) => {
@@ -126,12 +178,25 @@ export default class SideMenu extends Component<Props, State> {
     this.props.onSelectMenuItem(name)
   }
 
+  hasNotifications(type: ScreenNames) {
+    const { apps, contacts } = this.props
+    switch (type) {
+      case 'contacts':
+        return contacts.invitesCount > 0
+      case 'apps':
+        return apps.updatesCount > 0
+      default:
+        return false
+    }
+  }
+
   renderMenuItem(item: ScreenNames) {
     const selected = this.props.selected === item
     const data = BUTTONS[item]
     const icon = selected ? data.activeIcon : data.icon
     const variant = selected ? ['leftNav', 'leftNavActive'] : 'leftNav'
-    const notifications = this.props.notifications.indexOf(item) >= 0
+
+    const notifications = this.hasNotifications(item)
 
     return (
       <MenuItem key={item}>
@@ -159,3 +224,51 @@ export default class SideMenu extends Component<Props, State> {
     )
   }
 }
+
+const SideMenuRelayContainer = createFragmentContainer(SideMenu, {
+  contacts: graphql`
+    fragment SideMenu_contacts on Contacts
+      @argumentDefinitions(userID: { type: "String!" }) {
+      invitesCount(userID: $userID)
+    }
+  `,
+  apps: graphql`
+    fragment SideMenu_apps on Apps {
+      updatesCount
+    }
+  `,
+})
+
+export class SideMenuRenderer extends Component<QueryProps> {
+  static contextType = EnvironmentContext
+
+  render() {
+    return (
+      <QueryRenderer
+        environment={this.context}
+        query={graphql`
+          query SideMenuQuery($userID: String!) {
+            viewer {
+              apps {
+                ...SideMenu_apps
+              }
+              contacts {
+                ...SideMenu_contacts @arguments(userID: $userID)
+              }
+            }
+          }
+        `}
+        variables={{ userID: this.props.user.localID }}
+        render={({ error, props }) => {
+          if (error || !props) {
+            return <RelayLoaderView error={error ? error.message : undefined} />
+          } else {
+            return <SideMenuRelayContainer {...props.viewer} {...this.props} />
+          }
+        }}
+      />
+    )
+  }
+}
+
+export default applyContext(SideMenuRenderer)

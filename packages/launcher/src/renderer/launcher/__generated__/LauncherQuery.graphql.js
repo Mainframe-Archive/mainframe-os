@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 8d0d829a0e2ebc9c367378140f8caf91
+ * @relayHash 41d1470e63eee0a9c288e7136dc50686
  */
 
 /* eslint-disable */
@@ -9,17 +9,13 @@
 
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
-type Launcher_apps$ref = any;
 type Launcher_identities$ref = any;
 export type LauncherQueryVariables = {||};
 export type LauncherQueryResponse = {|
   +viewer: {|
-    +apps: {|
-      +$fragmentRefs: Launcher_apps$ref
-    |},
     +identities: {|
       +$fragmentRefs: Launcher_identities$ref
-    |},
+    |}
   |}
 |};
 export type LauncherQuery = {|
@@ -32,9 +28,6 @@ export type LauncherQuery = {|
 /*
 query LauncherQuery {
   viewer {
-    apps {
-      ...Launcher_apps
-    }
     identities {
       ...Launcher_identities
     }
@@ -42,14 +35,15 @@ query LauncherQuery {
   }
 }
 
-fragment Launcher_apps on Apps {
-  updatesCount
-}
-
 fragment Launcher_identities on Identities {
   ownUsers {
     defaultEthAddress
     localID
+    feedHash
+    profile {
+      name
+      ethAddress
+    }
     wallets {
       hd {
         localID
@@ -89,7 +83,7 @@ return {
   "operationKind": "query",
   "name": "LauncherQuery",
   "id": null,
-  "text": "query LauncherQuery {\n  viewer {\n    apps {\n      ...Launcher_apps\n    }\n    identities {\n      ...Launcher_identities\n    }\n    id\n  }\n}\n\nfragment Launcher_apps on Apps {\n  updatesCount\n}\n\nfragment Launcher_identities on Identities {\n  ownUsers {\n    defaultEthAddress\n    localID\n    wallets {\n      hd {\n        localID\n        id\n      }\n      ledger {\n        localID\n        id\n      }\n    }\n    id\n  }\n}\n",
+  "text": "query LauncherQuery {\n  viewer {\n    identities {\n      ...Launcher_identities\n    }\n    id\n  }\n}\n\nfragment Launcher_identities on Identities {\n  ownUsers {\n    defaultEthAddress\n    localID\n    feedHash\n    profile {\n      name\n      ethAddress\n    }\n    wallets {\n      hd {\n        localID\n        id\n      }\n      ledger {\n        localID\n        id\n      }\n    }\n    id\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -107,22 +101,6 @@ return {
         "concreteType": "Viewer",
         "plural": false,
         "selections": [
-          {
-            "kind": "LinkedField",
-            "alias": null,
-            "name": "apps",
-            "storageKey": null,
-            "args": null,
-            "concreteType": "Apps",
-            "plural": false,
-            "selections": [
-              {
-                "kind": "FragmentSpread",
-                "name": "Launcher_apps",
-                "args": null
-              }
-            ]
-          },
           {
             "kind": "LinkedField",
             "alias": null,
@@ -160,24 +138,6 @@ return {
           {
             "kind": "LinkedField",
             "alias": null,
-            "name": "apps",
-            "storageKey": null,
-            "args": null,
-            "concreteType": "Apps",
-            "plural": false,
-            "selections": [
-              {
-                "kind": "ScalarField",
-                "alias": null,
-                "name": "updatesCount",
-                "args": null,
-                "storageKey": null
-              }
-            ]
-          },
-          {
-            "kind": "LinkedField",
-            "alias": null,
             "name": "identities",
             "storageKey": null,
             "args": null,
@@ -201,6 +161,38 @@ return {
                     "storageKey": null
                   },
                   v0,
+                  {
+                    "kind": "ScalarField",
+                    "alias": null,
+                    "name": "feedHash",
+                    "args": null,
+                    "storageKey": null
+                  },
+                  {
+                    "kind": "LinkedField",
+                    "alias": null,
+                    "name": "profile",
+                    "storageKey": null,
+                    "args": null,
+                    "concreteType": "NamedProfile",
+                    "plural": false,
+                    "selections": [
+                      {
+                        "kind": "ScalarField",
+                        "alias": null,
+                        "name": "name",
+                        "args": null,
+                        "storageKey": null
+                      },
+                      {
+                        "kind": "ScalarField",
+                        "alias": null,
+                        "name": "ethAddress",
+                        "args": null,
+                        "storageKey": null
+                      }
+                    ]
+                  },
                   {
                     "kind": "LinkedField",
                     "alias": null,
@@ -245,5 +237,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '34b3a724035b34ca2b28db2534d38e18';
+(node/*: any*/).hash = '7b17d4721b814a9fdf9e02d9022a155d';
 module.exports = node;

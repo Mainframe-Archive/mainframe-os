@@ -9,7 +9,7 @@ import type EthWallet from 'ethereumjs-wallet'
 import { addHexPrefix } from 'ethereumjs-util'
 
 import AbstractWallet, {
-  type WalletSignTXParams,
+  type WalletEthSignTxParams,
   type WalletSignDataParams,
 } from './AbstractWallet'
 
@@ -146,7 +146,7 @@ export default class HDWallet extends AbstractWallet {
     return !!this._accountWalletByAddress(account)
   }
 
-  signTransaction(params: WalletSignTXParams): string {
+  signTransaction(params: WalletEthSignTxParams): string {
     const accountWallet = this._accountWalletByAddress(params.from)
 
     if (!accountWallet) {
@@ -158,7 +158,7 @@ export default class HDWallet extends AbstractWallet {
     return addHexPrefix(tx.serialize().toString('hex'))
   }
 
-  sign(params: WalletSignDataParams) {
+  sign(params: WalletSignDataParams): string {
     const accountWallet = this._accountWalletByAddress(params.address)
 
     if (!accountWallet) {

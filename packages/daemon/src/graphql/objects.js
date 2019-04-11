@@ -460,7 +460,7 @@ export const ownUserIdentity = new GraphQLObjectType({
       type: new GraphQLNonNull(GraphQLID),
     },
     feedHash: {
-      type: new GraphQLNonNull(GraphQLString),
+      type: GraphQLString,
       resolve: self => self.publicFeed.feedHash,
     },
     mfid: {
@@ -470,7 +470,7 @@ export const ownUserIdentity = new GraphQLObjectType({
     apps: {
       type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(app))),
       resolve: (self, args, ctx: ClientContext) => {
-        return ctx.openVault.apps.getAppsForUser(self.localID)
+        return ctx.openVault.apps.getInstalledAppsForUser(self.localID)
       },
     },
     defaultEthAddress: {
@@ -561,9 +561,53 @@ export const connectionState = new GraphQLEnumType({
   name: 'ConnectionState',
   values: {
     CONNECTED: { value: 'connected' },
-    SENDING: { value: 'sending' },
-    SENT: { value: 'sent' },
+    DECLINED: { value: 'declined' },
+    RECEIVED: { value: 'received' },
+    SENDING_FEED: { value: 'sending_feed' },
+    SENT_FEED: { value: 'sent_feed' },
+    SENDING_BLOCKCHAIN: { value: 'sending_blockchain' },
+    SENT_BLOCKCHAIN: { value: 'sent_blockchain' },
   },
+})
+
+export const stakeState = new GraphQLEnumType({
+  name: 'StakeState',
+  values: {
+    STAKED: { value: 'staked' },
+    RECLAIMING: { value: 'reclaiming' },
+    RECLAIMED: { value: 'reclaimed' },
+    SEIZED: { value: 'seized' },
+  },
+})
+
+export const stake = new GraphQLObjectType({
+  name: 'InviteStake',
+  fields: () => ({
+    amount: {
+      type: GraphQLString,
+    },
+    state: {
+      type: new GraphQLNonNull(stakeState),
+    },
+    reclaimedTX: {
+      type: GraphQLString,
+    },
+  }),
+})
+
+export const contactInviteData = new GraphQLObjectType({
+  name: 'ContactInviteData',
+  fields: () => ({
+    inviteTX: {
+      type: GraphQLString,
+    },
+    ethNetwork: {
+      type: GraphQLString,
+    },
+    stake: {
+      type: new GraphQLNonNull(stake),
+    },
+  }),
 })
 
 export const contact = new GraphQLObjectType({
@@ -583,10 +627,14 @@ export const contact = new GraphQLObjectType({
     pubKey: {
       type: new GraphQLNonNull(GraphQLString),
     },
+    invite: {
+      type: contactInviteData,
+    },
     profile: {
       type: new GraphQLNonNull(genericProfile),
       resolve: (self, args, ctx: ClientContext) => {
-        return ctx.openVault.identities.getContactProfile(self.localID)
+        const profile = ctx.openVault.identities.getContactProfile(self.localID)
+        return { ...self.profile, ...profile }
       },
     },
     connectionState: {
@@ -598,6 +646,15 @@ export const contact = new GraphQLObjectType({
 export const contacts = new GraphQLObjectType({
   name: 'Contacts',
   fields: () => ({
+    invitesCount: {
+      type: new GraphQLNonNull(GraphQLInt),
+      args: {
+        userID: { type: new GraphQLNonNull(GraphQLString) },
+      },
+      resolve: (self, args, ctx) => {
+        return ctx.queries.getInvitesCount(args.userID)
+      },
+    },
     userContacts: {
       type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(contact))),
       args: {
@@ -700,7 +757,7 @@ export const walletBalances = new GraphQLObjectType({
       type: new GraphQLNonNull(GraphQLString),
       resolve: async (self, args, ctx) => {
         try {
-          return await ctx.io.eth.getMFTBalance(self)
+          return await ctx.io.tokenContract.getBalance(self)
         } catch (err) {
           ctx.log(err)
           return 0

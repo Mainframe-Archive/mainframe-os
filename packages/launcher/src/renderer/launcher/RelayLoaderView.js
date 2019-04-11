@@ -22,9 +22,9 @@ export default class RelayLoaderView extends Component<Props> {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    padding: 40,
     alignItems: 'center',
+    flex: 1,
     justifyContent: 'center',
+    padding: 40,
   },
 })

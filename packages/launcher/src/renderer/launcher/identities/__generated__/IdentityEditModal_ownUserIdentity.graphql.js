@@ -12,7 +12,7 @@ import type { FragmentReference } from "relay-runtime";
 declare export opaque type IdentityEditModal_ownUserIdentity$ref: FragmentReference;
 export type IdentityEditModal_ownUserIdentity = {|
   +localID: string,
-  +feedHash: string,
+  +feedHash: ?string,
   +privateProfile: ?boolean,
   +profile: {|
     +name: string,

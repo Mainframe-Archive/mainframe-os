@@ -347,6 +347,9 @@ const addContactMutation = mutationWithClientMutationId({
     aliasName: {
       type: GraphQLString,
     },
+    sendInvite: {
+      type: GraphQLBoolean,
+    },
   },
   outputFields: {
     contact: {
@@ -356,16 +359,21 @@ const addContactMutation = mutationWithClientMutationId({
     viewer: viewerOutput,
   },
   mutateAndGetPayload: async (args, ctx) => {
-    return await ctx.mutations.createContactFromFeed(
+    const contact = await ctx.mutations.createContactFromFeed(
       args.userID,
       args.publicFeed,
       args.aliasName,
     )
+    if (args.sendInvite) {
+      await ctx.invitesHandler.sendInvite(args.userID, contact)
+    }
+    const contactData = ctx.queries.mergePeerContactData(contact)
+    return { contact: contactData }
   },
 })
 
 const deleteContactMutation = mutationWithClientMutationId({
-  name: 'DeletContact',
+  name: 'DeleteContact',
   inputFields: {
     contactID: {
       type: new GraphQLNonNull(GraphQLString),
@@ -377,6 +385,33 @@ const deleteContactMutation = mutationWithClientMutationId({
   mutateAndGetPayload: async (args, ctx) => {
     ctx.openVault.identities.deleteContact(args.userID, args.contactID)
     await ctx.openVault.save()
+  },
+})
+
+const acceptContactRequestMutation = mutationWithClientMutationId({
+  name: 'AcceptContactRequest',
+  inputFields: {
+    peerID: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    userID: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+  },
+  outputFields: {
+    viewer: viewerOutput,
+    contact: {
+      type: contact,
+      resolve: payload => payload.contact,
+    },
+  },
+  mutateAndGetPayload: async (args, ctx) => {
+    const contact = await ctx.mutations.createContactFromPeer(
+      args.userID,
+      args.peerID,
+    )
+    const contactData = ctx.queries.mergePeerContactData(contact)
+    return { contact: contactData }
   },
 })
 
@@ -674,6 +709,7 @@ export default new GraphQLObjectType({
     publishAppVersion: publishAppVersionMutation,
     updateAppDetails: updateAppDetailsMutation,
     // Users
+    acceptContactRequest: acceptContactRequestMutation,
     addContact: addContactMutation,
     createUserIdentity: createUserIdentityMutation,
     createDeveloperIdentity: createDeveloperIdentityMutation,

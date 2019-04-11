@@ -303,12 +303,13 @@ export const WALLET_ADD_HD_ACCOUNT_SCHEMA = {
 }
 
 export const ETH_TRANSACTION_SCHEMA = {
-  nonce: 'number',
+  nonce: 'string',
   from: 'string',
   to: 'string',
-  data: 'string',
   gas: 'string',
   gasPrice: 'string',
+  data: { type: 'string', optional: true },
+  value: { type: 'string', optional: true },
 }
 
 export const ETH_REQUEST_SCHEMA = {
@@ -318,12 +319,26 @@ export const ETH_REQUEST_SCHEMA = {
   params: { type: 'array', items: 'any' },
 }
 
-export const WALLET_SIGN_ETH_TRANSACTION_SCHEMA = ETH_TRANSACTION_SCHEMA
-
-export const WALLET_SIGN_TRANSACTION_SCHEMA = {
-  chain: WALLET_SUPPORTED_CHAIN_SCHEMA,
-  transactionData: 'object',
+export const INVITE_TX_DETAILS_SCHEMA = {
+  type: {
+    type: 'enum',
+    values: ['approve', 'sendInvite', 'retrieveStake', 'declineInvite'],
+  },
+  userID: 'string',
+  contactID: 'string',
 }
+
+export const INVITE_SEND_SCHEMA = {
+  userID: 'string',
+  contactID: 'string',
+}
+
+export const DECLINE_INVITE_SCHEMA = {
+  userID: 'string',
+  peerID: 'string',
+}
+
+export const WALLET_SIGN_ETH_TRANSACTION_SCHEMA = ETH_TRANSACTION_SCHEMA
 
 export const WALLET_GET_USER_ETH_ACCOUNTS_SCHEMA = {
   userID: 'string',
@@ -336,4 +351,9 @@ export const WALLET_GET_USER_ETH_WALLETS_SCHEMA = {
 export const WALLET_SET_USER_DEFAULT_SCHEMA = {
   userID: 'string',
   address: 'string',
+}
+
+export const WALLET_SIGN_ETH_SCHEMA = {
+  address: 'string',
+  data: 'string',
 }

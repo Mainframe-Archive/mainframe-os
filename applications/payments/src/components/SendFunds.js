@@ -140,20 +140,23 @@ class SendFunds extends Component<ContextProps, State> {
     if (!this.validateSend()) {
       return
     }
-    const accounts = await web3.eth.getAccounts()
     this.setState({
       processingTransaction: true,
       currentTX: undefined,
       errorMsg: undefined,
     })
+
+    const account = await sdk.ethereum.getDefaultAccount()
+
     const params = {
-      from: accounts[0],
+      from: account,
       to: this.state.recipient,
       value: this.state.amount,
     }
+
     const txSub = mft
-      ? sdk.ethereum.sendMFT(params)
-      : sdk.ethereum.sendETH(params)
+      ? await sdk.ethereum.sendMFT(params)
+      : await sdk.ethereum.sendETH(params)
 
     this.listenTX(txSub)
   }

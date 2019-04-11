@@ -9,7 +9,7 @@ import styled from 'styled-components/native'
 import { Text, Button, Checkbox } from '@morpheus-ui/core'
 
 import type { Subscription } from 'rxjs'
-import type { WalletSignTxParams } from '@mainframe/client'
+import type { WalletEthSignTxParams } from '@mainframe/client'
 import { type EthClient } from '@mainframe/eth'
 
 import ContactsIcon from '@morpheus-ui/icons/ContactsFilledMd'
@@ -38,9 +38,9 @@ type GrantedData = {
 type Request = {
   key: string,
   domain?: string,
-  params?: WalletSignTxParams | ContactSelectParams,
+  params?: WalletEthSignTxParams | ContactSelectParams,
   params: {
-    BLOCKCHAIN_SEND?: WalletSignTxParams,
+    BLOCKCHAIN_SEND?: WalletEthSignTxParams,
     CONTACTS_SELECT?: ContactSelectParams,
   },
 }
@@ -330,7 +330,7 @@ export default class UserAlertView extends Component<Props, State> {
         <Text>Invalid transaction data</Text>
       ) : (
         <WalletTxRequestView
-          transaction={params.BLOCKCHAIN_SEND.transactionData}
+          transaction={params.BLOCKCHAIN_SEND}
           ethClient={this.props.ethClient}
         />
       )
