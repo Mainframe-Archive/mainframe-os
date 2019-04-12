@@ -725,17 +725,9 @@ class ContactsViewComponent extends Component<Props, State> {
           </Text>
         </RadioTextContainer>
         <Tooltip top>
-          <Text variant="tooltipTitle">Where will my data be stored?</Text>
+          <Text variant="tooltipTitle">What is a Mutual Invitation?</Text>
           <Text variant="tooltipText">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin
-            consectetur mi in malesuada porttitor.
-          </Text>
-          <Text variant="tooltipTitle">
-            Why should I make my name discoverable?
-          </Text>
-          <Text variant="tooltipText">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin
-            consectetur mi in malesuada porttitor.
+            Both users must add each other’s Mainframe ID manually to establish the connection. Until then the contact remains "Pending" and cannot interact.
           </Text>
         </Tooltip>
       </RadioContainer>
@@ -751,21 +743,14 @@ class ContactsViewComponent extends Component<Props, State> {
             </Text>
           </Text>
           <Text color="#585858" size={11}>
-            The invitee needs to accept the invitation to retrieve your MFT
+            Send an invitation. Retrieve your stake when it is accepted.
           </Text>
         </RadioTextContainer>
         <Tooltip top>
-          <Text variant="tooltipTitle">Where will my data be stored?</Text>
+          <Text variant="tooltipTitle">What is a Blockchain Invitation?</Text>
           <Text variant="tooltipText">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin
-            consectetur mi in malesuada porttitor.
-          </Text>
-          <Text variant="tooltipTitle">
-            Why should I make my name discoverable?
-          </Text>
-          <Text variant="tooltipText">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin
-            consectetur mi in malesuada porttitor.
+            With a Blockchain invitation, you can send a notification to the other user that you want to connect and they can choose to accept or reject the invitation.
+            If the invitation is accepted, your MFT stake will be released back to you. If they reject the invitation, they can claim and keep the stake.
           </Text>
         </Tooltip>
       </RadioContainer>
@@ -785,9 +770,7 @@ class ContactsViewComponent extends Component<Props, State> {
                 variant="greyMid"
                 size={12}
                 theme={{ textAlign: 'center', marginBottom: 50 }}>
-                Connect with other Mainframe users by entering their Mainframe
-                Contact ID. Be sure to have them add your Mainframe Contact ID
-                too.
+                Connect with other Mainframe users by entering their Mainframe ID.
                 {/*  or scanning their QR code */}
               </Text>
             </Column>
@@ -1055,7 +1038,7 @@ class ContactsViewComponent extends Component<Props, State> {
                 <Column>
                   <InformationBox
                     content={
-                      'This person needs to accept your request in order to confirm your invitation and to retrieve your MFT.'
+                      'This person needs to accept your request in order to connect and retrieve your MFT stake.'
                     }
                     full
                   />
@@ -1067,7 +1050,7 @@ class ContactsViewComponent extends Component<Props, State> {
               <Column>
                 <InformationBox
                   content={
-                    'This person needs to add you back to confirm the invitation. Make sure to give out your Mainframe ID.'
+                    'This person needs to add you back to connect. Make sure to give them your Mainframe ID.'
                   }
                   full
                 />
@@ -1087,7 +1070,7 @@ class ContactsViewComponent extends Component<Props, State> {
               <Column>
                 <InformationBox
                   content={
-                    'Share your Mainframe ID with your contacts and let your friends add you on Mainframe OS'
+                    'Share your Mainframe ID with your contacts and let your friends add you on Mainframe OS.'
                   }
                   full
                 />

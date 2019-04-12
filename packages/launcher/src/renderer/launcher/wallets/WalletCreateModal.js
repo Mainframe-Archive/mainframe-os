@@ -281,17 +281,12 @@ export default class WalletCreateModal extends Component<Props, State> {
             }}>
             {backupDescription}{' '}
             <Tooltip theme={{ margin: '10px 0 0 10px' }}>
-              <Text variant="tooltipTitle">Where will my data be stored?</Text>
+              <Text variant="tooltipTitle">What is a Secret Backup Phrase?</Text>
               <Text variant="tooltipText">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin
-                consectetur mi in malesuada porttitor.
-              </Text>
-              <Text variant="tooltipTitle">
-                Why should I make my name discoverable?
-              </Text>
-              <Text variant="tooltipText">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin
-                consectetur mi in malesuada porttitor.
+                When you create a new wallet, a unique Secret Backup Phrase associated with your wallet is also generated.
+                Your Backup Phrase is 12 random words in a specific order that is the key to recover, back up, or import
+                your wallet on any platform. Write it down and store it in a secure location. No one else, including Mainframe,
+                has access to this phrase if you lose it.
               </Text>
             </Tooltip>
           </Text>

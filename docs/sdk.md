@@ -101,7 +101,7 @@ Read events from the blockchain.
 
 If no contact ID is provided the contact picker will be displayed by the trusted UI to allow the user to select a contact.
 
-If no from address is provided the users default eth address will be used.
+If no from address is provided the users default ETH address will be used.
 
 **Example:**
 

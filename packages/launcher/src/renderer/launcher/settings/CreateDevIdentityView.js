@@ -119,18 +119,10 @@ export default class CreateDevIdentityView extends Component<Props, State> {
               </Text>
               <Tooltip>
                 <Text variant="tooltipTitle">
-                  Where will my data be stored?
+                  Why do I need a Developer Identity?
                 </Text>
                 <Text variant="tooltipText">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin
-                  consectetur mi in malesuada porttitor.
-                </Text>
-                <Text variant="tooltipTitle">
-                  Why should I make my name discoverable?
-                </Text>
-                <Text variant="tooltipText">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin
-                  consectetur mi in malesuada porttitor.
+                  Your developer identity is used to sign your apps so users can verify authenticity when they install. They will also see your Developer Name next to your app icon on the Application screen.
                 </Text>
               </Tooltip>
             </DescriptionContainer>

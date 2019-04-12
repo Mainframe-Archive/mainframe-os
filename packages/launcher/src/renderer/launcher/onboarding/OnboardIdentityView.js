@@ -58,15 +58,9 @@ export const createUserMutation = graphql`
 
 const ToolTipContent = (
   <>
-    <Text variant="tooltipTitle">Where will my data be stored?</Text>
+    <Text variant="tooltipTitle">Why do I need an identity?</Text>
     <Text variant="tooltipText">
-      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin consectetur
-      mi in malesuada porttitor.
-    </Text>
-    <Text variant="tooltipTitle">Why should I make my name discoverable?</Text>
-    <Text variant="tooltipText">
-      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin consectetur
-      mi in malesuada porttitor.
+      An identity enables social functionality like sending payments to contacts, messaging, or otherwise interacting with users within Mainframe OS. You can choose whether or not to reveal your identity to other users.
     </Text>
   </>
 )
@@ -164,18 +158,10 @@ export default class OnboardIdentityView extends Component<Props, State> {
                 />
                 <Tooltip theme={{ margin: '10px 0 0 10px' }}>
                   <Text variant="tooltipTitle">
-                    Where will my data be stored?
+                    Why should I be discoverable?
                   </Text>
                   <Text variant="tooltipText">
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                    Proin consectetur mi in malesuada porttitor.
-                  </Text>
-                  <Text variant="tooltipTitle">
-                    Why should I make my name discoverable?
-                  </Text>
-                  <Text variant="tooltipText">
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                    Proin consectetur mi in malesuada porttitor.
+                    Making your identity discoverable will more easily enable you to interact with others. They will be able to see your name as well as the ETH address attached to your default wallet.
                   </Text>
                 </Tooltip>
               </Column>

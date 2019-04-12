@@ -42,14 +42,9 @@ const ToolTipContent = (
   <>
     <Text variant="tooltipTitle">Where will my data be stored?</Text>
     <Text variant="tooltipText">
-      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin consectetur
-      mi in malesuada porttitor.
+      Your user data is encrypted and stored locally on your device. You will be asked to grant permission before any app can access your data.
     </Text>
-    <Text variant="tooltipTitle">Why should I make my name discoverable?</Text>
-    <Text variant="tooltipText">
-      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin consectetur
-      mi in malesuada porttitor.
-    </Text>
+    <Text variant="tooltipTitle">DO NOT FORGET YOUR PASSWORD</Text>
   </>
 )
 

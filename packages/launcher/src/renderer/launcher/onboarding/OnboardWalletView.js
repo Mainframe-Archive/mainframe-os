@@ -43,15 +43,13 @@ const updateProfileMutation = graphql`
 
 const ToolTipContent = (
   <>
-    <Text variant="tooltipTitle">Where will my data be stored?</Text>
+    <Text variant="tooltipTitle">Why do I need a wallet?</Text>
     <Text variant="tooltipText">
-      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin consectetur
-      mi in malesuada porttitor.
+      Interacting with the blockchain requires a wallet. Mainframe OS uses your wallet address for signing transactions, encryption, and to hold and transfer cryptocurrency.
     </Text>
-    <Text variant="tooltipTitle">Why should I make my name discoverable?</Text>
+    <Text variant="tooltipTitle">Can I connect my ledger or add another wallet?</Text>
     <Text variant="tooltipText">
-      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin consectetur
-      mi in malesuada porttitor.
+      Yes, you can import an existing software wallet from a seed phrase, connect a ledger hardware wallet, or create a new wallet.
     </Text>
   </>
 )

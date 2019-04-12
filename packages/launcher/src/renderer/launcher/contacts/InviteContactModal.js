@@ -280,8 +280,22 @@ export class InviteContactModal extends Component<Props, State> {
       return (
         <Text color="#303030" variant="marginTop10" size={11}>
           {`${gasLabel}, ${costlabel}, ${mftLabel}`}
+          <Tooltip>
+            <Text variant="tooltipTitle">What is gas?</Text>
+            <Text variant="tooltipText">
+              When you send tokens, interact with a contract, or do anything else on the blockchain, you must pay for that computation.
+              That payment is calculated in gas, and gas is always paid in ETH. GWei is a measure of ETH. 1 Ether = 1,000,000,000 Gwei (10^9).
+            </Text>
+            <Text variant="tooltipTitle">What's the difference between Gas Price and Max Cost?</Text>
+            <Text variant="tooltipText">
+              Gas Price is the cost per computation. A complete transaction may have several computations.
+              Max Cost = estimated number of computation required to complete the transaction * Gas Price.
+              You are guaranteed not to pay more than this. It will likely actually be less.
+            </Text>
+          </Tooltip>
         </Text>
-      )
+
+    )
     }
   }
 
@@ -298,20 +312,6 @@ export class InviteContactModal extends Component<Props, State> {
             alignItems: 'center',
           }}>
           {title}{' '}
-          <Tooltip>
-            <Text variant="tooltipTitle">Where will my data be stored?</Text>
-            <Text variant="tooltipText">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin
-              consectetur mi in malesuada porttitor.
-            </Text>
-            <Text variant="tooltipTitle">
-              Why should I make my name discoverable?
-            </Text>
-            <Text variant="tooltipText">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin
-              consectetur mi in malesuada porttitor.
-            </Text>
-          </Tooltip>
         </Text>
         <AddContactDetail border>
           <Blocky>
@@ -351,17 +351,9 @@ export class InviteContactModal extends Component<Props, State> {
           }}>
           {title}{' '}
           <Tooltip>
-            <Text variant="tooltipTitle">Where will my data be stored?</Text>
+            <Text variant="tooltipTitle">Where did this address come from?</Text>
             <Text variant="tooltipText">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin
-              consectetur mi in malesuada porttitor.
-            </Text>
-            <Text variant="tooltipTitle">
-              Why should I make my name discoverable?
-            </Text>
-            <Text variant="tooltipText">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin
-              consectetur mi in malesuada porttitor.
+              This is your default ETH address. You can change it in the Wallets tab by selecting another address and designating it as default instead.
             </Text>
           </Tooltip>
         </Text>
@@ -441,10 +433,10 @@ export class InviteContactModal extends Component<Props, State> {
         if (!this.state.txProcessing) {
           if (invitePending && invitePending.state === 'awaiting_approval') {
             action = this.sendApproveTX
-            btnTitle = 'APPROVE INVITE'
+            btnTitle = 'APPROVE TRANSACTION'
           } else if (invitePending && invitePending.state === 'approved') {
             action = this.sendInvite
-            btnTitle = 'SEND INVITE'
+            btnTitle = 'SEND INVITATION'
           }
         }
         break
