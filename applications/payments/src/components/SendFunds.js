@@ -154,11 +154,18 @@ class SendFunds extends Component<ContextProps, State> {
       value: this.state.amount,
     }
 
-    const txSub = mft
-      ? await sdk.ethereum.sendMFT(params)
-      : await sdk.ethereum.sendETH(params)
+    try {
+      const txSub = mft
+        ? await sdk.ethereum.sendMFT(params)
+        : await sdk.ethereum.sendETH(params)
 
-    this.listenTX(txSub)
+      this.listenTX(txSub)
+    } catch (err) {
+      this.setState({
+        processingTransaction: false,
+        errorMsg: err.message || 'Error sending transaction',
+      })
+    }
   }
 
   listenTX(tx) {
