@@ -1,7 +1,7 @@
 {
   "name": "@mainframe/eth",
   "description": "Mainframe Ethereum API and utilities",
-  "version": "0.2.1",
+  "version": "0.3.1",
   "author": "Mainframe",
   "license": "MIT",
   "main": "cjs/index.js",
@@ -21,8 +21,9 @@
   "dependencies": {
     "@babel/runtime": "^7.4.2",
     "@mainframe/rpc-stream": "^0.3.0",
+    "ethers": "^4.0.27",
     "web3-eth-abi": "1.0.0-beta.36",
-    "web3-providers-http": "1.0.0-beta.36",
+    "web3-providers": "^1.0.0-beta.48",
     "web3-utils": "1.0.0-beta.36"
   },
   "devDependencies": {

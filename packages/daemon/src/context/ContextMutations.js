@@ -30,6 +30,7 @@ import type {
   OwnUserIdentity,
   PeerUserIdentity,
 } from '../identity'
+import type { CreateContactParams } from '../identity/IdentitiesRepository'
 import type { OwnDeveloperProfile } from '../identity/OwnDeveloperIdentity'
 import type { OwnUserProfile } from '../identity/OwnUserIdentity'
 import type { PeerUserProfile } from '../identity/PeerUserIdentity'
@@ -332,7 +333,11 @@ export default class ContextMutations {
       throw new Error('Wallet not found')
     }
     app.setDefaultEthAccount(idType(userID), idType(wallet.localID), address)
-    await openVault.save()
+    this._context.next({
+      type: 'eth_accounts_changed',
+      userID,
+      change: 'appUserDefault',
+    })
   }
 
   async setAppPermissionsRequirements(
@@ -424,7 +429,7 @@ export default class ContextMutations {
     const { openVault } = this._context
     Object.keys(apps).forEach(sharedAppID => {
       const app = openVault.apps
-        .getAppsForUser(idType(userID))
+        .getInstalledAppsForUser(idType(userID))
         .find((a: App) => a.updateFeedHash === sharedAppID)
       if (!app) return
 
@@ -483,13 +488,28 @@ export default class ContextMutations {
     })
   }
 
-  createContactFromPeer(userID: ID, peerID: ID, aliasName?: string): Contact {
-    const contact = this._context.openVault.identities.createContactFromPeer(
-      userID,
-      peerID,
-      aliasName,
-    )
-    this._context.next({ type: 'contact_created', contact, userID })
+  async createContactFromPeer(
+    userID: string,
+    peerID: string,
+  ): Promise<Contact> {
+    const { identities } = this._context.openVault
+
+    const params: CreateContactParams = { userID, peerID }
+
+    const inviteRequest = identities.getInviteRequest(userID, peerID)
+    if (inviteRequest) {
+      params.acceptanceSignature = await this._context.invitesHandler.signAccepted(
+        inviteRequest,
+      )
+      identities.deleteInviteRequest(userID, peerID)
+    }
+    const contact = identities.createContactFromPeer(params)
+
+    this._context.next({
+      type: 'contact_created',
+      contact,
+      userID: params.userID,
+    })
     return contact
   }
 
@@ -538,7 +558,7 @@ export default class ContextMutations {
       contactID,
     )
     if (contact == null) {
-      throw new Error('Peer not found')
+      throw new Error('Contact not found')
     }
     contact.profile = profile
     this._context.next({
@@ -546,6 +566,30 @@ export default class ContextMutations {
       contact,
       userID,
       change: 'profile',
+    })
+  }
+
+  updateContactAccepted(userID: string, contactID: string, signature: string) {
+    const contact = this._context.openVault.identities.getContact(
+      userID,
+      contactID,
+    )
+    if (!contact) {
+      this._context.log('Contact not found when trying to add peer')
+      return
+    }
+    if (!contact.invite) {
+      this._context.log(
+        'No invite data found for contact when updating accepted',
+      )
+      return
+    }
+    contact.invite.acceptedSignature = signature
+    this._context.next({
+      type: 'contact_changed',
+      contact,
+      userID,
+      change: 'inviteAccepted',
     })
   }
 
@@ -699,13 +743,28 @@ export default class ContextMutations {
       wallet.localID,
       address,
     )
-    await openVault.save()
+    if (this.updateUser)
+      this._context.next({
+        type: 'eth_accounts_changed',
+        userID,
+        change: 'userDefault',
+      })
+
+    const user = openVault.identities.getOwnUser(userID)
+    if (user) {
+      user.profile.ethAddress = address
+      this._context.next({ type: 'user_changed', change: 'profile', user })
+    }
   }
 
   async setEthNetwork(url: string): Promise<void> {
     const { openVault, io } = this._context
     openVault.setEthUrl(url)
-    io.eth.ethHttpUrl = url
-    await openVault.save()
+    io.eth.providerURL = url
+    await io.eth.fetchNetwork()
+    this._context.next({
+      type: 'eth_network_changed',
+      network: io.eth.networkName,
+    })
   }
 }

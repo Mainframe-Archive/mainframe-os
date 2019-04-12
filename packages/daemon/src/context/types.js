@@ -43,15 +43,46 @@ export type ContactChangedEvent = {|
   userID: string,
   change:
     | 'peerChanged'
-    | 'requestSent'
+    | 'feedRequestSent'
     | 'remoteFeed'
     | 'localFeed'
-    | 'profile',
+    | 'profile'
+    | 'inviteAccepted'
+    | 'inviteDeclined'
+    | 'inviteFailed'
+    | 'inviteReceived'
+    | 'inviteSent'
+    | 'stakeError'
+    | 'stakeReclaimMined'
+    | 'stakeReclaimProcessing',
 |}
+
+export type ContactsChangedEvent = {|
+  type: 'contacts_changed',
+  userID: string,
+|}
+
 export type ContactDeletedEvent = {|
   type: 'contact_deleted',
   contactID: string,
   userID: string,
+|}
+
+export type EthNetworkChangedEvent = {|
+  type: 'eth_network_changed',
+  network: string,
+|}
+
+export type EthAccountsChangedEvent = {|
+  type: 'eth_accounts_changed',
+  userID: string,
+  change: 'userDefault' | 'accountAdded' | 'appUserDefault',
+|}
+
+export type InvitesChangedEvent = {|
+  type: 'invites_changed',
+  userID: string,
+  change: 'inviteReceived' | 'inviteDeclined',
 |}
 
 export type PeerCreatedEvent = {|
@@ -96,7 +127,11 @@ export type ContextEvent =
   | AppUpdateEvent
   | ContactCreatedEvent
   | ContactChangedEvent
+  | ContactsChangedEvent
   | ContactDeletedEvent
+  | EthAccountsChangedEvent
+  | EthNetworkChangedEvent
+  | InvitesChangedEvent
   | PeerCreatedEvent
   | PeerChangedEvent
   | PeerDeletedEvent

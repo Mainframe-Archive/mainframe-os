@@ -14,7 +14,7 @@
     "test:types": "flow check"
   },
   "dependencies": {
-    "@mainframe/config": "^0.2.0",
+    "@mainframe/config": "^0.3.0",
     "execa": "^1.0.0",
     "fs-extra": "^7.0.0"
   },

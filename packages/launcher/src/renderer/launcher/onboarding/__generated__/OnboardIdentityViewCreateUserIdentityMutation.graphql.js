@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 8d216c453a4d5a0a3b1a480e0ee48343
+ * @relayHash 040c02c3bbaff3421e599609efdf397f
  */
 
 /* eslint-disable */
@@ -78,6 +78,11 @@ fragment Launcher_identities on Identities {
   ownUsers {
     defaultEthAddress
     localID
+    feedHash
+    profile {
+      name
+      ethAddress
+    }
     wallets {
       hd {
         localID
@@ -118,6 +123,13 @@ v2 = {
   "storageKey": null
 },
 v3 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "name",
+  "args": null,
+  "storageKey": null
+},
+v4 = {
   "kind": "LinkedField",
   "alias": null,
   "name": "profile",
@@ -126,39 +138,33 @@ v3 = {
   "concreteType": "NamedProfile",
   "plural": false,
   "selections": [
-    {
-      "kind": "ScalarField",
-      "alias": null,
-      "name": "name",
-      "args": null,
-      "storageKey": null
-    }
+    v3
   ]
 },
-v4 = {
+v5 = {
   "kind": "ScalarField",
   "alias": null,
   "name": "defaultEthAddress",
   "args": null,
   "storageKey": null
 },
-v5 = {
+v6 = {
   "kind": "ScalarField",
   "alias": null,
   "name": "id",
   "args": null,
   "storageKey": null
 },
-v6 = [
+v7 = [
   v2,
-  v5
+  v6
 ];
 return {
   "kind": "Request",
   "operationKind": "mutation",
   "name": "OnboardIdentityViewCreateUserIdentityMutation",
   "id": null,
-  "text": "mutation OnboardIdentityViewCreateUserIdentityMutation(\n  $input: CreateUserIdentityInput!\n) {\n  createUserIdentity(input: $input) {\n    user {\n      localID\n      profile {\n        name\n      }\n      id\n    }\n    viewer {\n      identities {\n        ownUsers {\n          defaultEthAddress\n          localID\n          id\n        }\n        ...Launcher_identities\n      }\n      id\n    }\n  }\n}\n\nfragment Launcher_identities on Identities {\n  ownUsers {\n    defaultEthAddress\n    localID\n    wallets {\n      hd {\n        localID\n        id\n      }\n      ledger {\n        localID\n        id\n      }\n    }\n    id\n  }\n}\n",
+  "text": "mutation OnboardIdentityViewCreateUserIdentityMutation(\n  $input: CreateUserIdentityInput!\n) {\n  createUserIdentity(input: $input) {\n    user {\n      localID\n      profile {\n        name\n      }\n      id\n    }\n    viewer {\n      identities {\n        ownUsers {\n          defaultEthAddress\n          localID\n          id\n        }\n        ...Launcher_identities\n      }\n      id\n    }\n  }\n}\n\nfragment Launcher_identities on Identities {\n  ownUsers {\n    defaultEthAddress\n    localID\n    feedHash\n    profile {\n      name\n      ethAddress\n    }\n    wallets {\n      hd {\n        localID\n        id\n      }\n      ledger {\n        localID\n        id\n      }\n    }\n    id\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -186,7 +192,7 @@ return {
             "plural": false,
             "selections": [
               v2,
-              v3
+              v4
             ]
           },
           {
@@ -216,7 +222,7 @@ return {
                     "concreteType": "OwnUserIdentity",
                     "plural": true,
                     "selections": [
-                      v4,
+                      v5,
                       v2
                     ]
                   },
@@ -257,8 +263,8 @@ return {
             "plural": false,
             "selections": [
               v2,
-              v3,
-              v5
+              v4,
+              v6
             ]
           },
           {
@@ -288,9 +294,35 @@ return {
                     "concreteType": "OwnUserIdentity",
                     "plural": true,
                     "selections": [
-                      v4,
-                      v2,
                       v5,
+                      v2,
+                      v6,
+                      {
+                        "kind": "ScalarField",
+                        "alias": null,
+                        "name": "feedHash",
+                        "args": null,
+                        "storageKey": null
+                      },
+                      {
+                        "kind": "LinkedField",
+                        "alias": null,
+                        "name": "profile",
+                        "storageKey": null,
+                        "args": null,
+                        "concreteType": "NamedProfile",
+                        "plural": false,
+                        "selections": [
+                          v3,
+                          {
+                            "kind": "ScalarField",
+                            "alias": null,
+                            "name": "ethAddress",
+                            "args": null,
+                            "storageKey": null
+                          }
+                        ]
+                      },
                       {
                         "kind": "LinkedField",
                         "alias": null,
@@ -308,7 +340,7 @@ return {
                             "args": null,
                             "concreteType": "EthHDWallet",
                             "plural": true,
-                            "selections": v6
+                            "selections": v7
                           },
                           {
                             "kind": "LinkedField",
@@ -318,7 +350,7 @@ return {
                             "args": null,
                             "concreteType": "EthLedgerWallet",
                             "plural": true,
-                            "selections": v6
+                            "selections": v7
                           }
                         ]
                       }
@@ -326,7 +358,7 @@ return {
                   }
                 ]
               },
-              v5
+              v6
             ]
           }
         ]

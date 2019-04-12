@@ -244,17 +244,50 @@ export type EthTransactionParams = {
   data: string,
   gas: string,
   gasPrice: string,
-  chainId: number,
+  chainId?: ?number,
 }
 
-export type BlockchainWeb3SendParams = {
-  id: number,
-  jsonrpc: string,
+export type BlockchainEthSendParams = {|
   method: string,
-  params: Array<any>,
+  params: Array<*>,
+|}
+
+export type BlockchainEthSendResult = any
+
+export type EthUnsubscribeParams = {
+  id: string,
 }
 
-export type BlockchainWeb3SendResult = any
+export type GetInviteTXDetailsParams = {
+  type: 'approve' | 'sendInvite',
+  userID: string,
+  contactID: string,
+}
+
+export type GetInviteTXDetailsResult = {
+  approved?: ?boolean,
+  gasPriceGwei?: string,
+  maxCost?: string,
+  stakeAmount: string,
+}
+
+export type SendInviteTXParams = {
+  userID: string,
+  contactID: string,
+  gasPrice?: string,
+}
+
+export type SendDeclineTXParams = {
+  userID: string,
+  peerID: string,
+  gasPrice?: string,
+}
+
+export type SendWithdrawInviteTXParams = {
+  userID: string,
+  contactID: string,
+  gasPrice?: string,
+}
 
 // Comms
 
@@ -430,8 +463,23 @@ export type ContactsGetAppUserContactsResult = {
 export type ContactResult = {
   localID: string,
   peerID: string,
-  connectionState: 'connected' | 'sent' | 'sending',
+  connectionState:
+    | 'connected'
+    | 'sent_feed'
+    | 'sending_feed'
+    | 'received'
+    | 'declined'
+    | 'sending_blockchain'
+    | 'sent_blockchain',
   profile: ContactProfile,
+  invite?: {
+    inviteTX: string,
+    stake: {
+      amount: string,
+      state: 'sending' | 'staked' | 'reclaiming' | 'reclaimed' | 'seized',
+      reclaimedTX?: ?string,
+    },
+  },
 }
 
 export type ContactsGetUserContactsParams = {
@@ -523,12 +571,16 @@ export type WalletEthSignDataParams = {
   data: string,
 }
 
-export type WalletSignTxParams = {
-  chain: WalletSupportedChains,
-  transactionData: EthTransactionParams,
-}
+export type WalletEthSignTxParams = EthTransactionParams
 
 export type WalletSignTxResult = string
+
+export type WalletEthSignParams = {
+  address: string,
+  data: string,
+}
+
+export type WalletSignResult = string
 
 export type WalletGetLedgerEthAccountsParams = {
   pageNum: number,

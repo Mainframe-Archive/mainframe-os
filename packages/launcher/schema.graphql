@@ -1,7 +1,20 @@
+input AcceptContactRequestInput {
+  peerID: String!
+  userID: String!
+  clientMutationId: String
+}
+
+type AcceptContactRequestPayload {
+  viewer: Viewer!
+  contact: Contact
+  clientMutationId: String
+}
+
 input AddContactInput {
   userID: String!
   publicFeed: String!
   aliasName: String
+  sendInvite: Boolean
   clientMutationId: String
 }
 
@@ -46,7 +59,7 @@ type App implements Node {
   name: String!
   manifest: AppManifestData!
   update: AppUpdateData
-  installationState: InstallationState
+  installationState: InstallationState!
   users: [AppUser!]!
 }
 
@@ -201,8 +214,12 @@ type AppVersionData {
 
 enum ConnectionState {
   CONNECTED
-  SENDING
-  SENT
+  DECLINED
+  RECEIVED
+  SENDING_FEED
+  SENT_FEED
+  SENDING_BLOCKCHAIN
+  SENT_BLOCKCHAIN
 }
 
 type Contact implements Node {
@@ -212,6 +229,7 @@ type Contact implements Node {
   peerID: ID!
   publicFeed: String!
   pubKey: String!
+  invite: ContactInviteData
   profile: GenericProfile!
   connectionState: ConnectionState!
 }
@@ -221,7 +239,14 @@ type ContactChangedPayload {
   viewer: Viewer!
 }
 
+type ContactInviteData {
+  inviteTX: String
+  ethNetwork: String
+  stake: InviteStake!
+}
+
 type Contacts {
+  invitesCount(userID: String!): Int!
   userContacts(userID: String!): [Contact!]!
 }
 
@@ -261,12 +286,12 @@ type CreateUserIdentityPayload {
   clientMutationId: String
 }
 
-input DeletContactInput {
+input DeleteContactInput {
   contactID: String!
   clientMutationId: String
 }
 
-type DeletContactPayload {
+type DeleteContactPayload {
   viewer: Viewer!
   clientMutationId: String
 }
@@ -335,6 +360,12 @@ enum InstallationState {
   ERROR
 }
 
+type InviteStake {
+  amount: String
+  state: StakeState!
+  reclaimedTX: String
+}
+
 input ManifestAuthorInput {
   id: String!
   name: String!
@@ -348,10 +379,11 @@ type Mutation {
   setAppPermissionsRequirements(input: SetAppPermissionsRequirementsInput!): SetAppPermissionsRequirementsPayload
   publishAppVersion(input: PublishAppVersionInput!): PublishAppVersionPayload
   updateAppDetails(input: UpdateAppDetailsInput!): UpdateAppDetailsPayload
+  acceptContactRequest(input: AcceptContactRequestInput!): AcceptContactRequestPayload
   addContact(input: AddContactInput!): AddContactPayload
   createUserIdentity(input: CreateUserIdentityInput!): CreateUserIdentityPayload
   createDeveloperIdentity(input: CreateDeveloperIdentityInput!): CreateDeveloperIdentityPayload
-  deleteContact(input: DeletContactInput!): DeletContactPayload
+  deleteContact(input: DeleteContactInput!): DeleteContactPayload
   setDefaultWallet(input: SetDefaultWalletInput!): SetDefaultWalletPayload
   setUserProfileVisibility(input: SetUserProfileVisibilityInput!): SetUserProfileVisibilityPayload
   updateProfile(input: UpdateProfileInput!): UpdateProfilePayload
@@ -404,7 +436,7 @@ type OwnUserIdentity implements Node {
   """The ID of an object"""
   id: ID!
   localID: ID!
-  feedHash: String!
+  feedHash: String
   mfid: ID!
   apps: [App!]!
   defaultEthAddress: String
@@ -500,9 +532,17 @@ type SetUserProfileVisibilityPayload {
   clientMutationId: String
 }
 
+enum StakeState {
+  STAKED
+  RECLAIMING
+  RECLAIMED
+  SEIZED
+}
+
 type Subscription {
   appUpdateChanged: AppUpdatePayload!
   contactChanged: ContactChangedPayload!
+  contactsChanged: ContactChangedPayload!
 }
 
 enum SupportedWallets {

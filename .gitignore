@@ -8,6 +8,7 @@ flow-typed
 /packages/*/.flowconfig
 /packages/*/cjs
 /packages/launcher/src/assets/svgs/*.svg
+/packages/smart-contracts/build
 dist/
 *.log
 .DS_Store
