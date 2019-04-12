@@ -1,6 +1,14 @@
 // @flow
 import EventEmitter from 'events'
-import { fromWei, toWei, toHex, hexToNumber, isAddress } from 'web3-utils'
+import {
+  fromWei,
+  hexToNumber,
+  isAddress,
+  numberToHex,
+  toWei,
+  toHex,
+  toBN,
+} from 'web3-utils'
 import type { Observable } from 'rxjs'
 import { WebsocketProvider } from 'web3-providers'
 import Web3EthAbi from 'web3-eth-abi'
@@ -271,6 +279,31 @@ export default class EthClient extends EventEmitter {
     })
   }
 
+  async estimateGas(txParams: Object): Promise<string> {
+    const { gasLimit } = await this.send('eth_getBlockByNumber', [
+      'latest',
+      false,
+    ])
+    // Get the block limit from previous block
+    const blockGasLimitBN = toBN(gasLimit)
+    const maxGasBN = blockGasLimitBN.muln(0.9)
+
+    // Get estimated tx limit
+    const estGasHex = await this.send('eth_estimateGas', [txParams])
+    const estGasBN = toBN(estGasHex)
+
+    // Pad the estimated limit
+    const paddedGasBN = estGasBN.muln(1.2)
+
+    if (estGasBN.gt(maxGasBN)) {
+      return estGasHex
+    }
+    if (paddedGasBN.lt(maxGasBN)) {
+      return numberToHex(paddedGasBN)
+    }
+    return numberToHex(maxGasBN)
+  }
+
   async completeTxParams(txParams: Object): Promise<Object> {
     if (!txParams.to) {
       throw new Error('Transaction "to" address required')
@@ -287,7 +320,7 @@ export default class EthClient extends EventEmitter {
 
     if (!txParams.gas) {
       try {
-        txParams.gas = await this.send('eth_estimateGas', [txParams])
+        txParams.gas = await this.estimateGas(txParams)
       } catch (err) {
         // handle simple value transfer case
         if (err.message === 'no contract code at given address') {
