@@ -1,7 +1,7 @@
 {
   "name": "@mainframe/cli",
   "description": "Mainframe CLI",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "author": "Mainframe",
   "license": "MIT",
   "main": "lib/index.js",
@@ -30,8 +30,8 @@
     "postpublish": "del-cli oclif.manifest.json"
   },
   "dependencies": {
-    "@mainframe/client": "^0.2.0",
-    "@mainframe/config": "^0.2.0",
+    "@mainframe/client": "^0.3.0",
+    "@mainframe/config": "^0.3.0",
     "@mainframe/toolbox": "^0.2.0",
     "@oclif/command": "^1.5.12",
     "@oclif/config": "^1.12.11",
