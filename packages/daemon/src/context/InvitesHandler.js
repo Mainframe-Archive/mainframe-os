@@ -36,7 +36,7 @@ const contracts = {
   // },
   ropsten: {
     token: '0xa46f1563984209fe47f8236f8b01a03f03f957e4',
-    invites: '0x33e16EFEA57968BC91fd5D9Db20068d5E4af5515',
+    invites: '0x2f554d5Ff0108618985489850393EA4923d6a3c1',
   },
   ganache: {
     token: '0xB3E555c3dB7B983E46bf5a530ce1dac4087D2d8D',
@@ -427,7 +427,7 @@ export default class InvitesHandler {
     return new Promise((resolve, reject) => {
       // TODO: Notify launcher and request permission from user?
 
-      if (!user.profile.ethAddress) {
+      if (!peer.profile.ethAddress) {
         throw new Error('No eth address found for recipient')
       }
 

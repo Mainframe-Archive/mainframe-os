@@ -53,6 +53,7 @@ const CONTACT_CHANGED_SUBSCRIPTION = graphql`
           avatar
         }
         invite {
+          ethNetwork
           inviteTX
           stake {
             reclaimedTX
