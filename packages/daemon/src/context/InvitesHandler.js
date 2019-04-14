@@ -389,8 +389,9 @@ export default class InvitesHandler {
     const balanceBN = utils.parseUnits(mftBalance, 'ether')
 
     if (stakeBN.gt(balanceBN)) {
+      const formattedStake = utils.formatUnits(stakeBN, 'ether')
       throw new Error(
-        `Insufficient MFT balance of ${balanceBN.toString()} for required stake ${stakeBN.toString()}`,
+        `Insufficient MFT balance of ${balanceBN.toString()} for required stake ${formattedStake}`,
       )
     }
 

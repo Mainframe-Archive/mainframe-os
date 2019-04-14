@@ -198,9 +198,9 @@ export class InviteContactModal extends Component<Props, State> {
     } catch (err) {
       this.setState({
         error: err.message,
+        txProcessing: false,
         invitePending: {
           state: 'approved',
-          txProcessing: false,
         },
       })
     }
