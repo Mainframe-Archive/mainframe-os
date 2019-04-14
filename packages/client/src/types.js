@@ -565,12 +565,6 @@ export type WalletGetEthWalletsResult = {
   ledger: WalletResults,
 }
 
-export type WalletEthSignDataParams = {
-  localID: ID,
-  address: string,
-  data: string,
-}
-
 export type WalletEthSignTxParams = EthTransactionParams
 
 export type WalletSignTxResult = string

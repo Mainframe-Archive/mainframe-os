@@ -77,7 +77,7 @@ contract ContactInvite is Ownable, Pausable {
     inviteRequests[senderHash][recipientHash].block = block.number;
     inviteRequests[senderHash][recipientHash].state = InviteState.PENDING;
     inviteRequests[senderHash][recipientHash].senderAddress = msg.sender;
-    emit Invited(recipientFeedHash, recipientAddressHash, senderFeed, senderAddressHash, requiredStake);
+    emit Invited(recipientFeedHash, recipientAddressHash, senderFeed, msg.sender, requiredStake);
   }
 
   function declineAndWithdraw(
@@ -108,7 +108,8 @@ contract ContactInvite is Ownable, Pausable {
     bytes32 senderHash = keccak256(abi.encodePacked(senderAddressHash, senderFeedHash));
     bytes32 recipientHash = keccak256(abi.encodePacked(recipientAddressHash, recipientFeedHash));
     require(inviteRequests[senderHash][recipientHash].stake > 0, 'No stake to withdraw');
-    require(verifySig(senderAddressHash, v, r, s) == recipientAddressHash, 'Unable to verify recipient signature');
+    bytes32 verifiedSig = verifySig(senderAddressHash, v, r, s);
+    require(verifiedSig == recipientAddressHash, 'Unable to verify recipient signature');
     uint stake = inviteRequests[senderHash][recipientHash].stake;
     inviteRequests[senderHash][recipientHash].stake = 0;
     inviteRequests[senderHash][recipientHash].state = InviteState.ACCEPTED;
@@ -152,7 +153,7 @@ contract ContactInvite is Ownable, Pausable {
     bytes32 indexed recipientFeedHash,
     bytes32 recipientAddressHash,
     string senderFeed,
-    bytes32 senderAddressHash,
+    address senderAddress,
     uint stakeAmount
   );
   event Declined(

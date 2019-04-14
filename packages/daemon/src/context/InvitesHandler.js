@@ -6,7 +6,7 @@ import createKeccakHash from 'keccak'
 import { utils } from 'ethers'
 import { filter } from 'rxjs/operators'
 import { type Observable } from 'rxjs'
-import type { bzzHash } from '../swarm/feed'
+// import type { bzzHash } from '../swarm/feed'
 
 import type { OwnUserIdentity, PeerUserIdentity } from '../identity'
 import type { InviteRequest } from '../identity/IdentitiesRepository'
@@ -27,7 +27,7 @@ type ObserveInvites<T = Object> = {
 //$FlowFixMe Cannot resolve module ./inviteABI.
 const INVITE_ABI = require('./inviteABI.json')
 
-const EVENT_BATCH_SIZE = 1000
+const EVENT_BATCH_SIZE = 5000
 
 const contracts = {
   // mainnet: {
@@ -44,11 +44,21 @@ const contracts = {
   },
 }
 
+const bufferFromHex = (hex: string) => {
+  return Buffer.from(hex.substr(2), 'hex')
+}
+
 const hash = (data: Buffer) => {
   const bytes = createKeccakHash('keccak256')
     .update(data)
     .digest()
   return '0x' + bytes.toString('hex')
+}
+
+const matchAddress = (addressHash: string, addresses: Array<string>) => {
+  return addresses.find(a => {
+    return hash(bufferFromHex(a)) === addressHash
+  })
 }
 
 export default class InvitesHandler {
@@ -102,25 +112,19 @@ export default class InvitesHandler {
 
   setup() {
     const { identities } = this._context.openVault
+
     Object.keys(identities.ownUsers).forEach(async id => {
       const user = identities.getOwnUser(id)
-      if (user) {
-        if (user.publicFeed.feedHash) {
-          const feedhash = hash(Buffer.from(user.publicFeed.feedHash))
-          await this.subscribeToEthEvents(user, feedhash)
-          await this.readEvents(
-            user,
-            feedhash,
-            'Invited',
-            this.handleInviteEvent,
-          )
-          await this.readEvents(
-            user,
-            feedhash,
-            'Declined',
-            this.handleRejectedEvent,
-          )
-        }
+      if (user && user.publicFeed.feedHash) {
+        const feedhash = hash(Buffer.from(user.publicFeed.feedHash))
+        await this.subscribeToEthEvents(user, feedhash)
+        await this.readEvents(user, feedhash, 'Invited', this.handleInviteEvent)
+        await this.readEvents(
+          user,
+          feedhash,
+          'Declined',
+          this.handleDeclinedEvent,
+        )
       }
     })
   }
@@ -189,18 +193,36 @@ export default class InvitesHandler {
     }
   }
 
-  async checkInviteState(sender: string, recipient: string, feed: ?bzzHash) {
-    const params = [sender, recipient, feed]
+  async checkInviteState(
+    senderAddrHash: string,
+    senderFeedHash: string,
+    recipientAddrHash: string,
+    recipientFeedHash: string,
+  ) {
+    const params = [
+      senderAddrHash,
+      senderFeedHash,
+      recipientAddrHash,
+      recipientFeedHash,
+    ]
     const res = await this.invitesContract.call('getInviteState', params)
     return utils.parseBytes32String(res)
   }
 
-  handleRejectedEvent = async (
+  handleDeclinedEvent = async (
     user: OwnUserIdentity,
     event: Object,
   ): Promise<void> => {
     const { identities } = this._context.openVault
-    const peer = identities.getPeerByFeed(event.recipientFeed)
+    const peerID = Object.keys(identities.peerUsers).find(id => {
+      const peer = identities.peerUsers[id]
+      return hash(Buffer.from(peer.publicFeed)) === event.recipientFeedHash
+    })
+    if (!peerID) {
+      this._context.log('Peer not found')
+      return
+    }
+    const peer = identities.getPeerUser(peerID)
     if (peer) {
       const contact = identities.getContactByPeerID(user.localID, peer.localID)
       if (contact && contact.invite) {
@@ -243,19 +265,38 @@ export default class InvitesHandler {
             mode: 'content-response',
           },
         )
+
         if (feedValue) {
           const feed = await feedValue.json()
+
+          const buffer = bufferFromHex(contractEvent.senderAddress)
+          const senderAddrHash = hash(buffer)
+
           const inviteState = await this.checkInviteState(
-            contractEvent.senderAddress,
-            contractEvent.recipientAddress,
-            user.publicFeed.feedHash,
+            senderAddrHash,
+            hash(Buffer.from(contractEvent.senderFeed)),
+            contractEvent.recipientAddressHash,
+            contractEvent.recipientFeedHash,
           )
           const storedInvites = identities.getInvites(user.localID)
           if (inviteState === 'PENDING' && !storedInvites[peer.localID]) {
+            const accounts = this._context.queries.getUserEthAccounts(
+              user.localID,
+            )
+            const receivedAddress = matchAddress(
+              contractEvent.recipientAddressHash,
+              accounts,
+            )
+            if (!receivedAddress) {
+              this._context.log(
+                'Failed to add invite due to missing receiving address',
+              )
+              return
+            }
             const contactInvite = {
               ethNetwork: this._context.io.eth.networkName,
               privateFeed: feed.privateFeed,
-              receivedAddress: contractEvent.recipientAddress,
+              receivedAddress: receivedAddress,
               senderAddress: contractEvent.senderAddress,
               peerID: peer.localID,
             }
@@ -377,17 +418,18 @@ export default class InvitesHandler {
   ) {
     return new Promise((resolve, reject) => {
       // TODO: Notify launcher and request permission from user?
-      if (!user.profile.ethAddress) {
-        throw new Error('No eth address found for user')
+      if (!peer.profile.ethAddress) {
+        throw new Error('No eth address found for recipient')
       }
+
+      const toAddrHash = hash(bufferFromHex(peer.profile.ethAddress))
+      const toFeedHash = hash(Buffer.from(peer.publicFeed))
+      const params = [toAddrHash, toFeedHash, user.publicFeed.feedHash]
+
       const txOptions = { from: user.profile.ethAddress }
 
       this.invitesContract
-        .send(
-          'sendInvite',
-          [peer.profile.ethAddress, peer.publicFeed, user.publicFeed.feedHash],
-          txOptions,
-        )
+        .send('sendInvite', params, txOptions)
         .then(inviteRes => {
           inviteRes.on('hash', hash => {
             resolve(hash)
@@ -420,8 +462,9 @@ export default class InvitesHandler {
     const balanceBN = utils.parseUnits(mftBalance, 'ether')
 
     if (stakeBN.gt(balanceBN)) {
+      const formattedStake = utils.formatUnits(stakeBN, 'ether')
       throw new Error(
-        `Insufficient MFT balance of ${balanceBN.toString()} for required stake ${stakeBN.toString()}`,
+        `Insufficient MFT balance of ${balanceBN.toString()} for required stake ${formattedStake}`,
       )
     }
 
@@ -467,7 +510,14 @@ export default class InvitesHandler {
     }
 
     const addr = inviteRequest.senderAddress.substr(2)
-    const messageHex = hash(Buffer.from(addr, 'hex'))
+    const addressHash = bufferFromHex(hash(Buffer.from(addr, 'hex')))
+
+    const messageBytes = Buffer.concat([
+      Buffer.from('MFOS Contact Accept:'),
+      addressHash,
+    ])
+
+    const messageHex = '0x' + messageBytes.toString('hex')
 
     const acceptanceSignature = await this._context.io.eth.signData({
       address: inviteRequest.receivedAddress,
@@ -486,18 +536,25 @@ export default class InvitesHandler {
   }
 
   async retrieveStake(userID: string, contactID: string) {
-    const { peer, contact } = this.getUserObjects(userID, contactID)
+    const { peer, contact, user } = this.getUserObjects(userID, contactID)
     const invite = contact._invite
     if (invite != null && invite.stake && invite.acceptedSignature) {
       const sigParams = this.signatureParams(invite.acceptedSignature)
 
+      // $FlowFixMe will have feedHash by this point
+      const fromFeedHash = hash(Buffer.from(user.publicFeed.feedHash))
+      const toAddrHash = hash(bufferFromHex(invite.toAddress))
+      const toFeedHash = hash(Buffer.from(peer.publicFeed))
+
       const txOptions = { from: invite.fromAddress }
       this.validateInviteNetwork(invite.ethNetwork)
+
       const res = await this.invitesContract.send(
         'retrieveStake',
         [
-          invite.toAddress,
-          peer.publicFeed,
+          toAddrHash,
+          toFeedHash,
+          fromFeedHash,
           sigParams.vNum,
           sigParams.r,
           sigParams.s,
@@ -554,10 +611,16 @@ export default class InvitesHandler {
       throw new Error('Invite not found')
     }
     this.validateInviteNetwork(inviteRequest.ethNetwork)
+
+    // $FlowFixMe must have feedhash by this point
+    const myFeedHash = hash(Buffer.from(user.publicFeed.feedHash))
+    const fromAddressHash = hash(bufferFromHex(inviteRequest.senderAddress))
+    const fromFeedHash = hash(Buffer.from(peer.publicFeed))
+
     const txOptions = { from: inviteRequest.receivedAddress }
     const res = await this.invitesContract.send(
       'declineAndWithdraw',
-      [inviteRequest.senderAddress, peer.publicFeed, user.publicFeed.feedHash],
+      [fromAddressHash, fromFeedHash, myFeedHash],
       txOptions,
     )
 
@@ -626,7 +689,7 @@ export default class InvitesHandler {
 
       // $FlowFixMe subscription compatibility already checked
       eth.web3Provider.on(declinedSub, async msg => {
-        handleEvent('Declined', msg, this.handleRejectedEvent)
+        handleEvent('Declined', msg, this.handleDeclinedEvent)
       })
     } catch (err) {
       this._context.log(err.message)
@@ -668,7 +731,7 @@ export default class InvitesHandler {
     }
   }
 
-  async getDeclineTXDetails(userID: string, peerID: string) {
+  async getDeclineTXDetails(userID: string, peerID: string): Promise<Object> {
     const { identities } = this._context.openVault
     const user = identities.getOwnUser(userID)
     if (!user) throw new Error('User not found')
@@ -678,10 +741,15 @@ export default class InvitesHandler {
     if (!inviteRequest) throw new Error('Invite request not found')
     this.validateInviteNetwork(inviteRequest.ethNetwork)
 
+    // $FlowFixMe will have feedHash by this point
+    const myFeedHash = hash(Buffer.from(user.publicFeed.feedHash))
+    const fromAddressHash = hash(bufferFromHex(inviteRequest.senderAddress))
+    const fromFeedHash = hash(Buffer.from(peer.publicFeed))
+
     const data = this.invitesContract.encodeCall('declineAndWithdraw', [
-      inviteRequest.senderAddress,
-      peer.publicFeed,
-      user.publicFeed.feedHash,
+      fromAddressHash,
+      fromFeedHash,
+      myFeedHash,
     ])
 
     const txOptions = {
@@ -698,14 +766,20 @@ export default class InvitesHandler {
     user: OwnUserIdentity,
     peer: PeerUserIdentity,
     contact: Contact,
-  ) {
+  ): Promise<Object> {
     const invite = contact._invite
     if (invite != null && invite.stake && invite.acceptedSignature) {
       const sigParams = this.signatureParams(invite.acceptedSignature)
 
+      // $FlowFixMe will have feedHash by this point
+      const fromFeedHash = hash(Buffer.from(user.publicFeed.feedHash))
+      const toAddrHash = hash(bufferFromHex(invite.toAddress))
+      const toFeedHash = hash(Buffer.from(peer.publicFeed))
+
       const txParams = [
-        invite.toAddress,
-        peer.publicFeed,
+        toAddrHash,
+        toFeedHash,
+        fromFeedHash,
         sigParams.vNum,
         sigParams.r,
         sigParams.s,
@@ -724,7 +798,7 @@ export default class InvitesHandler {
     throw new Error('Accepted signature not found')
   }
 
-  async getApproveTXDetails(user: OwnUserIdentity) {
+  async getApproveTXDetails(user: OwnUserIdentity): Promise<Object> {
     const { eth } = this._context.io
     const stake = await this.invitesContract.call('requiredStake')
     const data = this.tokenContract.encodeCall('approve', [
@@ -741,21 +815,29 @@ export default class InvitesHandler {
     return { ...params, ...formattedParams }
   }
 
-  async getSendInviteTXDetails(user: OwnUserIdentity, peer: PeerUserIdentity) {
+  async getSendInviteTXDetails(
+    user: OwnUserIdentity,
+    peer: PeerUserIdentity,
+  ): Promise<Object> {
     const { eth } = this._context.io
-    const data = this.invitesContract.encodeCall('sendInvite', [
-      peer.profile.ethAddress,
-      peer.publicFeed,
-      user.publicFeed.feedHash,
-    ])
+
+    if (!peer.profile.ethAddress) {
+      throw new Error('No eth address found for recipient')
+    }
+
+    const toAddrHash = hash(bufferFromHex(peer.profile.ethAddress))
+    const toAddrFeed = hash(Buffer.from(peer.publicFeed))
+    const params = [toAddrHash, toAddrFeed, user.publicFeed.feedHash]
+
+    const data = this.invitesContract.encodeCall('sendInvite', params)
     const txOptions = {
       from: user.profile.ethAddress,
       to: this.invitesContract.address,
       data,
     }
-    const params = await eth.completeTxParams(txOptions)
-    const formattedParams = await this.formatGasValues(params)
-    return { ...params, ...formattedParams }
+    const txParams = await eth.completeTxParams(txOptions)
+    const formattedParams = await this.formatGasValues(txParams)
+    return { ...txParams, ...formattedParams }
   }
 
   async getInviteTXDetails(
