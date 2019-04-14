@@ -4,7 +4,7 @@ import React, { Component } from 'react'
 
 import styled from 'styled-components/native'
 
-import { Text } from '@morpheus-ui/core'
+import { Text, Tooltip } from '@morpheus-ui/core'
 import bgGraphic from '../../../assets/images/onboard-background.png'
 import bgIDGraphic from '../../../assets/images/identity-onboard-background.png'
 import bgWalletGraphic from '../../../assets/images/wallet-onboard-background.png'
@@ -15,6 +15,7 @@ type Props = {
   description?: string,
   id?: boolean,
   wallet?: boolean,
+  tooltipContent?: ?any,
   step?: 1 | 2 | 3,
 }
 
@@ -67,12 +68,22 @@ const StepIndicator = styled.Text`
   ${props => props.selected && `color: #1F3464; border-top-color: #1F3464;`}
 `
 
+const DescriptionContainer = styled.View`
+  flex-direction: row;
+  align-items: center;
+`
+
 export default class OnboardContainerView extends Component<Props> {
   render() {
     const description = this.props.description ? (
-      <Text variant="regular" size={16}>
-        {this.props.description}
-      </Text>
+      <DescriptionContainer>
+        <Text variant="regular" size={16}>
+          {this.props.description}
+        </Text>
+        {this.props.tooltipContent && (
+          <Tooltip>{this.props.tooltipContent}</Tooltip>
+        )}
+      </DescriptionContainer>
     ) : null
     return (
       <Container>

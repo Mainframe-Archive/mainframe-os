@@ -305,7 +305,7 @@ export default class InvitesHandler {
       throw new Error('Peer not found')
     }
     if (!peer.profile.ethAddress) {
-      throw new Error('No public eth address found for Contact')
+      throw new Error('No public ETH address found for Contact')
     }
     return { user, peer, contact }
   }
@@ -330,7 +330,7 @@ export default class InvitesHandler {
   ) {
     const { user } = this.getUserObjects(userID, contactID)
     if (!user.profile.ethAddress) {
-      throw new Error('No public eth address found on profile')
+      throw new Error('No public ETH address found on profile')
     }
 
     const hasAllowance = await this.checkAllowance(user.profile.ethAddress)
@@ -386,7 +386,7 @@ export default class InvitesHandler {
     return new Promise((resolve, reject) => {
       // TODO: Notify launcher and request permission from user?
       if (!user.profile.ethAddress) {
-        throw new Error('No eth address found for user')
+        throw new Error('No ETH address found for user')
       }
       const txOptions = { from: user.profile.ethAddress }
 
@@ -413,10 +413,10 @@ export default class InvitesHandler {
   async sendInviteTX(userID: string, contactID: string): Promise<void> {
     const { user, peer, contact } = this.getUserObjects(userID, contactID)
     if (!user.profile.ethAddress) {
-      throw new Error('No public eth address found on profile')
+      throw new Error('No public ETH address found in profile')
     }
     if (!peer.profile.ethAddress) {
-      throw new Error('No public eth address found for Contact')
+      throw new Error('No public ETH address found for Contact')
     }
 
     const stake = await this.invitesContract.call('requiredStake')
