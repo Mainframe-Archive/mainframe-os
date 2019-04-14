@@ -1,6 +1,5 @@
 // @flow
 
-import type { ContactResult } from '@mainframe/client'
 import type { App, OwnApp } from '../app'
 import type { SharedAppData } from '../contact'
 import type { Contact, OwnUserIdentity, PeerUserIdentity } from '../identity'
@@ -57,6 +56,12 @@ export type ContactChangedEvent = {|
     | 'stakeReclaimMined'
     | 'stakeReclaimProcessing',
 |}
+
+export type ContactsChangedEvent = {|
+  type: 'contacts_changed',
+  userID: string,
+|}
+
 export type ContactDeletedEvent = {|
   type: 'contact_deleted',
   contactID: string,
@@ -77,8 +82,7 @@ export type EthAccountsChangedEvent = {|
 export type InvitesChangedEvent = {|
   type: 'invites_changed',
   userID: string,
-  contact: ContactResult,
-  change: 'inviteReceived' | 'inviteRejected',
+  change: 'inviteReceived' | 'inviteDeclined',
 |}
 
 export type PeerCreatedEvent = {|
@@ -123,6 +127,7 @@ export type ContextEvent =
   | AppUpdateEvent
   | ContactCreatedEvent
   | ContactChangedEvent
+  | ContactsChangedEvent
   | ContactDeletedEvent
   | EthAccountsChangedEvent
   | EthNetworkChangedEvent

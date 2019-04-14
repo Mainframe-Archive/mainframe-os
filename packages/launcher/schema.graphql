@@ -246,6 +246,7 @@ type ContactInviteData {
 }
 
 type Contacts {
+  invitesCount(userID: String!): Int!
   userContacts(userID: String!): [Contact!]!
 }
 

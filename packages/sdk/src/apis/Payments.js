@@ -26,7 +26,7 @@ export default class PaymentAPIs extends ClientAPIs {
       throw new Error('No contact selected')
     }
     if (!contact.data || !contact.data.profile.ethAddress) {
-      throw new Error(`No eth address found for contact: ${contact.id}`)
+      throw new Error(`No ETH address found for contact: ${contact.id}`)
     }
     // TODO: Fetch 'from' address from trusted UI if none provided
     const accounts = await this._sdk.ethereum.getAccounts()

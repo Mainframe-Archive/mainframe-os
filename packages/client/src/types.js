@@ -244,7 +244,7 @@ export type EthTransactionParams = {
   data: string,
   gas: string,
   gasPrice: string,
-  chainid?: ?string,
+  chainId?: ?number,
 }
 
 export type BlockchainEthSendParams = {|
@@ -474,7 +474,7 @@ export type ContactResult = {
   profile: ContactProfile,
   invite?: {
     inviteTX: string,
-    stake?: {
+    stake: {
       amount: string,
       state: 'sending' | 'staked' | 'reclaiming' | 'reclaimed' | 'seized',
       reclaimedTX?: ?string,

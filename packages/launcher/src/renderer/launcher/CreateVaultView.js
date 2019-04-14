@@ -38,6 +38,17 @@ const passwordValidation = ({ value }: FieldValidateFunctionParams) => {
   }
 }
 
+const ToolTipContent = (
+  <>
+    <Text variant="tooltipTitle">Where will my data be stored?</Text>
+    <Text variant="tooltipText">
+      Your user data is encrypted and stored locally on your device. You will be
+      asked to grant permission before any app can access your data.
+    </Text>
+    <Text variant="tooltipTitle">DO NOT FORGET YOUR PASSWORD</Text>
+  </>
+)
+
 const confirmPasswordValidation = ({
   value,
   values,
@@ -101,7 +112,8 @@ export default class CreateVaultView extends Component<Props, State> {
       <OnboardContainer
         step={1}
         title="Welcome"
-        description="Let’s quickly secure your data.">
+        description="Let’s quickly secure your data."
+        tooltipContent={ToolTipContent}>
         <FormContainer>
           <Form onSubmit={this.onSubmit}>
             <Row size={1} top>

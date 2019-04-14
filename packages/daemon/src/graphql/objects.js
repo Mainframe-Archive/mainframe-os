@@ -646,6 +646,15 @@ export const contact = new GraphQLObjectType({
 export const contacts = new GraphQLObjectType({
   name: 'Contacts',
   fields: () => ({
+    invitesCount: {
+      type: new GraphQLNonNull(GraphQLInt),
+      args: {
+        userID: { type: new GraphQLNonNull(GraphQLString) },
+      },
+      resolve: (self, args, ctx) => {
+        return ctx.queries.getInvitesCount(args.userID)
+      },
+    },
     userContacts: {
       type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(contact))),
       args: {

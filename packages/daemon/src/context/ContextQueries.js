@@ -142,6 +142,10 @@ export default class ContextQueries {
     }
   }
 
+  getInvitesCount(userID: string): number {
+    return this.getContactsFromInvites(userID).length
+  }
+
   getAppApprovedContacts(appID: string, userID: string) {
     const { apps } = this._context.openVault
     const app = apps.getAnyByID(appID)

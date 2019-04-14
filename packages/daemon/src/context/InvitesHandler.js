@@ -77,7 +77,11 @@ export default class InvitesHandler {
       this._context
         .pipe(
           filter((e: ContextEvent) => {
-            return e.type === 'vault_opened' || e.type === 'eth_network_changed'
+            return (
+              e.type === 'vault_opened' ||
+              e.type === 'eth_network_changed' ||
+              e.type === 'vault_created'
+            )
           }),
         )
         .subscribe(async (e: EthNetworkChangedEvent | VaultOpenedEvent) => {
@@ -228,6 +232,11 @@ export default class InvitesHandler {
       if (contact && contact.invite) {
         contact.invite.stake.state = 'seized'
         this._context.next({
+          type: 'invites_changed',
+          userID: user.localID,
+          change: 'inviteDeclined',
+        })
+        this._context.next({
           type: 'contact_changed',
           contact,
           userID: user.localID,
@@ -308,7 +317,6 @@ export default class InvitesHandler {
               this._context.next({
                 type: 'invites_changed',
                 userID: user.localID,
-                contact: eventContact,
                 change: 'inviteReceived',
               })
             }
@@ -338,7 +346,7 @@ export default class InvitesHandler {
       throw new Error('Peer not found')
     }
     if (!peer.profile.ethAddress) {
-      throw new Error('No public eth address found for Contact')
+      throw new Error('No public ETH address found for Contact')
     }
     return { user, peer, contact }
   }
@@ -363,7 +371,7 @@ export default class InvitesHandler {
   ) {
     const { user } = this.getUserObjects(userID, contactID)
     if (!user.profile.ethAddress) {
-      throw new Error('No public eth address found on profile')
+      throw new Error('No public ETH address found on profile')
     }
 
     const hasAllowance = await this.checkAllowance(user.profile.ethAddress)
@@ -418,7 +426,8 @@ export default class InvitesHandler {
   ) {
     return new Promise((resolve, reject) => {
       // TODO: Notify launcher and request permission from user?
-      if (!peer.profile.ethAddress) {
+
+      if (!user.profile.ethAddress) {
         throw new Error('No eth address found for recipient')
       }
 
@@ -431,7 +440,7 @@ export default class InvitesHandler {
       this.invitesContract
         .send('sendInvite', params, txOptions)
         .then(inviteRes => {
-          inviteRes.on('hash', hash => {
+          inviteRes.on('mined', hash => {
             resolve(hash)
           })
           inviteRes.on('error', err => {
@@ -447,10 +456,10 @@ export default class InvitesHandler {
   async sendInviteTX(userID: string, contactID: string): Promise<void> {
     const { user, peer, contact } = this.getUserObjects(userID, contactID)
     if (!user.profile.ethAddress) {
-      throw new Error('No public eth address found on profile')
+      throw new Error('No public ETH address found in profile')
     }
     if (!peer.profile.ethAddress) {
-      throw new Error('No public eth address found for Contact')
+      throw new Error('No public ETH address found for Contact')
     }
 
     const stake = await this.invitesContract.call('requiredStake')
@@ -629,17 +638,12 @@ export default class InvitesHandler {
         .on('mined', async hash => {
           inviteRequest.rejectedTXHash = hash
           await this._context.openVault.save()
-          const contactRes = this._context.queries.getContactFromInvite(
-            inviteRequest,
-          )
-          if (contactRes) {
-            this._context.next({
-              type: 'invites_changed',
-              userID: user.localID,
-              contact: contactRes,
-              change: 'inviteRejected',
-            })
-          }
+
+          this._context.next({
+            type: 'invites_changed',
+            userID: user.localID,
+            change: 'inviteDeclined',
+          })
           resolve(hash)
         })
         .on('error', err => {
@@ -697,7 +701,11 @@ export default class InvitesHandler {
   }
 
   observe(): ObserveInvites<InvitesChangedEvent> {
-    const source = this._context.pipe(filter(e => e.type === 'invites_changed'))
+    const source = this._context.pipe(
+      filter(
+        e => e.type === 'invites_changed' || e.type === 'contacts_changed',
+      ),
+    )
     this._observers.add(source)
 
     return {
