@@ -60,7 +60,9 @@ const ToolTipContent = (
   <>
     <Text variant="tooltipTitle">Why do I need an identity?</Text>
     <Text variant="tooltipText">
-      An identity enables social functionality like sending payments to contacts, messaging, or otherwise interacting with users within Mainframe OS. You can choose whether or not to reveal your identity to other users.
+      An identity enables social functionality like sending payments to
+      contacts, messaging, or otherwise interacting with users within Mainframe
+      OS. You can choose whether or not to reveal your identity to other users.
     </Text>
   </>
 )
@@ -161,7 +163,10 @@ export default class OnboardIdentityView extends Component<Props, State> {
                     Why should I be discoverable?
                   </Text>
                   <Text variant="tooltipText">
-                    Making your identity discoverable will more easily enable you to interact with others. They will be able to see your name as well as the ETH address attached to your default wallet.
+                    Making your identity discoverable will more easily enable
+                    you to interact with others. They will be able to see your
+                    name as well as the ETH address attached to your default
+                    wallet.
                   </Text>
                 </Tooltip>
               </Column>

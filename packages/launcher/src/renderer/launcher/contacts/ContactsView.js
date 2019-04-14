@@ -727,7 +727,9 @@ class ContactsViewComponent extends Component<Props, State> {
         <Tooltip top>
           <Text variant="tooltipTitle">What is a Mutual Invitation?</Text>
           <Text variant="tooltipText">
-            Both users must add each other’s Mainframe ID manually to establish the connection. Until then the contact remains "Pending" and cannot interact.
+            Both users must add each other’s Mainframe ID manually to establish
+            the connection. Until then the contact remains {'"Pending"'} and
+            cannot interact.
           </Text>
         </Tooltip>
       </RadioContainer>
@@ -749,8 +751,11 @@ class ContactsViewComponent extends Component<Props, State> {
         <Tooltip top>
           <Text variant="tooltipTitle">What is a Blockchain Invitation?</Text>
           <Text variant="tooltipText">
-            With a Blockchain invitation, you can send a notification to the other user that you want to connect and they can choose to accept or reject the invitation.
-            If the invitation is accepted, your MFT stake will be released back to you. If they reject the invitation, they can claim and keep the stake.
+            With a Blockchain invitation, you can send a notification to the
+            other user that you want to connect and they can choose to accept or
+            reject the invitation. If the invitation is accepted, your MFT stake
+            will be released back to you. If they reject the invitation, they
+            can claim and keep the stake.
           </Text>
         </Tooltip>
       </RadioContainer>
@@ -770,7 +775,8 @@ class ContactsViewComponent extends Component<Props, State> {
                 variant="greyMid"
                 size={12}
                 theme={{ textAlign: 'center', marginBottom: 50 }}>
-                Connect with other Mainframe users by entering their Mainframe ID.
+                Connect with other Mainframe users by entering their Mainframe
+                ID.
                 {/*  or scanning their QR code */}
               </Text>
             </Column>

@@ -45,11 +45,16 @@ const ToolTipContent = (
   <>
     <Text variant="tooltipTitle">Why do I need a wallet?</Text>
     <Text variant="tooltipText">
-      Interacting with the blockchain requires a wallet. Mainframe OS uses your wallet address for signing transactions, encryption, and to hold and transfer cryptocurrency.
+      Interacting with the blockchain requires a wallet. Mainframe OS uses your
+      wallet address for signing transactions, encryption, and to hold and
+      transfer cryptocurrency.
     </Text>
-    <Text variant="tooltipTitle">Can I connect my ledger or add another wallet?</Text>
+    <Text variant="tooltipTitle">
+      Can I connect my ledger or add another wallet?
+    </Text>
     <Text variant="tooltipText">
-      Yes, you can import an existing software wallet from a seed phrase, connect a ledger hardware wallet, or create a new wallet.
+      Yes, you can import an existing software wallet from a seed phrase,
+      connect a ledger hardware wallet, or create a new wallet.
     </Text>
   </>
 )

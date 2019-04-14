@@ -283,19 +283,24 @@ export class InviteContactModal extends Component<Props, State> {
           <Tooltip>
             <Text variant="tooltipTitle">What is gas?</Text>
             <Text variant="tooltipText">
-              When you send tokens, interact with a contract, or do anything else on the blockchain, you must pay for that computation.
-              That payment is calculated in gas, and gas is always paid in ETH. GWei is a measure of ETH. 1 Ether = 1,000,000,000 Gwei (10^9).
+              When you send tokens, interact with a contract, or do anything
+              else on the blockchain, you must pay for that computation. That
+              payment is calculated in gas, and gas is always paid in ETH. GWei
+              is a measure of ETH. 1 Ether = 1,000,000,000 Gwei (10^9).
             </Text>
-            <Text variant="tooltipTitle">What's the difference between Gas Price and Max Cost?</Text>
+            <Text variant="tooltipTitle">
+              {"What's "}the difference between Gas Price and Max Cost?
+            </Text>
             <Text variant="tooltipText">
-              Gas Price is the cost per computation. A complete transaction may have several computations.
-              Max Cost = estimated number of computation required to complete the transaction * Gas Price.
-              You are guaranteed not to pay more than this. It will likely actually be less.
+              Gas Price is the cost per computation. A complete transaction may
+              have several computations. Max Cost = estimated number of
+              computation required to complete the transaction * Gas Price. You
+              are guaranteed not to pay more than this. It will likely actually
+              be less.
             </Text>
           </Tooltip>
         </Text>
-
-    )
+      )
     }
   }
 
@@ -351,9 +356,13 @@ export class InviteContactModal extends Component<Props, State> {
           }}>
           {title}{' '}
           <Tooltip>
-            <Text variant="tooltipTitle">Where did this address come from?</Text>
+            <Text variant="tooltipTitle">
+              Where did this address come from?
+            </Text>
             <Text variant="tooltipText">
-              This is your default ETH address. You can change it in the Wallets tab by selecting another address and designating it as default instead.
+              This is your default ETH address. You can change it in the Wallets
+              tab by selecting another address and designating it as default
+              instead.
             </Text>
           </Tooltip>
         </Text>

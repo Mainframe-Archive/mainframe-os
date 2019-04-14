@@ -42,7 +42,8 @@ const ToolTipContent = (
   <>
     <Text variant="tooltipTitle">Where will my data be stored?</Text>
     <Text variant="tooltipText">
-      Your user data is encrypted and stored locally on your device. You will be asked to grant permission before any app can access your data.
+      Your user data is encrypted and stored locally on your device. You will be
+      asked to grant permission before any app can access your data.
     </Text>
     <Text variant="tooltipTitle">DO NOT FORGET YOUR PASSWORD</Text>
   </>
