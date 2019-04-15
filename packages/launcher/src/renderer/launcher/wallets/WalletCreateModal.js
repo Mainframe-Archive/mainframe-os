@@ -2,7 +2,14 @@
 
 import React, { Component } from 'react'
 import { graphql, commitMutation } from 'react-relay'
-import { Button, TextField, Row, Column, Text } from '@morpheus-ui/core'
+import {
+  Button,
+  TextField,
+  Row,
+  Column,
+  Text,
+  Tooltip,
+} from '@morpheus-ui/core'
 import {
   type FormSubmitPayload,
   type FieldValidateFunctionParams,
@@ -267,8 +274,25 @@ export default class WalletCreateModal extends Component<Props, State> {
           <Text
             size={12}
             variant={['greyMed', 'center']}
-            theme={{ marginBottom: '30px' }}>
-            {backupDescription}
+            theme={{
+              marginBottom: '30px',
+              display: 'flex',
+              alignItems: 'center',
+            }}>
+            {backupDescription}{' '}
+            <Tooltip theme={{ margin: '10px 0 0 10px' }}>
+              <Text variant="tooltipTitle">
+                What is a Secret Backup Phrase?
+              </Text>
+              <Text variant="tooltipText">
+                When you create a new wallet, a unique Secret Backup Phrase
+                associated with your wallet is also generated. Your Backup
+                Phrase is 12 random words in a specific order that is the key to
+                recover, back up, or import your wallet on any platform. Write
+                it down and store it in a secure location. No one else,
+                including Mainframe, has access to this phrase if you lose it.
+              </Text>
+            </Tooltip>
           </Text>
           <HorizontalView>
             <VerticalView>

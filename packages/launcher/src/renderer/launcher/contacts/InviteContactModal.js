@@ -1,7 +1,7 @@
 //@flow
 import React, { Component } from 'react'
 import styled from 'styled-components/native'
-import { Text } from '@morpheus-ui/core'
+import { Text, Tooltip } from '@morpheus-ui/core'
 import { graphql, createFragmentContainer } from 'react-relay'
 import Loader from '../../UIComponents/Loader'
 
@@ -198,9 +198,9 @@ export class InviteContactModal extends Component<Props, State> {
     } catch (err) {
       this.setState({
         error: err.message,
+        txProcessing: false,
         invitePending: {
           state: 'approved',
-          txProcessing: false,
         },
       })
     }
@@ -280,6 +280,25 @@ export class InviteContactModal extends Component<Props, State> {
       return (
         <Text color="#303030" variant="marginTop10" size={11}>
           {`${gasLabel}, ${costlabel}, ${mftLabel}`}
+          <Tooltip>
+            <Text variant="tooltipTitle">What is gas?</Text>
+            <Text variant="tooltipText">
+              When you send tokens, interact with a contract, or do anything
+              else on the blockchain, you must pay for that computation. That
+              payment is calculated in gas, and gas is always paid in ETH. GWei
+              is a measure of ETH. 1 Ether = 1,000,000,000 Gwei (10^9).
+            </Text>
+            <Text variant="tooltipTitle">
+              {"What's "}the difference between Gas Price and Max Cost?
+            </Text>
+            <Text variant="tooltipText">
+              Gas Price is the cost per computation. A complete transaction may
+              have several computations. Max Cost = estimated number of
+              computation required to complete the transaction * Gas Price. You
+              are guaranteed not to pay more than this. It will likely actually
+              be less.
+            </Text>
+          </Tooltip>
         </Text>
       )
     }
@@ -288,8 +307,16 @@ export class InviteContactModal extends Component<Props, State> {
   renderContactSection(title: string) {
     return (
       <Section>
-        <Text bold variant="smallTitle" color="#585858">
-          {title}
+        <Text
+          bold
+          variant="smallTitle"
+          color="#585858"
+          theme={{
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+          }}>
+          {title}{' '}
         </Text>
         <AddContactDetail border>
           <Blocky>
@@ -302,6 +329,9 @@ export class InviteContactModal extends Component<Props, State> {
             </Text>
             <Text variant={['greyDark23', 'ellipsis']} size={12}>
               {this.props.contact.publicFeed}
+            </Text>
+            <Text variant={['greyDark23', 'ellipsis']} size={12}>
+              {this.props.contact.profile.ethAddress}
             </Text>
           </AddContactDetailText>
         </AddContactDetail>
@@ -318,8 +348,26 @@ export class InviteContactModal extends Component<Props, State> {
     ) : null
     return (
       <Section>
-        <Text bold variant="smallTitle" color="#585858">
-          {title}
+        <Text
+          bold
+          variant="smallTitle"
+          color="#585858"
+          theme={{
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+          }}>
+          {title}{' '}
+          <Tooltip>
+            <Text variant="tooltipTitle">
+              Where did this address come from?
+            </Text>
+            <Text variant="tooltipText">
+              This is your default ETH address. You can change it in the Wallets
+              tab by selecting another address and designating it as default
+              instead.
+            </Text>
+          </Tooltip>
         </Text>
         <AddContactDetail border>
           <Blocky>
@@ -397,10 +445,10 @@ export class InviteContactModal extends Component<Props, State> {
         if (!this.state.txProcessing) {
           if (invitePending && invitePending.state === 'awaiting_approval') {
             action = this.sendApproveTX
-            btnTitle = 'APPROVE INVITE'
+            btnTitle = 'APPROVE TRANSACTION'
           } else if (invitePending && invitePending.state === 'approved') {
             action = this.sendInvite
-            btnTitle = 'SEND INVITE'
+            btnTitle = 'SEND INVITATION'
           }
         }
         break
@@ -434,7 +482,9 @@ export class InviteContactModal extends Component<Props, State> {
     }
 
     const error = this.state.error && (
-      <Text variant={['error']}>{this.state.error}</Text>
+      <Text variant={['error']} numberOfLines={2}>
+        {this.state.error}
+      </Text>
     )
     const render = (
       <>

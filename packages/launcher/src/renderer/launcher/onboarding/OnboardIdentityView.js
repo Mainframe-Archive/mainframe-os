@@ -2,7 +2,15 @@
 
 import React, { Component } from 'react'
 import { graphql, commitMutation } from 'react-relay'
-import { Button, TextField, Row, Column, Text, Switch } from '@morpheus-ui/core'
+import {
+  Button,
+  TextField,
+  Row,
+  Column,
+  Text,
+  Switch,
+  Tooltip,
+} from '@morpheus-ui/core'
 import CircleArrowRight from '@morpheus-ui/icons/CircleArrowRight'
 import { Form, type FormSubmitPayload } from '@morpheus-ui/forms'
 import styled from 'styled-components/native'
@@ -47,6 +55,17 @@ export const createUserMutation = graphql`
     }
   }
 `
+
+const ToolTipContent = (
+  <>
+    <Text variant="tooltipTitle">Why do I need an identity?</Text>
+    <Text variant="tooltipText">
+      An identity enables social functionality like sending payments to
+      contacts, messaging, or otherwise interacting with users within Mainframe
+      OS. You can choose whether or not to reveal your identity to other users.
+    </Text>
+  </>
+)
 
 export default class OnboardIdentityView extends Component<Props, State> {
   static contextType = EnvironmentContext
@@ -120,7 +139,8 @@ export default class OnboardIdentityView extends Component<Props, State> {
         id
         step={2}
         title="Identity"
-        description="Create your Mainframe identity">
+        description="Create your Mainframe identity"
+        tooltipContent={ToolTipContent}>
         <FormContainer>
           <Form onSubmit={this.onSubmit}>
             <Row size={1} top>
@@ -133,11 +153,22 @@ export default class OnboardIdentityView extends Component<Props, State> {
                   testID="onboard-create-identity-input-name"
                 />
               </Column>
-              <Column>
+              <Column styles="flex-direction:row;">
                 <Switch
                   label="Make my identity discoverable to other users"
                   name="discoverable"
                 />
+                <Tooltip theme={{ margin: '10px 0 0 10px' }}>
+                  <Text variant="tooltipTitle">
+                    Why should I be discoverable?
+                  </Text>
+                  <Text variant="tooltipText">
+                    Making your identity discoverable will more easily enable
+                    you to interact with others. They will be able to see your
+                    name as well as the ETH address attached to your default
+                    wallet.
+                  </Text>
+                </Tooltip>
               </Column>
             </Row>
 

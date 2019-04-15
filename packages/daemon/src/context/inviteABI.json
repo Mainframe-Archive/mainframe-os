@@ -144,7 +144,7 @@
       "inputs": [
         {
           "name": "",
-          "type": "address"
+          "type": "bytes32"
         },
         {
           "name": "",
@@ -164,6 +164,10 @@
         {
           "name": "state",
           "type": "uint8"
+        },
+        {
+          "name": "senderAddress",
+          "type": "address"
         }
       ],
       "payable": false,
@@ -213,14 +217,36 @@
       "anonymous": false,
       "inputs": [
         {
-          "indexed": true,
-          "name": "recipientFeed",
-          "type": "string"
+          "indexed": false,
+          "name": "recoveredAdress",
+          "type": "address"
         },
         {
           "indexed": false,
-          "name": "recipientAddress",
-          "type": "address"
+          "name": "addrHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "name": "messageHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "ECRecoverAddr",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "recipientFeedHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "name": "recipientAddressHash",
+          "type": "bytes32"
         },
         {
           "indexed": false,
@@ -246,18 +272,18 @@
       "inputs": [
         {
           "indexed": true,
-          "name": "senderFeed",
-          "type": "string"
+          "name": "senderFeedHash",
+          "type": "bytes32"
         },
         {
           "indexed": true,
-          "name": "senderAddress",
-          "type": "address"
+          "name": "senderAddressHash",
+          "type": "bytes32"
         },
         {
           "indexed": false,
-          "name": "recipientFeed",
-          "type": "string"
+          "name": "recipientFeedHash",
+          "type": "bytes32"
         }
       ],
       "name": "Declined",
@@ -268,13 +294,13 @@
       "inputs": [
         {
           "indexed": true,
-          "name": "sender",
+          "name": "senderAddress",
           "type": "address"
         },
         {
           "indexed": false,
-          "name": "recipient",
-          "type": "address"
+          "name": "recipientFeedHash",
+          "type": "bytes32"
         }
       ],
       "name": "StakeRetrieved",
@@ -290,8 +316,8 @@
         },
         {
           "indexed": false,
-          "name": "recipientFeed",
-          "type": "string"
+          "name": "recipientFeedHash",
+          "type": "bytes32"
         },
         {
           "indexed": false,
@@ -300,6 +326,23 @@
         }
       ],
       "name": "AdminRefunded",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "oldStake",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "newStake",
+          "type": "uint256"
+        }
+      ],
+      "name": "StakeChanged",
       "type": "event"
     },
     {
@@ -371,16 +414,20 @@
       "constant": true,
       "inputs": [
         {
-          "name": "senderAddr",
-          "type": "address"
+          "name": "senderAddressHash",
+          "type": "bytes32"
         },
         {
-          "name": "recipientAddr",
-          "type": "address"
+          "name": "senderFeedHash",
+          "type": "bytes32"
         },
         {
-          "name": "recipientFeed",
-          "type": "string"
+          "name": "recipientAddressHash",
+          "type": "bytes32"
+        },
+        {
+          "name": "recipientFeedHash",
+          "type": "bytes32"
         }
       ],
       "name": "getInviteState",
@@ -398,16 +445,20 @@
       "constant": true,
       "inputs": [
         {
-          "name": "senderAddress",
-          "type": "address"
+          "name": "senderAddressHash",
+          "type": "bytes32"
         },
         {
-          "name": "recipientAddr",
-          "type": "address"
+          "name": "senderFeedHash",
+          "type": "bytes32"
         },
         {
-          "name": "recipientFeed",
-          "type": "string"
+          "name": "recipientAddressHash",
+          "type": "bytes32"
+        },
+        {
+          "name": "recipientFeedHash",
+          "type": "bytes32"
         }
       ],
       "name": "pendingInviteStake",
@@ -425,12 +476,12 @@
       "constant": false,
       "inputs": [
         {
-          "name": "recipientAddr",
-          "type": "address"
+          "name": "recipientAddressHash",
+          "type": "bytes32"
         },
         {
-          "name": "recipientFeed",
-          "type": "string"
+          "name": "recipientFeedHash",
+          "type": "bytes32"
         },
         {
           "name": "senderFeed",
@@ -447,16 +498,16 @@
       "constant": false,
       "inputs": [
         {
-          "name": "senderAddress",
-          "type": "address"
+          "name": "senderAddressHash",
+          "type": "bytes32"
         },
         {
-          "name": "senderFeed",
-          "type": "string"
+          "name": "senderFeedHash",
+          "type": "bytes32"
         },
         {
-          "name": "recipientFeed",
-          "type": "string"
+          "name": "recipientFeedHash",
+          "type": "bytes32"
         }
       ],
       "name": "declineAndWithdraw",
@@ -469,12 +520,16 @@
       "constant": false,
       "inputs": [
         {
-          "name": "recipientAddr",
-          "type": "address"
+          "name": "recipientAddressHash",
+          "type": "bytes32"
         },
         {
-          "name": "recipientFeed",
-          "type": "string"
+          "name": "recipientFeedHash",
+          "type": "bytes32"
+        },
+        {
+          "name": "senderFeedHash",
+          "type": "bytes32"
         },
         {
           "name": "v",
@@ -499,19 +554,37 @@
       "constant": false,
       "inputs": [
         {
-          "name": "senderAddress",
-          "type": "address"
+          "name": "senderAddressHash",
+          "type": "bytes32"
         },
         {
-          "name": "recipientAddress",
-          "type": "address"
+          "name": "senderFeedHash",
+          "type": "bytes32"
         },
         {
-          "name": "recipientFeed",
-          "type": "string"
+          "name": "recipientAddressHash",
+          "type": "bytes32"
+        },
+        {
+          "name": "recipientFeedHash",
+          "type": "bytes32"
         }
       ],
       "name": "adminRefund",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "newStake",
+          "type": "uint256"
+        }
+      ],
+      "name": "setStake",
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",

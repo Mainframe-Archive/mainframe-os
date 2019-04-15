@@ -369,6 +369,19 @@ export default {
     regular: {
       fontWeight: '400',
     },
+    tooltipTitle: {
+      display: 'block',
+      color: COLORS.PRIMARY_RED,
+      fontWeight: 'bold',
+      fontSize: 11,
+      marginBottom: '10px',
+    },
+    tooltipText: {
+      display: 'block',
+      fontSize: 11,
+      marginBottom: '10px',
+    },
+
     error: {
       paddingBottom: 10,
       color: COLORS.PRIMARY_RED,
@@ -568,6 +581,11 @@ export default {
     default: {
       padding: '5px 10px',
       menuItemPadding: '5px 10px',
+    },
+  },
+  Tooltip: {
+    default: {
+      margin: '5px',
     },
   },
   styled: {

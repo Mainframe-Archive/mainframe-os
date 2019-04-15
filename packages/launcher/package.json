@@ -48,7 +48,7 @@
     "@mainframe/toolbox": "*",
     "@mainframe/utils-base64": "^0.1.1",
     "@mainframe/utils-id": "^0.1.0",
-    "@morpheus-ui/core": "^0.0.39",
+    "@morpheus-ui/core": "^0.0.41",
     "@morpheus-ui/fonts": "0.0.1",
     "@morpheus-ui/icons": "0.0.16",
     "electron-store": "^3.0.0",
