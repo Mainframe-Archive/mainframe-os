@@ -741,7 +741,7 @@ class ContactsViewComponent extends Component<Props, State> {
           <Text size={12} color="#232323">
             Blockchain invitation .{' '}
             <Text size={12} color="#DA1157">
-              Stake 10 MFT
+              Stake 100 MFT
             </Text>
           </Text>
           <Text color="#585858" size={11}>

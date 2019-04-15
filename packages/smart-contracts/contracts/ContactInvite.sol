@@ -24,7 +24,7 @@ contract ContactInvite is Ownable, Pausable {
 
   constructor(address _tokenAddress) public {
     token = ERC20(_tokenAddress);
-    requiredStake = 10 ether;
+    requiredStake = 100 ether;
     creationBlock = block.number;
   }
 
