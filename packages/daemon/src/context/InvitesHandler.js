@@ -6,7 +6,6 @@ import createKeccakHash from 'keccak'
 import { utils } from 'ethers'
 import { filter } from 'rxjs/operators'
 import { type Observable } from 'rxjs'
-// import type { bzzHash } from '../swarm/feed'
 
 import type { OwnUserIdentity, PeerUserIdentity } from '../identity'
 import type { InviteRequest } from '../identity/IdentitiesRepository'
@@ -27,13 +26,11 @@ type ObserveInvites<T = Object> = {
 //$FlowFixMe Cannot resolve module ./inviteABI.
 const INVITE_ABI = require('./inviteABI.json')
 
-const EVENT_BATCH_SIZE = 5000
-
 const contracts = {
-  // mainnet: {
-  //   token: '0xa46f1563984209fe47f8236f8b01a03f03f957e4',
-  //   invites: '0x6687b03F6D7eeac45d98340c8243e6a0434f1284',
-  // },
+  mainnet: {
+    token: '0xdf2c7238198ad8b389666574f2d8bc411a4b7428',
+    invites: '0xa201792736D5B4357a34a2C7Bee983be56Ba51bf',
+  },
   ropsten: {
     token: '0xa46f1563984209fe47f8236f8b01a03f03f957e4',
     invites: '0x2f554d5Ff0108618985489850393EA4923d6a3c1',
@@ -80,21 +77,19 @@ export default class InvitesHandler {
             return (
               e.type === 'vault_opened' ||
               e.type === 'eth_network_changed' ||
-              e.type === 'vault_created'
+              (e.type === 'user_changed' && e.change === 'publicFeed')
             )
           }),
         )
         .subscribe(async (e: EthNetworkChangedEvent | VaultOpenedEvent) => {
-          if (e.type === 'vault_opened') {
+          if (e.type !== 'eth_network_changed') {
             await this._context.io.eth.fetchNetwork()
           }
-          if (contracts[this._context.io.eth.networkName]) {
-            this.setup()
-          } else {
+          try {
+            await this.setup()
+          } catch (err) {
             this._context.log(
-              `Failed fetching blockchain invites, unsupported ethereum network: ${
-                this._context.io.eth.networkName
-              }`,
+              `Error setting up invites handler: ${err.message}`,
             )
           }
         }),
@@ -114,8 +109,10 @@ export default class InvitesHandler {
     )
   }
 
-  setup() {
+  async setup() {
     const { identities } = this._context.openVault
+
+    this.validateNetwork()
 
     Object.keys(identities.ownUsers).forEach(async id => {
       const user = identities.getOwnUser(id)
@@ -135,61 +132,26 @@ export default class InvitesHandler {
 
   // FETCH BLOCKCHAIN STATE
 
-  batchBlocks(from: number, to: number): Array<{ from: string, to: string }> {
-    let blockDiff = to - from
-    let fromBlock = from
-    const toBlock = blockDiff > EVENT_BATCH_SIZE ? from + EVENT_BATCH_SIZE : to
-
-    const batches = []
-    if (blockDiff > EVENT_BATCH_SIZE) {
-      while (blockDiff > EVENT_BATCH_SIZE) {
-        batches.push({
-          from: String(fromBlock),
-          to: String(fromBlock + EVENT_BATCH_SIZE),
-        })
-        fromBlock = fromBlock + EVENT_BATCH_SIZE + 1
-        blockDiff = to - fromBlock
-        if (blockDiff <= EVENT_BATCH_SIZE) {
-          // Fill the final range
-          batches.push({ from: String(fromBlock), to: String(to) })
-        }
-      }
-    } else {
-      batches.push({ from: String(fromBlock), to: String(toBlock) })
-    }
-    return batches
-  }
-
   async readEvents(
     user: OwnUserIdentity,
     userFeedHash: string,
     type: 'Declined' | 'Invited',
     handler: (user: OwnUserIdentity, events: Array<Object>) => Promise<void>,
   ) {
-    const { eventBlocksRead } = this._context.openVault.blockchainData
-    const { eth } = this._context.io
-    const lastCheckedBlock = eventBlocksRead[type][eth.networkID] || 0
     try {
-      const latestBlock = await eth.getLatestBlock()
       const creationBlock = await this.invitesContract.call('creationBlock')
 
-      const latestNum = Number(latestBlock)
-      const startNum = Math.max(lastCheckedBlock, Number(creationBlock))
-
-      const batches = this.batchBlocks(startNum, latestNum)
-      // $FlowFixMe iterator type
-      for await (const batch of batches) {
-        const params = {
-          fromBlock: batch.from,
-          toBlock: batch.to,
-          topics: [userFeedHash],
-        }
-        const events = await this.invitesContract.getPastEvents(type, params)
-        for (let i = 0; i < events.length; i++) {
-          await handler(user, events[i])
-        }
+      const params = {
+        fromBlock: Number(creationBlock),
+        toBlock: 'latest',
+        topics: [userFeedHash],
       }
-      eventBlocksRead[type][eth.networkID] = latestBlock
+      const events = await this.invitesContract.getPastEvents(type, params)
+
+      for (let i = 0; i < events.length; i++) {
+        await handler(user, events[i])
+      }
+
       await this._context.openVault.save()
     } catch (err) {
       this._context.log(`Error reading blockchain events: ${err}`)
@@ -254,6 +216,7 @@ export default class InvitesHandler {
     if (contractEvent.senderFeed) {
       try {
         let peer = identities.getPeerByFeed(contractEvent.senderFeed)
+
         if (peer) {
           const contact = identities.getContactByPeerID(
             user.localID,
@@ -274,7 +237,6 @@ export default class InvitesHandler {
             mode: 'content-response',
           },
         )
-
         if (feedValue) {
           const feed = await feedValue.json()
 
@@ -429,7 +391,7 @@ export default class InvitesHandler {
       // TODO: Notify launcher and request permission from user?
 
       if (!peer.profile.ethAddress) {
-        throw new Error('No eth address found for recipient')
+        throw new Error('No ETH address found for recipient')
       }
 
       const toAddrHash = hash(bufferFromHex(peer.profile.ethAddress))
@@ -557,7 +519,7 @@ export default class InvitesHandler {
       const toFeedHash = hash(Buffer.from(peer.publicFeed))
 
       const txOptions = { from: invite.fromAddress }
-      this.validateInviteNetwork(invite.ethNetwork)
+      this.validateInviteOriginNetwork(invite.ethNetwork)
 
       const res = await this.invitesContract.send(
         'retrieveStake',
@@ -620,7 +582,7 @@ export default class InvitesHandler {
     if (!inviteRequest) {
       throw new Error('Invite not found')
     }
-    this.validateInviteNetwork(inviteRequest.ethNetwork)
+    this.validateInviteOriginNetwork(inviteRequest.ethNetwork)
 
     // $FlowFixMe must have feedhash by this point
     const myFeedHash = hash(Buffer.from(user.publicFeed.feedHash))
@@ -653,10 +615,30 @@ export default class InvitesHandler {
     })
   }
 
-  validateInviteNetwork(ethNetwork: string) {
+  validateInviteOriginNetwork(ethNetwork: string) {
     if (ethNetwork !== this._context.io.eth.networkName) {
       throw new Error(
         `Please connect to the eth network (${ethNetwork}) this invite was originally sent from to withdraw this stake.`,
+      )
+    }
+  }
+
+  validateNetwork() {
+    if (!contracts[this._context.io.eth.networkName]) {
+      throw new Error(
+        `Sorry, Ethereum network "${
+          this._context.io.eth.networkName
+        }" is not supported for contact invites`,
+      )
+    }
+    if (
+      this._context.env.type === 'production' &&
+      this._context.io.eth.networkName !== 'mainnet'
+    ) {
+      throw new Error(
+        `Sorry, this feature is only available on Ethereum mainnet, you are currently running on ${
+          this._context.io.eth.networkName
+        }.`,
       )
     }
   }
@@ -748,7 +730,7 @@ export default class InvitesHandler {
     if (!peer) throw new Error('Peer not found')
     const inviteRequest = identities.getInviteRequest(userID, peerID)
     if (!inviteRequest) throw new Error('Invite request not found')
-    this.validateInviteNetwork(inviteRequest.ethNetwork)
+    this.validateInviteOriginNetwork(inviteRequest.ethNetwork)
 
     // $FlowFixMe will have feedHash by this point
     const myFeedHash = hash(Buffer.from(user.publicFeed.feedHash))
@@ -793,7 +775,7 @@ export default class InvitesHandler {
         sigParams.r,
         sigParams.s,
       ]
-      this.validateInviteNetwork(invite.ethNetwork)
+      this.validateInviteOriginNetwork(invite.ethNetwork)
       const data = this.invitesContract.encodeCall('retrieveStake', txParams)
       const txOptions = {
         from: invite.fromAddress,
@@ -854,6 +836,7 @@ export default class InvitesHandler {
     userID: string,
     contactOrPeerID: string,
   ) {
+    this.validateNetwork()
     if (type === 'declineInvite') {
       return this.getDeclineTXDetails(userID, contactOrPeerID)
     }

@@ -398,7 +398,7 @@ export class InviteContactModal extends Component<Props, State> {
     return (
       <>
         {this.renderContactSection('SEND BLOCKCHAIN INVITATION TO')}
-        {this.renderTransactionSection('APPROVE AND STAKE 10 MFT FROM')}
+        {this.renderTransactionSection('APPROVE AND STAKE 100 MFT FROM')}
         {reclaimedTX}
         {activity}
       </>
@@ -426,7 +426,7 @@ export class InviteContactModal extends Component<Props, State> {
     return (
       <>
         {this.renderContactSection('SEND BLOCKCHAIN INVITATION TO')}
-        {this.renderTransactionSection('APPROVE AND STAKE 10 MFT FROM')}
+        {this.renderTransactionSection('APPROVE AND STAKE 100 MFT FROM')}
         {activity}
       </>
     )
