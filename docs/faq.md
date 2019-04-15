@@ -31,22 +31,28 @@ Next, it’s time to use some dapps. Mainframe OS comes pre-built with several d
 ## What dapps are included with Mainframe OS?
 There are seven “suggested apps” included currently in Mainframe OS.
 
-Produced by Mainframe
-CDP-Pro: arguably the easiest way to create and manage a MakerDAO CDP.
-Compounded: arguably the easiest way to access Compound’s protocols to earn interest on ETH or DAI.
-Payments: a simple app that facilitates sending ETH or MFT to integrated contacts
-Noted: a text editor that stores encrypted notes in the decentralized Swarm network
+#### Produced by Mainframe
+- CDP-Pro: arguably the easiest way to create and manage a MakerDAO CDP.
+- Compounded: arguably the easiest way to access Compound’s protocols to earn interest on ETH or DAI.
+- Payments: a simple app that facilitates sending ETH or MFT to integrated contacts
+- Noted: a text editor that stores encrypted notes in the decentralized Swarm network
 
-Produced by Nonsense Tech (winners of our recent Dapp Developer Bounties Challenge and featured partners [here])
-CDP Portal: the popular MakerDAO CDP dapp, ported to Mainframe OS
-Uniswap: the popular exchange dapp, ported to Mainframe OS
-The Looper: leverage your assets (based on Instadapp leverage functionality)
+#### Produced by Nonsense Tech
+(winners of our recent Dapp Developer Bounties Challenge)
+- CDP Portal: the popular MakerDAO CDP dapp, ported to Mainframe OS
+- Uniswap: the popular exchange dapp, ported to Mainframe OS
+- The Looper: leverage your assets (based on Instadapp leverage functionality)
 
 ## What makes Mainframe OS different?
 One of our primary goals is to simplify the end-user experience especially for users who don't already know how to or don't regularly use dapps in a browser environment. Yes, there is an extra step to have them install the Mainframe OS application first and then your dapp inside it. But we try to make that simple and a better experience for them than the current norm of using a browser plus wallet extension (like chrome & metamask). Plus uses have a much more secure and private environment since all their data lives encrypted on their own machine, there are no connections to external endpoints without their explicit knowledge and permission, and only trusted dapps can be run in the sandboxed environment.
 
 ## How does Mainframe OS compare to a Browser with Metamask?
-Metamask is definitely the dominant paradigm currently for running dapps so we are indeed focused on improving the user experience while at the same time trying to still follow some standards they've set and not reduce available functionality without very good reason. We believe the end-user experience is better using Mainframe OS because 1) users don't have to know about or install a browser extension, 2) they setup their identity and wallet in a very streamlined onboarding flow, 3) we have contact functionality built-in at the system level so users can own their own social networks and contact data and make it available to dapps in a controlled way, 4) we are not running dapps in a browser so as mentioned before they are more unstoppable, trustful, and privacy-driven, and 5) through our SDK APIs, we can have control over blockchain transactions so can help guide users through complexities of gas, signing, verifying, approving, etc.
+Metamask is definitely the dominant paradigm currently for running dapps so we are indeed focused on improving the user experience while at the same time trying to still follow some standards they've set and not reduce available functionality without very good reason. We believe the end-user experience is better using Mainframe OS because
+1) users don't have to know about or install a browser extension,
+2) they setup their identity and wallet in a very streamlined onboarding flow,
+3) we have contact functionality built-in at the system level so users can own their own social networks and contact data and make it available to dapps in a controlled way,
+4) we are not running dapps in a browser so as mentioned before they are more unstoppable, trustful, and privacy-driven, and
+5) through our SDK APIs, we can have control over blockchain transactions so can help guide users through complexities of gas, signing, verifying, approving, etc.
 
 In Metamask, one of the major pain points is signing the transaction every time someone does anything. Currently we do require the same thing, but it feels a lot less cumbersome and more streamlined in Mainframe OS. And as we continue to improve our own blockchain APIs and eventually offer something better than Web3 js in the SDK, we could make it easier to batch sign transactions or streamline common flows like approve and transferFrom etc.
 
@@ -56,7 +62,7 @@ Dapps are not published or accessed in the traditional way from a web server tha
 ## What is a “sandboxed environment” and how does that guarantee privacy and trust?
 A Sandboxed Environment means Mainframe Apps run inside a window controlled by Mainframe OS. As such, we can intercept any http requests, and provide tight integration between the Mainframe OS SDK APIs and the dapp UI. At the top of the app windows is a title bar and the “Trusted UI” bar. Anything displayed in this area comes directly from Mainframe OS and dapps do not have access to it. This is where your app permissions alerts, contacts, wallets, and blockchain alerts are displayed when apps access them through the SDK.
 
-"Trusted app" status is enforced through dapp sharing/discovery, and through transparency of requested permissions on installation.
+_Trusted app_ status is enforced through dapp sharing/discovery, and through transparency of requested permissions on installation.
 
 In order for other users to install and use a dapp they need the Application ID generated when it's published. To get that application ID, the dapp developer has to publish it or share it in some way to their users. Then when the users install it, they will see the "permissions" the dapp was published with, which includes the list of external URLs accessed, the type of user data requested, and underlying services utilized. Users have to grant those permissions before anything can be accessed in the sandboxed environment. So by the time the user is using the dapp, they have 1-found the app ID somewhere (presumably if they are willing to install/try it, they already have a degree of "trust" of the developer), 2-seen clearly the external calls and data access requested and granted permission, and 3-know they are running the dapp inside the sandboxed environment so that any external calls or data accessed will be captured before executed and they'll have the chance again to grant permission.
 
@@ -67,8 +73,16 @@ Technically it is possible for someone to create a malicious dapp and put it out
 ## Can existing traditional browser-based dapps be run inside Mainframe OS?
 We have gone back and forth on this, but are currently committed to not allowing external dapps (i.e. dapps hosted outside the swarm network/not packaged and deployed from within Mainframe OS) to be installed and run inside Mainframe OS. This does limit the potential reach right now, but as dapps and dapp users are still in their infancy we're making that tradeoff in favor of decentralization, more controlled user experience, and guarantees for end-users around privacy.
 
-## Will solidity dapps be able to copy&paste over to Mainframe OS?
-Existing solidity dapps only need to follow three steps to work in Mainframe OS. 1)Integrate with our wallet, following a similar process to what it was like to integrate with metamask. 2)Make sure their app is structured as required by Mainframe OS (i.e. single-page webapp with index.html file at root level and relative paths to assets). 3)Deploy the front-end webapp to our decentralized storage layer which can easily be done within Mainframe OS. There is no need to redeploy any contracts since the front-end can continue to reference the same instance of contracts on the Ethereum blockchain.
+## How can solidity dapps migrate to Mainframe OS?
+Existing solidity dapps only need to follow three steps to work in Mainframe OS.
+
+1. Integrate with our wallet, following a similar process to what it was like to integrate with metamask.
+
+2. Make sure the app is structured as required by Mainframe OS (i.e. single-page webapp with index.html file at root level and relative paths to assets).
+
+3. Deploy the front-end webapp to our decentralized storage layer which can easily be done within Mainframe OS.
+
+There is no need to redeploy any contracts since the front-end can continue to reference the same instance of contracts on the Ethereum blockchain.
 
 ## How does MFT integrate with Mainframe OS?
 MFT tokens are integrated in Mainframe OS to power underlying services. In this initial release, users can stake MFT to send invitations to other users to connect.
@@ -92,11 +106,11 @@ It is on our roadmap.
 ## What will the OS look like once it integrates with other blockchains? Will there be more ‘Identities’ you can choose from, and then choices within apps for payments, etc.?
 The idea is to abstract specifics about different blockchains away from the users so it is virtually invisible to them. The chain has implications on identity, wallet, and blockchain transactions, which are all accessed through our SDK functions.
 
-First, Identity: Mainframe Identity is not tied to the Ethereum network, but rather a users' ETH address is stored as a property inside the users Mainframe Identity. So other chains could easily be integrated and those addresses likewise stored as an additional properties on the Mainframe Identity object. The dapps can access the relevant address as needed for their functionality for users and contacts.
+**First, Identity:** Mainframe Identity is not tied to the Ethereum network, but rather a users' ETH address is stored as a property inside the users Mainframe Identity. So other chains could easily be integrated and those addresses likewise stored as an additional properties on the Mainframe Identity object. The dapps can access the relevant address as needed for their functionality for users and contacts.
 
-Second, Wallet: the Mainframe OS Wallet is a collection of any number of different software or hardware wallet integrations. Currently only Ethereum accounts are supported, but it was designed so other types of wallets could also be integrated eventually. A user selects one of their addresses to be their "default" and when dapps run, it is within that context - which can easily be switched by the user at run-time. So once there are additional chains integrated, there could be multiple defaults (default ETH address, default Tezos address, etc) or whatever makes sense for the different characteristics of those chains. The dapps can then indicate which type of wallet they require and we can ensure the user has that set up before being able to run the dapp.
+**Second, Wallet:** the Mainframe OS Wallet is a collection of any number of different software or hardware wallet integrations. Currently only Ethereum accounts are supported, but it was designed so other types of wallets could also be integrated eventually. A user selects one of their addresses to be their "default" and when dapps run, it is within that context - which can easily be switched by the user at run-time. So once there are additional chains integrated, there could be multiple defaults (default ETH address, default Tezos address, etc) or whatever makes sense for the different characteristics of those chains. The dapps can then indicate which type of wallet they require and we can ensure the user has that set up before being able to run the dapp.
 
-Third, Blockchain Transactions: Currently the Mainframe SDK wraps several common Ethereum blockchain APIs to simplify integration with that chain. We would extend the SDK for each additional chain supported. We would also support/enable/simplify atomic swaps between chains. That is probably a ways off, but definitely on the roadmap.
+**Third, Blockchain Transactions:** Currently the Mainframe SDK wraps several common Ethereum blockchain APIs to simplify integration with that chain. We would extend the SDK for each additional chain supported. We would also support/enable/simplify atomic swaps between chains. That is probably a ways off, but definitely on the roadmap.
 
 Mainframe OS is admittedly pretty Ethereum-centric right now. Seemed a good place to start.   That’s where the developers are, it’s the most decentralized smart contract platform, most battle tested and trusted by users. Other chains like Tron and EOS seem to be attracting game devs but that’s not our focus, we’re currently more interested in supporting developers wanting to build in the defi space. Trust, security and decentralization is a high priority when it comes to these types of apps. That’s not to say we won’t be integrating with other blockchains in the future, our platform is blockchain agnostic and we hope to better enable cross chain interactions between dapps.
 
@@ -147,11 +161,8 @@ We have a multi-pronged approach to support our long-term vision of moving the w
 There's no question these are the early days and it's going to take some work to build up to the demand we ultimately expect. We have a long-term view and are invested to see it through.
 
 
-## It seems there are still only few devs trying to build dapps on Mainframe. The team is using bounties now, but it doesn’t look like the dev version got a lot of attention yet
-We haven’t been pushing too hard but mainly working closely with a select number of devs to keep a tight feedback loop in this early alpha phase.
-
-## The functionalities seem to be limited initially and although sooo much work was done under the hood to integrate a lot of Web3 technologies, having simple apps (like Noted) ‘decentralized’ does look like making something simple very complicated.
-We value decentralization, security and privacy, our feature set might be rather limited right now but we’ve built some solid foundations and feel well positioned to support dapps that align with our values. We’re more than a wallet or browser, we enable developers to host apps on fully decentralised infrastructure and interact over decentralised API’s including comms, payments, social and storage api’s. We’re also aware the ecosystem is young and this space will be evolving rapidly over the next few years, we believe we’ve built a system that’s flexible enough to adapt as new developer and user needs arise.
+## Why should developers build on Mainframe OS, and what do you offer them?
+We value decentralization, security and privacy. Our feature set might be rather limited right now but we’ve built some solid foundations and feel well positioned to support dapps that align with our values. We’re more than a wallet or browser, we enable developers to host apps on fully decentralised infrastructure and interact over decentralised API’s including comms, payments, social and storage api’s. We’re also aware the ecosystem is young and this space will be evolving rapidly over the next few years, we believe we’ve built a system that’s flexible enough to adapt as new developer and user needs arise.
 
 
 ## Will Mainframe OS allow atomic swaps?
