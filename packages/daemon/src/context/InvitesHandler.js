@@ -6,7 +6,6 @@ import createKeccakHash from 'keccak'
 import { utils } from 'ethers'
 import { filter } from 'rxjs/operators'
 import { type Observable } from 'rxjs'
-// import type { bzzHash } from '../swarm/feed'
 
 import type { OwnUserIdentity, PeerUserIdentity } from '../identity'
 import type { InviteRequest } from '../identity/IdentitiesRepository'
@@ -78,12 +77,12 @@ export default class InvitesHandler {
             return (
               e.type === 'vault_opened' ||
               e.type === 'eth_network_changed' ||
-              e.type === 'vault_created'
+              (e.type === 'user_changed' && e.change === 'publicFeed')
             )
           }),
         )
         .subscribe(async (e: EthNetworkChangedEvent | VaultOpenedEvent) => {
-          if (e.type === 'vault_opened') {
+          if (e.type !== 'eth_network_changed') {
             await this._context.io.eth.fetchNetwork()
           }
           if (contracts[this._context.io.eth.networkName]) {
@@ -391,7 +390,7 @@ export default class InvitesHandler {
       // TODO: Notify launcher and request permission from user?
 
       if (!peer.profile.ethAddress) {
-        throw new Error('No eth address found for recipient')
+        throw new Error('No ETH address found for recipient')
       }
 
       const toAddrHash = hash(bufferFromHex(peer.profile.ethAddress))
