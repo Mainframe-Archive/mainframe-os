@@ -111,9 +111,9 @@ Users get to choose whether or not to make their Name and ETH address “discove
 
 
 ## Is Mainframe OS perfect?
-This is where we get to give all sorts of disclaimers about how this is very new and young technology and while we know our concepts and designs are solid, Mainframe OS is still very much in an early “alpha” state. Swarm, the underlying storage layer powering much of Mainframe OS, is itself still an alpha project. That means no matter how polished we are on top (which I’m not saying we totally are), there are no guarantees at this stage that things will work smoothly, that things won’t break unexpectedly and without warning, or that versions won’t get released down the road that are not backwards compatible. We of course will try to mitigate that as much as possible. But this is the reality of decentralized development today.
+Of course not. While we know our concepts and designs are solid, Mainframe OS is still very much in an early “alpha” state. Swarm, the underlying storage layer powering much of Mainframe OS, is itself still an alpha project. That means there are no guarantees at this stage that things will always work smoothly. This is the reality of decentralized development today.
 
-When we started a few years ago, the goal was to build a decentralized, unstoppable, private, secure messaging app. Step by step we went down the stack to realize the plumbing to facilitate all this smoothly simply didn’t exist yet so we got to work helping to build it from the ground up. A lot has gone into Mainframe OS and the way it is designed and built is really very good, if we do say so ourselves. Right now it is early and it’s buggy and incomplete. But with this first user release, we’re now on the path of continual improvements and enhancements so the future is bright.
+When we started a few years ago, the goal was to build a decentralized, unstoppable, private, secure messaging app. Step by step we went down the stack to realize the plumbing to facilitate all this smoothly simply didn’t exist yet so we got to work helping to build it from the ground up. A lot has gone into Mainframe OS and the way it is designed and built is really very good, if we do say so ourselves. Right now it is early and it’s buggy and incomplete. But with this first user release, we’re now on the path of continual improvements and enhancements towards a very bright future.
 
 ## How can I help?
 Help us improve Mainframe OS by giving us constructive feedback on our gitter channel
@@ -135,8 +135,9 @@ Yes, Mainframe OS definitely needs to go mobile sooner than later. We are still 
 
 There are additional risks related to living within other platforms (Apple’s app store, etc) especially if Mainframe OS contains a “dapp store” of our own. Mainframe OS can exist and dapps can run without Apple's blessing. So the problem becomes finding/installing Mainframe OS. On desktop there are other options for installing applications besides the app store. On mobile that gets much harder, especially if we try to have a straight dapp store/dapp purchase model. Maybe straightforward in-app purchases are a path. We are trying to be creative.
 
-## How does the team plan to increase the value of MFT over time?
-We have a multi-pronged approach to supporting MFT value that includes:
+## What are some of the goals and plans for the team going forward?
+We have a multi-pronged approach to support our long-term vision of moving the world to web3, and making Mainframe OS its home. That includes:
+
 1-killer dapps to bring users into the Mainframe OS ecosystem. We'll help build or incentivize them initially to showcase capabilities, inspire other devs, and seed the offering. We are prepared to continue being the primary dapp devs, or being heavily involved in this as momentum builds.
 2-continual improvements to Mainframe OS to support users and increase capabilities
 3-increase integration of MFT in Mainframe OS (see section on token utility below)
