@@ -29,61 +29,6 @@ contract('ContactInvite', accounts => {
     invites = await ContactInvite.new(token.address)
   })
 
-  it('Should fund and approve accounts for testing for testing', async () => {
-    await token.transfer(accounts[1], '100000000000000000000', {
-      from: accounts[0],
-    })
-    await token.transfer(accounts[2], '100000000000000000000', {
-      from: accounts[0],
-    })
-    await token.transfer(accounts[3], '100000000000000000000', {
-      from: accounts[0],
-    })
-    await token.transfer(accounts[4], '100000000000000000000', {
-      from: accounts[0],
-    })
-    await token.transfer(accounts[5], '100000000000000000000', {
-      from: accounts[0],
-    })
-    await token.transfer(accounts[6], '100000000000000000000', {
-      from: accounts[0],
-    })
-    await token.transfer(accounts[7], '100000000000000000000', {
-      from: accounts[0],
-    })
-
-    await token.approve(invites.address, '100000000000000000000', {
-      from: accounts[1],
-    })
-
-    await token.approve(invites.address, '100000000000000000000', {
-      from: accounts[2],
-    })
-
-    await token.approve(invites.address, '100000000000000000000', {
-      from: accounts[3],
-    })
-
-    await token.approve(invites.address, '100000000000000000000', {
-      from: accounts[4],
-    })
-
-    await token.approve(invites.address, '100000000000000000000', {
-      from: accounts[5],
-    })
-
-    await token.approve(invites.address, '100000000000000000000', {
-      from: accounts[6],
-    })
-
-    await token.approve(invites.address, '100000000000000000000', {
-      from: accounts[7],
-    })
-
-    console.log('token.address: ', token.address)
-    console.log('invites.address: ', invites.address)
-  })
-
   it('Should allow sending invites with recipient data in events', async () => {
     const bnStake = await invites.requiredStake()
     const stake = bnStake.toString()
@@ -95,9 +40,6 @@ contract('ContactInvite', accounts => {
       recipientFeedHash,
       {},
     )
-
-    const val = EthUtil.keccak('0xA02fEd9f0C137e86489Aad17e10b9a255baB83e3')
-    console.log('hashed address: ', val.toString('hex'))
 
     assert.equal(web3.utils.toUtf8(inviteState), 'NONE', 'Invalid invite state')
 
@@ -145,7 +87,7 @@ contract('ContactInvite', accounts => {
     await web3.eth.sendTransaction({
       to: '0x158bc802c0bc93abc96d1619b0e476c205275375',
       from: accounts[0],
-      value: stake,
+      value: web3.utils.toWei('1'),
     })
     await token.transfer('0x158bc802c0bc93abc96d1619b0e476c205275375', stake, {
       from: accounts[0],
@@ -509,7 +451,7 @@ contract('ContactInvite', accounts => {
 
     truffleAssert.eventEmitted(res, 'StakeChanged', ev => {
       return (
-        ev.oldStake.toString() === ethers.utils.parseEther('10').toString() &&
+        ev.oldStake.toString() === ethers.utils.parseEther('100').toString() &&
         ev.newStake.toString() === ethers.utils.parseEther('1000').toString()
       )
     })
@@ -536,7 +478,7 @@ contract('ContactInvite', accounts => {
 
     assert.equal(
       ethers.utils.formatEther(pendingStake.toString()),
-      '10.0',
+      '100.0',
       'Incorrect staked value',
     )
 
