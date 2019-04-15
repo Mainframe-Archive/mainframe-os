@@ -5,7 +5,14 @@ import React, { Component } from 'react'
 import { graphql, commitMutation } from 'react-relay'
 
 import styled from 'styled-components/native'
-import { Button, Row, Column, TextField, Text } from '@morpheus-ui/core'
+import {
+  Button,
+  Row,
+  Column,
+  TextField,
+  Text,
+  Tooltip,
+} from '@morpheus-ui/core'
 import { Form, type FormSubmitPayload } from '@morpheus-ui/forms'
 import CircleArrowRight from '@morpheus-ui/icons/CircleArrowRight'
 
@@ -21,12 +28,18 @@ type State = {
 
 const Container = styled.View`
   margin-top: 20px;
+  padding-left: 48px;
   flex: 1;
 `
 
 const FormContainer = styled.View`
   margin-top: 10px;
   max-width: 450px;
+`
+
+const DescriptionContainer = styled.View`
+  flex-direction: row;
+  align-items: center;
 `
 
 export const createDeveloperMutation = graphql`
@@ -100,9 +113,22 @@ export default class CreateDevIdentityView extends Component<Props, State> {
         </Row>
         <Row size={1}>
           <Column>
-            <Text variant="greyMed" size={12}>
-              Please create your developer identity in order to create apps.
-            </Text>
+            <DescriptionContainer>
+              <Text variant="greyMed" size={12}>
+                Please create your developer identity in order to create apps.
+              </Text>
+              <Tooltip>
+                <Text variant="tooltipTitle">
+                  Why do I need a Developer Identity?
+                </Text>
+                <Text variant="tooltipText">
+                  Your developer identity is used to sign your apps so users can
+                  verify authenticity when they install. They will also see your
+                  Developer Name next to your app icon on the Application
+                  screen.
+                </Text>
+              </Tooltip>
+            </DescriptionContainer>
           </Column>
         </Row>
         <FormContainer>

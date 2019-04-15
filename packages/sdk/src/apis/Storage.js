@@ -3,7 +3,7 @@
 import ClientAPIs from '../ClientAPIs'
 
 export default class StorageAPIs extends ClientAPIs {
-  promptUpload(key: string): Promise<?string> {
+  promptUpload(key: string): Promise<boolean> {
     return this._rpc.request('storage_promptUpload', { key })
   }
 
@@ -11,8 +11,8 @@ export default class StorageAPIs extends ClientAPIs {
     return this._rpc.request('storage_list')
   }
 
-  set(data: string, key: string): Promise<?string> {
-    return this._rpc.request('storage_set', { data, key })
+  set(key: string, data: string): Promise<?string> {
+    return this._rpc.request('storage_set', { key, data })
   }
 
   get(key: string): Promise<?string> {

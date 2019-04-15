@@ -11,6 +11,7 @@ import {
   type Disposable,
   type Environment,
 } from 'react-relay'
+import { EthClient } from '@mainframe/eth'
 
 import OnboardView from './onboarding/OnboardView'
 import { EnvironmentContext } from './RelayEnvironment'
@@ -23,18 +24,52 @@ import WalletsScreen from './wallets/WalletsScreen'
 import ContactsScreen from './contacts/ContactsScreen'
 import NotificationsScreen from './notifications/NotificationsScreen'
 import SettingsScreen from './settings/SettingsScreen'
+import rpc from './rpc'
 
-const CONTACT_CHANGED_SUBSCRIPTION = graphql`
-  subscription LauncherContactChangedSubscription {
-    contactChanged {
-      connectionState
-      profile {
-        name
-        avatar
+import type { Launcher_identities as Identities } from './__generated__/Launcher_identities.graphql'
+
+const APP_UPDATE_CHANGED_SUBSCRIPTION = graphql`
+  subscription LauncherAppUpdateChangedSubscription {
+    appUpdateChanged {
+      viewer {
+        apps {
+          ...SideMenu_apps
+        }
+      }
+      app {
+        ...AppItem_installedApp
       }
     }
   }
 `
+
+const CONTACT_CHANGED_SUBSCRIPTION = graphql`
+  subscription LauncherContactChangedSubscription {
+    contactChanged {
+      contact {
+        connectionState
+        profile {
+          name
+          avatar
+        }
+        invite {
+          inviteTX
+          stake {
+            reclaimedTX
+            amount
+            state
+          }
+        }
+      }
+    }
+  }
+`
+
+const ethClientProvider = {
+  send: async (method: string, params: Array<*>): Promise<*> => {
+    return rpc.ethSend({ method, params })
+  },
+}
 
 const Container = styled.View`
   flex-direction: row;
@@ -44,22 +79,12 @@ const Container = styled.View`
 `
 
 const ContentContainer = styled.View`
-  padding: 40px 50px 20px 50px;
   min-width: 600px;
   flex: 1;
 `
 
 type Props = {
-  identities: {
-    ownUsers: Array<{
-      localID: string,
-      defaultEthAddress: ?string,
-      wallets: {
-        hd: Array<{ localID: string }>,
-        ledger: Array<{ localID: string }>,
-      },
-    }>,
-  },
+  identities: Identities,
   relay: {
     environment: Environment,
   },
@@ -73,7 +98,8 @@ type State = {
 }
 
 class Launcher extends Component<Props, State> {
-  _subscription: ?Disposable
+  _subscriptions: Array<Disposable> = []
+  _ethClient: EthClient
 
   constructor(props: Props) {
     super(props)
@@ -91,18 +117,23 @@ class Launcher extends Component<Props, State> {
       onboardRequired,
       openScreen: 'apps',
     }
+    this._ethClient = new EthClient(ethClientProvider)
   }
 
   componentDidMount() {
-    this._subscription = requestSubscription(this.props.relay.environment, {
-      subscription: CONTACT_CHANGED_SUBSCRIPTION,
+    this._subscriptions = [
+      APP_UPDATE_CHANGED_SUBSCRIPTION,
+      CONTACT_CHANGED_SUBSCRIPTION,
+    ].map(subscription => {
+      return requestSubscription(this.props.relay.environment, { subscription })
     })
   }
 
   componentWillUnmount() {
-    if (this._subscription != null) {
-      this._subscription.dispose()
-    }
+    this._subscriptions.forEach(sub => {
+      sub.dispose()
+    })
+    this._subscriptions = []
   }
 
   setOpenScreen = (name: ScreenNames) => {
@@ -151,7 +182,7 @@ class Launcher extends Component<Props, State> {
     }
 
     return (
-      <Provider value={{ user: ownUsers[0] }}>
+      <Provider value={{ user: ownUsers[0], ethClient: this._ethClient }}>
         <Container testID="launcher-view">
           <SideMenu
             selected={this.state.openScreen}
@@ -170,6 +201,11 @@ const LauncherRelayContainer = createFragmentContainer(Launcher, {
       ownUsers {
         defaultEthAddress
         localID
+        feedHash
+        profile {
+          name
+          ethAddress
+        }
         wallets {
           hd {
             localID

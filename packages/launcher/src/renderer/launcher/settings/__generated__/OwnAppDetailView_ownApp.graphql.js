@@ -15,12 +15,13 @@ export type OwnAppDetailView_ownApp = {|
   +mfid: string,
   +name: string,
   +contentsPath: string,
-  +updateFeedHash: ?string,
+  +updateFeedHash: string,
   +developer: {|
     +id: ?string,
     +name: ?string,
   |},
-  +versions: $ReadOnlyArray<{|
+  +publishedVersion: ?string,
+  +currentVersionData: {|
     +version: string,
     +versionHash: ?string,
     +permissions: {|
@@ -37,7 +38,7 @@ export type OwnAppDetailView_ownApp = {|
         +CONTACTS_READ: ?boolean,
       |},
     |},
-  |}>,
+  |},
   +$refType: OwnAppDetailView_ownApp$ref,
 |};
 */
@@ -137,13 +138,20 @@ return {
       ]
     },
     {
+      "kind": "ScalarField",
+      "alias": null,
+      "name": "publishedVersion",
+      "args": null,
+      "storageKey": null
+    },
+    {
       "kind": "LinkedField",
       "alias": null,
-      "name": "versions",
+      "name": "currentVersionData",
       "storageKey": null,
       "args": null,
       "concreteType": "AppVersionData",
-      "plural": true,
+      "plural": false,
       "selections": [
         {
           "kind": "ScalarField",
@@ -196,5 +204,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = 'eeae199b11af420b39ec6ab4625eee49';
+(node/*: any*/).hash = 'be0e5ff3fb81bac3fbb214358530f3cd';
 module.exports = node;

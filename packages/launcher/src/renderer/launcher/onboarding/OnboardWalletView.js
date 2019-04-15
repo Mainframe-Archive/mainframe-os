@@ -1,7 +1,7 @@
 // @flow
 
 import React, { Component } from 'react'
-import { Button, Row } from '@morpheus-ui/core'
+import { Button, Row, Text } from '@morpheus-ui/core'
 import { graphql, commitMutation } from 'react-relay'
 import styled from 'styled-components/native'
 
@@ -40,6 +40,24 @@ const updateProfileMutation = graphql`
     }
   }
 `
+
+const ToolTipContent = (
+  <>
+    <Text variant="tooltipTitle">Why do I need a wallet?</Text>
+    <Text variant="tooltipText">
+      Interacting with the blockchain requires a wallet. Mainframe OS uses your
+      wallet address for signing transactions, encryption, and to hold and
+      transfer cryptocurrency.
+    </Text>
+    <Text variant="tooltipTitle">
+      Can I connect my ledger or add another wallet?
+    </Text>
+    <Text variant="tooltipText">
+      Yes, you can import an existing software wallet from a seed phrase,
+      connect a ledger hardware wallet, or create a new wallet.
+    </Text>
+  </>
+)
 
 export default class OnboardWalletView extends Component<Props, State> {
   static contextType = EnvironmentContext
@@ -194,6 +212,7 @@ export default class OnboardWalletView extends Component<Props, State> {
         title="Wallet"
         description="Create or import your Ethereum wallet."
         step={3}
+        tooltipContent={ToolTipContent}
         wallet>
         {this.renderContent()}
       </OnboardContainer>

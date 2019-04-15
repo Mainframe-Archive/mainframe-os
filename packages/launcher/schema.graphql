@@ -1,7 +1,20 @@
+input AcceptContactRequestInput {
+  peerID: String!
+  userID: String!
+  clientMutationId: String
+}
+
+type AcceptContactRequestPayload {
+  viewer: Viewer!
+  contact: Contact
+  clientMutationId: String
+}
+
 input AddContactInput {
   userID: String!
   publicFeed: String!
   aliasName: String
+  sendInvite: Boolean
   clientMutationId: String
 }
 
@@ -45,7 +58,9 @@ type App implements Node {
   localID: ID!
   name: String!
   manifest: AppManifestData!
-  users: [AppUser]
+  update: AppUpdateData
+  installationState: InstallationState!
+  users: [AppUser!]!
 }
 
 type AppAuthor {
@@ -63,7 +78,19 @@ input AppCreateMutationInput {
 }
 
 type AppCreateMutationPayload {
-  app: OwnApp
+  app: OwnApp!
+  viewer: Viewer!
+  clientMutationId: String
+}
+
+input AppCreateVersionMutationInput {
+  appID: String!
+  version: String!
+  clientMutationId: String
+}
+
+type AppCreateVersionMutationPayload {
+  app: OwnApp!
   viewer: Viewer!
   clientMutationId: String
 }
@@ -139,8 +166,32 @@ input AppPermissionsSettingsInput {
 }
 
 type Apps {
-  installed: [App]
-  own: [OwnApp]
+  installed: [App!]!
+  own: [OwnApp!]!
+  updatesCount: Int!
+}
+
+type AppUpdateData {
+  manifest: AppManifestData!
+  permissionsChanged: Boolean!
+}
+
+input AppUpdateMutationInput {
+  appID: String!
+  userID: String!
+  permissionsSettings: AppPermissionsSettingsInput
+  clientMutationId: String
+}
+
+type AppUpdateMutationPayload {
+  app: App
+  viewer: Viewer!
+  clientMutationId: String
+}
+
+type AppUpdatePayload {
+  app: App!
+  viewer: Viewer!
 }
 
 type AppUser {
@@ -163,8 +214,12 @@ type AppVersionData {
 
 enum ConnectionState {
   CONNECTED
-  SENDING
-  SENT
+  DECLINED
+  RECEIVED
+  SENDING_FEED
+  SENT_FEED
+  SENDING_BLOCKCHAIN
+  SENT_BLOCKCHAIN
 }
 
 type Contact implements Node {
@@ -174,12 +229,25 @@ type Contact implements Node {
   peerID: ID!
   publicFeed: String!
   pubKey: String!
+  invite: ContactInviteData
   profile: GenericProfile!
   connectionState: ConnectionState!
 }
 
+type ContactChangedPayload {
+  contact: Contact!
+  viewer: Viewer!
+}
+
+type ContactInviteData {
+  inviteTX: String
+  ethNetwork: String
+  stake: InviteStake!
+}
+
 type Contacts {
-  userContacts(userID: String!): [Contact]
+  invitesCount(userID: String!): Int!
+  userContacts(userID: String!): [Contact!]!
 }
 
 input CreateDeveloperIdentityInput {
@@ -218,12 +286,12 @@ type CreateUserIdentityPayload {
   clientMutationId: String
 }
 
-input DeletContactInput {
+input DeleteContactInput {
   contactID: String!
   clientMutationId: String
 }
 
-type DeletContactPayload {
+type DeleteContactPayload {
   viewer: Viewer!
   clientMutationId: String
 }
@@ -257,8 +325,8 @@ type EthLedgerWallet implements Node {
 }
 
 type EthWallets {
-  hd: [EthHDWallet]
-  ledger: [EthLedgerWallet]
+  hd: [EthHDWallet!]!
+  ledger: [EthLedgerWallet!]!
 }
 
 type GenericProfile {
@@ -268,8 +336,8 @@ type GenericProfile {
 }
 
 type Identities {
-  ownUsers: [OwnUserIdentity]
-  ownDevelopers: [OwnDeveloperIdentity]
+  ownUsers: [OwnUserIdentity!]!
+  ownDevelopers: [OwnDeveloperIdentity!]!
 }
 
 input ImportHDWalletInput {
@@ -286,6 +354,18 @@ type ImportHDWalletPayload {
   clientMutationId: String
 }
 
+enum InstallationState {
+  READY
+  DOWNLOADING
+  ERROR
+}
+
+type InviteStake {
+  amount: String
+  state: StakeState!
+  reclaimedTX: String
+}
+
 input ManifestAuthorInput {
   id: String!
   name: String!
@@ -293,14 +373,17 @@ input ManifestAuthorInput {
 
 type Mutation {
   createApp(input: AppCreateMutationInput!): AppCreateMutationPayload
+  createAppVersion(input: AppCreateVersionMutationInput!): AppCreateVersionMutationPayload
   installApp(input: AppInstallMutationInput!): AppInstallMutationPayload
+  updateApp(input: AppUpdateMutationInput!): AppUpdateMutationPayload
   setAppPermissionsRequirements(input: SetAppPermissionsRequirementsInput!): SetAppPermissionsRequirementsPayload
   publishAppVersion(input: PublishAppVersionInput!): PublishAppVersionPayload
   updateAppDetails(input: UpdateAppDetailsInput!): UpdateAppDetailsPayload
+  acceptContactRequest(input: AcceptContactRequestInput!): AcceptContactRequestPayload
   addContact(input: AddContactInput!): AddContactPayload
   createUserIdentity(input: CreateUserIdentityInput!): CreateUserIdentityPayload
   createDeveloperIdentity(input: CreateDeveloperIdentityInput!): CreateDeveloperIdentityPayload
-  deleteContact(input: DeletContactInput!): DeletContactPayload
+  deleteContact(input: DeleteContactInput!): DeleteContactPayload
   setDefaultWallet(input: SetDefaultWalletInput!): SetDefaultWalletPayload
   setUserProfileVisibility(input: SetUserProfileVisibilityInput!): SetUserProfileVisibilityPayload
   updateProfile(input: UpdateProfileInput!): UpdateProfilePayload
@@ -331,10 +414,13 @@ type OwnApp implements Node {
   mfid: String!
   name: String!
   contentsPath: String!
-  updateFeedHash: String
+  updateFeedHash: String!
+  currentVersion: String!
+  currentVersionData: AppVersionData!
+  publishedVersion: String
   versions: [AppVersionData!]!
   developer: AppAuthor!
-  users: [AppUser]
+  users: [AppUser!]!
 }
 
 type OwnDeveloperIdentity implements Node {
@@ -350,9 +436,9 @@ type OwnUserIdentity implements Node {
   """The ID of an object"""
   id: ID!
   localID: ID!
-  feedHash: String!
+  feedHash: String
   mfid: ID!
-  apps: [App]
+  apps: [App!]!
   defaultEthAddress: String
   wallets: EthWallets!
   profile: NamedProfile!
@@ -446,8 +532,17 @@ type SetUserProfileVisibilityPayload {
   clientMutationId: String
 }
 
+enum StakeState {
+  STAKED
+  RECLAIMING
+  RECLAIMED
+  SEIZED
+}
+
 type Subscription {
-  contactChanged: Contact!
+  appUpdateChanged: AppUpdatePayload!
+  contactChanged: ContactChangedPayload!
+  contactsChanged: ContactChangedPayload!
 }
 
 enum SupportedWallets {
@@ -519,6 +614,6 @@ input WebRequestGrantInput {
 }
 
 type WebRequestGrants {
-  granted: [String]
-  denied: [String]
+  granted: [String!]!
+  denied: [String!]!
 }

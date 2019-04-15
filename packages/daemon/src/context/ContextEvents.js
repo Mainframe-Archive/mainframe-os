@@ -1,7 +1,13 @@
 // @flow
 
-import type { Observable, Subscription } from 'rxjs'
-import { debounceTime, filter } from 'rxjs/operators'
+import { type Observable, type Subscription, Subject } from 'rxjs'
+import {
+  debounceTime,
+  filter,
+  multicast,
+  refCount,
+  flatMap,
+} from 'rxjs/operators'
 import { idType } from '@mainframe/utils-id'
 
 import { OwnFeed } from '../swarm/feed'
@@ -18,6 +24,8 @@ import type {
 export default class ContextEvents {
   vaultOpened: Observable<ContextEvent>
   vaultModified: Observable<ContextEvent>
+  ethNetworkChanged: Observable<{ networkID: string }>
+  ethAccountsChanged: Observable<{ accounts: Array<string> }>
 
   _context: ClientContext
   _subscriptions: { [key: string]: Subscription } = {}
@@ -40,6 +48,9 @@ export default class ContextEvents {
           e.type === 'contact_created' ||
           e.type === 'contact_changed' ||
           e.type === 'contact_deleted' ||
+          e.type === 'eth_accounts_changed' ||
+          e.type === 'eth_network_changed' ||
+          e.type === 'invites_changed' ||
           e.type === 'peer_created' ||
           e.type === 'peer_changed' ||
           e.type === 'peer_deleted' ||
@@ -48,6 +59,33 @@ export default class ContextEvents {
           e.type === 'user_deleted'
         )
       }),
+    )
+    // $FlowFixMe: ConnectableObservable pipe
+    this.ethNetworkChanged = this._context.pipe(
+      filter((e: ContextEvent) => {
+        return e.type === 'eth_network_changed'
+      }),
+      flatMap(async () => {
+        const networkID = await this._context.io.eth.fetchNetwork()
+        return { networkID }
+      }),
+      multicast(new Subject()),
+      refCount(),
+    )
+    // $FlowFixMe: ConnectableObservable pipe
+    this.ethAccountsChanged = this._context.pipe(
+      filter((e: ContextEvent) => {
+        return e.type === 'eth_accounts_changed'
+      }),
+      flatMap(async (e: ContextEvent) => {
+        const accounts = await this._context.queries.getUserEthAccounts(
+          // $FlowFixMe type checked in filter
+          e.userID,
+        )
+        return { accounts }
+      }),
+      multicast(new Subject()),
+      refCount(),
     )
 
     // Using addSubscription() will make sure the subscription will be cleared when the client disconnects
@@ -91,24 +129,36 @@ export default class ContextEvents {
         }),
     )
     this.addSubscription(
+      'contactCreated',
+      this._context
+        .pipe(
+          filter((e: ContextEvent) => {
+            return e.type === 'contact_created'
+          }),
+        )
+        .subscribe(async (e: ContactCreatedEvent) => {
+          this._context.next({
+            type: 'contacts_changed',
+            userID: e.userID,
+          })
+        }),
+    )
+    this.addSubscription(
       'contactRequestSending',
       this._context
         .pipe(
           filter((e: ContextEvent) => {
             return (
               (e.type === 'contact_created' || e.type === 'contact_changed') &&
-              e.contact.connectionState === 'sending'
+              e.contact.connectionState === 'sending_feed'
             )
           }),
         )
         .subscribe(async (e: ContactCreatedEvent | ContactChangedEvent) => {
           const { contact, userID } = e
-          const user = this._context.openVault.identities.getOwnUser(
-            idType(userID),
-          )
-          const peer = this._context.openVault.identities.getPeerUser(
-            idType(contact.peerID),
-          )
+          const { identities } = this._context.openVault
+          const user = identities.getOwnUser(idType(userID))
+          const peer = identities.getPeerUser(idType(contact.peerID))
           if (!user || !peer) return
 
           await Promise.all([
@@ -125,13 +175,12 @@ export default class ContextEvents {
             this._context.io.bzz,
             contact.generatefirstContactPayload(),
           )
-          contact.requestSent = true
-
+          contact.feedRequestSent = true
           this._context.next({
             type: 'contact_changed',
             contact,
             userID,
-            change: 'requestSent',
+            change: 'feedRequestSent',
           })
         }),
     )

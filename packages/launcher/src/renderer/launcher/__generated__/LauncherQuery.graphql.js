@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 4519e46e1b508ccc411f552ab2526032
+ * @relayHash 41d1470e63eee0a9c288e7136dc50686
  */
 
 /* eslint-disable */
@@ -39,6 +39,11 @@ fragment Launcher_identities on Identities {
   ownUsers {
     defaultEthAddress
     localID
+    feedHash
+    profile {
+      name
+      ethAddress
+    }
     wallets {
       hd {
         localID
@@ -78,7 +83,7 @@ return {
   "operationKind": "query",
   "name": "LauncherQuery",
   "id": null,
-  "text": "query LauncherQuery {\n  viewer {\n    identities {\n      ...Launcher_identities\n    }\n    id\n  }\n}\n\nfragment Launcher_identities on Identities {\n  ownUsers {\n    defaultEthAddress\n    localID\n    wallets {\n      hd {\n        localID\n        id\n      }\n      ledger {\n        localID\n        id\n      }\n    }\n    id\n  }\n}\n",
+  "text": "query LauncherQuery {\n  viewer {\n    identities {\n      ...Launcher_identities\n    }\n    id\n  }\n}\n\nfragment Launcher_identities on Identities {\n  ownUsers {\n    defaultEthAddress\n    localID\n    feedHash\n    profile {\n      name\n      ethAddress\n    }\n    wallets {\n      hd {\n        localID\n        id\n      }\n      ledger {\n        localID\n        id\n      }\n    }\n    id\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -156,6 +161,38 @@ return {
                     "storageKey": null
                   },
                   v0,
+                  {
+                    "kind": "ScalarField",
+                    "alias": null,
+                    "name": "feedHash",
+                    "args": null,
+                    "storageKey": null
+                  },
+                  {
+                    "kind": "LinkedField",
+                    "alias": null,
+                    "name": "profile",
+                    "storageKey": null,
+                    "args": null,
+                    "concreteType": "NamedProfile",
+                    "plural": false,
+                    "selections": [
+                      {
+                        "kind": "ScalarField",
+                        "alias": null,
+                        "name": "name",
+                        "args": null,
+                        "storageKey": null
+                      },
+                      {
+                        "kind": "ScalarField",
+                        "alias": null,
+                        "name": "ethAddress",
+                        "args": null,
+                        "storageKey": null
+                      }
+                    ]
+                  },
                   {
                     "kind": "LinkedField",
                     "alias": null,

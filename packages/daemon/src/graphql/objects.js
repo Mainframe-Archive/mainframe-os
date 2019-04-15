@@ -5,6 +5,7 @@ import {
   GraphQLBoolean,
   GraphQLEnumType,
   GraphQLID,
+  GraphQLInt,
   GraphQLList,
   GraphQLObjectType,
   GraphQLNonNull,
@@ -98,8 +99,16 @@ export const idResolver = globalIdField(null, obj => obj.localID)
 export const webRequestGrants = new GraphQLObjectType({
   name: 'WebRequestGrants',
   fields: () => ({
-    granted: { type: new GraphQLList(GraphQLString) },
-    denied: { type: new GraphQLList(GraphQLString) },
+    granted: {
+      type: new GraphQLNonNull(
+        new GraphQLList(new GraphQLNonNull(GraphQLString)),
+      ),
+    },
+    denied: {
+      type: new GraphQLNonNull(
+        new GraphQLList(new GraphQLNonNull(GraphQLString)),
+      ),
+    },
   }),
 })
 
@@ -227,6 +236,29 @@ export const appVersionData = new GraphQLObjectType({
   }),
 })
 
+export const appUpdateData = new GraphQLObjectType({
+  name: 'AppUpdateData',
+  fields: () => ({
+    manifest: {
+      type: new GraphQLNonNull(appManifestData),
+      resolve: self => self.app.manifest,
+    },
+    permissionsChanged: {
+      type: new GraphQLNonNull(GraphQLBoolean),
+      resolve: self => self.hasRequiredPermissionsChanges,
+    },
+  }),
+})
+
+export const installationState = new GraphQLEnumType({
+  name: 'InstallationState',
+  values: {
+    READY: { value: 'ready' },
+    DOWNLOADING: { value: 'downloading' },
+    ERROR: { value: 'download_error' },
+  },
+})
+
 export const app = new GraphQLObjectType({
   name: 'App',
   interfaces: () => [nodeInterface],
@@ -246,8 +278,17 @@ export const app = new GraphQLObjectType({
     manifest: {
       type: new GraphQLNonNull(appManifestData),
     },
+    update: {
+      type: appUpdateData,
+      resolve: (self, args, ctx) => {
+        return ctx.openVault.apps.getUpdate(self.id)
+      },
+    },
+    installationState: {
+      type: new GraphQLNonNull(installationState),
+    },
     users: {
-      type: new GraphQLList(appUser),
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(appUser))),
       resolve: ({ settings }) => {
         return Object.keys(settings).map(id => ({
           localID: id,
@@ -272,25 +313,37 @@ export const ownApp = new GraphQLObjectType({
     },
     name: {
       type: new GraphQLNonNull(GraphQLString),
-      resolve: self => self.data.name,
     },
     contentsPath: {
       type: new GraphQLNonNull(GraphQLString),
-      resolve: self => self.data.contentsPath,
     },
     updateFeedHash: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    currentVersion: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    currentVersionData: {
+      type: new GraphQLNonNull(appVersionData),
+      resolve: self => ({
+        ...self.getVersionData(),
+        version: self.currentVersion,
+      }),
+    },
+    publishedVersion: {
       type: GraphQLString,
+      resolve: self => {
+        const found = self.getSortedVersions().find(v => v.versionHash != null)
+        if (found != null) {
+          return found.version
+        }
+      },
     },
     versions: {
       type: new GraphQLNonNull(
         new GraphQLList(new GraphQLNonNull(appVersionData)),
       ),
-      resolve: ({ versions }) => {
-        return Object.keys(versions).map(version => ({
-          version: version,
-          ...versions[version],
-        }))
-      },
+      resolve: self => self.getSortedVersions(),
     },
     developer: {
       type: new GraphQLNonNull(appAuthor),
@@ -305,7 +358,7 @@ export const ownApp = new GraphQLObjectType({
       },
     },
     users: {
-      type: new GraphQLList(appUser),
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(appUser))),
       resolve: ({ settings }) => {
         return Object.keys(settings).map(id => ({
           localID: id,
@@ -347,7 +400,7 @@ export const namedProfile = new GraphQLObjectType({
   name: 'NamedProfile',
   fields: () => ({
     name: {
-      type: GraphQLNonNull(GraphQLString),
+      type: new GraphQLNonNull(GraphQLString),
     },
     avatar: {
       type: GraphQLString,
@@ -407,7 +460,7 @@ export const ownUserIdentity = new GraphQLObjectType({
       type: new GraphQLNonNull(GraphQLID),
     },
     feedHash: {
-      type: new GraphQLNonNull(GraphQLString),
+      type: GraphQLString,
       resolve: self => self.publicFeed.feedHash,
     },
     mfid: {
@@ -415,9 +468,9 @@ export const ownUserIdentity = new GraphQLObjectType({
       resolve: self => self.id,
     },
     apps: {
-      type: new GraphQLList(app),
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(app))),
       resolve: (self, args, ctx: ClientContext) => {
-        return ctx.openVault.apps.getAppsForUser(self.localID)
+        return ctx.openVault.apps.getInstalledAppsForUser(self.localID)
       },
     },
     defaultEthAddress: {
@@ -508,9 +561,53 @@ export const connectionState = new GraphQLEnumType({
   name: 'ConnectionState',
   values: {
     CONNECTED: { value: 'connected' },
-    SENDING: { value: 'sending' },
-    SENT: { value: 'sent' },
+    DECLINED: { value: 'declined' },
+    RECEIVED: { value: 'received' },
+    SENDING_FEED: { value: 'sending_feed' },
+    SENT_FEED: { value: 'sent_feed' },
+    SENDING_BLOCKCHAIN: { value: 'sending_blockchain' },
+    SENT_BLOCKCHAIN: { value: 'sent_blockchain' },
   },
+})
+
+export const stakeState = new GraphQLEnumType({
+  name: 'StakeState',
+  values: {
+    STAKED: { value: 'staked' },
+    RECLAIMING: { value: 'reclaiming' },
+    RECLAIMED: { value: 'reclaimed' },
+    SEIZED: { value: 'seized' },
+  },
+})
+
+export const stake = new GraphQLObjectType({
+  name: 'InviteStake',
+  fields: () => ({
+    amount: {
+      type: GraphQLString,
+    },
+    state: {
+      type: new GraphQLNonNull(stakeState),
+    },
+    reclaimedTX: {
+      type: GraphQLString,
+    },
+  }),
+})
+
+export const contactInviteData = new GraphQLObjectType({
+  name: 'ContactInviteData',
+  fields: () => ({
+    inviteTX: {
+      type: GraphQLString,
+    },
+    ethNetwork: {
+      type: GraphQLString,
+    },
+    stake: {
+      type: new GraphQLNonNull(stake),
+    },
+  }),
 })
 
 export const contact = new GraphQLObjectType({
@@ -530,10 +627,14 @@ export const contact = new GraphQLObjectType({
     pubKey: {
       type: new GraphQLNonNull(GraphQLString),
     },
+    invite: {
+      type: contactInviteData,
+    },
     profile: {
       type: new GraphQLNonNull(genericProfile),
       resolve: (self, args, ctx: ClientContext) => {
-        return ctx.openVault.identities.getContactProfile(self.localID)
+        const profile = ctx.openVault.identities.getContactProfile(self.localID)
+        return { ...self.profile, ...profile }
       },
     },
     connectionState: {
@@ -545,8 +646,17 @@ export const contact = new GraphQLObjectType({
 export const contacts = new GraphQLObjectType({
   name: 'Contacts',
   fields: () => ({
+    invitesCount: {
+      type: new GraphQLNonNull(GraphQLInt),
+      args: {
+        userID: { type: new GraphQLNonNull(GraphQLString) },
+      },
+      resolve: (self, args, ctx) => {
+        return ctx.queries.getInvitesCount(args.userID)
+      },
+    },
     userContacts: {
-      type: new GraphQLList(contact),
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(contact))),
       args: {
         userID: { type: new GraphQLNonNull(GraphQLString) },
       },
@@ -561,15 +671,21 @@ export const apps = new GraphQLObjectType({
   name: 'Apps',
   fields: () => ({
     installed: {
-      type: new GraphQLList(app),
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(app))),
       resolve: (self, args, ctx: ClientContext) => {
         return Object.values(ctx.openVault.apps.apps)
       },
     },
     own: {
-      type: new GraphQLList(ownApp),
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(ownApp))),
       resolve: (self, args, ctx: ClientContext) => {
         return Object.values(ctx.openVault.apps.ownApps)
+      },
+    },
+    updatesCount: {
+      type: new GraphQLNonNull(GraphQLInt),
+      resolve: (self, args, ctx: ClientContext) => {
+        return ctx.openVault.apps.getUpdatesCount()
       },
     },
   }),
@@ -579,13 +695,17 @@ export const identities = new GraphQLObjectType({
   name: 'Identities',
   fields: () => ({
     ownUsers: {
-      type: new GraphQLList(ownUserIdentity),
+      type: new GraphQLNonNull(
+        new GraphQLList(new GraphQLNonNull(ownUserIdentity)),
+      ),
       resolve: (self, args, ctx: ClientContext) => {
         return Object.values(ctx.openVault.identities.ownUsers)
       },
     },
     ownDevelopers: {
-      type: new GraphQLList(ownDeveloperIdentity),
+      type: new GraphQLNonNull(
+        new GraphQLList(new GraphQLNonNull(ownDeveloperIdentity)),
+      ),
       resolve: (self, args, ctx: ClientContext) => {
         return Object.values(ctx.openVault.identities.ownDevelopers)
       },
@@ -637,7 +757,7 @@ export const walletBalances = new GraphQLObjectType({
       type: new GraphQLNonNull(GraphQLString),
       resolve: async (self, args, ctx) => {
         try {
-          return await ctx.io.eth.getMFTBalance(self)
+          return await ctx.io.tokenContract.getBalance(self)
         } catch (err) {
           ctx.log(err)
           return 0
@@ -702,13 +822,17 @@ export const ethWallets = new GraphQLObjectType({
   name: 'EthWallets',
   fields: () => ({
     hd: {
-      type: new GraphQLList(ethHdWallet),
+      type: new GraphQLNonNull(
+        new GraphQLList(new GraphQLNonNull(ethHdWallet)),
+      ),
       resolve: self => {
         return self.filter(w => w.type === 'hd')
       },
     },
     ledger: {
-      type: new GraphQLList(ethLedgerWallet),
+      type: new GraphQLNonNull(
+        new GraphQLList(new GraphQLNonNull(ethLedgerWallet)),
+      ),
       resolve: self => {
         return self.filter(w => w.type === 'ledger')
       },

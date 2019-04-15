@@ -5,16 +5,22 @@ import url from 'url'
 import Store from 'electron-store'
 import type { ID } from '@mainframe/utils-id'
 import React, { Component } from 'react'
-import { View, StyleSheet } from 'react-native-web'
-import { ThemeProvider as MFThemeProvider, Button } from '@morpheus-ui/core'
-import WalletsFilledIcon from '@morpheus-ui/icons/WalletsFilledMd'
+import { flattenDeep } from 'lodash'
+import {
+  ThemeProvider as MFThemeProvider,
+  Button,
+  Text,
+  TextField,
+} from '@morpheus-ui/core'
+import { Form, type FormSubmitPayload } from '@morpheus-ui/forms'
+import NetworkIcon from '@morpheus-ui/icons/NetworkSm'
+import CloseIcon from '@morpheus-ui/icons/Close'
+
 import styled from 'styled-components/native'
 import { EthClient } from '@mainframe/eth'
+import WalletIcon from '../UIComponents/Icons/Wallet'
 
 import THEME from '../theme'
-import colors from '../colors'
-import Text from '../UIComponents/Text'
-import TextInput from '../UIComponents/TextInput'
 import rpc from './rpc'
 import UserAlertView from './UserAlertView'
 
@@ -54,17 +60,44 @@ type State = {
   bundleUrl: string,
   showUrlButtons?: ?boolean,
   ethNetwork: string,
+  multipleWallets?: ?boolean,
 }
 
 const store = new Store()
 
+const OuterContainer = styled.View`
+  flex: 1;
+`
+const Header = styled.View`
+  background-color: #232323;
+`
+
+const ActionBar = styled.View`
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  height: 42px;
+  padding: 0 1px 2px 0;
+`
+
+const URLContainer = styled.View`
+  flex-direction: row;
+  align-items: center;
+  flex: 1;
+  margin-left: 10px;
+  margin-right: 10px;
+  background-color: #303030;
+  border-radius: 3px;
+  height: 30px;
+  overflow: hidden;
+`
+
+const FieldContainer = styled.View`
+  flex: 1;
+  margin-left: 10px;
+  height: 22px;
+`
 const TitleBar = styled.View`
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 20px;
-  background-color: transparent;
   align-items: center;
   justify-content: center;
 `
@@ -73,33 +106,24 @@ const HeaderButtons = styled.View`
   flex-direction: row;
   justify-content: flex-end;
   padding-right: 6px;
-  flex: 1;
 `
 
 const EthNetwork = styled.View`
-  height: 28px;
-  margin-right: 10px;
-  background-color: #171717;
-  border-radius: 3px;
-  padding-horizontal: 10px;
+  flex-direction: row;
   justify-content: center;
+  align-items: center;
+  margin-left: 10px;
 `
 
-// TODO: Refactor various web3 providers
 const ethClientProvider = {
-  sendAsync: async (payload: Object, cb: (?Error, ?any) => any) => {
-    try {
-      const res = await rpc.web3Send(payload)
-      const jsonResponse = {
-        jsonrpc: '2.0',
-        id: payload.id,
-        result: res,
-      }
-      cb(null, jsonResponse)
-    } catch (err) {
-      cb(err)
-    }
+  send: async (method: string, params: Array<*>): Promise<*> => {
+    return rpc.ethSend({ method, params })
   },
+}
+
+const subscriptions = {
+  networkChanged: rpc.ethNetworkChangedSubscription,
+  accountsChanged: rpc.ethAccountsChangedSubscription,
 }
 
 export default class AppContainer extends Component<Props, State> {
@@ -114,7 +138,7 @@ export default class AppContainer extends Component<Props, State> {
     })
     const cachedData = store.get(props.appSession.app.appID)
     const customUrl = cachedData ? cachedData.customUrl : null
-    this.eth = new EthClient(ethClientProvider, true)
+    this.eth = new EthClient(ethClientProvider, null, subscriptions)
     this.state = {
       bundleUrl,
       urlInputValue: customUrl || bundleUrl,
@@ -126,6 +150,22 @@ export default class AppContainer extends Component<Props, State> {
         ethNetwork: this.eth.networkName,
       })
     })
+  }
+
+  componentDidMount() {
+    this.fetchWallets()
+  }
+
+  async fetchWallets() {
+    const wallets = await rpc.getUserEthWallets()
+    const addresses = flattenDeep([
+      ...wallets.hd.map(item => item.accounts),
+      ...wallets.ledger.map(item => item.accounts),
+    ])
+
+    if (addresses.length > 1) {
+      this.setState({ multipleWallets: true })
+    }
   }
 
   onChangeUrl = (value: string) => {
@@ -146,12 +186,6 @@ export default class AppContainer extends Component<Props, State> {
     })
   }
 
-  onKeyPress = (event: SyntheticKeyboardEvent<HTMLInputElement>) => {
-    if (event.key === 'Enter') {
-      this.relaodContents()
-    }
-  }
-
   resetUrl = () => {
     this.setState({
       urlInputValue: this.state.bundleUrl,
@@ -160,11 +194,11 @@ export default class AppContainer extends Component<Props, State> {
     this.persistCustomUrl(null)
   }
 
-  relaodContents = () => {
-    this.setState({
-      contentsPath: this.state.urlInputValue,
-    })
-    this.persistCustomUrl(this.state.urlInputValue)
+  reloadContents = (payload: FormSubmitPayload) => {
+    if (payload.valid) {
+      this.setState({ contentsPath: payload.fields.contentsPath })
+      this.persistCustomUrl(payload.fields.contentsPath)
+    }
   }
 
   persistCustomUrl(url: ?string) {
@@ -182,7 +216,7 @@ export default class AppContainer extends Component<Props, State> {
   render() {
     const { appSession } = this.props
     if (!appSession) {
-      return <View />
+      return <OuterContainer />
     }
     const preloadPath = url.format({
       pathname: path.join(__static, 'preload.js'),
@@ -191,65 +225,62 @@ export default class AppContainer extends Component<Props, State> {
     })
 
     const appUrl = this.state.contentsPath || this.state.bundleUrl
-    const buttons = this.state.showUrlButtons ? (
-      <View style={styles.rowContainer}>
-        <Button
-          title="reload"
-          onPress={this.relaodContents}
-          style={styles.reloadButton}
-          textStyle={styles.buttonTextStyle}
-        />
-        <Button
-          title="reset"
-          onPress={this.resetUrl}
-          style={[styles.reloadButton, styles.resetButton]}
-          textStyle={styles.buttonTextStyle}
-        />
-      </View>
-    ) : null
 
     const urlBar = this.props.appSession.isDev ? (
-      <View style={[styles.rowContainer, styles.urlContainer]}>
-        <Text style={styles.headerLabel}>Contents path: </Text>
-        <TextInput
-          onBlur={this.onBlurUrlInput}
-          onFocus={this.onFocusUrlInput}
-          style={styles.urlInput}
-          value={this.state.urlInputValue}
-          placeholder="custom url e.g. http://localhost:3000"
-          onChangeText={this.onChangeUrl}
-          onKeyPress={this.onKeyPress}
-        />
-        {buttons}
-      </View>
+      <URLContainer>
+        <Form onSubmit={this.reloadContents}>
+          <Text
+            size={11}
+            bold
+            color="#808080"
+            theme={{ padding: '10px', backgroundColor: '#010101' }}>
+            Path
+          </Text>
+          <FieldContainer>
+            <TextField
+              name="contentsPath"
+              variant="trustedUI"
+              onBlur={this.onBlurUrlInput}
+              onFocus={this.onFocusUrlInput}
+              value={this.state.urlInputValue}
+              onChange={this.onChangeUrl}
+              placeholder="custom url e.g. http://localhost:3000"
+            />
+          </FieldContainer>
+          <Button variant="TuiUrl" Icon={CloseIcon} onPress={this.resetUrl} />
+        </Form>
+      </URLContainer>
     ) : null
 
     return (
       <MFThemeProvider theme={THEME}>
-        <View style={styles.outerContainer}>
-          <View style={styles.header}>
+        <OuterContainer>
+          <Header>
             <TitleBar className="draggable">
-              <View style={styles.appInfo}>
-                <Text style={styles.headerLabel}>
-                  <Text style={styles.boldLabel}>
-                    {appSession.app.manifest.name}
-                  </Text>
-                </Text>
-              </View>
+              <Text variant="TuiAppTitle">{appSession.app.manifest.name}</Text>
             </TitleBar>
-            {urlBar}
-            <HeaderButtons>
+            <ActionBar>
               <EthNetwork>
-                <Text style={styles.headerLabel}>{this.state.ethNetwork}</Text>
+                <NetworkIcon color="#808080" width={14} height={14} />
+                <Text color="#808080" bold size={11} variant="marginLeft5">
+                  {this.state.ethNetwork}
+                </Text>
               </EthNetwork>
-              <Button
-                variant={['appHeader']}
-                Icon={WalletsFilledIcon}
-                onPress={this.onPressSelectWallet}
-              />
-            </HeaderButtons>
-          </View>
+              {urlBar}
+              {this.state.multipleWallets && (
+                <HeaderButtons>
+                  <Button
+                    variant="TuiWalletsButton"
+                    title="Wallets"
+                    Icon={WalletIcon}
+                    onPress={this.onPressSelectWallet}
+                  />
+                </HeaderButtons>
+              )}
+            </ActionBar>
+          </Header>
           <UserAlertView
+            multipleWallets={this.state.multipleWallets}
             ethClient={this.eth}
             appSession={this.props.appSession}
           />
@@ -261,63 +292,8 @@ export default class AppContainer extends Component<Props, State> {
             sandboxed="true"
             partition={this.props.partition}
           />
-        </View>
+        </OuterContainer>
       </MFThemeProvider>
     )
   }
 }
-
-const styles = StyleSheet.create({
-  outerContainer: {
-    flex: 1,
-  },
-  header: {
-    paddingTop: 20,
-    height: 60,
-    flexDirection: 'row',
-    backgroundColor: colors.GREY_DARK_23,
-    alignItems: 'center',
-  },
-  appInfo: {
-    paddingLeft: 10,
-    flex: 1,
-  },
-  headerLabel: {
-    textAlign: 'left',
-    color: colors.LIGHT_GREY_CC,
-    fontSize: 12,
-  },
-  boldLabel: {
-    fontWeight: 'bold',
-  },
-  urlInput: {
-    height: 28,
-    fontSize: 12,
-    marginHorizontal: 8,
-    minWidth: 250,
-    borderColor: colors.GREY_DARK_48,
-    backgroundColor: colors.GREY_DARK_38,
-    color: colors.LIGHT_GREY_F7,
-  },
-  rowContainer: {
-    flexDirection: 'row',
-  },
-  urlContainer: {
-    alignItems: 'center',
-    marginLeft: 10,
-  },
-  reloadButton: {
-    height: 30,
-    paddingVertical: 0,
-    justifyContent: 'center',
-    paddingHorizontal: 12,
-    marginRight: 8,
-  },
-  resetButton: {
-    backgroundColor: colors.LIGHT_GREY_F7,
-  },
-  buttonTextStyle: {
-    fontSize: 12,
-    color: colors.GREY_DARK_54,
-  },
-})

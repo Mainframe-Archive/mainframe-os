@@ -104,10 +104,17 @@ Returns a numeric string representing the Ethereum network ID. A few example val
 ‘42’: Kovan Test Network
 ```
 
-### ethereum.selectedAddress
+### ethereum.getDefaultAccount
 
-Returns a hex-prefixed string representing the current user’s selected address, e.g.:
-`0xde0B295669a9FD93d5F28D9Ec85E40f4cb697BAe`.
+Fetches the users default Ethereum address
+
+**returns:** Promise<?string>
+
+**Example:**
+
+```
+const account = await sdk.ethereum.getDefaultAccount()
+```
 
 ### ethereum.on(eventName, value)
 
@@ -136,7 +143,7 @@ Transfer ETH on Ethereum blockchain.
 1. `from: string`
 1. `confirmations?: number`
 
-**returns:** [Transaction EventEmitter](#transaction-eventEmitter)
+**returns:** Promise<[Transaction EventEmitter](#transaction-eventEmitter)>
 
 **Example:**
 
@@ -166,7 +173,7 @@ Transfer MFT on Ethereum blockchain.
 1. `from: string`
 1. `confirmations?: number`
 
-**returns:** [Transaction EventEmitter](#transaction-eventEmitter)
+**returns:** Promise<[Transaction EventEmitter](#transaction-eventEmitter)>
 
 **Example:**
 
@@ -221,6 +228,63 @@ tx.on('hash', hash => ... )
   .on('error', error => ... )
 
 
+```
+
+## Storage
+
+### storage.promptUpload()
+
+Will show a file upload window to the user, they can select one file they wish to upload.
+
+**returns:** Promise<boolean>
+
+**Example:**
+
+```
+const key = 'example.jpg' // name that is going to be used in the app
+
+await sdk.storage.promptUpload(key)
+```
+
+### storage.list()
+
+Fetches keys for all the files your app has previously uploaded.
+
+**returns:** Promise<Array<{ contentType: string, key: string }>>
+
+**Example:**
+
+```
+const list = await sdk.storage.list()
+```
+
+### storage.set()
+
+Sets a string value for a given key.
+
+**returns:** Promise<?string>
+
+**Example:**
+
+```
+const key = 'my-key'
+const data = 'example data'
+
+await sdk.storage.set(key, data)
+```
+
+### storage.get()
+
+Fetches a string value for a given key.
+
+**returns:** Promise<?string>
+
+**Example:**
+
+```
+const key = 'my-key'
+
+const data = await sdk.storage.get(key)
 ```
 
 ## Types

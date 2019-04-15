@@ -1,6 +1,6 @@
 {
   "name": "@mainframe/data-types",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "main": "lib/index.js",
   "license": "MIT",
   "files": [
@@ -17,6 +17,6 @@
     "multibase": "^0.6.0"
   },
   "devDependencies": {
-    "flow-bin": "^0.93.0"
+    "flow-bin": "^0.95.1"
   }
 }

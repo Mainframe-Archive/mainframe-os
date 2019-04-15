@@ -8,19 +8,31 @@
 
 /*::
 import type { ConcreteFragment } from 'relay-runtime';
-export type ConnectionState = "CONNECTED" | "SENDING" | "SENT" | "%future added value";
+type InviteContactModal_contact$ref = any;
+export type ConnectionState = "CONNECTED" | "DECLINED" | "RECEIVED" | "SENDING_BLOCKCHAIN" | "SENDING_FEED" | "SENT_BLOCKCHAIN" | "SENT_FEED" | "%future added value";
+export type StakeState = "RECLAIMED" | "RECLAIMING" | "SEIZED" | "STAKED" | "%future added value";
 import type { FragmentReference } from "relay-runtime";
 declare export opaque type ContactsView_contacts$ref: FragmentReference;
 export type ContactsView_contacts = {|
-  +userContacts: ?$ReadOnlyArray<?{|
+  +userContacts: $ReadOnlyArray<{|
     +peerID: string,
     +localID: string,
     +connectionState: ConnectionState,
     +publicFeed: string,
+    +invite: ?{|
+      +ethNetwork: ?string,
+      +inviteTX: ?string,
+      +stake: {|
+        +reclaimedTX: ?string,
+        +amount: ?string,
+        +state: StakeState,
+      |},
+    |},
     +profile: {|
       +name: ?string,
       +ethAddress: ?string,
     |},
+    +$fragmentRefs: InviteContactModal_contact$ref,
   |}>,
   +$refType: ContactsView_contacts$ref,
 |};
@@ -58,6 +70,11 @@ const node/*: ConcreteFragment*/ = {
       "plural": true,
       "selections": [
         {
+          "kind": "FragmentSpread",
+          "name": "InviteContactModal_contact",
+          "args": null
+        },
+        {
           "kind": "ScalarField",
           "alias": null,
           "name": "peerID",
@@ -84,6 +101,63 @@ const node/*: ConcreteFragment*/ = {
           "name": "publicFeed",
           "args": null,
           "storageKey": null
+        },
+        {
+          "kind": "LinkedField",
+          "alias": null,
+          "name": "invite",
+          "storageKey": null,
+          "args": null,
+          "concreteType": "ContactInviteData",
+          "plural": false,
+          "selections": [
+            {
+              "kind": "ScalarField",
+              "alias": null,
+              "name": "ethNetwork",
+              "args": null,
+              "storageKey": null
+            },
+            {
+              "kind": "ScalarField",
+              "alias": null,
+              "name": "inviteTX",
+              "args": null,
+              "storageKey": null
+            },
+            {
+              "kind": "LinkedField",
+              "alias": null,
+              "name": "stake",
+              "storageKey": null,
+              "args": null,
+              "concreteType": "InviteStake",
+              "plural": false,
+              "selections": [
+                {
+                  "kind": "ScalarField",
+                  "alias": null,
+                  "name": "reclaimedTX",
+                  "args": null,
+                  "storageKey": null
+                },
+                {
+                  "kind": "ScalarField",
+                  "alias": null,
+                  "name": "amount",
+                  "args": null,
+                  "storageKey": null
+                },
+                {
+                  "kind": "ScalarField",
+                  "alias": null,
+                  "name": "state",
+                  "args": null,
+                  "storageKey": null
+                }
+              ]
+            }
+          ]
         },
         {
           "kind": "LinkedField",
@@ -115,5 +189,5 @@ const node/*: ConcreteFragment*/ = {
   ]
 };
 // prettier-ignore
-(node/*: any*/).hash = '8d6ca7412949eb13461ff37d5b19c437';
+(node/*: any*/).hash = 'c22cf4752d0f607334d15ac0152fdc7c';
 module.exports = node;

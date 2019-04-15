@@ -19,9 +19,11 @@ class NotificationsScreen extends Component<{}> {
   render() {
     return (
       <Container>
-        <Text variant={['grey']}>{'This feature is coming soon.'}</Text>
-        <Text variant={['grey', 'marginBottom10']}>
-          {'Sign up to receive the latest Mainframe OS updates.'}
+        <Text color="#585858" size={12}>
+          This feature is coming soon.
+        </Text>
+        <Text variant="marginBottom20" color="#585858" size={12}>
+          Sign up to receive the latest Mainframe OS updates.
         </Text>
         <Button
           title="GO TO SIGN UP PAGE"

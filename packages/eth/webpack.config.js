@@ -5,14 +5,11 @@ module.exports = {
   entry: './src/index.js',
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'ContractUtils.js',
-    library: 'ContractUtils',
+    filename: 'EthClient.js',
+    library: 'EthClient',
     libraryTarget: 'umd',
   },
   module: {
-    rules: [
-      { test: /\.js/, use: 'babel-loader' },
-      { test: /\.json$/, loader: 'json-loader' },
-    ],
+    rules: [{ test: /\.js$/, use: 'babel-loader' }],
   },
 }

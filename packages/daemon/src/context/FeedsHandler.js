@@ -1,9 +1,13 @@
 // @flow
 
+import { getFeedTopic } from '@erebos/api-bzz-base'
+import { Timeline, type Chapter } from '@erebos/timeline'
+import type { SignedContents } from '@mainframe/secure-file'
 import { type Observable, Subject, type Subscription } from 'rxjs'
 import { filter, multicast, refCount, tap, flatMap } from 'rxjs/operators'
-import { getFeedTopic } from '@erebos/api-bzz-base'
+import semver from 'semver'
 
+import type App from '../app/App'
 import type Contact, {
   FirstContactPayload,
   ContactPayload,
@@ -16,6 +20,8 @@ import { pollFeedJSON } from '../swarm/feed'
 
 import type ClientContext from './ClientContext'
 import type {
+  AppInstalledEvent,
+  AppUpdateEvent,
   ContextEvent,
   ContactChangedEvent,
   ContactCreatedEvent,
@@ -54,6 +60,99 @@ class FeedsHandler {
     })
     this._observers = new Set()
     this._subscriptions = {}
+  }
+}
+
+export class AppsUpdatesHandler extends FeedsHandler {
+  _appInstalledSubscription: ?Subscription
+
+  _setup() {
+    this._appInstalledSubscription = this._context
+      .pipe(filter((e: ContextEvent) => e.type === 'app_installed'))
+      .subscribe((e: AppInstalledEvent) => {
+        this.add(e.app.id)
+      })
+
+    // $FlowFixMe: Object.values() losing type
+    Object.values(this._context.openVault.apps.apps).forEach((app: App) => {
+      this._subscribe(app)
+    })
+  }
+
+  _subscribe(app: App) {
+    const { io, log, openVault } = this._context
+
+    const timeline = new Timeline({ bzz: io.bzz, feed: app.updateFeedHash })
+    this._subscriptions[app.id] = timeline
+      .live({ interval: DEFAULT_POLL_INTERVAL })
+      .subscribe({
+        next: (chapters: Array<Chapter<SignedContents>>) => {
+          try {
+            const chapter = chapters[chapters.length - 1]
+            const manifest = app.verifyManifest(chapter.content.manifest)
+            if (semver.lte(manifest.version, app.manifest.version)) {
+              // Ignore this version
+              return
+            }
+
+            const existing = openVault.apps.getUpdate(app.id)
+            if (
+              existing == null ||
+              (semver.gt(manifest.version, existing.app.manifest.version) &&
+                existing.app.installationState !== 'downloading')
+            ) {
+              openVault.apps.setUpdate(app.id, manifest)
+              this._context.next({
+                type: 'app_update',
+                app,
+                version: manifest.version,
+                status: 'updateAvailable',
+              })
+            }
+          } catch (err) {
+            log('Manifest verification failed', err)
+          }
+        },
+        error: err => {
+          log('Failed to read app update feed', err)
+        },
+      })
+  }
+
+  add(appID: string) {
+    const app = this._context.openVault.apps.getByID(appID)
+    if (app == null) {
+      throw new Error('App not found')
+    }
+    if (this._subscriptions[appID] == null && this._observers.size > 0) {
+      this._subscribe(app)
+    }
+  }
+
+  clear() {
+    super.clear()
+    if (this._appInstalledSubscription != null) {
+      this._appInstalledSubscription.unsubscribe()
+    }
+  }
+
+  observe(): ObserveFeed<AppUpdateEvent> {
+    if (this._observers.size === 0) {
+      this._setup()
+    }
+
+    const source = this._context.pipe(filter(e => e.type === 'app_update'))
+    this._observers.add(source)
+
+    return {
+      dispose: () => {
+        this._observers.delete(source)
+        if (this._observers.size === 0) {
+          this.clear()
+        }
+      },
+      source,
+    }
   }
 }
 
@@ -205,10 +304,12 @@ export class ContactsFeedsHandler extends FeedsHandler {
     }
 
     if (contact.connectionState !== 'connected') {
-      const topic = getFeedTopic({ name: user.base64PublicKey() })
-      this._subscriptions[contactSubRef] = this._context.io.bzz
+      this._context.io.bzz
         .pollFeedValue(
-          peer.firstContactAddress,
+          {
+            user: peer.firstContactAddress,
+            topic: getFeedTopic({ name: user.base64PublicKey() }),
+          },
           {
             mode: 'content-response',
             whenEmpty: 'ignore',
@@ -216,7 +317,6 @@ export class ContactsFeedsHandler extends FeedsHandler {
             immediate: true,
             interval: DEFAULT_POLL_INTERVAL,
           },
-          { topic },
         )
         .pipe(flatMap(res => res.json()))
         .subscribe({
@@ -248,6 +348,13 @@ export class ContactsFeedsHandler extends FeedsHandler {
                 userID,
                 contact.localID,
                 data.profile,
+              )
+            }
+            if (data.acceptanceSignature != null) {
+              this._context.mutations.updateContactAccepted(
+                userID,
+                contact.localID,
+                data.acceptanceSignature,
               )
             }
             if (data.apps != null) {
@@ -288,9 +395,14 @@ export class ContactsFeedsHandler extends FeedsHandler {
         }
       })
 
-    // Subscribe to contact created event to start polling new contacts
+    // Subscribe to contact request sent event to start polling new contacts
     this._contactCreatedSubscription = this._context
-      .pipe(filter((e: ContextEvent) => e.type === 'contact_created'))
+      .pipe(
+        filter(
+          (e: ContextEvent) =>
+            e.type === 'contact_changed' && e.change === 'feedRequestSent',
+        ),
+      )
       .subscribe((e: ContactCreatedEvent) => {
         this.add(e.userID, e.contact)
       })

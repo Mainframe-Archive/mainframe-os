@@ -8,6 +8,7 @@ import {
 } from '@morpheus-ui/forms'
 import styled from 'styled-components/native'
 import { isValidSemver } from '@mainframe/app-manifest'
+import semver from 'semver'
 
 import FormModalView from '../../UIComponents/FormModalView'
 
@@ -25,8 +26,10 @@ export type CompleteAppData = {
 
 type Props = {
   appData: AppData,
+  isEdition?: boolean,
   onSetAppData: (appData: CompleteAppData) => void,
   onRequestClose: () => void,
+  previousVersion?: ?string,
   submitButtonTitle?: ?string,
 }
 
@@ -41,16 +44,6 @@ const Container = styled.View`
   padding: 20px;
   justify-content: center;
 `
-
-const validateVersion = (params: FieldValidateFunctionParams) => {
-  if (
-    params.value &&
-    typeof params.value === 'string' &&
-    !isValidSemver(params.value)
-  ) {
-    return 'Please provide a valid version number, e.g. 1.0.0'
-  }
-}
 
 const appNameValidaton = ({ value }: FieldValidateFunctionParams) => {
   if (
@@ -71,6 +64,21 @@ export default class EditAppDetailsView extends Component<Props, State> {
     super(props)
     this.state = {
       contentsPath: props.appData.contentsPath,
+    }
+  }
+
+  validateVersion = (params: FieldValidateFunctionParams) => {
+    const { previousVersion } = this.props
+    if (params.value && typeof params.value === 'string') {
+      if (!isValidSemver(params.value)) {
+        return 'Please provide a valid version number, e.g. 1.0.0'
+      }
+      if (
+        previousVersion != null &&
+        semver.lte(params.value, previousVersion)
+      ) {
+        return `Please provide a version higher than the previous one (${previousVersion})`
+      }
     }
   }
 
@@ -100,7 +108,7 @@ export default class EditAppDetailsView extends Component<Props, State> {
   render() {
     return (
       <FormModalView
-        title="Create an App"
+        title={this.props.isEdition ? 'App details' : 'Create an App'}
         dismissButton="CANCEL"
         confirmTestID="create-app-set-info-button"
         confirmButton={this.props.submitButtonTitle || 'CONTINUE'}
@@ -126,7 +134,7 @@ export default class EditAppDetailsView extends Component<Props, State> {
             name="version"
             label="Version"
             testID="create-app-version-input"
-            validation={validateVersion}
+            validation={this.validateVersion}
             defaultValue={this.props.appData.version}
             required
           />

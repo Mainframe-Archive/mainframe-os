@@ -31,6 +31,7 @@ type State = {
   fetchingAccounts?: ?boolean,
   accounts?: ?Array<string>,
   ledgerName: string,
+  hover: ?string,
 }
 
 const Container = styled.View`
@@ -38,7 +39,7 @@ const Container = styled.View`
   flex: 1;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 20px 20px 50px 20px;
 `
 
 const AccountsContainer = styled.View`
@@ -51,7 +52,7 @@ const ScrollView = styled.ScrollView``
 
 const AccountItem = styled.View`
   padding: 10px 10px 3px 10px;
-  ${props => props.odd && `background-color: #f9f9f9;`}
+  ${props => props.hover && `background-color: #f9f9f9;`}
 `
 
 const ActivityContainer = styled.View`
@@ -87,6 +88,7 @@ export default class WalletAddLedgerModal extends Component<Props, State> {
     currentPage: 1,
     selectedItems: [],
     ledgerName: '',
+    hover: '',
     saving: false,
   }
 
@@ -104,7 +106,7 @@ export default class WalletAddLedgerModal extends Component<Props, State> {
       const accounts = await rpc.getLedgerAccounts(pageNumber)
       const name =
         pageNumber === 1 && accounts.length
-          ? accounts[0]
+          ? `Ledger ${accounts[0].substring(0, 4)}`
           : this.state.ledgerName
 
       this.setState({
@@ -195,7 +197,7 @@ export default class WalletAddLedgerModal extends Component<Props, State> {
       return (
         <ActivityContainer>
           <Text variant={['center', 'modalText', 'marginBottom20']}>
-            Saving your accounts...
+            Saving your addresses...
           </Text>
           <Loader />
         </ActivityContainer>
@@ -206,7 +208,7 @@ export default class WalletAddLedgerModal extends Component<Props, State> {
       return (
         <ActivityContainer>
           <Text variant={['center', 'modalText', 'marginBottom20']}>
-            Fetching accounts...
+            Fetching addresses...
           </Text>
           <Loader />
         </ActivityContainer>
@@ -221,8 +223,16 @@ export default class WalletAddLedgerModal extends Component<Props, State> {
         const onPress = () => this.onSelectAccount(index)
         const selected = this.state.selectedItems.indexOf(index) >= 0
         const disabled = this.hasAddress(addresses, a)
+
+        const setHover = () => this.setState({ hover: a })
+        const releaseHover = () => this.setState({ hover: '' })
+
         return (
-          <AccountItem odd={i % 2} key={a}>
+          <AccountItem
+            hover={this.state.hover === a}
+            onMouseOver={setHover}
+            onMouseLeave={releaseHover}
+            key={a}>
             <Checkbox
               variant="mono"
               defaultValue={selected || disabled}

@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash eaeec66a6c01c6d07a3ba95f6ed2ff4d
+ * @relayHash 48452eb186307c92888b7fac178db711
  */
 
 /* eslint-disable */
@@ -33,7 +33,7 @@ export type appMutationsAppCreateMutationVariables = {|
 |};
 export type appMutationsAppCreateMutationResponse = {|
   +createApp: ?{|
-    +app: ?{|
+    +app: {|
       +id: string,
       +localID: string,
       +name: string,
@@ -89,29 +89,6 @@ fragment AppItem_ownApp on OwnApp {
     id
     name
   }
-  versions {
-    version
-    permissions {
-      optional {
-        WEB_REQUEST
-        BLOCKCHAIN_SEND
-      }
-      required {
-        WEB_REQUEST
-        BLOCKCHAIN_SEND
-      }
-    }
-  }
-  users {
-    localID
-    identity {
-      profile {
-        name
-      }
-      id
-    }
-    id
-  }
 }
 
 fragment OwnAppDetailView_ownApp on OwnApp {
@@ -124,7 +101,8 @@ fragment OwnAppDetailView_ownApp on OwnApp {
     id
     name
   }
-  versions {
+  publishedVersion
+  currentVersionData {
     version
     versionHash
     permissions {
@@ -232,7 +210,7 @@ return {
   "operationKind": "mutation",
   "name": "appMutationsAppCreateMutation",
   "id": null,
-  "text": "mutation appMutationsAppCreateMutation(\n  $input: AppCreateMutationInput!\n) {\n  createApp(input: $input) {\n    app {\n      id\n      localID\n      name\n    }\n    viewer {\n      apps {\n        ...OwnAppsView_apps\n      }\n      id\n    }\n  }\n}\n\nfragment OwnAppsView_apps on Apps {\n  own {\n    localID\n    name\n    ...AppItem_ownApp\n    ...OwnAppDetailView_ownApp\n    id\n  }\n}\n\nfragment AppItem_ownApp on OwnApp {\n  mfid\n  localID\n  name\n  developer {\n    id\n    name\n  }\n  versions {\n    version\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n    }\n  }\n  users {\n    localID\n    identity {\n      profile {\n        name\n      }\n      id\n    }\n    id\n  }\n}\n\nfragment OwnAppDetailView_ownApp on OwnApp {\n  localID\n  mfid\n  name\n  contentsPath\n  updateFeedHash\n  developer {\n    id\n    name\n  }\n  versions {\n    version\n    versionHash\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        COMMS_CONTACT\n        CONTACTS_READ\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        COMMS_CONTACT\n        CONTACTS_READ\n      }\n    }\n  }\n}\n",
+  "text": "mutation appMutationsAppCreateMutation(\n  $input: AppCreateMutationInput!\n) {\n  createApp(input: $input) {\n    app {\n      id\n      localID\n      name\n    }\n    viewer {\n      apps {\n        ...OwnAppsView_apps\n      }\n      id\n    }\n  }\n}\n\nfragment OwnAppsView_apps on Apps {\n  own {\n    localID\n    name\n    ...AppItem_ownApp\n    ...OwnAppDetailView_ownApp\n    id\n  }\n}\n\nfragment AppItem_ownApp on OwnApp {\n  mfid\n  localID\n  name\n  developer {\n    id\n    name\n  }\n}\n\nfragment OwnAppDetailView_ownApp on OwnApp {\n  localID\n  mfid\n  name\n  contentsPath\n  updateFeedHash\n  developer {\n    id\n    name\n  }\n  publishedVersion\n  currentVersionData {\n    version\n    versionHash\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        COMMS_CONTACT\n        CONTACTS_READ\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        COMMS_CONTACT\n        CONTACTS_READ\n      }\n    }\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -347,18 +325,46 @@ return {
                         ]
                       },
                       {
+                        "kind": "ScalarField",
+                        "alias": null,
+                        "name": "contentsPath",
+                        "args": null,
+                        "storageKey": null
+                      },
+                      {
+                        "kind": "ScalarField",
+                        "alias": null,
+                        "name": "updateFeedHash",
+                        "args": null,
+                        "storageKey": null
+                      },
+                      {
+                        "kind": "ScalarField",
+                        "alias": null,
+                        "name": "publishedVersion",
+                        "args": null,
+                        "storageKey": null
+                      },
+                      {
                         "kind": "LinkedField",
                         "alias": null,
-                        "name": "versions",
+                        "name": "currentVersionData",
                         "storageKey": null,
                         "args": null,
                         "concreteType": "AppVersionData",
-                        "plural": true,
+                        "plural": false,
                         "selections": [
                           {
                             "kind": "ScalarField",
                             "alias": null,
                             "name": "version",
+                            "args": null,
+                            "storageKey": null
+                          },
+                          {
+                            "kind": "ScalarField",
+                            "alias": null,
+                            "name": "versionHash",
                             "args": null,
                             "storageKey": null
                           },
@@ -392,66 +398,8 @@ return {
                                 "selections": v6
                               }
                             ]
-                          },
-                          {
-                            "kind": "ScalarField",
-                            "alias": null,
-                            "name": "versionHash",
-                            "args": null,
-                            "storageKey": null
                           }
                         ]
-                      },
-                      {
-                        "kind": "LinkedField",
-                        "alias": null,
-                        "name": "users",
-                        "storageKey": null,
-                        "args": null,
-                        "concreteType": "AppUser",
-                        "plural": true,
-                        "selections": [
-                          v3,
-                          {
-                            "kind": "LinkedField",
-                            "alias": null,
-                            "name": "identity",
-                            "storageKey": null,
-                            "args": null,
-                            "concreteType": "OwnUserIdentity",
-                            "plural": false,
-                            "selections": [
-                              {
-                                "kind": "LinkedField",
-                                "alias": null,
-                                "name": "profile",
-                                "storageKey": null,
-                                "args": null,
-                                "concreteType": "NamedProfile",
-                                "plural": false,
-                                "selections": [
-                                  v4
-                                ]
-                              },
-                              v2
-                            ]
-                          },
-                          v2
-                        ]
-                      },
-                      {
-                        "kind": "ScalarField",
-                        "alias": null,
-                        "name": "contentsPath",
-                        "args": null,
-                        "storageKey": null
-                      },
-                      {
-                        "kind": "ScalarField",
-                        "alias": null,
-                        "name": "updateFeedHash",
-                        "args": null,
-                        "storageKey": null
                       },
                       v2
                     ]

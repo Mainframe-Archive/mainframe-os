@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 90a66c32252fadae7d38d8102a26d810
+ * @relayHash 592b0b9489a1d91def546153adf35596
  */
 
 /* eslint-disable */
@@ -13,7 +13,7 @@ export type CreateAppModalQueryVariables = {||};
 export type CreateAppModalQueryResponse = {|
   +viewer: {|
     +identities: {|
-      +ownDevelopers: ?$ReadOnlyArray<?{|
+      +ownDevelopers: $ReadOnlyArray<{|
         +localID: string
       |}>
     |}

@@ -12,7 +12,8 @@ import ContextIO from './ContextIO'
 import ContextMutations from './ContextMutations'
 import ContextQueries from './ContextQueries'
 import ContextSubscriptions from './ContextSubscriptions'
-import { ContactsFeedsHandler } from './FeedsHandler'
+import InvitesHandler from './InvitesHandler'
+import { AppsUpdatesHandler, ContactsFeedsHandler } from './FeedsHandler'
 import type { ContextEvent } from './types'
 
 type LogFunc = (...args: Array<any>) => void
@@ -36,7 +37,9 @@ export default class ClientContext extends Subject<ContextEvent> {
   socket: Socket
   subscriptions: ContextSubscriptions
   vaults: VaultRegistry
+  appsUpdates: AppsUpdatesHandler
   contactsFeeds: ContactsFeedsHandler
+  invitesHandler: InvitesHandler
 
   constructor(params: Params) {
     super()
@@ -50,7 +53,9 @@ export default class ClientContext extends Subject<ContextEvent> {
     this.mutations = new ContextMutations(this)
     this.queries = new ContextQueries(this)
     this.subscriptions = new ContextSubscriptions(this)
+    this.appsUpdates = new AppsUpdatesHandler(this)
     this.contactsFeeds = new ContactsFeedsHandler(this)
+    this.invitesHandler = new InvitesHandler(this)
   }
 
   get openVault(): Vault {

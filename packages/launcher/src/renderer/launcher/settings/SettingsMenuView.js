@@ -2,7 +2,7 @@
 import React, { Component } from 'react'
 import { Text, Button, DropDown } from '@morpheus-ui/core'
 import styled from 'styled-components/native'
-import { INFURA_URLS } from '@mainframe/eth'
+import { ETH_RPC_URLS } from '@mainframe/eth'
 import { commitMutation, graphql } from 'react-relay'
 
 import SettingsToolIcon from '@morpheus-ui/icons/SettingsToolSm'
@@ -29,7 +29,7 @@ type State = {
 
 const Container = styled.View`
   flex: 1;
-  padding: 0 5px;
+  padding: 40px 50px;
 `
 const ScrollView = styled.ScrollView``
 
@@ -50,8 +50,9 @@ const setEthNetworkMutation = graphql`
 `
 
 const NETWORK_NAMES = {
-  ropsten: 'Testnet (Ropsten)',
   mainnet: 'Mainnet',
+  ropsten: 'Testnet (Ropsten)',
+  ganache: 'Ganache (localhost:8545)',
   custom: 'Custom (MFT transfers disabled)',
 }
 
@@ -61,17 +62,18 @@ export default class SettingsMenuView extends Component<Props, State> {
   state = {}
 
   getNetworkName() {
-    const networkKey = Object.keys(INFURA_URLS).find(
-      key => INFURA_URLS[key] === this.props.ethereumUrl,
+    const networkKey = Object.keys(ETH_RPC_URLS.WS).find(
+      key => ETH_RPC_URLS.WS[key] === this.props.ethereumUrl,
     )
     return networkKey ? NETWORK_NAMES[networkKey] : NETWORK_NAMES.custom
   }
 
   onChangeEthNetwork = (value: string) => {
-    const url =
-      value === NETWORK_NAMES.mainnet
-        ? INFURA_URLS.mainnet
-        : INFURA_URLS.ropsten
+    const networkKey = Object.keys(NETWORK_NAMES).find(
+      key => NETWORK_NAMES[key] === value,
+    )
+    // $FlowFixMe computed property
+    const url = ETH_RPC_URLS.WS[networkKey]
 
     const input = { url }
 
@@ -129,7 +131,11 @@ export default class SettingsMenuView extends Component<Props, State> {
                   theme={{ minWidth: 150 }}
                   label="Select"
                   onChange={this.onChangeEthNetwork}
-                  options={['Testnet (Ropsten)', 'Mainnet']}
+                  options={[
+                    NETWORK_NAMES.mainnet,
+                    NETWORK_NAMES.ropsten,
+                    NETWORK_NAMES.ganache,
+                  ]}
                   defaultValue={this.getNetworkName()}
                 />
               )}

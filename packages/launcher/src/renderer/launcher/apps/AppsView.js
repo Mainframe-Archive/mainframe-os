@@ -6,12 +6,11 @@ import {
   havePermissionsToGrant,
   type StrictPermissionsGrants,
 } from '@mainframe/app-permissions'
-import type { AppInstalledData } from '@mainframe/client'
 import styled from 'styled-components/native'
 import { Text } from '@morpheus-ui/core'
-import PlusIcon from '@morpheus-ui/icons/PlusSymbolCircled'
 import { findIndex } from 'lodash'
 import memoize from 'memoize-one'
+import PlusIcon from '../../UIComponents/Icons/PlusIcon'
 
 import rpc from '../rpc'
 import PermissionsView from '../PermissionsView'
@@ -20,10 +19,21 @@ import applyContext, { type CurrentUser } from '../LauncherContext'
 import CompleteOnboardSession from './CompleteOnboardSession'
 
 import AppInstallModal from './AppInstallModal'
-import { InstalledAppItem, SuggestedAppItem } from './AppItem'
+import AppPreviewModal from './AppPreviewModal'
+import AppUpdateModal from './AppUpdateModal'
+import { InstalledAppItem } from './AppItem'
+import SuggestedAppItem, { type SuggestedAppData } from './SuggestedItem'
+import type { AppsView_apps as Apps } from './__generated__/AppsView_apps.graphql'
+
+type InstalledApps = $PropertyType<Apps, 'installed'>
+type AppData = $Call<<T>($ReadOnlyArray<T>) => T, InstalledApps>
 
 const SUGGESTED_APPS_URL =
-  'https://s3-us-west-2.amazonaws.com/suggested-apps/suggested-apps.json'
+  'https://s3-us-west-2.amazonaws.com/suggested-apps/suggested-apps-v2.json'
+
+const Container = styled.View`
+  padding: 40px 50px 20px 50px;
+`
 
 const Header = styled.View`
   height: 50px;
@@ -32,15 +42,18 @@ const Header = styled.View`
 export const AppsGrid = styled.View`
   flex-direction: row;
   flex-wrap: wrap;
+  margin-left: -8px;
+  margin-top: 5px;
+  margin-bottom: 15px;
 `
 
 const AppInstallContainer = styled.TouchableOpacity`
-  padding: 15px 10px;
+  padding: 20px;
+  margin-left: 12px;
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
   width: 110px;
-  height: 150px;
 `
 
 const InstallIcon = styled.View`
@@ -56,36 +69,53 @@ const InstallIcon = styled.View`
 
 const ScrollView = styled.ScrollView``
 
-export const NewAppButton = (props: {
+type NewAppProps = {
   title: string,
   onPress: () => void,
   testID: string,
-}) => {
-  return (
-    <AppInstallContainer onPress={props.onPress} testID={props.testID}>
-      <InstallIcon>
-        <PlusIcon color="#808080" />
-      </InstallIcon>
-      <Text
-        theme={{
-          width: '72px',
-          fontSize: '11px',
-          padding: '5px 0',
-          color: '#808080',
-          border: '1px solid #a9a9a9',
-          borderRadius: '3px',
-          textAlign: 'center',
-        }}>
-        {props.title}
-      </Text>
-    </AppInstallContainer>
-  )
 }
 
-type AppData = AppInstalledData
+type NewAppState = {
+  hover: boolean,
+}
 
-export type Apps = {
-  installed: Array<AppData>,
+export class NewAppButton extends Component<NewAppProps, NewAppState> {
+  state = {
+    hover: false,
+  }
+
+  toggleHover = () => {
+    this.setState({ hover: !this.state.hover })
+  }
+
+  render() {
+    return (
+      <AppInstallContainer
+        onPress={this.props.onPress}
+        testID={this.props.testID}
+        onMouseOver={this.toggleHover}
+        onMouseOut={this.toggleHover}>
+        <InstallIcon hover={this.state.hover}>
+          <PlusIcon color={this.state.hover ? '#DA1157' : '#808080'} />
+        </InstallIcon>
+        <Text
+          className="transition"
+          theme={{
+            width: '72px',
+            fontSize: '11px',
+            padding: '5px 0',
+            color: this.state.hover ? '#DA1157' : '#808080',
+            border: this.state.hover
+              ? '1px solid #DA1157'
+              : '1px solid #a9a9a9',
+            borderRadius: '3px',
+            textAlign: 'center',
+          }}>
+          {this.props.title}
+        </Text>
+      </AppInstallContainer>
+    )
+  }
 }
 
 type Props = {
@@ -95,15 +125,16 @@ type Props = {
 
 type State = {
   showModal: ?{
-    type: 'accept_permissions' | 'app_install',
+    type: 'accept_permissions' | 'app_install' | 'app_preview' | 'app_update',
     appID?: ?string,
+    suggestedApp?: ?Object,
     data?: ?{
       app: AppData,
     },
   },
   hover: ?string,
   showOnboarding: boolean,
-  suggestedApps: Array<Object>,
+  suggestedApps: Array<SuggestedAppData>,
 }
 
 class AppsView extends Component<Props, State> {
@@ -121,7 +152,6 @@ class AppsView extends Component<Props, State> {
   fetchSuggested = async () => {
     try {
       const suggestedPromise = await fetch(SUGGESTED_APPS_URL)
-
       const suggestedApps = await suggestedPromise.json()
       this.setState({ suggestedApps })
     } catch (err) {
@@ -136,7 +166,7 @@ class AppsView extends Component<Props, State> {
     })
   }
 
-  // App Install
+  // App install / update / open
 
   onPressInstall = () => {
     this.setState({
@@ -152,6 +182,21 @@ class AppsView extends Component<Props, State> {
         type: 'app_install',
         appID,
       },
+    })
+  }
+
+  onPressUpdate = (appID: string) => {
+    const app = this.props.apps.installed.find(app => app.localID === appID)
+    if (app != null) {
+      this.setState({
+        showModal: { type: 'app_update', appID },
+      })
+    }
+  }
+
+  previewSuggested = (app: Object) => {
+    this.setState({
+      showModal: { type: 'app_preview', suggestedApp: app, appID: app.hash },
     })
   }
 
@@ -184,26 +229,27 @@ class AppsView extends Component<Props, State> {
     }
   }
 
-  onOpenApp = async (app: AppData) => {
-    const { user } = this.props
+  onOpenApp = async (appID: string) => {
+    const { apps, user } = this.props
+    const app = apps.installed.find(app => app.localID === appID)
+    if (app == null) {
+      return
+    }
+
     const appUser = app.users.find(u => u.localID === user.localID)
     if (
+      // $FlowFixMe: difference between Relay-generated and library-defined types
       havePermissionsToGrant(app.manifest.permissions) &&
       (!appUser || !appUser.settings.permissionsSettings.permissionsChecked)
     ) {
       // If this user hasn't used the app before
       // we need to ask to accept permissions
       this.setState({
-        showModal: {
-          type: 'accept_permissions',
-          data: {
-            app,
-          },
-        },
+        showModal: { type: 'accept_permissions', appID },
       })
     } else {
       try {
-        await rpc.launchApp(app.localID, user.localID)
+        await rpc.launchApp(appID, user.localID)
       } catch (err) {
         // TODO: - Error feedback
       }
@@ -217,54 +263,61 @@ class AppsView extends Component<Props, State> {
   }
 
   getSuggestedList = memoize(
-    (apps: Array<AppData>, suggestedApps: Array<Object>) => {
+    (apps: InstalledApps, suggestedApps: Array<SuggestedAppData>) => {
       return suggestedApps.filter(
         item => findIndex(apps, { mfid: item.mfid }) < 0,
       )
     },
   )
 
+  getIcon = memoize(
+    (
+      mfId?: ?string,
+      suggestedApps: Array<SuggestedAppData> = this.state.suggestedApps,
+    ) => {
+      if (!mfId) return null
+      const icon = suggestedApps.filter(app => app.mfid === mfId)
+      return icon.length ? icon[0].icon : null
+    },
+  )
+
   // RENDER
 
-  renderApp(app: AppData) {
-    return (
+  renderApps() {
+    const apps = this.props.apps.installed
+    const installed = apps.map(app => (
+      // $FlowFixMe: injected fragment type
       <InstalledAppItem
+        icon={this.getIcon(app.mfid, this.state.suggestedApps)}
         key={app.localID}
         installedApp={app}
         onOpenApp={this.onOpenApp}
+        onPressUpdate={this.onPressUpdate}
       />
-    )
-  }
-
-  renderApps(apps: Array<AppData>) {
+    ))
     const suggested = this.getSuggestedList(apps, this.state.suggestedApps)
+
     return (
       <ScrollView>
-        <Text variant={['smallTitle', 'blue', 'bold']}>
-          Installed Applications
-        </Text>
+        <Text variant={['appsTitle', 'blue', 'bold']}>Installed</Text>
         <AppsGrid>
-          {apps.map(app => this.renderApp(app))}
+          {installed}
           <NewAppButton
-            title="Install"
+            title="ADD"
             onPress={this.onPressInstall}
             testID="launcher-install-app-button"
           />
         </AppsGrid>
         {suggested.length ? (
           <>
-            <Text variant={['smallTitle', 'blue', 'bold']}>
-              Suggested Applications
-            </Text>
+            <Text variant={['appsTitle', 'blue', 'bold']}>Suggestions</Text>
             <AppsGrid>
               {suggested.map(app => (
                 <SuggestedAppItem
                   key={app.hash}
-                  appID={app.hash}
-                  mfid={app.mfid}
-                  appName={app.name}
-                  devName="Mainframe"
-                  onOpen={this.installSuggested}
+                  appData={app}
+                  onPressInstall={this.installSuggested}
+                  onOpen={this.previewSuggested}
                 />
               ))}
             </AppsGrid>
@@ -272,10 +325,6 @@ class AppsView extends Component<Props, State> {
         ) : null}
       </ScrollView>
     )
-  }
-
-  renderInstalled() {
-    return this.renderApps(this.props.apps.installed)
   }
 
   renderButton(title: string, onPress: () => void, testID: string) {
@@ -315,15 +364,29 @@ class AppsView extends Component<Props, State> {
               appID={this.state.showModal.appID}
               onRequestClose={this.onCloseModal}
               onInstallComplete={this.onInstallComplete}
+              getIcon={this.getIcon}
             />
           )
+          break
+        case 'app_preview':
+          modal = this.state.showModal.suggestedApp ? (
+            <AppPreviewModal
+              appData={this.state.showModal.suggestedApp}
+              onRequestClose={this.onCloseModal}
+              onPressInstall={this.installSuggested}
+            />
+          ) : null
           break
         case 'accept_permissions': {
           // $FlowFixMe ignore undefined warning
           const { app } = this.state.showModal.data
+          const icon = this.getIcon(app.mfid, this.state.suggestedApps)
           modal = (
             <PermissionsView
-              name={app.manifest.name}
+              mfid={app.mfid}
+              icon={icon}
+              name={app.name}
+              // $FlowFixMe: difference between Relay-generated and library-defined types
               permissions={app.manifest.permissions}
               onCancel={this.onCloseModal}
               onSubmit={this.onSubmitPermissions}
@@ -331,11 +394,27 @@ class AppsView extends Component<Props, State> {
           )
           break
         }
+        case 'app_update': {
+          const app = this.props.apps.installed.find(
+            // $FlowFixMe ignore undefined warning
+            app => app.localID === this.state.showModal.appID,
+          )
+          modal = app ? (
+            // $FlowFixMe: injected fragment type
+            <AppUpdateModal
+              app={app}
+              onRequestClose={this.onCloseModal}
+              onUpdateComplete={this.onInstallComplete}
+            />
+          ) : null
+          break
+        }
         default:
+          modal = null
       }
     }
     return (
-      <>
+      <Container>
         <Header>
           <OSLogo />
         </Header>
@@ -345,9 +424,9 @@ class AppsView extends Component<Props, State> {
             onSkip={this.onSkipOnboarding}
           />
         )}
-        {this.renderInstalled()}
+        {this.renderApps()}
         {modal}
-      </>
+      </Container>
     )
   }
 }
@@ -356,9 +435,43 @@ const AppsViewFragmentContainer = createFragmentContainer(AppsView, {
   apps: graphql`
     fragment AppsView_apps on Apps {
       installed {
+        ...AppItem_installedApp
+        ...AppUpdateModal_app
         localID
         mfid
-        ...AppItem_installedApp
+        manifest {
+          permissions {
+            optional {
+              WEB_REQUEST
+              BLOCKCHAIN_SEND
+            }
+            required {
+              WEB_REQUEST
+              BLOCKCHAIN_SEND
+            }
+          }
+        }
+        name
+        users {
+          localID
+          identity {
+            profile {
+              name
+            }
+          }
+          settings {
+            permissionsSettings {
+              permissionsChecked
+              grants {
+                BLOCKCHAIN_SEND
+                WEB_REQUEST {
+                  granted
+                  denied
+                }
+              }
+            }
+          }
+        }
       }
     }
   `,

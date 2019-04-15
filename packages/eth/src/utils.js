@@ -1,6 +1,7 @@
 // @flow
+
 import Web3EthAbi from 'web3-eth-abi'
-import type { DecodedTxResult } from './types'
+import type { DecodedTxResult, JsonRpcResponse } from './types'
 
 export const unitMap = {
   noether: '0',
@@ -88,5 +89,14 @@ export const decodeTransactionData = async (
     signatureHex: methodSig,
     signatureName: METHOD_LABELS[methodSig],
     params: cleanedParams,
+  }
+}
+
+export const jsonRpcResponse = (result: any, id: number): JsonRpcResponse => {
+  return {
+    result,
+    id,
+    jsonrpc: '2.0',
+    error: null,
   }
 }

@@ -2,56 +2,132 @@
 
 import React, { Component } from 'react'
 import { createFragmentContainer, graphql } from 'react-relay'
-import type { AppInstalledData } from '@mainframe/client'
 import styled from 'styled-components/native'
-import { Text } from '@morpheus-ui/core'
-import type OwnApp from '../settings/__generated__/OwnAppDetailView_ownApp.graphql.js'
+import { Button, Text } from '@morpheus-ui/core'
+
+import CircleLoader from '../../UIComponents/CircleLoader'
+import type { AppItem_installedApp as InstalledApp } from './__generated__/AppItem_installedApp.graphql.js'
+import type { AppItem_ownApp as OwnApp } from './__generated__/AppItem_ownApp.graphql.js'
 import AppIcon from './AppIcon'
 
+export const AppShadow = styled.View`
+  margin-top: 2px;
+  width: 50px;
+  height: 1px;
+  margin-top: -1px;
+
+  ${props => props.small && `width: 35px;`}
+`
 const AppButtonContainer = styled.TouchableOpacity`
-  padding: 15px 10px;
+  position: relative;
+  padding: 20px;
+  margin-left: 12px;
   flex-direction: column;
   align-items: center;
-  justify-content: space-between;
   width: 110px;
+  height: 155px;
+  border-radius: 10px;
+
+  ${props =>
+    !props.disabled &&
+    props.hover &&
+    `
+    shadow-color: #000;
+    shadow-offset: {width: 0, height: 0};
+    shadow-opacity: 0.1;
+    shadow-radius: 10;
+  `}
+
+  ${props => props.disabled && 'cursor: not-allowed;'}
 `
 
 const IconContainer = styled.View`
+  position: relative;
+  width: 72px;
+  align-items: center;
+  margin-bottom: 15px;
+  ${props =>
+    !props.disabled &&
+    props.hover &&
+    `
+      margin-top: -3px;
+      margin-bottom: 18px;
+  `}
+
+  ${props => props.disabled && 'opacity: 0.3;'}
+`
+
+const LoaderContainer = styled.View`
   width: 72px;
   height: 72px;
-  margin-bottom: 10px;
+  border-radius: 3px;
+  background-color: #0000009e;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 20px;
+  left: 19px;
+`
+
+const CircleContainer = styled.View`
+  width: 45px;
+  height: 45px;
+  border-radius: 100%;
+  background-color: #1b1b1b;
+  align-items: center;
+  justify-content: center;
+`
+
+const UpdateBadge = styled.View`
+  position: absolute;
+  z-index: 2;
+  top: -8px;
+  right: -8px;
+  width: 19px;
+  height: 19px;
+  background-color: #da1157;
+  border-radius: 100%;
+  shadow-color: #000;
+  shadow-offset: {width: 0, height: 0};
+  shadow-opacity: 0.1;
+  shadow-radius: 10;
+`
+
+const UpdateButton = styled.View`
+  opacity: 0;
+  position: absolute;
+  bottom: 15px;
+  ${props => props.hover && 'opacity: 1;'}
 `
 
 type SharedProps = {
-  onOpenApp: (app: AppInstalledData | OwnApp, own: boolean) => any,
+  icon?: ?string,
+  onOpenApp: (appID: string, own: boolean) => any,
 }
 
 type InstalledProps = SharedProps & {
-  installedApp: AppInstalledData,
+  installedApp: InstalledApp,
+  onPressUpdate: (appID: string) => void,
 }
 
 type OwnProps = SharedProps & {
   ownApp: OwnApp,
 }
 
-type SuggestedProps = {
-  appID: string,
-  mfid: string,
-  appName: string,
-  devName: string,
-  onOpen: (appID: string) => void,
-}
-
 type Props = {
   appID: string,
   appName: string,
-  devName: string,
+  devName: ?string,
   onOpen: () => void,
+  onUpdate?: ?() => void,
   testID: string,
+  icon?: ?string,
+  installing?: ?boolean,
 }
 
 type State = {
   direction: string,
+  hover: boolean,
 }
 
 type MouseEvent = { clientX: number }
@@ -59,6 +135,7 @@ type MouseEvent = { clientX: number }
 export default class AppItem extends Component<Props, State> {
   state = {
     direction: 'no-skew',
+    hover: false,
   }
 
   mousePosition: number = 0
@@ -88,52 +165,102 @@ export default class AppItem extends Component<Props, State> {
     })
   }
 
+  setHover = () => {
+    this.setState({ hover: true })
+  }
+
+  releaseHover = () => {
+    this.setState({ hover: false })
+  }
+
   render() {
-    const { appID, appName, devName, onOpen, testID } = this.props
+    const {
+      appID,
+      appName,
+      devName,
+      icon,
+      onOpen,
+      onUpdate,
+      testID,
+      installing,
+    } = this.props
+
     return (
-      <AppButtonContainer onPress={onOpen} key={appID} testID={testID}>
+      <AppButtonContainer
+        disabled={installing}
+        onPress={onOpen}
+        key={appID}
+        testID={testID}
+        hover={this.state.hover}
+        onMouseOver={this.setHover}
+        onMouseOut={this.releaseHover}>
         <IconContainer
+          disabled={installing}
+          hover={this.state.hover}
           className={this.state.direction}
           onMouseMove={this.setDirection}
           onMouseOver={this.startMoving}
           onMouseOut={this.stopMoving}>
-          <AppIcon id={appID} />
+          <AppIcon url={icon} id={appID} />
+          <AppShadow
+            className={
+              this.state.hover ? 'app-shadow app-shadow-hover' : 'app-shadow'
+            }
+          />
+          {onUpdate && <UpdateBadge />}
         </IconContainer>
-        <Text variant="appButtonName">{appName}</Text>
+        <Text
+          variant={[
+            'appButtonName',
+            'ellipsis',
+            installing ? 'opacity50' : '',
+          ]}>
+          {appName}
+        </Text>
         <Text variant="appButtonId">{devName}</Text>
+        {onUpdate && (
+          <UpdateButton className="transition" hover={this.state.hover}>
+            <Button
+              onPress={onUpdate}
+              title="UPDATE"
+              variant={['updateButton']}
+            />
+          </UpdateButton>
+        )}
+        {installing ? (
+          <LoaderContainer>
+            <CircleContainer>
+              <CircleLoader />
+            </CircleContainer>
+          </LoaderContainer>
+        ) : null}
       </AppButtonContainer>
     )
   }
 }
 
-export const SuggestedAppItem = (props: SuggestedProps) => {
-  const onOpen = () => {
-    props.onOpen(props.appID)
-  }
-
-  return (
-    <AppItem
-      appID={props.mfid}
-      appName={props.appName}
-      devName={props.devName}
-      onOpen={onOpen}
-      testID="suggested-app-item"
-    />
-  )
-}
-
 const InstalledView = (props: InstalledProps) => {
   const app = props.installedApp
+
   const onOpen = () => {
-    props.onOpenApp(app, false)
+    props.onOpenApp(app.localID, false)
   }
+  const onUpdate =
+    app.update == null
+      ? undefined
+      : () => {
+          props.onPressUpdate(app.localID)
+        }
 
   return (
     <AppItem
+      installing={app.installationState === 'DOWNLOADING'}
+      icon={props.icon}
       appID={app.mfid}
       appName={app.name}
       devName={app.manifest.author.name}
       onOpen={onOpen}
+      onUpdate={onUpdate}
       testID="installed-app-item"
     />
   )
@@ -142,7 +269,7 @@ const InstalledView = (props: InstalledProps) => {
 const OwnView = (props: OwnProps) => {
   const app = props.ownApp
   const onOpen = () => {
-    props.onOpenApp(app, true)
+    props.onOpenApp(app.localID, true)
   }
 
   return (
@@ -162,40 +289,16 @@ export const InstalledAppItem = createFragmentContainer(InstalledView, {
       mfid
       localID
       name
+      installationState
       manifest {
-        permissions {
-          optional {
-            WEB_REQUEST
-            BLOCKCHAIN_SEND
-          }
-          required {
-            WEB_REQUEST
-            BLOCKCHAIN_SEND
-          }
-        }
         author {
           id
           name
         }
       }
-      users {
-        localID
-        identity {
-          profile {
-            name
-          }
-        }
-        settings {
-          permissionsSettings {
-            permissionsChecked
-            grants {
-              BLOCKCHAIN_SEND
-              WEB_REQUEST {
-                granted
-                denied
-              }
-            }
-          }
+      update {
+        manifest {
+          version
         }
       }
     }
@@ -211,27 +314,6 @@ export const OwnAppItem = createFragmentContainer(OwnView, {
       developer {
         id
         name
-      }
-      versions {
-        version
-        permissions {
-          optional {
-            WEB_REQUEST
-            BLOCKCHAIN_SEND
-          }
-          required {
-            WEB_REQUEST
-            BLOCKCHAIN_SEND
-          }
-        }
-      }
-      users {
-        localID
-        identity {
-          profile {
-            name
-          }
-        }
       }
     }
   `,

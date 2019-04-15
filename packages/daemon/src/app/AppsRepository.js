@@ -197,7 +197,7 @@ export default class AppsRepository {
     return this.getByID(idType(id)) || this.getOwnByID(idType(id))
   }
 
-  getAppsForUser(id: ID): Array<App> {
+  getAppsForUser(id: ID): Array<App | OwnApp> {
     const apps = []
     if (this._appsByUser[id]) {
       this._appsByUser[id].forEach(id => {
@@ -208,6 +208,11 @@ export default class AppsRepository {
       })
     }
     return apps
+  }
+
+  getInstalledAppsForUser(id: ID): Array<App> {
+    // $FlowFixMe filter removes other types
+    return this.getAppsForUser(id).filter(a => a instanceof App)
   }
 
   // App lifecycle
@@ -325,7 +330,11 @@ export default class AppsRepository {
     return this._updates[id]
   }
 
-  createUpdate(appID: ID, manifest: ManifestData): AppUpdate {
+  getUpdatesCount(): number {
+    return Object.keys(this._updates).length
+  }
+
+  setUpdate(appID: ID, manifest: ManifestData): AppUpdate {
     const app = this.getByID(appID)
     if (app == null) {
       throw new Error('Invalid app')
@@ -363,6 +372,11 @@ export default class AppsRepository {
 
     this._updates[appID] = update
     return update
+  }
+
+  applyUpdate(app: App): void {
+    delete this._updates[app.id]
+    this._apps[app.id] = app
   }
 
   // Own apps

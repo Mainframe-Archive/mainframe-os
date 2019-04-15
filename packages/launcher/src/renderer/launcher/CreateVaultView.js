@@ -25,6 +25,7 @@ type Props = {
 type State = {
   error?: ?string,
   awaitingResponse?: boolean,
+  validPass?: boolean,
 }
 
 const FormContainer = styled.View`
@@ -36,6 +37,17 @@ const passwordValidation = ({ value }: FieldValidateFunctionParams) => {
     return 'Password must be at least 8 characters'
   }
 }
+
+const ToolTipContent = (
+  <>
+    <Text variant="tooltipTitle">Where will my data be stored?</Text>
+    <Text variant="tooltipText">
+      Your user data is encrypted and stored locally on your device. You will be
+      asked to grant permission before any app can access your data.
+    </Text>
+    <Text variant="tooltipTitle">DO NOT FORGET YOUR PASSWORD</Text>
+  </>
+)
 
 const confirmPasswordValidation = ({
   value,
@@ -70,7 +82,7 @@ export default class CreateVaultView extends Component<Props, State> {
       // eslint-disable-next-line no-console
       console.warn(err)
       this.setState({
-        error: 'Error creating vault',
+        error: 'Error creating vault.',
         awaitingResponse: false,
       })
     }
@@ -92,6 +104,7 @@ export default class CreateVaultView extends Component<Props, State> {
         variant="onboarding"
         Icon={CircleArrowRight}
         testID="create-vault-button-submit"
+        invalidFormDisabled
         submit
       />
     )
@@ -99,7 +112,8 @@ export default class CreateVaultView extends Component<Props, State> {
       <OnboardContainer
         step={1}
         title="Welcome"
-        description="Let’s quickly secure your MainframeOS vault.">
+        description="Let’s quickly secure your data."
+        tooltipContent={ToolTipContent}>
         <FormContainer>
           <Form onSubmit={this.onSubmit}>
             <Row size={1} top>
@@ -119,6 +133,7 @@ export default class CreateVaultView extends Component<Props, State> {
                   label="Confirm Password"
                   name="confirmPassword"
                   type="password"
+                  renderIfValid="password"
                   testID="create-vault-input-confirm-password"
                   validation={confirmPasswordValidation}
                 />

@@ -22,6 +22,7 @@ import WalletImportView from './WalletImportView'
 import WalletCreateModal from './WalletCreateModal'
 import WalletAddLedgerModal from './WalletAddLedgerModal'
 import WallePreviewModal from './WalletPreviewModal'
+import WalletIcon from './WalletIcon'
 
 export type WalletAccounts = Array<{
   address: string,
@@ -59,6 +60,7 @@ type State = {
 
 const Container = styled.View`
   flex: 1;
+  padding: 54px 54px 40px 54px;
 `
 
 const Buttons = styled.View`
@@ -111,6 +113,7 @@ const AddWrapper = styled.View`
 const AccountView = styled.TouchableOpacity`
   padding: 10px;
   flex-direction: row;
+  align-items: center;
   border-top-width: 1px;
   border-top-color: #efefef;
   ${props => props.first && `border-top-width: 0;`}
@@ -127,7 +130,8 @@ const AccountView = styled.TouchableOpacity`
 const Address = styled.View`
   flex: 1;
   overflow: hidden;
-  flex-wrap: wrap;
+  flex-direction: row;
+  align-items: center;
 `
 
 const Ballance = styled.View`
@@ -172,6 +176,11 @@ const setDefaultWalletMutation = graphql`
     }
   }
 `
+
+const roundNum = (number, precision) => {
+  precision = Math.pow(10, precision)
+  return Math.ceil(Number(number) * precision) / precision
+}
 
 const getWalletsArray = (props: Props): Array<Wallet> => {
   const { ethWallets } = props.wallets
@@ -333,9 +342,15 @@ class WalletsView extends Component<Props, State> {
           first={index === 0}
           className="transition">
           <Address>
+            <WalletIcon address={a.address} />
             <Text
-              variant={['mono', 'ellipsis', hover ? 'red' : 'greyMed']}
-              size={11}>
+              variant={[
+                'mono',
+                'marginLeft15',
+                'ellipsis',
+                hover ? 'red' : 'greyMed',
+              ]}
+              size={12}>
               {a.address}
             </Text>
           </Address>
@@ -348,8 +363,9 @@ class WalletsView extends Component<Props, State> {
               theme={{
                 marginLeft: 10,
                 minWidth: 80,
-              }}>
-              {a.balances.eth} ETH
+              }}
+              color="#232323">
+              {roundNum(a.balances.eth, 5)} ETH
             </Text>
           </Ballance>
           <Ballance>
@@ -360,8 +376,9 @@ class WalletsView extends Component<Props, State> {
               theme={{
                 marginLeft: 10,
                 minWidth: 80,
-              }}>
-              {a.balances.mft} MFT
+              }}
+              color="#232323">
+              {roundNum(a.balances.mft, 5)} MFT
             </Text>
           </Ballance>
         </AccountView>

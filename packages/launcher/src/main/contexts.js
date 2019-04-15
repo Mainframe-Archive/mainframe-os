@@ -32,8 +32,8 @@ export class ContextSubscription<T = ?mixed> {
   _method: string
   data: ?T
 
-  constructor(method: string, data?: T) {
-    this._id = uniqueID()
+  constructor(method: string, data?: ?T, id?: string) {
+    this._id = id || uniqueID()
     this._method = method
     this.data = data
   }
@@ -115,7 +115,7 @@ export class AppContext extends Context {
     if (this._bzz == null) {
       this._bzz = new BzzAPI({
         url: this.settings.bzzURL,
-        signFeedDigest: this.storage.signFeedDigest,
+        signBytes: this.storage.signBytes,
       })
     }
     return this._bzz
@@ -123,14 +123,14 @@ export class AppContext extends Context {
 
   get storage(): ContextStorageSettings {
     if (this._storage == null) {
-      const keyPair = createKeyPair(this.appSession.storage.feedKey, 'hex')
+      const keyPair = createKeyPair(this.appSession.storage.feedKey)
       const privKey = keyPair.getPrivate()
       this._storage = {
         contentHash: null,
         address: pubKeyToAddress(keyPair.getPublic().encode()),
         encryptionKey: decodeBase64(this.appSession.storage.encryptionKey),
         feedHash: this.appSession.storage.feedHash,
-        signFeedDigest: async digest => sign(digest, privKey),
+        signBytes: async bytes => sign(bytes, privKey),
       }
     }
     return this._storage
