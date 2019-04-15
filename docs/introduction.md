@@ -11,15 +11,7 @@ Mainframe OS is an integrated development and execution environment that dramati
 
 ## Install Mainframe OS
 
-#### MacOS
-1. From a terminal window run the following command to install the Mainframe OS Daemon
-
-        $ npm install --global @mainframe/daemon
-2. **[Download](https://s3.us-east-2.amazonaws.com/mainframe-os-releases/v0.2/MainframeOS.dmg)** Mainframe OS Installer
-3. Click. Drag. Run!
-
-
-#### Windows & Unix
+> Note: We are currently in final stages working toward a release of a new version of Mainframe OS, expected April 15, 2019. A new macOS binary installer will be available then.
 
 Go to [Mainframe Platform](platform.md) for instructions to compile and run Mainframe OS from source.
 
