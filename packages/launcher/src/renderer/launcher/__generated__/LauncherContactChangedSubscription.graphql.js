@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 0adde722ad859d9ffd793e3df8020429
+ * @relayHash a2eaa765940d9095554192f4d3f50663
  */
 
 /* eslint-disable */
@@ -21,6 +21,7 @@ export type LauncherContactChangedSubscriptionResponse = {|
         +avatar: ?string,
       |},
       +invite: ?{|
+        +ethNetwork: ?string,
         +inviteTX: ?string,
         +stake: {|
           +reclaimedTX: ?string,
@@ -48,6 +49,7 @@ subscription LauncherContactChangedSubscription {
         avatar
       }
       invite {
+        ethNetwork
         inviteTX
         stake {
           reclaimedTX
@@ -106,6 +108,13 @@ v2 = {
     {
       "kind": "ScalarField",
       "alias": null,
+      "name": "ethNetwork",
+      "args": null,
+      "storageKey": null
+    },
+    {
+      "kind": "ScalarField",
+      "alias": null,
       "name": "inviteTX",
       "args": null,
       "storageKey": null
@@ -149,7 +158,7 @@ return {
   "operationKind": "subscription",
   "name": "LauncherContactChangedSubscription",
   "id": null,
-  "text": "subscription LauncherContactChangedSubscription {\n  contactChanged {\n    contact {\n      connectionState\n      profile {\n        name\n        avatar\n      }\n      invite {\n        inviteTX\n        stake {\n          reclaimedTX\n          amount\n          state\n        }\n      }\n      id\n    }\n  }\n}\n",
+  "text": "subscription LauncherContactChangedSubscription {\n  contactChanged {\n    contact {\n      connectionState\n      profile {\n        name\n        avatar\n      }\n      invite {\n        ethNetwork\n        inviteTX\n        stake {\n          reclaimedTX\n          amount\n          state\n        }\n      }\n      id\n    }\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -227,5 +236,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '8c61ea4b7e2b5571b29122aa4ee0a6fa';
+(node/*: any*/).hash = 'a404e625edc8a2a594d99532406af0dc';
 module.exports = node;
