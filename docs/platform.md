@@ -57,16 +57,10 @@ packages/cli/bin/run daemon:setup --bin-path=./packages/daemon/bin/run
 
 ### Run Mainframe OS
 
-In one terminal tab, run the daemon:
+From the project root folder, run the daemon (backend) and the launcher (frontend):
 
 ```
-./packages/cli/bin/run daemon:start
-```
-
-Then, in another tab, run the launcher:
-
-```
-cd packages/launcher && yarn run dev
+yarn dev
 ```
 
 

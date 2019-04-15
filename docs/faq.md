@@ -77,9 +77,7 @@ We have gone back and forth on this, but are currently committed to not allowing
 Existing solidity dapps only need to follow three steps to work in Mainframe OS.
 
 1. Integrate with our wallet, following a similar process to what it was like to integrate with metamask.
-
 2. Make sure the app is structured as required by Mainframe OS (i.e. single-page webapp with index.html file at root level and relative paths to assets).
-
 3. Deploy the front-end webapp to our decentralized storage layer which can easily be done within Mainframe OS.
 
 There is no need to redeploy any contracts since the front-end can continue to reference the same instance of contracts on the Ethereum blockchain.
