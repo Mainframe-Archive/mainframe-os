@@ -67,7 +67,13 @@ main() {
             exit 0;
        else
             installDaemon;
+            echo "";
+            echo "";
             echo "System preinstall complete.";
+            echo "";
+            echo "";
+            echo "Congratulations! Your environment is now set up for Mainframe OS. You can close this window and continue with installation step 2 - dragging the app icon to the Applications folder.";
+            osascript -e 'tell application "Terminal" to close first window' & exit 0;
             exit 0;
        fi
     else
@@ -81,7 +87,7 @@ main() {
         fi
     fi
 
-   osascript -e 'tell application "Terminal" to close (every window whose name contains "MainframeOS")' &
+    echo "Congratulations! Your environment is now set up for Mainframe OS. You can close this window and continue with installation step 2 - dragging the app icon to the Applications folder.";
 
     exit;
 }
