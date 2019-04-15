@@ -80,12 +80,9 @@ The newly created environment then needs to be configured using the CLI:</p>
 <pre><code class="hljs">packages/cli/bin/<span class="hljs-builtin-name">run</span> daemon:setup <span class="hljs-attribute">--bin-path</span>=./packages/daemon/bin/run
 </code></pre>
 <h3><a class="anchor" aria-hidden="true" id="run-mainframe-os"></a><a href="#run-mainframe-os" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Run Mainframe OS</h3>
-<p>In one terminal tab, run the daemon:</p>
-<pre><code class="hljs">.<span class="hljs-regexp">/packages/</span>cli<span class="hljs-regexp">/bin/</span>run <span class="hljs-string">daemon:</span>start
+<p>From the project root folder, run the daemon (backend) and the launcher (frontend):</p>
+<pre><code class="hljs"><span class="hljs-attribute">yarn dev</span>
 </code></pre>
-<p>Then, in another tab, run the launcher:</p>
-<pre><code class="hljs">cd packages/launcher &amp;&amp; yarn <span class="hljs-keyword">run</span><span class="bash"> dev
-</span></code></pre>
 <h2><a class="anchor" aria-hidden="true" id="mainframe-platform-components"></a><a href="#mainframe-platform-components" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Mainframe Platform Components</h2>
 <p>The main components (packages) of the Mainframe Platform are as follows:</p>
 <ul>
