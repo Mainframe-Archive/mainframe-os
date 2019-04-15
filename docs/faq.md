@@ -5,7 +5,7 @@ sidebar_label: FAQ
 ---
 
 ## What is Mainframe OS?
-Mainframe OS is a platform for end users to find and use dapps, and for developers to build and deploy dapps. Mainframe OS provides users with the elegant and cohesive UI comforts they have come to expect from a modern platform. Users can manage identity, wallets, contacts, and other security features in a single, integrated experience.
+Mainframe OS is a platform that makes it easy for end users to find and use dapps, and for developers to build and deploy dapps. A unique network design delivers unparallelled privacy and security, by default. Mainframe OS provides users with the elegant and cohesive UI comforts they have come to expect from a modern platform. Users can manage identity, wallets, contacts, and other security features in a single, integrated experience.
 
 Mainframe OS takes care of all underlying web3 infrastructure and services, removing friction and making blockchain functionality accessible and seamless.
 
@@ -44,7 +44,7 @@ There are seven “suggested apps” included currently in Mainframe OS.
 - The Looper: leverage your assets (based on Instadapp leverage functionality)
 
 ## What makes Mainframe OS different?
-One of our primary goals is to simplify the end-user experience especially for users who don't already know how to or don't regularly use dapps in a browser environment. Yes, there is an extra step to have them install the Mainframe OS application first and then your dapp inside it. But we try to make that simple and a better experience for them than the current norm of using a browser plus wallet extension (like chrome & metamask). Plus uses have a much more secure and private environment since all their data lives encrypted on their own machine, there are no connections to external endpoints without their explicit knowledge and permission, and only trusted dapps can be run in the sandboxed environment.
+One of our primary goals is to simplify the end-user experience especially for users who don't already know how to or don't regularly use dapps in a browser environment. Yes, there is an extra step to have them install the Mainframe OS application first and then your dapp inside it. But we try to make that simple and a better experience for them than the current norm of using a browser plus wallet extension (like chrome & metamask). Plus users have a much more secure and private environment since all their data lives encrypted on their own machine, there are no connections to external endpoints without their explicit knowledge and permission, and only trusted dapps can be run in the sandboxed environment.
 
 ## How does Mainframe OS compare to a Browser with Metamask?
 Metamask is definitely the dominant paradigm currently for running dapps so we are indeed focused on improving the user experience while at the same time trying to still follow some standards they've set and not reduce available functionality without very good reason. We believe the end-user experience is better using Mainframe OS because
@@ -95,15 +95,12 @@ As additional underlying services are enhanced to include incentivization functi
 
 
 ## Does Mainframe have it’s own Blockchain?
-No. Mainframe Tokens (MFT) are ERC-20 Assets on the Ethereum Blockchain.
+No. Mainframe Tokens (MFT) are ERC-20 Assets on the Ethereum Blockchain. This frees it from scalability issues and other constraints that come with a blockchain.
 
 ## What blockchains does Mainframe OS support?
 Mainframe SDK is currently only integrated with Ethereum. However, the underlying service architecture is designed to be modular and pluggable, able to integrate with any other blockchain. No matter where the industry goes, we’ll support the popular blockchains and programming languages, so builders can use it anywhere.
 
-## Will Mainframe OS ever integrate with other blockchains?
-It is on our roadmap.
-
-## What will the OS look like once it integrates with other blockchains? Will there be more ‘Identities’ you can choose from, and then choices within apps for payments, etc.?
+## What will the OS look like once it integrates with other blockchains?
 The idea is to abstract specifics about different blockchains away from the users so it is virtually invisible to them. The chain has implications on identity, wallet, and blockchain transactions, which are all accessed through our SDK functions.
 
 **First, Identity:** Mainframe Identity is not tied to the Ethereum network, but rather a users' ETH address is stored as a property inside the users Mainframe Identity. So other chains could easily be integrated and those addresses likewise stored as an additional properties on the Mainframe Identity object. The dapps can access the relevant address as needed for their functionality for users and contacts.
@@ -127,13 +124,26 @@ Users get to choose whether or not to make their Name and ETH address “discove
 ## Is Mainframe OS perfect?
 Of course not. While we know our concepts and designs are solid, Mainframe OS is still very much in an early “alpha” state. Swarm, the underlying storage layer powering much of Mainframe OS, is itself still an alpha project. That means there are no guarantees at this stage that things will always work smoothly. This is the reality of decentralized development today.
 
-When we started a few years ago, the goal was to build a decentralized, unstoppable, private, secure messaging app. Step by step we went down the stack to realize the plumbing to facilitate all this smoothly simply didn’t exist yet so we got to work helping to build it from the ground up. A lot has gone into Mainframe OS and the way it is designed and built is really very good, if we do say so ourselves. Right now it is early and it’s buggy and incomplete. But with this first user release, we’re now on the path of continual improvements and enhancements towards a very bright future.
+When we started a few years ago, the goal was to build a decentralized, unstoppable, private, secure messaging app. Step by step we went down the stack to realize the plumbing to facilitate all this smoothly simply didn’t exist yet, so we got to work helping to build it from the ground up. A lot has gone into Mainframe OS and we’re proud of its design. Even so, it’s still early and incomplete. But with this first user release, we’re now on the path of continual improvements and enhancements towards a very bright future.
+
+## What are some of the goals and plans for the team going forward?
+We have a multi-pronged approach to support our long-term vision of moving the world to web3, and making Mainframe OS its home. That includes:
+
+1. Killer dapps to bring users into the Mainframe OS ecosystem. We’ll help build or incentivize them initially to showcase capabilities, inspire other devs, and seed the offering. We are prepared to continue being the primary dapp devs, or being heavily involved in this as momentum builds.
+2. Continual improvements to Mainframe OS to support users and increase capabilities
+3. Increased integration of MFT in Mainframe OS (see section on token utility)
+4. Continued involvement with the decentralized development community, including Ethereum and Swarm and others, to stay aligned in vision, intention, and roadmap.
+5. Execute on our roadmap as well as possible and as appropriate for the market/resources.
+
+There's no question these are the early days and it's going to take some work to build up to the demand we ultimately expect. We have a long-term view and are invested to see it through.
+
 
 ## How can I help?
 Help us improve Mainframe OS by giving us constructive feedback on our gitter channel
 Mainframe OS is an open source project. Jump in and give us a hand!
 Try it out. Spread the word. Tell us what you think. Become a part of the Mainframe family.
 
+
 
 # Getting even deeper...
 
@@ -149,16 +159,6 @@ Yes, Mainframe OS definitely needs to go mobile sooner than later. We are still 
 
 There are additional risks related to living within other platforms (Apple’s app store, etc) especially if Mainframe OS contains a “dapp store” of our own. Mainframe OS can exist and dapps can run without Apple's blessing. So the problem becomes finding/installing Mainframe OS. On desktop there are other options for installing applications besides the app store. On mobile that gets much harder, especially if we try to have a straight dapp store/dapp purchase model. Maybe straightforward in-app purchases are a path. We are trying to be creative.
 
-## What are some of the goals and plans for the team going forward?
-We have a multi-pronged approach to support our long-term vision of moving the world to web3, and making Mainframe OS its home. That includes:
-
-1-killer dapps to bring users into the Mainframe OS ecosystem. We'll help build or incentivize them initially to showcase capabilities, inspire other devs, and seed the offering. We are prepared to continue being the primary dapp devs, or being heavily involved in this as momentum builds.
-2-continual improvements to Mainframe OS to support users and increase capabilities
-3-increase integration of MFT in Mainframe OS (see section on token utility below)
-4-continued involvement with the decentralized development community, including Ethereum and Swarm and others, to stay aligned in vision, intention, and roadmap.
-4-execute on our roadmap as well as possible and as appropriate for the market/resources.
-
-There's no question these are the early days and it's going to take some work to build up to the demand we ultimately expect. We have a long-term view and are invested to see it through.
 
 
 ## Why should developers build on Mainframe OS, and what do you offer them?
@@ -172,7 +172,7 @@ We do not disallow atomic swaps, so any dapp could be written to support such fe
 ## What’s the deal with Swarm? Are IPFS and Swarm trying to accomplish roughly the same thing?
 We believe the Swarm vision is a little bit larger, but you can think of them as fairly similar for a storage option. Swarm gets especially interesting when you look at things like their Kademlia neighborhoods/routing system, ACL’s, incentivization,Feeds, PSS (comms), etc.
 
-## What is the financial incentive for developers to put dapps on the platform? Obviously they wouldn't be able to 'sell' apps to individual users, right?
+## What is the financial incentive for developers to put dapps on the platform?
 We have not yet integrated the business models, but are definitely thinking through possibilities for subscriptions, paid apps, in-app purchases, etc that would all make capitalizing on dapps easier for developers. Moreover, we are confident our end-user experience is easier for most users, and that is helpful to dapp developers especially who are developing for less-crypto/dapp-savvy users.
 
 
