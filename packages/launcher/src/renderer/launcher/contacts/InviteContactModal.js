@@ -198,9 +198,9 @@ export class InviteContactModal extends Component<Props, State> {
     } catch (err) {
       this.setState({
         error: err.message,
+        txProcessing: false,
         invitePending: {
           state: 'approved',
-          txProcessing: false,
         },
       })
     }
@@ -329,6 +329,9 @@ export class InviteContactModal extends Component<Props, State> {
             </Text>
             <Text variant={['greyDark23', 'ellipsis']} size={12}>
               {this.props.contact.publicFeed}
+            </Text>
+            <Text variant={['greyDark23', 'ellipsis']} size={12}>
+              {this.props.contact.profile.ethAddress}
             </Text>
           </AddContactDetailText>
         </AddContactDetail>
@@ -479,7 +482,9 @@ export class InviteContactModal extends Component<Props, State> {
     }
 
     const error = this.state.error && (
-      <Text variant={['error']}>{this.state.error}</Text>
+      <Text variant={['error']} numberOfLines={2}>
+        {this.state.error}
+      </Text>
     )
     const render = (
       <>
