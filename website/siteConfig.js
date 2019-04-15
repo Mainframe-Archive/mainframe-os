@@ -9,7 +9,7 @@
 // site configuration options.
 
 const siteConfig = {
-  title: 'Mainframe Developer Documentation', // Title for your website.
+  title: 'Mainframe OS Documentation', // Title for your website.
   tagline: 'Get started using Mainframe.',
   url: 'https://docs.mainframe.com', // Your website URL
   baseUrl: '/', // Base URL for your project */
