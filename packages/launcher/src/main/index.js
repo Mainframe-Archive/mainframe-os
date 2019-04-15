@@ -309,7 +309,7 @@ const createLauncherWindow = async () => {
 
 const shutdown = async () => {
   daemonConfig.runStatus = 'stopped'
-  await stopDaemon(daemonConfig)
+  stopDaemon(daemonConfig)
 }
 
 app.on('ready', createLauncherWindow)

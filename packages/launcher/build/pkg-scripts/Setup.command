@@ -46,7 +46,7 @@ installBrew() {
 
 installNode() {
     echo "Installing Node.js...";
-    brew install node
+    brew install node@10
 }
 
 installDaemon() {
@@ -55,6 +55,8 @@ installDaemon() {
 }
 
 main() {
+
+    echo -n -e "\033]0;MainframeOS\007"
 
     checkNode
 
@@ -79,7 +81,9 @@ main() {
         fi
     fi
 
-    exit 0;
+   osascript -e 'tell application "Terminal" to close (every window whose name contains "MainframeOS")' &
+
+    exit;
 }
 
 main

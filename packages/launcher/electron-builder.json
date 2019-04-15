@@ -22,7 +22,7 @@
       },
       {
         "type": "file",
-        "path": "build/pkg-scripts/preinstall.command",
+        "path": "build/pkg-scripts/Setup.command",
         "x": "275",
         "y": "160"
       },
