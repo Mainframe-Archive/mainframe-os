@@ -477,7 +477,9 @@ export default class ContextMutations {
 
   async addPeerByFeed(hash: bzzHash): Promise<PeerUserIdentity> {
     // TODO: validate peer data
-    const peerPublicRes = await this._context.io.bzz.download(hash)
+    const peerPublicRes = await this._context.io.bzz.download(hash, {
+      timeout: 10000,
+    })
     const data = await peerPublicRes.json()
     return await this.addPeer({
       key: data.publicKey,

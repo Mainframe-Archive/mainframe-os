@@ -27,8 +27,6 @@ type ObserveInvites<T = Object> = {
 //$FlowFixMe Cannot resolve module ./inviteABI.
 const INVITE_ABI = require('./inviteABI.json')
 
-const EVENT_BATCH_SIZE = 5000
-
 const contracts = {
   // mainnet: {
   //   token: '0xa46f1563984209fe47f8236f8b01a03f03f957e4',
@@ -135,61 +133,25 @@ export default class InvitesHandler {
 
   // FETCH BLOCKCHAIN STATE
 
-  batchBlocks(from: number, to: number): Array<{ from: string, to: string }> {
-    let blockDiff = to - from
-    let fromBlock = from
-    const toBlock = blockDiff > EVENT_BATCH_SIZE ? from + EVENT_BATCH_SIZE : to
-
-    const batches = []
-    if (blockDiff > EVENT_BATCH_SIZE) {
-      while (blockDiff > EVENT_BATCH_SIZE) {
-        batches.push({
-          from: String(fromBlock),
-          to: String(fromBlock + EVENT_BATCH_SIZE),
-        })
-        fromBlock = fromBlock + EVENT_BATCH_SIZE + 1
-        blockDiff = to - fromBlock
-        if (blockDiff <= EVENT_BATCH_SIZE) {
-          // Fill the final range
-          batches.push({ from: String(fromBlock), to: String(to) })
-        }
-      }
-    } else {
-      batches.push({ from: String(fromBlock), to: String(toBlock) })
-    }
-    return batches
-  }
-
   async readEvents(
     user: OwnUserIdentity,
     userFeedHash: string,
     type: 'Declined' | 'Invited',
     handler: (user: OwnUserIdentity, events: Array<Object>) => Promise<void>,
   ) {
-    const { eventBlocksRead } = this._context.openVault.blockchainData
-    const { eth } = this._context.io
-    const lastCheckedBlock = eventBlocksRead[type][eth.networkID] || 0
     try {
-      const latestBlock = await eth.getLatestBlock()
       const creationBlock = await this.invitesContract.call('creationBlock')
 
-      const latestNum = Number(latestBlock)
-      const startNum = Math.max(lastCheckedBlock, Number(creationBlock))
-
-      const batches = this.batchBlocks(startNum, latestNum)
-      // $FlowFixMe iterator type
-      for await (const batch of batches) {
-        const params = {
-          fromBlock: batch.from,
-          toBlock: batch.to,
-          topics: [userFeedHash],
-        }
-        const events = await this.invitesContract.getPastEvents(type, params)
-        for (let i = 0; i < events.length; i++) {
-          await handler(user, events[i])
-        }
+      const params = {
+        fromBlock: Number(creationBlock),
+        toBlock: 'latest',
+        topics: [userFeedHash],
       }
-      eventBlocksRead[type][eth.networkID] = latestBlock
+      const events = await this.invitesContract.getPastEvents(type, params)
+      for (let i = 0; i < events.length; i++) {
+        await handler(user, events[i])
+      }
+
       await this._context.openVault.save()
     } catch (err) {
       this._context.log(`Error reading blockchain events: ${err}`)
@@ -254,6 +216,7 @@ export default class InvitesHandler {
     if (contractEvent.senderFeed) {
       try {
         let peer = identities.getPeerByFeed(contractEvent.senderFeed)
+
         if (peer) {
           const contact = identities.getContactByPeerID(
             user.localID,
@@ -274,7 +237,6 @@ export default class InvitesHandler {
             mode: 'content-response',
           },
         )
-
         if (feedValue) {
           const feed = await feedValue.json()
 
