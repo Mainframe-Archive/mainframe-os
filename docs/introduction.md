@@ -22,8 +22,13 @@ Follow onscreen instructions to secure your vault, setup your identity, and crea
 
 **Mainframe OS > Contacts > Add Contact**
 
-Paste Contact ID of another Mainframe OS user. The Contact ID can be found on the **Identity** tab of Mainframe OS.
-Exchange Contact IDs out-of-band with other Mainframe OS users.
+Paste Mainframe ID of another Mainframe OS user. The Mainframe ID can be found on the **Identity** tab of Mainframe OS, or in contacts under your own entry.
+There are two options for adding a contact:
+1. **Mutual Invitation:** Exchange Mainframe IDs out-of-band with other Mainframe OS users and each of you add each other's Mainframe ID. Once you have each added each other, it should no longer appear as "pending". This option is FREE.
+2. **Blockchain Invitation:** One user can add another user and using a blockchain transaction can send an invitation and notification to the other user. Once the second user sees and accepts the invitation, the contacts are no longer "pending".
+This option requires the invitor to stake 100MFT (plus applicable gas fees). Once the invitee accepts the invitation, the invitor can re-claim their stake. If the invitee alternatively rejects the invitation,
+they can keep the stake themselves. This system incentivizes responsible "cold-calling" and penalizes spamming.
+
 
 
 ## Create your Dapp

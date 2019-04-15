@@ -88,7 +88,10 @@ In order to make it easier to share code among packages, this project uses [lern
 
 There are several places to look when errors arise initially or during development. Here is an overview:
 
-- if the Launcher won't start, look to the terminal logs where you ran `npm run dev`. Some javascript errors could prevent Electron from showing a window.
+- if the Launcher won't start, look to the terminal logs where you ran `yarn dev`, or in the second tab that opens automatically from that command. Some javascript errors could prevent Electron from showing a window.
+- to separate the launcher and daemon processes, instead of running `yarn dev` at the root, do this two-step process:
+    - from the root run `./packages/cli/bin/run daemon:start`
+    - from a second terminal tab, in the `packages/launcher` folder, run `yarn dev`
 - you can send all logs (including in-app `console.log` calls) to the terminal by starting electron with the `ELECTRON_ENABLE_LOGGING` environment variable, e.g. `ELECTRON_ENABLE_LOGGING=1 npm run dev`
 - if there are problems inside the launcher or apps, you can use the regular Chrome debugger (cmd-option-I) to view logs and diagnose issues.
 - the daemon also shows errors in the terminal, and you can enable more verbose logging by setting the `DEBUG="*"` environment variable, e.g. `DEBUG="*" ./packages/cli/bin/run daemon:start`
