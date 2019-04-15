@@ -30,6 +30,7 @@ const siteConfig = {
     {doc: 'introduction', label: 'Quick Start'},
     {doc: 'platform', label: 'Platform'},
     {doc: 'sdk', label: 'SDK'},
+    {doc: 'faq', label: 'FAQ'},
   ],
 
   /* path to images for header/footer */
