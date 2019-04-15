@@ -55,6 +55,7 @@ installDaemon() {
 }
 
 main() {
+
     checkNode
 
     if [ $NODE_EXISTS == true ]; then
