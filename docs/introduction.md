@@ -77,9 +77,16 @@ From the app details view in Mainframe OS, click **Publish**.
 The resulting App ID is what is needed to share and install your dapp.
 
 ### Update your Dapp
-*coming soon*
+Once the app has been published, on the app details screen choose **New Version +**.
+
+Bump the version number and Add. You should now see an entry for that version in draft form. You can work on the changes and when ready choose **Publish Update**.
+
+Users who have already installed the app will be notified there is an available update and guided through installing it.
+
+New users will automatically have access to the latest version.
+
 
 ### Submit your Dapp
 *coming soon*
 
-Submit your dapp to be considered for the Mainframe Suggested Apps. MFT required.
+Submit your dapp to be considered for the Mainframe Suggested Apps. MFT staking required.
