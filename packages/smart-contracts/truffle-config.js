@@ -50,8 +50,18 @@ module.exports = {
           'https://ropsten.infura.io/v3/8ec0911ee74c4583b1346bbc1afdf22d',
         )
       },
-      gasPrice: 20000000000,
+      gasPrice: 5000000000,
       // gas: 8500000,           // Gas sent with each transaction (default: ~6700000)
+    },
+    mainnet: {
+      network_id: '1',
+      provider: function() {
+        return new HDWalletProvider(
+          mnemonic,
+          'https://mainnet.infura.io/v3/8ec0911ee74c4583b1346bbc1afdf22d',
+        )
+      },
+      gasPrice: 5000000000,
     },
   },
 
