@@ -3,6 +3,7 @@
 <url> <loc>https://docs.mainframe.com/help</loc> <changefreq>weekly</changefreq> <priority>0.5</priority> <xhtml:link rel="alternate" hreflang="en" href="https://docs.mainframe.com/en/help" /> </url>
 <url> <loc>https://docs.mainframe.com/docs/build-dapps</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://docs.mainframe.com/docs/build-dapps" /> </url>
 <url> <loc>https://docs.mainframe.com/docs/create-mainframe-dapp</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://docs.mainframe.com/docs/create-mainframe-dapp" /> </url>
+<url> <loc>https://docs.mainframe.com/docs/faq</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://docs.mainframe.com/docs/faq" /> </url>
 <url> <loc>https://docs.mainframe.com/docs/introduction</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://docs.mainframe.com/docs/introduction" /> </url>
 <url> <loc>https://docs.mainframe.com/docs/mft</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://docs.mainframe.com/docs/mft" /> </url>
 <url> <loc>https://docs.mainframe.com/docs/platform</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://docs.mainframe.com/docs/platform" /> </url>
