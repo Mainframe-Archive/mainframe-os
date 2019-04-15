@@ -146,7 +146,7 @@ Returns a numeric string representing the Ethereum network ID. A few example val
 ‘42’: Kovan Test Network
 ```
 
-### ethereum.selectedAddress
+### ethereum.selectedAccount
 
 Returns a hex-prefixed string representing the current user’s selected address, e.g.:
 `0xde0B295669a9FD93d5F28D9Ec85E40f4cb697BAe`.
