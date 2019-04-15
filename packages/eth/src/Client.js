@@ -293,7 +293,7 @@ export default class EthClient extends EventEmitter {
     const estGasBN = toBN(estGasHex)
 
     // Pad the estimated limit
-    const paddedGasBN = estGasBN.muln(1.2)
+    const paddedGasBN = estGasBN.muln(1.5)
 
     if (estGasBN.gt(maxGasBN)) {
       return estGasHex
