@@ -196,7 +196,7 @@ export default class Vault {
       settings: {
         bzzURL: 'http://mainframe-gateways.net:8500',
         pssURL: 'ws://mainframe-gateways.net:8546',
-        ethURL: ETH_RPC_URLS.WS.ropsten,
+        ethURL: ETH_RPC_URLS.WS.mainnet,
       },
       identityWallets: new IdentityWallets(),
       contactAppData: new ContactAppData(),
