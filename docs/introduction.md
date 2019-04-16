@@ -11,7 +11,19 @@ Mainframe OS is an integrated development and execution environment that dramati
 
 ## Install Mainframe OS
 
-> Note: We are currently in final stages working toward a release of a new version of Mainframe OS, expected April 15, 2019. A new macOS binary installer will be available then.
+#### MacOS
+**[Download](https://download.mainframeos.com/os/releases/MainframeOS.dmg)** Mainframe OS Installer
+
+Run the 2 steps outlined in the installer package:
+
+**Step 1:** Click on the Setup.command script to initialize your environment
+
+**Step 2:** Drag the app icon to the Applications folder.
+
+Now you should be able to run it as usual from the Applications folder.
+
+
+#### Windows & Unix
 
 Go to [Mainframe Platform](platform.md) for instructions to compile and run Mainframe OS from source.
 
@@ -36,13 +48,11 @@ Use [create-mainframe-dapp](create-mainframe-dapp.md) to setup your dapp for eas
 
 ### Launch your dapp in Mainframe OS
 
-Next, __launch Mainframe OS__ and follow the onboarding prompts.
-
-Once you are setup, in the **More Tab** click the **App Development Tool** link.
+Next, __launch Mainframe OS__ and go to the **More** tab and click the **App Development Tool** link.
 
 #### Create a developer identity
- * choose a name for the identity that you will use to publish dapps under.
- * select "create."
+ * choose a name for the identity that you will use to publish dapps under
+ * select **create**
 
 Once you have created your Developer Identity, click **Add** to
 
