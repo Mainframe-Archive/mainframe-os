@@ -103,7 +103,12 @@ The newly created environment then needs to be configured using the CLI:</p>
 <h2><a class="anchor" aria-hidden="true" id="troubleshooting"></a><a href="#troubleshooting" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Troubleshooting</h2>
 <p>There are several places to look when errors arise initially or during development. Here is an overview:</p>
 <ul>
-<li>if the Launcher won't start, look to the terminal logs where you ran <code>npm run dev</code>. Some javascript errors could prevent Electron from showing a window.</li>
+<li>if the Launcher won't start, look to the terminal logs where you ran <code>yarn dev</code>, or in the second tab that opens automatically from that command. Some javascript errors could prevent Electron from showing a window.</li>
+<li>to separate the launcher and daemon processes, instead of running <code>yarn dev</code> at the root, do this two-step process:
+<ul>
+<li>from the root run <code>./packages/cli/bin/run daemon:start</code></li>
+<li>from a second terminal tab, in the <code>packages/launcher</code> folder, run <code>yarn dev</code></li>
+</ul></li>
 <li>you can send all logs (including in-app <code>console.log</code> calls) to the terminal by starting electron with the <code>ELECTRON_ENABLE_LOGGING</code> environment variable, e.g. <code>ELECTRON_ENABLE_LOGGING=1 npm run dev</code></li>
 <li>if there are problems inside the launcher or apps, you can use the regular Chrome debugger (cmd-option-I) to view logs and diagnose issues.</li>
 <li>the daemon also shows errors in the terminal, and you can enable more verbose logging by setting the <code>DEBUG=&quot;*&quot;</code> environment variable, e.g. <code>DEBUG=&quot;*&quot; ./packages/cli/bin/run daemon:start</code></li>
