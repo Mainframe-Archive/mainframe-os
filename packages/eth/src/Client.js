@@ -305,9 +305,6 @@ export default class EthClient extends EventEmitter {
   }
 
   async completeTxParams(txParams: Object): Promise<Object> {
-    if (!txParams.to) {
-      throw new Error('Transaction "to" address required')
-    }
     if (!txParams.from) {
       throw new Error('Transaction "from" address required')
     }
@@ -348,11 +345,11 @@ export default class EthClient extends EventEmitter {
   }
 
   validateTransaction(txParams: Object) {
-    if (!txParams.from || !isAddress(txParams.from)) {
-      throw new Error('Invalid sender address')
+    if (!txParams.from) {
+      throw new Error('Missing sender address')
     }
-    if (!txParams.to || !isAddress(txParams.to)) {
-      throw new Error('Invalid recipient address')
+    if (!isAddress(txParams.from)) {
+      throw new Error('Invalid sender address')
     }
   }
 
