@@ -331,7 +331,7 @@ app.on('activate', () => {
   }
 })
 
-app.on('will-quit', async (event) => {
+app.on('will-quit', async event => {
   event.preventDefault()
   await shutdown()
   app.exit()
