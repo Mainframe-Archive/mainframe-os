@@ -26,7 +26,7 @@ const DAEMON_BIN_PATH = is.development
 
 const envType =
   process.env.NODE_ENV === 'production' ? 'production' : 'development'
-const envName = process.env.MAINFRAME_ENV || `v0.3-${envType}`
+const envName = process.env.MAINFRAME_ENV || `v030-${envType}`
 // Get existing env or create with specified type
 const env = Environment.get(envName, envType)
 

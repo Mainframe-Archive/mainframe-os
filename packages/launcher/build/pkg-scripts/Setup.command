@@ -52,6 +52,7 @@ installNode() {
 installDaemon() {
     echo "Installing the Mainframe Daemon...";
     npm install --global @mainframe/daemon
+    npm update --global @mainframe/daemon
 }
 
 main() {
