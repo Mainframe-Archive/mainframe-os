@@ -345,6 +345,9 @@ export default class EthClient extends EventEmitter {
   }
 
   validateTransaction(txParams: Object) {
+    if (txParams.to && !isAddress(txParams.to)) {
+      throw new Error('Invalid to address')
+    }
     if (!txParams.from) {
       throw new Error('Missing sender address')
     }
