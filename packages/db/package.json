@@ -1,0 +1,27 @@
+{
+  "name": "@mfos/db",
+  "description": "Mainframe OS local database",
+  "version": "0.1.0",
+  "author": "Mainframe",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "files": [
+    "lib/*"
+  ],
+  "scripts": {
+    "clean": "del-cli lib",
+    "build:js": "babel src --out-dir lib",
+    "build:flow": "flow-copy-source src lib",
+    "build": "npm run clean && npm run build:js && npm run build:flow",
+    "test:types": "flow check"
+  },
+  "dependencies": {
+    "leveldown": "^5.0.1",
+    "pouchdb-adapter-leveldb": "^7.0.0",
+    "rxdb": "^8.0.7",
+    "rxjs": "^6.4.0"
+  },
+  "devDependencies": {
+    "flow-bin": "^0.95.1"
+  }
+}

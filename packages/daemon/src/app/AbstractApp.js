@@ -69,7 +69,6 @@ export type ApprovedContact = {
 export type AbstractAppParams = {
   appID: ID,
   settings?: { [ID]: AppUserSettings },
-  storage?: StorageSettings,
 }
 
 export type AbstractAppSerialized = AbstractAppParams
