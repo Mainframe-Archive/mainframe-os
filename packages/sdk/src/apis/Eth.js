@@ -19,6 +19,11 @@ const MFT_TOKEN_ADDRESSES = {
   mainnet: '0xdf2c7238198ad8b389666574f2d8bc411a4b7428',
 }
 
+type SignParams = {
+  address: string,
+  data: string,
+}
+
 class WalletProvider {
   _rpc: StreamRPC
 
@@ -34,8 +39,8 @@ class WalletProvider {
     return this._rpc.request('wallet_signEthTx', params)
   }
 
-  async sign() {
-    throw new Error('Needs implementing')
+  async sign(params: SignParams) {
+    return this._rpc.request('wallet_signEthData', params)
   }
 }
 

@@ -48,7 +48,7 @@ type SignDataParams = {
 
 type WalletProvider = {
   +signTransaction: (params: TXParams) => Promise<Object>,
-  +sign: (params: SignDataParams) => Promise<string>,
+  +sign: (params: SignDataParams) => Promise<string>, // Web3 provides params as array [address, data]
   +getAccounts: () => Promise<Array<string>>,
 }
 

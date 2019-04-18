@@ -15,17 +15,21 @@ import { isAddress } from 'web3-utils'
 import applyContext, { type ContextProps } from './Context'
 import { ABI } from '@mainframe/eth'
 
+type Tabs = 'tokens' | 'ether' | 'contact' | 'sign'
+
 type State = {
   recipient: string,
   amount: string,
   data: string,
   errorMsg?: ?string,
+  message: string,
+  signedMessage?: string,
   currentTX: ?{
     hash?: ?string,
     state: 'broadcast' | 'mined' | 'confirmed',
   },
   processingTransaction?: ?boolean,
-  sendType: 'tokens' | 'ether' | 'contact',
+  sendType: Tabs,
 }
 
 class SendFunds extends Component<ContextProps, State> {
@@ -33,6 +37,7 @@ class SendFunds extends Component<ContextProps, State> {
     recipient: '',
     amount: '',
     data: '',
+    message: '',
     sendType: 'ether',
     currentTX: undefined,
   }
@@ -58,21 +63,15 @@ class SendFunds extends Component<ContextProps, State> {
     })
   }
 
-  onPressShowEthSend = () => {
+  onChangeMessage = (value: string) => {
     this.setState({
-      sendType: 'ether',
+      message: value,
     })
   }
 
-  onPressShowTokenSend = () => {
+  onPressTab = (type: Tabs) => {
     this.setState({
-      sendType: 'tokens',
-    })
-  }
-
-  onPressShowPayContact = () => {
-    this.setState({
-      sendType: 'contact',
+      sendType: type,
     })
   }
 
@@ -137,6 +136,7 @@ class SendFunds extends Component<ContextProps, State> {
 
   sendTransaction = async (mft?: boolean) => {
     const { web3, sdk } = this.props
+
     if (!this.validateSend()) {
       return
     }
@@ -202,6 +202,14 @@ class SendFunds extends Component<ContextProps, State> {
       })
   }
 
+  onPressSign = async () => {
+    const { web3, sdk } = this.props
+
+    const account = await sdk.ethereum.getDefaultAccount()
+    const signedMessage = await web3.eth.sign(this.state.message, account)
+    this.setState({ signedMessage })
+  }
+
   // RENDER
 
   renderTokenSend() {
@@ -262,6 +270,27 @@ class SendFunds extends Component<ContextProps, State> {
     )
   }
 
+  renderSignMessage() {
+    const signed = this.state.signedMessage ? (
+      <View style={[styles.feedbackContainer, styles.receiptContainer]}>
+        <Text>{this.state.signedMessage}</Text>
+      </View>
+    ) : null
+    return (
+      <View>
+        <TextInput
+          placeholder="Message"
+          style={styles.textInput}
+          onChangeText={this.onChangeMessage}
+          value={this.state.message}
+          numberOfLines={4}
+          multiline
+        />
+        {signed}
+      </View>
+    )
+  }
+
   renderTabs() {
     const ethStyles = [styles.tab]
     const tokenStyles = [styles.tab]
@@ -269,25 +298,31 @@ class SendFunds extends Component<ContextProps, State> {
       ether: [styles.tab],
       tokens: [styles.tab],
       contact: [styles.tab],
+      sign: [styles.tab],
     }
     tabStyles[this.state.sendType].push(styles.tabSelected)
 
     return (
       <View style={styles.tabs}>
         <TouchableOpacity
-          onPress={this.onPressShowEthSend}
+          onPress={() => this.onPressTab('ether')}
           style={tabStyles.ether}>
           <Text style={styles.tabLabel}>ETHER</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          onPress={this.onPressShowTokenSend}
+          onPress={() => this.onPressTab('tokens')}
           style={tabStyles.tokens}>
           <Text style={styles.tabLabel}>MFT</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          onPress={this.onPressShowPayContact}
+          onPress={() => this.onPressTab('contact')}
           style={tabStyles.contact}>
           <Text style={styles.tabLabel}>PAY CONTACT</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => this.onPressTab('sign')}
+          style={tabStyles.sign}>
+          <Text style={styles.tabLabel}>SIGN MESSAGE</Text>
         </TouchableOpacity>
       </View>
     )
@@ -327,6 +362,7 @@ class SendFunds extends Component<ContextProps, State> {
 
   render() {
     let content, onPress
+    let buttonTitle = 'Send'
     switch (this.state.sendType) {
       case 'tokens':
         content = this.renderTokenSend()
@@ -335,6 +371,11 @@ class SendFunds extends Component<ContextProps, State> {
       case 'contact':
         content = this.renderPayContact()
         onPress = this.onPressPayContact
+        break
+      case 'sign':
+        content = this.renderSignMessage()
+        onPress = this.onPressSign
+        buttonTitle = 'Sign'
         break
       case 'ether':
       default:
@@ -346,7 +387,7 @@ class SendFunds extends Component<ContextProps, State> {
     const button = this.state.processingTransaction ? (
       <ActivityIndicator />
     ) : (
-      <Button title="Send" onPress={onPress} />
+      <Button title={buttonTitle} onPress={onPress} />
     )
     return (
       <View style={styles.container}>
@@ -387,7 +428,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 2,
     color: '#999999',
     borderColor: '#dddddd',
-    paddingHorizontal: 10,
+    paddingHorizontal: 12,
     paddingVertical: 5,
   },
   tabSelected: {
@@ -395,7 +436,7 @@ const styles = StyleSheet.create({
     borderColor: '#4896EC',
   },
   tabLabel: {
-    fontSize: 16,
+    fontSize: 13,
     letterSpacing: 2,
   },
   dataInput: {

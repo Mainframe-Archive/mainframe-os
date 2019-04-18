@@ -7,10 +7,14 @@ import { ipcRenderer } from 'electron'
 import React, { Component } from 'react'
 import styled from 'styled-components/native'
 import { Text, Button, Checkbox } from '@morpheus-ui/core'
+import { hexToUtf8, isHex } from 'web3-utils'
+import { type EthClient, truncateAddress } from '@mainframe/eth'
 
 import type { Subscription } from 'rxjs'
-import type { WalletEthSignTxParams } from '@mainframe/client'
-import { type EthClient } from '@mainframe/eth'
+import type {
+  WalletEthSignTxParams,
+  WalletEthSignParams,
+} from '@mainframe/client'
 
 import ContactsIcon from '@morpheus-ui/icons/ContactsFilledMd'
 
@@ -41,6 +45,7 @@ type Request = {
   params?: WalletEthSignTxParams | ContactSelectParams,
   params: {
     BLOCKCHAIN_SEND?: WalletEthSignTxParams,
+    BLOCKCHAIN_SIGN?: WalletEthSignParams,
     CONTACTS_SELECT?: ContactSelectParams,
   },
 }
@@ -101,6 +106,7 @@ const handleMessage = createHandler({ methods, validatorOptions })
 
 const permissionDescriptions = {
   BLOCKCHAIN_SEND: 'make an Ethereum blockchain transaction',
+  BLOCKCHAIN_SIGN: 'sign a message with Ethereum wallet',
   CONTACTS_READ: 'access contacts',
   CONTACTS_SELECT: 'select contacts',
   WALLET_ACCOUNT_SELECT: 'select wallets',
@@ -169,6 +175,24 @@ const PermissionDeniedAlert = styled.View`
   position: absolute;
   max-width: 300px;
 `
+
+const MessageSignContainer = styled.ScrollView`
+  background-color: #585858;
+  border-radius: 3px;
+  padding: 10px;
+  max-height: 200px;
+  margin-top: 12px;
+`
+
+const FromContainer = styled.View`
+  flex-direction: 'row';
+`
+
+const ErrorMsgContainer = styled.View`
+  padding: 10px;
+  background-color: #303030;
+`
+
 export default class UserAlertView extends Component<Props, State> {
   state = {
     permissionDeniedNotifs: [],
@@ -321,6 +345,83 @@ export default class UserAlertView extends Component<Props, State> {
     return alerts.length ? (
       <PermissionDeniedAlert>{alerts}</PermissionDeniedAlert>
     ) : null
+  }
+
+  renderButtons(requestID: string, acceptEnabled: boolean) {
+    const acceptButton = acceptEnabled ? (
+      <Button
+        variant={['TuiButton']}
+        title="AUTHORIZE"
+        onPress={() => this.acceptPermission(requestID)}
+      />
+    ) : null
+    return (
+      <ButtonsContainer>
+        <Button
+          variant={['TuiButton', 'TuiButtonDismiss']}
+          title="REJECT"
+          onPress={() => this.declinePermission(requestID)}
+        />
+        {acceptButton}
+      </ButtonsContainer>
+    )
+  }
+
+  renderSignMessageRequest(requestID: string, request: Request) {
+    const { params } = request
+    let valid = false
+    let content
+    if (!params || !params.BLOCKCHAIN_SIGN) {
+      content = (
+        <ErrorMsgContainer>
+          <Text variant="error">No data to sign</Text>
+        </ErrorMsgContainer>
+      )
+    } else if (!isHex(params.BLOCKCHAIN_SIGN.data)) {
+      content = (
+        <ErrorMsgContainer>
+          <Text variant="error">
+            Invalid hex value for message signing: {params.BLOCKCHAIN_SIGN.data}
+          </Text>
+        </ErrorMsgContainer>
+      )
+    } else {
+      // $FlowFixMe null checked above
+      const address = truncateAddress(params.BLOCKCHAIN_SIGN.address)
+      // $FlowFixMe null checked above
+      const message = hexToUtf8(params.BLOCKCHAIN_SIGN.data)
+      valid = true
+      content = (
+        <>
+          <FromContainer>
+            <Text color="#9A9A9A" variant={['size13', 'bold']}>
+              From:{' '}
+            </Text>
+            <Text color="#9A9A9A" variant={['size13']}>
+              {address}
+            </Text>
+          </FromContainer>
+          <Text color="#9A9A9A" variant={['size13', 'bold', 'marginTop10']}>
+            Message:
+          </Text>
+          <MessageSignContainer>
+            <Text color="#FFF">{message}</Text>
+          </MessageSignContainer>
+        </>
+      )
+    }
+    return (
+      <>
+        <TitleContainer>
+          <Text variant="TuiHeader">Sign Message</Text>
+          <BellIcon width={24} height={24} />
+        </TitleContainer>
+        <ContentContainer>
+          {content}
+          {this.renderButtons(requestID, valid)}
+        </ContentContainer>
+      </>
+    )
   }
 
   renderTxSignRequest(requestID: string, request: Request) {
@@ -482,6 +583,10 @@ export default class UserAlertView extends Component<Props, State> {
         case 'BLOCKCHAIN_SEND':
           large = true
           content = this.renderTxSignRequest(id, requestData)
+          break
+        case 'BLOCKCHAIN_SIGN':
+          large = true
+          content = this.renderSignMessageRequest(id, requestData)
           break
         case 'CONTACTS_SELECT':
           content = this.renderContactPicker(id, requestData)
