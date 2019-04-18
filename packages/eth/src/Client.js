@@ -48,7 +48,7 @@ type SignDataParams = {
 
 type WalletProvider = {
   +signTransaction: (params: TXParams) => Promise<Object>,
-  +sign: (params: SignDataParams) => Promise<string>, // Web3 provides params as array [address, data]
+  +sign: (params: SignDataParams) => Promise<string>,
   +getAccounts: () => Promise<Array<string>>,
 }
 
@@ -225,6 +225,11 @@ export default class EthClient extends EventEmitter {
       return this._walletProvider.sign(params)
     }
     throw new Error('No wallet provider found')
+  }
+
+  async signMessage(message: string, address: string) {
+    const data = toHex(message)
+    return this.signData({ address, data })
   }
 
   // Sending transactions

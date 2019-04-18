@@ -206,7 +206,7 @@ class SendFunds extends Component<ContextProps, State> {
     const { web3, sdk } = this.props
 
     const account = await sdk.ethereum.getDefaultAccount()
-    const signedMessage = await web3.eth.sign(this.state.message, account)
+    const signedMessage = await sdk.ethereum.sign(this.state.message, account)
     this.setState({ signedMessage })
   }
 

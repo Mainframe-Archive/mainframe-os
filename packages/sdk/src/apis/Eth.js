@@ -152,6 +152,10 @@ export default class EthAPIs extends ClientAPIs {
     return accounts ? accounts[0] : undefined
   }
 
+  sign(message: string, address: string): Promise<string> {
+    return this._ethClient.signMessage(message, address)
+  }
+
   sendETH(params: SendParams): Promise<TXEventEmitter> {
     return this._ethClient.sendETH(params)
   }
