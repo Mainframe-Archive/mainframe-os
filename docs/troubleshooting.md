@@ -89,7 +89,7 @@ If you run into this permissions problem either in the setup script or when tryi
 
 `sudo chown -R $(whoami) /usr/local/lib/node_modules`
 
-`npm install —global @mainframe/daemon`
+`npm install --global @mainframe/daemon`
 
 ### Error in Setup.command script installing Node causing infinite loop, and other node-related installation issues
 
