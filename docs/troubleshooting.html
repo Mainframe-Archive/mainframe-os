@@ -1,0 +1,113 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Troubleshooting Mainframe OS installation (macOS only) · Mainframe OS Documentation</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;blockquote&gt;
+&lt;p&gt;Note: we are currently in the process of refactoring some of the Mainframe OS&lt;/p&gt;
+&lt;/blockquote&gt;
+"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Troubleshooting Mainframe OS installation (macOS only) · Mainframe OS Documentation"/><meta property="og:type" content="website"/><meta property="og:url" content="https://docs.mainframe.com/index.html"/><meta property="og:description" content="&lt;blockquote&gt;
+&lt;p&gt;Note: we are currently in the process of refactoring some of the Mainframe OS&lt;/p&gt;
+&lt;/blockquote&gt;
+"/><meta name="twitter:card" content="summary"/><link rel="shortcut icon" href="/img/favicon.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/MF_Symbol_Red-Rose_BG.png" alt="Mainframe OS Documentation"/><h2 class="headerTitleWithLogo">Mainframe OS Documentation</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/docs/introduction" target="_self">Quick Start</a></li><li class=""><a href="/docs/platform" target="_self">Platform</a></li><li class=""><a href="/docs/sdk" target="_self">SDK</a></li><li class=""><a href="/docs/faq" target="_self">FAQ</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 class="postHeaderTitle">Troubleshooting Mainframe OS installation (macOS only)</h1></header><article><div><span><blockquote>
+<p>Note: we are currently in the process of refactoring some of the Mainframe OS
+architecture so this process can be simplified (essentially eliminating the need for step 1 below).
+In the mean time here are some things to try if you're having trouble getting Mainframe OS setup and running.</p>
+</blockquote>
+<p><strong>Background:</strong> The Mainframe OS installer includes 2 necessary steps.</p>
+<h5><a class="anchor" aria-hidden="true" id="step-1-run-the-environment-setup-script-setupcommand"></a><a href="#step-1-run-the-environment-setup-script-setupcommand" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Step 1: Run the environment setup script (<code>Setup.command</code>)</h5>
+<p>The whole purpose of this step is to ultimately run the command:</p>
+<p><code>npm install --global @mainframe/daemon</code></p>
+<p>This installs the required daemon package so it can be launched and leveraged when running Mainframe OS.</p>
+<p>For users who already have <code>npm</code> installed, this is a very straightforward command.
+However not all users do, in fact most non-developers do not, which means first we have to
+install <code>npm</code> which requires <code>node</code> and <code>brew</code> and <code>python</code> and XCode tools and and lots of other goodies be
+installed and verified and configured correctly.</p>
+<h5><a class="anchor" aria-hidden="true" id="step-2-drag-the-mainframe-os-app-icon-to-the-applications-folder"></a><a href="#step-2-drag-the-mainframe-os-app-icon-to-the-applications-folder" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Step 2: Drag the Mainframe OS App Icon to the Applications folder</h5>
+<p>This installs the Mainframe OS binaries in the Applications folder. When the icon is clicked, the daemon
+(installed above in step 1) is started, new environment set up (for first time run), and the Mainframe OS
+application launches.</p>
+<h2><a class="anchor" aria-hidden="true" id="troubleshooting-installation-issues"></a><a href="#troubleshooting-installation-issues" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Troubleshooting installation issues</h2>
+<h3><a class="anchor" aria-hidden="true" id="javascript-error-when-starting-mainframe-os"></a><a href="#javascript-error-when-starting-mainframe-os" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Javascript error when starting Mainframe OS</h3>
+<p><img src="/docs/assets/javascripterror.png" alt="spawn mainframed ENOENT"></p>
+<p>This error means the daemon was not correctly installed during Step 1 of the installation process.</p>
+<p>Check the following:</p>
+<ul>
+<li>Run the setup script from Step 1 above (just in case somehow you missed Step #1 completely)</li>
+<li>If the setup script failed, but you know you already have <code>npm</code> installed, go ahead and just install the daemon manually (see below).</li>
+<li>Otherwise, see output from setup script for clues on which aspect failed and follow issues below for next steps.</li>
+</ul>
+<h3><a class="anchor" aria-hidden="true" id="try-to-install-mainframe-daemon-manually"></a><a href="#try-to-install-mainframe-daemon-manually" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Try to install Mainframe daemon manually</h3>
+<p>You can skip the Setup.command script completely if you already have node and npm installed. You'll just need to install the Mainframe daemon manually.
+Open the terminal application (launch from Applications/Utilities, or command-space to open Spotlight Search and find &quot;terminal.app&quot;)
+and run the following command:</p>
+<p><code>npm install --global @mainframe/daemon</code></p>
+<h3><a class="anchor" aria-hidden="true" id="setupcommand-script-asking-for-password"></a><a href="#setupcommand-script-asking-for-password" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Setup.command script asking for password</h3>
+<p>Certain steps in the environment setup script may require you to enter your macOS user password. You'll see a message and prompt
+in the terminal window and it will pause waiting for your input. You'll need to click on the terminal window to put it in focus
+then start typing. You won't see anything on the screen while you are typing your password so it may appear as though nothing is happening.
+Hit <code>enter</code> after typing your password and the script should continue.</p>
+<h3><a class="anchor" aria-hidden="true" id="permissions-error-when-installing-daemon"></a><a href="#permissions-error-when-installing-daemon" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Permissions error when installing Daemon</h3>
+<pre><code class="hljs"><span class="hljs-built_in">npm</span> install --<span class="hljs-built_in">global</span> @mainframe/daemon
+<span class="hljs-built_in">npm</span> WARN checkPermissions Missing write access to /usr/local/lib/node_modules
+<span class="hljs-built_in">npm</span> ERR! path /usr/local/lib/node_modules
+<span class="hljs-built_in">npm</span> ERR! code EACCES
+<span class="hljs-built_in">npm</span> ERR! errno <span class="hljs-number">-13</span>
+<span class="hljs-built_in">npm</span> ERR! syscall access
+<span class="hljs-built_in">npm</span> ERR! Error: EACCES: permission denied, access <span class="hljs-string">'/usr/local/lib/node_modules'</span>
+<span class="hljs-built_in">npm</span> ERR! { [Error: EACCES: permission denied, access <span class="hljs-string">'/usr/local/lib/node_modules'</span>]
+<span class="hljs-built_in">npm</span> ERR! stack:
+<span class="hljs-built_in">npm</span> ERR! <span class="hljs-string">'Error: EACCES: permission denied, access \'/usr/local/lib/node_modules\''</span>,
+<span class="hljs-built_in">npm</span> ERR! errno: <span class="hljs-number">-13</span>,
+<span class="hljs-built_in">npm</span> ERR! code: <span class="hljs-string">'EACCES'</span>,
+<span class="hljs-built_in">npm</span> ERR! syscall: <span class="hljs-string">'access'</span>,
+<span class="hljs-built_in">npm</span> ERR! path: <span class="hljs-string">'/usr/local/lib/node_modules'</span> }
+<span class="hljs-built_in">npm</span> ERR!
+<span class="hljs-built_in">npm</span> ERR! The operation was rejected <span class="hljs-keyword">by</span> your operating system.
+<span class="hljs-built_in">npm</span> ERR! It <span class="hljs-keyword">is</span> likely you <span class="hljs-keyword">do</span> <span class="hljs-keyword">not</span> have the permissions to access <span class="hljs-keyword">this</span> file <span class="hljs-keyword">as</span> the current user
+<span class="hljs-built_in">npm</span> ERR!
+<span class="hljs-built_in">npm</span> ERR! If you believe <span class="hljs-keyword">this</span> might be a permissions issue, please double-check the
+<span class="hljs-built_in">npm</span> ERR! permissions <span class="hljs-keyword">of</span> the file <span class="hljs-keyword">and</span> its containing directories, <span class="hljs-keyword">or</span> <span class="hljs-keyword">try</span> running
+<span class="hljs-built_in">npm</span> ERR! the command again <span class="hljs-keyword">as</span> root/Administrator (though <span class="hljs-keyword">this</span> <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> recommended)
+</code></pre>
+<p>If you run into this permissions problem either in the setup script or when trying to install the daemon manually, try the following two commands:</p>
+<p><code>sudo chown -R $(whoami) /usr/local/lib/node_modules</code></p>
+<p><code>npm install —global @mainframe/daemon</code></p>
+<h3><a class="anchor" aria-hidden="true" id="error-in-setupcommand-script-installing-node-causing-infinite-loop-and-other-node-related-installation-issues"></a><a href="#error-in-setupcommand-script-installing-node-causing-infinite-loop-and-other-node-related-installation-issues" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Error in Setup.command script installing Node causing infinite loop, and other node-related installation issues</h3>
+<pre><code class="hljs"><span class="hljs-attribute">Warning</span>: node<span class="hljs-variable">@10</span> <span class="hljs-number">10.15</span>.<span class="hljs-number">2</span> is already installed and up-to-date
+To reinstall <span class="hljs-number">10.15</span>.<span class="hljs-number">2</span>, run brew reinstall node<span class="hljs-variable">@10</span>
+Checking system dependencies...
+No local Node.js installations were found.
+Checking system dependencies...
+Installing Node.js...
+<span class="hljs-attribute">Warning</span>: node<span class="hljs-variable">@10</span> <span class="hljs-number">10.15</span>.<span class="hljs-number">2</span> is already installed and up-to-date
+</code></pre>
+<p>Run the following to assess your configuration:</p>
+<h5><a class="anchor" aria-hidden="true" id="homebrew"></a><a href="#homebrew" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Homebrew</h5>
+<p><code>which brew</code></p>
+<p>should have ouput similar to this:</p>
+<pre><code class="hljs"> Doug-Mainframe-MacBook-<span class="hljs-string">Pro:</span>Downloads doug$ which brew
+<span class="hljs-regexp">/usr/</span>local<span class="hljs-regexp">/bin/</span>brew
+</code></pre>
+<p>If you don't have brew installed, or want to try reinstalling, go to <a href="https://brew.sh">https://brew.sh</a> for install/uninstall instructions</p>
+<h5><a class="anchor" aria-hidden="true" id="node-npm"></a><a href="#node-npm" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Node &amp; NPM</h5>
+<p><code>node -v</code></p>
+<p>should have output similar to this:</p>
+<pre><code class="hljs">Doug-Ma<span class="hljs-literal">inf</span>rame-MacBook-Pro:Downloads doug$ <span class="hljs-keyword">node</span> <span class="hljs-title">-v</span>
+v11.<span class="hljs-number">14.0</span>
+</code></pre>
+<p>Other versions of Node greater than 10 are also acceptable.</p>
+<p><code>echo $(npm config get prefix)</code></p>
+<p>should have output similar to this:</p>
+<pre><code class="hljs"><span class="hljs-regexp">/Users/sarahwiley/</span>.<span class="hljs-built_in">npm</span>-<span class="hljs-built_in">global</span>
+</code></pre>
+<p>If you don't have Node or NPM, then you can try to get it from nodejs.org, or homebrew, or nvm.</p>
+<p>Make sure Node/NPM is in your path</p>
+<p><code>echo $PATH</code></p>
+<h5><a class="anchor" aria-hidden="true" id="python"></a><a href="#python" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Python</h5>
+<p><code>python --version</code></p>
+<p>should have output similar to this:</p>
+<pre><code class="hljs">Doug-Mainframe-MacBook-Pro:Downloads doug$ python --version
+Python <span class="hljs-number">2.7</span><span class="hljs-number">.10</span>
+</code></pre>
+<p>*Note: Mainframe OS installation does not work with Python version 3+. It must be version 2.x</p>
+<h3><a class="anchor" aria-hidden="true" id="xcode-error-when-installing-daemon"></a><a href="#xcode-error-when-installing-daemon" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Xcode error when installing daemon</h3>
+<p><img src="/docs/assets/xcodeerror.png" alt="xcode error"></p>
+<p>Install the latest version of MacOS Command Line tools.</p>
+<p><a href="https://developer.apple.com/download/more/">https://developer.apple.com/download/more/</a></p>
+</span></div></article></div><div class="docs-prevnext"></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#troubleshooting-installation-issues">Troubleshooting installation issues</a><ul class="toc-headings"><li><a href="#javascript-error-when-starting-mainframe-os">Javascript error when starting Mainframe OS</a></li><li><a href="#try-to-install-mainframe-daemon-manually">Try to install Mainframe daemon manually</a></li><li><a href="#setupcommand-script-asking-for-password">Setup.command script asking for password</a></li><li><a href="#permissions-error-when-installing-daemon">Permissions error when installing Daemon</a></li><li><a href="#error-in-setupcommand-script-installing-node-causing-infinite-loop-and-other-node-related-installation-issues">Error in Setup.command script installing Node causing infinite loop, and other node-related installation issues</a></li><li><a href="#xcode-error-when-installing-daemon">Xcode error when installing daemon</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/" class="nav-home"><img src="/img/MF_Symbol_Dark_BG.png" alt="Mainframe OS Documentation" width="66"/></a><div><h5>Docs</h5><a href="/docs/quick-start">Getting Started</a><a href="/docs/web3">Guidelines</a><a href="/docs/introduction">API Reference</a></div><div><h5>Community</h5><a href="https://gitter.im/MainframeHQ/Lobby" target="_blank" rel="noreferrer noopener">Gitter</a><a href="https://www.youtube.com/c/MainframeHQ">YouTube</a><a href="https://twitter.com/Mainframe_HQ" target="_blank" rel="noreferrer noopener">Twitter</a></div><div><h5>More</h5><a href="https://github.com/MainframeHQ">GitHub</a><a class="github-button" href="https://github.com/mainframehq/mainframe-os" data-icon="octicon-star" data-show-count="true" aria-label="Star mainframehq/mainframe-os on GitHub">Star</a></div></section><a href="https://www.mainframe.com/developers" target="_blank" rel="noreferrer noopener" class="fbOpenSource"><img src="/img/mainframe_dark.png" alt="Mainframe" width="170"/></a><section class="copyright">Copyright © 2019 Mainframe</section></footer></div></body></html>
