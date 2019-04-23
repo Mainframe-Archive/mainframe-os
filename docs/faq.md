@@ -41,7 +41,7 @@ There are seven “suggested apps” included currently in Mainframe OS.
 (winners of our recent Dapp Developer Bounties Challenge)
 - CDP Portal: the popular MakerDAO CDP dapp, ported to Mainframe OS
 - Uniswap: the popular exchange dapp, ported to Mainframe OS
-- The Looper: leverage your assets (based on Instadapp leverage functionality)
+- The Looper: leverage your assets (using Instadapps smart contracts)
 
 ## What makes Mainframe OS different?
 One of our primary goals is to simplify the end-user experience especially for users who don't already know how to or don't regularly use dapps in a browser environment. Yes, there is an extra step to have them install the Mainframe OS application first and then your dapp inside it. But we try to make that simple and a better experience for them than the current norm of using a browser plus wallet extension (like chrome & metamask). Plus users have a much more secure and private environment since all their data lives encrypted on their own machine, there are no connections to external endpoints without their explicit knowledge and permission, and only trusted dapps can be run in the sandboxed environment.
