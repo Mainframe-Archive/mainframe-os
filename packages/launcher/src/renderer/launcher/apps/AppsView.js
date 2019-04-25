@@ -299,7 +299,7 @@ class AppsView extends Component<Props, State> {
     const suggested = this.getSuggestedList(apps, this.state.suggestedApps)
 
     return (
-      <ScrollView className="testffafa">
+      <ScrollView>
         <Text variant={['appsTitle', 'blue', 'bold']}>Installed</Text>
         <AppsGrid>
           {installed}
