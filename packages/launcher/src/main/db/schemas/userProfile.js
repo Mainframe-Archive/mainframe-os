@@ -1,5 +1,7 @@
 // @flow
 
+import ethAddress from './ethAddress'
+
 export default {
   title: 'user profile',
   version: 0,
@@ -11,8 +13,6 @@ export default {
     avatar: {
       type: 'string',
     },
-    ethAddress: {
-      type: 'string', // hex
-    },
+    ethAddress,
   },
 }

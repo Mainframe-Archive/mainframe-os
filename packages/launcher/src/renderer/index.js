@@ -9,28 +9,34 @@ import '@morpheus-ui/fonts'
 import 'typeface-ibm-plex-mono'
 import './styles.css'
 
-import Launcher from './launcher/App.js'
+import Launcher from './launcher/Root.js'
 import AppContainer from './app/AppContainer.js'
 
-const callback = () => ipcRenderer.send('ready-window')
+const AppTypes = {
+  app: AppContainer,
+  launcher: Launcher,
+}
+
 const rootTag = document.getElementById('app')
-
-ipcRenderer.send('init-window')
-
 Modal.setAppElement(rootTag)
 
-ipcRenderer.on('start', (event, params) => {
-  if (params.type === 'launcher') {
-    AppRegistry.registerComponent('Launcher', () => Launcher)
-    AppRegistry.runApplication('Launcher', { rootTag, callback })
+ipcRenderer.on('window-start', (event, params) => {
+  const App = AppTypes[params.type]
+  if (App == null) {
+    ipcRenderer.send('window-exception', {
+      message: `Unknown app type: ${params.type}`,
+    })
   } else {
-    const App = () => (
-      <AppContainer
-        appSession={params.appSession}
-        partition={params.partition}
-      />
-    )
-    AppRegistry.registerComponent('App', () => App)
-    AppRegistry.runApplication('App', { rootTag, callback })
+    const props = params.initialProps || {}
+    const Root = () => <App {...props} />
+    AppRegistry.registerComponent('Root', () => Root)
+    AppRegistry.runApplication('Root', {
+      rootTag,
+      callback: () => {
+        ipcRenderer.send('window-ready')
+      },
+    })
   }
 })
+
+ipcRenderer.send('window-opened')

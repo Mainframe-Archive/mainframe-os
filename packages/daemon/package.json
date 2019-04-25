@@ -31,15 +31,15 @@
   },
   "dependencies": {
     "@babel/polyfill": "^7.4.0",
-    "@erebos/api-bzz-base": "^0.7.1",
+    "@erebos/api-bzz-base": "^0.7.2",
     "@erebos/api-bzz-node": "^0.7.0",
     "@erebos/api-pss": "^0.7.0",
     "@erebos/hex": "^0.7.0",
     "@erebos/keccak256": "^0.7.0",
     "@erebos/secp256k1": "^0.7.0",
     "@erebos/timeline": "^0.7.0",
-    "@ledgerhq/hw-app-eth": "^4.48.0",
-    "@ledgerhq/hw-transport-node-hid": "^4.48.0",
+    "@ledgerhq/hw-app-eth": "^4.54.0",
+    "@ledgerhq/hw-transport-node-hid": "^4.54.0",
     "@mainframe/app-manifest": "^0.3.0",
     "@mainframe/app-permissions": "^0.3.0",
     "@mainframe/client": "^0.3.0",
@@ -55,7 +55,7 @@
     "@mainframe/utils-crypto": "^0.4.0",
     "@mainframe/utils-hex": "^0.1.1",
     "@mainframe/utils-id": "^0.1.0",
-    "@oclif/command": "^1.5.12",
+    "@oclif/command": "^1.5.13",
     "@oclif/config": "^1.12.11",
     "@oclif/plugin-help": "^2.1.2",
     "bip39": "^2.5.0",
@@ -72,7 +72,7 @@
     "graphql-relay": "^0.6.0",
     "multibase": "^0.6.0",
     "oboe": "^2.1.4",
-    "rxjs": "^6.3.3",
+    "rxjs": "^6.5.1",
     "semver": "^6.0.0",
     "web3-utils": "^1.0.0-beta.36"
   },
@@ -80,6 +80,6 @@
     "@oclif/dev-cli": "^1.21.3",
     "babel-plugin-inline-json-import": "^0.3.2",
     "del-cli": "^1.1.0",
-    "flow-bin": "^0.95.1"
+    "flow-bin": "^0.97.0"
   }
 }

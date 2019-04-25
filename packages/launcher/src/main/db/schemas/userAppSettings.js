@@ -3,6 +3,7 @@
 import { COLLECTION_NAMES } from '../constants'
 
 import permissionsGrants from './appPermissionsGrants'
+import bzzHash from './bzzHash'
 
 // These settings should be shared by both own apps and installed ones
 
@@ -43,9 +44,7 @@ export default {
       type: 'string',
       final: true,
     },
-    storageFeedHash: {
-      type: 'string',
-    },
+    storageFeedHash: bzzHash,
     storageFeedKey: {
       type: 'string',
       final: true,

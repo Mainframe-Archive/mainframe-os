@@ -3,6 +3,7 @@
 import { COLLECTION_NAMES } from '../constants'
 
 import bidirectionalFeed from './bidirectionalFeed'
+import ethAddress from './ethAddress'
 import userProfile from './userProfile'
 
 const invite = {
@@ -18,11 +19,11 @@ const invite = {
       final: true,
     },
     fromAddress: {
-      type: 'string',
+      ...ethAddress,
       final: true,
     },
     toAddress: {
-      type: 'string',
+      ...ethAddress,
       final: true,
     },
     acceptedSignature: {

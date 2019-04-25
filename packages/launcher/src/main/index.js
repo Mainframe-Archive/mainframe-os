@@ -2,46 +2,92 @@
 
 import path from 'path'
 import url from 'url'
-import Client, { type VaultSettings } from '@mainframe/client'
-import { Environment, DaemonConfig, VaultConfig } from '@mainframe/config'
 import StreamRPC from '@mainframe/rpc-stream'
-import { startDaemon } from '@mainframe/toolbox'
 import { app, BrowserWindow, WebContents, ipcMain } from 'electron'
 import { is } from 'electron-util'
 
 import { APP_TRUSTED_REQUEST_CHANNEL } from '../constants'
 import type { AppSession } from '../types'
 
-import { AppContext, LauncherContext } from './contexts'
+import { AppContext } from './contexts'
 import { interceptWebRequests } from './permissions'
 import { registerStreamProtocol } from './storage'
 import createElectronTransport from './createElectronTransport'
-import createRPCChannels from './rpc/createChannels'
+import { createChannels } from './rpc'
+
+import { LauncherContext } from './context/launcher'
+import { SystemContext } from './context/system'
+import { Environment } from './environment'
+import { createLogger } from './logger'
 
 const PORT = process.env.ELECTRON_WEBPACK_WDS_PORT || ''
+const { MAINFRAME_ENV, NODE_ENV } = process.env
 
-const envType =
-  process.env.NODE_ENV === 'production' ? 'production' : 'development'
+const ENV_NAME = MAINFRAME_ENV || 'local-test'
+let ENV_TYPE = is.development ? 'development' : 'production'
+if (
+  NODE_ENV === 'development' ||
+  NODE_ENV === 'testing' ||
+  NODE_ENV === 'production'
+) {
+  ENV_TYPE = NODE_ENV
+}
 
-const envName = process.env.MAINFRAME_ENV || `v030-${envType}`
+const env = Environment.get(ENV_NAME, ENV_TYPE)
+const logger = createLogger(env)
+const systemContext = new SystemContext({ env, logger })
 
-// Get existing env or create with specified type
-const env = Environment.get(envName, envType)
+const launcherContexts: WeakMap<WebContents, LauncherContext> = new WeakMap()
+createChannels({
+  logger,
+  getAppSanboxedContext: (_contents: WebContents) => {
+    throw new Error('Must be implemented')
+  },
+  getAppTrustedContext: (_contents: WebContents) => {
+    throw new Error('Must be implemented')
+  },
+  getLauncherContext: (contents: WebContents) => {
+    const context = launcherContexts.get(contents)
+    if (context == null) {
+      throw new Error('Failed to retrieve launcher context')
+    }
+    return context
+  },
+})
 
-// eslint-disable-next-line no-console
-console.log(`using environment "${env.name}" (${env.type})`)
+let systemInitialized = false
+const initSystem = async () => {
+  logger.debug('Initialize system')
 
-const daemonConfig = new DaemonConfig(env)
-const vaultConfig = new VaultConfig(env)
+  if (systemContext.config.get('savePassword') === true) {
+    try {
+      const password = await systemContext.getPassword()
+      if (password == null) {
+        logger.warn('Context password not found even though it should be saved')
+      } else {
+        await systemContext.openDB(password)
+        logger.debug('Database opened using saved password')
+      }
+    } catch (error) {
+      logger.log({
+        level: 'error',
+        message: 'Failed to open database using saved password',
+        error,
+      })
+    }
+  } else {
+    logger.debug('No saved password to open database')
+  }
 
-let client
-let launcherWindow
+  systemInitialized = true
+  logger.debug('System initialized')
+}
 
-type AppContexts = { [appID: string]: { [userID: string]: AppContext } }
-
-const appContexts: AppContexts = {}
-const contextsBySandbox: WeakMap<WebContents, AppContext> = new WeakMap()
-const contextsByWindow: WeakMap<BrowserWindow, AppContext> = new WeakMap()
+// type AppContexts = { [appID: string]: { [userID: string]: AppContext } }
+//
+// const appContexts: AppContexts = {}
+// const contextsBySandbox: WeakMap<WebContents, AppContext> = new WeakMap()
+// const contextsByWindow: WeakMap<BrowserWindow, AppContext> = new WeakMap()
 
 const newWindow = (params: Object = {}) => {
   const window = new BrowserWindow({
@@ -64,187 +110,185 @@ const newWindow = (params: Object = {}) => {
     })
     window.loadURL(formattedUrl)
   }
+
   return window
 }
 
 // App Lifecycle
 
-const launchApp = async (
-  appSession: AppSession,
-  vaultSettings: VaultSettings,
-) => {
-  const appID = appSession.app.appID
-  const userID = appSession.user.id
-  const appOpen = appContexts[appID] && appContexts[appID][userID]
-  if (appOpen) {
-    const appWindow = appContexts[appID][userID].window
-    if (appWindow.isMinimized()) {
-      appWindow.restore()
-    }
-    appWindow.show()
-    appWindow.focus()
-    return
+// const launchApp = async (
+//   appSession: AppSession,
+//   // vaultSettings: VaultSettings,
+// ) => {
+//   const appID = appSession.app.appID
+//   const userID = appSession.user.id
+//   const appOpen = appContexts[appID] && appContexts[appID][userID]
+//   if (appOpen) {
+//     const appWindow = appContexts[appID][userID].window
+//     if (appWindow.isMinimized()) {
+//       appWindow.restore()
+//     }
+//     appWindow.show()
+//     appWindow.focus()
+//     return
+//   }
+//
+//   const appWindow = newWindow()
+//   if (appSession.isDev) {
+//     appWindow.webContents.on('did-attach-webview', () => {
+//       // Open a separate developer tools window for the app
+//       appWindow.webContents.executeJavaScript(
+//         `document.getElementById('sandbox-webview').openDevTools()`,
+//       )
+//     })
+//   }
+//   appWindow.on('closed', async () => {
+//     // await client.app.close({ sessID: appSession.session.sessID })
+//     const ctx = contextsByWindow.get(appWindow)
+//     if (ctx != null) {
+//       await ctx.clear()
+//       contextsByWindow.delete(appWindow)
+//     }
+//     delete appContexts[appID][userID]
+//   })
+//
+//   const appContext = new AppContext({
+//     appSession,
+//     trustedRPC: new StreamRPC(
+//       createElectronTransport(appWindow, APP_TRUSTED_REQUEST_CHANNEL),
+//     ),
+//     window: appWindow,
+//     // settings: vaultSettings,
+//   })
+//   contextsByWindow.set(appWindow, appContext)
+//
+//   appWindow.webContents.on('did-attach-webview', (event, webContents) => {
+//     webContents.on('destroyed', () => {
+//       contextsBySandbox.delete(webContents)
+//       appContext.sandbox = null
+//     })
+//
+//     contextsBySandbox.set(webContents, appContext)
+//     appContext.sandbox = webContents
+//
+//     interceptWebRequests(appContext, webContents.session)
+//   })
+//
+//   if (appContexts[appID]) {
+//     appContexts[appID][userID] = appContext
+//   } else {
+//     // $FlowFixMe: can't assign ID type
+//     appContexts[appID] = { [userID]: appContext }
+//   }
+//
+//   appWindow.webContents.on('did-attach-webview', (event, webContents) => {
+//     // Open a separate developer tools window for the app
+//     appContext.sandbox = webContents
+//     registerStreamProtocol(appContext)
+//     if (is.development) {
+//       appWindow.webContents.executeJavaScript(
+//         `document.getElementById('sandbox-webview').openDevTools()`,
+//       )
+//     }
+//   })
+//
+//   appWindow.on('closed', async () => {
+//     // await client.app.close({ sessID: appSession.session.sessID })
+//     const ctx = contextsByWindow.get(appWindow)
+//     if (ctx != null) {
+//       await ctx.clear()
+//       contextsByWindow.delete(appWindow)
+//     }
+//     delete appContexts[appID][userID]
+//   })
+// }
+
+const createLauncherWindow = async (userID?: string) => {
+  if (systemInitialized === false) {
+    await initSystem()
   }
 
-  const appWindow = newWindow()
-  if (appSession.isDev) {
-    appWindow.webContents.on('did-attach-webview', () => {
-      // Open a separate developer tools window for the app
-      appWindow.webContents.executeJavaScript(
-        `document.getElementById('sandbox-webview').openDevTools()`,
-      )
-    })
-  }
-  appWindow.on('closed', async () => {
-    await client.app.close({ sessID: appSession.session.sessID })
-    const ctx = contextsByWindow.get(appWindow)
-    if (ctx != null) {
-      await ctx.clear()
-      contextsByWindow.delete(appWindow)
-    }
-    delete appContexts[appID][userID]
-  })
-
-  const appContext = new AppContext({
-    appSession,
-    client,
-    trustedRPC: new StreamRPC(
-      createElectronTransport(appWindow, APP_TRUSTED_REQUEST_CHANNEL),
-    ),
-    window: appWindow,
-    settings: vaultSettings,
-  })
-  contextsByWindow.set(appWindow, appContext)
-
-  appWindow.webContents.on('did-attach-webview', (event, webContents) => {
-    webContents.on('destroyed', () => {
-      contextsBySandbox.delete(webContents)
-      appContext.sandbox = null
-    })
-
-    contextsBySandbox.set(webContents, appContext)
-    appContext.sandbox = webContents
-
-    interceptWebRequests(appContext, webContents.session)
-  })
-
-  if (appContexts[appID]) {
-    appContexts[appID][userID] = appContext
-  } else {
-    // $FlowFixMe: can't assign ID type
-    appContexts[appID] = { [userID]: appContext }
+  if (userID == null) {
+    userID = systemContext.config.get('defaultUser', null)
   }
 
-  appWindow.webContents.on('did-attach-webview', (event, webContents) => {
-    // Open a separate developer tools window for the app
-    appContext.sandbox = webContents
-    registerStreamProtocol(appContext)
-    if (is.development) {
-      appWindow.webContents.executeJavaScript(
-        `document.getElementById('sandbox-webview').openDevTools()`,
-      )
-    }
-  })
-
-  appWindow.on('closed', async () => {
-    await client.app.close({ sessID: appSession.session.sessID })
-    const ctx = contextsByWindow.get(appWindow)
-    if (ctx != null) {
-      await ctx.clear()
-      contextsByWindow.delete(appWindow)
-    }
-    delete appContexts[appID][userID]
-  })
-}
-
-// TODO: proper setup, this is just temporary logic to simplify development flow
-const setupClient = async () => {
-  // /!\ Temporary only, should be handled by toolbox with installation flow
-  if (daemonConfig.binPath == null) {
-    daemonConfig.binPath = path.resolve(__dirname, '../../../daemon/bin/run')
-  }
-  if (daemonConfig.runStatus !== 'running') {
-    daemonConfig.runStatus = 'stopped'
-  }
-
-  await startDaemon(daemonConfig, true)
-  daemonConfig.runStatus = 'running'
-  client = new Client(daemonConfig.socketPath)
-
-  // Simple check for API call, not proper versioning logic
-  const version = await client.apiVersion()
-  if (version !== 0.1) {
-    throw new Error('Unexpected API version')
-  }
-}
-
-const createLauncherWindow = async () => {
-  await setupClient()
-
-  launcherWindow = newWindow({
+  const launcherWindow = newWindow({
     width: 900,
     height: 600,
     minWidth: 900,
     minHeight: 600,
   })
-
   const launcherContext = new LauncherContext({
-    client,
-    launchApp,
-    vaultConfig,
+    system: systemContext,
+    userID,
     window: launcherWindow,
   })
-  createRPCChannels(launcherContext, contextsBySandbox, contextsByWindow)
+  launcherContexts.set(launcherWindow.webContents, launcherContext)
 
   // Emitted when the window is closed.
   launcherWindow.on('closed', async () => {
-    // TODO: fix below to not error on close
-    // const keys = Object.keys(appWindows)
-    // Object.keys(appWindows).forEach(w => {
-    //   appWindows[w].close()
-    // })
-    launcherWindow = null
-    await launcherContext.clear()
+    // launcherWindow = null
+    // await launcherContext.clear()
   })
 }
 
-app.on('ready', createLauncherWindow)
+app.on('ready', () => {
+  createLauncherWindow()
+})
 
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit()
-  }
+  app.quit()
 })
 
 app.on('activate', () => {
-  // On macOS it's common to re-create a window in the app when the
-  // dock icon is clicked and there are no other windows open.
-  if (launcherWindow === null) {
-    createLauncherWindow()
-  }
+  // TODO: focus on most relevant window
 })
 
 // Window lifecycle events
 
-ipcMain.on('init-window', event => {
-  const window = BrowserWindow.fromWebContents(event.sender)
-  if (window === launcherWindow) {
-    window.webContents.send('start', { type: 'launcher' })
-  } else {
-    const appContext = contextsByWindow.get(window)
-    if (appContext != null) {
-      window.webContents.send('start', {
-        type: 'app',
-        appSession: appContext.appSession,
-        partition: `persist:${appContext.appSession.app.appID}/${
-          appContext.appSession.user.id
-        }`,
-      })
-    }
-  }
+ipcMain.on('window-exception', (event, error) => {
+  // TODO: use the right context logger for better trace
+  logger.error(`Window exception: ${error.message}`)
 })
 
-ipcMain.on('ready-window', event => {
+ipcMain.on('window-opened', event => {
+  const launcherContext = launcherContexts.get(event.sender)
+  if (launcherContext != null) {
+    let db = null
+    if (launcherContext.system.db != null) {
+      db = 'opened'
+    } else if (launcherContext.config.get('dbCreated', false)) {
+      db = 'created'
+    }
+    event.sender.send('window-start', {
+      type: 'launcher',
+      initialProps: {
+        db,
+        userID: launcherContext.userID,
+      },
+    })
+  }
+
+  // TODO: handle apps
+
+  // const window = BrowserWindow.fromWebContents(event.sender)
+  // if (window === launcherWindow) {
+  //   window.webContents.send('start', { type: 'launcher' })
+  // } else {
+  //   const appContext = contextsByWindow.get(window)
+  //   if (appContext != null) {
+  //     window.webContents.send('start', {
+  //       type: 'app',
+  //       appSession: appContext.appSession,
+  //       partition: `persist:${appContext.appSession.app.appID}/${
+  //         appContext.appSession.user.id
+  //       }`,
+  //     })
+  //   }
+  // }
+})
+
+ipcMain.on('window-ready', event => {
   BrowserWindow.fromWebContents(event.sender).show()
 })

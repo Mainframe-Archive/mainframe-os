@@ -1,5 +1,7 @@
 // @flow
 
+import bzzHash from './bzzHash'
+
 export default {
   title: 'own Swarm feed',
   version: 0,
@@ -14,8 +16,6 @@ export default {
       type: 'string',
       final: true,
     },
-    feedHash: {
-      type: 'string',
-    },
+    feedHash: bzzHash,
   },
 }

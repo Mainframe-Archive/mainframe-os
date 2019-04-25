@@ -2,6 +2,9 @@
 
 import { COLLECTION_NAMES } from '../constants'
 
+import bzzHash from './bzzHash'
+import ethAddress from './ethAddress'
+
 export default {
   title: 'contact request',
   version: 0,
@@ -20,15 +23,15 @@ export default {
       final: true,
     },
     privateFeed: {
-      type: 'string',
+      ...bzzHash,
       final: true,
     },
     receivedAddress: {
-      type: 'string',
+      ...ethAddress,
       final: true,
     },
     senderAddress: {
-      type: 'string',
+      ...ethAddress,
       final: true,
     },
     rejectedTXHash: {

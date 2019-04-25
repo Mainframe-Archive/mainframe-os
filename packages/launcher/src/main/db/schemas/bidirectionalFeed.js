@@ -1,5 +1,6 @@
 // @flow
 
+import bzzHash from './bzzHash'
 import ownFeed from './ownFeed'
 
 export default {
@@ -12,8 +13,6 @@ export default {
     localFeedData: {
       type: 'string', // JSON-stringified object
     },
-    remoteFeed: {
-      type: 'string', // Swarm hash
-    },
+    remoteFeed: bzzHash,
   },
 }

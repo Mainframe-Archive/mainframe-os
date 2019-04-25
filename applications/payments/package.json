@@ -13,7 +13,7 @@
     "web3": "1.0.0-beta.36"
   },
   "devDependencies": {
-    "flow-bin": "^0.95.1"
+    "flow-bin": "^0.97.0"
   },
   "scripts": {
     "start": "react-scripts start",

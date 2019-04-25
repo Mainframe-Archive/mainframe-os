@@ -5,6 +5,8 @@ export const COLLECTION_NAMES = {
   APP_VERSIONS: 'app_versions',
   CONTACTS: 'contacts',
   CONTACT_REQUESTS: 'contact_requests',
+  ETH_WALLETS_HD: 'eth_wallets_hd',
+  ETH_WALLETS_LEDGER: 'eth_wallets_ledger',
   OWN_APPS: 'own_app',
   OWN_DEVELOPERS: 'own_developers',
   PEERS: 'peers',

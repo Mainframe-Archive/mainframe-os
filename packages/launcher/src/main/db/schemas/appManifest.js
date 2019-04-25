@@ -1,6 +1,7 @@
 // @flow
 
 import permissionsRequirements from './appPermissionsRequirements'
+import bzzHash from './bzzHash'
 
 export default {
   title: 'application manifest',
@@ -31,11 +32,9 @@ export default {
     version: {
       type: 'string', // semver
     },
-    contentsHash: {
-      type: 'string',
-    },
+    contentsHash: bzzHash,
     updateHash: {
-      type: 'string',
+      ...bzzHash,
       final: true,
     },
     permissions: permissionsRequirements,
