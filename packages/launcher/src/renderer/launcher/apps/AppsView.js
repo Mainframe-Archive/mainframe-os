@@ -33,6 +33,7 @@ const SUGGESTED_APPS_URL =
 
 const Container = styled.View`
   padding: 40px 50px 20px 50px;
+  flex: 1;
 `
 
 const Header = styled.View`
@@ -298,7 +299,7 @@ class AppsView extends Component<Props, State> {
     const suggested = this.getSuggestedList(apps, this.state.suggestedApps)
 
     return (
-      <ScrollView>
+      <ScrollView className="testffafa">
         <Text variant={['appsTitle', 'blue', 'bold']}>Installed</Text>
         <AppsGrid>
           {installed}
