@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+NVM_EXISTS=false
 NODE_EXISTS=false
 BREW_EXISTS=false
 DAEMON_EXISTS=false
@@ -15,6 +16,16 @@ checkNode() {
     else
         echo "No local Node.js installations were found."
         NODE_EXISTS=false
+    fi
+}
+
+checkNVM() {
+    dependencies;
+    if hash nvm 2>/dev/null; then
+        NVM_EXISTS=true
+    else
+        echo "No node version manager (NVM) installations were found."
+        NVM_EXISTS=false
     fi
 }
 
@@ -46,13 +57,31 @@ installBrew() {
 
 installNode() {
     echo "Installing Node.js...";
-    brew install node@10
+    #brew install node@10
+    nvm install 10
+}
+
+installNVM() {
+    echo "Installing NVM...";
+    # check for git prompt for xcode tools install
+    curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.34.0/install.sh | bash
+
+    export NVM_DIR="$HOME/.nvm"
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # this loads nvm
+
 }
 
 installDaemon() {
     echo "Installing the Mainframe Daemon...";
-    npm install --global @mainframe/daemon
-    npm update --global @mainframe/daemon
+
+    if [ $NVM_EXISTS == true ]; then
+        nvm exec 10 npm install --global @mainframe/daemon
+        nvm exec 10 npm update --global @mainframe/daemon
+    else
+        npm install --global @mainframe/daemon
+        npm update --global @mainframe/daemon
+    fi
+
 }
 
 main() {
@@ -78,12 +107,12 @@ main() {
             exit 0;
        fi
     else
-        checkBrew;
-        if [ $BREW_EXISTS == true ]; then
+        checkNVM;
+        if [ $NVM_EXISTS == true ]; then
             installNode;
             main;
         else
-            installBrew;
+            installNVM;
             main;
         fi
     fi
