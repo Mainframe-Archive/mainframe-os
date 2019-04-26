@@ -35,10 +35,6 @@ jobs:
           name: Setup test env
           command: './packages/cli/bin/run env:create -n v030-production -t testing -d && ./packages/cli/bin/run daemon:setup --bin-path=./packages/daemon/bin/run'
       - run:
-          name: Start test daemon
-          command: ./packages/cli/bin/run daemon:start
-          background: true
-      - run:
           name: Integration tests
           command: cd ./packages/launcher && yarn run dist:ci && yarn run test
       - store_test_results:

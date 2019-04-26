@@ -73,6 +73,14 @@ export default class EthereumProvider extends EventEmitter {
           )
         }
         break
+      case 'eth_sign':
+        if (this._ethClient.walletProvider) {
+          response = await this._ethClient.walletProvider.sign({
+            address: params[0],
+            data: params[1],
+          })
+        }
+        break
       default:
         response = await this._ethClient.send(method, params)
     }

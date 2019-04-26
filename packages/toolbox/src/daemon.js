@@ -4,12 +4,32 @@ import { spawn, type ChildProcess } from 'child_process'
 import type { DaemonConfig } from '@mainframe/config'
 import execa from 'execa'
 
+import { onDataMatch } from './utils'
+
 const execStartDaemon = (
   binPath: string,
   envName: string,
   detached: boolean = false,
-): ChildProcess => {
-  return spawn(binPath, ['start', `--env=${envName}`], { detached })
+): Promise<ChildProcess> => {
+  return new Promise((resolve, reject) => {
+    const proc = spawn(binPath, ['start', `--env=${envName}`], { detached })
+    const stopOut = onDataMatch(
+      proc.stdout,
+      `${envName} server started`,
+      () => {
+        stopOut()
+        resolve(proc)
+      },
+    )
+    const stopErr = onDataMatch(
+      proc.stderr,
+      `${envName} server failed to start`,
+      () => {
+        stopErr()
+        reject(new Error('Server failed to start'))
+      },
+    )
+  })
 }
 
 const execStopDaemon = (binPath: string, envName: string) => {
@@ -64,7 +84,7 @@ export const startDaemon = async (
     case 'stopped':
       // Return the child process as provided by execa
       cfg.runStatus = 'starting'
-      return execStartDaemon(cfg.binPath, cfg.env.name, detached)
+      return await execStartDaemon(cfg.binPath, cfg.env.name, detached)
     default:
       throw new Error(`Unhandled daemon status: ${status}`)
   }
@@ -101,7 +121,7 @@ export const stopDaemon = async (cfg: DaemonConfig): Promise<?ChildProcess> => {
     // eslint-disable-next-line no-fallthrough
     case 'running':
       // Return the child process as provided by execa
-      cfg.runStatus = 'stopping'
+      cfg.runStatus = 'stopped'
       return execStopDaemon(cfg.binPath, cfg.env.name)
     default:
       throw new Error(`Unhandled daemon status: ${status}`)

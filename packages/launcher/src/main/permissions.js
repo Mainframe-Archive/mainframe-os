@@ -101,7 +101,11 @@ export const isGranted = async (
   const permissions = ctx.appSession.session.permissions.session
   let granted = checkPermission(permissions, key)
   // Always request permission for transaction signing
-  if (granted === 'not_set' || key === 'BLOCKCHAIN_SEND') {
+  if (
+    granted === 'not_set' ||
+    key === 'BLOCKCHAIN_SEND' ||
+    key === 'BLOCKCHAIN_SIGN'
+  ) {
     const askParams = { [key]: params }
     const res = await ctx.trustedRPC.request('user_request', {
       key,

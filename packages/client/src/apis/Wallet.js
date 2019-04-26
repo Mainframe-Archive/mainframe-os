@@ -64,7 +64,7 @@ export default class WalletAPIs extends ClientAPIs {
   }
 
   async sign(params: WalletEthSignParams): Promise<WalletSignResult> {
-    return this._rpc.request('wallet_signEth', params)
+    return this._rpc.request('wallet_signEthData', params)
   }
 
   async getLedgerEthAccounts(params: { pageNum: number }) {

@@ -192,6 +192,19 @@ await sdk.payments.sendMFT(params)
 
 ```
 
+### ethereum.sign(message: string, address: string)
+
+Sign a message with a users Ethereum wallet.
+
+**returns:** Promise<string>
+
+**Example:**
+
+```
+const signedMsg = await sdk.ethereum.sign('hello', '0xcf8d1238198ad8b389666574f2d8bc411a4b39b6')
+
+```
+
 ## Payments
 
 Payment API's to facilitate transferring funds between users.
