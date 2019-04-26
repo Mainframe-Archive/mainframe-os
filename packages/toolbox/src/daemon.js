@@ -73,8 +73,6 @@ export const startDaemon = async (
   switch (status) {
     case 'running':
       // OK, return without the process as it's been created elsewhere
-      await stopDaemon(cfg)
-      startDaemon(cfg)
       return
     case 'starting':
       // Already being started by another process, just need to wait for it

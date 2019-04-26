@@ -14,25 +14,6 @@
     "icon": "./build/icon.png",
     "target": ["dmg", "dir"]
   },
-  "dmg": {
-    "contents": [
-      {
-        "x": "275",
-        "y": "310"
-      },
-      {
-        "type": "file",
-        "path": "build/pkg-scripts/Setup.command",
-        "x": "275",
-        "y": "160"
-      },
-      {
-        "type": "link",
-        "path": "/Applications",
-        "x": "490",
-        "y": "310"
-      }]
-  },
   "win": {
     "icon": "./build/icon.png",
     "target": "nsis"
