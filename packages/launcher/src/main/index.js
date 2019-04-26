@@ -5,9 +5,12 @@ import url from 'url'
 import Client, { type VaultSettings } from '@mainframe/client'
 import { Environment, DaemonConfig, VaultConfig } from '@mainframe/config'
 import StreamRPC from '@mainframe/rpc-stream'
-import { setupDaemon, startDaemon, stopDaemon } from '@mainframe/toolbox'
 import { app, BrowserWindow, WebContents, ipcMain, Menu } from 'electron'
 import { is } from 'electron-util'
+import {
+  startServer as startDaemon,
+  stopServer as stopDaemon,
+} from '@mainframe/daemon'
 
 import { APP_TRUSTED_REQUEST_CHANNEL } from '../constants'
 import type { AppSession } from '../types'
@@ -19,10 +22,6 @@ import createElectronTransport from './createElectronTransport'
 import createRPCChannels from './rpc/createChannels'
 
 const PORT = process.env.ELECTRON_WEBPACK_WDS_PORT || ''
-
-const DAEMON_BIN_PATH = is.development
-  ? path.resolve(__dirname, '../../../daemon/bin/run')
-  : `mainframed`
 
 const envType =
   process.env.NODE_ENV === 'production' ? 'production' : 'development'
@@ -38,7 +37,7 @@ const vaultConfig = new VaultConfig(env)
 
 let client
 let launcherWindow
-let daemonProc
+let localDaemon = false
 
 type AppContexts = { [appID: string]: { [userID: string]: AppContext } }
 
@@ -252,19 +251,18 @@ const setupClient = async () => {
     fixPath()
   }
 
-  if (daemonConfig.binPath == null) {
-    // Setup daemon
-    await setupDaemon(daemonConfig, {
-      binPath: DAEMON_BIN_PATH,
-      socketPath: env.createSocketPath('mainframe.ipc'),
-    })
+  if (envType === 'production') {
+    daemonConfig.runStatus = 'stopped'
+    await stopDaemon(env.name)
   }
 
   // Start daemon and connect local client to it
   if (daemonConfig.runStatus !== 'running') {
     daemonConfig.runStatus = 'stopped'
+    await startDaemon(env.name)
+    localDaemon = true
   }
-  daemonProc = await startDaemon(daemonConfig)
+
   daemonConfig.runStatus = 'running'
   client = new Client(daemonConfig.socketPath)
 
@@ -308,12 +306,9 @@ const createLauncherWindow = async () => {
   })
 }
 
-const shutdown = async () => {
+const shutdownDaemon = async () => {
   daemonConfig.runStatus = 'stopped'
-  await stopDaemon(daemonConfig)
-  if (daemonProc) {
-    daemonProc.kill()
-  }
+  await stopDaemon(env.name)
 }
 
 app.on('ready', createLauncherWindow)
@@ -333,7 +328,10 @@ app.on('activate', () => {
 
 app.on('will-quit', async event => {
   event.preventDefault()
-  await shutdown()
+  client.close()
+  if (localDaemon) {
+    await shutdownDaemon()
+  }
   app.exit()
 })
 
