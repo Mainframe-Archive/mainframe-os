@@ -12,10 +12,10 @@ import type { FragmentReference } from "relay-runtime";
 declare export opaque type WalletsView_wallets$ref: FragmentReference;
 export type WalletsView_wallets = {|
   +ethWallets: {|
-    +hd: ?$ReadOnlyArray<?{|
+    +hd: $ReadOnlyArray<{|
+      +name: ?string,
       +localID: string,
       +accounts: ?$ReadOnlyArray<?{|
-        +name: string,
         +address: string,
         +balances: {|
           +eth: string,
@@ -23,10 +23,10 @@ export type WalletsView_wallets = {|
         |},
       |}>,
     |}>,
-    +ledger: ?$ReadOnlyArray<?{|
+    +ledger: $ReadOnlyArray<{|
+      +name: ?string,
       +localID: string,
       +accounts: ?$ReadOnlyArray<?{|
-        +name: string,
         +address: string,
         +balances: {|
           +eth: string,
@@ -45,6 +45,13 @@ var v0 = [
   {
     "kind": "ScalarField",
     "alias": null,
+    "name": "name",
+    "args": null,
+    "storageKey": null
+  },
+  {
+    "kind": "ScalarField",
+    "alias": null,
     "name": "localID",
     "args": null,
     "storageKey": null
@@ -55,16 +62,9 @@ var v0 = [
     "name": "accounts",
     "storageKey": null,
     "args": null,
-    "concreteType": "NamedWalletAccountType",
+    "concreteType": "WalletAccount",
     "plural": true,
     "selections": [
-      {
-        "kind": "ScalarField",
-        "alias": null,
-        "name": "name",
-        "args": null,
-        "storageKey": null
-      },
       {
         "kind": "ScalarField",
         "alias": null,
@@ -78,7 +78,7 @@ var v0 = [
         "name": "balances",
         "storageKey": null,
         "args": null,
-        "concreteType": "WalletBalancesType",
+        "concreteType": "WalletBalances",
         "plural": false,
         "selections": [
           {
@@ -103,16 +103,30 @@ var v0 = [
 return {
   "kind": "Fragment",
   "name": "WalletsView_wallets",
-  "type": "WalletsQuery",
+  "type": "Wallets",
   "metadata": null,
-  "argumentDefinitions": [],
+  "argumentDefinitions": [
+    {
+      "kind": "LocalArgument",
+      "name": "userID",
+      "type": "String!",
+      "defaultValue": null
+    }
+  ],
   "selections": [
     {
       "kind": "LinkedField",
       "alias": null,
       "name": "ethWallets",
       "storageKey": null,
-      "args": null,
+      "args": [
+        {
+          "kind": "Variable",
+          "name": "userID",
+          "variableName": "userID",
+          "type": "String!"
+        }
+      ],
       "concreteType": "EthWallets",
       "plural": false,
       "selections": [
@@ -142,5 +156,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = 'bc876eb24451446e5a461af50bba6444';
+(node/*: any*/).hash = '1ef7545c89dbbf5725d77d85d9f6ddce';
 module.exports = node;

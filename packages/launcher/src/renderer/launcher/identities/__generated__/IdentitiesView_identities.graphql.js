@@ -8,24 +8,22 @@
 
 /*::
 import type { ConcreteFragment } from 'relay-runtime';
+type IdentityEditModal_ownUserIdentity$ref = any;
 import type { FragmentReference } from "relay-runtime";
 declare export opaque type IdentitiesView_identities$ref: FragmentReference;
 export type IdentitiesView_identities = {|
-  +ownUsers: ?$ReadOnlyArray<?{|
+  +ownUsers: $ReadOnlyArray<{|
     +localID: string,
-    +profile: ?{|
+    +feedHash: ?string,
+    +profile: {|
       +name: string
     |},
-    +wallets: ?$ReadOnlyArray<?{|
-      +localID: string,
-      +accounts: ?$ReadOnlyArray<?string>,
-    |}>,
-    +apps: ?$ReadOnlyArray<?{|
+    +apps: $ReadOnlyArray<{|
       +localID: string,
       +manifest: {|
         +name: string
       |},
-      +users: ?$ReadOnlyArray<?{|
+      +users: $ReadOnlyArray<{|
         +settings: {|
           +permissionsSettings: {|
             +permissionsChecked: boolean,
@@ -36,10 +34,11 @@ export type IdentitiesView_identities = {|
         |}
       |}>,
     |}>,
+    +$fragmentRefs: IdentityEditModal_ownUserIdentity$ref,
   |}>,
-  +ownDevelopers: ?$ReadOnlyArray<?{|
+  +ownDevelopers: $ReadOnlyArray<{|
     +localID: string,
-    +profile: ?{|
+    +profile: {|
       +name: string
     |},
   |}>,
@@ -64,11 +63,21 @@ v1 = [
     "args": null,
     "storageKey": null
   }
-];
+],
+v2 = {
+  "kind": "LinkedField",
+  "alias": null,
+  "name": "profile",
+  "storageKey": null,
+  "args": null,
+  "concreteType": "NamedProfile",
+  "plural": false,
+  "selections": v1
+};
 return {
   "kind": "Fragment",
   "name": "IdentitiesView_identities",
-  "type": "IdentitiesQuery",
+  "type": "Identities",
   "metadata": null,
   "argumentDefinitions": [],
   "selections": [
@@ -81,36 +90,20 @@ return {
       "concreteType": "OwnUserIdentity",
       "plural": true,
       "selections": [
+        {
+          "kind": "FragmentSpread",
+          "name": "IdentityEditModal_ownUserIdentity",
+          "args": null
+        },
         v0,
         {
-          "kind": "LinkedField",
+          "kind": "ScalarField",
           "alias": null,
-          "name": "profile",
-          "storageKey": null,
+          "name": "feedHash",
           "args": null,
-          "concreteType": "OwnUserProfile",
-          "plural": false,
-          "selections": v1
+          "storageKey": null
         },
-        {
-          "kind": "LinkedField",
-          "alias": null,
-          "name": "wallets",
-          "storageKey": null,
-          "args": null,
-          "concreteType": "UserWalletType",
-          "plural": true,
-          "selections": [
-            v0,
-            {
-              "kind": "ScalarField",
-              "alias": null,
-              "name": "accounts",
-              "args": null,
-              "storageKey": null
-            }
-          ]
-        },
+        v2,
         {
           "kind": "LinkedField",
           "alias": null,
@@ -203,21 +196,12 @@ return {
       "plural": true,
       "selections": [
         v0,
-        {
-          "kind": "LinkedField",
-          "alias": null,
-          "name": "profile",
-          "storageKey": null,
-          "args": null,
-          "concreteType": "OwnDeveloperProfile",
-          "plural": false,
-          "selections": v1
-        }
+        v2
       ]
     }
   ]
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '3a588857335af2777dd4c7b0b3d7954b';
+(node/*: any*/).hash = '0f74049c86a42c875369196ede1862dc';
 module.exports = node;

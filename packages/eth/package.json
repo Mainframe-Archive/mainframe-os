@@ -1,0 +1,35 @@
+{
+  "name": "@mainframe/eth",
+  "description": "Mainframe Ethereum API and utilities",
+  "version": "0.3.2",
+  "author": "Mainframe",
+  "license": "MIT",
+  "main": "cjs/index.js",
+  "files": [
+    "cjs/*",
+    "dist/*"
+  ],
+  "scripts": {
+    "clean": "del-cli cjs dist",
+    "webpack": "webpack",
+    "build:dist": "cross-env BABEL_ENV=browser-esm npm run webpack",
+    "build:cjs": "cross-env BABEL_ENV=browser-cjs babel src --out-dir cjs",
+    "build:flow": "flow-copy-source src cjs",
+    "build": "npm run clean && npm run build:dist && npm run build:cjs && npm run build:flow",
+    "test:types": "flow check"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.4.2",
+    "@mainframe/rpc-stream": "^0.3.0",
+    "ethers": "^4.0.27",
+    "web3-eth-abi": "^1.0.0-beta.52",
+    "web3-providers": "^1.0.0-beta.48",
+    "web3-utils": "^1.0.0-beta.36"
+  },
+  "devDependencies": {
+    "babel-loader": "^8.0.0",
+    "flow-bin": "^0.95.1",
+    "webpack": "^4.29.6",
+    "webpack-cli": "^3.3.0"
+  }
+}

@@ -2,9 +2,10 @@
 
 import * as app from './app'
 import * as blockchain from './blockchain'
+import * as comms from './comms'
+import * as contact from './contact'
 import * as graphql from './graphql'
 import * as identity from './identity'
-import * as pss from './pss'
 import * as sub from './subscription'
 import * as vault from './vault'
 import * as wallet from './wallet'
@@ -16,48 +17,61 @@ export default {
 
   app_checkPermission: app.checkPermission,
   app_close: app.close,
-  app_install: app.install,
-  app_remove: app.remove,
-  app_open: app.open,
+  app_create: app.create,
   app_getAll: app.getAll,
+  app_getManifestData: app.getManifestData,
+  app_install: app.install,
+  app_loadManifest: app.loadManifest,
+  app_open: app.open,
+  app_publish: app.publish,
+  app_remove: app.remove,
   app_setPermission: app.setPermission,
+  app_setPermissionsRequirements: app.setPermissionsRequirements,
+  app_setUserDefaultWallet: app.setUserDefaultWallet,
   app_setUserPermissionsSettings: app.setUserPermissionsSettings,
-  app_setUserSettings: app.setUserSettings,
+  app_setFeedHash: app.setFeedHash,
   // TODO: remove app for given user only
   // Options:
   // - "clear": removes app contents, only possible if there is no user left for app
   // - "remove": clear + also removes manifest, no more knowledge about this app in vault
   app_uninstall: noop,
   app_update: noop, // TODO: similar to install
-  app_create: app.create,
-  app_getManifestData: app.getManifestData,
-  app_setPermissionsRequirements: app.setPermissionsRequirements,
-  app_publishContents: app.publishContents,
-  app_writeManifest: app.writeManifest,
 
-  blockchain_web3Send: blockchain.web3Send,
+  blockchain_ethSend: blockchain.ethSend,
+  blockchain_ethSubscribe: blockchain.ethSubscribe,
+  blockchain_ethUnsubscribe: blockchain.ethUnsubscribe,
+  blockchain_getInviteTXDetails: blockchain.getInviteTXDetails,
+  blockchain_sendInviteApprovalTX: blockchain.sendInviteApprovalTX,
+  blockchain_sendWithdrawInviteTX: blockchain.sendWithdrawInviteTX,
+  blockchain_sendInviteTX: blockchain.sendInviteTX,
+  blockchain_sendDeclineInviteTX: blockchain.sendDeclineInviteTX,
+  blockchain_subEthNetworkChanged: blockchain.subEthNetworkChanged,
+
+  comms_publish: comms.publish,
+  comms_subscribe: comms.subscribe,
+  comms_getSubscribable: comms.getSubscribable,
+
+  contact_approveContacts: contact.approveContactsForApp,
+  contact_getAppApprovedContacts: contact.getAppApprovedContacts,
+  contact_getAppUserContacts: contact.getAppUserContacts,
+  contact_getUserContacts: contact.getUserContacts,
 
   graphql_query: graphql.query,
+  graphql_subscription: graphql.subscription,
 
   identity_addPeer: identity.addPeer,
   identity_addPeerByFeed: identity.addPeerByFeed,
+  identity_createContactFromFeed: identity.createContactFromFeed,
+  identity_createContactFromPeer: identity.createContactFromPeer,
   identity_createUser: identity.createUser,
   identity_createDeveloper: identity.createDeveloper,
   identity_deleteContact: identity.deleteContact,
   identity_getOwnUsers: identity.getOwnUsers,
   identity_getOwnDevelopers: identity.getOwnDevelopers,
   identity_getPeers: identity.getPeers,
+  identity_updateUser: identity.updateUser,
   identity_linkEthWallet: identity.linkEthWallet,
   identity_unlinkEthWallet: identity.unlinkEthWallet,
-  identity_getUserContacts: identity.getUserContacts,
-
-  // Temporary PSS APIs - should be removed when communication APIs are settled
-  pss_baseAddr: pss.baseAddr,
-  pss_createTopicSubscription: pss.createTopicSubscription,
-  pss_getPublicKey: pss.getPublicKey,
-  pss_sendAsym: pss.sendAsym,
-  pss_setPeerPublicKey: pss.setPeerPublicKey,
-  pss_stringToTopic: pss.stringToTopic,
 
   sub_unsubscribe: sub.unsubscribe,
 
@@ -70,8 +84,12 @@ export default {
   wallet_importMnemonic: wallet.importMnemonic,
   wallet_addHDAccount: wallet.addHDAccount,
   wallet_delete: wallet.deleteWallet,
-  wallet_getEthWallets: wallet.getEthWallets,
+  wallet_getUserEthWallets: wallet.getUserEthWallets,
+  wallet_getUserEthAccounts: wallet.getUserEthAccounts,
   wallet_ledgerGetEthAccounts: wallet.getLedgerEthAccounts,
-  wallet_ledgerAddEthAccount: wallet.addLedgerEthAccount,
-  wallet_signTx: wallet.signTransaction,
+  wallet_ledgerAddEthAccounts: wallet.addLedgerEthAccounts,
+  wallet_setUserDefault: wallet.setUsersDefaultWallet,
+  wallet_signEthData: wallet.sign,
+  wallet_signEthTx: wallet.signTransaction,
+  wallet_subEthAccountsChanged: wallet.subEthAccountsChanged,
 }

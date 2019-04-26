@@ -26,9 +26,10 @@ export const webHostCheck = function(value: string) {
 }
 
 export const PERMISSION_KEYS_BOOLEAN = [
-  'SWARM_DOWNLOAD',
-  'SWARM_UPLOAD',
   'BLOCKCHAIN_SEND',
+  'BLOCKCHAIN_SIGN',
+  'CONTACTS_READ',
+  'COMMS_CONTACT',
 ]
 
 export const PERMISSION_KEYS = [...PERMISSION_KEYS_BOOLEAN, 'WEB_REQUEST']

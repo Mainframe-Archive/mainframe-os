@@ -4,29 +4,28 @@ import type { Socket } from 'net'
 import { inspect } from 'util'
 import { MANIFEST_SCHEMA_MESSAGES } from '@mainframe/app-manifest'
 import type { Environment } from '@mainframe/config'
-import createHandler, {
-  parseJSON,
-  type IncomingMessage, // eslint-disable-line import/named
-} from '@mainframe/rpc-handler'
+import { parseError } from '@mainframe/rpc-error'
+import createHandler, { type IncomingMessage } from '@mainframe/rpc-handler'
 import { uniqueID } from '@mainframe/utils-id'
 import debug from 'debug'
+import oboe from 'oboe'
 
+import ClientContext from '../context/ClientContext'
 import type { VaultRegistry } from '../vault'
 
 import methods from './methods'
-import RequestContext from './RequestContext'
 
 export type NotifyFunc = (method: string, params: Object) => void
 
 const handleMessage = createHandler({
   methods,
-  onHandlerError: (ctx: RequestContext, msg: IncomingMessage, err: Error) => {
+  onHandlerError: (ctx: ClientContext, msg: IncomingMessage, err: Error) => {
     ctx.log('handler error', msg, err.stack)
   },
-  onInvalidMessage: (ctx: RequestContext, msg: IncomingMessage) => {
+  onInvalidMessage: (ctx: ClientContext, msg: IncomingMessage) => {
     ctx.log('invalid message', msg)
   },
-  onNotification: (ctx: RequestContext, msg: IncomingMessage) => {
+  onNotification: (ctx: ClientContext, msg: IncomingMessage) => {
     ctx.log('notification received', msg)
   },
   validatorOptions: {
@@ -52,7 +51,7 @@ export default (socket: Socket, env: Environment, vaults: VaultRegistry) => {
     sendJSON({ jsonrpc: '2.0', method, params })
   }
 
-  const context = new RequestContext({
+  const context = new ClientContext({
     log,
     env,
     notify: sendNotification,
@@ -60,21 +59,17 @@ export default (socket: Socket, env: Environment, vaults: VaultRegistry) => {
     vaults,
   })
 
-  socket.on('data', async (chunk: Buffer) => {
-    let msg
-    try {
-      msg = parseJSON(chunk.toString())
-    } catch (err) {
-      return sendJSON({ jsonrpc: '2.0', error: err.toObject() })
-    }
-
-    logJSON('==>', msg)
-
-    const reply = await handleMessage(context, msg)
-    if (reply != null) {
-      sendJSON(reply)
-    }
-  })
+  oboe(socket)
+    .on('done', async (value: IncomingMessage) => {
+      logJSON('==>', value)
+      const reply = await handleMessage(context, value)
+      if (reply != null) {
+        sendJSON(reply)
+      }
+    })
+    .on('fail', () => {
+      sendJSON({ jsonrpc: '2.0', error: parseError().toObject() })
+    })
 
   socket.on('end', async () => {
     log('disconnected')

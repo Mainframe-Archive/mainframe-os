@@ -1,8 +1,9 @@
 // @flow
 import React, { Component } from 'react'
-import { View, ActivityIndicator, StyleSheet } from 'react-native-web'
+import { View, StyleSheet } from 'react-native-web'
 
-import Text from '../UIComponents/Text'
+import { Text } from '@morpheus-ui/core'
+import Loader from '../UIComponents/Loader'
 
 type Props = {
   error?: string,
@@ -13,7 +14,7 @@ export default class RelayLoaderView extends Component<Props> {
     const content = this.props.error ? (
       <Text>{this.props.error}</Text>
     ) : (
-      <ActivityIndicator />
+      <Loader />
     )
     return <View style={styles.container}>{content}</View>
   }
@@ -21,9 +22,9 @@ export default class RelayLoaderView extends Component<Props> {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    padding: 40,
     alignItems: 'center',
+    flex: 1,
     justifyContent: 'center',
+    padding: 40,
   },
 })

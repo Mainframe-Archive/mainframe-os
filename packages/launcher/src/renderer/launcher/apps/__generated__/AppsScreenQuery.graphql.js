@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 530c89f62f71e7f9ca210568161eb839
+ * @relayHash 5df864fcc2954fd28dee93bfa0acdd2b
  */
 
 /* eslint-disable */
@@ -35,51 +35,100 @@ query AppsScreenQuery {
   }
 }
 
-fragment AppsScreen_apps on AppsQuery {
+fragment AppsScreen_apps on Apps {
   ...AppsView_apps
 }
 
-fragment AppsView_apps on AppsQuery {
+fragment AppsView_apps on Apps {
   installed {
     ...AppItem_installedApp
-    id
-  }
-  own {
-    ...AppItem_ownApp
+    ...AppUpdateModal_app
+    localID
+    mfid
+    manifest {
+      permissions {
+        optional {
+          WEB_REQUEST
+          BLOCKCHAIN_SEND
+        }
+        required {
+          WEB_REQUEST
+          BLOCKCHAIN_SEND
+        }
+      }
+    }
+    name
+    users {
+      localID
+      identity {
+        profile {
+          name
+        }
+        id
+      }
+      settings {
+        permissionsSettings {
+          permissionsChecked
+          grants {
+            BLOCKCHAIN_SEND
+            WEB_REQUEST {
+              granted
+              denied
+            }
+          }
+        }
+      }
+      id
+    }
     id
   }
 }
 
 fragment AppItem_installedApp on App {
+  mfid
   localID
   name
+  installationState
   manifest {
-    permissions {
-      optional {
-        WEB_REQUEST
-        BLOCKCHAIN_SEND
-      }
-      required {
-        WEB_REQUEST
-        BLOCKCHAIN_SEND
-      }
-    }
     author {
       id
       name
     }
   }
+  update {
+    manifest {
+      version
+    }
+  }
+}
+
+fragment AppUpdateModal_app on App {
+  localID
+  mfid
+  name
+  manifest {
+    version
+  }
+  update {
+    manifest {
+      permissions {
+        optional {
+          WEB_REQUEST
+          BLOCKCHAIN_SEND
+        }
+        required {
+          WEB_REQUEST
+          BLOCKCHAIN_SEND
+        }
+      }
+      version
+    }
+    permissionsChanged
+  }
   users {
     localID
-    identity {
-      profile {
-        name
-      }
-      id
-    }
     settings {
       permissionsSettings {
-        permissionsChecked
         grants {
           BLOCKCHAIN_SEND
           WEB_REQUEST {
@@ -88,38 +137,6 @@ fragment AppItem_installedApp on App {
           }
         }
       }
-    }
-    id
-  }
-}
-
-fragment AppItem_ownApp on OwnApp {
-  localID
-  name
-  developer {
-    id
-    name
-  }
-  versions {
-    version
-    permissions {
-      optional {
-        WEB_REQUEST
-        BLOCKCHAIN_SEND
-      }
-      required {
-        WEB_REQUEST
-        BLOCKCHAIN_SEND
-      }
-    }
-  }
-  users {
-    localID
-    identity {
-      profile {
-        name
-      }
-      id
     }
     id
   }
@@ -144,11 +161,25 @@ v1 = {
 v2 = {
   "kind": "ScalarField",
   "alias": null,
+  "name": "id",
+  "args": null,
+  "storageKey": null
+},
+v3 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "version",
+  "args": null,
+  "storageKey": null
+},
+v4 = {
+  "kind": "ScalarField",
+  "alias": null,
   "name": "BLOCKCHAIN_SEND",
   "args": null,
   "storageKey": null
 },
-v3 = [
+v5 = [
   {
     "kind": "ScalarField",
     "alias": null,
@@ -156,9 +187,9 @@ v3 = [
     "args": null,
     "storageKey": null
   },
-  v2
+  v4
 ],
-v4 = {
+v6 = {
   "kind": "LinkedField",
   "alias": null,
   "name": "permissions",
@@ -175,7 +206,7 @@ v4 = {
       "args": null,
       "concreteType": "AppPermissionDefinitions",
       "plural": false,
-      "selections": v3
+      "selections": v5
     },
     {
       "kind": "LinkedField",
@@ -185,43 +216,8 @@ v4 = {
       "args": null,
       "concreteType": "AppPermissionDefinitions",
       "plural": false,
-      "selections": v3
+      "selections": v5
     }
-  ]
-},
-v5 = {
-  "kind": "ScalarField",
-  "alias": null,
-  "name": "id",
-  "args": null,
-  "storageKey": null
-},
-v6 = [
-  v5,
-  v1
-],
-v7 = {
-  "kind": "LinkedField",
-  "alias": null,
-  "name": "identity",
-  "storageKey": null,
-  "args": null,
-  "concreteType": "OwnUserIdentity",
-  "plural": false,
-  "selections": [
-    {
-      "kind": "LinkedField",
-      "alias": null,
-      "name": "profile",
-      "storageKey": null,
-      "args": null,
-      "concreteType": "OwnUserProfile",
-      "plural": false,
-      "selections": [
-        v1
-      ]
-    },
-    v5
   ]
 };
 return {
@@ -229,7 +225,7 @@ return {
   "operationKind": "query",
   "name": "AppsScreenQuery",
   "id": null,
-  "text": "query AppsScreenQuery {\n  viewer {\n    apps {\n      ...AppsScreen_apps\n    }\n    id\n  }\n}\n\nfragment AppsScreen_apps on AppsQuery {\n  ...AppsView_apps\n}\n\nfragment AppsView_apps on AppsQuery {\n  installed {\n    ...AppItem_installedApp\n    id\n  }\n  own {\n    ...AppItem_ownApp\n    id\n  }\n}\n\nfragment AppItem_installedApp on App {\n  localID\n  name\n  manifest {\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n    }\n    author {\n      id\n      name\n    }\n  }\n  users {\n    localID\n    identity {\n      profile {\n        name\n      }\n      id\n    }\n    settings {\n      permissionsSettings {\n        permissionsChecked\n        grants {\n          BLOCKCHAIN_SEND\n          WEB_REQUEST {\n            granted\n            denied\n          }\n        }\n      }\n    }\n    id\n  }\n}\n\nfragment AppItem_ownApp on OwnApp {\n  localID\n  name\n  developer {\n    id\n    name\n  }\n  versions {\n    version\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n      }\n    }\n  }\n  users {\n    localID\n    identity {\n      profile {\n        name\n      }\n      id\n    }\n    id\n  }\n}\n",
+  "text": "query AppsScreenQuery {\n  viewer {\n    apps {\n      ...AppsScreen_apps\n    }\n    id\n  }\n}\n\nfragment AppsScreen_apps on Apps {\n  ...AppsView_apps\n}\n\nfragment AppsView_apps on Apps {\n  installed {\n    ...AppItem_installedApp\n    ...AppUpdateModal_app\n    localID\n    mfid\n    manifest {\n      permissions {\n        optional {\n          WEB_REQUEST\n          BLOCKCHAIN_SEND\n        }\n        required {\n          WEB_REQUEST\n          BLOCKCHAIN_SEND\n        }\n      }\n    }\n    name\n    users {\n      localID\n      identity {\n        profile {\n          name\n        }\n        id\n      }\n      settings {\n        permissionsSettings {\n          permissionsChecked\n          grants {\n            BLOCKCHAIN_SEND\n            WEB_REQUEST {\n              granted\n              denied\n            }\n          }\n        }\n      }\n      id\n    }\n    id\n  }\n}\n\nfragment AppItem_installedApp on App {\n  mfid\n  localID\n  name\n  installationState\n  manifest {\n    author {\n      id\n      name\n    }\n  }\n  update {\n    manifest {\n      version\n    }\n  }\n}\n\nfragment AppUpdateModal_app on App {\n  localID\n  mfid\n  name\n  manifest {\n    version\n  }\n  update {\n    manifest {\n      permissions {\n        optional {\n          WEB_REQUEST\n          BLOCKCHAIN_SEND\n        }\n        required {\n          WEB_REQUEST\n          BLOCKCHAIN_SEND\n        }\n      }\n      version\n    }\n    permissionsChanged\n  }\n  users {\n    localID\n    settings {\n      permissionsSettings {\n        grants {\n          BLOCKCHAIN_SEND\n          WEB_REQUEST {\n            granted\n            denied\n          }\n        }\n      }\n    }\n    id\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -253,7 +249,7 @@ return {
             "name": "apps",
             "storageKey": null,
             "args": null,
-            "concreteType": "AppsQuery",
+            "concreteType": "Apps",
             "plural": false,
             "selections": [
               {
@@ -287,7 +283,7 @@ return {
             "name": "apps",
             "storageKey": null,
             "args": null,
-            "concreteType": "AppsQuery",
+            "concreteType": "Apps",
             "plural": false,
             "selections": [
               {
@@ -299,8 +295,22 @@ return {
                 "concreteType": "App",
                 "plural": true,
                 "selections": [
+                  {
+                    "kind": "ScalarField",
+                    "alias": null,
+                    "name": "mfid",
+                    "args": null,
+                    "storageKey": null
+                  },
                   v0,
                   v1,
+                  {
+                    "kind": "ScalarField",
+                    "alias": null,
+                    "name": "installationState",
+                    "args": null,
+                    "storageKey": null
+                  },
                   {
                     "kind": "LinkedField",
                     "alias": null,
@@ -310,7 +320,6 @@ return {
                     "concreteType": "AppManifestData",
                     "plural": false,
                     "selections": [
-                      v4,
                       {
                         "kind": "LinkedField",
                         "alias": null,
@@ -319,7 +328,43 @@ return {
                         "args": null,
                         "concreteType": "AppAuthor",
                         "plural": false,
-                        "selections": v6
+                        "selections": [
+                          v2,
+                          v1
+                        ]
+                      },
+                      v3,
+                      v6
+                    ]
+                  },
+                  {
+                    "kind": "LinkedField",
+                    "alias": null,
+                    "name": "update",
+                    "storageKey": null,
+                    "args": null,
+                    "concreteType": "AppUpdateData",
+                    "plural": false,
+                    "selections": [
+                      {
+                        "kind": "LinkedField",
+                        "alias": null,
+                        "name": "manifest",
+                        "storageKey": null,
+                        "args": null,
+                        "concreteType": "AppManifestData",
+                        "plural": false,
+                        "selections": [
+                          v3,
+                          v6
+                        ]
+                      },
+                      {
+                        "kind": "ScalarField",
+                        "alias": null,
+                        "name": "permissionsChanged",
+                        "args": null,
+                        "storageKey": null
                       }
                     ]
                   },
@@ -333,7 +378,6 @@ return {
                     "plural": true,
                     "selections": [
                       v0,
-                      v7,
                       {
                         "kind": "LinkedField",
                         "alias": null,
@@ -353,13 +397,6 @@ return {
                             "plural": false,
                             "selections": [
                               {
-                                "kind": "ScalarField",
-                                "alias": null,
-                                "name": "permissionsChecked",
-                                "args": null,
-                                "storageKey": null
-                              },
-                              {
                                 "kind": "LinkedField",
                                 "alias": null,
                                 "name": "grants",
@@ -368,7 +405,7 @@ return {
                                 "concreteType": "AppPermissions",
                                 "plural": false,
                                 "selections": [
-                                  v2,
+                                  v4,
                                   {
                                     "kind": "LinkedField",
                                     "alias": null,
@@ -395,77 +432,51 @@ return {
                                     ]
                                   }
                                 ]
+                              },
+                              {
+                                "kind": "ScalarField",
+                                "alias": null,
+                                "name": "permissionsChecked",
+                                "args": null,
+                                "storageKey": null
                               }
                             ]
                           }
                         ]
                       },
-                      v5
-                    ]
-                  },
-                  v5
-                ]
-              },
-              {
-                "kind": "LinkedField",
-                "alias": null,
-                "name": "own",
-                "storageKey": null,
-                "args": null,
-                "concreteType": "OwnApp",
-                "plural": true,
-                "selections": [
-                  v0,
-                  v1,
-                  {
-                    "kind": "LinkedField",
-                    "alias": null,
-                    "name": "developer",
-                    "storageKey": null,
-                    "args": null,
-                    "concreteType": "AppAuthor",
-                    "plural": false,
-                    "selections": v6
-                  },
-                  {
-                    "kind": "LinkedField",
-                    "alias": null,
-                    "name": "versions",
-                    "storageKey": null,
-                    "args": null,
-                    "concreteType": "AppVersionData",
-                    "plural": true,
-                    "selections": [
+                      v2,
                       {
-                        "kind": "ScalarField",
+                        "kind": "LinkedField",
                         "alias": null,
-                        "name": "version",
+                        "name": "identity",
+                        "storageKey": null,
                         "args": null,
-                        "storageKey": null
-                      },
-                      v4
+                        "concreteType": "OwnUserIdentity",
+                        "plural": false,
+                        "selections": [
+                          {
+                            "kind": "LinkedField",
+                            "alias": null,
+                            "name": "profile",
+                            "storageKey": null,
+                            "args": null,
+                            "concreteType": "NamedProfile",
+                            "plural": false,
+                            "selections": [
+                              v1
+                            ]
+                          },
+                          v2
+                        ]
+                      }
                     ]
                   },
-                  {
-                    "kind": "LinkedField",
-                    "alias": null,
-                    "name": "users",
-                    "storageKey": null,
-                    "args": null,
-                    "concreteType": "AppUser",
-                    "plural": true,
-                    "selections": [
-                      v0,
-                      v7,
-                      v5
-                    ]
-                  },
-                  v5
+                  v2
                 ]
               }
             ]
           },
-          v5
+          v2
         ]
       }
     ]

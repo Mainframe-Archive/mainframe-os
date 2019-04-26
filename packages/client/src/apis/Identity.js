@@ -5,6 +5,9 @@ import type {
   IdentityAddPeerByFeedParams,
   IdentityAddPeerParams,
   IdentityAddPeerResult,
+  IdentityCreateContactFromFeedParams,
+  IdentityCreateContactFromPeerParams,
+  IdentityCreateContactResult,
   IdentityCreateDeveloperParams,
   IdentityCreateUserParams,
   IdentityCreateResult,
@@ -12,10 +15,9 @@ import type {
   IdentityGetOwnDevelopersResult,
   IdentityGetOwnUsersResult,
   IdentityGetPeersResult,
-  IdentityGetUserContactsParams,
-  IdentityGetUserContactsResult,
   IdentityLinkEthWalletAccountParams,
   IdentityUnlinkEthWalletAccountParams,
+  IdentityUpdateUserParams,
 } from '../types'
 
 export default class IdentityAPIs extends ClientAPIs {
@@ -37,6 +39,10 @@ export default class IdentityAPIs extends ClientAPIs {
     return this._rpc.request('identity_getOwnUsers')
   }
 
+  updateUser(params: IdentityUpdateUserParams): Promise<void> {
+    return this._rpc.request('identity_updateUser', params)
+  }
+
   // Contacts
 
   addPeer(params: IdentityAddPeerParams): Promise<IdentityAddPeerResult> {
@@ -53,14 +59,20 @@ export default class IdentityAPIs extends ClientAPIs {
     return this._rpc.request('identity_getPeers')
   }
 
-  deleteContact(params: IdentityDeleteContactParams): Promise<void> {
-    return this._rpc.request('identity_deleteContact', params)
+  createContactFromPeer(
+    params: IdentityCreateContactFromPeerParams,
+  ): Promise<IdentityCreateContactResult> {
+    return this._rpc.request('identity_createContactFromPeer', params)
   }
 
-  getUserContacts(
-    params: IdentityGetUserContactsParams,
-  ): Promise<IdentityGetUserContactsResult> {
-    return this._rpc.request('identity_getUserContacts', params)
+  createContactFromFeed(
+    params: IdentityCreateContactFromFeedParams,
+  ): Promise<IdentityCreateContactResult> {
+    return this._rpc.request('identity_createContactFromFeed', params)
+  }
+
+  deleteContact(params: IdentityDeleteContactParams): Promise<void> {
+    return this._rpc.request('identity_deleteContact', params)
   }
 
   // Wallets

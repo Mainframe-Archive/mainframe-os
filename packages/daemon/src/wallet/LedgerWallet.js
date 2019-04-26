@@ -1,46 +1,54 @@
 // @flow
 import EthereumTx from 'ethereumjs-tx'
-import ethUtil from 'ethereumjs-util'
+import { bufferToHex, addHexPrefix } from 'ethereumjs-util'
 import { toChecksumAddress } from 'web3-utils'
-import type {
-  EthTransactionParams,
-  WalletEthSignDataParams,
-} from '@mainframe/client'
-import { uniqueID } from '@mainframe/utils-id'
 
-import { getAddressAtIndex, signTransaction } from './ledgerClient'
-import { type AbstractWalletParams } from './AbstractSoftwareWallet'
+import {
+  getAddressAtIndex,
+  signTransaction,
+  signPersonalMessage,
+} from './ledgerClient'
+import AbstractWallet, {
+  type WalletEthSignTxParams,
+  type WalletSignDataParams,
+} from './AbstractWallet'
 
 type AccountAddress = string
 
 type ActiveAccounts = { [index: string]: AccountAddress }
 
-export type LedgerWalletParams = AbstractWalletParams & {
+export type LedgerWalletParams = {
+  localID: string,
+  name: ?string,
   activeAccounts: { [index: string]: AccountAddress },
   firstAddress: string,
-  localID: string,
 }
 
-export default class LedgerWallet {
+export type LedgerWalletSerialized = LedgerWalletParams
+
+export default class LedgerWallet extends AbstractWallet {
+  static fromJSON = (params: LedgerWalletSerialized): LedgerWallet =>
+    new LedgerWallet(params)
+
+  // $FlowFixMe: Wallet type
+  static toJSON = (wallet: LedgerWallet): LedgerWalletSerialized => ({
+    activeAccounts: wallet.activeAccounts,
+    localID: wallet.localID,
+    firstAddress: wallet.firstAddress,
+    name: wallet.name,
+  })
+
   // Store address at 0 to identify ledger
-  _localID: string
   _firstAddress: string
   _activeAccounts: ActiveAccounts
 
-  constructor(params?: LedgerWalletParams) {
-    if (params) {
-      this._activeAccounts = params.activeAccounts
-      this._localID = params.localID
-      this._firstAddress = params.firstAddress
-    } else {
-      this._activeAccounts = {}
-      this._localID = uniqueID()
-    }
+  constructor(params: LedgerWalletParams) {
+    super({ ...params, type: 'ledger' })
+    this._activeAccounts = params.activeAccounts
+    this._firstAddress = params.firstAddress
   }
 
-  get id(): string {
-    return this._localID
-  }
+  // Getters
 
   get firstAddress(): string {
     return this._firstAddress
@@ -83,36 +91,50 @@ export default class LedgerWallet {
     return newAddresses
   }
 
-  async signTransaction(params: EthTransactionParams): Promise<string> {
-    if (!params.chainId) {
-      throw new Error('ethereum chain id not set in tx params')
+  async signTransaction(
+    params: WalletEthSignTxParams,
+    chainId: string,
+  ): Promise<string> {
+    if (!params.chainId && chainId) {
+      params.chainId = Number(chainId)
+    } else if (!params.chainId) {
+      throw new Error('chainId missing in Ledger tx params')
     }
     const index = this.getIndexForAccount(params.from)
     if (!index) {
       throw new Error('account not registered with this device')
     }
     const tx = new EthereumTx(params)
-    tx.v = ethUtil.bufferToHex(tx.getChainId())
+    tx.v = bufferToHex(tx.getChainId())
     tx.r = '0x00'
     tx.s = '0x00'
     const txHex = tx.serialize().toString('hex')
 
     const res = await signTransaction(Number(index), txHex)
-
     tx.v = Buffer.from(res.v, 'hex')
     tx.r = Buffer.from(res.r, 'hex')
     tx.s = Buffer.from(res.s, 'hex')
     const valid = tx.verifySignature()
 
     if (valid) {
-      return ethUtil.addHexPrefix(tx.serialize().toString('hex'))
+      return addHexPrefix(tx.serialize().toString('hex'))
     } else {
       throw new Error('invalid transaction signature')
     }
   }
 
-  sign(params: WalletEthSignDataParams) {
-    params
-    // TODO: Needs implementing
+  async sign(params: WalletSignDataParams): Promise<string> {
+    // TODO: Needs testing, based on:
+    // https://github.com/LedgerHQ/ledgerjs/tree/master/packages/hw-app-eth#examples-4
+    const index = this.getIndexForAccount(params.address)
+    const messageHex = Buffer.from(params.data).toString('hex')
+    const result = await signPersonalMessage(Number(index), messageHex)
+
+    let v = result['v'] - 27
+    v = v.toString(16)
+    if (v.length < 2) {
+      v = '0' + v
+    }
+    return '0x' + result['r'] + result['s'] + v
   }
 }

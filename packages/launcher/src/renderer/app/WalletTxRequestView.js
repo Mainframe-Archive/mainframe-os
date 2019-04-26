@@ -1,25 +1,17 @@
 // @flow
 
 import React, { Component } from 'react'
-import { View, StyleSheet, ScrollView } from 'react-native-web'
-import web3Utils from 'web3-utils'
-import Web3Contract from 'web3-eth-contract'
+import { hexToNumberString, fromWei } from 'web3-utils'
 import {
-  ABI,
-  getERC20Data,
   decodeTransactionData,
-  type ERC20DataResult,
   type DecodedTxResult,
-} from '@mainframe/contract-utils'
+  type EthClient,
+} from '@mainframe/eth'
 
-import globalStyles from '../styles'
-import Text from '../UIComponents/Text'
-import colors from '../colors'
-import { truncateAddress } from '../../utils'
+import styled from 'styled-components/native'
+import { Text } from '@morpheus-ui/core'
+
 import rpc from './rpc'
-import renderRPCProvider from './RPCProvider'
-
-Web3Contract.setProvider(renderRPCProvider)
 
 type Props = {
   transaction: {
@@ -31,18 +23,57 @@ type Props = {
     gasPrice: string,
     gas: string,
   },
+  ethClient: EthClient,
 }
 
 type State = {
   error?: ?string,
   wallets?: ?Object, // TODO define
-  tokenInfo?: ERC20DataResult,
+  tokenInfo?: {
+    symbol: string,
+    decimalsUnit: string,
+  },
   txInfo?: DecodedTxResult,
 }
 
+const Container = styled.View`
+  padding: 8px;
+`
+
+const AmountContainer = styled.View`
+  background-color: #585858;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  padding: 20px;
+`
+
+const ParamLabel = styled.View`
+  padding-vertical: 3px;
+  flex-direction: row;
+  justify-content: space-between;
+`
+
+const DataContainer = styled.ScrollView`
+  flex: 1;
+  padding: 10px;
+  max-height: 80px;
+`
+
+const TransactionInfo = styled.View`
+  margin: 20px 0;
+`
+
+const GasInfo = styled.View`
+  border-color: #979797;
+  border-top-width: 1px;
+  flex-direction: row;
+  padding-top: 20px;
+  justify-content: space-between;
+`
+
 export default class WalletTxRequestView extends Component<Props, State> {
   state = {}
-  tokenContract: Web3Contract
 
   componentDidMount() {
     this.getEthWallets()
@@ -55,20 +86,28 @@ export default class WalletTxRequestView extends Component<Props, State> {
   }
 
   async getEthWallets() {
-    const wallets = await rpc.getEthWallets()
+    const wallets = await rpc.getUserEthWallets()
     this.setState({ wallets })
   }
 
   async attemptToReadData() {
-    const { transaction } = this.props
+    const { transaction, ethClient } = this.props
     const txData = transaction.data
     if (txData) {
       try {
         const txInfo = await decodeTransactionData(txData)
         let tokenInfo
+
         if (txInfo.contractType === 'ERC20') {
-          const contract = new Web3Contract(ABI.ERC20, transaction.to)
-          tokenInfo = await getERC20Data(contract, transaction.from)
+          const contract = ethClient.erc20Contract(transaction.to)
+          const [symbol, decimalsUnit] = await Promise.all([
+            contract.getTicker(),
+            contract.getTokenDecimalsUnit(),
+          ])
+          tokenInfo = {
+            decimalsUnit,
+            symbol,
+          }
         }
         this.setState({
           tokenInfo,
@@ -82,37 +121,54 @@ export default class WalletTxRequestView extends Component<Props, State> {
 
   renderTransactionInfo(from: string, to: string, data?: string) {
     return (
-      <View style={styles.transactionInfo}>
-        <Text style={styles.paramLabel}>
-          <Text style={globalStyles.boldText}>From:</Text>{' '}
-          {truncateAddress(from)}
-        </Text>
-        <Text style={styles.paramLabel}>
-          <Text style={globalStyles.boldText}>To:</Text> {truncateAddress(to)}
-        </Text>
+      <>
+        <TransactionInfo>
+          <ParamLabel>
+            <Text color="#9A9A9A" size={10}>
+              From
+            </Text>
+            <Text variant="mono" color="#F9F9F9" size={10}>
+              {from}
+            </Text>
+          </ParamLabel>
+          <ParamLabel>
+            <Text color="#9A9A9A" size={10}>
+              To
+            </Text>
+            <Text variant="mono" color="#F9F9F9" size={10}>
+              {to}
+            </Text>
+          </ParamLabel>
+        </TransactionInfo>
         {this.renderGas()}
         {data ? (
-          <View>
-            <Text style={styles.paramLabel}>
-              <Text style={globalStyles.boldText}>Data:</Text>
+          <ParamLabel>
+            <Text color="#9A9A9A" size={10}>
+              Data
             </Text>
-            <ScrollView style={styles.dataConatiner}>
-              <Text style={styles.dataText}>{data}</Text>
-            </ScrollView>
-          </View>
+            <DataContainer>
+              <Text color="#F9F9F9" size={10}>
+                {data}
+              </Text>
+            </DataContainer>
+          </ParamLabel>
         ) : null}
-      </View>
+      </>
     )
   }
 
   renderAmount(amount: string | number, ticker: string, method: string) {
     return (
-      <View style={styles.amountContainer}>
-        <Text style={styles.methodTypeLabel}>{method.toUpperCase()}</Text>
-        <Text style={styles.amountLabel}>
+      <AmountContainer>
+        <Text
+          color="white"
+          variant={['smallTitle', 'padding0', 'marginBottom10']}>
+          {method.toUpperCase()}
+        </Text>
+        <Text size={24} color="#F9F9F9">
           {amount} {ticker}
         </Text>
-      </View>
+      </AmountContainer>
     )
   }
 
@@ -121,57 +177,62 @@ export default class WalletTxRequestView extends Component<Props, State> {
     const { transaction } = this.props
     // TODO Add alert if also sending eth
 
-    if (txInfo == null) {
+    if (txInfo == null || !tokenInfo) {
       return null
     }
 
-    const value = txInfo.params.amount
-      ? web3Utils.fromWei(txInfo.params.amount)
-      : 0
+    const value =
+      txInfo.params.amount && tokenInfo.decimalsUnit
+        ? fromWei(txInfo.params.amount, tokenInfo.decimalsUnit)
+        : 0
     const ticker = tokenInfo ? tokenInfo.symbol : 'Tokens'
     return (
-      <View style={styles.container}>
-        <Text style={styles.header}>Sign Transaction</Text>
+      <Container>
         {this.renderAmount(value, ticker, txInfo.signatureName)}
         {this.renderTransactionInfo(transaction.from, txInfo.params.to)}
-      </View>
+      </Container>
     )
   }
 
   renderBasic() {
     const { transaction } = this.props
-    const valueString = web3Utils.hexToNumberString(transaction.value)
-    const valueEther = transaction.value
-      ? web3Utils.fromWei(valueString, 'ether')
-      : 0
+    const valueString = hexToNumberString(transaction.value)
+    const valueEther = transaction.value ? fromWei(valueString, 'ether') : 0
     return (
-      <View style={styles.container}>
-        <Text style={styles.header}>Sign Transaction</Text>
+      <Container>
         {this.renderAmount(valueEther, 'ETH', 'SEND')}
         {this.renderTransactionInfo(
           transaction.from,
           transaction.to,
           transaction.data,
         )}
-      </View>
+      </Container>
     )
   }
 
   renderGas() {
-    const gasLimit = web3Utils.hexToNumberString(this.props.transaction.gas)
-    const gasPrice = web3Utils.hexToNumberString(
-      this.props.transaction.gasPrice,
-    )
-    const gasPriceGwei = web3Utils.fromWei(gasPrice, 'gwei')
+    const gasLimit = hexToNumberString(this.props.transaction.gas)
+    const gasPrice = hexToNumberString(this.props.transaction.gasPrice)
+    const gasPriceGwei = fromWei(gasPrice, 'gwei')
     return (
-      <View style={styles.gasInfo}>
-        <Text style={[styles.paramLabel, styles.gasLabel]}>
-          <Text style={globalStyles.boldText}>Gas limit:</Text> {gasLimit}{' '}
-        </Text>
-        <Text style={[styles.paramLabel, styles.gasLabel]}>
-          <Text style={globalStyles.boldText}>Price:</Text> {gasPriceGwei} Gwei
-        </Text>
-      </View>
+      <GasInfo>
+        <ParamLabel>
+          <Text color="#9A9A9A" size={10}>
+            Gas limit{'   '}
+          </Text>
+          <Text variant="mono" color="#F9F9F9" size={10}>
+            {gasLimit}
+          </Text>
+        </ParamLabel>
+        <ParamLabel>
+          <Text color="#9A9A9A" size={10}>
+            Price{'   '}
+          </Text>
+          <Text variant="mono" color="#F9F9F9" size={10}>
+            {gasPriceGwei} Gwei
+          </Text>
+        </ParamLabel>
+      </GasInfo>
     )
   }
 
@@ -184,56 +245,3 @@ export default class WalletTxRequestView extends Component<Props, State> {
     }
   }
 }
-
-const styles = StyleSheet.create({
-  container: {
-    padding: 8,
-  },
-  header: {
-    fontWeight: 'bold',
-    paddingBottom: 6,
-    color: colors.GREY_DARK_48,
-    fontSize: 16,
-  },
-  amountContainer: {
-    textAlign: 'center',
-    paddingVertical: 12,
-    borderColor: colors.LIGHT_GREY_DE,
-    borderWidth: 1,
-    borderRadius: 5,
-  },
-  amountLabel: {
-    fontSize: 28,
-    color: colors.GREY_DARK_48,
-  },
-  methodTypeLabel: {
-    color: colors.BRIGHT_BLUE,
-    fontSize: 15,
-  },
-  transactionInfo: {
-    borderColor: colors.LIGHT_GREY_DE,
-    borderBottomWidth: 1,
-    paddingVertical: 10,
-  },
-  paramLabel: {
-    paddingVertical: 3,
-    color: colors.GREY_MED_75,
-  },
-  gasInfo: {
-    flexDirection: 'row',
-    marginTop: 3,
-  },
-  gasLabel: {
-    paddingRight: 10,
-  },
-  dataConatiner: {
-    padding: 10,
-    maxHeight: 80,
-    backgroundColor: colors.LIGHT_GREY_EE,
-    borderRadius: 5,
-  },
-  dataText: {
-    fontSize: 12,
-    color: colors.GREY_DARK_48,
-  },
-})

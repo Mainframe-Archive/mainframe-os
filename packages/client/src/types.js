@@ -1,5 +1,6 @@
 // @flow
 
+import type { SignBytesFunc } from '@erebos/api-bzz-base'
 import type { ManifestData, PartialManifestData } from '@mainframe/app-manifest'
 import type {
   PermissionCheckResult,
@@ -10,6 +11,7 @@ import type {
   StrictPermissionsRequirements,
   StrictPermissionsGrants,
 } from '@mainframe/app-permissions'
+import type { base64 } from '@mainframe/utils-base64'
 import type { ID } from '@mainframe/utils-id'
 import type { ExecutionResult } from 'graphql'
 
@@ -18,11 +20,19 @@ export type { ID } from '@mainframe/utils-id'
 export type WalletTypes = 'hd' | 'ledger'
 export type WalletSupportedChains = 'ethereum'
 export type WalletAccount = string
+
+export type WalletResult = {
+  localID: string,
+  name: ?string,
+  type: string,
+  accounts: Array<string>,
+}
+
 export type IdentityOwnData = {
   id: string,
   localID: string,
   profile: Object,
-  ethWallets: { [walletID: string]: Array<WalletAccount> },
+  ethWallets: Array<WalletResult>,
 }
 
 export type AppCheckPermissionParams = {
@@ -35,6 +45,12 @@ export type AppCheckPermissionResult = {
   result: PermissionCheckResult,
 }
 
+export type ApprovedContact = {
+  publicDataOnly: boolean,
+  id: string,
+  localID: string,
+}
+
 export type AppUserPermissionsSettings = {
   grants: StrictPermissionsGrants,
   permissionsChecked: boolean,
@@ -44,7 +60,7 @@ export type AppCloseParams = { sessID: ID }
 
 export type AppCreateParams = {
   contentsPath: string,
-  developerID: ID,
+  developerID: string,
   name?: ?string,
   version?: ?string,
   permissionsRequirements?: ?StrictPermissionsRequirements,
@@ -52,13 +68,32 @@ export type AppCreateParams = {
 
 export type AppCreateResult = { appID: ID }
 
-export type WalletSettings = {
+export type AppUserWalletSettings = {
   defaultEthAccount: ?string,
 }
 
+export type ContextStorageSettings = {
+  address: string,
+  encryptionKey: Buffer,
+  contentHash: ?string,
+  feedHash: ?string,
+  signBytes: SignBytesFunc,
+  manifestHash?: string,
+}
+
+export type StorageSettings = {
+  feedHash: ?string,
+  feedKey: string, // hex
+  encryptionKey: base64,
+}
+
 export type AppUserSettings = {
+  approvedContacts: {
+    [id: string]: ApprovedContact,
+  },
   permissionsSettings: AppUserPermissionsSettings,
-  walletSettings: WalletSettings,
+  walletSettings: AppUserWalletSettings,
+  storageSettings: StorageSettings,
 }
 
 export type AppUser = IdentityOwnData & {
@@ -67,6 +102,7 @@ export type AppUser = IdentityOwnData & {
 
 export type AppInstalledData = {
   localID: ID,
+  mfid: ID,
   manifest: ManifestData,
   users: Array<AppUser>,
   name: string,
@@ -74,6 +110,7 @@ export type AppInstalledData = {
 
 export type AppOwnData = {
   localID: ID,
+  mfid: ID,
   manifest: ManifestData,
   users: Array<AppUser>,
   name: string,
@@ -103,7 +140,28 @@ export type AppInstallParams = {
   permissionsSettings: AppUserPermissionsSettings,
 }
 
-export type AppInstallResult = { appID: ID }
+export type AppInstallationState =
+  | 'pending'
+  | 'hash_lookup'
+  | 'hash_not_found'
+  | 'downloading'
+  | 'download_error'
+  | 'ready'
+
+export type AppInstallResult = {
+  appID: ID,
+  installationState: AppInstallationState,
+}
+
+export type AppLoadManifestParams = {
+  hash: string,
+}
+
+export type AppLoadManifestResult = {
+  appID?: ID,
+  manifest: ManifestData,
+  isOwn?: ?boolean,
+}
 
 export type AppOpenParams = {
   appID: ID,
@@ -116,6 +174,12 @@ export type AppData = {
   contentsPath: string,
 }
 
+export type AppStorage = {
+  feedHash: ?string,
+  feedKey: string, // hex
+  encryptionKey: base64,
+}
+
 export type AppSession = {
   sessID: ID,
   permissions: PermissionsDetails,
@@ -125,24 +189,26 @@ export type AppOpenResult = {
   app: AppData,
   session: AppSession,
   user: IdentityOwnData,
+  isDev?: ?boolean,
   defaultEthAccount: ?string,
+  storage: AppStorage,
 }
 
-export type AppPublishContentsParams = {
+export type AppPublishParams = {
   appID: ID,
   version?: ?string,
 }
 
-export type AppPublishContentsResult = {
-  contentsURI: string,
+export type AppPublishResult = {
+  hash: string,
 }
 
 export type AppRemoveParams = { appID: ID }
 
-export type AppSetUserSettingsParams = {
-  appID: ID,
-  userID: ID,
-  settings: AppUserSettings,
+export type AppSetUserDefaultWalletParams = {
+  appID: string,
+  userID: string,
+  address: string,
 }
 
 export type AppSetUserPermissionsSettingsParams = {
@@ -163,10 +229,9 @@ export type AppSetPermissionsRequirementsParams = {
   version?: ?string,
 }
 
-export type AppWriteManifestParams = {
-  appID: ID,
-  path: string,
-  version?: ?string,
+export type AppSetFeedHashParams = {
+  sessID: ID,
+  feedHash: string,
 }
 
 // Blockchain
@@ -179,17 +244,75 @@ export type EthTransactionParams = {
   data: string,
   gas: string,
   gasPrice: string,
-  chainId: number,
+  chainId?: ?number,
 }
 
-export type BlockchainWeb3SendParams = {
-  id: number,
-  jsonrpc: string,
+export type BlockchainEthSendParams = {|
   method: string,
-  params: Array<any>,
+  params: Array<*>,
+|}
+
+export type BlockchainEthSendResult = any
+
+export type EthUnsubscribeParams = {
+  id: string,
 }
 
-export type BlockchainWeb3SendResult = any
+export type GetInviteTXDetailsParams = {
+  type: 'approve' | 'sendInvite',
+  userID: string,
+  contactID: string,
+}
+
+export type GetInviteTXDetailsResult = {
+  approved?: ?boolean,
+  gasPriceGwei?: string,
+  maxCost?: string,
+  stakeAmount: string,
+}
+
+export type SendInviteTXParams = {
+  userID: string,
+  contactID: string,
+  gasPrice?: string,
+}
+
+export type SendDeclineTXParams = {
+  userID: string,
+  peerID: string,
+  gasPrice?: string,
+}
+
+export type SendWithdrawInviteTXParams = {
+  userID: string,
+  contactID: string,
+  gasPrice?: string,
+}
+
+// Comms
+
+export type CommsPublishParams = {
+  appID: ID,
+  userID: string,
+  contactID: string,
+  key: string,
+  value: Object,
+}
+
+export type CommsSubscribeParams = {
+  appID: ID,
+  userID: string,
+  contactID: string,
+  key: string,
+}
+
+export type CommsGetSubscribableParams = {
+  appID: ID,
+  userID: string,
+  contactID: string,
+}
+
+export type CommsGetSubscribableResult = Array<string>
 
 // GraphQL
 
@@ -209,12 +332,14 @@ export type Feeds = {
 }
 
 export type IdentityAddPeerParams = {
-  mfid: string,
+  key: string,
   profile: {
     name?: ?string,
     avatar?: ?string,
+    ethAddress?: ?string,
   },
   publicFeed: string,
+  firstContactAddress: string,
   otherFeeds: Feeds,
 }
 
@@ -228,6 +353,7 @@ export type IdentityPeerResult = {
   profile: {
     name?: ?string,
     avatar?: ?string,
+    ethAddress?: ?string,
   },
 }
 
@@ -244,6 +370,7 @@ export type IdentityCreateUserParams = {
   profile: {
     name: string,
     avatar?: ?string,
+    ethAddress?: ?string,
   },
 }
 
@@ -261,6 +388,16 @@ export type IdentityCreateContactParams = {
     ownFeed?: ?string,
     contactFeed?: ?string,
   },
+}
+
+export type IdentityCreateContactFromPeerParams = {
+  userID: string,
+  peerID: string,
+}
+
+export type IdentityCreateContactFromFeedParams = {
+  userID: string,
+  feedHash: string,
 }
 
 export type IdentityCreateContactResult = { id: ID }
@@ -282,19 +419,84 @@ export type IdentityDeleteContactParams = {
   contactID: ID,
 }
 
-export type IdentityGetUserContactsParams = {
-  userID: ID,
+export type ContactsGetAppApprovedContactsParams = {
+  appID: string,
+  userID: string,
+}
+
+export type ContactsGetAppUserContactsParams = {
+  appID: string,
+  userID: string,
+  contactIDs: Array<string>,
+}
+
+export type ContactsApproveContactsForAppParams = {
+  appID: string,
+  userID: string,
+  contactsToApprove: Array<{
+    publicDataOnly: boolean,
+    localID: string,
+  }>,
+}
+
+export type ContactProfile = {
+  name?: ?string,
+  avatar?: ?string,
+  ethAddress?: ?string,
+}
+
+export type AppUserContact = {
+  id: string,
+  data: ?{
+    profile: ContactProfile,
+  },
+}
+
+export type ContactsApproveContactsForAppResult = {
+  approvedContacts: Array<AppUserContact>,
+}
+
+export type ContactsGetAppUserContactsResult = {
+  contacts: Array<AppUserContact>,
 }
 
 export type ContactResult = {
-  id: string,
-  name?: ?string,
-  avatar?: ?string,
-  connection: 'sent' | 'connected',
+  localID: string,
+  peerID: string,
+  connectionState:
+    | 'connected'
+    | 'sent_feed'
+    | 'sending_feed'
+    | 'received'
+    | 'declined'
+    | 'sending_blockchain'
+    | 'sent_blockchain',
+  profile: ContactProfile,
+  invite?: {
+    inviteTX: string,
+    stake: {
+      amount: string,
+      state: 'sending' | 'staked' | 'reclaiming' | 'reclaimed' | 'seized',
+      reclaimedTX?: ?string,
+    },
+  },
 }
 
-export type IdentityGetUserContactsResult = {
+export type ContactsGetUserContactsParams = {
+  userID: string,
+}
+
+export type ContactsGetUserContactsResult = {
   contacts: Array<ContactResult>,
+}
+
+export type IdentityUpdateUserParams = {
+  userID: string,
+  profile: {
+    name?: string,
+    avatar?: ?string,
+    ethAddress?: ?string,
+  },
 }
 
 export type IdentityLinkEthWalletAccountParams = {
@@ -320,7 +522,6 @@ export type VaultSettings = {
   bzzURL: string,
   pssURL: string,
   ethURL: string,
-  ethChainID: number,
 }
 
 export type VaultSettingsParams = $Shape<VaultSettings>
@@ -328,37 +529,26 @@ export type VaultSettingsParams = $Shape<VaultSettings>
 // Wallet
 
 export type WalletImportMnemonicParams = {
-  chain: WalletSupportedChains,
+  blockchain: WalletSupportedChains,
   mnemonic: string,
   name: string,
-}
-
-export type WalletNamedAccount = {
-  name: string,
-  address: string,
-}
-
-export type WalletResult = {
-  walletID: ID,
-  type: WalletTypes,
-  accounts: Array<string>,
+  userID?: string,
 }
 
 export type WalletImportResult = {
-  walletID: ID,
-  type: WalletTypes,
-  accounts: Array<WalletNamedAccount>,
+  localID: ID,
+  accounts: Array<string>,
 }
 
 export type WalletCreateHDParams = {
-  chain: WalletSupportedChains,
+  blockchain: WalletSupportedChains,
   name: string,
+  userID?: string,
 }
 
 export type WalletCreateHDResult = {
-  walletID: ID,
-  type: WalletTypes,
-  accounts: Array<WalletNamedAccount>,
+  localID: ID,
+  accounts: Array<string>,
   mnemonic: string,
 }
 
@@ -367,7 +557,7 @@ export type WalletResults = Array<WalletResult>
 export type WalletDeleteParams = {
   chain: string,
   type: WalletTypes,
-  walletID: ID,
+  localID: string,
 }
 
 export type WalletGetEthWalletsResult = {
@@ -375,39 +565,53 @@ export type WalletGetEthWalletsResult = {
   ledger: WalletResults,
 }
 
-export type WalletEthSignDataParams = {
-  walletID: ID,
+export type WalletEthSignTxParams = EthTransactionParams
+
+export type WalletSignTxResult = string
+
+export type WalletEthSignParams = {
   address: string,
   data: string,
 }
 
-export type WalletSignTxParams = {
-  chain: WalletSupportedChains,
-  transactionData: EthTransactionParams,
-}
-
-export type WalletSignTxResult = string
+export type WalletSignResult = string
 
 export type WalletGetLedgerEthAccountsParams = {
   pageNum: number,
 }
 
+export type WalletGetUserEthAccountsParams = {
+  userID: string,
+}
+
+export type WalletGetUserEthWalletsParams = {
+  userID: string,
+}
+
 export type WalletGetLedgerEthAccountsResult = Array<string>
 
-export type WalletAddLedgerEthAccountParams = {
-  index: number,
+export type WalletGetEthAccountsResult = Array<string>
+
+export type WalletAddLedgerEthAccountsParams = {
+  indexes: Array<number>,
   name: string,
+  userID?: string,
 }
 
 export type WalletAddHDAccountParams = {
-  name: string,
   index: number,
-  walletID: ID,
+  walletID: string,
+  userID?: string,
 }
 
 export type WalletAddHDAccountResult = string
 
 export type WalletAddLedgerResult = {
-  walletID: string,
+  localID: string,
+  addresses: Array<string>,
+}
+
+export type WalletSetUserDefaulParams = {
+  userID: string,
   address: string,
 }

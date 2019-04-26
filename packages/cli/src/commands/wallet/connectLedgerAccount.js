@@ -33,16 +33,19 @@ export default class ConnectLedgerWalletCommand extends Command {
     }
 
     if (this.client) {
-      const res = await this.client.wallet.addLedgerEthAccount({
-        index: Number(answers.index),
+      const res = await this.client.wallet.addLedgerEthAccounts({
+        indexes: [Number(answers.index)],
         name: answers.name,
       })
 
       if (this.flags.userID && this.client) {
-        await this.client.identity.linkEthWalletAccount({
-          id: this.flags.userID,
-          walletID: res.walletID,
-          address: res.address,
+        res.addresses.forEach(async addr => {
+          // $FlowFixMe Already checked for client
+          await this.client.identity.linkEthWalletAccount({
+            id: this.flags.userID,
+            walletID: res.localID,
+            address: addr,
+          })
         })
       }
       this.log(res)

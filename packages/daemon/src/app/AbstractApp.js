@@ -1,5 +1,6 @@
 // @flow
 
+import { createKeyPair } from '@erebos/secp256k1'
 import {
   createStrictPermissionGrants,
   type PermissionGrant,
@@ -8,21 +9,38 @@ import {
   type PermissionsGrants,
   type StrictPermissionsGrants,
 } from '@mainframe/app-permissions'
-// eslint-disable-next-line import/named
-import { idType, type ID } from '@mainframe/utils-id'
+import { encodeBase64 } from '@mainframe/utils-base64'
+import { createSecretStreamKey } from '@mainframe/utils-crypto'
+import type {
+  AppUserPermissionsSettings,
+  AppUserSettings,
+  StorageSettings,
+} from '@mainframe/client'
+import { idType, type ID, uniqueID } from '@mainframe/utils-id'
 
 import type Session from './Session'
 
-const DEFAULT_SETTINGS = {
-  permissionsSettings: {
-    grants: {
-      WEB_REQUEST: [],
+const getDefaultSettings = () => {
+  return {
+    approvedContacts: {},
+    permissionsSettings: {
+      grants: {
+        WEB_REQUEST: {
+          denied: [],
+          granted: [],
+        },
+      },
+      permissionsChecked: false,
     },
-    permissionsChecked: false,
-  },
-  walletSettings: {
-    defaultEthAccount: null,
-  },
+    storageSettings: {
+      feedHash: undefined,
+      feedKey: createKeyPair().getPrivate('hex'),
+      encryptionKey: encodeBase64(createSecretStreamKey()),
+    },
+    walletSettings: {
+      defaultEthAccount: null,
+    },
+  }
 }
 
 export type WalletSettings = {
@@ -34,21 +52,24 @@ export type SessionData = {
   session: Session,
   permissions: PermissionsDetails,
   isDev?: ?boolean,
+  storage: StorageSettings,
 }
 
-export type PermissionsSettings = {
-  grants: StrictPermissionsGrants,
-  permissionsChecked: boolean,
+export type ContactToApprove = {
+  localID: string,
+  publicDataOnly: boolean,
 }
 
-export type AppUserSettings = {
-  permissionsSettings: PermissionsSettings,
-  walletSettings: WalletSettings,
+export type ApprovedContact = {
+  id: string,
+  localID: string,
+  publicDataOnly: boolean,
 }
 
 export type AbstractAppParams = {
   appID: ID,
   settings?: { [ID]: AppUserSettings },
+  storage?: StorageSettings,
 }
 
 export type AbstractAppSerialized = AbstractAppParams
@@ -81,10 +102,20 @@ export default class AbstractApp {
     return Object.keys(this._settings).map(idType)
   }
 
+  // User settings
+
+  hasUser(userID: ID): boolean {
+    return this._settings[userID] != null
+  }
+
+  removeUser(userID: ID) {
+    delete this._settings[userID]
+  }
+
   // Settings
 
-  getSettings(userID: ID): AppUserSettings {
-    return this._settings[userID] || { ...DEFAULT_SETTINGS }
+  getSettings(userID: ID | string): AppUserSettings {
+    return this._settings[idType(userID)] || getDefaultSettings()
   }
 
   setSettings(userID: ID, settings: AppUserSettings): void {
@@ -94,11 +125,8 @@ export default class AbstractApp {
     this._settings[userID] = settings
   }
 
-  getPermissions(userID: ID): ?StrictPermissionsGrants {
-    const settings = this._settings[userID]
-    if (settings != null && settings.permissionsSettings != null) {
-      return settings.permissionsSettings.grants
-    }
+  getPermissions(userID: ID): StrictPermissionsGrants {
+    return this.getSettings(userID).permissionsSettings.grants
   }
 
   setPermissions(
@@ -112,7 +140,10 @@ export default class AbstractApp {
     this._settings[userID] = settings
   }
 
-  setPermissionsSettings(userID: ID, settings: PermissionsSettings): void {
+  setPermissionsSettings(
+    userID: ID,
+    settings: AppUserPermissionsSettings,
+  ): void {
     const appSettings = this.getSettings(userID)
     appSettings.permissionsSettings.grants = createStrictPermissionGrants(
       settings.grants,
@@ -147,6 +178,12 @@ export default class AbstractApp {
     this._settings[userID] = settings
   }
 
+  setFeedHash(userID: ID, feedHash: string): void {
+    const settings = this.getSettings(userID)
+    settings.storageSettings.feedHash = feedHash
+    this._settings[userID] = settings
+  }
+
   setDefaultEthAccount(userID: ID, walletID: ID, account: string) {
     const settings = this.getSettings(userID)
     settings.walletSettings.defaultEthAccount = account
@@ -160,8 +197,47 @@ export default class AbstractApp {
     }
   }
 
-  removeUser(userID: ID) {
-    delete this._settings[userID]
+  getLocalIDByApprovedID(userID: ID | string, id: string): ?string {
+    const found = this.getSettings(userID).approvedContacts[id]
+    return found ? found.localID : null
+  }
+
+  getApprovedIDByLocalID(userID: ID | string, localID: ?string): ?string {
+    const { approvedContacts } = this.getSettings(userID)
+    const found = Object.values(approvedContacts).find(
+      // $FlowFixMe: Object.values
+      c => c.localID === localID,
+    )
+    // $FlowFixMe: Object.values
+    return found ? found.id : null
+  }
+
+  getApprovedContacts(userID: ID | string): { [string]: ApprovedContact } {
+    const { approvedContacts } = this.getSettings(userID)
+    return approvedContacts
+  }
+
+  approveContacts(
+    userID: ID,
+    contacts: Array<ContactToApprove>,
+  ): { [string]: ApprovedContact } {
+    const settings = this.getSettings(userID)
+    const approvedContacts = settings.approvedContacts
+    const contactsAdded = {}
+    contacts.forEach(c => {
+      let id = this.getApprovedIDByLocalID(userID, c.localID)
+      if (!id) {
+        id = (uniqueID(): string)
+        approvedContacts[id] = {
+          id,
+          localID: c.localID,
+          publicDataOnly: c.publicDataOnly,
+        }
+      }
+      contactsAdded[id] = approvedContacts[id]
+    })
+    this._settings[userID] = settings
+    return contactsAdded
   }
 
   // Session

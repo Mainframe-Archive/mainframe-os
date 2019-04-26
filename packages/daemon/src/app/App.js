@@ -1,6 +1,6 @@
 // @flow
 
-import type { ManifestData } from '@mainframe/app-manifest'
+import { verifyManifest, type ManifestData } from '@mainframe/app-manifest'
 import {
   createWebRequestGrant,
   havePermissionsToGrant,
@@ -8,22 +8,17 @@ import {
   PERMISSION_KEYS_BOOLEAN,
   type StrictPermissionsGrants,
 } from '@mainframe/app-permissions'
-// eslint-disable-next-line import/named
+import type { AppInstallationState } from '@mainframe/client'
+import { MFID } from '@mainframe/data-types'
+import type { SignedContents } from '@mainframe/secure-file'
 import { uniqueID, type ID } from '@mainframe/utils-id'
 
+import type { bzzHash } from '../swarm/feed'
 import AbstractApp, {
   type AbstractAppParams,
   type SessionData,
 } from './AbstractApp'
 import Session from './Session'
-
-export type AppInstallationState =
-  | 'pending'
-  | 'hash_lookup'
-  | 'hash_not_found'
-  | 'downloading'
-  | 'download_error'
-  | 'ready'
 
 export type AppParams = AbstractAppParams & {
   manifest: ManifestData,
@@ -31,6 +26,8 @@ export type AppParams = AbstractAppParams & {
 }
 
 export type AppSerialized = AppParams
+
+export type AppUpdateData = { manifest: SignedContents }
 
 export default class App extends AbstractApp {
   static fromJSON = (params: AppSerialized): App => new App(params)
@@ -66,11 +63,40 @@ export default class App extends AbstractApp {
     return this._manifest
   }
 
+  get mfid(): string {
+    return this._manifest.id
+  }
+
+  get version(): string {
+    return this._manifest.version
+  }
+
+  get updateFeedHash(): bzzHash {
+    return this._manifest.updateHash
+  }
+
   getPermissionsChecked(userID: ID): boolean {
     if (!havePermissionsToGrant(this._manifest.permissions)) {
       return true
     }
     return this.getSettings(userID).permissionsSettings.permissionsChecked
+  }
+
+  // Updates
+
+  verifyManifest(contents: SignedContents): ManifestData {
+    return verifyManifest(contents, [
+      MFID.from(this.mfid).data.toBuffer(),
+      MFID.from(this.manifest.author.id).data.toBuffer(),
+    ])
+  }
+
+  applyUpdate(
+    manifest: ManifestData,
+    installationState?: AppInstallationState = 'pending',
+  ): void {
+    this._manifest = manifest
+    this._installationState = installationState
   }
 
   // Session
@@ -108,6 +134,7 @@ export default class App extends AbstractApp {
       permissions,
       sessID: uniqueID(),
       session,
+      storage: this.getSettings(userID).storageSettings,
     }
   }
 }

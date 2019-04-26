@@ -1,25 +1,28 @@
 {
   "name": "@mainframe/client",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "main": "lib/index.js",
   "license": "MIT",
+  "files": [
+    "lib/*"
+  ],
   "scripts": {
     "clean": "del-cli lib",
-    "build:js": "flow-remove-types src --out-dir lib",
+    "build:js": "babel src --out-dir lib",
     "build:flow": "flow-copy-source src lib",
     "build": "npm run clean && npm run build:js && npm run build:flow",
     "test:types": "flow check"
   },
   "dependencies": {
-    "@mainframe/rpc-ipc": "^0.2.3",
-    "graphql": "^0.13.2",
+    "@mainframe/rpc-ipc": "^0.3.0",
+    "graphql": "^14.1.1",
     "rxjs": "^6.3.3"
   },
   "devDependencies": {
-    "@mainframe/app-manifest": "*",
-    "@mainframe/app-permissions": "*",
-    "@mainframe/rpc-stream": "^0.2.3",
+    "@mainframe/app-manifest": "^0.3.0",
+    "@mainframe/app-permissions": "^0.3.0",
+    "@mainframe/rpc-stream": "^0.3.0",
     "@mainframe/utils-id": "^0.1.0",
-    "flow-bin": "^0.87.0"
+    "flow-bin": "^0.95.1"
   }
 }

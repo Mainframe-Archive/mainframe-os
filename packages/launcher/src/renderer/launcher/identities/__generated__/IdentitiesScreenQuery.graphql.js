@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash eec3ec0944a0edb2e0c20bc023ede5f2
+ * @relayHash 57e92abfb00d75f37fa7db711101fe55
  */
 
 /* eslint-disable */
@@ -35,19 +35,17 @@ query IdentitiesScreenQuery {
   }
 }
 
-fragment IdentitiesScreen_identities on IdentitiesQuery {
+fragment IdentitiesScreen_identities on Identities {
   ...IdentitiesView_identities
 }
 
-fragment IdentitiesView_identities on IdentitiesQuery {
+fragment IdentitiesView_identities on Identities {
   ownUsers {
+    ...IdentityEditModal_ownUserIdentity
     localID
+    feedHash
     profile {
       name
-    }
-    wallets {
-      localID
-      accounts
     }
     apps {
       localID
@@ -77,6 +75,16 @@ fragment IdentitiesView_identities on IdentitiesQuery {
     id
   }
 }
+
+fragment IdentityEditModal_ownUserIdentity on OwnUserIdentity {
+  localID
+  feedHash
+  privateProfile
+  profile {
+    name
+    avatar
+  }
+}
 */
 
 const node/*: ConcreteRequest*/ = (function(){
@@ -87,16 +95,17 @@ var v0 = {
   "args": null,
   "storageKey": null
 },
-v1 = [
-  {
-    "kind": "ScalarField",
-    "alias": null,
-    "name": "name",
-    "args": null,
-    "storageKey": null
-  }
+v1 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "name",
+  "args": null,
+  "storageKey": null
+},
+v2 = [
+  v1
 ],
-v2 = {
+v3 = {
   "kind": "ScalarField",
   "alias": null,
   "name": "id",
@@ -108,7 +117,7 @@ return {
   "operationKind": "query",
   "name": "IdentitiesScreenQuery",
   "id": null,
-  "text": "query IdentitiesScreenQuery {\n  viewer {\n    identities {\n      ...IdentitiesScreen_identities\n    }\n    id\n  }\n}\n\nfragment IdentitiesScreen_identities on IdentitiesQuery {\n  ...IdentitiesView_identities\n}\n\nfragment IdentitiesView_identities on IdentitiesQuery {\n  ownUsers {\n    localID\n    profile {\n      name\n    }\n    wallets {\n      localID\n      accounts\n    }\n    apps {\n      localID\n      manifest {\n        name\n      }\n      users {\n        settings {\n          permissionsSettings {\n            permissionsChecked\n            grants {\n              BLOCKCHAIN_SEND\n            }\n          }\n        }\n        id\n      }\n      id\n    }\n    id\n  }\n  ownDevelopers {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n}\n",
+  "text": "query IdentitiesScreenQuery {\n  viewer {\n    identities {\n      ...IdentitiesScreen_identities\n    }\n    id\n  }\n}\n\nfragment IdentitiesScreen_identities on Identities {\n  ...IdentitiesView_identities\n}\n\nfragment IdentitiesView_identities on Identities {\n  ownUsers {\n    ...IdentityEditModal_ownUserIdentity\n    localID\n    feedHash\n    profile {\n      name\n    }\n    apps {\n      localID\n      manifest {\n        name\n      }\n      users {\n        settings {\n          permissionsSettings {\n            permissionsChecked\n            grants {\n              BLOCKCHAIN_SEND\n            }\n          }\n        }\n        id\n      }\n      id\n    }\n    id\n  }\n  ownDevelopers {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n}\n\nfragment IdentityEditModal_ownUserIdentity on OwnUserIdentity {\n  localID\n  feedHash\n  privateProfile\n  profile {\n    name\n    avatar\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -132,7 +141,7 @@ return {
             "name": "identities",
             "storageKey": null,
             "args": null,
-            "concreteType": "IdentitiesQuery",
+            "concreteType": "Identities",
             "plural": false,
             "selections": [
               {
@@ -166,7 +175,7 @@ return {
             "name": "identities",
             "storageKey": null,
             "args": null,
-            "concreteType": "IdentitiesQuery",
+            "concreteType": "Identities",
             "plural": false,
             "selections": [
               {
@@ -180,29 +189,33 @@ return {
                 "selections": [
                   v0,
                   {
+                    "kind": "ScalarField",
+                    "alias": null,
+                    "name": "feedHash",
+                    "args": null,
+                    "storageKey": null
+                  },
+                  {
+                    "kind": "ScalarField",
+                    "alias": null,
+                    "name": "privateProfile",
+                    "args": null,
+                    "storageKey": null
+                  },
+                  {
                     "kind": "LinkedField",
                     "alias": null,
                     "name": "profile",
                     "storageKey": null,
                     "args": null,
-                    "concreteType": "OwnUserProfile",
+                    "concreteType": "NamedProfile",
                     "plural": false,
-                    "selections": v1
-                  },
-                  {
-                    "kind": "LinkedField",
-                    "alias": null,
-                    "name": "wallets",
-                    "storageKey": null,
-                    "args": null,
-                    "concreteType": "UserWalletType",
-                    "plural": true,
                     "selections": [
-                      v0,
+                      v1,
                       {
                         "kind": "ScalarField",
                         "alias": null,
-                        "name": "accounts",
+                        "name": "avatar",
                         "args": null,
                         "storageKey": null
                       }
@@ -226,7 +239,7 @@ return {
                         "args": null,
                         "concreteType": "AppManifestData",
                         "plural": false,
-                        "selections": v1
+                        "selections": v2
                       },
                       {
                         "kind": "LinkedField",
@@ -284,13 +297,13 @@ return {
                               }
                             ]
                           },
-                          v2
+                          v3
                         ]
                       },
-                      v2
+                      v3
                     ]
                   },
-                  v2
+                  v3
                 ]
               },
               {
@@ -309,16 +322,16 @@ return {
                     "name": "profile",
                     "storageKey": null,
                     "args": null,
-                    "concreteType": "OwnDeveloperProfile",
+                    "concreteType": "NamedProfile",
                     "plural": false,
-                    "selections": v1
+                    "selections": v2
                   },
-                  v2
+                  v3
                 ]
               }
             ]
           },
-          v2
+          v3
         ]
       }
     ]

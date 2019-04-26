@@ -2,12 +2,11 @@
 
 import {
   checkPermission,
-  type PermissionKey, // eslint-disable-line import/named
-  type PermissionGrant, // eslint-disable-line import/named
-  type StrictPermissionsGrants, // eslint-disable-line import/named
-  type PermissionCheckResult, // eslint-disable-line import/named
+  type PermissionKey,
+  type PermissionGrant,
+  type StrictPermissionsGrants,
+  type PermissionCheckResult,
 } from '@mainframe/app-permissions'
-// eslint-disable-next-line import/named
 import { type ID } from '@mainframe/utils-id'
 
 export default class Session {

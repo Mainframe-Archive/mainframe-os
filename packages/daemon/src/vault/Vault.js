@@ -1,22 +1,13 @@
 // @flow
 
-// eslint-disable-next-line import/named
-import {
-  isValidSemver,
-  writeManifestFile,
-  type ManifestData, // eslint-disable-line import/named
-  type PartialManifestData, // eslint-disable-line import/named
-} from '@mainframe/app-manifest'
-import {
-  createRequirements,
-  type PermissionsRequirements, // eslint-disable-line import/named
-  type StrictPermissionsRequirements,
-} from '@mainframe/app-permissions'
+import { type ManifestData } from '@mainframe/app-manifest'
+import { type PermissionsRequirements } from '@mainframe/app-permissions'
+import type { AppUserPermissionsSettings } from '@mainframe/client'
 import { readEncryptedFile, writeEncryptedFile } from '@mainframe/secure-file'
 import {
   decodeBase64,
   encodeBase64,
-  type base64, // eslint-disable-line import/named
+  type base64,
 } from '@mainframe/utils-base64'
 import {
   PASSWORDHASH_ALG_ARGON2ID13,
@@ -25,19 +16,15 @@ import {
   createPasswordHashSalt,
   createSecretBoxKeyFromPassword,
 } from '@mainframe/utils-crypto'
-// eslint-disable-next-line import/named
-import { uniqueID, type ID } from '@mainframe/utils-id'
+import { type ID } from '@mainframe/utils-id'
+import { ETH_RPC_URLS } from '@mainframe/eth'
+import semver from 'semver'
 
-import type {
-  AppUserSettings,
-  PermissionsSettings,
-  SessionData,
-} from '../app/AbstractApp'
+import type { SessionData } from '../app/AbstractApp'
 import type App from '../app/App'
 import AppsRepository, {
   type AppsRepositorySerialized,
 } from '../app/AppsRepository'
-import type OwnApp from '../app/OwnApp'
 import type Session from '../app/Session'
 import IdentitiesRepository, {
   type IdentitiesRepositorySerialized,
@@ -48,6 +35,9 @@ import WalletsRepository, {
 import IdentityWallets, {
   type IdentityWalletsSerialized,
 } from '../identity/IdentityWallets'
+import ContactAppData, {
+  type ContactAppDataSerialized,
+} from '../contact/ContactAppData'
 
 type VaultKDF = {
   algorithm: number,
@@ -85,6 +75,13 @@ export const createVaultKeyParams = async (
   )
   return { kdf, key }
 }
+
+const defaultBlockchainData = () => ({
+  eventBlocksRead: {
+    Invited: {},
+    Declined: {},
+  },
+})
 
 export const readVaultFile = async (
   path: string,
@@ -127,11 +124,21 @@ export const readVaultFile = async (
   }
 }
 
+export type BlockchainData = {
+  eventBlocksRead: {
+    Invited: {
+      [network: string]: number,
+    },
+    Declined: {
+      [network: string]: number,
+    },
+  },
+}
+
 export type UserSettings = {
   bzzURL: string,
   pssURL: string,
   ethURL: string,
-  ethChainID: number,
 }
 
 export type VaultData = {
@@ -140,6 +147,8 @@ export type VaultData = {
   settings: UserSettings,
   wallets: WalletsRepository,
   identityWallets: IdentityWallets,
+  contactAppData: ContactAppData,
+  blockchainData: BlockchainData,
 }
 
 export type VaultSerialized = {
@@ -148,6 +157,8 @@ export type VaultSerialized = {
   settings?: UserSettings,
   wallets?: WalletsRepositorySerialized,
   identityWallets?: IdentityWalletsSerialized,
+  contactAppData?: ContactAppDataSerialized,
+  blockchainData?: BlockchainData,
 }
 
 export default class Vault {
@@ -165,7 +176,9 @@ export default class Vault {
       identities: IdentitiesRepository.fromJSON(data.identities),
       wallets: WalletsRepository.fromJSON(data.wallets),
       identityWallets: IdentityWallets.fromJSON(data.identityWallets),
+      contactAppData: ContactAppData.fromJSON(data.contactAppData),
       settings: data.settings,
+      blockchainData: data.blockchainData || defaultBlockchainData(),
     })
   }
 
@@ -181,13 +194,14 @@ export default class Vault {
       apps: new AppsRepository(),
       identities: new IdentitiesRepository(),
       settings: {
-        bzzURL: 'http://swarm-gateways.net',
-        pssURL: 'ws://localhost:8546',
-        ethURL: 'https://ropsten.infura.io/KWLG1YOMaYgl4wiFlcJv',
-        ethChainID: 3, // Mainnet 1, Ropsten 3, Rinkeby 4, Kovan 42, Local (ganache) 1977
+        bzzURL: 'http://mainframe-gateways.net:8500',
+        pssURL: 'ws://mainframe-gateways.net:8546',
+        ethURL: ETH_RPC_URLS.WS.mainnet,
       },
       identityWallets: new IdentityWallets(),
+      contactAppData: new ContactAppData(),
       wallets: new WalletsRepository(),
+      blockchainData: defaultBlockchainData(),
     }
     this._data = data ? Object.assign(vaultData, data) : vaultData
   }
@@ -218,8 +232,12 @@ export default class Vault {
     return this._data.identityWallets
   }
 
-  getWalletsForIdentity(id: string): { [walletID: string]: Array<string> } {
-    return this.identityWallets.walletsByIdentity[id] || {}
+  get contactAppData(): ContactAppData {
+    return this._data.contactAppData
+  }
+
+  get blockchainData(): BlockchainData {
+    return this._data.blockchainData
   }
 
   // App lifecycle
@@ -237,15 +255,21 @@ export default class Vault {
   installApp(
     manifest: ManifestData,
     userID: ID,
-    settings: PermissionsSettings,
+    settings: AppUserPermissionsSettings,
   ): App {
     let app = this.apps.getByMFID(manifest.id)
     if (app == null) {
       // Add app with user settings
       app = this.apps.add(manifest, userID, settings)
     } else {
-      // Set user settings for already existing app
-      this.apps.setUserPermissionsSettings(app.id, userID, settings)
+      // If manifest version is higher than current one, apply update
+      if (semver.gt(manifest.version, app.version)) {
+        app.applyUpdate(manifest)
+      }
+      // Set user settings for additional user
+      if (!app.hasUser(userID)) {
+        this.apps.setUserPermissionsSettings(app.id, userID, settings)
+      }
     }
     return app
   }
@@ -260,56 +284,6 @@ export default class Vault {
 
   // App creation and management
 
-  createApp(params: {
-    contentsPath: string,
-    developerID: ID,
-    name?: ?string,
-    version?: ?string,
-    permissionsRequirements?: ?StrictPermissionsRequirements,
-  }): OwnApp {
-    const appIdentity = this.identities.getOwnApp(
-      this.identities.createOwnApp(),
-    )
-    if (appIdentity == null) {
-      throw new Error('Failed to create app identity')
-    }
-
-    const devIdentity = this.identities.getOwnDeveloper(params.developerID)
-    if (devIdentity == null) {
-      throw new Error('Developer identity not found')
-    }
-
-    const version =
-      params.version == null || !isValidSemver(params.version)
-        ? '1.0.0'
-        : params.version
-
-    return this.apps.create({
-      appID: uniqueID(),
-      data: {
-        contentsPath: params.contentsPath,
-        developerID: params.developerID,
-        mfid: appIdentity.id,
-        name: params.name || 'Untitled',
-        version,
-      },
-      versions: {
-        [version]: {
-          permissions: params.permissionsRequirements || createRequirements(),
-          publicationState: 'unpublished',
-        },
-      },
-    })
-  }
-
-  setAppContentsURI(appID: ID, contentsURI: string, version?: ?string): void {
-    const app = this.apps.getOwnByID(appID)
-    if (app == null) {
-      throw new Error('App not found')
-    }
-    app.setContentsURI(contentsURI, version)
-  }
-
   setAppPermissionsRequirements(
     appID: ID,
     permissions: PermissionsRequirements,
@@ -322,105 +296,12 @@ export default class Vault {
     app.setPermissionsRequirements(permissions, version)
   }
 
-  setAppUserSettings(appID: ID, userID: ID, settings: AppUserSettings): void {
-    this.apps.setUserSettings(appID, userID, settings)
-  }
-
   setAppUserPermissionsSettings(
     appID: ID,
     userID: ID,
-    settings: PermissionsSettings,
+    settings: AppUserPermissionsSettings,
   ): void {
     this.apps.setUserPermissionsSettings(appID, userID, settings)
-  }
-
-  getAppManifestData(appID: ID, version?: ?string): PartialManifestData {
-    const app = this.apps.getOwnByID(appID)
-    if (app == null) {
-      throw new Error('App not found')
-    }
-    const devIdentity = this.identities.getOwnDeveloper(app.data.developerID)
-    if (devIdentity == null) {
-      throw new Error('Developer identity not found')
-    }
-    const versionData = app.getVersionData(version)
-    if (versionData == null) {
-      throw new Error('Invalid app version')
-    }
-
-    return {
-      id: app.mfid,
-      author: {
-        id: devIdentity.id,
-        name: devIdentity.profile.name,
-      },
-      name: app.data.name,
-      version: app.data.version,
-      contentsURI: versionData.contentsURI,
-      permissions: versionData.permissions,
-    }
-  }
-
-  async writeAppManifest(
-    appID: ID,
-    toPath: string,
-    version?: ?string,
-  ): Promise<void> {
-    const app = this.apps.getOwnByID(appID)
-    if (app == null) {
-      throw new Error('App not found')
-    }
-
-    const appIdentityID = this.identities.getID(app.mfid)
-    if (appIdentityID == null) {
-      throw new Error('App identity not found')
-    }
-    const appIdentity = this.identities.getOwnApp(appIdentityID)
-    if (appIdentity == null) {
-      throw new Error('App identity not found')
-    }
-
-    const devIdentity = this.identities.getOwnDeveloper(app.data.developerID)
-    if (devIdentity == null) {
-      throw new Error('Developer identity not found')
-    }
-
-    const versionData = app.getVersionData(version)
-    if (versionData == null) {
-      throw new Error('Invalid app version')
-    }
-
-    if (versionData.publicationState === 'unpublished') {
-      throw new Error(
-        'App contents must be published before manifest can be created',
-      )
-    }
-    if (versionData.publicationState === 'manifest_published') {
-      throw new Error('Manifest has already been published for this version')
-    }
-
-    if (versionData.contentsURI == null) {
-      throw new Error(
-        'App contents URI must be set before manifest can be created',
-      )
-    }
-
-    const manifestData = {
-      id: app.mfid,
-      author: {
-        id: devIdentity.id,
-        name: devIdentity.profile.name,
-      },
-      name: app.data.name,
-      version: app.data.version,
-      contentsURI: versionData.contentsURI,
-      permissions: versionData.permissions,
-    }
-
-    await writeManifestFile(toPath, manifestData, [
-      appIdentity.keyPair,
-      devIdentity.keyPair,
-    ])
   }
 
   // Settings
@@ -442,10 +323,6 @@ export default class Vault {
     this._data.settings.ethURL = url
   }
 
-  setEthChainID(chainID: number): void {
-    this._data.settings.ethChainID = chainID
-  }
-
   // Vault lifecycle
 
   save() {
@@ -463,7 +340,9 @@ export default class Vault {
           identities: IdentitiesRepository.toJSON(this._data.identities),
           wallets: WalletsRepository.toJSON(this._data.wallets),
           identityWallets: IdentityWallets.toJSON(this._data.identityWallets),
+          contactAppData: ContactAppData.toJSON(this._data.contactAppData),
           settings: this._data.settings,
+          blockchainData: this._data.blockchainData,
         }
       : {}
   }

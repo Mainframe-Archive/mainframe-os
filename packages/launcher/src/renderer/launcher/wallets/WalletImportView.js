@@ -3,15 +3,21 @@
 import React, { Component } from 'react'
 import { graphql, commitMutation, type PayloadError } from 'react-relay'
 import styled from 'styled-components/native'
-import { Button, TextField, Row, Column, Text } from '@morpheus-ui/core'
-import { Form, type FormSubmitPayload } from '@morpheus-ui/forms'
+import { TextField, Row, Column, Text } from '@morpheus-ui/core'
+import {
+  type FormSubmitPayload,
+  type FieldValidateFunctionParams,
+} from '@morpheus-ui/forms'
 
-import ModalView from '../../UIComponents/ModalView'
+import FormModalView from '../../UIComponents/FormModalView'
 import { EnvironmentContext } from '../RelayEnvironment'
 
 type Props = {
-  currentWalletID: ?string,
+  currentWalletID?: ?string,
   onClose: () => void,
+  onSuccess?: (address: string) => void,
+  userID: string,
+  full?: boolean,
 }
 
 type State = {
@@ -19,7 +25,9 @@ type State = {
 }
 
 const FormContainer = styled.View`
-  padding-top: 20px;
+  width: 80%;
+  max-width: 450px;
+  padding-top: 70px;
 `
 
 const IMPORT_ERR_MSG = 'Sorry, there was a problem importing your wallet.'
@@ -27,18 +35,21 @@ const IMPORT_ERR_MSG = 'Sorry, there was a problem importing your wallet.'
 const walletImportMutation = graphql`
   mutation WalletImportViewImportHDWalletMutation(
     $input: ImportHDWalletInput!
+    $userID: String!
   ) {
     importHDWallet(input: $input) {
       hdWallet {
         accounts {
-          name
           address
         }
         localID
       }
       viewer {
+        identities {
+          ...Launcher_identities
+        }
         wallets {
-          ...WalletsView_wallets
+          ...WalletsView_wallets @arguments(userID: $userID)
         }
       }
     }
@@ -46,16 +57,25 @@ const walletImportMutation = graphql`
 `
 
 const deleteWalletMutation = graphql`
-  mutation WalletImportViewDeleteWalletMutation($input: DeleteWalletInput!) {
+  mutation WalletImportViewDeleteWalletMutation(
+    $input: DeleteWalletInput!
+    $userID: String!
+  ) {
     deleteWallet(input: $input) {
       viewer {
         wallets {
-          ...WalletsView_wallets
+          ...WalletsView_wallets @arguments(userID: $userID)
         }
       }
     }
   }
 `
+
+const seedValidation = ({ value }: FieldValidateFunctionParams) => {
+  if (value && typeof value === 'string' && value.split(' ').length !== 12) {
+    return 'Seed phrase must consist of 12 words.'
+  }
+}
 
 export default class WalletImportView extends Component<Props, State> {
   static contextType = EnvironmentContext
@@ -76,14 +96,14 @@ export default class WalletImportView extends Component<Props, State> {
 
       commitMutation(this.context, {
         mutation: deleteWalletMutation,
-        variables: { input: deleteInput },
+        variables: { input: deleteInput, userID: this.props.userID },
         onCompleted: (response, errors) => {
           if (errors || !response) {
             const error =
               errors && errors.length ? errors[0] : new Error(IMPORT_ERR_MSG)
             this.displayError(error)
           } else {
-            this.commitImportMutation(fields.seed)
+            this.commitImportMutation(fields.walletName, fields.seed)
           }
         },
         onError: err => {
@@ -91,27 +111,30 @@ export default class WalletImportView extends Component<Props, State> {
         },
       })
     } else {
-      this.commitImportMutation(fields.seed)
+      this.commitImportMutation(fields.walletName, fields.seed)
     }
   }
 
-  commitImportMutation = (seed: string) => {
+  commitImportMutation = (name: string, seed: string) => {
     const importInput = {
-      type: 'ETHEREUM',
+      blockchain: 'ETHEREUM',
       mnemonic: seed,
-      name: 'Account 1',
+      name: name,
+      userID: this.props.userID,
     }
 
     commitMutation(this.context, {
       mutation: walletImportMutation,
-      variables: { input: importInput },
-      onCompleted: (response, errors) => {
-        if (errors || !response) {
+      variables: { input: importInput, userID: this.props.userID },
+      onCompleted: ({ importHDWallet }, errors) => {
+        if (errors || !importHDWallet) {
           const error =
             errors && errors.length ? errors[0] : new Error(IMPORT_ERR_MSG)
           this.displayError(error)
         } else {
-          this.props.onClose()
+          this.props.onSuccess
+            ? this.props.onSuccess(importHDWallet.hdWallet.accounts[0].address)
+            : this.props.onClose()
         }
       },
       onError: err => {
@@ -127,6 +150,12 @@ export default class WalletImportView extends Component<Props, State> {
     })
   }
 
+  walletNameValidation = ({ value }: FieldValidateFunctionParams) => {
+    if (value && typeof value === 'string' && value.length < 3) {
+      return 'Wallet name must be at least 3 characters'
+    }
+  }
+
   render() {
     const errorMsg = this.state.errorMsg ? (
       <Row size={1}>
@@ -136,40 +165,43 @@ export default class WalletImportView extends Component<Props, State> {
       </Row>
     ) : null
     return (
-      <ModalView onRequestClose={this.props.onClose}>
-        <Text variant="h2">Import Wallet</Text>
-        <Text>
-          Import an existing Ethereum wallet using your 12 word seed phrase.
+      <FormModalView
+        title="Import Account with Seed Phrase"
+        onRequestClose={this.props.onClose}
+        dismissButton="BACK"
+        confirmButton="IMPORT"
+        confirmTestID="import-wallet-button"
+        onSubmitForm={this.onSubmit}
+        full={this.props.full}>
+        <Text variant={['modalText', 'center']}>
+          Enter your secret twelve word phrase here
+          <br />
+          to restore your vault.
         </Text>
         <FormContainer>
-          <Form onSubmit={this.onSubmit}>
-            <Row size={1} top>
-              <Column>
-                <TextField
-                  autoFocus
-                  label="Seed Phrase"
-                  name="seed"
-                  required
-                  multiline
-                  numberOfLines={3}
-                  testID="import-wallet-seed-input"
-                />
-              </Column>
-            </Row>
-            {errorMsg}
-            <Row size={2} top>
-              <Column styles="align-items:flex-end;" smOffset={1}>
-                <Button
-                  variant=""
-                  title="IMPORT"
-                  testID="import-wallet-button"
-                  submit
-                />
-              </Column>
-            </Row>
-          </Form>
+          <TextField
+            autoFocus
+            required
+            label="Wallet name"
+            name="walletName"
+            testID="wallet-import-name-field"
+            validation={this.walletNameValidation}
+          />
+          <TextField
+            label="Seed Phrase"
+            placeholder="Separate each word with a single space"
+            name="seed"
+            required
+            multiline
+            validation={seedValidation}
+            numberOfLines={6}
+            testID="import-wallet-seed-input"
+          />
+          <Row size={1}>
+            <Column>{errorMsg}</Column>
+          </Row>
         </FormContainer>
-      </ModalView>
+      </FormModalView>
     )
   }
 }

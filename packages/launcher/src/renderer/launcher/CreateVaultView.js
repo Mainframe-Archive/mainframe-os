@@ -1,7 +1,7 @@
 //@flow
 
 import React, { Component } from 'react'
-import { ActivityIndicator } from 'react-native'
+
 import { uniqueID } from '@mainframe/utils-id'
 
 import { Button, TextField, Row, Column, Text } from '@morpheus-ui/core'
@@ -14,9 +14,9 @@ import {
 
 import styled from 'styled-components/native'
 
-import OnboardContainer from '../UIComponents/OnboardContainer'
-
+import Loader from '../UIComponents/Loader'
 import rpc from './rpc'
+import OnboardContainer from './onboarding/OnboardContainer'
 
 type Props = {
   onVaultCreated: () => void,
@@ -25,11 +25,39 @@ type Props = {
 type State = {
   error?: ?string,
   awaitingResponse?: boolean,
+  validPass?: boolean,
 }
 
 const FormContainer = styled.View`
   max-width: 260px;
 `
+
+const passwordValidation = ({ value }: FieldValidateFunctionParams) => {
+  if (value && typeof value === 'string' && value.length < 8) {
+    return 'Password must be at least 8 characters'
+  }
+}
+
+const ToolTipContent = (
+  <>
+    <Text variant="tooltipTitle">Where will my data be stored?</Text>
+    <Text variant="tooltipText">
+      Your user data is encrypted and stored locally on your device. You will be
+      asked to grant permission before any app can access your data.
+    </Text>
+    <Text variant="tooltipTitle">DO NOT FORGET YOUR PASSWORD</Text>
+  </>
+)
+
+const confirmPasswordValidation = ({
+  value,
+  values,
+}: FieldValidateFunctionParams) => {
+  if (values && value !== values.password) {
+    return 'Passwords do not match'
+  }
+  return ''
+}
 
 export default class CreateVaultView extends Component<Props, State> {
   state = {}
@@ -54,26 +82,10 @@ export default class CreateVaultView extends Component<Props, State> {
       // eslint-disable-next-line no-console
       console.warn(err)
       this.setState({
-        error: 'Error creating vault',
+        error: 'Error creating vault.',
         awaitingResponse: false,
       })
     }
-  }
-
-  passwordValidation = ({ value }: FieldValidateFunctionParams) => {
-    if (value && typeof value === 'string' && value.length < 8) {
-      return 'Password must be at least 8 characters'
-    }
-  }
-
-  confirmPasswordValidation = ({
-    value,
-    values,
-  }: FieldValidateFunctionParams) => {
-    if (values && value !== values.password) {
-      return 'Passwords do not match'
-    }
-    return ''
   }
 
   render() {
@@ -85,20 +97,23 @@ export default class CreateVaultView extends Component<Props, State> {
       </Row>
     ) : null
     const action = this.state.awaitingResponse ? (
-      <ActivityIndicator />
+      <Loader />
     ) : (
       <Button
         title="CONTINUE"
         variant="onboarding"
         Icon={CircleArrowRight}
         testID="create-vault-button-submit"
+        invalidFormDisabled
         submit
       />
     )
     return (
       <OnboardContainer
+        step={1}
         title="Welcome"
-        description="Let’s quickly secure your MainframeOS vault.">
+        description="Let’s quickly secure your data."
+        tooltipContent={ToolTipContent}>
         <FormContainer>
           <Form onSubmit={this.onSubmit}>
             <Row size={1} top>
@@ -109,7 +124,7 @@ export default class CreateVaultView extends Component<Props, State> {
                   name="password"
                   type="password"
                   testID="create-vault-input-password"
-                  validation={this.passwordValidation}
+                  validation={passwordValidation}
                   required
                 />
               </Column>
@@ -118,8 +133,9 @@ export default class CreateVaultView extends Component<Props, State> {
                   label="Confirm Password"
                   name="confirmPassword"
                   type="password"
+                  renderIfValid="password"
                   testID="create-vault-input-confirm-password"
-                  validation={this.confirmPasswordValidation}
+                  validation={confirmPasswordValidation}
                 />
               </Column>
             </Row>

@@ -1,5 +1,7 @@
 // @flow
 
+import { Observable } from 'rxjs'
+
 import ClientAPIs from '../ClientAPIs'
 import type {
   WalletAddHDAccountParams,
@@ -7,11 +9,17 @@ import type {
   WalletCreateHDParams,
   WalletImportResult,
   WalletImportMnemonicParams,
+  WalletGetUserEthWalletsParams,
   WalletGetEthWalletsResult,
   WalletCreateHDResult,
   WalletDeleteParams,
-  WalletSignTxParams,
+  WalletGetUserEthAccountsParams,
+  WalletGetEthAccountsResult,
+  WalletSetUserDefaulParams,
+  WalletEthSignTxParams,
   WalletSignTxResult,
+  WalletEthSignParams,
+  WalletSignResult,
 } from '../types'
 
 export default class WalletAPIs extends ClientAPIs {
@@ -37,21 +45,78 @@ export default class WalletAPIs extends ClientAPIs {
     return this._rpc.request('wallet_delete', params)
   }
 
-  async getEthWallets(): Promise<WalletGetEthWalletsResult> {
-    return this._rpc.request('wallet_getEthWallets')
+  async getUserEthWallets(
+    params: WalletGetUserEthWalletsParams,
+  ): Promise<WalletGetEthWalletsResult> {
+    return this._rpc.request('wallet_getUserEthWallets', params)
+  }
+
+  async getUserEthAccounts(
+    params: WalletGetUserEthAccountsParams,
+  ): Promise<WalletGetEthAccountsResult> {
+    return this._rpc.request('wallet_getUserEthAccounts', params)
   }
 
   async signTransaction(
-    params: WalletSignTxParams,
+    params: WalletEthSignTxParams,
   ): Promise<WalletSignTxResult> {
-    return this._rpc.request('wallet_signTx', params)
+    return this._rpc.request('wallet_signEthTx', params)
+  }
+
+  async sign(params: WalletEthSignParams): Promise<WalletSignResult> {
+    return this._rpc.request('wallet_signEthData', params)
   }
 
   async getLedgerEthAccounts(params: { pageNum: number }) {
     return this._rpc.request('wallet_ledgerGetEthAccounts', params)
   }
 
-  async addLedgerEthAccount(params: { index: number }) {
-    return this._rpc.request('wallet_ledgerAddEthAccount', params)
+  async addLedgerEthAccounts(params: { indexes: Array<number> }) {
+    return this._rpc.request('wallet_ledgerAddEthAccounts', params)
+  }
+
+  async setUsersDefaultWallet(params: WalletSetUserDefaulParams) {
+    return this._rpc.request('wallet_setUserDefault', params)
+  }
+
+  async subscribeEthAccountsChanged(): Promise<
+    Observable<{ networkID: string }>,
+  > {
+    const subscription = await this._rpc.request('wallet_subEthAccountsChanged')
+    const unsubscribe = () => {
+      return this._rpc.request('sub_unsubscribe', { id: subscription })
+    }
+
+    return Observable.create(observer => {
+      this._rpc.subscribe({
+        next: msg => {
+          if (
+            msg.method === 'eth_accounts_subscription' &&
+            msg.params != null &&
+            msg.params.subscription === subscription
+          ) {
+            const { result } = msg.params
+            if (result != null) {
+              try {
+                observer.next(result)
+              } catch (err) {
+                // eslint-disable-next-line no-console
+                console.warn('Error handling message', result, err)
+              }
+            }
+          }
+        },
+        error: err => {
+          observer.error(err)
+          unsubscribe()
+        },
+        complete: () => {
+          observer.complete()
+          unsubscribe()
+        },
+      })
+
+      return unsubscribe
+    })
   }
 }

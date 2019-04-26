@@ -29,15 +29,15 @@ export default class CreateEthWalletCommand extends Command {
 
     if (this.client) {
       const res = await this.client.wallet.createHDWallet({
-        chain: 'ethereum',
+        blockchain: 'ethereum',
         name: answers.name,
       })
 
       if (this.flags.userID && this.client) {
         await this.client.identity.linkEthWalletAccount({
           id: this.flags.userID,
-          walletID: res.walletID,
-          address: res.accounts[0].address,
+          walletID: res.localID,
+          address: res.accounts[0],
         })
       }
       this.log(res)

@@ -2,6 +2,7 @@
 
 import { MFID } from '@mainframe/data-types'
 import { openSigned, verifySignature } from '@mainframe/utils-crypto'
+import multibase from 'multibase'
 
 const KEY_TYPE = 'pub-key:ed25519'
 
@@ -38,6 +39,10 @@ export default class Identity {
 
   get publicKey(): Buffer {
     return this._key
+  }
+
+  base64PublicKey(): string {
+    return multibase.encode('base64', this.publicKey).toString()
   }
 
   verifySignature(message: Buffer, signature: Buffer): boolean {

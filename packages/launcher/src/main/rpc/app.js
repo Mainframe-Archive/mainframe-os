@@ -1,20 +1,33 @@
 // @flow
 
+import { createReadStream } from 'fs'
+import { Readable } from 'stream'
+import type { ListResult } from '@erebos/api-bzz-base'
+import getStream from 'get-stream'
 import {
   LOCAL_ID_SCHEMA,
-  type BlockchainWeb3SendParams,
+  type BlockchainEthSendParams,
+  type ContactsGetUserContactsResult,
+  type EthUnsubscribeParams,
   type WalletGetEthWalletsResult,
 } from '@mainframe/client'
+import { dialog } from 'electron'
 import type { Subscription as RxSubscription } from 'rxjs'
+import * as mime from 'mime'
 
 import { type AppContext, ContextSubscription } from '../contexts'
 import { withPermission } from '../permissions'
+import {
+  getStorageManifestHash,
+  downloadStream,
+  uploadStream,
+} from '../storage'
 
-class TopicSubscription extends ContextSubscription<RxSubscription> {
-  data: ?RxSubscription
+const STORAGE_KEY_PARAM = { type: 'string', pattern: /^([A-Za-z0-9_. =+-]+?)$/ }
 
+class CommsSubscription extends ContextSubscription<RxSubscription> {
   constructor() {
-    super('pss_subscription')
+    super('comms_subscription')
   }
 
   async dispose() {
@@ -24,41 +37,49 @@ class TopicSubscription extends ContextSubscription<RxSubscription> {
   }
 }
 
-export const sandboxed = {
-  api_version: (ctx: AppContext) => ctx.client.apiVersion(),
+class EthNetworkSubscription extends ContextSubscription<RxSubscription> {
+  constructor() {
+    super('eth_network_subscription')
+  }
 
-  // Blockchain
+  async dispose() {
+    if (this.data != null) {
+      this.data.unsubscribe()
+    }
+  }
+}
 
-  blockchain_web3Send: async (
-    ctx: AppContext,
-    params: BlockchainWeb3SendParams,
-  ): Promise<Object> => {
-    return ctx.client.blockchain.web3Send(params)
-  },
+class EthWalletSubscription extends ContextSubscription<RxSubscription> {
+  constructor() {
+    super('eth_accounts_subscription')
+  }
 
-  // Wallet
+  async dispose() {
+    if (this.data != null) {
+      this.data.unsubscribe()
+    }
+  }
+}
 
-  wallet_signTx: withPermission(
-    'BLOCKCHAIN_SEND',
-    (ctx: AppContext, params: any) => ctx.client.wallet.signTransaction(params),
-    // TODO notify app if using ledger to feedback awaiting sign
-  ),
+class EthBlockchainSubscription extends ContextSubscription<RxSubscription> {
+  constructor(id: string) {
+    super('eth_blockchain_subscription', null, id)
+  }
 
-  wallet_getEthWallets: async (
-    ctx: AppContext,
-  ): Promise<WalletGetEthWalletsResult> => {
-    return ctx.client.wallet.getEthWallets()
-  },
+  async dispose() {
+    if (this.data != null) {
+      this.data.unsubscribe()
+    }
+  }
+}
 
+const sharedMethods = {
   wallet_getEthAccounts: async (ctx: AppContext): Promise<Array<string>> => {
-    const ethWallets = await ctx.client.wallet.getEthWallets()
-    const accounts = Object.keys(ethWallets).reduce((acc, key) => {
-      ethWallets[key].forEach(w => acc.push(...w.accounts))
-      return acc
-    }, [])
+    // $FlowFixMe indexer property
+    const accounts = await ctx.client.wallet.getUserEthAccounts({
+      userID: ctx.appSession.user.localID,
+    })
     if (
-      // TODO: We'll also eventually want default
-      // accounts attached to identities
       ctx.appSession.defaultEthAccount &&
       accounts.includes(ctx.appSession.defaultEthAccount)
     ) {
@@ -69,67 +90,289 @@ export const sandboxed = {
     }
     return accounts
   },
-
-  // Temporary PSS APIs - should be removed when communication APIs are settled
-  pss_baseAddr: (ctx: AppContext): Promise<string> => {
-    return ctx.client.pss.baseAddr()
+  blockchain_ethSend: async (
+    ctx: AppContext,
+    params: BlockchainEthSendParams,
+  ): Promise<Object> => {
+    return ctx.client.blockchain.ethSend(params)
   },
-  pss_createTopicSubscription: {
-    params: {
-      topic: 'string',
-    },
-    handler: async (
+}
+
+export const sandboxed = {
+  ...sharedMethods,
+
+  api_version: (ctx: AppContext) => ctx.client.apiVersion(),
+
+  // Blockchain
+
+  blockchain_ethSubscribe: async (
+    ctx: AppContext,
+    params: BlockchainEthSendParams,
+  ): Promise<Object> => {
+    const { subscription, id } = await ctx.client.blockchain.ethSubscribe(
+      params,
+    )
+    const sub = new EthBlockchainSubscription(id)
+    sub.data = subscription.subscribe(msg => {
+      ctx.notifySandboxed(sub.id, msg.result)
+    })
+    ctx.setSubscription(sub)
+    return sub.id
+  },
+
+  blockchain_ethUnsubscribe: async (
+    ctx: AppContext,
+    params: EthUnsubscribeParams,
+  ): Promise<Object> => {
+    return ctx.client.blockchain.ethUnsubscribe(params)
+  },
+
+  blockchain_subscribeNetworkChanged: async (
+    ctx: AppContext,
+  ): Promise<Object> => {
+    const subscription = await ctx.client.blockchain.subscribeNetworkChanged()
+    const sub = new EthNetworkSubscription()
+    sub.data = subscription.subscribe(msg => {
+      ctx.notifySandboxed(sub.id, msg)
+    })
+    ctx.setSubscription(sub)
+    return { id: sub.id }
+  },
+
+  wallet_subEthAccountsChanged: async (ctx: AppContext): Promise<Object> => {
+    const subscription = await ctx.client.wallet.subscribeEthAccountsChanged()
+    const sub = new EthWalletSubscription()
+    sub.data = subscription.subscribe(msg => {
+      ctx.notifySandboxed(sub.id, msg)
+    })
+    ctx.setSubscription(sub)
+    return { id: sub.id }
+  },
+
+  // Wallet
+
+  wallet_signEthTx: withPermission(
+    'BLOCKCHAIN_SEND',
+    (ctx: AppContext, params: any) => ctx.client.wallet.signTransaction(params),
+  ),
+
+  wallet_signEthData: withPermission(
+    'BLOCKCHAIN_SIGN',
+    (ctx: AppContext, params: any) => ctx.client.wallet.sign(params),
+  ),
+
+  // Comms
+
+  comms_publish: withPermission(
+    'COMMS_CONTACT',
+    async (
       ctx: AppContext,
-      params: { topic: string },
+      params: { contactID: string, key: string, value: Object },
+    ): Promise<void> => {
+      const appID = ctx.appSession.app.appID
+      const userID = ctx.appSession.user.id
+      return ctx.client.comms.publish({ ...params, appID, userID })
+    },
+  ),
+
+  comms_subscribe: withPermission(
+    'COMMS_CONTACT',
+    async (
+      ctx: AppContext,
+      params: { contactID: string, key: string },
     ): Promise<string> => {
-      const subscription = await ctx.client.pss.createTopicSubscription(params)
-      const sub = new TopicSubscription()
+      const appID = ctx.appSession.app.appID
+      const userID = ctx.appSession.user.id
+      const subscription = await ctx.client.comms.subscribe({
+        ...params,
+        appID,
+        userID,
+      })
+      const sub = new CommsSubscription()
       sub.data = subscription.subscribe(msg => {
         ctx.notifySandboxed(sub.id, msg)
       })
       ctx.setSubscription(sub)
       return sub.id
     },
-  },
-  pss_getPublicKey: (ctx: AppContext): Promise<string> => {
-    return ctx.client.pss.getPublicKey()
-  },
-  pss_sendAsym: {
-    params: {
-      key: 'string',
-      topic: 'string',
-      message: 'string',
-    },
-    handler: (
+  ),
+
+  comms_getSubscribable: withPermission(
+    'COMMS_CONTACT',
+    async (
       ctx: AppContext,
-      params: { key: string, topic: string, message: string },
-    ): Promise<null> => {
-      return ctx.client.pss.sendAsym(params)
+      params: { contactID: string },
+    ): Promise<Array<string>> => {
+      const appID = ctx.appSession.app.appID
+      const userID = ctx.appSession.user.id
+      return ctx.client.comms.getSubscribable({ ...params, appID, userID })
+    },
+  ),
+
+  // Contacts
+
+  contacts_select: withPermission(
+    'CONTACTS_READ',
+    async (ctx: AppContext, params: { multi?: boolean }) => {
+      const res = await ctx.trustedRPC.request('user_request', {
+        key: 'CONTACTS_SELECT',
+        params: { CONTACTS_SELECT: params },
+      })
+      if (!res || !res.granted || !res.data || !res.data.selectedContactIDs) {
+        return { contacts: [] }
+      }
+      const userID = ctx.appSession.user.id
+      const appID = ctx.appSession.app.appID
+      const contactIDs = res.data.selectedContactIDs
+      const contactsToApprove = contactIDs.map(id => ({
+        localID: id,
+        publicDataOnly: true, // TODO allow user to set only public data
+      }))
+      const {
+        approvedContacts,
+      } = await ctx.client.contacts.approveContactsForApp({
+        appID,
+        userID,
+        contactsToApprove,
+      })
+      const ids = approvedContacts.map(c => c.id)
+
+      const contactsRes = await ctx.client.contacts.getAppUserContacts({
+        appID,
+        userID,
+        contactIDs: ids,
+      })
+      return contactsRes.contacts
+    },
+  ),
+
+  contacts_getData: withPermission(
+    'CONTACTS_READ',
+    async (ctx: AppContext, params: { contactIDs: Array<string> }) => {
+      const userID = ctx.appSession.user.id
+      const appID = ctx.appSession.app.appID
+      const contactsRes = await ctx.client.contacts.getAppUserContacts({
+        appID,
+        userID,
+        contactIDs: params.contactIDs,
+      })
+      return contactsRes.contacts
+    },
+  ),
+
+  contacts_getApproved: withPermission(
+    'CONTACTS_READ',
+    async (ctx: AppContext) => {
+      const userID = ctx.appSession.user.id
+      const appID = ctx.appSession.app.appID
+      const contactsRes = await ctx.client.contacts.getAppApprovedContacts({
+        appID,
+        userID,
+      })
+      return contactsRes.contacts
+    },
+  ),
+
+  storage_promptUpload: {
+    params: {
+      key: STORAGE_KEY_PARAM,
+    },
+    handler: (ctx: AppContext, params: { key: string }): Promise<boolean> => {
+      return new Promise((resolve, reject) => {
+        dialog.showOpenDialog(
+          ctx.window,
+          { title: 'Select file to upload', buttonLabel: 'Upload' },
+          async filePaths => {
+            if (filePaths.length === 0) {
+              // No file selected
+              resolve(false)
+            } else {
+              try {
+                const filePath = filePaths[0]
+                await uploadStream(ctx, {
+                  contentType: mime.getType(filePath),
+                  key: params.key,
+                  stream: createReadStream(filePath),
+                })
+                resolve(true)
+              } catch (error) {
+                reject(new Error('Failed to access storage'))
+              }
+            }
+          },
+        )
+      })
     },
   },
-  pss_setPeerPublicKey: {
-    params: {
-      key: 'string',
-      topic: 'string',
-    },
-    handler: (
+
+  storage_list: {
+    handler: async (
       ctx: AppContext,
-      params: { key: string, topic: string },
-    ): Promise<null> => {
-      return ctx.client.pss.setPeerPublicKey(params)
+    ): Promise<Array<{ contentType: string, key: string }>> => {
+      try {
+        const { manifestHash } = await getStorageManifestHash(ctx)
+        const list: ListResult = await ctx.bzz.list(manifestHash)
+        return list.entries == null
+          ? []
+          : list.entries.map(meta => {
+              return { contentType: meta.contentType, key: meta.path }
+            })
+      } catch (error) {
+        throw new Error('Failed to access storage')
+      }
     },
   },
-  pss_stringToTopic: {
+
+  storage_set: {
     params: {
-      string: 'string',
+      key: STORAGE_KEY_PARAM,
+      data: 'string',
     },
-    handler: (ctx: AppContext, params: { string: string }): Promise<string> => {
-      return ctx.client.pss.stringToTopic(params)
+    handler: async (
+      ctx: AppContext,
+      params: {
+        key: string,
+        data: string,
+      },
+    ): Promise<void> => {
+      try {
+        const stream = new Readable()
+        stream.push(params.data)
+        stream.push(null)
+        await uploadStream(ctx, {
+          contentType: 'text/plain',
+          key: params.key,
+          stream,
+        })
+      } catch (error) {
+        throw new Error('Failed to access storage')
+      }
+    },
+  },
+
+  storage_get: {
+    params: {
+      key: STORAGE_KEY_PARAM,
+    },
+    handler: async (
+      ctx: AppContext,
+      params: { key: string },
+    ): Promise<?string> => {
+      try {
+        const stream = await downloadStream(ctx, params.key)
+        if (stream !== null) {
+          return await getStream(stream)
+        }
+      } catch (error) {
+        throw new Error('Failed to access storage')
+      }
     },
   },
 }
 
 export const trusted = {
+  ...sharedMethods,
+
   sub_createPermissionDenied: (ctx: AppContext): { id: string } => ({
     id: ctx.createPermissionDeniedSubscription(),
   }),
@@ -140,5 +383,64 @@ export const trusted = {
     handler: (ctx: AppContext, params: { id: string }): void => {
       ctx.removeSubscription(params.id)
     },
+  },
+
+  blockchain_subscribeNetworkChanged: async (
+    ctx: AppContext,
+  ): Promise<Object> => {
+    const subscription = await ctx.client.blockchain.subscribeNetworkChanged()
+    const sub = new EthNetworkSubscription()
+    sub.data = subscription.subscribe(msg => {
+      ctx.notifyTrusted(sub.id, msg)
+    })
+    ctx.setSubscription(sub)
+    return { id: sub.id }
+  },
+
+  wallet_getUserEthWallets: async (
+    ctx: AppContext,
+  ): Promise<WalletGetEthWalletsResult> => {
+    return ctx.client.wallet.getUserEthWallets({
+      userID: ctx.appSession.user.localID,
+    })
+  },
+
+  wallet_selectDefault: async (
+    ctx: AppContext,
+  ): Promise<{ address: ?string }> => {
+    const res = await ctx.trustedRPC.request('user_request', {
+      key: 'WALLET_ACCOUNT_SELECT',
+      params: {},
+    })
+    let address
+    if (res.data && res.data.address) {
+      address = res.data.address
+      ctx.appSession.defaultEthAccount = res.data.address
+      const userID = ctx.appSession.user.id
+      const appID = ctx.appSession.app.appID
+      await ctx.client.app.setUserDefaultWallet({
+        userID,
+        appID,
+        address,
+      })
+    }
+    return { address }
+  },
+
+  wallet_subEthAccountsChanged: async (ctx: AppContext): Promise<Object> => {
+    const subscription = await ctx.client.wallet.subscribeEthAccountsChanged()
+    const sub = new EthWalletSubscription()
+    sub.data = subscription.subscribe(msg => {
+      ctx.notifyTrusted(sub.id, msg)
+    })
+    ctx.setSubscription(sub)
+    return { id: sub.id }
+  },
+
+  contacts_getUserContacts: (
+    ctx: AppContext,
+    params: { userID: string },
+  ): Promise<ContactsGetUserContactsResult> => {
+    return ctx.client.contacts.getUserContacts(params)
   },
 }

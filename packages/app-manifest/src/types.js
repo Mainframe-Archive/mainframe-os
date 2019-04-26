@@ -2,6 +2,8 @@
 
 import type { StrictPermissionsRequirements } from '@mainframe/app-permissions'
 
+export type bzzHash = string
+
 export type ManifestData = {
   id: string,
   author: {
@@ -10,7 +12,8 @@ export type ManifestData = {
   },
   name: string,
   version: string,
-  contentsURI: string,
+  contentsHash: bzzHash,
+  updateHash: bzzHash,
   permissions: StrictPermissionsRequirements,
 }
 
@@ -22,7 +25,8 @@ export type PartialManifestData = {
   },
   name: string,
   version: string,
-  contentsURI: ?string,
+  contentsHash: ?bzzHash,
+  updateHash: ?bzzHash,
   permissions: ?StrictPermissionsRequirements,
 }
 

@@ -10,19 +10,26 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native-web'
+import { isAddress } from 'web3-utils'
 
 import applyContext, { type ContextProps } from './Context'
-import { ABI } from '@mainframe/contract-utils'
+import { ABI } from '@mainframe/eth'
+
+type Tabs = 'tokens' | 'ether' | 'contact' | 'sign'
 
 type State = {
   recipient: string,
-  tokenAddress: string,
   amount: string,
   data: string,
   errorMsg?: ?string,
-  txReceipt?: ?string,
+  message: string,
+  signedMessage?: string,
+  currentTX: ?{
+    hash?: ?string,
+    state: 'broadcast' | 'mined' | 'confirmed',
+  },
   processingTransaction?: ?boolean,
-  sendType: 'tokens' | 'ether',
+  sendType: Tabs,
 }
 
 class SendFunds extends Component<ContextProps, State> {
@@ -30,8 +37,9 @@ class SendFunds extends Component<ContextProps, State> {
     recipient: '',
     amount: '',
     data: '',
-    tokenAddress: '',
+    message: '',
     sendType: 'ether',
+    currentTX: undefined,
   }
 
   // HANDLERS
@@ -49,33 +57,45 @@ class SendFunds extends Component<ContextProps, State> {
     })
   }
 
-  onChangeTokenAddress = (value: string) => {
-    this.setState({
-      tokenAddress: value,
-    })
-  }
-
   onChangeData = (value: string) => {
     this.setState({
       data: value,
     })
   }
 
-  onPressShowEthSend = () => {
+  onChangeMessage = (value: string) => {
     this.setState({
-      sendType: 'ether',
+      message: value,
     })
   }
 
-  onPressShowTokenSend = () => {
+  onPressTab = (type: Tabs) => {
     this.setState({
-      sendType: 'tokens',
+      sendType: type,
     })
+  }
+
+  onFocusContactRecipient = () => {
+    this.selectContact()
+  }
+
+  async selectContact() {
+    const { sdk } = this.props
+    try {
+      const contact = await sdk.contacts.selectContact()
+      if (contact && contact.data.profile.ethAddress) {
+        this.setState({
+          recipient: contact.data.profile.ethAddress,
+        })
+      }
+    } catch (err) {
+      console.log('contacts err: ', err)
+    }
   }
 
   validateSend(): boolean {
     const { web3 } = this.props
-    if (!web3.utils.isAddress(this.state.recipient)) {
+    if (!isAddress(this.state.recipient)) {
       this.setState({ errorMsg: 'Please provide a valid recipent address' })
       return false
     }
@@ -86,88 +106,108 @@ class SendFunds extends Component<ContextProps, State> {
     return true
   }
 
-  validateSendTokens() {
-    const { web3 } = this.props
-    if (this.validateSend()) {
-      if (!web3.utils.isAddress(this.state.tokenAddress)) {
-        this.setState({ errorMsg: 'Please provide a valid token address' })
-        return false
-      }
-    }
-    return true
-  }
-
   onPressSendToken = async () => {
-    const { web3 } = this.props
-    if (!this.validateSend()) {
-      return
-    }
-    const tokenContract = new web3.eth.Contract(
-      ABI.ERC20,
-      this.state.tokenAddress,
-    )
-    const accounts = await web3.eth.getAccounts()
-    // TODO: fetch decimal
-    const amount = web3.utils.toWei(this.state.amount)
-    try {
-      this.sendTransaction(() => {
-        return tokenContract.methods
-          .transfer(this.state.recipient, amount)
-          .send({
-            from: accounts[0],
-          })
-      })
-    } catch (err) {
-      this.setState({
-        processingTransaction: false,
-        errorMsg: err.message || 'Error processing transaction',
-      })
-    }
+    this.sendTransaction(true)
   }
 
   onPressSendEth = async () => {
-    const { web3 } = this.props
-    const accounts = await web3.eth.getAccounts()
-    const amount = web3.utils.toWei(this.state.amount || '0')
+    this.sendTransaction()
+  }
 
+  onPressPayContact = async () => {
+    const { sdk } = this.props
+    const params = {
+      currency: 'ETH',
+      value: this.state.amount,
+    }
+    this.setState({
+      currentTX: undefined,
+      errorMsg: undefined,
+    })
     try {
-      this.sendTransaction(() => {
-        return this.props.web3.eth.sendTransaction({
-          data: this.state.data,
-          to: this.state.recipient,
-          from: accounts[0],
-          value: amount,
-        })
-      })
+      const tx = await sdk.payments.payContact(params)
+      this.listenTX(tx)
     } catch (err) {
       this.setState({
-        processingTransaction: false,
-        errorMsg: err.message || 'Error processing transaction',
+        errorMsg: err.message || 'Error sending transaction',
       })
     }
   }
 
-  sendTransaction = txFunc => {
+  sendTransaction = async (mft?: boolean) => {
+    const { web3, sdk } = this.props
+
+    if (!this.validateSend()) {
+      return
+    }
     this.setState({
       processingTransaction: true,
-      txReceipt: undefined,
+      currentTX: undefined,
       errorMsg: undefined,
     })
-    txFunc()
-      .on('error', err => {
-        console.warn(err)
+
+    const account = await sdk.ethereum.getDefaultAccount()
+
+    const params = {
+      from: account,
+      to: this.state.recipient,
+      value: this.state.amount,
+    }
+
+    try {
+      const txSub = mft
+        ? await sdk.ethereum.sendMFT(params)
+        : await sdk.ethereum.sendETH(params)
+
+      this.listenTX(txSub)
+    } catch (err) {
+      this.setState({
+        processingTransaction: false,
+        errorMsg: err.message || 'Error sending transaction',
+      })
+    }
+  }
+
+  listenTX(tx) {
+    tx.on('hash', hash => {
+      this.setState({
+        currentTX: {
+          hash,
+          state: 'broadcast',
+        },
+      })
+    })
+      .on('mined', () => {
         this.setState({
           processingTransaction: false,
-          errorMsg: err.message || 'Error processing transaction',
+          currentTX: {
+            ...this.state.currentTX,
+            state: 'mined',
+          },
         })
       })
-      .on('receipt', receipt => {
-        console.log(receipt)
+      .on('confirmed', () => {
+        this.setState({
+          currentTX: {
+            ...this.state.currentTX,
+            state: 'confirmed',
+          },
+        })
+      })
+      .on('error', error => {
         this.setState({
           processingTransaction: false,
-          txReceipt: receipt.transactionHash,
+          errorMsg: error.message || 'Error sending transaction',
         })
       })
+  }
+
+  onPressSign = async () => {
+    const { web3, sdk } = this.props
+
+    const account = await sdk.ethereum.getDefaultAccount()
+    const signedMessage = await sdk.ethereum.sign(this.state.message, account)
+    this.setState({ signedMessage })
   }
 
   // RENDER
@@ -175,12 +215,6 @@ class SendFunds extends Component<ContextProps, State> {
   renderTokenSend() {
     return (
       <View>
-        <TextInput
-          placeholder="Token address"
-          style={styles.textInput}
-          onChangeText={this.onChangeTokenAddress}
-          value={this.state.tokenAddress}
-        />
         <TextInput
           placeholder="Recipient address"
           style={styles.textInput}
@@ -223,34 +257,94 @@ class SendFunds extends Component<ContextProps, State> {
     )
   }
 
+  renderPayContact() {
+    return (
+      <View>
+        <TextInput
+          placeholder="Amount"
+          style={styles.textInput}
+          onChangeText={this.onChangeAmount}
+          value={this.state.amount}
+        />
+      </View>
+    )
+  }
+
+  renderSignMessage() {
+    const signed = this.state.signedMessage ? (
+      <View style={[styles.feedbackContainer, styles.receiptContainer]}>
+        <Text>{this.state.signedMessage}</Text>
+      </View>
+    ) : null
+    return (
+      <View>
+        <TextInput
+          placeholder="Message"
+          style={styles.textInput}
+          onChangeText={this.onChangeMessage}
+          value={this.state.message}
+          numberOfLines={4}
+          multiline
+        />
+        {signed}
+      </View>
+    )
+  }
+
   renderTabs() {
     const ethStyles = [styles.tab]
     const tokenStyles = [styles.tab]
-    if (this.state.sendType === 'ether') {
-      ethStyles.push(styles.tabSelected)
-    } else {
-      tokenStyles.push(styles.tabSelected)
+    const tabStyles = {
+      ether: [styles.tab],
+      tokens: [styles.tab],
+      contact: [styles.tab],
+      sign: [styles.tab],
     }
+    tabStyles[this.state.sendType].push(styles.tabSelected)
 
     return (
       <View style={styles.tabs}>
-        <TouchableOpacity onPress={this.onPressShowEthSend} style={ethStyles}>
+        <TouchableOpacity
+          onPress={() => this.onPressTab('ether')}
+          style={tabStyles.ether}>
           <Text style={styles.tabLabel}>ETHER</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          onPress={this.onPressShowTokenSend}
-          style={tokenStyles}>
-          <Text style={styles.tabLabel}>TOKENS</Text>
+          onPress={() => this.onPressTab('tokens')}
+          style={tabStyles.tokens}>
+          <Text style={styles.tabLabel}>MFT</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => this.onPressTab('contact')}
+          style={tabStyles.contact}>
+          <Text style={styles.tabLabel}>PAY CONTACT</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => this.onPressTab('sign')}
+          style={tabStyles.sign}>
+          <Text style={styles.tabLabel}>SIGN MESSAGE</Text>
         </TouchableOpacity>
       </View>
     )
   }
 
   renderResult() {
-    if (this.state.txReceipt) {
+    const { currentTX } = this.state
+    if (currentTX) {
+      const style =
+        currentTX.state === 'broadcast'
+          ? styles.broadcastContainer
+          : styles.receiptContainer
+      const label =
+        currentTX.state === 'broadcast'
+          ? 'Waiting to be mined: '
+          : 'Transaction confirmed: '
       return (
-        <View style={[styles.feedbackContainer, styles.receiptContainer]}>
-          <Text>{this.state.txReceipt}</Text>
+        <View style={[styles.feedbackContainer, style]}>
+          <Text>
+            {label}
+            {currentTX.hash}
+          </Text>
         </View>
       )
     }
@@ -267,20 +361,33 @@ class SendFunds extends Component<ContextProps, State> {
   }
 
   render() {
-    const content =
-      this.state.sendType === 'ether'
-        ? this.renderEthSend()
-        : this.renderTokenSend()
-
-    const onPress =
-      this.state.sendType === 'ether'
-        ? this.onPressSendEth
-        : this.onPressSendToken
+    let content, onPress
+    let buttonTitle = 'Send'
+    switch (this.state.sendType) {
+      case 'tokens':
+        content = this.renderTokenSend()
+        onPress = this.onPressSendToken
+        break
+      case 'contact':
+        content = this.renderPayContact()
+        onPress = this.onPressPayContact
+        break
+      case 'sign':
+        content = this.renderSignMessage()
+        onPress = this.onPressSign
+        buttonTitle = 'Sign'
+        break
+      case 'ether':
+      default:
+        content = this.renderEthSend()
+        onPress = this.onPressSendEth
+        break
+    }
 
     const button = this.state.processingTransaction ? (
       <ActivityIndicator />
     ) : (
-      <Button title="Send" onPress={onPress} />
+      <Button title={buttonTitle} onPress={onPress} />
     )
     return (
       <View style={styles.container}>
@@ -321,7 +428,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 2,
     color: '#999999',
     borderColor: '#dddddd',
-    paddingHorizontal: 10,
+    paddingHorizontal: 12,
     paddingVertical: 5,
   },
   tabSelected: {
@@ -329,7 +436,7 @@ const styles = StyleSheet.create({
     borderColor: '#4896EC',
   },
   tabLabel: {
-    fontSize: 16,
+    fontSize: 13,
     letterSpacing: 2,
   },
   dataInput: {
@@ -345,9 +452,12 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   receiptContainer: {
-    color: '#535748',
     backgroundColor: '#e6f2bf',
     borderColor: '#d3e2a7',
+  },
+  broadcastContainer: {
+    backgroundColor: '#F8F2E2',
+    borderColor: '#E7E2D2',
   },
   errorContainer: {
     color: '#473f3e',

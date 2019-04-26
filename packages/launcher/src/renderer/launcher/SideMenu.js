@@ -1,9 +1,17 @@
 //@flow
 
 import React, { Component } from 'react'
+import {
+  graphql,
+  QueryRenderer,
+  createFragmentContainer,
+  // $FlowFixMe: requestSubscription not present in Flow definition but exported by library
+  requestSubscription,
+  type Disposable,
+  type Environment,
+} from 'react-relay'
 
 import { Button } from '@morpheus-ui/core'
-
 import styled from 'styled-components/native'
 
 //import Icons
@@ -20,6 +28,14 @@ import SettingsFilledIcon from '@morpheus-ui/icons/SettingsFilledMd'
 import NotificationsIcon from '@morpheus-ui/icons/NotificationsMd'
 import NotificationsFilledIcon from '@morpheus-ui/icons/NotificationsFilledMd'
 
+import SvgSelectedPointer from '../UIComponents/SVGSelectedPointer'
+import RelayLoaderView from './RelayLoaderView'
+import { EnvironmentContext } from './RelayEnvironment'
+import applyContext, { type CurrentUser } from './LauncherContext'
+
+import type { SideMenu_contacts as Contacts } from './__generated__/SideMenu_contacts.graphql'
+import type { SideMenu_apps as Apps } from './__generated__/SideMenu_apps.graphql'
+
 export type ScreenNames =
   | 'apps'
   | 'identities'
@@ -28,10 +44,18 @@ export type ScreenNames =
   | 'settings'
   | 'notifications'
 
-type Props = {
+type QueryProps = {
+  user: CurrentUser,
   onSelectMenuItem: (name: ScreenNames) => void,
   selected: ScreenNames,
-  notifications: Array<ScreenNames>,
+}
+
+type Props = QueryProps & {
+  contacts: Contacts,
+  apps: Apps,
+  relay: {
+    environment: Environment,
+  },
 }
 
 type State = {
@@ -69,7 +93,7 @@ const BUTTONS: Object = {
     activeIcon: WalletsFilledIcon,
   },
   settings: {
-    title: 'Settings',
+    title: 'More',
     icon: SettingsIcon,
     activeIcon: SettingsFilledIcon,
   },
@@ -82,6 +106,7 @@ const BUTTONS: Object = {
 
 const Container = styled.View`
   width: 126px;
+  padding-top: 20px;
   background-color: ${props => props.theme.colors.LIGHT_GREY_F5};
 `
 
@@ -90,9 +115,7 @@ const ScrollView = styled.ScrollView`
 `
 
 const MenuItem = styled.View`
-  padding: ${props => props.theme.spacing * 2}px 0
-    ${props => props.theme.spacing}px 0;
-  text-align: center;
+  padding: 10px 0 15px 0;
   align-items: center;
 `
 
@@ -113,19 +136,39 @@ const SelectedPointer = styled.View`
   margin-top: -8px;
 `
 
-const SvgSelected = props => (
-  <svg width="21px" height="42px" viewBox="0 0 29 60" {...props}>
-    <path
-      d="M28.05 60.016L2.243 34.208a6 6 0 0 1 0-8.485L27.965 0l.085 60.016z"
-      fill="#FFF"
-      fillRule="evenodd"
-    />
-  </svg>
-)
+const CONTACTS_CHANGED_SUBSCRIPTION = graphql`
+  subscription SideMenuContactsChangedSubscription($userID: String!) {
+    contactsChanged {
+      viewer {
+        contacts {
+          invitesCount(userID: $userID)
+        }
+      }
+    }
+  }
+`
 
-export default class SideMenu extends Component<Props, State> {
+class SideMenu extends Component<Props, State> {
+  _contactsChangedSub: Disposable
+
   static defaultProps = {
     notifications: [],
+  }
+
+  componentDidMount() {
+    this._contactsChangedSub = requestSubscription(
+      this.props.relay.environment,
+      {
+        subscription: CONTACTS_CHANGED_SUBSCRIPTION,
+        variables: {
+          userID: this.props.user.localID,
+        },
+      },
+    )
+  }
+
+  componentWillUnmount() {
+    this._contactsChangedSub.dispose()
   }
 
   onPressMenuItem = (name: ScreenNames) => {
@@ -135,12 +178,25 @@ export default class SideMenu extends Component<Props, State> {
     this.props.onSelectMenuItem(name)
   }
 
+  hasNotifications(type: ScreenNames) {
+    const { apps, contacts } = this.props
+    switch (type) {
+      case 'contacts':
+        return contacts.invitesCount > 0
+      case 'apps':
+        return apps.updatesCount > 0
+      default:
+        return false
+    }
+  }
+
   renderMenuItem(item: ScreenNames) {
     const selected = this.props.selected === item
     const data = BUTTONS[item]
     const icon = selected ? data.activeIcon : data.icon
     const variant = selected ? ['leftNav', 'leftNavActive'] : 'leftNav'
-    const notifications = this.props.notifications.indexOf(item) >= 0
+
+    const notifications = this.hasNotifications(item)
 
     return (
       <MenuItem key={item}>
@@ -152,7 +208,7 @@ export default class SideMenu extends Component<Props, State> {
         />
         {selected && (
           <SelectedPointer>
-            <SvgSelected />
+            <SvgSelectedPointer />
           </SelectedPointer>
         )}
         {<NotificationDot notifications={notifications} />}
@@ -168,3 +224,51 @@ export default class SideMenu extends Component<Props, State> {
     )
   }
 }
+
+const SideMenuRelayContainer = createFragmentContainer(SideMenu, {
+  contacts: graphql`
+    fragment SideMenu_contacts on Contacts
+      @argumentDefinitions(userID: { type: "String!" }) {
+      invitesCount(userID: $userID)
+    }
+  `,
+  apps: graphql`
+    fragment SideMenu_apps on Apps {
+      updatesCount
+    }
+  `,
+})
+
+export class SideMenuRenderer extends Component<QueryProps> {
+  static contextType = EnvironmentContext
+
+  render() {
+    return (
+      <QueryRenderer
+        environment={this.context}
+        query={graphql`
+          query SideMenuQuery($userID: String!) {
+            viewer {
+              apps {
+                ...SideMenu_apps
+              }
+              contacts {
+                ...SideMenu_contacts @arguments(userID: $userID)
+              }
+            }
+          }
+        `}
+        variables={{ userID: this.props.user.localID }}
+        render={({ error, props }) => {
+          if (error || !props) {
+            return <RelayLoaderView error={error ? error.message : undefined} />
+          } else {
+            return <SideMenuRelayContainer {...props.viewer} {...this.props} />
+          }
+        }}
+      />
+    )
+  }
+}
+
+export default applyContext(SideMenuRenderer)

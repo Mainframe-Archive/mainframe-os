@@ -1,8 +1,12 @@
 {
   "name": "@mainframe/sdk",
-  "version": "0.1.0",
+  "version": "0.3.1",
   "main": "cjs/index.js",
   "license": "MIT",
+  "files": [
+    "cjs/*",
+    "dist/*"
+  ],
   "scripts": {
     "clean": "del-cli cjs dist",
     "webpack": "webpack",
@@ -13,15 +17,16 @@
     "test:types": "flow check"
   },
   "dependencies": {
-    "@babel/runtime": "^7.1.2",
-    "ethereumjs-abi": "^0.6.5",
-    "web3-provider-engine": "^14.1.0"
+    "@babel/runtime": "^7.4.2",
+    "@mainframe/eth": "^0.3.1",
+    "ethereumjs-abi": "^0.6.6",
+    "eventemitter3": "^3.1.0"
   },
   "devDependencies": {
-    "@mainframe/rpc-stream": "^0.2.4",
+    "@mainframe/rpc-stream": "^0.3.0",
     "babel-loader": "^8.0.4",
-    "flow-bin": "^0.87.0",
-    "webpack": "^4.20.2",
-    "webpack-cli": "^3.1.2"
+    "flow-bin": "^0.95.1",
+    "webpack": "^4.29.6",
+    "webpack-cli": "^3.3.0"
   }
 }

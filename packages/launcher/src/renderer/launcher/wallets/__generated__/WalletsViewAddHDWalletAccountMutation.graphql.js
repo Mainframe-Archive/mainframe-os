@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 8e38b707847052034fa01d0f6863202d
+ * @relayHash 8c76b61a7fd07e473b8870a431df0722
  */
 
 /* eslint-disable */
@@ -9,23 +9,28 @@
 
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
+type Launcher_identities$ref = any;
 type WalletsView_wallets$ref = any;
 export type AddHDWalletAccountInput = {
   walletID: string,
   index: number,
-  name: string,
+  userID?: ?string,
   clientMutationId?: ?string,
 };
 export type WalletsViewAddHDWalletAccountMutationVariables = {|
-  input: AddHDWalletAccountInput
+  input: AddHDWalletAccountInput,
+  userID: string,
 |};
 export type WalletsViewAddHDWalletAccountMutationResponse = {|
   +addHDWalletAccount: ?{|
     +address: string,
     +viewer: {|
+      +identities: {|
+        +$fragmentRefs: Launcher_identities$ref
+      |},
       +wallets: {|
         +$fragmentRefs: WalletsView_wallets$ref
-      |}
+      |},
     |},
   |}
 |};
@@ -39,24 +44,51 @@ export type WalletsViewAddHDWalletAccountMutation = {|
 /*
 mutation WalletsViewAddHDWalletAccountMutation(
   $input: AddHDWalletAccountInput!
+  $userID: String!
 ) {
   addHDWalletAccount(input: $input) {
     address
     viewer {
+      identities {
+        ...Launcher_identities
+      }
       wallets {
-        ...WalletsView_wallets
+        ...WalletsView_wallets_3iqrP
       }
       id
     }
   }
 }
 
-fragment WalletsView_wallets on WalletsQuery {
-  ethWallets {
+fragment Launcher_identities on Identities {
+  ownUsers {
+    defaultEthAddress
+    localID
+    feedHash
+    profile {
+      name
+      ethAddress
+    }
+    wallets {
+      hd {
+        localID
+        id
+      }
+      ledger {
+        localID
+        id
+      }
+    }
+    id
+  }
+}
+
+fragment WalletsView_wallets_3iqrP on Wallets {
+  ethWallets(userID: $userID) {
     hd {
+      name
       localID
       accounts {
-        name
         address
         balances {
           eth
@@ -66,9 +98,9 @@ fragment WalletsView_wallets on WalletsQuery {
       id
     }
     ledger {
+      name
       localID
       accounts {
-        name
         address
         balances {
           eth
@@ -87,6 +119,12 @@ var v0 = [
     "kind": "LocalArgument",
     "name": "input",
     "type": "AddHDWalletAccountInput!",
+    "defaultValue": null
+  },
+  {
+    "kind": "LocalArgument",
+    "name": "userID",
+    "type": "String!",
     "defaultValue": null
   }
 ],
@@ -108,34 +146,40 @@ v2 = {
 v3 = {
   "kind": "ScalarField",
   "alias": null,
+  "name": "localID",
+  "args": null,
+  "storageKey": null
+},
+v4 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "name",
+  "args": null,
+  "storageKey": null
+},
+v5 = {
+  "kind": "ScalarField",
+  "alias": null,
   "name": "id",
   "args": null,
   "storageKey": null
 },
-v4 = [
-  {
-    "kind": "ScalarField",
-    "alias": null,
-    "name": "localID",
-    "args": null,
-    "storageKey": null
-  },
+v6 = [
+  v3,
+  v5
+],
+v7 = [
+  v4,
+  v3,
   {
     "kind": "LinkedField",
     "alias": null,
     "name": "accounts",
     "storageKey": null,
     "args": null,
-    "concreteType": "NamedWalletAccountType",
+    "concreteType": "WalletAccount",
     "plural": true,
     "selections": [
-      {
-        "kind": "ScalarField",
-        "alias": null,
-        "name": "name",
-        "args": null,
-        "storageKey": null
-      },
       v2,
       {
         "kind": "LinkedField",
@@ -143,7 +187,7 @@ v4 = [
         "name": "balances",
         "storageKey": null,
         "args": null,
-        "concreteType": "WalletBalancesType",
+        "concreteType": "WalletBalances",
         "plural": false,
         "selections": [
           {
@@ -164,14 +208,14 @@ v4 = [
       }
     ]
   },
-  v3
+  v5
 ];
 return {
   "kind": "Request",
   "operationKind": "mutation",
   "name": "WalletsViewAddHDWalletAccountMutation",
   "id": null,
-  "text": "mutation WalletsViewAddHDWalletAccountMutation(\n  $input: AddHDWalletAccountInput!\n) {\n  addHDWalletAccount(input: $input) {\n    address\n    viewer {\n      wallets {\n        ...WalletsView_wallets\n      }\n      id\n    }\n  }\n}\n\nfragment WalletsView_wallets on WalletsQuery {\n  ethWallets {\n    hd {\n      localID\n      accounts {\n        name\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n    ledger {\n      localID\n      accounts {\n        name\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n  }\n}\n",
+  "text": "mutation WalletsViewAddHDWalletAccountMutation(\n  $input: AddHDWalletAccountInput!\n  $userID: String!\n) {\n  addHDWalletAccount(input: $input) {\n    address\n    viewer {\n      identities {\n        ...Launcher_identities\n      }\n      wallets {\n        ...WalletsView_wallets_3iqrP\n      }\n      id\n    }\n  }\n}\n\nfragment Launcher_identities on Identities {\n  ownUsers {\n    defaultEthAddress\n    localID\n    feedHash\n    profile {\n      name\n      ethAddress\n    }\n    wallets {\n      hd {\n        localID\n        id\n      }\n      ledger {\n        localID\n        id\n      }\n    }\n    id\n  }\n}\n\nfragment WalletsView_wallets_3iqrP on Wallets {\n  ethWallets(userID: $userID) {\n    hd {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n    ledger {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -202,16 +246,39 @@ return {
               {
                 "kind": "LinkedField",
                 "alias": null,
+                "name": "identities",
+                "storageKey": null,
+                "args": null,
+                "concreteType": "Identities",
+                "plural": false,
+                "selections": [
+                  {
+                    "kind": "FragmentSpread",
+                    "name": "Launcher_identities",
+                    "args": null
+                  }
+                ]
+              },
+              {
+                "kind": "LinkedField",
+                "alias": null,
                 "name": "wallets",
                 "storageKey": null,
                 "args": null,
-                "concreteType": "WalletsQuery",
+                "concreteType": "Wallets",
                 "plural": false,
                 "selections": [
                   {
                     "kind": "FragmentSpread",
                     "name": "WalletsView_wallets",
-                    "args": null
+                    "args": [
+                      {
+                        "kind": "Variable",
+                        "name": "userID",
+                        "variableName": "userID",
+                        "type": null
+                      }
+                    ]
                   }
                 ]
               }
@@ -248,10 +315,98 @@ return {
               {
                 "kind": "LinkedField",
                 "alias": null,
+                "name": "identities",
+                "storageKey": null,
+                "args": null,
+                "concreteType": "Identities",
+                "plural": false,
+                "selections": [
+                  {
+                    "kind": "LinkedField",
+                    "alias": null,
+                    "name": "ownUsers",
+                    "storageKey": null,
+                    "args": null,
+                    "concreteType": "OwnUserIdentity",
+                    "plural": true,
+                    "selections": [
+                      {
+                        "kind": "ScalarField",
+                        "alias": null,
+                        "name": "defaultEthAddress",
+                        "args": null,
+                        "storageKey": null
+                      },
+                      v3,
+                      {
+                        "kind": "ScalarField",
+                        "alias": null,
+                        "name": "feedHash",
+                        "args": null,
+                        "storageKey": null
+                      },
+                      {
+                        "kind": "LinkedField",
+                        "alias": null,
+                        "name": "profile",
+                        "storageKey": null,
+                        "args": null,
+                        "concreteType": "NamedProfile",
+                        "plural": false,
+                        "selections": [
+                          v4,
+                          {
+                            "kind": "ScalarField",
+                            "alias": null,
+                            "name": "ethAddress",
+                            "args": null,
+                            "storageKey": null
+                          }
+                        ]
+                      },
+                      {
+                        "kind": "LinkedField",
+                        "alias": null,
+                        "name": "wallets",
+                        "storageKey": null,
+                        "args": null,
+                        "concreteType": "EthWallets",
+                        "plural": false,
+                        "selections": [
+                          {
+                            "kind": "LinkedField",
+                            "alias": null,
+                            "name": "hd",
+                            "storageKey": null,
+                            "args": null,
+                            "concreteType": "EthHDWallet",
+                            "plural": true,
+                            "selections": v6
+                          },
+                          {
+                            "kind": "LinkedField",
+                            "alias": null,
+                            "name": "ledger",
+                            "storageKey": null,
+                            "args": null,
+                            "concreteType": "EthLedgerWallet",
+                            "plural": true,
+                            "selections": v6
+                          }
+                        ]
+                      },
+                      v5
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": "LinkedField",
+                "alias": null,
                 "name": "wallets",
                 "storageKey": null,
                 "args": null,
-                "concreteType": "WalletsQuery",
+                "concreteType": "Wallets",
                 "plural": false,
                 "selections": [
                   {
@@ -259,7 +414,14 @@ return {
                     "alias": null,
                     "name": "ethWallets",
                     "storageKey": null,
-                    "args": null,
+                    "args": [
+                      {
+                        "kind": "Variable",
+                        "name": "userID",
+                        "variableName": "userID",
+                        "type": "String!"
+                      }
+                    ],
                     "concreteType": "EthWallets",
                     "plural": false,
                     "selections": [
@@ -271,7 +433,7 @@ return {
                         "args": null,
                         "concreteType": "EthHDWallet",
                         "plural": true,
-                        "selections": v4
+                        "selections": v7
                       },
                       {
                         "kind": "LinkedField",
@@ -281,13 +443,13 @@ return {
                         "args": null,
                         "concreteType": "EthLedgerWallet",
                         "plural": true,
-                        "selections": v4
+                        "selections": v7
                       }
                     ]
                   }
                 ]
               },
-              v3
+              v5
             ]
           }
         ]
@@ -297,5 +459,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '787d206bf98f734e6f9cd5fec1af651a';
+(node/*: any*/).hash = '419feb38a4282b86d695784ab43a567e';
 module.exports = node;

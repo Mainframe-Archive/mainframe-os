@@ -1,7 +1,6 @@
 //@flow
 
 import React, { Component } from 'react'
-import { ActivityIndicator } from 'react-native'
 
 import { Button, TextField, Row, Column, Text } from '@morpheus-ui/core'
 import CircleArrowRight from '@morpheus-ui/icons/CircleArrowRight'
@@ -9,9 +8,9 @@ import { Form, type FormSubmitPayload } from '@morpheus-ui/forms'
 
 import styled from 'styled-components/native'
 
-import OnboardContainer from '../UIComponents/OnboardContainer'
-
 import type { VaultsData } from '../../types'
+import Loader from '../UIComponents/Loader'
+import OnboardContainer from './onboarding/OnboardContainer'
 
 import rpc from './rpc'
 
@@ -66,7 +65,7 @@ export default class UnlockVaultView extends Component<Props, State> {
       </Row>
     ) : null
     const action = this.state.awaitingResponse ? (
-      <ActivityIndicator />
+      <Loader />
     ) : (
       <Button
         title="UNLOCK"

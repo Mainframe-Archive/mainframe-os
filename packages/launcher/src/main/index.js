@@ -2,20 +2,22 @@
 
 import path from 'path'
 import url from 'url'
-// eslint-disable-next-line import/named
-import Client from '@mainframe/client'
+import Client, { type VaultSettings } from '@mainframe/client'
 import { Environment, DaemonConfig, VaultConfig } from '@mainframe/config'
 import StreamRPC from '@mainframe/rpc-stream'
-import { startDaemon } from '@mainframe/toolbox'
-// eslint-disable-next-line import/named
-import { app, BrowserWindow, ipcMain } from 'electron'
+import { app, BrowserWindow, WebContents, ipcMain, Menu } from 'electron'
 import { is } from 'electron-util'
+import {
+  startServer as startDaemon,
+  stopServer as stopDaemon,
+} from '@mainframe/daemon'
 
 import { APP_TRUSTED_REQUEST_CHANNEL } from '../constants'
 import type { AppSession } from '../types'
 
 import { AppContext, LauncherContext } from './contexts'
 import { interceptWebRequests } from './permissions'
+import { registerStreamProtocol } from './storage'
 import createElectronTransport from './createElectronTransport'
 import createRPCChannels from './rpc/createChannels'
 
@@ -23,8 +25,9 @@ const PORT = process.env.ELECTRON_WEBPACK_WDS_PORT || ''
 
 const envType =
   process.env.NODE_ENV === 'production' ? 'production' : 'development'
-const envName =
-  process.env.MAINFRAME_ENV || Environment.getDefault() || `launcher-${envType}`
+
+const envName = process.env.MAINFRAME_ENV || `v030-${envType}`
+
 // Get existing env or create with specified type
 const env = Environment.get(envName, envType)
 
@@ -36,17 +39,23 @@ const vaultConfig = new VaultConfig(env)
 
 let client
 let launcherWindow
+let localDaemon = false
 
 type AppContexts = { [appID: string]: { [userID: string]: AppContext } }
 
 const appContexts: AppContexts = {}
+const contextsBySandbox: WeakMap<WebContents, AppContext> = new WeakMap()
 const contextsByWindow: WeakMap<BrowserWindow, AppContext> = new WeakMap()
 
 const newWindow = (params: Object = {}) => {
   const window = new BrowserWindow({
-    width: params.width || 800,
-    height: params.height || 600,
+    minWidth: 1020,
+    minHeight: 702,
+    width: 1020,
+    height: 702,
     show: false,
+    titleBarStyle: 'hidden',
+    ...params,
   })
 
   if (is.development) {
@@ -62,9 +71,93 @@ const newWindow = (params: Object = {}) => {
   return window
 }
 
+const template = [
+  {
+    label: 'Edit',
+    submenu: [
+      { role: 'undo' },
+      { role: 'redo' },
+      { type: 'separator' },
+      { role: 'cut' },
+      { role: 'copy' },
+      { role: 'paste' },
+      { role: 'pasteandmatchstyle' },
+      { role: 'delete' },
+      { role: 'selectall' },
+    ],
+  },
+  {
+    label: 'View',
+    submenu: [
+      { role: 'reload' },
+      { role: 'forcereload' },
+      { role: 'toggledevtools' },
+      { type: 'separator' },
+      { role: 'resetzoom' },
+      { role: 'zoomin' },
+      { role: 'zoomout' },
+      { type: 'separator' },
+      { role: 'togglefullscreen' },
+    ],
+  },
+  {
+    role: 'window',
+    submenu: [{ role: 'minimize' }, { role: 'close' }],
+  },
+  {
+    role: 'help',
+    submenu: [
+      {
+        label: 'Learn More',
+        click() {
+          require('electron').shell.openExternal('https://electronjs.org')
+        },
+      },
+    ],
+  },
+]
+
+if (process.platform === 'darwin') {
+  template.unshift({
+    label: app.getName(),
+    submenu: [
+      { role: 'about' },
+      { type: 'separator' },
+      { role: 'services' },
+      { type: 'separator' },
+      { role: 'hide' },
+      { role: 'hideothers' },
+      { role: 'unhide' },
+      { type: 'separator' },
+      { role: 'quit' },
+    ],
+  })
+
+  // Edit menu
+  template[1].submenu.push(
+    { type: 'separator' },
+    {
+      label: 'Speech',
+      submenu: [{ role: 'startspeaking' }, { role: 'stopspeaking' }],
+    },
+  )
+
+  // Window menu
+  template[3].submenu = [
+    { role: 'close' },
+    { role: 'minimize' },
+    { role: 'zoom' },
+    { type: 'separator' },
+    { role: 'front' },
+  ]
+}
+
 // App Lifecycle
 
-const launchApp = async (appSession: AppSession) => {
+const launchApp = async (
+  appSession: AppSession,
+  vaultSettings: VaultSettings,
+) => {
   const appID = appSession.app.appID
   const userID = appSession.user.id
   const appOpen = appContexts[appID] && appContexts[appID][userID]
@@ -79,7 +172,7 @@ const launchApp = async (appSession: AppSession) => {
   }
 
   const appWindow = newWindow()
-  if (is.development) {
+  if (appSession.isDev) {
     appWindow.webContents.on('did-attach-webview', () => {
       // Open a separate developer tools window for the app
       appWindow.webContents.executeJavaScript(
@@ -104,9 +197,21 @@ const launchApp = async (appSession: AppSession) => {
       createElectronTransport(appWindow, APP_TRUSTED_REQUEST_CHANNEL),
     ),
     window: appWindow,
+    settings: vaultSettings,
   })
   contextsByWindow.set(appWindow, appContext)
-  interceptWebRequests(appContext)
+
+  appWindow.webContents.on('did-attach-webview', (event, webContents) => {
+    webContents.on('destroyed', () => {
+      contextsBySandbox.delete(webContents)
+      appContext.sandbox = null
+    })
+
+    contextsBySandbox.set(webContents, appContext)
+    appContext.sandbox = webContents
+
+    interceptWebRequests(appContext, webContents.session)
+  })
 
   if (appContexts[appID]) {
     appContexts[appID][userID] = appContext
@@ -114,19 +219,52 @@ const launchApp = async (appSession: AppSession) => {
     // $FlowFixMe: can't assign ID type
     appContexts[appID] = { [userID]: appContext }
   }
+
+  appWindow.webContents.on('did-attach-webview', (event, webContents) => {
+    // Open a separate developer tools window for the app
+    appContext.sandbox = webContents
+    registerStreamProtocol(appContext)
+    if (is.development) {
+      appWindow.webContents.executeJavaScript(
+        `document.getElementById('sandbox-webview').openDevTools()`,
+      )
+    }
+  })
+
+  appWindow.on('closed', async () => {
+    await client.app.close({ sessID: appSession.session.sessID })
+    const ctx = contextsByWindow.get(appWindow)
+    if (ctx != null) {
+      await ctx.clear()
+      contextsByWindow.delete(appWindow)
+    }
+    delete appContexts[appID][userID]
+  })
 }
 
 // TODO: proper setup, this is just temporary logic to simplify development flow
 const setupClient = async () => {
-  // /!\ Temporary only, should be handled by toolbox with installation flow
-  if (daemonConfig.binPath == null) {
-    daemonConfig.binPath = path.resolve(__dirname, '../../../daemon/bin/run')
-  }
-  if (daemonConfig.runStatus !== 'running') {
-    daemonConfig.runStatus = 'stopped'
+  // First launch flow: initial setup
+
+  const isMac = process.platform === 'darwin'
+
+  if (isMac) {
+    const fixPath = require('fix-path')
+    fixPath()
   }
 
-  await startDaemon(daemonConfig, true)
+  if (envType === 'production') {
+    daemonConfig.runStatus = 'stopped'
+    await stopDaemon(env.name)
+  }
+
+  // Start daemon and connect local client to it
+  if (daemonConfig.runStatus !== 'running') {
+    daemonConfig.runStatus = 'stopped'
+    await startDaemon(env.name)
+    localDaemon = true
+  }
+
   daemonConfig.runStatus = 'running'
   client = new Client(daemonConfig.socketPath)
 
@@ -140,33 +278,46 @@ const setupClient = async () => {
 const createLauncherWindow = async () => {
   await setupClient()
 
-  launcherWindow = newWindow({ width: 900, height: 600 })
+  launcherWindow = newWindow({
+    width: 900,
+    height: 600,
+    minWidth: 900,
+    minHeight: 600,
+  })
+
+  const menu = Menu.buildFromTemplate(template)
+  Menu.setApplicationMenu(menu)
 
   const launcherContext = new LauncherContext({
     client,
     launchApp,
     vaultConfig,
+    window: launcherWindow,
   })
-  createRPCChannels(launcherContext, contextsByWindow)
+  createRPCChannels(launcherContext, contextsBySandbox, contextsByWindow)
 
   // Emitted when the window is closed.
-  launcherWindow.on('closed', () => {
+  launcherWindow.on('closed', async () => {
     // TODO: fix below to not error on close
     // const keys = Object.keys(appWindows)
     // Object.keys(appWindows).forEach(w => {
     //   appWindows[w].close()
     // })
     launcherWindow = null
+    await launcherContext.clear()
   })
+}
+
+const shutdownDaemon = async () => {
+  daemonConfig.runStatus = 'stopped'
+  await stopDaemon(env.name)
 }
 
 app.on('ready', createLauncherWindow)
 
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit()
-  }
+  app.quit()
 })
 
 app.on('activate', () => {
@@ -175,6 +326,15 @@ app.on('activate', () => {
   if (launcherWindow === null) {
     createLauncherWindow()
   }
+})
+
+app.on('will-quit', async event => {
+  event.preventDefault()
+  client.close()
+  if (localDaemon) {
+    await shutdownDaemon()
+  }
+  app.exit()
 })
 
 // Window lifecycle events

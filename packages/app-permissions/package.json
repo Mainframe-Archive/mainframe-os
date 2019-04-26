@@ -1,16 +1,19 @@
 {
   "name": "@mainframe/app-permissions",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "main": "lib/index.js",
   "license": "MIT",
+  "files": [
+    "lib/*"
+  ],
   "scripts": {
     "clean": "del-cli lib",
-    "build:js": "flow-remove-types src --out-dir lib",
+    "build:js": "babel src --out-dir lib",
     "build:flow": "flow-copy-source src lib",
     "build": "npm run clean && npm run build:js && npm run build:flow",
     "test:types": "flow check"
   },
   "devDependencies": {
-    "flow-bin": "^0.87.0"
+    "flow-bin": "^0.95.1"
   }
 }

@@ -1,4 +1,5 @@
 [ignore]
+.*/.git
 .*/node_modules/config-chain/test/.*
 .*/node_modules/graphql/utilities/buildASTSchema.js.flow
 .*/node_modules/oboe/test/.*
@@ -12,5 +13,6 @@
 
 [options]
 module.name_mapper='^react-native$' -> 'react-native-web'
+sharedmemory.hash_table_pow=21
 
 [strict]

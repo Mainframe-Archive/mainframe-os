@@ -1,6 +1,5 @@
 // @flow
 
-import { readManifestFile } from '@mainframe/app-manifest'
 import {
   /* eslint-disable import/named */
   type AppGetAllResult,
@@ -14,12 +13,14 @@ import {
   type AppOpenParams,
   APP_REMOVE_SCHEMA,
   type AppRemoveParams,
-  type AppSetUserSettingsParams,
-  APP_SET_USER_SETTINGS_SCHEMA,
   type AppSetUserPermissionsSettingsParams,
   APP_SET_USER_PERMISSIONS_SETTINGS_SCHEMA,
-  type BlockchainWeb3SendParams,
-  ETH_REQUEST_SCHEMA,
+  type BlockchainEthSendParams,
+  type GetInviteTXDetailsParams,
+  GRAPHQL_QUERY_SCHEMA,
+  type GraphQLQueryParams,
+  type GraphQLQueryResult,
+  DECLINE_INVITE_SCHEMA,
   type IdentityCreateResult,
   type IdentityCreateUserParams,
   type IdentityCreateDeveloperParams,
@@ -27,9 +28,12 @@ import {
   type IdentityGetOwnDevelopersResult,
   IDENTITY_CREATE_OWN_USER_SCHEMA,
   IDENTITY_CREATE_OWN_DEVELOPER_SCHEMA,
-  GRAPHQL_QUERY_SCHEMA,
-  type GraphQLQueryParams,
-  type GraphQLQueryResult,
+  INVITE_TX_DETAILS_SCHEMA,
+  INVITE_SEND_SCHEMA,
+  LOCAL_ID_SCHEMA,
+  type SendInviteTXParams,
+  type SendDeclineTXParams,
+  type SendWithdrawInviteTXParams,
   VAULT_SCHEMA,
   type VaultParams,
   type WalletGetLedgerEthAccountsParams,
@@ -37,11 +41,33 @@ import {
   WALLET_GET_LEDGER_ETH_ACCOUNTS_SCHEMA,
   /* eslint-enable import/named */
 } from '@mainframe/client'
+import type { Subscription as RxSubscription } from 'rxjs'
 
-import type { LauncherContext } from '../contexts'
+import { type LauncherContext, ContextSubscription } from '../contexts'
+
+class GraphQLSubscription extends ContextSubscription<RxSubscription> {
+  constructor() {
+    super('graphql_subscription_update')
+  }
+
+  async dispose() {
+    if (this.data != null) {
+      this.data.unsubscribe()
+    }
+  }
+}
 
 export default {
   // Apps
+  app_create: {
+    params: APP_CREATE_SCHEMA,
+    handler: (
+      ctx: LauncherContext,
+      params: AppCreateParams,
+    ): Promise<AppCreateResult> => {
+      return ctx.client.app.create(params)
+    },
+  },
   app_getAll: (ctx: LauncherContext): Promise<AppGetAllResult> => {
     return ctx.client.app.getAll()
   },
@@ -57,17 +83,19 @@ export default {
   app_launch: {
     params: APP_OPEN_SCHEMA,
     handler: async (ctx: LauncherContext, params: AppOpenParams) => {
-      const appSession = await ctx.client.app.open(params)
-      ctx.launchApp(appSession)
+      const [appSession, vaultSettings] = await Promise.all([
+        ctx.client.app.open(params),
+        ctx.client.vault.getSettings(),
+      ])
+      ctx.launchApp(appSession, vaultSettings)
     },
   },
-  app_create: {
-    params: APP_CREATE_SCHEMA,
-    handler: (
-      ctx: LauncherContext,
-      params: AppCreateParams,
-    ): Promise<AppCreateResult> => {
-      return ctx.client.app.create(params)
+  app_loadManifest: {
+    params: {
+      hash: 'string',
+    },
+    handler: (ctx: LauncherContext, params: { hash: string }) => {
+      return ctx.client.app.loadManifest(params)
     },
   },
   app_remove: {
@@ -82,26 +110,6 @@ export default {
       return ctx.client.app.remove(params)
     },
   },
-  app_readManifest: {
-    params: {
-      path: 'string',
-    },
-    handler: async (ctx: LauncherContext, params: { path: string }) => {
-      const manifest = await readManifestFile(params.path)
-      return {
-        data: manifest.data,
-        // TODO: lookup keys to check if they match know identities in vault
-        keys: manifest.keys,
-      }
-    },
-  },
-  app_setUserSettings: {
-    params: APP_SET_USER_SETTINGS_SCHEMA,
-    handler: (ctx: LauncherContext, params: AppSetUserSettingsParams) => {
-      return ctx.client.app.setUserSettings(params)
-    },
-  },
-
   app_setUserPermissionsSettings: {
     params: APP_SET_USER_PERMISSIONS_SETTINGS_SCHEMA,
     handler: (
@@ -150,7 +158,33 @@ export default {
       ctx: LauncherContext,
       params: GraphQLQueryParams,
     ): Promise<GraphQLQueryResult> => {
-      return ctx.client.graphql(params)
+      return ctx.client.graphql.query(params)
+    },
+  },
+  graphql_subscription: {
+    params: GRAPHQL_QUERY_SCHEMA,
+    handler: async (
+      ctx: LauncherContext,
+      params: GraphQLQueryParams,
+    ): Promise<string> => {
+      const subscription = await ctx.client.graphql.subscription(params)
+      const sub = new GraphQLSubscription()
+      sub.data = subscription.subscribe(msg => {
+        ctx.notify(sub.id, msg)
+      })
+      ctx.setSubscription(sub)
+      return sub.id
+    },
+  },
+
+  // Subscriptions
+
+  sub_unsubscribe: {
+    params: {
+      id: LOCAL_ID_SCHEMA,
+    },
+    handler: (ctx: LauncherContext, params: { id: string }): void => {
+      ctx.removeSubscription(params.id)
     },
   },
 
@@ -195,13 +229,60 @@ export default {
     },
   },
 
-  blockchain_web3Send: {
-    params: ETH_REQUEST_SCHEMA,
+  blockchain_ethSend: async (
+    ctx: LauncherContext,
+    params: BlockchainEthSendParams,
+  ): Promise<Object> => {
+    return ctx.client.blockchain.ethSend(params)
+  },
+
+  blockchain_getInviteTXDetails: {
+    params: INVITE_TX_DETAILS_SCHEMA,
     handler: (
       ctx: LauncherContext,
-      params: BlockchainWeb3SendParams,
+      params: GetInviteTXDetailsParams,
     ): Promise<any> => {
-      return ctx.client.blockchain.web3Send(params)
+      return ctx.client.blockchain.getInviteTXDetails(params)
+    },
+  },
+
+  blockchain_sendInviteApprovalTX: {
+    params: INVITE_SEND_SCHEMA,
+    handler: (
+      ctx: LauncherContext,
+      params: SendInviteTXParams,
+    ): Promise<any> => {
+      return ctx.client.blockchain.sendInviteApprovalTX(params)
+    },
+  },
+
+  blockchain_sendInviteTX: {
+    params: INVITE_SEND_SCHEMA,
+    handler: (
+      ctx: LauncherContext,
+      params: SendInviteTXParams,
+    ): Promise<any> => {
+      return ctx.client.blockchain.sendInviteTX(params)
+    },
+  },
+
+  blockchain_sendDeclineInviteTX: {
+    params: DECLINE_INVITE_SCHEMA,
+    handler: (
+      ctx: LauncherContext,
+      params: SendDeclineTXParams,
+    ): Promise<any> => {
+      return ctx.client.blockchain.sendDeclineInviteTX(params)
+    },
+  },
+
+  blockchain_sendWithdrawInviteTX: {
+    params: INVITE_SEND_SCHEMA,
+    handler: (
+      ctx: LauncherContext,
+      params: SendWithdrawInviteTXParams,
+    ): Promise<any> => {
+      return ctx.client.blockchain.sendWithdrawInviteTX(params)
     },
   },
 }
