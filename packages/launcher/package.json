@@ -7,6 +7,7 @@
     "dev": "electron-webpack dev",
     "compile": "electron-webpack",
     "compile:preload": "webpack --config webpack.preload.js",
+    "deps:build": "electron-builder install-app-deps",
     "dist": "npm run compile && electron-builder",
     "electron-builder": "electron-builder",
     "dist:ci": "yarn run compile && yarn run electron-builder --dir",
@@ -14,7 +15,6 @@
     "dist:electron": "electron-builder",
     "build:flow": "flow-copy-source src lib",
     "relay": "relay-compiler --src ./src --schema ./schema.graphql",
-    "postinstall": "electron-builder install-app-deps",
     "svg": "svgr -d ./src/renderer/UIComponents/Icons ./src/assets/svgs --icon --replace-attr-values \"#D3D3D3=currentColor\"",
     "test:types": "flow check",
     "test": "mocha"
