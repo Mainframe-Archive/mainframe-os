@@ -87,7 +87,7 @@ const Blocky = styled.View`
   margin-right: 15px;
 `
 
-export class InviteContactModal extends Component<Props, State> {
+class InviteContactModal extends Component<Props, State> {
   state = {}
 
   componentDidMount() {

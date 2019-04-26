@@ -202,6 +202,8 @@ export default class Contact {
           return 'sent_blockchain'
         case 'seized':
           return 'declined'
+        default:
+          break
       }
     }
     return 'sent_feed'
