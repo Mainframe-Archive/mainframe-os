@@ -1,6 +1,6 @@
 // @flow
-import Web3EthAbi from 'web3-eth-abi'
 
+import Web3EthAbi from '../web3EthAbi'
 import type EthClient from '../Client'
 
 export default class Contract {

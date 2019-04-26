@@ -148,7 +148,7 @@ const CONTACTS_CHANGED_SUBSCRIPTION = graphql`
   }
 `
 
-export class SideMenu extends Component<Props, State> {
+class SideMenu extends Component<Props, State> {
   _contactsChangedSub: Disposable
 
   static defaultProps = {
