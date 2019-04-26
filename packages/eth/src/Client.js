@@ -227,6 +227,11 @@ export default class EthClient extends EventEmitter {
     throw new Error('No wallet provider found')
   }
 
+  async signMessage(message: string, address: string) {
+    const data = toHex(message)
+    return this.signData({ address, data })
+  }
+
   // Sending transactions
 
   sendETH(params: SendParams) {

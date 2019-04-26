@@ -1,6 +1,7 @@
 // @flow
 
 export type PermissionKeyBasic =
+  | 'BLOCKCHAIN_SIGN'
   | 'BLOCKCHAIN_SEND'
   | 'CONTACTS_READ'
   | 'COMMS_CONTACT'

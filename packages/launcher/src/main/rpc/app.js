@@ -156,13 +156,10 @@ export const sandboxed = {
     (ctx: AppContext, params: any) => ctx.client.wallet.signTransaction(params),
   ),
 
-  // TODO: Implement signing messages with permission
-
-  // wallet_signEth: withPermission(
-  //   'BLOCKCHAIN_SIGN',
-  //   (ctx: AppContext, params: WalletEthSignParams) =>
-  //     ctx.client.wallet.sign(params),
-  // ),
+  wallet_signEthData: withPermission(
+    'BLOCKCHAIN_SIGN',
+    (ctx: AppContext, params: any) => ctx.client.wallet.sign(params),
+  ),
 
   // Comms
 
