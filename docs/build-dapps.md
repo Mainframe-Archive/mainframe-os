@@ -5,7 +5,7 @@ title: Building Mainframe Apps
 
 You can build a Mainframe app using any Web technology supported by Electron v2 (Chromium v61).
 
-The Mainframe teams build apps using [React Native Web](https://github.com/necolas/react-native-web). You can see a sample setup in the reference apps, [Onyx Stats](/applications/onyx-stats) and [create-mainframe-dapp](https://github.com/MainframeHQ/create-mainframe-dapp).
+The Mainframe teams build apps using [React Native Web](https://github.com/necolas/react-native-web). You can see a sample setup in the reference apps, [Payments](https://github.com/MainframeHQ/payments) and [onyx-stats](https://github.com/MainframeHQ/mainframe-os/tree/master/applications/onyx-stats).
 
 ### Morpheus UI
 [Morpheus UI](https://github.com/MainframeHQ/morpheus-ui) is a React Native Web UI toolkit to make it easier for developers to build Mainframe app interfaces.

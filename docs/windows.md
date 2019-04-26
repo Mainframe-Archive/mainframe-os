@@ -29,6 +29,9 @@ Next, a local environment must be created. An environment contains references to
 ```
 
 This first environment should be created with the `development` type and set as default environment.
+
+>Note: git for windows does not allow selection of options with arrows. so use git within a windows command line (windows+r cmd, bash) because windows cmd does have the ability to select arrow options.
+
 The newly created environment then needs to be configured using the CLI:
 
 ```
@@ -57,3 +60,4 @@ Then, in another tab, run the launcher:
 cd packages/launcher && npm run dev
 ```
 
+>>Note: There is a known issue trying to download, install, and run published dapps, or to build and open your own dapps on Windows. App windows appear blank. For your own dapps, the workaround is to serve them locally from localhost:3000 and input that in the address bar on the dapp window (don't forget the http://). There is currently no workaround for downloading and running published dapps.

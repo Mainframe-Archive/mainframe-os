@@ -128,7 +128,7 @@ API's for interacting with the Ethereum blockchain.
 
 A getter for the MainframeOS web3Provider.
 
-_Currently incompatible with Web3 versions bigger than 1.0.0-beta.37, see issue [#2266](https://github.com/ethereum/web3.js/issues/2266) for more info._
+_Currently incompatible with Web3 versions later than 1.0.0-beta.37, see issue [#2266](https://github.com/ethereum/web3.js/issues/2266) for more info._
 
 ```
 const web3 = new Web3(sdk.ethereum.web3Provider)
@@ -146,7 +146,7 @@ Returns a numeric string representing the Ethereum network ID. A few example val
 ‘42’: Kovan Test Network
 ```
 
-### ethereum.selectedAddress
+### ethereum.selectedAccount
 
 Returns a hex-prefixed string representing the current user’s selected address, e.g.:
 `0xde0B295669a9FD93d5F28D9Ec85E40f4cb697BAe`.
@@ -226,6 +226,64 @@ await sdk.payments.sendMFT(params)
   .on('error', error => ... )
 
 ```
+
+# Storage
+
+### storage.promptUpload()
+
+Will show a file upload window to the user, they can select one file they wish to upload.
+
+**returns:** Promise<boolean>
+
+**Example:**
+
+```
+const key = 'example.jpg' // name that is going to be used in the app
+
+await sdk.storage.promptUpload(key)
+```
+
+### storage.list()
+
+Fetches keys for all the files your app has previously uploaded.
+
+**returns:** Promise<Array<{ contentType: string, key: string }>>
+
+**Example:**
+
+```
+const list = await sdk.storage.list()
+```
+
+### storage.set()
+
+Sets a string value for a given key.
+
+**returns:** Promise<?string>
+
+**Example:**
+
+```
+const key = 'my-key'
+const data = 'example data'
+
+await sdk.storage.set(key, data)
+```
+
+### storage.get()
+
+Fetches a string value for a given key.
+
+**returns:** Promise<?string>
+
+**Example:**
+
+```
+const key = 'my-key'
+
+const data = await sdk.storage.get(key)
+```
+
 
 
 # Types
