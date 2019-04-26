@@ -413,7 +413,7 @@ class InviteContactModal extends Component<Props, State> {
     return (
       <>
         {this.renderContactSection('DECLINE INVITATION FROM')}
-        {this.renderTransactionSection('CLAIM 10 MFT ON')}
+        {this.renderTransactionSection('CLAIM 100 MFT ON')}
         {declinedTXHash}
         {activity}
       </>

@@ -305,7 +305,7 @@ export const WALLET_ADD_HD_ACCOUNT_SCHEMA = {
 export const ETH_TRANSACTION_SCHEMA = {
   nonce: 'string',
   from: 'string',
-  to: 'string',
+  to: { type: 'string', optional: true },
   gas: 'string',
   gasPrice: 'string',
   data: { type: 'string', optional: true },

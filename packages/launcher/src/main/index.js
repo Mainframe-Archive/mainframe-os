@@ -25,7 +25,9 @@ const PORT = process.env.ELECTRON_WEBPACK_WDS_PORT || ''
 
 const envType =
   process.env.NODE_ENV === 'production' ? 'production' : 'development'
+
 const envName = process.env.MAINFRAME_ENV || `v030-${envType}`
+
 // Get existing env or create with specified type
 const env = Environment.get(envName, envType)
 
