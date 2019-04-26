@@ -12,7 +12,7 @@ import {
 } from 'graphql'
 import { fromGlobalId, globalIdField, nodeDefinitions } from 'graphql-relay'
 
-import type { OSContext } from '../context/os'
+import type { GraphQLContext } from '../context/graphql'
 
 const TYPE_COLLECTION = {
   App: 'apps',
@@ -24,15 +24,15 @@ const TYPE_COLLECTION = {
   PeerUserIdentity: 'peers',
 }
 
-export const { nodeInterface, nodeField } = nodeDefinitions<OSContext>(
-  (globalId: string, ctx: OSContext) => {
+export const { nodeInterface, nodeField } = nodeDefinitions<GraphQLContext>(
+  (globalId: string, ctx: GraphQLContext) => {
     if (globalId === 'viewer') {
       return {}
     }
 
     const { type, id } = fromGlobalId(globalId)
     const collection = TYPE_COLLECTION[type]
-    return collection == null ? null : ctx.dbGet(collection, id)
+    return collection == null ? null : ctx.getDoc(collection, id)
     // switch (type) {
     //   case 'App':
     //     return ctx.db.apps.findOne(id).exec()
@@ -151,8 +151,8 @@ export const appUser = new GraphQLObjectType({
     },
     identity: {
       type: new GraphQLNonNull(ownUserIdentity),
-      resolve: (self, args, ctx: OSContext) => {
-        return ctx.dbGet('users', self.localID)
+      resolve: (self, args, ctx: GrahpQLContext) => {
+        return ctx.getDoc('users', self.localID)
       },
     },
     settings: {
@@ -469,7 +469,7 @@ export const ownUserIdentity = new GraphQLObjectType({
     },
     apps: {
       type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(app))),
-      resolve: (self, args, ctx: ClientContext) => {
+      resolve: (self, args, ctx: GraphQLContext) => {
         return ctx.openVault.apps.getInstalledAppsForUser(self.localID)
       },
     },
@@ -632,7 +632,7 @@ export const contact = new GraphQLObjectType({
     },
     profile: {
       type: new GraphQLNonNull(genericProfile),
-      resolve: (self, args, ctx: ClientContext) => {
+      resolve: (self, args, ctx: GraphQLContext) => {
         const profile = ctx.openVault.identities.getContactProfile(self.localID)
         return { ...self.profile, ...profile }
       },
@@ -672,19 +672,19 @@ export const apps = new GraphQLObjectType({
   fields: () => ({
     installed: {
       type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(app))),
-      resolve: (self, args, ctx: ClientContext) => {
+      resolve: (self, args, ctx: GraphQLContext) => {
         return Object.values(ctx.openVault.apps.apps)
       },
     },
     own: {
       type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(ownApp))),
-      resolve: (self, args, ctx: ClientContext) => {
+      resolve: (self, args, ctx: GraphQLContext) => {
         return Object.values(ctx.openVault.apps.ownApps)
       },
     },
     updatesCount: {
       type: new GraphQLNonNull(GraphQLInt),
-      resolve: (self, args, ctx: ClientContext) => {
+      resolve: (self, args, ctx: GraphQLContext) => {
         return ctx.openVault.apps.getUpdatesCount()
       },
     },
@@ -698,7 +698,7 @@ export const identities = new GraphQLObjectType({
       type: new GraphQLNonNull(
         new GraphQLList(new GraphQLNonNull(ownUserIdentity)),
       ),
-      resolve: (self, args, ctx: ClientContext) => {
+      resolve: (self, args, ctx: GraphQLContext) => {
         return Object.values(ctx.openVault.identities.ownUsers)
       },
     },
@@ -706,7 +706,7 @@ export const identities = new GraphQLObjectType({
       type: new GraphQLNonNull(
         new GraphQLList(new GraphQLNonNull(ownDeveloperIdentity)),
       ),
-      resolve: (self, args, ctx: ClientContext) => {
+      resolve: (self, args, ctx: GraphQLContext) => {
         return Object.values(ctx.openVault.identities.ownDevelopers)
       },
     },
@@ -721,7 +721,7 @@ export const peers = new GraphQLObjectType({
       args: {
         feedHash: { type: new GraphQLNonNull(GraphQLString) },
       },
-      resolve: async (self, args, ctx: ClientContext) => {
+      resolve: async (self, args, ctx: GraphQLContext) => {
         try {
           const peerPublicRes = await ctx.io.bzz.download(args.feedHash)
           const data = await peerPublicRes.json()
@@ -848,7 +848,7 @@ export const wallets = new GraphQLObjectType({
       args: {
         userID: { type: new GraphQLNonNull(GraphQLString) },
       },
-      resolve: (self, args, ctx: ClientContext) => {
+      resolve: (self, args, ctx: GraphQLContext) => {
         return ctx.queries.getUserEthWallets(args.userID)
       },
     },
@@ -860,7 +860,7 @@ export const settings = new GraphQLObjectType({
   fields: () => ({
     ethereumUrl: {
       type: new GraphQLNonNull(GraphQLString),
-      resolve: (self, args, ctx: ClientContext) => {
+      resolve: (self, args, ctx: GraphQLContext) => {
         return ctx.openVault.settings.ethURL
       },
     },

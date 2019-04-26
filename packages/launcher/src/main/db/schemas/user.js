@@ -57,19 +57,18 @@ export default {
           },
         },
       },
-    },
-    settings: {
-      type: 'object',
-      properties: {
-        bzzURL: {
-          type: 'string',
-          default: 'http://mainframe-gateways.net:8500',
-        },
-        ethURL: {
-          type: 'string',
-          default: ETH_RPC_URLS.WS.mainnet,
-        },
+      default: {
+        hd: [],
+        ledger: [],
       },
+    },
+    ethURL: {
+      type: 'string',
+      default: ETH_RPC_URLS.WS.mainnet,
+    },
+    bzzURL: {
+      type: 'string',
+      default: 'http://mainframe-gateways.net:8500',
     },
   },
   required: ['localID', 'keyPair', 'profile'],

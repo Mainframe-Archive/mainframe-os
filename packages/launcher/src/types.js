@@ -47,3 +47,16 @@ export type RequestContext = {
   window: BrowserWindow,
   client: Client,
 }
+
+// RPC
+
+export type DBRequestParams = { password: string, save?: ?boolean }
+
+export type DBOpenResult = { user: boolean, wallet: boolean }
+
+export type GraphQLRequestParams = { query: string, variables?: ?Object }
+
+export type UserCreateRequestParams = {
+  profile: { name: string },
+  isPrivate: boolean,
+}

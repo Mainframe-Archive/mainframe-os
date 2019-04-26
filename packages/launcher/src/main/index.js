@@ -203,13 +203,13 @@ const newWindow = (params: Object = {}) => {
 //   })
 // }
 
-const createLauncherWindow = async (userID?: string) => {
+const createLauncherWindow = async (userID?: ?string) => {
   if (systemInitialized === false) {
     await initSystem()
   }
 
   if (userID == null) {
-    userID = systemContext.config.get('defaultUser', null)
+    userID = systemContext.defaultUser
   }
 
   const launcherWindow = newWindow({
@@ -228,7 +228,7 @@ const createLauncherWindow = async (userID?: string) => {
   // Emitted when the window is closed.
   launcherWindow.on('closed', async () => {
     // launcherWindow = null
-    // await launcherContext.clear()
+    await launcherContext.clear()
   })
 }
 
@@ -252,20 +252,13 @@ ipcMain.on('window-exception', (event, error) => {
   logger.error(`Window exception: ${error.message}`)
 })
 
-ipcMain.on('window-opened', event => {
+ipcMain.on('window-opened', async event => {
   const launcherContext = launcherContexts.get(event.sender)
   if (launcherContext != null) {
-    let db = null
-    if (launcherContext.system.db != null) {
-      db = 'opened'
-    } else if (launcherContext.config.get('dbCreated', false)) {
-      db = 'created'
-    }
     event.sender.send('window-start', {
       type: 'launcher',
       initialProps: {
-        db,
-        userID: launcherContext.userID,
+        route: await launcherContext.getInitialRoute(),
       },
     })
   }

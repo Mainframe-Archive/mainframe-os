@@ -20,6 +20,11 @@ import launcherMethods from './launcher'
 
 const validatorOptions = { messages: MANIFEST_SCHEMA_MESSAGES }
 
+type Notification = {
+  method: string,
+  params: Object,
+}
+
 type ChannelParams = {
   logger: Logger,
   name: string,
@@ -28,10 +33,22 @@ type ChannelParams = {
 }
 
 const createChannel = (params: ChannelParams) => {
+  const onNotification = (ctx: *, notif: Notification) => {
+    if (notif.method === 'log') {
+      params.logger.log(notif.params)
+    } else {
+      params.logger.error(
+        `Unsupported notification from window: ${notif.method}`,
+      )
+    }
+  }
+
   const handleMessage = createHandler({
     methods: params.methods,
+    onNotification,
     validatorOptions,
   })
+
   ipcMain.on(params.name, async (event, incoming) => {
     try {
       const ctx = params.getContext(event.sender)

@@ -5,21 +5,18 @@ import { Redirect, Route, Switch } from 'react-router-dom'
 
 import { ROUTES } from '../constants'
 
+import CreateDB from './CreateDB'
+import CreateUser from './CreateUser'
+import CreateWallet from './CreateWallet'
+import OpenDB from './OpenDB'
+
 export default function OnboardingRouter() {
   return (
     <Switch>
-      <Route
-        path={ROUTES.ONBOARDING_USER}
-        render={() => <h1>User onboarding</h1>}
-      />
-      <Route
-        path={ROUTES.ONBOARDING_OPEN}
-        render={() => <h1>Open existing DB</h1>}
-      />
-      <Route
-        path={ROUTES.ONBOARDING_CREATE}
-        render={() => <h1>Create DB</h1>}
-      />
+      <Route path={ROUTES.ONBOARDING_OPEN} component={OpenDB} />
+      <Route path={ROUTES.ONBOARDING_CREATE} component={CreateDB} />
+      <Route path={ROUTES.ONBOARDING_USER} component={CreateUser} />
+      <Route path={ROUTES.ONBOARDING_WALLET} component={CreateWallet} />
       <Redirect to={ROUTES.ONBOARDING_CREATE} />
     </Switch>
   )

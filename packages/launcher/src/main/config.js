@@ -17,7 +17,7 @@ const schema = {
 export type Config = Object
 
 export const createConfig = (projectName: string): Config => {
-  return new Conf({
+  const config = new Conf({
     defaults: {
       dbCreated: false,
       savePassword: false,
@@ -26,4 +26,11 @@ export const createConfig = (projectName: string): Config => {
     projectName,
     schema,
   })
+
+  // Uncomment the following line if needed to re-create the DB
+  // config.delete('dbCreated')
+  // Uncomment the following line if needed to re-create the default user
+  // config.delete('defaultUser')
+
+  return config
 }

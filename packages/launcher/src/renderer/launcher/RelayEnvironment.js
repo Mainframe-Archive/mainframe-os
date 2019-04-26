@@ -1,6 +1,6 @@
 // @flow
 
-import { createContext } from 'react'
+import { createContext, useContext } from 'react'
 import { Environment, Network, RecordSource, Store } from 'relay-runtime'
 
 import rpc from './rpc'
@@ -10,7 +10,7 @@ const fetchQuery = (operation: Object, variables: ?Object) => {
 }
 
 const subscribeQuery = (operation: Object, variables: ?Object) => {
-  return rpc.graphqlSubscription(operation.text, variables)
+  return rpc.graphqlSubscribe(operation.text, variables)
 }
 
 export const createEnvironment = () => {
@@ -23,3 +23,5 @@ export const createEnvironment = () => {
 export const EnvironmentContext = createContext<Environment>(
   createEnvironment(),
 )
+
+export const useEnvironment = () => useContext(EnvironmentContext)

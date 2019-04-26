@@ -63,6 +63,7 @@
     "keytar": "^4.5.0",
     "leveldown": "^5.0.2",
     "mime": "^2.4.0",
+    "nanoid": "^2.0.1",
     "pouchdb-adapter-leveldb": "^7.0.0",
     "qrcode.react": "^0.9.3",
     "react": "^16.8.5",

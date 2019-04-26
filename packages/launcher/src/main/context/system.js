@@ -36,6 +36,18 @@ export class SystemContext {
     return this.env.config
   }
 
+  get defaultUser(): ?string {
+    return this.config.get('defaultUser')
+  }
+
+  set defaultUser(id: ?string): void {
+    if (id == null) {
+      this.config.delete('defaultUser')
+    } else {
+      this.config.set('defaultUser', id)
+    }
+  }
+
   async getPassword(): Promise<string | null> {
     try {
       return await getPassword(
@@ -82,15 +94,5 @@ export class SystemContext {
 
     this._resolveDB(db)
     return db
-  }
-
-  async dbGet(collection: $Keys<DB>, id: string): Promise<Object | null> {
-    if (this.db == null) {
-      return null
-    }
-    if (this.db[collection] == null) {
-      throw new Error(`Invalid collection: ${collection}`)
-    }
-    return await this.db[collection].findOne(id).exec()
   }
 }

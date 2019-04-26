@@ -2,12 +2,12 @@
 
 import { ThemeProvider } from '@morpheus-ui/core'
 import React from 'react'
-import { Link, MemoryRouter, Route, Switch } from 'react-router-dom'
+import { MemoryRouter, Route, Switch } from 'react-router-dom'
 import styled from 'styled-components/native'
 
 import THEME from '../theme'
-
 import { ROUTES } from './constants'
+
 import OnboardingRouter from './onboarding/Router'
 
 const Container = styled.View`
@@ -24,25 +24,13 @@ const TitleBar = styled.View`
 `
 
 type Props = {
-  db?: 'opened' | 'created' | null,
-  userID?: ?string,
+  route?: ?string,
 }
 
-export default function Root({ db, userID }: Props) {
-  let initialRoute
-  if (userID != null) {
-    initialRoute = ROUTES.HOME
-  } else if (db === 'opened') {
-    initialRoute = ROUTES.ONBOARDING_USER
-  } else if (db === 'created') {
-    initialRoute = ROUTES.ONBOARDING_OPEN
-  } else {
-    initialRoute = ROUTES.ONBOARDING_CREATE
-  }
-
+export default function Root({ route }: Props) {
   return (
     <ThemeProvider theme={THEME}>
-      <MemoryRouter initialEntries={[initialRoute]}>
+      <MemoryRouter initialEntries={[route || ROUTES.ONBOARDING_CREATE]}>
         <Container>
           <TitleBar className="draggable" />
           <Switch>
@@ -51,9 +39,7 @@ export default function Root({ db, userID }: Props) {
               path="/"
               render={() => (
                 <div>
-                  <br />
                   <h1>Home</h1>
-                  <Link to="/onboarding">Onboarding</Link>
                 </div>
               )}
             />

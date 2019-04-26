@@ -1,19 +1,20 @@
 // @flow
 
-import React, { Component } from 'react'
 import { Button, Row, Text } from '@morpheus-ui/core'
-import { graphql, commitMutation } from 'react-relay'
-import styled from 'styled-components/native'
-
 import LedgerIcon from '@morpheus-ui/icons/Ledger'
 import PlusSymbolMdIcon from '@morpheus-ui/icons/PlusSymbolMd'
 import DownloadMdIcon from '@morpheus-ui/icons/DownloadMd'
+import React, { Component } from 'react'
+import { graphql, commitMutation } from 'react-relay'
+import styled from 'styled-components/native'
+
+import Loader from '../../UIComponents/Loader'
+import { EnvironmentContext } from '../RelayEnvironment'
 import WalletCreateModal from '../wallets/WalletCreateModal'
 import WalletImportView from '../wallets/WalletImportView'
 import WalletAddLedgerModal from '../wallets/WalletAddLedgerModal'
-import { EnvironmentContext } from '../RelayEnvironment'
-import Loader from '../../UIComponents/Loader'
-import OnboardContainer from './OnboardContainer'
+
+import FlowContainer from './FlowContainer'
 
 type Props = {
   onSetupWallet: () => void,
@@ -59,7 +60,7 @@ const ToolTipContent = (
   </>
 )
 
-export default class OnboardWalletView extends Component<Props, State> {
+export default class OnboardingCreateWallet extends Component<Props, State> {
   static contextType = EnvironmentContext
 
   state = {
@@ -208,14 +209,14 @@ export default class OnboardWalletView extends Component<Props, State> {
 
   render() {
     return (
-      <OnboardContainer
+      <FlowContainer
         title="Wallet"
         description="Create or import your Ethereum wallet."
         step={3}
         tooltipContent={ToolTipContent}
         wallet>
         {this.renderContent()}
-      </OnboardContainer>
+      </FlowContainer>
     )
   }
 }

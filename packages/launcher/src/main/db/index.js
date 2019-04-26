@@ -1,5 +1,7 @@
 // @flow
 
+import { dirname } from 'path'
+import { ensureDir } from 'fs-extra'
 import leveldown from 'leveldown'
 import levelAdapter from 'pouchdb-adapter-leveldb'
 import * as RxDB from 'rxdb'
@@ -32,10 +34,17 @@ export type DB = {
   users: Object,
 }
 
+export type Collection = $Keys<DB>
+
 export const createDB = async (
   location: string,
   password: string,
 ): Promise<DB> => {
+  // Uncomment the following line to reset the DB in development
+  // await RxDB.removeDatabase(location, leveldown)
+
+  await ensureDir(dirname(location))
+
   const db = await RxDB.create({
     name: location,
     adapter: leveldown,

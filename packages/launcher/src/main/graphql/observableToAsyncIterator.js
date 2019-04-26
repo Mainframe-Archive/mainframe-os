@@ -1,8 +1,9 @@
 // @flow
 
+import type { ExecutionResult } from 'graphql'
 import type { Observable } from 'rxjs'
 
-export type SubscriptionIterator<T> = AsyncIterator<T> & {
+export type SubscriptionIterator = AsyncIterator<ExecutionResult> & {
   return: () => Promise<void>,
 }
 

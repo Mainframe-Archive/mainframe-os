@@ -1,5 +1,9 @@
 // @flow
 
+import type { KeyPairSerialized } from '../../crypto/ed25519'
+
+export type KeyPair = KeyPairSerialized
+
 export default {
   title: 'base64-encoded key pair',
   encrypted: true,
