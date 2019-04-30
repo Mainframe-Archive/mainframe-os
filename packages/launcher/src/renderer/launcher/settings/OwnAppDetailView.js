@@ -93,9 +93,10 @@ const publishVersionMutation = graphql`
     publishAppVersion(input: $input) {
       versionHash
       viewer {
-        apps {
-          ...OwnAppsView_apps
-        }
+        id
+        # apps {
+        #   ...OwnAppsView_apps
+        # }
       }
     }
   }
@@ -107,9 +108,10 @@ const updateAppDetailsMutation = graphql`
   ) {
     updateAppDetails(input: $input) {
       viewer {
-        apps {
-          ...OwnAppsView_apps
-        }
+        id
+        # apps {
+        #   ...OwnAppsView_apps
+        # }
       }
     }
   }
@@ -121,9 +123,10 @@ const setAppPermissionsRequirementsMutation = graphql`
   ) {
     setAppPermissionsRequirements(input: $input) {
       viewer {
-        apps {
-          ...OwnAppsView_apps
-        }
+        id
+        # apps {
+        #   ...OwnAppsView_apps
+        # }
       }
     }
   }

@@ -270,19 +270,20 @@ export const acceptContactRequestMutation = graphql`
   }
 `
 
-const peerLookupQuery = graphql`
-  query ContactsViewQuery($feedHash: String!) {
-    peers {
-      peerLookupByFeed(feedHash: $feedHash) {
-        profile {
-          name
-        }
-        publicFeed
-        publicKey
-      }
-    }
-  }
-`
+const peerLookupQuery = null
+// graphql`
+//   query ContactsViewQuery($feedHash: String!) {
+//     peers {
+//       peerLookupByFeed(feedHash: $feedHash) {
+//         profile {
+//           name
+//         }
+//         publicFeed
+//         publicKey
+//       }
+//     }
+//   }
+// `
 
 class ContactsViewComponent extends Component<Props, State> {
   static contextType = EnvironmentContext

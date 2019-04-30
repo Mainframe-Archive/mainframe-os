@@ -141,6 +141,7 @@ input AppPermissionDefinitionsInput {
 
 type AppPermissions {
   BLOCKCHAIN_SEND: Boolean
+  COMMS_CONTACT: Boolean
   CONTACTS_READ: Boolean
   WEB_REQUEST: WebRequestGrants!
 }
@@ -264,7 +265,6 @@ type CreateDeveloperIdentityPayload {
 input CreateHDWalletInput {
   blockchain: SupportedWallets!
   name: String!
-  userID: String
   clientMutationId: String
 }
 
@@ -310,18 +310,18 @@ type DeleteWalletPayload {
 type EthHDWallet implements Node {
   """The ID of an object"""
   id: ID!
-  name: String
   localID: ID!
   mnemonic: String!
-  accounts: [WalletAccount]
+  name: String
+  accounts: [WalletAccount!]!
 }
 
 type EthLedgerWallet implements Node {
   """The ID of an object"""
   id: ID!
-  name: String
   localID: ID!
-  accounts: [WalletAccount]
+  name: String
+  accounts: [WalletAccount!]!
 }
 
 type EthWallets {
@@ -446,16 +446,6 @@ type OwnUserIdentity implements Node {
   privateProfile: Boolean
 }
 
-type Peer {
-  publicKey: String!
-  publicFeed: String!
-  profile: GenericProfile!
-}
-
-type Peers {
-  peerLookupByFeed(feedHash: String!): Peer
-}
-
 input PermissionGrantsInput {
   BLOCKCHAIN_SEND: Boolean
   COMMS_CONTACT: Boolean
@@ -481,8 +471,7 @@ type Query {
     """The ID of an object"""
     id: ID!
   ): Node
-  viewer: Viewer!
-  peers: Peers!
+  viewer: User!
 }
 
 input SetAppPermissionsRequirementsInput {
@@ -578,6 +567,18 @@ input UpdateUserProfileInput {
   name: String
   avatar: String
   ethAddress: String
+}
+
+type User implements Node {
+  """The ID of an object"""
+  id: ID!
+  localID: ID!
+  profile: NamedProfile!
+  privateProfile: Boolean!
+  publicID: ID!
+  apps: [App!]!
+  defaultEthAddress: String
+  ethWallets: EthWallets!
 }
 
 input UserProfileInput {

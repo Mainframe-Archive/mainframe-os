@@ -745,23 +745,27 @@ export const walletBalances = new GraphQLObjectType({
     eth: {
       type: new GraphQLNonNull(GraphQLString),
       resolve: async (self, args, ctx) => {
-        try {
-          return await ctx.io.eth.getETHBalance(self)
-        } catch (err) {
-          ctx.log(err)
-          return 0
-        }
+        // TODO
+        return 0
+        // try {
+        //   return await ctx.io.eth.getETHBalance(self)
+        // } catch (err) {
+        //   ctx.log(err)
+        //   return 0
+        // }
       },
     },
     mft: {
       type: new GraphQLNonNull(GraphQLString),
       resolve: async (self, args, ctx) => {
-        try {
-          return await ctx.io.tokenContract.getBalance(self)
-        } catch (err) {
-          ctx.log(err)
-          return 0
-        }
+        // TODO
+        return 0
+        // try {
+        //   return await ctx.io.tokenContract.getBalance(self)
+        // } catch (err) {
+        //   ctx.log(err)
+        //   return 0
+        // }
       },
     },
   }),
@@ -772,11 +776,9 @@ export const walletAccount = new GraphQLObjectType({
   fields: () => ({
     address: {
       type: new GraphQLNonNull(GraphQLString),
-      resolve: self => self,
     },
     balances: {
       type: new GraphQLNonNull(walletBalances),
-      resolve: self => self,
     },
   }),
 })
@@ -786,14 +788,16 @@ export const ethLedgerWallet = new GraphQLObjectType({
   interfaces: () => [nodeInterface],
   fields: () => ({
     id: idResolver,
-    name: {
-      type: GraphQLString,
-    },
     localID: {
       type: new GraphQLNonNull(GraphQLID),
     },
+    name: {
+      type: GraphQLString,
+    },
     accounts: {
-      type: new GraphQLList(walletAccount),
+      type: new GraphQLNonNull(
+        new GraphQLList(new GraphQLNonNull(walletAccount)),
+      ),
     },
   }),
 })
@@ -803,17 +807,19 @@ export const ethHdWallet = new GraphQLObjectType({
   interfaces: () => [nodeInterface],
   fields: () => ({
     id: idResolver,
-    name: {
-      type: GraphQLString,
-    },
     localID: {
       type: new GraphQLNonNull(GraphQLID),
     },
     mnemonic: {
       type: new GraphQLNonNull(GraphQLString),
     },
+    name: {
+      type: GraphQLString,
+    },
     accounts: {
-      type: new GraphQLList(walletAccount),
+      type: new GraphQLNonNull(
+        new GraphQLList(new GraphQLNonNull(walletAccount)),
+      ),
     },
   }),
 })
@@ -825,17 +831,13 @@ export const ethWallets = new GraphQLObjectType({
       type: new GraphQLNonNull(
         new GraphQLList(new GraphQLNonNull(ethHdWallet)),
       ),
-      resolve: self => {
-        return self.filter(w => w.type === 'hd')
-      },
+      resolve: self => self.populate('hd'),
     },
     ledger: {
       type: new GraphQLNonNull(
         new GraphQLList(new GraphQLNonNull(ethLedgerWallet)),
       ),
-      resolve: self => {
-        return self.filter(w => w.type === 'ledger')
-      },
+      resolve: self => self.populate('ledger'),
     },
   }),
 })
@@ -893,6 +895,45 @@ export const viewer = new GraphQLObjectType({
     settings: {
       type: new GraphQLNonNull(settings),
       resolve: () => ({}),
+    },
+  }),
+})
+
+// NEW OBJECTS BELOW
+
+export const user = new GraphQLObjectType({
+  name: 'User',
+  interfaces: () => [nodeInterface],
+  fields: () => ({
+    id: idResolver,
+    localID: {
+      type: new GraphQLNonNull(GraphQLID),
+    },
+    profile: {
+      type: new GraphQLNonNull(namedProfile),
+    },
+    privateProfile: {
+      type: new GraphQLNonNull(GraphQLBoolean),
+    },
+    publicID: {
+      type: new GraphQLNonNull(GraphQLID),
+      resolve: self => self.publicFeed.feedHash,
+    },
+    apps: {
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(app))),
+      resolve: (self, args, ctx: GraphQLContext) => {
+        // TODO
+        return []
+      },
+    },
+    defaultEthAddress: {
+      type: GraphQLString,
+      resolve: (self, args, ctx) => {
+        return ctx.queries.getUserDefaultEthAccount(self.localID)
+      },
+    },
+    ethWallets: {
+      type: new GraphQLNonNull(ethWallets),
     },
   }),
 })

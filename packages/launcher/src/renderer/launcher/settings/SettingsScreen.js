@@ -105,9 +105,10 @@ export default class SettingsScreenQueryRenderer extends Component<{}> {
         query={graphql`
           query SettingsScreenQuery {
             viewer {
-              settings {
-                ...SettingsScreen_settings
-              }
+              id
+              # settings {
+              #   ...SettingsScreen_settings
+              # }
             }
           }
         `}

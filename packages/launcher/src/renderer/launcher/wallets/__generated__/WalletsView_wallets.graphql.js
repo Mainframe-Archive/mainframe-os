@@ -15,7 +15,7 @@ export type WalletsView_wallets = {|
     +hd: $ReadOnlyArray<{|
       +name: ?string,
       +localID: string,
-      +accounts: ?$ReadOnlyArray<?{|
+      +accounts: $ReadOnlyArray<{|
         +address: string,
         +balances: {|
           +eth: string,
@@ -26,7 +26,7 @@ export type WalletsView_wallets = {|
     +ledger: $ReadOnlyArray<{|
       +name: ?string,
       +localID: string,
-      +accounts: ?$ReadOnlyArray<?{|
+      +accounts: $ReadOnlyArray<{|
         +address: string,
         +balances: {|
           +eth: string,

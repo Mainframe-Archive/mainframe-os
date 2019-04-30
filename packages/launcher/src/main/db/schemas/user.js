@@ -62,6 +62,9 @@ export default {
         ledger: [],
       },
     },
+    defaultEthAddress: {
+      type: 'string',
+    },
     ethURL: {
       type: 'string',
       default: ETH_RPC_URLS.WS.mainnet,

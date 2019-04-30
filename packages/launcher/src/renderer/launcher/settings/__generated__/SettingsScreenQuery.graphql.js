@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash ed9376e625cba762bdbc4dd0e9e83f1c
+ * @relayHash 10e2acc4ed9f2a994c9153a2ff42e521
  */
 
 /* eslint-disable */
@@ -9,13 +9,10 @@
 
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
-type SettingsScreen_settings$ref = any;
 export type SettingsScreenQueryVariables = {||};
 export type SettingsScreenQueryResponse = {|
   +viewer: {|
-    +settings: {|
-      +$fragmentRefs: SettingsScreen_settings$ref
-    |}
+    +id: string
   |}
 |};
 export type SettingsScreenQuery = {|
@@ -28,24 +25,38 @@ export type SettingsScreenQuery = {|
 /*
 query SettingsScreenQuery {
   viewer {
-    settings {
-      ...SettingsScreen_settings
-    }
     id
   }
 }
-
-fragment SettingsScreen_settings on Settings {
-  ethereumUrl
-}
 */
 
-const node/*: ConcreteRequest*/ = {
+const node/*: ConcreteRequest*/ = (function(){
+var v0 = [
+  {
+    "kind": "LinkedField",
+    "alias": null,
+    "name": "viewer",
+    "storageKey": null,
+    "args": null,
+    "concreteType": "User",
+    "plural": false,
+    "selections": [
+      {
+        "kind": "ScalarField",
+        "alias": null,
+        "name": "id",
+        "args": null,
+        "storageKey": null
+      }
+    ]
+  }
+];
+return {
   "kind": "Request",
   "operationKind": "query",
   "name": "SettingsScreenQuery",
   "id": null,
-  "text": "query SettingsScreenQuery {\n  viewer {\n    settings {\n      ...SettingsScreen_settings\n    }\n    id\n  }\n}\n\nfragment SettingsScreen_settings on Settings {\n  ethereumUrl\n}\n",
+  "text": "query SettingsScreenQuery {\n  viewer {\n    id\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -53,80 +64,16 @@ const node/*: ConcreteRequest*/ = {
     "type": "Query",
     "metadata": null,
     "argumentDefinitions": [],
-    "selections": [
-      {
-        "kind": "LinkedField",
-        "alias": null,
-        "name": "viewer",
-        "storageKey": null,
-        "args": null,
-        "concreteType": "Viewer",
-        "plural": false,
-        "selections": [
-          {
-            "kind": "LinkedField",
-            "alias": null,
-            "name": "settings",
-            "storageKey": null,
-            "args": null,
-            "concreteType": "Settings",
-            "plural": false,
-            "selections": [
-              {
-                "kind": "FragmentSpread",
-                "name": "SettingsScreen_settings",
-                "args": null
-              }
-            ]
-          }
-        ]
-      }
-    ]
+    "selections": v0
   },
   "operation": {
     "kind": "Operation",
     "name": "SettingsScreenQuery",
     "argumentDefinitions": [],
-    "selections": [
-      {
-        "kind": "LinkedField",
-        "alias": null,
-        "name": "viewer",
-        "storageKey": null,
-        "args": null,
-        "concreteType": "Viewer",
-        "plural": false,
-        "selections": [
-          {
-            "kind": "LinkedField",
-            "alias": null,
-            "name": "settings",
-            "storageKey": null,
-            "args": null,
-            "concreteType": "Settings",
-            "plural": false,
-            "selections": [
-              {
-                "kind": "ScalarField",
-                "alias": null,
-                "name": "ethereumUrl",
-                "args": null,
-                "storageKey": null
-              }
-            ]
-          },
-          {
-            "kind": "ScalarField",
-            "alias": null,
-            "name": "id",
-            "args": null,
-            "storageKey": null
-          }
-        ]
-      }
-    ]
+    "selections": v0
   }
 };
+})();
 // prettier-ignore
-(node/*: any*/).hash = '6f809e5f80c02ac0457e291c0221f514';
+(node/*: any*/).hash = 'aaa10b22068917af8311ec2af918b69c';
 module.exports = node;

@@ -432,47 +432,48 @@ class AppsView extends Component<Props, State> {
 }
 
 const AppsViewFragmentContainer = createFragmentContainer(AppsView, {
-  apps: graphql`
-    fragment AppsView_apps on Apps {
-      installed {
-        ...AppItem_installedApp
-        ...AppUpdateModal_app
-        localID
-        mfid
-        manifest {
-          permissions {
-            optional {
-              WEB_REQUEST
-              BLOCKCHAIN_SEND
-            }
-            required {
-              WEB_REQUEST
-              BLOCKCHAIN_SEND
-            }
-          }
-        }
-        name
-        users {
-          localID
-          identity {
-            profile {
-              name
-            }
-          }
-          settings {
-            permissionsSettings {
-              permissionsChecked
-              grants {
-                BLOCKCHAIN_SEND
-                WEB_REQUEST {
-                  granted
-                  denied
-                }
-              }
-            }
-          }
-        }
-      }
+  // ...AppItem_installedApp
+  // ...AppUpdateModal_app
+  viewer: graphql`
+    fragment AppsView_viewer on Viewer {
+      id
+      # apps {
+      #   localID
+      #   mfid
+      #   manifest {
+      #     permissions {
+      #       optional {
+      #         WEB_REQUEST
+      #         BLOCKCHAIN_SEND
+      #       }
+      #       required {
+      #         WEB_REQUEST
+      #         BLOCKCHAIN_SEND
+      #       }
+      #     }
+      #   }
+      #   name
+      #   users {
+      #     localID
+      #     identity {
+      #       profile {
+      #         name
+      #       }
+      #     }
+      #     settings {
+      #       permissionsSettings {
+      #         permissionsChecked
+      #         grants {
+      #           BLOCKCHAIN_SEND
+      #           WEB_REQUEST {
+      #             granted
+      #             denied
+      #           }
+      #         }
+      #       }
+      #     }
+      #   }
+      # }
     }
   `,
 })

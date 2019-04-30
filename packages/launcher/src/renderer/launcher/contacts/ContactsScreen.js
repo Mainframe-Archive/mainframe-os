@@ -38,12 +38,12 @@ class ContactsScreenComponent extends Component<Props, State> {
 const ContactsScreenRelayContainer = createFragmentContainer(
   ContactsScreenComponent,
   {
-    contacts: graphql`
-      fragment ContactsScreen_contacts on Contacts
-        @argumentDefinitions(userID: { type: "String!" }) {
-        ...ContactsView_contacts @arguments(userID: $userID)
-      }
-    `,
+    // contacts: graphql`
+    //   fragment ContactsScreen_contacts on Contacts
+    //     @argumentDefinitions(userID: { type: "String!" }) {
+    //     ...ContactsView_contacts @arguments(userID: $userID)
+    //   }
+    // `,
   },
 )
 
@@ -55,11 +55,13 @@ export class ContactsScreenRenderer extends Component<QueryProps> {
       <QueryRenderer
         environment={this.context}
         query={graphql`
-          query ContactsScreenQuery($userID: String!) {
+          query ContactsScreenQuery {
+            # $userID: String!
             viewer {
-              contacts {
-                ...ContactsScreen_contacts @arguments(userID: $userID)
-              }
+              id
+              # contacts {
+              #   ...ContactsScreen_contacts @arguments(userID: $userID)
+              # }
             }
           }
         `}

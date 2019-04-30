@@ -5,24 +5,24 @@ import { graphql, createFragmentContainer, QueryRenderer } from 'react-relay'
 import { EnvironmentContext } from '../RelayEnvironment'
 import RelayLoaderView from '../RelayLoaderView'
 import AppsView from './AppsView'
-import type { AppsScreen_apps as Apps } from './__generated__/AppsScreen_apps.graphql'
+import type { AppsScreen_viewer as Viewer } from './__generated__/AppsScreen_viewer.graphql'
 
-type RendererProps = {}
+// type RendererProps = {}
+//
+// type Props = RendererProps & {
+//   viewer: Viewer,
+// }
+//
+// class AppsScreen extends Component<Props> {
+//   render() {
+//     return <AppsView viewer={this.props.viewer} />
+//   }
+// }
 
-type Props = RendererProps & {
-  apps: Apps,
-}
-
-class AppsScreen extends Component<Props> {
-  render() {
-    return <AppsView apps={this.props.apps} />
-  }
-}
-
-const AppsScreenRelayContainer = createFragmentContainer(AppsScreen, {
-  apps: graphql`
-    fragment AppsScreen_apps on Apps {
-      ...AppsView_apps
+const AppsScreenRelayContainer = createFragmentContainer(AppsView, {
+  viewer: graphql`
+    fragment AppsScreen_viewer on Viewer {
+      ...AppsView_viewer
     }
   `,
 })
@@ -37,9 +37,7 @@ export default class AppsScreenRenderer extends Component<{}> {
         query={graphql`
           query AppsScreenQuery {
             viewer {
-              apps {
-                ...AppsScreen_apps
-              }
+              id
             }
           }
         `}

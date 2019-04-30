@@ -39,9 +39,10 @@ export default class IdentitiesScreenRenderer extends Component<{}> {
         query={graphql`
           query IdentitiesScreenQuery {
             viewer {
-              identities {
-                ...IdentitiesScreen_identities
-              }
+              id
+              # identities {
+              #   ...IdentitiesScreen_identities
+              # }
             }
           }
         `}

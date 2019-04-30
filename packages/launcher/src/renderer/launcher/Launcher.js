@@ -32,9 +32,10 @@ const APP_UPDATE_CHANGED_SUBSCRIPTION = graphql`
   subscription LauncherAppUpdateChangedSubscription {
     appUpdateChanged {
       viewer {
-        apps {
-          ...SideMenu_apps
-        }
+        id
+        # apps {
+        #   ...SideMenu_apps
+        # }
       }
       app {
         ...AppItem_installedApp
@@ -230,9 +231,10 @@ export default class LauncherQueryRenderer extends Component<{}> {
         query={graphql`
           query LauncherQuery {
             viewer {
-              identities {
-                ...Launcher_identities
-              }
+              id
+              # identities {
+              #   ...Launcher_identities
+              # }
             }
           }
         `}

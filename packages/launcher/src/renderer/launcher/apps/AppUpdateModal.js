@@ -22,9 +22,10 @@ const appUpdateMutation = graphql`
   mutation AppUpdateModalAppUpdateMutation($input: AppUpdateMutationInput!) {
     updateApp(input: $input) {
       viewer {
-        apps {
-          ...AppsView_apps
-        }
+        id
+        # apps {
+        #   ...AppsView_apps
+        # }
       }
     }
   }

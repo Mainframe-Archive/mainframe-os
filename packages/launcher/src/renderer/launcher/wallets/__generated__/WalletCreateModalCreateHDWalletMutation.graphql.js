@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash d39f5749ce8d484ad3938df00c1874f1
+ * @relayHash 36dbce6f31b7246612cb63dad8d2d069
  */
 
 /* eslint-disable */
@@ -15,7 +15,6 @@ export type SupportedWallets = "ETHEREUM" | "%future added value";
 export type CreateHDWalletInput = {
   blockchain: SupportedWallets,
   name: string,
-  userID?: ?string,
   clientMutationId?: ?string,
 };
 export type WalletCreateModalCreateHDWalletMutationVariables = {|
@@ -25,7 +24,7 @@ export type WalletCreateModalCreateHDWalletMutationVariables = {|
 export type WalletCreateModalCreateHDWalletMutationResponse = {|
   +createHDWallet: ?{|
     +hdWallet: ?{|
-      +accounts: ?$ReadOnlyArray<?{|
+      +accounts: $ReadOnlyArray<{|
         +address: string
       |}>,
       +mnemonic: string,

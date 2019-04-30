@@ -11,9 +11,10 @@ export const appCreateMutation = graphql`
         name
       }
       viewer {
-        apps {
-          ...OwnAppsView_apps
-        }
+        id
+        # apps {
+        #   ...OwnAppsView_apps
+        # }
       }
     }
   }
@@ -28,9 +29,10 @@ export const appInstallMutation = graphql`
         name
       }
       viewer {
-        apps {
-          ...AppsView_apps
-        }
+        id
+        # apps {
+        #   ...AppsView_apps
+        # }
       }
     }
   }

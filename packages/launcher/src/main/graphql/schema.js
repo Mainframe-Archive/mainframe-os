@@ -3,7 +3,7 @@
 import { GraphQLObjectType, GraphQLNonNull, GraphQLSchema } from 'graphql'
 
 import mutation from './mutation'
-import { nodeField, peers, viewer } from './objects'
+import { nodeField, user } from './objects'
 import subscription from './subscription'
 
 const query = new GraphQLObjectType({
@@ -11,13 +11,13 @@ const query = new GraphQLObjectType({
   fields: () => ({
     node: nodeField,
     viewer: {
-      type: new GraphQLNonNull(viewer),
-      resolve: () => ({}),
+      type: new GraphQLNonNull(user),
+      resolve: (self, args, ctx) => ctx.getUser(),
     },
-    peers: {
-      type: new GraphQLNonNull(peers),
-      resolve: () => ({}),
-    },
+    // peers: {
+    //   type: new GraphQLNonNull(peers),
+    //   resolve: () => ({}),
+    // },
   }),
 })
 

@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 6f647bee8058a900f3e24946e0b83680
+ * @relayHash ea2de7456d223061fe90f84e5a6604f0
  */
 
 /* eslint-disable */
@@ -21,10 +21,10 @@ export type UpdateUserProfileInput = {
   avatar?: ?string,
   ethAddress?: ?string,
 };
-export type OnboardWalletViewUpdateProfileMutationVariables = {|
+export type CreateWalletUpdateProfileMutationVariables = {|
   input: UpdateProfileInput
 |};
-export type OnboardWalletViewUpdateProfileMutationResponse = {|
+export type CreateWalletUpdateProfileMutationResponse = {|
   +updateProfile: ?{|
     +viewer: {|
       +identities: {|
@@ -33,15 +33,15 @@ export type OnboardWalletViewUpdateProfileMutationResponse = {|
     |}
   |}
 |};
-export type OnboardWalletViewUpdateProfileMutation = {|
-  variables: OnboardWalletViewUpdateProfileMutationVariables,
-  response: OnboardWalletViewUpdateProfileMutationResponse,
+export type CreateWalletUpdateProfileMutation = {|
+  variables: CreateWalletUpdateProfileMutationVariables,
+  response: CreateWalletUpdateProfileMutationResponse,
 |};
 */
 
 
 /*
-mutation OnboardWalletViewUpdateProfileMutation(
+mutation CreateWalletUpdateProfileMutation(
   $input: UpdateProfileInput!
 ) {
   updateProfile(input: $input) {
@@ -116,13 +116,13 @@ v4 = [
 return {
   "kind": "Request",
   "operationKind": "mutation",
-  "name": "OnboardWalletViewUpdateProfileMutation",
+  "name": "CreateWalletUpdateProfileMutation",
   "id": null,
-  "text": "mutation OnboardWalletViewUpdateProfileMutation(\n  $input: UpdateProfileInput!\n) {\n  updateProfile(input: $input) {\n    viewer {\n      identities {\n        ...Launcher_identities\n      }\n      id\n    }\n  }\n}\n\nfragment Launcher_identities on Identities {\n  ownUsers {\n    defaultEthAddress\n    localID\n    feedHash\n    profile {\n      name\n      ethAddress\n    }\n    wallets {\n      hd {\n        localID\n        id\n      }\n      ledger {\n        localID\n        id\n      }\n    }\n    id\n  }\n}\n",
+  "text": "mutation CreateWalletUpdateProfileMutation(\n  $input: UpdateProfileInput!\n) {\n  updateProfile(input: $input) {\n    viewer {\n      identities {\n        ...Launcher_identities\n      }\n      id\n    }\n  }\n}\n\nfragment Launcher_identities on Identities {\n  ownUsers {\n    defaultEthAddress\n    localID\n    feedHash\n    profile {\n      name\n      ethAddress\n    }\n    wallets {\n      hd {\n        localID\n        id\n      }\n      ledger {\n        localID\n        id\n      }\n    }\n    id\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
-    "name": "OnboardWalletViewUpdateProfileMutation",
+    "name": "CreateWalletUpdateProfileMutation",
     "type": "Mutation",
     "metadata": null,
     "argumentDefinitions": v0,
@@ -169,7 +169,7 @@ return {
   },
   "operation": {
     "kind": "Operation",
-    "name": "OnboardWalletViewUpdateProfileMutation",
+    "name": "CreateWalletUpdateProfileMutation",
     "argumentDefinitions": v0,
     "selections": [
       {
@@ -294,5 +294,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '6a0738c1daaa89a3f0a1de099e400c8c';
+(node/*: any*/).hash = 'd2a9a73a322c8f9a72ddd8c3dc42555c';
 module.exports = node;

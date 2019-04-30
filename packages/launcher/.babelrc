@@ -4,5 +4,10 @@
     "react-native-web",
     "relay"
   ],
-  "presets": ["@babel/preset-flow", "@babel/preset-react"]
+  "presets": ["@babel/preset-flow", "@babel/preset-react"],
+  "env": {
+    "script": {
+      "presets": [["@babel/preset-env", { "targets": { "node": "current" } }]]
+    }
+  }
 }

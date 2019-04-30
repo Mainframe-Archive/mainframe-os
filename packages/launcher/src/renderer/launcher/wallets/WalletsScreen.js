@@ -38,11 +38,13 @@ export class WalletsScreenRenderer extends Component<RendererProps> {
       <QueryRenderer
         environment={this.context}
         query={graphql`
-          query WalletsScreenQuery($userID: String!) {
+          query WalletsScreenQuery {
+            # $userID: String!
             viewer {
-              wallets {
-                ...WalletsScreen_wallets @arguments(userID: $userID)
-              }
+              id
+              # wallets {
+              #   ...WalletsScreen_wallets @arguments(userID: $userID)
+              # }
             }
           }
         `}

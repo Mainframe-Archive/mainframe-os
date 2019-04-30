@@ -9,30 +9,30 @@
 /*::
 import type { ConcreteFragment } from 'relay-runtime';
 import type { FragmentReference } from "relay-runtime";
-declare export opaque type SideMenu_apps$ref: FragmentReference;
-export type SideMenu_apps = {|
-  +updatesCount: number,
-  +$refType: SideMenu_apps$ref,
+declare export opaque type AppsView_viewer$ref: FragmentReference;
+export type AppsView_viewer = {|
+  +id: string,
+  +$refType: AppsView_viewer$ref,
 |};
 */
 
 
 const node/*: ConcreteFragment*/ = {
   "kind": "Fragment",
-  "name": "SideMenu_apps",
-  "type": "Apps",
+  "name": "AppsView_viewer",
+  "type": "Viewer",
   "metadata": null,
   "argumentDefinitions": [],
   "selections": [
     {
       "kind": "ScalarField",
       "alias": null,
-      "name": "updatesCount",
+      "name": "id",
       "args": null,
       "storageKey": null
     }
   ]
 };
 // prettier-ignore
-(node/*: any*/).hash = '634273320b0f363d45af7be4e190cbc5';
+(node/*: any*/).hash = '0138961278e7b915834dccbb75bd8314';
 module.exports = node;

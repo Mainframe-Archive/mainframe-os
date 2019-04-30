@@ -13,6 +13,9 @@ export default {
       type: 'string',
       final: true,
     },
+    name: {
+      type: 'string',
+    },
     hdPath: {
       type: 'string',
       default: `m/44'/60'/0'/0`,
@@ -20,9 +23,18 @@ export default {
     activeAccounts: {
       type: 'array',
       items: {
-        type: 'string',
+        type: 'object',
+        properties: {
+          index: {
+            type: 'integer',
+            minimum: 0,
+          },
+          address: {
+            type: 'string',
+          },
+        },
       },
-      default: ['0'],
+      default: [],
     },
   },
 }

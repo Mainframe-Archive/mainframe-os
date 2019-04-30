@@ -202,11 +202,12 @@ export default class CreateAppModalRenderer extends Component<RendererProps> {
         query={graphql`
           query CreateAppModalQuery {
             viewer {
-              identities {
-                ownDevelopers {
-                  localID
-                }
-              }
+              id
+              # identities {
+              #   ownDevelopers {
+              #     localID
+              #   }
+              # }
             }
           }
         `}

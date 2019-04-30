@@ -180,23 +180,23 @@ class OwnAppsView extends Component<Props, State> {
 }
 
 const OwnAppsViewRelayContainer = createFragmentContainer(OwnAppsView, {
-  identities: graphql`
-    fragment OwnAppsView_identities on Identities {
-      ownDevelopers {
-        localID
-      }
-    }
-  `,
-  apps: graphql`
-    fragment OwnAppsView_apps on Apps {
-      own {
-        localID
-        name
-        ...AppItem_ownApp
-        ...OwnAppDetailView_ownApp
-      }
-    }
-  `,
+  // identities: graphql`
+  //   fragment OwnAppsView_identities on Identities {
+  //     ownDevelopers {
+  //       localID
+  //     }
+  //   }
+  // `,
+  // apps: graphql`
+  //   fragment OwnAppsView_apps on Apps {
+  //     own {
+  //       localID
+  //       name
+  //       ...AppItem_ownApp
+  //       ...OwnAppDetailView_ownApp
+  //     }
+  //   }
+  // `,
 })
 
 export default class OwnAppsViewRenderer extends Component<{}> {
@@ -209,12 +209,13 @@ export default class OwnAppsViewRenderer extends Component<{}> {
         query={graphql`
           query OwnAppsViewQuery {
             viewer {
-              identities {
-                ...OwnAppsView_identities
-              }
-              apps {
-                ...OwnAppsView_apps
-              }
+              id
+              # identities {
+              #   ...OwnAppsView_identities
+              # }
+              # apps {
+              #   ...OwnAppsView_apps
+              # }
             }
           }
         `}

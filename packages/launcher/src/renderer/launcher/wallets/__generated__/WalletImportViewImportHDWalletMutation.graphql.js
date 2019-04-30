@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash a41b9b2e19ef85ebce4e9a9a8b04280b
+ * @relayHash 9b33f8576d82d90694f7f6c89c656c50
  */
 
 /* eslint-disable */
@@ -26,7 +26,7 @@ export type WalletImportViewImportHDWalletMutationVariables = {|
 export type WalletImportViewImportHDWalletMutationResponse = {|
   +importHDWallet: ?{|
     +hdWallet: ?{|
-      +accounts: ?$ReadOnlyArray<?{|
+      +accounts: $ReadOnlyArray<{|
         +address: string
       |}>,
       +localID: string,

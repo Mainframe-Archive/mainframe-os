@@ -187,20 +187,21 @@ export default class IdentitySelectorQueryContainer extends Component<ContainerP
         query={graphql`
           query IdentitySelectorViewQuery {
             viewer {
-              identities {
-                ownUsers {
-                  localID
-                  profile {
-                    name
-                  }
-                }
-                ownDevelopers {
-                  localID
-                  profile {
-                    name
-                  }
-                }
-              }
+              id
+              # identities {
+              #   ownUsers {
+              #     localID
+              #     profile {
+              #       name
+              #     }
+              #   }
+              #   ownDevelopers {
+              #     localID
+              #     profile {
+              #       name
+              #     }
+              #   }
+              # }
             }
           }
         `}

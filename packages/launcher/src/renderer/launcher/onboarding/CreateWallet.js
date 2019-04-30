@@ -31,7 +31,7 @@ const ButtonWrapper = styled.View`
 `
 
 const updateProfileMutation = graphql`
-  mutation OnboardWalletViewUpdateProfileMutation($input: UpdateProfileInput!) {
+  mutation CreateWalletUpdateProfileMutation($input: UpdateProfileInput!) {
     updateProfile(input: $input) {
       viewer {
         identities {

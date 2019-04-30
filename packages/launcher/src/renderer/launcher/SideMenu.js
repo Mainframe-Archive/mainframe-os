@@ -232,11 +232,11 @@ const SideMenuRelayContainer = createFragmentContainer(SideMenu, {
       invitesCount(userID: $userID)
     }
   `,
-  apps: graphql`
-    fragment SideMenu_apps on Apps {
-      updatesCount
-    }
-  `,
+  // apps: graphql`
+  //   fragment SideMenu_apps on Apps {
+  //     updatesCount
+  //   }
+  // `,
 })
 
 export class SideMenuRenderer extends Component<QueryProps> {
@@ -247,14 +247,16 @@ export class SideMenuRenderer extends Component<QueryProps> {
       <QueryRenderer
         environment={this.context}
         query={graphql`
-          query SideMenuQuery($userID: String!) {
+          query SideMenuQuery {
+            # $userID: String!
             viewer {
-              apps {
-                ...SideMenu_apps
-              }
-              contacts {
-                ...SideMenu_contacts @arguments(userID: $userID)
-              }
+              id
+              # apps {
+              #   ...SideMenu_apps
+              # }
+              # contacts {
+              #   ...SideMenu_contacts @arguments(userID: $userID)
+              # }
             }
           }
         `}

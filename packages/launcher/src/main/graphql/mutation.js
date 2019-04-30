@@ -125,28 +125,21 @@ const createHDWalletMutation = mutationWithClientMutationId({
     name: {
       type: new GraphQLNonNull(GraphQLString),
     },
-    userID: {
-      type: GraphQLString,
-    },
   },
   outputFields: {
     hdWallet: {
       type: ethHdWallet,
-      resolve: payload => payload,
+      resolve: payload => payload.wallet,
     },
     viewer: viewerOutput,
   },
   mutateAndGetPayload: async (args, ctx) => {
-    const wallet = await ctx.mutations.createHDWallet(
-      args.blockchain,
-      args.name,
-      args.userID,
-    )
-    return {
-      localID: wallet.localID,
-      mnemonic: wallet.mnemonic,
-      accounts: wallet.getAccounts(),
-    }
+    const [user, wallet] = await Promise.all([
+      ctx.getUser(),
+      ctx.db.eth_wallets_hd.create({ name: args.name }),
+    ])
+    await user.update({ $push: { 'ethWallets.hd': wallet.localID } })
+    return { wallet }
   },
 })
 
