@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 386bd9e83379831703ac3cffa59ae8de
+ * @relayHash d0457c49544cfb660898cdcce78965c1
  */
 
 /* eslint-disable */
@@ -23,13 +23,7 @@ export type CreateDevIdentityViewCreateDeveloperIdentityMutationVariables = {|
 export type CreateDevIdentityViewCreateDeveloperIdentityMutationResponse = {|
   +createDeveloperIdentity: ?{|
     +viewer: {|
-      +identities: {|
-        +ownDevelopers: $ReadOnlyArray<{|
-          +profile: {|
-            +name: string
-          |}
-        |}>
-      |}
+      +id: string
     |}
   |}
 |};
@@ -46,14 +40,6 @@ mutation CreateDevIdentityViewCreateDeveloperIdentityMutation(
 ) {
   createDeveloperIdentity(input: $input) {
     viewer {
-      identities {
-        ownDevelopers {
-          profile {
-            name
-          }
-          id
-        }
-      }
       id
     }
   }
@@ -71,43 +57,48 @@ var v0 = [
 ],
 v1 = [
   {
-    "kind": "Variable",
-    "name": "input",
-    "variableName": "input",
-    "type": "CreateDeveloperIdentityInput!"
+    "kind": "LinkedField",
+    "alias": null,
+    "name": "createDeveloperIdentity",
+    "storageKey": null,
+    "args": [
+      {
+        "kind": "Variable",
+        "name": "input",
+        "variableName": "input",
+        "type": "CreateDeveloperIdentityInput!"
+      }
+    ],
+    "concreteType": "CreateDeveloperIdentityPayload",
+    "plural": false,
+    "selections": [
+      {
+        "kind": "LinkedField",
+        "alias": null,
+        "name": "viewer",
+        "storageKey": null,
+        "args": null,
+        "concreteType": "User",
+        "plural": false,
+        "selections": [
+          {
+            "kind": "ScalarField",
+            "alias": null,
+            "name": "id",
+            "args": null,
+            "storageKey": null
+          }
+        ]
+      }
+    ]
   }
-],
-v2 = {
-  "kind": "LinkedField",
-  "alias": null,
-  "name": "profile",
-  "storageKey": null,
-  "args": null,
-  "concreteType": "NamedProfile",
-  "plural": false,
-  "selections": [
-    {
-      "kind": "ScalarField",
-      "alias": null,
-      "name": "name",
-      "args": null,
-      "storageKey": null
-    }
-  ]
-},
-v3 = {
-  "kind": "ScalarField",
-  "alias": null,
-  "name": "id",
-  "args": null,
-  "storageKey": null
-};
+];
 return {
   "kind": "Request",
   "operationKind": "mutation",
   "name": "CreateDevIdentityViewCreateDeveloperIdentityMutation",
   "id": null,
-  "text": "mutation CreateDevIdentityViewCreateDeveloperIdentityMutation(\n  $input: CreateDeveloperIdentityInput!\n) {\n  createDeveloperIdentity(input: $input) {\n    viewer {\n      identities {\n        ownDevelopers {\n          profile {\n            name\n          }\n          id\n        }\n      }\n      id\n    }\n  }\n}\n",
+  "text": "mutation CreateDevIdentityViewCreateDeveloperIdentityMutation(\n  $input: CreateDeveloperIdentityInput!\n) {\n  createDeveloperIdentity(input: $input) {\n    viewer {\n      id\n    }\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -115,110 +106,16 @@ return {
     "type": "Mutation",
     "metadata": null,
     "argumentDefinitions": v0,
-    "selections": [
-      {
-        "kind": "LinkedField",
-        "alias": null,
-        "name": "createDeveloperIdentity",
-        "storageKey": null,
-        "args": v1,
-        "concreteType": "CreateDeveloperIdentityPayload",
-        "plural": false,
-        "selections": [
-          {
-            "kind": "LinkedField",
-            "alias": null,
-            "name": "viewer",
-            "storageKey": null,
-            "args": null,
-            "concreteType": "Viewer",
-            "plural": false,
-            "selections": [
-              {
-                "kind": "LinkedField",
-                "alias": null,
-                "name": "identities",
-                "storageKey": null,
-                "args": null,
-                "concreteType": "Identities",
-                "plural": false,
-                "selections": [
-                  {
-                    "kind": "LinkedField",
-                    "alias": null,
-                    "name": "ownDevelopers",
-                    "storageKey": null,
-                    "args": null,
-                    "concreteType": "OwnDeveloperIdentity",
-                    "plural": true,
-                    "selections": [
-                      v2
-                    ]
-                  }
-                ]
-              }
-            ]
-          }
-        ]
-      }
-    ]
+    "selections": v1
   },
   "operation": {
     "kind": "Operation",
     "name": "CreateDevIdentityViewCreateDeveloperIdentityMutation",
     "argumentDefinitions": v0,
-    "selections": [
-      {
-        "kind": "LinkedField",
-        "alias": null,
-        "name": "createDeveloperIdentity",
-        "storageKey": null,
-        "args": v1,
-        "concreteType": "CreateDeveloperIdentityPayload",
-        "plural": false,
-        "selections": [
-          {
-            "kind": "LinkedField",
-            "alias": null,
-            "name": "viewer",
-            "storageKey": null,
-            "args": null,
-            "concreteType": "Viewer",
-            "plural": false,
-            "selections": [
-              {
-                "kind": "LinkedField",
-                "alias": null,
-                "name": "identities",
-                "storageKey": null,
-                "args": null,
-                "concreteType": "Identities",
-                "plural": false,
-                "selections": [
-                  {
-                    "kind": "LinkedField",
-                    "alias": null,
-                    "name": "ownDevelopers",
-                    "storageKey": null,
-                    "args": null,
-                    "concreteType": "OwnDeveloperIdentity",
-                    "plural": true,
-                    "selections": [
-                      v2,
-                      v3
-                    ]
-                  }
-                ]
-              },
-              v3
-            ]
-          }
-        ]
-      }
-    ]
+    "selections": v1
   }
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = 'e95f4d0abbfc546f0377959e44c19bac';
+(node/*: any*/).hash = '4d502474c8a7f9d9af835395c77ffad1';
 module.exports = node;

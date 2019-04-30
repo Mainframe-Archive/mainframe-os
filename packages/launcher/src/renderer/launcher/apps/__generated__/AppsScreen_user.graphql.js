@@ -8,30 +8,30 @@
 
 /*::
 import type { ConcreteFragment } from 'relay-runtime';
-type AppsView_viewer$ref = any;
+type AppsView_user$ref = any;
 import type { FragmentReference } from "relay-runtime";
-declare export opaque type AppsScreen_viewer$ref: FragmentReference;
-export type AppsScreen_viewer = {|
-  +$fragmentRefs: AppsView_viewer$ref,
-  +$refType: AppsScreen_viewer$ref,
+declare export opaque type AppsScreen_user$ref: FragmentReference;
+export type AppsScreen_user = {|
+  +$fragmentRefs: AppsView_user$ref,
+  +$refType: AppsScreen_user$ref,
 |};
 */
 
 
 const node/*: ConcreteFragment*/ = {
   "kind": "Fragment",
-  "name": "AppsScreen_viewer",
-  "type": "Viewer",
+  "name": "AppsScreen_user",
+  "type": "User",
   "metadata": null,
   "argumentDefinitions": [],
   "selections": [
     {
       "kind": "FragmentSpread",
-      "name": "AppsView_viewer",
+      "name": "AppsView_user",
       "args": null
     }
   ]
 };
 // prettier-ignore
-(node/*: any*/).hash = '575a68c185176ecdc209b30733eb35d3';
+(node/*: any*/).hash = 'db635a585f8c1f354a9d1588c5875ca2';
 module.exports = node;

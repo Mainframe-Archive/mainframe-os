@@ -226,30 +226,29 @@ type State = {
 }
 
 const CONTACTS_CHANGED_SUBSCRIPTION = graphql`
-  subscription ContactsViewContactsChangedSubscription($userID: String!) {
+  subscription ContactsViewContactsChangedSubscription {
     contactsChanged {
       viewer {
-        contacts {
-          ...ContactsView_contacts @arguments(userID: $userID)
-        }
+        id
+        # contacts {
+        #   ...ContactsView_contacts @arguments(userID: $userID)
+        # }
       }
     }
   }
 `
 
 export const addContactMutation = graphql`
-  mutation ContactsViewAddContactMutation(
-    $input: AddContactInput!
-    $userID: String!
-  ) {
+  mutation ContactsViewAddContactMutation($input: AddContactInput!) {
     addContact(input: $input) {
       contact {
         ...InviteContactModal_contact
       }
       viewer {
-        contacts {
-          ...ContactsView_contacts @arguments(userID: $userID)
-        }
+        id
+        # contacts {
+        #   ...ContactsView_contacts @arguments(userID: $userID)
+        # }
       }
     }
   }
@@ -258,13 +257,13 @@ export const addContactMutation = graphql`
 export const acceptContactRequestMutation = graphql`
   mutation ContactsViewAcceptContactRequestMutation(
     $input: AcceptContactRequestInput!
-    $userID: String!
   ) {
     acceptContactRequest(input: $input) {
       viewer {
-        contacts {
-          ...ContactsView_contacts @arguments(userID: $userID)
-        }
+        id
+        # contacts {
+        #   ...ContactsView_contacts @arguments(userID: $userID)
+        # }
       }
     }
   }
@@ -1194,31 +1193,31 @@ class ContactsViewComponent extends Component<Props, State> {
 }
 
 const ContactsView = createFragmentContainer(ContactsViewComponent, {
-  contacts: graphql`
-    fragment ContactsView_contacts on Contacts
-      @argumentDefinitions(userID: { type: "String!" }) {
-      userContacts(userID: $userID) {
-        ...InviteContactModal_contact
-        peerID
-        localID
-        connectionState
-        publicFeed
-        invite {
-          ethNetwork
-          inviteTX
-          stake {
-            reclaimedTX
-            amount
-            state
-          }
-        }
-        profile {
-          name
-          ethAddress
-        }
-      }
-    }
-  `,
+  // contacts: graphql`
+  //   fragment ContactsView_contacts on Contacts
+  //     @argumentDefinitions(userID: { type: "String!" }) {
+  //     userContacts(userID: $userID) {
+  //       ...InviteContactModal_contact
+  //       peerID
+  //       localID
+  //       connectionState
+  //       publicFeed
+  //       invite {
+  //         ethNetwork
+  //         inviteTX
+  //         stake {
+  //           reclaimedTX
+  //           amount
+  //           state
+  //         }
+  //       }
+  //       profile {
+  //         name
+  //         ethAddress
+  //       }
+  //     }
+  //   }
+  // `,
 })
 
 export default ContactsView

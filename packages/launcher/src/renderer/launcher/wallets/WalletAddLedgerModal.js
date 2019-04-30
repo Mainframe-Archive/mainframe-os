@@ -69,14 +69,11 @@ const ACCOUNT_FETCH_ERR_MSG =
 const addLedgerWalletMutation = graphql`
   mutation WalletAddLedgerModalAddLedgerWalletAccountsMutation(
     $input: AddLedgerWalletAccountsInput!
-    $userID: String!
   ) {
     addLedgerWalletAccounts(input: $input) {
       addresses
       viewer {
-        wallets {
-          ...WalletsView_wallets @arguments(userID: $userID)
-        }
+        ...WalletsView_user
       }
     }
   }

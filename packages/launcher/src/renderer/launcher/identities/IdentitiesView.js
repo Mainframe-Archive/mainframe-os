@@ -174,40 +174,40 @@ class IdentitiesView extends Component<Props, State> {
 export const IdentitiesViewRelayContainer = createFragmentContainer(
   IdentitiesView,
   {
-    identities: graphql`
-      fragment IdentitiesView_identities on Identities {
-        ownUsers {
-          ...IdentityEditModal_ownUserIdentity
-          localID
-          feedHash
-          profile {
-            name
-          }
-          apps {
-            localID
-            manifest {
-              name
-            }
-            users {
-              settings {
-                permissionsSettings {
-                  permissionsChecked
-                  grants {
-                    BLOCKCHAIN_SEND
-                  }
-                }
-              }
-            }
-          }
-        }
-        ownDevelopers {
-          localID
-          profile {
-            name
-          }
-        }
-      }
-    `,
+    //   identities: graphql`
+    //     fragment IdentitiesView_identities on Identities {
+    //       ownUsers {
+    //         ...IdentityEditModal_ownUserIdentity
+    //         localID
+    //         feedHash
+    //         profile {
+    //           name
+    //         }
+    //         apps {
+    //           localID
+    //           manifest {
+    //             name
+    //           }
+    //           users {
+    //             settings {
+    //               permissionsSettings {
+    //                 permissionsChecked
+    //                 grants {
+    //                   BLOCKCHAIN_SEND
+    //                 }
+    //               }
+    //             }
+    //           }
+    //         }
+    //       }
+    //       ownDevelopers {
+    //         localID
+    //         profile {
+    //           name
+    //         }
+    //       }
+    //     }
+    //   `,
   },
 )
 

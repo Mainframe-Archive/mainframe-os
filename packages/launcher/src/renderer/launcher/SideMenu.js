@@ -137,12 +137,13 @@ const SelectedPointer = styled.View`
 `
 
 const CONTACTS_CHANGED_SUBSCRIPTION = graphql`
-  subscription SideMenuContactsChangedSubscription($userID: String!) {
+  subscription SideMenuContactsChangedSubscription {
     contactsChanged {
       viewer {
-        contacts {
-          invitesCount(userID: $userID)
-        }
+        id
+        # contacts {
+        #   invitesCount(userID: $userID)
+        # }
       }
     }
   }
@@ -226,12 +227,12 @@ export class SideMenu extends Component<Props, State> {
 }
 
 const SideMenuRelayContainer = createFragmentContainer(SideMenu, {
-  contacts: graphql`
-    fragment SideMenu_contacts on Contacts
-      @argumentDefinitions(userID: { type: "String!" }) {
-      invitesCount(userID: $userID)
-    }
-  `,
+  // contacts: graphql`
+  //   fragment SideMenu_contacts on Contacts
+  //     @argumentDefinitions(userID: { type: "String!" }) {
+  //     invitesCount(userID: $userID)
+  //   }
+  // `,
   // apps: graphql`
   //   fragment SideMenu_apps on Apps {
   //     updatesCount

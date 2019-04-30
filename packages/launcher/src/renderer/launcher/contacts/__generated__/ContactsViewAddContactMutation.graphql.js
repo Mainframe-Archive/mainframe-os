@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 2f5a28b8982fe1efe3ca29c518376765
+ * @relayHash 86e3f9b3cc0e1d8a8f0737a7c1a1f68a
  */
 
 /* eslint-disable */
@@ -9,7 +9,6 @@
 
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
-type ContactsView_contacts$ref = any;
 type InviteContactModal_contact$ref = any;
 export type AddContactInput = {
   userID: string,
@@ -19,8 +18,7 @@ export type AddContactInput = {
   clientMutationId?: ?string,
 };
 export type ContactsViewAddContactMutationVariables = {|
-  input: AddContactInput,
-  userID: string,
+  input: AddContactInput
 |};
 export type ContactsViewAddContactMutationResponse = {|
   +addContact: ?{|
@@ -28,9 +26,7 @@ export type ContactsViewAddContactMutationResponse = {|
       +$fragmentRefs: InviteContactModal_contact$ref
     |},
     +viewer: {|
-      +contacts: {|
-        +$fragmentRefs: ContactsView_contacts$ref
-      |}
+      +id: string
     |},
   |}
 |};
@@ -44,7 +40,6 @@ export type ContactsViewAddContactMutation = {|
 /*
 mutation ContactsViewAddContactMutation(
   $input: AddContactInput!
-  $userID: String!
 ) {
   addContact(input: $input) {
     contact {
@@ -52,9 +47,6 @@ mutation ContactsViewAddContactMutation(
       id
     }
     viewer {
-      contacts {
-        ...ContactsView_contacts_3iqrP
-      }
       id
     }
   }
@@ -78,30 +70,6 @@ fragment InviteContactModal_contact on Contact {
     ethAddress
   }
 }
-
-fragment ContactsView_contacts_3iqrP on Contacts {
-  userContacts(userID: $userID) {
-    ...InviteContactModal_contact
-    peerID
-    localID
-    connectionState
-    publicFeed
-    invite {
-      ethNetwork
-      inviteTX
-      stake {
-        reclaimedTX
-        amount
-        state
-      }
-    }
-    profile {
-      name
-      ethAddress
-    }
-    id
-  }
-}
 */
 
 const node/*: ConcreteRequest*/ = (function(){
@@ -110,12 +78,6 @@ var v0 = [
     "kind": "LocalArgument",
     "name": "input",
     "type": "AddContactInput!",
-    "defaultValue": null
-  },
-  {
-    "kind": "LocalArgument",
-    "name": "userID",
-    "type": "String!",
     "defaultValue": null
   }
 ],
@@ -130,108 +92,28 @@ v1 = [
 v2 = {
   "kind": "ScalarField",
   "alias": null,
-  "name": "peerID",
+  "name": "id",
   "args": null,
   "storageKey": null
 },
 v3 = {
-  "kind": "ScalarField",
-  "alias": null,
-  "name": "localID",
-  "args": null,
-  "storageKey": null
-},
-v4 = {
-  "kind": "ScalarField",
-  "alias": null,
-  "name": "connectionState",
-  "args": null,
-  "storageKey": null
-},
-v5 = {
-  "kind": "ScalarField",
-  "alias": null,
-  "name": "publicFeed",
-  "args": null,
-  "storageKey": null
-},
-v6 = {
-  "kind": "ScalarField",
-  "alias": null,
-  "name": "inviteTX",
-  "args": null,
-  "storageKey": null
-},
-v7 = {
   "kind": "LinkedField",
   "alias": null,
-  "name": "stake",
+  "name": "viewer",
   "storageKey": null,
   "args": null,
-  "concreteType": "InviteStake",
+  "concreteType": "User",
   "plural": false,
   "selections": [
-    {
-      "kind": "ScalarField",
-      "alias": null,
-      "name": "reclaimedTX",
-      "args": null,
-      "storageKey": null
-    },
-    {
-      "kind": "ScalarField",
-      "alias": null,
-      "name": "amount",
-      "args": null,
-      "storageKey": null
-    },
-    {
-      "kind": "ScalarField",
-      "alias": null,
-      "name": "state",
-      "args": null,
-      "storageKey": null
-    }
+    v2
   ]
-},
-v8 = {
-  "kind": "LinkedField",
-  "alias": null,
-  "name": "profile",
-  "storageKey": null,
-  "args": null,
-  "concreteType": "GenericProfile",
-  "plural": false,
-  "selections": [
-    {
-      "kind": "ScalarField",
-      "alias": null,
-      "name": "name",
-      "args": null,
-      "storageKey": null
-    },
-    {
-      "kind": "ScalarField",
-      "alias": null,
-      "name": "ethAddress",
-      "args": null,
-      "storageKey": null
-    }
-  ]
-},
-v9 = {
-  "kind": "ScalarField",
-  "alias": null,
-  "name": "id",
-  "args": null,
-  "storageKey": null
 };
 return {
   "kind": "Request",
   "operationKind": "mutation",
   "name": "ContactsViewAddContactMutation",
   "id": null,
-  "text": "mutation ContactsViewAddContactMutation(\n  $input: AddContactInput!\n  $userID: String!\n) {\n  addContact(input: $input) {\n    contact {\n      ...InviteContactModal_contact\n      id\n    }\n    viewer {\n      contacts {\n        ...ContactsView_contacts_3iqrP\n      }\n      id\n    }\n  }\n}\n\nfragment InviteContactModal_contact on Contact {\n  peerID\n  localID\n  connectionState\n  publicFeed\n  invite {\n    inviteTX\n    stake {\n      reclaimedTX\n      amount\n      state\n    }\n  }\n  profile {\n    name\n    ethAddress\n  }\n}\n\nfragment ContactsView_contacts_3iqrP on Contacts {\n  userContacts(userID: $userID) {\n    ...InviteContactModal_contact\n    peerID\n    localID\n    connectionState\n    publicFeed\n    invite {\n      ethNetwork\n      inviteTX\n      stake {\n        reclaimedTX\n        amount\n        state\n      }\n    }\n    profile {\n      name\n      ethAddress\n    }\n    id\n  }\n}\n",
+  "text": "mutation ContactsViewAddContactMutation(\n  $input: AddContactInput!\n) {\n  addContact(input: $input) {\n    contact {\n      ...InviteContactModal_contact\n      id\n    }\n    viewer {\n      id\n    }\n  }\n}\n\nfragment InviteContactModal_contact on Contact {\n  peerID\n  localID\n  connectionState\n  publicFeed\n  invite {\n    inviteTX\n    stake {\n      reclaimedTX\n      amount\n      state\n    }\n  }\n  profile {\n    name\n    ethAddress\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -265,40 +147,7 @@ return {
               }
             ]
           },
-          {
-            "kind": "LinkedField",
-            "alias": null,
-            "name": "viewer",
-            "storageKey": null,
-            "args": null,
-            "concreteType": "Viewer",
-            "plural": false,
-            "selections": [
-              {
-                "kind": "LinkedField",
-                "alias": null,
-                "name": "contacts",
-                "storageKey": null,
-                "args": null,
-                "concreteType": "Contacts",
-                "plural": false,
-                "selections": [
-                  {
-                    "kind": "FragmentSpread",
-                    "name": "ContactsView_contacts",
-                    "args": [
-                      {
-                        "kind": "Variable",
-                        "name": "userID",
-                        "variableName": "userID",
-                        "type": null
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
-          }
+          v3
         ]
       }
     ]
@@ -326,10 +175,34 @@ return {
             "concreteType": "Contact",
             "plural": false,
             "selections": [
-              v2,
-              v3,
-              v4,
-              v5,
+              {
+                "kind": "ScalarField",
+                "alias": null,
+                "name": "peerID",
+                "args": null,
+                "storageKey": null
+              },
+              {
+                "kind": "ScalarField",
+                "alias": null,
+                "name": "localID",
+                "args": null,
+                "storageKey": null
+              },
+              {
+                "kind": "ScalarField",
+                "alias": null,
+                "name": "connectionState",
+                "args": null,
+                "storageKey": null
+              },
+              {
+                "kind": "ScalarField",
+                "alias": null,
+                "name": "publicFeed",
+                "args": null,
+                "storageKey": null
+              },
               {
                 "kind": "LinkedField",
                 "alias": null,
@@ -339,81 +212,76 @@ return {
                 "concreteType": "ContactInviteData",
                 "plural": false,
                 "selections": [
-                  v6,
-                  v7
-                ]
-              },
-              v8,
-              v9
-            ]
-          },
-          {
-            "kind": "LinkedField",
-            "alias": null,
-            "name": "viewer",
-            "storageKey": null,
-            "args": null,
-            "concreteType": "Viewer",
-            "plural": false,
-            "selections": [
-              {
-                "kind": "LinkedField",
-                "alias": null,
-                "name": "contacts",
-                "storageKey": null,
-                "args": null,
-                "concreteType": "Contacts",
-                "plural": false,
-                "selections": [
+                  {
+                    "kind": "ScalarField",
+                    "alias": null,
+                    "name": "inviteTX",
+                    "args": null,
+                    "storageKey": null
+                  },
                   {
                     "kind": "LinkedField",
                     "alias": null,
-                    "name": "userContacts",
+                    "name": "stake",
                     "storageKey": null,
-                    "args": [
-                      {
-                        "kind": "Variable",
-                        "name": "userID",
-                        "variableName": "userID",
-                        "type": "String!"
-                      }
-                    ],
-                    "concreteType": "Contact",
-                    "plural": true,
+                    "args": null,
+                    "concreteType": "InviteStake",
+                    "plural": false,
                     "selections": [
-                      v2,
-                      v3,
-                      v4,
-                      v5,
                       {
-                        "kind": "LinkedField",
+                        "kind": "ScalarField",
                         "alias": null,
-                        "name": "invite",
-                        "storageKey": null,
+                        "name": "reclaimedTX",
                         "args": null,
-                        "concreteType": "ContactInviteData",
-                        "plural": false,
-                        "selections": [
-                          v6,
-                          v7,
-                          {
-                            "kind": "ScalarField",
-                            "alias": null,
-                            "name": "ethNetwork",
-                            "args": null,
-                            "storageKey": null
-                          }
-                        ]
+                        "storageKey": null
                       },
-                      v8,
-                      v9
+                      {
+                        "kind": "ScalarField",
+                        "alias": null,
+                        "name": "amount",
+                        "args": null,
+                        "storageKey": null
+                      },
+                      {
+                        "kind": "ScalarField",
+                        "alias": null,
+                        "name": "state",
+                        "args": null,
+                        "storageKey": null
+                      }
                     ]
                   }
                 ]
               },
-              v9
+              {
+                "kind": "LinkedField",
+                "alias": null,
+                "name": "profile",
+                "storageKey": null,
+                "args": null,
+                "concreteType": "GenericProfile",
+                "plural": false,
+                "selections": [
+                  {
+                    "kind": "ScalarField",
+                    "alias": null,
+                    "name": "name",
+                    "args": null,
+                    "storageKey": null
+                  },
+                  {
+                    "kind": "ScalarField",
+                    "alias": null,
+                    "name": "ethAddress",
+                    "args": null,
+                    "storageKey": null
+                  }
+                ]
+              },
+              v2
             ]
-          }
+          },
+          v3
         ]
       }
     ]
@@ -421,5 +289,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = 'e3b88ea88e87b7fcdd26adf016b8ebb7';
+(node/*: any*/).hash = 'aa2084657bcd15f6772d505c0b8f7262';
 module.exports = node;

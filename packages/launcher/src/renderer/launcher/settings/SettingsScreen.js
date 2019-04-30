@@ -88,11 +88,11 @@ class SettingsScreen extends Component<Props, State> {
 }
 
 const SettingsScreenRelayContainer = createFragmentContainer(SettingsScreen, {
-  settings: graphql`
-    fragment SettingsScreen_settings on Settings {
-      ethereumUrl
-    }
-  `,
+  // settings: graphql`
+  //   fragment SettingsScreen_settings on Settings {
+  //     ethereumUrl
+  //   }
+  // `,
 })
 
 export default class SettingsScreenQueryRenderer extends Component<{}> {

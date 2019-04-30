@@ -34,9 +34,7 @@ const updateProfileMutation = graphql`
   mutation CreateWalletUpdateProfileMutation($input: UpdateProfileInput!) {
     updateProfile(input: $input) {
       viewer {
-        identities {
-          ...Launcher_identities
-        }
+        id
       }
     }
   }
@@ -162,7 +160,6 @@ export default class OnboardingCreateWallet extends Component<Props, State> {
       <WalletCreateModal
         onClose={this.closeModal}
         onSetupWallet={this.onSetupWallet}
-        userID={this.props.userID}
         full
       />
     )

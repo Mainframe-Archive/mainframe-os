@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash b1d3e38f7ecc9ff7a4bf6e657faf1c53
+ * @relayHash 3dac3edf3e039c42dea639b2e8689a88
  */
 
 /* eslint-disable */
@@ -19,9 +19,7 @@ export type SettingsMenuViewSetEthNetworkMutationVariables = {|
 export type SettingsMenuViewSetEthNetworkMutationResponse = {|
   +setEthNetwork: ?{|
     +viewer: {|
-      +settings: {|
-        +ethereumUrl: string
-      |}
+      +ethURL: string
     |}
   |}
 |};
@@ -38,9 +36,7 @@ mutation SettingsMenuViewSetEthNetworkMutation(
 ) {
   setEthNetwork(input: $input) {
     viewer {
-      settings {
-        ethereumUrl
-      }
+      ethURL
       id
     }
   }
@@ -65,29 +61,18 @@ v1 = [
   }
 ],
 v2 = {
-  "kind": "LinkedField",
+  "kind": "ScalarField",
   "alias": null,
-  "name": "settings",
-  "storageKey": null,
+  "name": "ethURL",
   "args": null,
-  "concreteType": "Settings",
-  "plural": false,
-  "selections": [
-    {
-      "kind": "ScalarField",
-      "alias": null,
-      "name": "ethereumUrl",
-      "args": null,
-      "storageKey": null
-    }
-  ]
+  "storageKey": null
 };
 return {
   "kind": "Request",
   "operationKind": "mutation",
   "name": "SettingsMenuViewSetEthNetworkMutation",
   "id": null,
-  "text": "mutation SettingsMenuViewSetEthNetworkMutation(\n  $input: SetEthNetworkInput!\n) {\n  setEthNetwork(input: $input) {\n    viewer {\n      settings {\n        ethereumUrl\n      }\n      id\n    }\n  }\n}\n",
+  "text": "mutation SettingsMenuViewSetEthNetworkMutation(\n  $input: SetEthNetworkInput!\n) {\n  setEthNetwork(input: $input) {\n    viewer {\n      ethURL\n      id\n    }\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -111,7 +96,7 @@ return {
             "name": "viewer",
             "storageKey": null,
             "args": null,
-            "concreteType": "Viewer",
+            "concreteType": "User",
             "plural": false,
             "selections": [
               v2
@@ -141,7 +126,7 @@ return {
             "name": "viewer",
             "storageKey": null,
             "args": null,
-            "concreteType": "Viewer",
+            "concreteType": "User",
             "plural": false,
             "selections": [
               v2,
@@ -161,5 +146,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '00f6e56de1c760cf21efb0a3ca5010e6';
+(node/*: any*/).hash = 'c7fadb064f0135e390cf08ca37e87334';
 module.exports = node;

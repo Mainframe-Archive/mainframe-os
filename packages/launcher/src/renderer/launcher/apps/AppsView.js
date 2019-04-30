@@ -434,8 +434,8 @@ class AppsView extends Component<Props, State> {
 const AppsViewFragmentContainer = createFragmentContainer(AppsView, {
   // ...AppItem_installedApp
   // ...AppUpdateModal_app
-  viewer: graphql`
-    fragment AppsView_viewer on Viewer {
+  user: graphql`
+    fragment AppsView_user on User {
       id
       # apps {
       #   localID

@@ -90,7 +90,6 @@ const backupDescription = `Below is your 12 word seed phrase, write down the wor
 const createWalletMutation = graphql`
   mutation WalletCreateModalCreateHDWalletMutation(
     $input: CreateHDWalletInput!
-    $userID: String!
   ) {
     createHDWallet(input: $input) {
       hdWallet {
@@ -101,12 +100,7 @@ const createWalletMutation = graphql`
         localID
       }
       viewer {
-        identities {
-          ...Launcher_identities
-        }
-        wallets {
-          ...WalletsView_wallets @arguments(userID: $userID)
-        }
+        ...WalletsView_user
       }
     }
   }

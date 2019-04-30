@@ -19,13 +19,8 @@ import {
   ownApp,
   ownDeveloperIdentity,
   ownUserIdentity,
-  viewer,
+  viewerField,
 } from './objects'
-
-const viewerOutput = {
-  type: new GraphQLNonNull(viewer),
-  resolve: () => ({}),
-}
 
 const supportedWalletsEnum = new GraphQLEnumType({
   name: 'SupportedWallets',
@@ -45,7 +40,7 @@ const deleteWalletMutation = mutationWithClientMutationId({
     },
   },
   outputFields: {
-    viewer: viewerOutput,
+    viewer: viewerField,
   },
   mutateAndGetPayload: async (args, ctx) => {
     await ctx.mutations.deleteWallet('ethereum', args.type, args.walletID)
@@ -71,7 +66,7 @@ const addHDWalletAccountMutation = mutationWithClientMutationId({
       type: new GraphQLNonNull(GraphQLString),
       resolve: payload => payload.address,
     },
-    viewer: viewerOutput,
+    viewer: viewerField,
   },
   mutateAndGetPayload: async (args, ctx) => {
     const address = await ctx.mutations.addHDWalletAccount(args)
@@ -100,7 +95,7 @@ const importHDWalletMutation = mutationWithClientMutationId({
       type: ethHdWallet,
       resolve: payload => payload,
     },
-    viewer: viewerOutput,
+    viewer: viewerField,
   },
   mutateAndGetPayload: async (args, ctx) => {
     const wallet = await ctx.mutations.importHDWallet({
@@ -131,7 +126,7 @@ const createHDWalletMutation = mutationWithClientMutationId({
       type: ethHdWallet,
       resolve: payload => payload.wallet,
     },
-    viewer: viewerOutput,
+    viewer: viewerField,
   },
   mutateAndGetPayload: async (args, ctx) => {
     const [user, wallet] = await Promise.all([
@@ -165,7 +160,7 @@ const addLedgerWalletAccountsMutation = mutationWithClientMutationId({
       type: new GraphQLNonNull(GraphQLString),
       resolve: payload => payload.localID,
     },
-    viewer: viewerOutput,
+    viewer: viewerField,
   },
   mutateAndGetPayload: async (args, ctx) => {
     const res = await ctx.mutations.addLedgerWalletAccounts(
@@ -188,7 +183,7 @@ const setDefaultWalletMutation = mutationWithClientMutationId({
     },
   },
   outputFields: {
-    viewer: viewerOutput,
+    viewer: viewerField,
   },
   mutateAndGetPayload: async (args, ctx) => {
     await ctx.mutations.setUsersDefaultWallet(args.userID, args.address)
@@ -204,7 +199,7 @@ const setEthNetworkMutation = mutationWithClientMutationId({
     },
   },
   outputFields: {
-    viewer: viewerOutput,
+    viewer: viewerField,
   },
   mutateAndGetPayload: async (args, ctx) => {
     await ctx.mutations.setEthNetwork(args.url)
@@ -239,7 +234,7 @@ const createUserIdentityMutation = mutationWithClientMutationId({
       type: ownUserIdentity,
       resolve: payload => payload.user,
     },
-    viewer: viewerOutput,
+    viewer: viewerField,
   },
   mutateAndGetPayload: async (args, ctx) => {
     const user = await ctx.mutations.createUser(args.profile, args.private)
@@ -259,7 +254,7 @@ const createDeveloperIdentityMutation = mutationWithClientMutationId({
       type: ownDeveloperIdentity,
       resolve: payload => payload.user,
     },
-    viewer: viewerOutput,
+    viewer: viewerField,
   },
   mutateAndGetPayload: async (args, ctx) => {
     const user = ctx.openVault.identities.createOwnDeveloper(args.profile)
@@ -297,7 +292,7 @@ const updateProfileMutation = mutationWithClientMutationId({
     },
   },
   outputFields: {
-    viewer: viewerOutput,
+    viewer: viewerField,
   },
   mutateAndGetPayload: async (args, ctx) => {
     await ctx.mutations.updateUser(
@@ -320,7 +315,7 @@ const setUserProfileVisibilityMutation = mutationWithClientMutationId({
     },
   },
   outputFields: {
-    viewer: viewerOutput,
+    viewer: viewerField,
   },
   mutateAndGetPayload: async (args, ctx) => {
     await ctx.mutations.setUserProfileVisibility(args.userID, args.visibile)
@@ -349,7 +344,7 @@ const addContactMutation = mutationWithClientMutationId({
       type: contact,
       resolve: payload => payload.contact,
     },
-    viewer: viewerOutput,
+    viewer: viewerField,
   },
   mutateAndGetPayload: async (args, ctx) => {
     const contact = await ctx.mutations.createContactFromFeed(
@@ -373,7 +368,7 @@ const deleteContactMutation = mutationWithClientMutationId({
     },
   },
   outputFields: {
-    viewer: viewerOutput,
+    viewer: viewerField,
   },
   mutateAndGetPayload: async (args, ctx) => {
     ctx.openVault.identities.deleteContact(args.userID, args.contactID)
@@ -392,7 +387,7 @@ const acceptContactRequestMutation = mutationWithClientMutationId({
     },
   },
   outputFields: {
-    viewer: viewerOutput,
+    viewer: viewerField,
     contact: {
       type: contact,
       resolve: payload => payload.contact,
@@ -462,7 +457,7 @@ const appCreateMutation = mutationWithClientMutationId({
       type: new GraphQLNonNull(ownApp),
       resolve: payload => payload.app,
     },
-    viewer: viewerOutput,
+    viewer: viewerField,
   },
   mutateAndGetPayload: async (args, ctx) => {
     const app = await ctx.mutations.createApp(args)
@@ -485,7 +480,7 @@ const appCreateVersionMutation = mutationWithClientMutationId({
       type: new GraphQLNonNull(ownApp),
       resolve: payload => payload.app,
     },
-    viewer: viewerOutput,
+    viewer: viewerField,
   },
   mutateAndGetPayload: async (args, ctx) => {
     const app = await ctx.mutations.createAppVersion(args)
@@ -504,7 +499,7 @@ const setAppPermissionsRequirementsMutation = mutationWithClientMutationId({
     },
   },
   outputFields: {
-    viewer: viewerOutput,
+    viewer: viewerField,
   },
   mutateAndGetPayload: async (args, ctx) => {
     await ctx.mutations.setAppPermissionsRequirements(
@@ -602,7 +597,7 @@ const appInstallMutation = mutationWithClientMutationId({
       type: app,
       resolve: payload => payload.app,
     },
-    viewer: viewerOutput,
+    viewer: viewerField,
   },
   mutateAndGetPayload: async (
     { userID, manifest, permissionsSettings },
@@ -635,7 +630,7 @@ const appUpdateMutation = mutationWithClientMutationId({
       type: app,
       resolve: payload => payload.app,
     },
-    viewer: viewerOutput,
+    viewer: viewerField,
   },
   mutateAndGetPayload: async (params, ctx) => {
     const app = await ctx.mutations.updateApp(params)
@@ -660,7 +655,7 @@ export const updateAppDetailsMutation = mutationWithClientMutationId({
     },
   },
   outputFields: {
-    viewer: viewerOutput,
+    viewer: viewerField,
   },
   mutateAndGetPayload: async (params, ctx) => {
     await ctx.mutations.updateAppDetails(params)
@@ -682,7 +677,7 @@ const publishAppVersionMutation = mutationWithClientMutationId({
     versionHash: {
       type: GraphQLNonNull(GraphQLString),
     },
-    viewer: viewerOutput,
+    viewer: viewerField,
   },
   mutateAndGetPayload: async (params, ctx) => {
     const versionHash = await ctx.mutations.publishApp(params)

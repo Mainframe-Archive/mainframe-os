@@ -5,7 +5,7 @@ input AcceptContactRequestInput {
 }
 
 type AcceptContactRequestPayload {
-  viewer: Viewer!
+  viewer: User!
   contact: Contact
   clientMutationId: String
 }
@@ -20,7 +20,7 @@ input AddContactInput {
 
 type AddContactPayload {
   contact: Contact
-  viewer: Viewer!
+  viewer: User!
   clientMutationId: String
 }
 
@@ -33,7 +33,7 @@ input AddHDWalletAccountInput {
 
 type AddHDWalletAccountPayload {
   address: String!
-  viewer: Viewer!
+  viewer: User!
   clientMutationId: String
 }
 
@@ -47,7 +47,7 @@ input AddLedgerWalletAccountsInput {
 type AddLedgerWalletAccountsPayload {
   addresses: [String]
   localID: String!
-  viewer: Viewer!
+  viewer: User!
   clientMutationId: String
 }
 
@@ -79,7 +79,7 @@ input AppCreateMutationInput {
 
 type AppCreateMutationPayload {
   app: OwnApp!
-  viewer: Viewer!
+  viewer: User!
   clientMutationId: String
 }
 
@@ -91,7 +91,7 @@ input AppCreateVersionMutationInput {
 
 type AppCreateVersionMutationPayload {
   app: OwnApp!
-  viewer: Viewer!
+  viewer: User!
   clientMutationId: String
 }
 
@@ -104,7 +104,7 @@ input AppInstallMutationInput {
 
 type AppInstallMutationPayload {
   app: App
-  viewer: Viewer!
+  viewer: User!
   clientMutationId: String
 }
 
@@ -166,12 +166,6 @@ input AppPermissionsSettingsInput {
   grants: PermissionGrantsInput!
 }
 
-type Apps {
-  installed: [App!]!
-  own: [OwnApp!]!
-  updatesCount: Int!
-}
-
 type AppUpdateData {
   manifest: AppManifestData!
   permissionsChanged: Boolean!
@@ -186,13 +180,13 @@ input AppUpdateMutationInput {
 
 type AppUpdateMutationPayload {
   app: App
-  viewer: Viewer!
+  viewer: User!
   clientMutationId: String
 }
 
 type AppUpdatePayload {
   app: App!
-  viewer: Viewer!
+  viewer: User!
 }
 
 type AppUser {
@@ -237,18 +231,13 @@ type Contact implements Node {
 
 type ContactChangedPayload {
   contact: Contact!
-  viewer: Viewer!
+  viewer: User!
 }
 
 type ContactInviteData {
   inviteTX: String
   ethNetwork: String
   stake: InviteStake!
-}
-
-type Contacts {
-  invitesCount(userID: String!): Int!
-  userContacts(userID: String!): [Contact!]!
 }
 
 input CreateDeveloperIdentityInput {
@@ -258,7 +247,7 @@ input CreateDeveloperIdentityInput {
 
 type CreateDeveloperIdentityPayload {
   user: OwnDeveloperIdentity
-  viewer: Viewer!
+  viewer: User!
   clientMutationId: String
 }
 
@@ -270,7 +259,7 @@ input CreateHDWalletInput {
 
 type CreateHDWalletPayload {
   hdWallet: EthHDWallet
-  viewer: Viewer!
+  viewer: User!
   clientMutationId: String
 }
 
@@ -282,7 +271,7 @@ input CreateUserIdentityInput {
 
 type CreateUserIdentityPayload {
   user: OwnUserIdentity
-  viewer: Viewer!
+  viewer: User!
   clientMutationId: String
 }
 
@@ -292,7 +281,7 @@ input DeleteContactInput {
 }
 
 type DeleteContactPayload {
-  viewer: Viewer!
+  viewer: User!
   clientMutationId: String
 }
 
@@ -303,7 +292,7 @@ input DeleteWalletInput {
 }
 
 type DeleteWalletPayload {
-  viewer: Viewer!
+  viewer: User!
   clientMutationId: String
 }
 
@@ -335,11 +324,6 @@ type GenericProfile {
   ethAddress: String
 }
 
-type Identities {
-  ownUsers: [OwnUserIdentity!]!
-  ownDevelopers: [OwnDeveloperIdentity!]!
-}
-
 input ImportHDWalletInput {
   blockchain: SupportedWallets!
   mnemonic: String!
@@ -350,7 +334,7 @@ input ImportHDWalletInput {
 
 type ImportHDWalletPayload {
   hdWallet: EthHDWallet
-  viewer: Viewer!
+  viewer: User!
   clientMutationId: String
 }
 
@@ -461,7 +445,7 @@ input PublishAppVersionInput {
 
 type PublishAppVersionPayload {
   versionHash: String!
-  viewer: Viewer!
+  viewer: User!
   clientMutationId: String
 }
 
@@ -481,7 +465,7 @@ input SetAppPermissionsRequirementsInput {
 }
 
 type SetAppPermissionsRequirementsPayload {
-  viewer: Viewer!
+  viewer: User!
   clientMutationId: String
 }
 
@@ -492,7 +476,7 @@ input SetDefaultWalletInput {
 }
 
 type SetDefaultWalletPayload {
-  viewer: Viewer!
+  viewer: User!
   clientMutationId: String
 }
 
@@ -502,12 +486,8 @@ input SetEthNetworkInput {
 }
 
 type SetEthNetworkPayload {
-  viewer: Viewer!
+  viewer: User!
   clientMutationId: String
-}
-
-type Settings {
-  ethereumUrl: String!
 }
 
 input SetUserProfileVisibilityInput {
@@ -517,7 +497,7 @@ input SetUserProfileVisibilityInput {
 }
 
 type SetUserProfileVisibilityPayload {
-  viewer: Viewer!
+  viewer: User!
   clientMutationId: String
 }
 
@@ -547,7 +527,7 @@ input UpdateAppDetailsInput {
 }
 
 type UpdateAppDetailsPayload {
-  viewer: Viewer!
+  viewer: User!
   clientMutationId: String
 }
 
@@ -559,7 +539,7 @@ input UpdateProfileInput {
 }
 
 type UpdateProfilePayload {
-  viewer: Viewer!
+  viewer: User!
   clientMutationId: String
 }
 
@@ -579,20 +559,13 @@ type User implements Node {
   apps: [App!]!
   defaultEthAddress: String
   ethWallets: EthWallets!
+  ethURL: String!
+  bzzURL: String!
 }
 
 input UserProfileInput {
   name: String!
   avatar: String
-}
-
-type Viewer {
-  id: ID!
-  apps: Apps!
-  contacts: Contacts!
-  identities: Identities!
-  wallets: Wallets!
-  settings: Settings!
 }
 
 type WalletAccount {
@@ -603,10 +576,6 @@ type WalletAccount {
 type WalletBalances {
   eth: String!
   mft: String!
-}
-
-type Wallets {
-  ethWallets(userID: String!): EthWallets!
 }
 
 input WebRequestGrantInput {

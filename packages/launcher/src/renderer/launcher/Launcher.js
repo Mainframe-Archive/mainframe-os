@@ -198,27 +198,27 @@ class Launcher extends Component<Props, State> {
 }
 
 const LauncherRelayContainer = createFragmentContainer(Launcher, {
-  identities: graphql`
-    fragment Launcher_identities on Identities {
-      ownUsers {
-        defaultEthAddress
-        localID
-        feedHash
-        profile {
-          name
-          ethAddress
-        }
-        wallets {
-          hd {
-            localID
-          }
-          ledger {
-            localID
-          }
-        }
-      }
-    }
-  `,
+  // identities: graphql`
+  //   fragment Launcher_identities on Identities {
+  //     ownUsers {
+  //       defaultEthAddress
+  //       localID
+  //       feedHash
+  //       profile {
+  //         name
+  //         ethAddress
+  //       }
+  //       wallets {
+  //         hd {
+  //           localID
+  //         }
+  //         ledger {
+  //           localID
+  //         }
+  //       }
+  //     }
+  //   }
+  // `,
 })
 
 export default class LauncherQueryRenderer extends Component<{}> {

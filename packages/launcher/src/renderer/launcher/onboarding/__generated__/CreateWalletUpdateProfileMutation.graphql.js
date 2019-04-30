@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash ea2de7456d223061fe90f84e5a6604f0
+ * @relayHash ed47c3422af9f9dc5e9d229896573779
  */
 
 /* eslint-disable */
@@ -9,7 +9,6 @@
 
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
-type Launcher_identities$ref = any;
 export type UpdateProfileInput = {
   userID: string,
   profile: UpdateUserProfileInput,
@@ -27,9 +26,7 @@ export type CreateWalletUpdateProfileMutationVariables = {|
 export type CreateWalletUpdateProfileMutationResponse = {|
   +updateProfile: ?{|
     +viewer: {|
-      +identities: {|
-        +$fragmentRefs: Launcher_identities$ref
-      |}
+      +id: string
     |}
   |}
 |};
@@ -46,34 +43,8 @@ mutation CreateWalletUpdateProfileMutation(
 ) {
   updateProfile(input: $input) {
     viewer {
-      identities {
-        ...Launcher_identities
-      }
       id
     }
-  }
-}
-
-fragment Launcher_identities on Identities {
-  ownUsers {
-    defaultEthAddress
-    localID
-    feedHash
-    profile {
-      name
-      ethAddress
-    }
-    wallets {
-      hd {
-        localID
-        id
-      }
-      ledger {
-        localID
-        id
-      }
-    }
-    id
   }
 }
 */
@@ -89,36 +60,48 @@ var v0 = [
 ],
 v1 = [
   {
-    "kind": "Variable",
-    "name": "input",
-    "variableName": "input",
-    "type": "UpdateProfileInput!"
+    "kind": "LinkedField",
+    "alias": null,
+    "name": "updateProfile",
+    "storageKey": null,
+    "args": [
+      {
+        "kind": "Variable",
+        "name": "input",
+        "variableName": "input",
+        "type": "UpdateProfileInput!"
+      }
+    ],
+    "concreteType": "UpdateProfilePayload",
+    "plural": false,
+    "selections": [
+      {
+        "kind": "LinkedField",
+        "alias": null,
+        "name": "viewer",
+        "storageKey": null,
+        "args": null,
+        "concreteType": "User",
+        "plural": false,
+        "selections": [
+          {
+            "kind": "ScalarField",
+            "alias": null,
+            "name": "id",
+            "args": null,
+            "storageKey": null
+          }
+        ]
+      }
+    ]
   }
-],
-v2 = {
-  "kind": "ScalarField",
-  "alias": null,
-  "name": "localID",
-  "args": null,
-  "storageKey": null
-},
-v3 = {
-  "kind": "ScalarField",
-  "alias": null,
-  "name": "id",
-  "args": null,
-  "storageKey": null
-},
-v4 = [
-  v2,
-  v3
 ];
 return {
   "kind": "Request",
   "operationKind": "mutation",
   "name": "CreateWalletUpdateProfileMutation",
   "id": null,
-  "text": "mutation CreateWalletUpdateProfileMutation(\n  $input: UpdateProfileInput!\n) {\n  updateProfile(input: $input) {\n    viewer {\n      identities {\n        ...Launcher_identities\n      }\n      id\n    }\n  }\n}\n\nfragment Launcher_identities on Identities {\n  ownUsers {\n    defaultEthAddress\n    localID\n    feedHash\n    profile {\n      name\n      ethAddress\n    }\n    wallets {\n      hd {\n        localID\n        id\n      }\n      ledger {\n        localID\n        id\n      }\n    }\n    id\n  }\n}\n",
+  "text": "mutation CreateWalletUpdateProfileMutation(\n  $input: UpdateProfileInput!\n) {\n  updateProfile(input: $input) {\n    viewer {\n      id\n    }\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -126,173 +109,16 @@ return {
     "type": "Mutation",
     "metadata": null,
     "argumentDefinitions": v0,
-    "selections": [
-      {
-        "kind": "LinkedField",
-        "alias": null,
-        "name": "updateProfile",
-        "storageKey": null,
-        "args": v1,
-        "concreteType": "UpdateProfilePayload",
-        "plural": false,
-        "selections": [
-          {
-            "kind": "LinkedField",
-            "alias": null,
-            "name": "viewer",
-            "storageKey": null,
-            "args": null,
-            "concreteType": "Viewer",
-            "plural": false,
-            "selections": [
-              {
-                "kind": "LinkedField",
-                "alias": null,
-                "name": "identities",
-                "storageKey": null,
-                "args": null,
-                "concreteType": "Identities",
-                "plural": false,
-                "selections": [
-                  {
-                    "kind": "FragmentSpread",
-                    "name": "Launcher_identities",
-                    "args": null
-                  }
-                ]
-              }
-            ]
-          }
-        ]
-      }
-    ]
+    "selections": v1
   },
   "operation": {
     "kind": "Operation",
     "name": "CreateWalletUpdateProfileMutation",
     "argumentDefinitions": v0,
-    "selections": [
-      {
-        "kind": "LinkedField",
-        "alias": null,
-        "name": "updateProfile",
-        "storageKey": null,
-        "args": v1,
-        "concreteType": "UpdateProfilePayload",
-        "plural": false,
-        "selections": [
-          {
-            "kind": "LinkedField",
-            "alias": null,
-            "name": "viewer",
-            "storageKey": null,
-            "args": null,
-            "concreteType": "Viewer",
-            "plural": false,
-            "selections": [
-              {
-                "kind": "LinkedField",
-                "alias": null,
-                "name": "identities",
-                "storageKey": null,
-                "args": null,
-                "concreteType": "Identities",
-                "plural": false,
-                "selections": [
-                  {
-                    "kind": "LinkedField",
-                    "alias": null,
-                    "name": "ownUsers",
-                    "storageKey": null,
-                    "args": null,
-                    "concreteType": "OwnUserIdentity",
-                    "plural": true,
-                    "selections": [
-                      {
-                        "kind": "ScalarField",
-                        "alias": null,
-                        "name": "defaultEthAddress",
-                        "args": null,
-                        "storageKey": null
-                      },
-                      v2,
-                      {
-                        "kind": "ScalarField",
-                        "alias": null,
-                        "name": "feedHash",
-                        "args": null,
-                        "storageKey": null
-                      },
-                      {
-                        "kind": "LinkedField",
-                        "alias": null,
-                        "name": "profile",
-                        "storageKey": null,
-                        "args": null,
-                        "concreteType": "NamedProfile",
-                        "plural": false,
-                        "selections": [
-                          {
-                            "kind": "ScalarField",
-                            "alias": null,
-                            "name": "name",
-                            "args": null,
-                            "storageKey": null
-                          },
-                          {
-                            "kind": "ScalarField",
-                            "alias": null,
-                            "name": "ethAddress",
-                            "args": null,
-                            "storageKey": null
-                          }
-                        ]
-                      },
-                      {
-                        "kind": "LinkedField",
-                        "alias": null,
-                        "name": "wallets",
-                        "storageKey": null,
-                        "args": null,
-                        "concreteType": "EthWallets",
-                        "plural": false,
-                        "selections": [
-                          {
-                            "kind": "LinkedField",
-                            "alias": null,
-                            "name": "hd",
-                            "storageKey": null,
-                            "args": null,
-                            "concreteType": "EthHDWallet",
-                            "plural": true,
-                            "selections": v4
-                          },
-                          {
-                            "kind": "LinkedField",
-                            "alias": null,
-                            "name": "ledger",
-                            "storageKey": null,
-                            "args": null,
-                            "concreteType": "EthLedgerWallet",
-                            "plural": true,
-                            "selections": v4
-                          }
-                        ]
-                      },
-                      v3
-                    ]
-                  }
-                ]
-              },
-              v3
-            ]
-          }
-        ]
-      }
-    ]
+    "selections": v1
   }
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = 'd2a9a73a322c8f9a72ddd8c3dc42555c';
+(node/*: any*/).hash = 'e0b03a1d957fd09c76a031942c2e56cc';
 module.exports = node;

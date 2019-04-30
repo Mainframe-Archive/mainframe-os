@@ -41,9 +41,7 @@ const setEthNetworkMutation = graphql`
   mutation SettingsMenuViewSetEthNetworkMutation($input: SetEthNetworkInput!) {
     setEthNetwork(input: $input) {
       viewer {
-        settings {
-          ethereumUrl
-        }
+        ethURL
       }
     }
   }

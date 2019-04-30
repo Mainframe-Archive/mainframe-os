@@ -52,18 +52,19 @@ export const createUserMutation = graphql`
         }
       }
       viewer {
-        identities {
-          ownUsers {
-            profile {
-              name
-            }
-          }
-          ownDevelopers {
-            profile {
-              name
-            }
-          }
-        }
+        id
+        # identities {
+        #   ownUsers {
+        #     profile {
+        #       name
+        #     }
+        #   }
+        #   ownDevelopers {
+        #     profile {
+        #       name
+        #     }
+        #   }
+        # }
       }
     }
   }
@@ -81,18 +82,19 @@ export const createDeveloperMutation = graphql`
         }
       }
       viewer {
-        identities {
-          ownUsers {
-            profile {
-              name
-            }
-          }
-          ownDevelopers {
-            profile {
-              name
-            }
-          }
-        }
+        id
+        # identities {
+        #   ownUsers {
+        #     profile {
+        #       name
+        #     }
+        #   }
+        #   ownDevelopers {
+        #     profile {
+        #       name
+        #     }
+        #   }
+        # }
       }
     }
   }

@@ -26,9 +26,9 @@ const TYPE_COLLECTION = {
 
 export const { nodeInterface, nodeField } = nodeDefinitions<GraphQLContext>(
   (globalId: string, ctx: GraphQLContext) => {
-    if (globalId === 'viewer') {
-      return {}
-    }
+    // if (globalId === 'viewer') {
+    //   return {}
+    // }
 
     const { type, id } = fromGlobalId(globalId)
     const collection = TYPE_COLLECTION[type]
@@ -869,35 +869,35 @@ export const settings = new GraphQLObjectType({
   }),
 })
 
-export const viewer = new GraphQLObjectType({
-  name: 'Viewer',
-  fields: () => ({
-    id: {
-      type: new GraphQLNonNull(GraphQLID),
-      resolve: () => 'viewer',
-    },
-    apps: {
-      type: new GraphQLNonNull(apps),
-      resolve: () => ({}),
-    },
-    contacts: {
-      type: new GraphQLNonNull(contacts),
-      resolve: () => ({}),
-    },
-    identities: {
-      type: new GraphQLNonNull(identities),
-      resolve: () => ({}),
-    },
-    wallets: {
-      type: new GraphQLNonNull(wallets),
-      resolve: () => ({}),
-    },
-    settings: {
-      type: new GraphQLNonNull(settings),
-      resolve: () => ({}),
-    },
-  }),
-})
+// export const viewer = new GraphQLObjectType({
+//   name: 'Viewer',
+//   fields: () => ({
+//     id: {
+//       type: new GraphQLNonNull(GraphQLID),
+//       resolve: () => 'viewer',
+//     },
+//     apps: {
+//       type: new GraphQLNonNull(apps),
+//       resolve: () => ({}),
+//     },
+//     contacts: {
+//       type: new GraphQLNonNull(contacts),
+//       resolve: () => ({}),
+//     },
+//     identities: {
+//       type: new GraphQLNonNull(identities),
+//       resolve: () => ({}),
+//     },
+//     wallets: {
+//       type: new GraphQLNonNull(wallets),
+//       resolve: () => ({}),
+//     },
+//     settings: {
+//       type: new GraphQLNonNull(settings),
+//       resolve: () => ({}),
+//     },
+//   }),
+// })
 
 // NEW OBJECTS BELOW
 
@@ -935,5 +935,16 @@ export const user = new GraphQLObjectType({
     ethWallets: {
       type: new GraphQLNonNull(ethWallets),
     },
+    ethURL: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    bzzURL: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
   }),
 })
+
+export const viewerField = {
+  type: new GraphQLNonNull(user),
+  resolve: (self, args, ctx) => ctx.getUser(),
+}

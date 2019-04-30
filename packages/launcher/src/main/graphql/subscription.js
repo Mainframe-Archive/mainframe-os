@@ -5,7 +5,7 @@ import { map } from 'rxjs/operators'
 
 import type ClientContext from '../context/ClientContext'
 
-import { app, contact, viewer } from './objects'
+import { app, contact, viewerField } from './objects'
 import observableToAsyncIterator from './observableToAsyncIterator'
 
 const appUpdatePayload = new GraphQLObjectType({
@@ -14,9 +14,7 @@ const appUpdatePayload = new GraphQLObjectType({
     app: {
       type: new GraphQLNonNull(app),
     },
-    viewer: {
-      type: new GraphQLNonNull(viewer),
-    },
+    viewer: viewerField,
   }),
 })
 
@@ -40,9 +38,7 @@ const contactChangedPayload = new GraphQLObjectType({
         return ctx.queries.mergePeerContactData(self.contact)
       },
     },
-    viewer: {
-      type: new GraphQLNonNull(viewer),
-    },
+    viewer: viewerField,
   }),
 })
 

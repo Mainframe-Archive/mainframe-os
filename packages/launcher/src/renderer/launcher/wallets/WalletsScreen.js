@@ -22,12 +22,12 @@ class WalletsScreen extends Component<Props> {
 }
 
 const WalletsScreenRelayContainer = createFragmentContainer(WalletsScreen, {
-  wallets: graphql`
-    fragment WalletsScreen_wallets on Wallets
-      @argumentDefinitions(userID: { type: "String!" }) {
-      ...WalletsView_wallets @arguments(userID: $userID)
-    }
-  `,
+  // wallets: graphql`
+  //   fragment WalletsScreen_wallets on Wallets
+  //     @argumentDefinitions(userID: { type: "String!" }) {
+  //     ...WalletsView_wallets @arguments(userID: $userID)
+  //   }
+  // `,
 })
 
 export class WalletsScreenRenderer extends Component<RendererProps> {

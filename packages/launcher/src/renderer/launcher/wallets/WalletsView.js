@@ -1,23 +1,21 @@
 // @flow
 
-import React, { Component, type ElementRef } from 'react'
-import { createFragmentContainer, graphql, commitMutation } from 'react-relay'
-import styled from 'styled-components/native'
 import { Text, Button, TextField } from '@morpheus-ui/core'
 import { Form, type FormSubmitPayload } from '@morpheus-ui/forms'
-
 import LedgerIcon from '@morpheus-ui/icons/Ledger'
 import PlusSymbolMdIcon from '@morpheus-ui/icons/PlusSymbolMd'
 import PlusSymbolSmIcon from '@morpheus-ui/icons/PlusSymbolSm'
-
 import DownloadMdIcon from '@morpheus-ui/icons/DownloadMd'
 import EthCircledIcon from '@morpheus-ui/icons/EthCircled'
 import MftCircledIcon from '@morpheus-ui/icons/MftCircled'
-
 import { sortBy } from 'lodash'
+import React, { Component, type ElementRef } from 'react'
+import { createFragmentContainer, graphql, commitMutation } from 'react-relay'
+import styled from 'styled-components/native'
 
 import { EnvironmentContext } from '../RelayEnvironment'
 import type { CurrentUser } from '../LauncherContext'
+
 import WalletImportView from './WalletImportView'
 import WalletCreateModal from './WalletCreateModal'
 import WalletAddLedgerModal from './WalletAddLedgerModal'
@@ -143,35 +141,21 @@ const Ballance = styled.View`
 const addWalletMutation = graphql`
   mutation WalletsViewAddHDWalletAccountMutation(
     $input: AddHDWalletAccountInput!
-    $userID: String!
   ) {
     addHDWalletAccount(input: $input) {
       address
       viewer {
-        identities {
-          ...Launcher_identities
-        }
-        wallets {
-          ...WalletsView_wallets @arguments(userID: $userID)
-        }
+        ...WalletsView_user
       }
     }
   }
 `
 
 const setDefaultWalletMutation = graphql`
-  mutation WalletsViewSetDefaultWalletMutation(
-    $input: SetDefaultWalletInput!
-    $userID: String!
-  ) {
+  mutation WalletsViewSetDefaultWalletMutation($input: SetDefaultWalletInput!) {
     setDefaultWallet(input: $input) {
       viewer {
-        identities {
-          ...Launcher_identities
-        }
-        wallets {
-          ...WalletsView_wallets @arguments(userID: $userID)
-        }
+        ...WalletsView_user
       }
     }
   }
@@ -183,7 +167,7 @@ const roundNum = (number, precision) => {
 }
 
 const getWalletsArray = (props: Props): Array<Wallet> => {
-  const { ethWallets } = props.wallets
+  const { ethWallets } = props
   const wallets: Array<Wallet> = sortBy(
     [
       ...ethWallets.hd.map(w => ({ ...w, type: 'hd' })),
@@ -528,10 +512,9 @@ class WalletsView extends Component<Props, State> {
 }
 
 export default createFragmentContainer(WalletsView, {
-  wallets: graphql`
-    fragment WalletsView_wallets on Wallets
-      @argumentDefinitions(userID: { type: "String!" }) {
-      ethWallets(userID: $userID) {
+  user: graphql`
+    fragment WalletsView_user on User {
+      ethWallets {
         hd {
           name
           localID

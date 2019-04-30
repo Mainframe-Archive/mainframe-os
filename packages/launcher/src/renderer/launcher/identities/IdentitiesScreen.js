@@ -21,11 +21,11 @@ class IdentitiesScreen extends Component<Props> {
 const IdentitiesScreenRelayContainer = createFragmentContainer(
   IdentitiesScreen,
   {
-    identities: graphql`
-      fragment IdentitiesScreen_identities on Identities {
-        ...IdentitiesView_identities
-      }
-    `,
+    // identities: graphql`
+    //   fragment IdentitiesScreen_identities on Identities {
+    //     ...IdentitiesView_identities
+    //   }
+    // `,
   },
 )
 

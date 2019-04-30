@@ -20,9 +20,9 @@ import type { AppsScreen_viewer as Viewer } from './__generated__/AppsScreen_vie
 // }
 
 const AppsScreenRelayContainer = createFragmentContainer(AppsView, {
-  viewer: graphql`
-    fragment AppsScreen_viewer on Viewer {
-      ...AppsView_viewer
+  user: graphql`
+    fragment AppsScreen_user on User {
+      ...AppsView_user
     }
   `,
 })

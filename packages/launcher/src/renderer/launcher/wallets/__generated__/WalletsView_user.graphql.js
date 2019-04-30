@@ -9,8 +9,8 @@
 /*::
 import type { ConcreteFragment } from 'relay-runtime';
 import type { FragmentReference } from "relay-runtime";
-declare export opaque type WalletsView_wallets$ref: FragmentReference;
-export type WalletsView_wallets = {|
+declare export opaque type WalletsView_user$ref: FragmentReference;
+export type WalletsView_user = {|
   +ethWallets: {|
     +hd: $ReadOnlyArray<{|
       +name: ?string,
@@ -35,7 +35,7 @@ export type WalletsView_wallets = {|
       |}>,
     |}>,
   |},
-  +$refType: WalletsView_wallets$ref,
+  +$refType: WalletsView_user$ref,
 |};
 */
 
@@ -102,31 +102,17 @@ var v0 = [
 ];
 return {
   "kind": "Fragment",
-  "name": "WalletsView_wallets",
-  "type": "Wallets",
+  "name": "WalletsView_user",
+  "type": "User",
   "metadata": null,
-  "argumentDefinitions": [
-    {
-      "kind": "LocalArgument",
-      "name": "userID",
-      "type": "String!",
-      "defaultValue": null
-    }
-  ],
+  "argumentDefinitions": [],
   "selections": [
     {
       "kind": "LinkedField",
       "alias": null,
       "name": "ethWallets",
       "storageKey": null,
-      "args": [
-        {
-          "kind": "Variable",
-          "name": "userID",
-          "variableName": "userID",
-          "type": "String!"
-        }
-      ],
+      "args": null,
       "concreteType": "EthWallets",
       "plural": false,
       "selections": [
@@ -156,5 +142,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '1ef7545c89dbbf5725d77d85d9f6ddce';
+(node/*: any*/).hash = '1410b74219b6c1281679bebfa295429d';
 module.exports = node;

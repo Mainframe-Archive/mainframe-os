@@ -40,10 +40,11 @@ const updateProfileMutation = graphql`
   mutation IdentityEditModalUpdateProfileMutation($input: UpdateProfileInput!) {
     updateProfile(input: $input) {
       viewer {
-        identities {
-          ...Launcher_identities
-          ...IdentitiesView_identities
-        }
+        id
+        # identities {
+        #   ...Launcher_identities
+        #   ...IdentitiesView_identities
+        # }
       }
     }
   }

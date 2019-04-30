@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash e22a839021d602a5981ce3e19f27c73b
+ * @relayHash 9f5db1e4fc6799b459ad082e0cc86921
  */
 
 /* eslint-disable */
@@ -9,15 +9,11 @@
 
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
-export type SideMenuContactsChangedSubscriptionVariables = {|
-  userID: string
-|};
+export type SideMenuContactsChangedSubscriptionVariables = {||};
 export type SideMenuContactsChangedSubscriptionResponse = {|
   +contactsChanged: {|
     +viewer: {|
-      +contacts: {|
-        +invitesCount: number
-      |}
+      +id: string
     |}
   |}
 |};
@@ -29,14 +25,9 @@ export type SideMenuContactsChangedSubscription = {|
 
 
 /*
-subscription SideMenuContactsChangedSubscription(
-  $userID: String!
-) {
+subscription SideMenuContactsChangedSubscription {
   contactsChanged {
     viewer {
-      contacts {
-        invitesCount(userID: $userID)
-      }
       id
     }
   }
@@ -46,115 +37,58 @@ subscription SideMenuContactsChangedSubscription(
 const node/*: ConcreteRequest*/ = (function(){
 var v0 = [
   {
-    "kind": "LocalArgument",
-    "name": "userID",
-    "type": "String!",
-    "defaultValue": null
+    "kind": "LinkedField",
+    "alias": null,
+    "name": "contactsChanged",
+    "storageKey": null,
+    "args": null,
+    "concreteType": "ContactChangedPayload",
+    "plural": false,
+    "selections": [
+      {
+        "kind": "LinkedField",
+        "alias": null,
+        "name": "viewer",
+        "storageKey": null,
+        "args": null,
+        "concreteType": "User",
+        "plural": false,
+        "selections": [
+          {
+            "kind": "ScalarField",
+            "alias": null,
+            "name": "id",
+            "args": null,
+            "storageKey": null
+          }
+        ]
+      }
+    ]
   }
-],
-v1 = {
-  "kind": "LinkedField",
-  "alias": null,
-  "name": "contacts",
-  "storageKey": null,
-  "args": null,
-  "concreteType": "Contacts",
-  "plural": false,
-  "selections": [
-    {
-      "kind": "ScalarField",
-      "alias": null,
-      "name": "invitesCount",
-      "args": [
-        {
-          "kind": "Variable",
-          "name": "userID",
-          "variableName": "userID",
-          "type": "String!"
-        }
-      ],
-      "storageKey": null
-    }
-  ]
-};
+];
 return {
   "kind": "Request",
   "operationKind": "subscription",
   "name": "SideMenuContactsChangedSubscription",
   "id": null,
-  "text": "subscription SideMenuContactsChangedSubscription(\n  $userID: String!\n) {\n  contactsChanged {\n    viewer {\n      contacts {\n        invitesCount(userID: $userID)\n      }\n      id\n    }\n  }\n}\n",
+  "text": "subscription SideMenuContactsChangedSubscription {\n  contactsChanged {\n    viewer {\n      id\n    }\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
     "name": "SideMenuContactsChangedSubscription",
     "type": "Subscription",
     "metadata": null,
-    "argumentDefinitions": v0,
-    "selections": [
-      {
-        "kind": "LinkedField",
-        "alias": null,
-        "name": "contactsChanged",
-        "storageKey": null,
-        "args": null,
-        "concreteType": "ContactChangedPayload",
-        "plural": false,
-        "selections": [
-          {
-            "kind": "LinkedField",
-            "alias": null,
-            "name": "viewer",
-            "storageKey": null,
-            "args": null,
-            "concreteType": "Viewer",
-            "plural": false,
-            "selections": [
-              v1
-            ]
-          }
-        ]
-      }
-    ]
+    "argumentDefinitions": [],
+    "selections": v0
   },
   "operation": {
     "kind": "Operation",
     "name": "SideMenuContactsChangedSubscription",
-    "argumentDefinitions": v0,
-    "selections": [
-      {
-        "kind": "LinkedField",
-        "alias": null,
-        "name": "contactsChanged",
-        "storageKey": null,
-        "args": null,
-        "concreteType": "ContactChangedPayload",
-        "plural": false,
-        "selections": [
-          {
-            "kind": "LinkedField",
-            "alias": null,
-            "name": "viewer",
-            "storageKey": null,
-            "args": null,
-            "concreteType": "Viewer",
-            "plural": false,
-            "selections": [
-              v1,
-              {
-                "kind": "ScalarField",
-                "alias": null,
-                "name": "id",
-                "args": null,
-                "storageKey": null
-              }
-            ]
-          }
-        ]
-      }
-    ]
+    "argumentDefinitions": [],
+    "selections": v0
   }
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '091a216ce99908530a9eca1b3749a4a5';
+(node/*: any*/).hash = '74c0ab639cd8095b42e87d0d8f3860c6';
 module.exports = node;

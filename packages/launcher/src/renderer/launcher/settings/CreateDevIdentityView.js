@@ -48,13 +48,14 @@ export const createDeveloperMutation = graphql`
   ) {
     createDeveloperIdentity(input: $input) {
       viewer {
-        identities {
-          ownDevelopers {
-            profile {
-              name
-            }
-          }
-        }
+        id
+        # identities {
+        #   ownDevelopers {
+        #     profile {
+        #       name
+        #     }
+        #   }
+        # }
       }
     }
   }

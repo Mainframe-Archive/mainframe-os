@@ -35,7 +35,6 @@ const IMPORT_ERR_MSG = 'Sorry, there was a problem importing your wallet.'
 const walletImportMutation = graphql`
   mutation WalletImportViewImportHDWalletMutation(
     $input: ImportHDWalletInput!
-    $userID: String!
   ) {
     importHDWallet(input: $input) {
       hdWallet {
@@ -45,27 +44,17 @@ const walletImportMutation = graphql`
         localID
       }
       viewer {
-        identities {
-          ...Launcher_identities
-        }
-        wallets {
-          ...WalletsView_wallets @arguments(userID: $userID)
-        }
+        ...WalletsView_user
       }
     }
   }
 `
 
 const deleteWalletMutation = graphql`
-  mutation WalletImportViewDeleteWalletMutation(
-    $input: DeleteWalletInput!
-    $userID: String!
-  ) {
+  mutation WalletImportViewDeleteWalletMutation($input: DeleteWalletInput!) {
     deleteWallet(input: $input) {
       viewer {
-        wallets {
-          ...WalletsView_wallets @arguments(userID: $userID)
-        }
+        ...WalletsView_user
       }
     }
   }

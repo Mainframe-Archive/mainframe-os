@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 0aa0f960e5a86fda017b8022826b47fc
+ * @relayHash da129713cad17ff79920ac902e537a62
  */
 
 /* eslint-disable */
@@ -30,18 +30,7 @@ export type IdentitySelectorViewCreateUserIdentityMutationResponse = {|
       |},
     |},
     +viewer: {|
-      +identities: {|
-        +ownUsers: $ReadOnlyArray<{|
-          +profile: {|
-            +name: string
-          |}
-        |}>,
-        +ownDevelopers: $ReadOnlyArray<{|
-          +profile: {|
-            +name: string
-          |}
-        |}>,
-      |}
+      +id: string
     |},
   |}
 |};
@@ -65,20 +54,6 @@ mutation IdentitySelectorViewCreateUserIdentityMutation(
       id
     }
     viewer {
-      identities {
-        ownUsers {
-          profile {
-            name
-          }
-          id
-        }
-        ownDevelopers {
-          profile {
-            name
-          }
-          id
-        }
-      }
       id
     }
   }
@@ -127,26 +102,31 @@ v3 = {
     }
   ]
 },
-v4 = [
-  v3
-],
-v5 = {
+v4 = {
   "kind": "ScalarField",
   "alias": null,
   "name": "id",
   "args": null,
   "storageKey": null
 },
-v6 = [
-  v3,
-  v5
-];
+v5 = {
+  "kind": "LinkedField",
+  "alias": null,
+  "name": "viewer",
+  "storageKey": null,
+  "args": null,
+  "concreteType": "User",
+  "plural": false,
+  "selections": [
+    v4
+  ]
+};
 return {
   "kind": "Request",
   "operationKind": "mutation",
   "name": "IdentitySelectorViewCreateUserIdentityMutation",
   "id": null,
-  "text": "mutation IdentitySelectorViewCreateUserIdentityMutation(\n  $input: CreateUserIdentityInput!\n) {\n  createUserIdentity(input: $input) {\n    user {\n      localID\n      profile {\n        name\n      }\n      id\n    }\n    viewer {\n      identities {\n        ownUsers {\n          profile {\n            name\n          }\n          id\n        }\n        ownDevelopers {\n          profile {\n            name\n          }\n          id\n        }\n      }\n      id\n    }\n  }\n}\n",
+  "text": "mutation IdentitySelectorViewCreateUserIdentityMutation(\n  $input: CreateUserIdentityInput!\n) {\n  createUserIdentity(input: $input) {\n    user {\n      localID\n      profile {\n        name\n      }\n      id\n    }\n    viewer {\n      id\n    }\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -177,48 +157,7 @@ return {
               v3
             ]
           },
-          {
-            "kind": "LinkedField",
-            "alias": null,
-            "name": "viewer",
-            "storageKey": null,
-            "args": null,
-            "concreteType": "Viewer",
-            "plural": false,
-            "selections": [
-              {
-                "kind": "LinkedField",
-                "alias": null,
-                "name": "identities",
-                "storageKey": null,
-                "args": null,
-                "concreteType": "Identities",
-                "plural": false,
-                "selections": [
-                  {
-                    "kind": "LinkedField",
-                    "alias": null,
-                    "name": "ownUsers",
-                    "storageKey": null,
-                    "args": null,
-                    "concreteType": "OwnUserIdentity",
-                    "plural": true,
-                    "selections": v4
-                  },
-                  {
-                    "kind": "LinkedField",
-                    "alias": null,
-                    "name": "ownDevelopers",
-                    "storageKey": null,
-                    "args": null,
-                    "concreteType": "OwnDeveloperIdentity",
-                    "plural": true,
-                    "selections": v4
-                  }
-                ]
-              }
-            ]
-          }
+          v5
         ]
       }
     ]
@@ -248,52 +187,10 @@ return {
             "selections": [
               v2,
               v3,
-              v5
+              v4
             ]
           },
-          {
-            "kind": "LinkedField",
-            "alias": null,
-            "name": "viewer",
-            "storageKey": null,
-            "args": null,
-            "concreteType": "Viewer",
-            "plural": false,
-            "selections": [
-              {
-                "kind": "LinkedField",
-                "alias": null,
-                "name": "identities",
-                "storageKey": null,
-                "args": null,
-                "concreteType": "Identities",
-                "plural": false,
-                "selections": [
-                  {
-                    "kind": "LinkedField",
-                    "alias": null,
-                    "name": "ownUsers",
-                    "storageKey": null,
-                    "args": null,
-                    "concreteType": "OwnUserIdentity",
-                    "plural": true,
-                    "selections": v6
-                  },
-                  {
-                    "kind": "LinkedField",
-                    "alias": null,
-                    "name": "ownDevelopers",
-                    "storageKey": null,
-                    "args": null,
-                    "concreteType": "OwnDeveloperIdentity",
-                    "plural": true,
-                    "selections": v6
-                  }
-                ]
-              },
-              v5
-            ]
-          }
+          v5
         ]
       }
     ]
@@ -301,5 +198,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '032729d00eeafaf532be34f9bf56f9d4';
+(node/*: any*/).hash = 'e373a3c4e1e93f7bb82c75b27c964f39';
 module.exports = node;

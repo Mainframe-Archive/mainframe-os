@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 2d8ed7662bed4911d54608a6a73e5d12
+ * @relayHash e494d0f6c19894853da846a9656fed18
  */
 
 /* eslint-disable */
@@ -77,7 +77,7 @@ v1 = [
         "name": "viewer",
         "storageKey": null,
         "args": null,
-        "concreteType": "Viewer",
+        "concreteType": "User",
         "plural": false,
         "selections": [
           {
