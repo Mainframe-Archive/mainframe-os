@@ -289,17 +289,20 @@ export const sandboxed = {
             } else {
               try {
                 const stream = await downloadStream(ctx, params.key)
-                await new Promise((resolve, reject) => {
-                  stream
-                    .pipe(createWriteStream(filePath))
-                    .on('error', error => {
-                      reject(error)
-                    })
-                    .on('finish', () => {
-                      resolve()
-                    })
-                })
-                resolve(true)
+                if (stream === null) {
+                  reject(new Error('File not found'))
+                } else {
+                  await new Promise((resolve, reject) => {
+                    stream
+                      .pipe(createWriteStream(filePath))
+                      .on('error', error => {
+                        reject(error)
+                      })
+                      .on('finish', () => {
+                        resolve(true)
+                      })
+                  })
+                }
               } catch (error) {
                 reject(new Error('Failed to access storage'))
               }
