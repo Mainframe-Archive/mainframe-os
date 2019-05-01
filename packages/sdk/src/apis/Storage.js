@@ -3,6 +3,10 @@
 import ClientAPIs from '../ClientAPIs'
 
 export default class StorageAPIs extends ClientAPIs {
+  promptDownload(key: string): Promise<boolean> {
+    return this._rpc.request('storage_promptDownload', { key })
+  }
+
   promptUpload(key: string): Promise<boolean> {
     return this._rpc.request('storage_promptUpload', { key })
   }
