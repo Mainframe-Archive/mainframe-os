@@ -292,8 +292,12 @@ export const sandboxed = {
                 await new Promise((resolve, reject) => {
                   stream
                     .pipe(createWriteStream(filePath))
-                    .on('error', error => {reject(error)})
-                    .on('finish', () => {resolve()})
+                    .on('error', error => {
+                      reject(error)
+                    })
+                    .on('finish', () => {
+                      resolve()
+                    })
                 })
                 resolve(true)
               } catch (error) {
@@ -305,7 +309,6 @@ export const sandboxed = {
       })
     },
   },
-
 
   storage_promptUpload: {
     params: {
