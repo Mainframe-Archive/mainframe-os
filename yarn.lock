@@ -8132,11 +8132,6 @@ fastest-validator@0.6.15:
   resolved "https://registry.yarnpkg.com/fastest-validator/-/fastest-validator-0.6.15.tgz#7b82f319658d9138c10fefd0127412c5930e60ca"
   integrity sha512-y+AKxLmoaedv1rxZnRVDlDnsyRyhfU0SAZ9VgOMY1XpobIyVyz8MQxF0trJEI478RJQfGADsYGp0bluP+MNUrQ==
 
-fastest-validator@^0.6.17:
-  version "0.6.17"
-  resolved "https://registry.yarnpkg.com/fastest-validator/-/fastest-validator-0.6.17.tgz#15a8eef2c7c5a3268e4689dfd4a4b6553f0ff8b1"
-  integrity sha512-XkdrjNbXwFJSn8s8dceofnA2ZHppfXtbTHP2dO2jXHZfm2GWP55VQBx/0UKWxfFfdWqmJv4ppBzuf342h5bahw==
-
 fastparse@^1.1.1:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/fastparse/-/fastparse-1.1.2.tgz#91728c5a5942eced8531283c79441ee4122c35a9"
