@@ -1,6 +1,6 @@
 // @flow
 
-import Web3EthAbi from 'web3-eth-abi'
+import Web3EthAbi from './web3EthAbi'
 import type { DecodedTxResult, JsonRpcResponse } from './types'
 
 export const unitMap = {
@@ -99,4 +99,16 @@ export const jsonRpcResponse = (result: any, id: number): JsonRpcResponse => {
     jsonrpc: '2.0',
     error: null,
   }
+}
+
+export const truncateAddress = (
+  address: string,
+  endChars: number = 8,
+): string => {
+  if (address.length < endChars * 2 + 3) {
+    return address
+  }
+  const start = address.substring(0, endChars)
+  const end = address.substring(address.length - endChars, address.length)
+  return start + '...' + end
 }

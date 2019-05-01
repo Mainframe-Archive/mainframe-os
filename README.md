@@ -111,7 +111,7 @@ Or on Windows
 Then, in another tab, run the launcher:
 
 ```
-cd packages/launcher && yarn run dev
+cd packages/launcher && yarn deps:build && yarn run dev
 ```
 
 ### Building Mainframe Apps

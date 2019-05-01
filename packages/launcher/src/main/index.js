@@ -10,6 +10,7 @@ import { APP_TRUSTED_REQUEST_CHANNEL } from '../constants'
 import type { AppSession } from '../types'
 
 import { AppContext } from './contexts'
+import { setMenu } from './menu'
 import { interceptWebRequests } from './permissions'
 import { registerStreamProtocol } from './storage'
 import createElectronTransport from './createElectronTransport'
@@ -58,6 +59,8 @@ createChannels({
 let systemInitialized = false
 const initSystem = async () => {
   logger.debug('Initialize system')
+
+  setMenu()
 
   if (systemContext.config.get('savePassword') === true) {
     try {
@@ -218,6 +221,7 @@ const createLauncherWindow = async (userID?: ?string) => {
     minWidth: 900,
     minHeight: 600,
   })
+
   const launcherContext = new LauncherContext({
     system: systemContext,
     userID,

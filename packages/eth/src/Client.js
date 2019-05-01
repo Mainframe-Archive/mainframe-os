@@ -11,7 +11,6 @@ import {
 } from 'web3-utils'
 import type { Observable } from 'rxjs'
 import { WebsocketProvider } from 'web3-providers'
-import Web3EthAbi from 'web3-eth-abi'
 
 import ERC20 from './Contracts/ERC20'
 import BaseContract from './Contracts/BaseContract'
@@ -22,6 +21,7 @@ import type {
   TXEventEmitter,
   TXParams,
 } from './types'
+import Web3EthAbi from './web3EthAbi'
 
 export const NETWORKS = {
   '1': 'mainnet',
@@ -225,6 +225,11 @@ export default class EthClient extends EventEmitter {
       return this._walletProvider.sign(params)
     }
     throw new Error('No wallet provider found')
+  }
+
+  async signMessage(message: string, address: string) {
+    const data = toHex(message)
+    return this.signData({ address, data })
   }
 
   // Sending transactions

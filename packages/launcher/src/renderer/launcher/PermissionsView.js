@@ -37,6 +37,11 @@ const PERMISSION_NAMES = {
     description:
       'Allow this app to make transactional calls to the blockchain, e.g. send tokens',
   },
+  BLOCKCHAIN_SIGN: {
+    name: 'Sign messages using your wallet',
+    description:
+      'Allow the app to sign data using your Ethereum wallet (we will always request your permission before signing)',
+  },
   COMMS_CONTACT: {
     name: 'Communicate with your contacts',
     description: 'Allows the app to communicate data with approved contacts.',
