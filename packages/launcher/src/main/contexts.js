@@ -127,7 +127,10 @@ export class AppContext extends Context {
       this._storage = {
         contentHash: null,
         address: pubKeyToAddress(keyPair.getPublic().encode()),
-        encryptionKey: Buffer.from(this.appSession.storage.encryptionKey, 'base64'),
+        encryptionKey: Buffer.from(
+          this.appSession.storage.encryptionKey,
+          'base64',
+        ),
         feedHash: this.appSession.storage.feedHash,
         signBytes: async bytes => sign(bytes, privKey),
       }
