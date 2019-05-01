@@ -32,7 +32,7 @@ const SUGGESTED_APPS_URL =
   'https://s3-us-west-2.amazonaws.com/suggested-apps/suggested-apps-v2.json'
 
 const Container = styled.View`
-  padding: 40px 50px 20px 50px;
+  padding: 40px 0 20px 50px;
   flex: 1;
 `
 
@@ -68,7 +68,15 @@ const InstallIcon = styled.View`
   ${props => props.hover && 'border: 1px solid #DA1157;'}
 `
 
-const ScrollView = styled.ScrollView``
+const Bottom = styled.View`
+  height: 5px;
+  bottom: -20px;
+`
+
+const ScrollView = styled.ScrollView`
+  padding-right: 40px;
+  padding-bottom: 20px;
+`
 
 type NewAppProps = {
   title: string,
@@ -427,6 +435,7 @@ class AppsView extends Component<Props, State> {
         )}
         {this.renderApps()}
         {modal}
+        <Bottom className="white-shadow" />
       </Container>
     )
   }

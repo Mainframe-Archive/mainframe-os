@@ -27,8 +27,8 @@
     "build": "lerna run build && lerna run build:sdk",
     "start": "yarn run build && yarn run test",
     "start:daemon": "./packages/cli/bin/run daemon:stop && ./packages/cli/bin/run daemon:start",
-    "start:launcher": "cd packages/launcher && yarn dev",
-    "dev": "nf start"
+    "start:launcher": "cd packages/launcher && yarn deps:build && yarn run dev",
+    "dev": "cd packages/launcher && yarn deps:build && yarn run dev"
   },
   "devDependencies": {
     "@babel/cli": "^7.1.2",

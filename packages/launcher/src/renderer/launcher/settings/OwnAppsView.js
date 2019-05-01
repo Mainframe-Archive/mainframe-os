@@ -38,7 +38,7 @@ const Container = styled.View`
 const AppsContainer = styled.View`
   flex: 1;
   margin-top: 10px;
-  padding: 0 48px 36px 48px;
+  padding: 0 0 36px 48px;
 `
 
 const Nav = styled.View`
@@ -52,6 +52,12 @@ const NavItem = styled.TouchableOpacity`
 
 const ScrollView = styled.ScrollView`
   margin-top: -15px;
+  padding-right: 48px;
+`
+
+const Bottom = styled.View`
+  height: 5px;
+  bottom: -20px;
 `
 
 class OwnAppsView extends Component<Props, State> {
@@ -174,6 +180,7 @@ class OwnAppsView extends Component<Props, State> {
             </AppsGrid>
           </ScrollView>
         </AppsContainer>
+        <Bottom className="white-shadow" />
       </Container>
     )
   }

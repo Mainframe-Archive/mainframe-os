@@ -106,12 +106,8 @@ const BUTTONS: Object = {
 
 const Container = styled.View`
   width: 126px;
-  padding-top: 20px;
+  padding-top: 40px;
   background-color: ${props => props.theme.colors.LIGHT_GREY_F5};
-`
-
-const ScrollView = styled.ScrollView`
-  padding: ${props => props.theme.spacing * 2}px;
 `
 
 const MenuItem = styled.View`
@@ -217,11 +213,7 @@ class SideMenu extends Component<Props, State> {
   }
 
   render() {
-    return (
-      <Container>
-        <ScrollView>{MENU_ITEMS.map(i => this.renderMenuItem(i))}</ScrollView>
-      </Container>
-    )
+    return <Container>{MENU_ITEMS.map(i => this.renderMenuItem(i))}</Container>
   }
 }
 

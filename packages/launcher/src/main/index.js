@@ -280,7 +280,7 @@ const createLauncherWindow = async () => {
 
   launcherWindow = newWindow({
     width: 900,
-    height: 600,
+    height: 760,
     minWidth: 900,
     minHeight: 600,
   })
