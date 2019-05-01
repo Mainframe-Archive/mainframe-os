@@ -95,12 +95,20 @@ export default {
         profile: params.profile,
         privateProfile: params.isPrivate,
       })
-      ctx.logger.debug(`Created user: ${user.localID}`)
+      ctx.logger.log({
+        level: 'debug',
+        message: 'Created user',
+        id: user.localID,
+      })
 
       if (ctx.system.defaultUser == null) {
         ctx.system.defaultUser = user.localID
         ctx.userID = user.localID
-        ctx.logger.debug(`Created user set as system default: ${user.localID}`)
+        ctx.logger.log({
+          level: 'debug',
+          message: 'Created user set as system default',
+          id: user.localID,
+        })
       }
 
       return user.localID

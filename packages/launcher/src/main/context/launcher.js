@@ -9,7 +9,7 @@ import { LAUNCHER_CHANNEL } from '../../constants'
 import { ROUTES } from '../../renderer/launcher/constants'
 
 import type { Config } from '../config'
-import type { DB } from '../db'
+import type { DB } from '../db/types'
 import type { SubscriptionIterator } from '../graphql/observableToAsyncIterator'
 import schema from '../graphql/schema'
 import type { Logger } from '../logger'
@@ -68,13 +68,17 @@ export class LauncherContext {
   window: BrowserWindow
 
   constructor(params: ContextParams) {
-    // $FlowFixMe: type def
     this.logger = params.system.logger.child({
       context: `launcher-${params.window.id}`,
     })
     this.system = params.system
     this.userID = params.userID
     this.window = params.window
+    this.logger.log({
+      level: 'debug',
+      message: 'Launcher context created',
+      userID: params.userID,
+    })
   }
 
   get config(): Config {
@@ -113,7 +117,11 @@ export class LauncherContext {
     const id = this.userID
     const user = await this.db.users.findOne(id).exec()
     if (user == null) {
-      this.logger.warn(`User ID provided in context not found in DB: ${id}`)
+      this.logger.log({
+        level: 'warn',
+        message: 'User ID provided in context not found in DB',
+        id,
+      })
       this.userID = null
       if (id === this.system.defaultUser) {
         // TODO: get another user from DB to set as default?

@@ -1,6 +1,6 @@
 // @flow
 
-import type { Collection, DB } from '../db'
+import type { Collection, DB } from '../db/types'
 import type { Logger } from '../logger'
 
 export type ContextParams = {
@@ -16,7 +16,7 @@ export class GraphQLContext {
 
   constructor(params: ContextParams) {
     this.db = params.db
-    this.logger = params.logger
+    this.logger = params.logger.child({ userID: params.userID })
     this.userID = params.userID
   }
 

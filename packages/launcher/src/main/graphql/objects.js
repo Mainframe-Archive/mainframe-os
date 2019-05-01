@@ -26,70 +26,30 @@ const TYPE_COLLECTION = {
 
 export const { nodeInterface, nodeField } = nodeDefinitions<GraphQLContext>(
   (globalId: string, ctx: GraphQLContext) => {
-    // if (globalId === 'viewer') {
-    //   return {}
-    // }
-
     const { type, id } = fromGlobalId(globalId)
     const collection = TYPE_COLLECTION[type]
     return collection == null ? null : ctx.getDoc(collection, id)
-    // switch (type) {
-    //   case 'App':
-    //     return ctx.db.apps.findOne(id).exec()
-    //   case 'EthHDWallet':
-    //     return ctx.db.eth_wallets_hd.findOne(id).exec()
-    //   case 'EthLedgerWallet':
-    //     return ctx.db.eth_wallets_ledger.findOne(id).exec()
-    //   case 'OwnApp':
-    //     return ctx.db.own_apps.findOne(id).exec()
-    //   // case 'OwnAppIdentity':
-    //   //   return ctx.openVault.identities.getOwnApp(typedID)
-    //   case 'OwnDeveloperIdentity':
-    //     return ctx.db.own_developers.findOne(id).exec()
-    //   case 'OwnUserIdentity':
-    //     return ctx.db.users.findOne(id).exec()
-    //   // case 'PeerAppIdentity':
-    //   //   return ctx.dbGet('apps', id).exec()
-    //   // case 'PeerDeveloperIdentity':
-    //   //   return ctx.openVault.identities.getPeerDeveloper(typedID)
-    //   case 'PeerUserIdentity':
-    //     return ctx.db.peers.findOne(id).exec()
-    //   default:
-    //     return null
-    // }
   },
-  obj => {
-    // if (obj instanceof App) {
-    //   return app
-    // }
-    // if (obj instanceof HDWallet) {
-    //   return ethHdWallet
-    // }
-    // if (obj instanceof LedgerWallet) {
-    //   return ethLedgerWallet
-    // }
-    // if (obj instanceof OwnApp) {
-    //   return ownApp
-    // }
-    // if (obj instanceof OwnAppIdentity) {
-    //   return ownAppIdentity
-    // }
-    // if (obj instanceof OwnDeveloperIdentity) {
-    //   return ownDeveloperIdentity
-    // }
-    // if (obj instanceof OwnUserIdentity) {
-    //   return ownUserIdentity
-    // }
-    // if (obj instanceof PeerAppIdentity) {
-    //   return peerAppIdentity
-    // }
-    // if (obj instanceof PeerDeveloperIdentity) {
-    //   return peerDeveloperIdentity
-    // }
-    // if (obj instanceof PeerUserIdentity) {
-    //   return peerUserIdentity
-    // }
-    return null
+  doc => {
+    const collection = doc.collection && doc.collection.name
+    switch (collection) {
+      case 'apps':
+        return app
+      case 'eth_wallets_hd':
+        return ethHdWallet
+      case 'eth_wallets_ledger':
+        return ethLedgerWallet
+      case 'own_apps':
+        return ownApp
+      case 'own_developers':
+        return ownDeveloperIdentity
+      case 'users':
+        return user
+      case 'peers':
+        return peer
+      default:
+        return null
+    }
   },
 )
 
@@ -744,7 +704,7 @@ export const walletBalances = new GraphQLObjectType({
   fields: () => ({
     eth: {
       type: new GraphQLNonNull(GraphQLString),
-      resolve: async (self, args, ctx) => {
+      resolve: async (address, args, ctx) => {
         // TODO
         return 0
         // try {
@@ -757,7 +717,7 @@ export const walletBalances = new GraphQLObjectType({
     },
     mft: {
       type: new GraphQLNonNull(GraphQLString),
-      resolve: async (self, args, ctx) => {
+      resolve: async (address, args, ctx) => {
         // TODO
         return 0
         // try {
@@ -779,6 +739,7 @@ export const walletAccount = new GraphQLObjectType({
     },
     balances: {
       type: new GraphQLNonNull(walletBalances),
+      resolve: self => self.address,
     },
   }),
 })
@@ -798,6 +759,7 @@ export const ethLedgerWallet = new GraphQLObjectType({
       type: new GraphQLNonNull(
         new GraphQLList(new GraphQLNonNull(walletAccount)),
       ),
+      resolve: doc => doc.activeAccounts,
     },
   }),
 })
@@ -820,6 +782,7 @@ export const ethHdWallet = new GraphQLObjectType({
       type: new GraphQLNonNull(
         new GraphQLList(new GraphQLNonNull(walletAccount)),
       ),
+      resolve: doc => doc.activeAccounts,
     },
   }),
 })
@@ -831,13 +794,13 @@ export const ethWallets = new GraphQLObjectType({
       type: new GraphQLNonNull(
         new GraphQLList(new GraphQLNonNull(ethHdWallet)),
       ),
-      resolve: self => self.populate('hd'),
+      resolve: doc => doc.populate('ethWallets.hd'),
     },
     ledger: {
       type: new GraphQLNonNull(
         new GraphQLList(new GraphQLNonNull(ethLedgerWallet)),
       ),
-      resolve: self => self.populate('ledger'),
+      resolve: doc => doc.populate('ethWallets.ledger'),
     },
   }),
 })
@@ -934,6 +897,7 @@ export const user = new GraphQLObjectType({
     },
     ethWallets: {
       type: new GraphQLNonNull(ethWallets),
+      resolve: doc => doc,
     },
     ethURL: {
       type: new GraphQLNonNull(GraphQLString),

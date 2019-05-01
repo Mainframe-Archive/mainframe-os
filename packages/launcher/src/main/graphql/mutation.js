@@ -129,12 +129,31 @@ const createHDWalletMutation = mutationWithClientMutationId({
     viewer: viewerField,
   },
   mutateAndGetPayload: async (args, ctx) => {
-    const [user, wallet] = await Promise.all([
-      ctx.getUser(),
-      ctx.db.eth_wallets_hd.create({ name: args.name }),
-    ])
-    await user.update({ $push: { 'ethWallets.hd': wallet.localID } })
-    return { wallet }
+    ctx.logger.log({
+      level: 'debug',
+      message: 'CreateHDWallet mutation called',
+      args,
+    })
+    try {
+      const [user, wallet] = await Promise.all([
+        ctx.getUser(),
+        ctx.db.eth_wallets_hd.create({ name: args.name }),
+      ])
+      await user.addEthHDWallet(wallet.localID)
+      ctx.logger.log({
+        level: 'debug',
+        message: 'CreateHDWallet mutation complete',
+        walletID: wallet.localID,
+      })
+      return { wallet }
+    } catch (error) {
+      ctx.logger.log({
+        level: 'error',
+        message: 'CreateHDWallet mutation failed',
+        error: error.toString(),
+      })
+      throw new Error('Failed to create wallet')
+    }
   },
 })
 

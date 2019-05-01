@@ -2,6 +2,8 @@
 
 import Conf from 'conf'
 
+import type { EnvType } from './environment'
+
 const schema = {
   dbCreated: {
     type: 'boolean',
@@ -16,13 +18,14 @@ const schema = {
 
 export type Config = Object
 
-export const createConfig = (projectName: string): Config => {
+export const createConfig = (projectName: string, type: EnvType): Config => {
   const config = new Conf({
     defaults: {
       dbCreated: false,
       savePassword: false,
     },
-    encryptionKey: 'mainframe', // NOT a security measure - see https://github.com/sindresorhus/conf#encryptionkey
+    // NOT a security measure - see https://github.com/sindresorhus/conf#encryptionkey
+    encryptionKey: type === 'production' ? 'mainframe' : undefined,
     projectName,
     schema,
   })

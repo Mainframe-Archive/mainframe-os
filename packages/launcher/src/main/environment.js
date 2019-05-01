@@ -42,7 +42,7 @@ export class Environment {
   constructor(name: string, type: EnvType) {
     const namespace = `mfos-env-${name}-${type}`
     this.name = name
-    this.config = createConfig(namespace)
+    this.config = createConfig(namespace, type)
     this.paths = envPaths(namespace)
     this.type = type
   }

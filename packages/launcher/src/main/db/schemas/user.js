@@ -44,16 +44,16 @@ export default {
       properties: {
         hd: {
           type: 'array',
+          ref: COLLECTION_NAMES.ETH_WALLETS_HD,
           items: {
             type: 'string',
-            ref: COLLECTION_NAMES.ETH_WALLETS_HD,
           },
         },
         ledger: {
           type: 'array',
+          ref: COLLECTION_NAMES.ETH_WALLETS_LEDGER,
           items: {
             type: 'string',
-            ref: COLLECTION_NAMES.ETH_WALLETS_LEDGER,
           },
         },
       },

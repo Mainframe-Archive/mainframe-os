@@ -1,13 +1,13 @@
 // @flow
 
-import bip39 from 'bip39'
+import { generateMnemonic, mnemonicToSeed } from 'bip39'
 import sigUtil from 'eth-sig-util'
 import type EthWallet from 'ethereumjs-wallet'
 import HDkey from 'ethereumjs-wallet/hdkey'
 import nanoid from 'nanoid'
-import type { RxDatabase } from 'rxdb'
 
 import { COLLECTION_NAMES } from '../constants'
+import type { CollectionParams } from '../types'
 
 import schema from '../schemas/ethWalletHD'
 
@@ -19,55 +19,151 @@ const getWallet = (root: any, index: number): EthWallet => {
   return root.deriveChild(index).getWallet()
 }
 
-export default async (db: RxDatabase) => {
+export default async (params: CollectionParams) => {
+  const db = params.db
+  const logger = params.logger.child({
+    collection: COLLECTION_NAMES.ETH_WALLETS_HD,
+  })
+
   return await db.collection({
     name: COLLECTION_NAMES.ETH_WALLETS_HD,
     schema,
     statics: {
-      async create(data: { name: string }) {
-        const doc = this.newDocument({
-          ...data,
-          localID: nanoid(),
-          mnemonic: bip39.generateMnemonic(),
+      async create(data: { name: string, mnemonic?: ?string }) {
+        const localID = nanoid()
+        logger.log({
+          level: 'debug',
+          message: 'Create HD wallet',
+          name: data.name,
+          mnemonicProvided: data.mnemonic != null,
+          localID,
         })
+        if (data.mnemonic == null) {
+          data.mnemonic = generateMnemonic()
+        }
+        const doc = this.newDocument({ ...data, localID })
+        const root = await doc.getRoot()
         doc.activeAccounts = [
           {
             index: 0,
-            address: getAddress(getWallet(doc.getRoot(), 0)),
+            address: getAddress(getWallet(root, 0)),
           },
         ]
+        logger.log({
+          level: 'debug',
+          message: 'HD wallet created',
+          name: data.name,
+          localID,
+        })
         await doc.save()
         return doc
       },
     },
     methods: {
-      getSeed() {
+      async getSeed() {
         if (this._seed == null) {
-          this._seed = bip39.mnemonicToSeed(this.mnemonic)
+          logger.log({
+            level: 'debug',
+            message: 'Create seed from mnemonic',
+            localID: this.localID,
+          })
+          this._seed = await mnemonicToSeed(this.mnemonic)
         }
         return this._seed
       },
-      getHDKey() {
+
+      async getHDKey() {
         if (this._hdKey == null) {
-          this._hdKey = HDkey.fromMasterSeed(this.getSeed())
+          logger.log({
+            level: 'debug',
+            message: 'Create HD key from seed',
+            localID: this.localID,
+          })
+          this._hdKey = HDkey.fromMasterSeed(await this.getSeed())
         }
         return this._hdKey
       },
-      getRoot() {
+
+      async getRoot() {
         if (this._root == null) {
-          this._root = this.getHDKey().derivePath(this.hdPath)
+          logger.log({
+            level: 'debug',
+            message: 'Create root from HD key',
+            localID: this.localID,
+          })
+          const key = await this.getHDKey()
+          this._root = key.derivePath(this.hdPath)
         }
         return this._root
       },
+
       async addAccounts(indexes: Array<number>) {
         const existingIndexes = this.activeAccounts.map(a => a.index)
         const addIndexes = indexes.filter(i => !existingIndexes.contains(i))
-        const root = this.getRoot()
+
+        if (addIndexes.length === 0) {
+          logger.log({
+            level: 'debug',
+            message: 'Accounts to add already existing',
+            localID: this.localID,
+            indexes,
+            existingIndexes,
+          })
+          return
+        }
+
+        logger.log({
+          level: 'debug',
+          message: 'Add accounts',
+          localID: this.localID,
+          indexes,
+          existingIndexes,
+          addIndexes,
+        })
+        const root = await this.getRoot()
         const accounts = addIndexes.map(index => ({
           index,
           address: getAddress(getWallet(root, index)),
         }))
+
         await this.update({ $addToSet: { activeAccounts: accounts } })
+        logger.log({
+          level: 'debug',
+          message: 'Accounts added',
+          localID: this.localID,
+          accounts,
+        })
+      },
+
+      async getUsers() {
+        return await db.users
+          .find({ 'ethWallets.hd': { $in: [this.localID] } })
+          .exec()
+      },
+
+      async safeRemove() {
+        logger.log({
+          level: 'debug',
+          message: 'Remove linked references to self',
+          localID: this.localID,
+        })
+
+        const users = await this.getUsers()
+        const filter = id => id !== this.localID
+        await Promise.all(
+          users.map(async u => {
+            await u.update({
+              $set: { 'ethWallets.hd': u.ethWallets.hd.filter(filter) },
+            })
+          }),
+        )
+
+        await this.remove()
+        logger.log({
+          level: 'debug',
+          message: 'Removed',
+          localID: this.localID,
+        })
       },
     },
   })

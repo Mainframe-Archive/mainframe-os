@@ -17,53 +17,36 @@ import createOwnDevelopersCollection from './collections/ownDevelopers'
 import createPeersCollection from './collections/peers'
 import createUserAppSettingsCollection from './collections/userAppSettings'
 import createUsersCollection from './collections/users'
+import type { DB, DBParams } from './types'
 
 RxDB.plugin(levelAdapter)
 
-export type DB = {
-  apps: Object,
-  app_versions: Object,
-  contact_requests: Object,
-  contacts: Object,
-  eth_wallets_hd: Object,
-  eth_wallets_ledger: Object,
-  own_apps: Object,
-  own_developers: Object,
-  peers: Object,
-  user_app_settings: Object,
-  users: Object,
-}
-
-export type Collection = $Keys<DB>
-
-export const createDB = async (
-  location: string,
-  password: string,
-): Promise<DB> => {
+export const createDB = async (params: DBParams): Promise<DB> => {
   // Uncomment the following line to reset the DB in development
-  // await RxDB.removeDatabase(location, leveldown)
+  // await RxDB.removeDatabase(params.location, leveldown)
 
-  await ensureDir(dirname(location))
+  await ensureDir(dirname(params.location))
 
   const db = await RxDB.create({
-    name: location,
+    name: params.location,
     adapter: leveldown,
-    password,
+    password: params.password,
     multiInstance: false,
   })
 
+  const collectionParams = { db, logger: params.logger }
   await Promise.all([
-    createAppsCollection(db),
-    createAppVersionsCollection(db),
-    createContactRequestsCollection(db),
-    createContactsCollection(db),
-    createEthWalletsHDCollection(db),
-    createEthWalletsLedgerCollection(db),
-    createOwnAppsCollection(db),
-    createOwnDevelopersCollection(db),
-    createPeersCollection(db),
-    createUserAppSettingsCollection(db),
-    createUsersCollection(db),
+    createAppsCollection(collectionParams),
+    createAppVersionsCollection(collectionParams),
+    createContactRequestsCollection(collectionParams),
+    createContactsCollection(collectionParams),
+    createEthWalletsHDCollection(collectionParams),
+    createEthWalletsLedgerCollection(collectionParams),
+    createOwnAppsCollection(collectionParams),
+    createOwnDevelopersCollection(collectionParams),
+    createPeersCollection(collectionParams),
+    createUserAppSettingsCollection(collectionParams),
+    createUsersCollection(collectionParams),
   ])
 
   return db

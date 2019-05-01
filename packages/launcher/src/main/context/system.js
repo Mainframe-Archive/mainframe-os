@@ -3,7 +3,8 @@
 import { getPassword, setPassword } from 'keytar'
 
 import type { Config } from '../config'
-import { createDB, type DB } from '../db'
+import { createDB } from '../db'
+import type { DB } from '../db/types'
 import type { Environment } from '../environment'
 import type { Logger } from '../logger'
 
@@ -29,7 +30,14 @@ export class SystemContext {
       }
     })
     this.env = params.env
-    this.logger = params.logger
+    this.logger = params.logger.child({ context: 'system' })
+    this.logger.log({
+      level: 'debug',
+      message: 'System context created',
+      envName: this.env.name,
+      envType: this.env.type,
+      config: this.config.store,
+    })
   }
 
   get config(): Config {
@@ -41,6 +49,11 @@ export class SystemContext {
   }
 
   set defaultUser(id: ?string): void {
+    this.logger.log({
+      level: 'debug',
+      message: 'Set default user',
+      id,
+    })
     if (id == null) {
       this.config.delete('defaultUser')
     } else {
@@ -86,7 +99,11 @@ export class SystemContext {
       throw new Error('DB already open')
     }
 
-    const db = await createDB(this.env.getDBPath(), password)
+    const db = await createDB({
+      location: this.env.getDBPath(),
+      logger: this.logger,
+      password,
+    })
 
     if (this.env.config.get('dbCreated', false) === false) {
       this.env.config.set('dbCreated', true)
