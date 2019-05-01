@@ -7,7 +7,8 @@
     "dev": "electron-webpack dev",
     "compile": "electron-webpack",
     "compile:preload": "webpack --config webpack.preload.js",
-    "deps:build": "electron-builder install-app-deps",
+    "daemon:hardlink": "rm -rf ./node_modules/@mainframe/daemon; cp -r ../daemon ./node_modules/@mainframe/daemon",
+    "deps:build": "yarn daemon:hardlink && electron-builder install-app-deps",
     "dist": "npm run compile && electron-builder",
     "electron-builder": "electron-builder",
     "dist:ci": "yarn run compile && yarn run electron-builder --dir",
@@ -77,7 +78,6 @@
   "devDependencies": {
     "@babel/plugin-syntax-dynamic-import": "^7.0.0",
     "@erebos/api-bzz-node": "^0.7.0",
-    "@mainframe/utils-id": "^0.1.0",
     "babel-loader": "^8.0.4",
     "babel-plugin-react-native-web": "^0.10.0",
     "babel-plugin-relay": "^1.7.0",
