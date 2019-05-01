@@ -49,7 +49,6 @@
     "@mainframe/rpc-electron": "^0.2.0",
     "@mainframe/rpc-handler": "^0.3.0",
     "@mainframe/toolbox": "*",
-    "@mainframe/utils-base64": "^0.1.1",
     "@mainframe/utils-id": "^0.1.0",
     "@morpheus-ui/core": "^0.0.41",
     "@morpheus-ui/fonts": "0.0.1",
