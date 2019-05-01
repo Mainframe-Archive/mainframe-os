@@ -5394,15 +5394,17 @@ concat-stream@^2.0.0:
     readable-stream "^3.0.2"
     typedarray "^0.0.6"
 
-conf@^3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/conf/-/conf-3.0.0.tgz#9b788f897e208684952058c38f01ddb1dff0c40b"
-  integrity sha512-z3XAlQY1pwHi+PFqWJ8lPqxSbHl0rlpgKpFSARGRw3Qj8zj0I1jNwLRjfDnUrjCtgea5HTf1YhdF5KKjDrUnTA==
+conf@^4.0.0:
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/conf/-/conf-4.0.2.tgz#cc25649295259fc77f4606840b7718cca5c1d5bd"
+  integrity sha512-SVEWGdAlA+BNfpJ5vF7S6SbkXA7Qk1ycWV6+UAWkC3vQvjxx7xxuYNriKnShjlbIPStUiTK0MZWdQYYtTYdwZw==
   dependencies:
-    dot-prop "^4.1.0"
-    env-paths "^1.0.0"
-    make-dir "^2.0.0"
-    pkg-up "^2.0.0"
+    ajv "^6.10.0"
+    dot-prop "^5.0.0"
+    env-paths "^2.2.0"
+    json-schema-typed "^7.0.0"
+    make-dir "^3.0.0"
+    pkg-up "^3.0.1"
     write-file-atomic "^2.4.2"
 
 conf@^4.0.1:
@@ -8271,6 +8273,11 @@ file-uri-to-path@1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/file-uri-to-path/-/file-uri-to-path-1.0.0.tgz#553a7b8446ff6f684359c445f1e37a05dacc33dd"
   integrity sha512-0Zt+s3L7Vf1biwWZ29aARiVYLx7iMGnEUl9x33fbB/j3jR81u/O2LbqK+Bm1CDSNDKVtJ/YjwY7TUd5SkeLQLw==
+
+file-url@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/file-url/-/file-url-3.0.0.tgz#247a586a746ce9f7a8ed05560290968afc262a77"
+  integrity sha512-g872QGsHexznxkIAdK8UiZRe7SkE6kvylShU4Nsj8NvfvZag7S0QuQ4IgvPDkk75HxgjIVDwycFTDAgIiO4nDA==
 
 filename-regex@^2.0.0:
   version "2.0.1"
