@@ -3,6 +3,7 @@ import url from 'url'
 import { type Session } from 'electron'
 import { checkPermission } from '@mainframe/app-permissions'
 import type { PermissionKey } from '@mainframe/app-permissions'
+import fileUrl from 'file-url'
 import type { AppContext } from './contexts'
 
 export const userDeniedError = (key: PermissionKey) => {
@@ -13,7 +14,8 @@ export const interceptWebRequests = (
   context: AppContext,
   webviewSession: Session,
 ) => {
-  const appPath = encodeURI(context.appSession.app.contentsPath)
+  const appUrl = fileUrl(context.appSession.app.contentsPath)
+  const appPath = url.parse(appUrl).path
   webviewSession.webRequest.onBeforeRequest([], async (request, callback) => {
     const urlParts = url.parse(request.url)
 
@@ -27,7 +29,7 @@ export const interceptWebRequests = (
     // Allowing files loaded from apps contents
 
     if (urlParts.protocol === 'file:') {
-      if (urlParts.path && urlParts.path.startsWith(appPath)) {
+      if (urlParts.path && appPath && urlParts.path.startsWith(appPath)) {
         // Loading app contents
         callback({ cancel: false })
         return

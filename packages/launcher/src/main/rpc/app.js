@@ -1,6 +1,6 @@
 // @flow
 
-import { createReadStream } from 'fs'
+import { createReadStream, createWriteStream } from 'fs'
 import { Readable } from 'stream'
 import type { ListResult } from '@erebos/api-bzz-base'
 import getStream from 'get-stream'
@@ -272,6 +272,46 @@ export const sandboxed = {
       return contactsRes.contacts
     },
   ),
+
+  storage_promptDownload: {
+    params: {
+      key: STORAGE_KEY_PARAM,
+    },
+    handler: (ctx: AppContext, params: { key: string }): Promise<boolean> => {
+      return new Promise((resolve, reject) => {
+        dialog.showSaveDialog(
+          ctx.window,
+          { title: 'Save file to:', buttonLabel: 'Download' },
+          async filePath => {
+            if (filePath === undefined) {
+              // Dialog was canceled
+              resolve(false)
+            } else {
+              try {
+                const stream = await downloadStream(ctx, params.key)
+                if (stream === null) {
+                  reject(new Error('File not found'))
+                } else {
+                  await new Promise((resolve, reject) => {
+                    stream
+                      .pipe(createWriteStream(filePath))
+                      .on('error', error => {
+                        reject(error)
+                      })
+                      .on('finish', () => {
+                        resolve(true)
+                      })
+                  })
+                }
+              } catch (error) {
+                reject(new Error('Failed to access storage'))
+              }
+            }
+          },
+        )
+      })
+    },
+  },
 
   storage_promptUpload: {
     params: {
