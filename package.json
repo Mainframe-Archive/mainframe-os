@@ -9,7 +9,10 @@
       "applications/*",
       "packages/*"
     ],
-    "nohoist": []
+    "nohoist": [
+      "Mainframe/@mainframe/daemon/**",
+      "Mainframe/@mainframe/daemon"
+    ]
   },
   "scripts": {
     "flow:install": "lerna exec --concurrency 1 -- flow-typed install --ignoreDeps=dev",

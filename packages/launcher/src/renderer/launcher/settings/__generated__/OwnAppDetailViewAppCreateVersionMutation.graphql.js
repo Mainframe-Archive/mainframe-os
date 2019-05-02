@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash db1075f9b2e12155ce2143addae2e3b9
+ * @relayHash 74e10efe0eebda8e0dc192b5fefba6b9
  */
 
 /* eslint-disable */
@@ -62,12 +62,14 @@ fragment OwnAppDetailView_ownApp on OwnApp {
       optional {
         WEB_REQUEST
         BLOCKCHAIN_SEND
+        BLOCKCHAIN_SIGN
         COMMS_CONTACT
         CONTACTS_READ
       }
       required {
         WEB_REQUEST
         BLOCKCHAIN_SEND
+        BLOCKCHAIN_SIGN
         COMMS_CONTACT
         CONTACTS_READ
       }
@@ -125,6 +127,13 @@ v4 = [
   {
     "kind": "ScalarField",
     "alias": null,
+    "name": "BLOCKCHAIN_SIGN",
+    "args": null,
+    "storageKey": null
+  },
+  {
+    "kind": "ScalarField",
+    "alias": null,
     "name": "COMMS_CONTACT",
     "args": null,
     "storageKey": null
@@ -142,7 +151,7 @@ return {
   "operationKind": "mutation",
   "name": "OwnAppDetailViewAppCreateVersionMutation",
   "id": null,
-  "text": "mutation OwnAppDetailViewAppCreateVersionMutation(\n  $input: AppCreateVersionMutationInput!\n) {\n  createAppVersion(input: $input) {\n    app {\n      ...OwnAppDetailView_ownApp\n      id\n    }\n  }\n}\n\nfragment OwnAppDetailView_ownApp on OwnApp {\n  localID\n  mfid\n  name\n  contentsPath\n  updateFeedHash\n  developer {\n    id\n    name\n  }\n  publishedVersion\n  currentVersionData {\n    version\n    versionHash\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        COMMS_CONTACT\n        CONTACTS_READ\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        COMMS_CONTACT\n        CONTACTS_READ\n      }\n    }\n  }\n}\n",
+  "text": "mutation OwnAppDetailViewAppCreateVersionMutation(\n  $input: AppCreateVersionMutationInput!\n) {\n  createAppVersion(input: $input) {\n    app {\n      ...OwnAppDetailView_ownApp\n      id\n    }\n  }\n}\n\nfragment OwnAppDetailView_ownApp on OwnApp {\n  localID\n  mfid\n  name\n  contentsPath\n  updateFeedHash\n  developer {\n    id\n    name\n  }\n  publishedVersion\n  currentVersionData {\n    version\n    versionHash\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        BLOCKCHAIN_SIGN\n        COMMS_CONTACT\n        CONTACTS_READ\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        BLOCKCHAIN_SIGN\n        COMMS_CONTACT\n        CONTACTS_READ\n      }\n    }\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
