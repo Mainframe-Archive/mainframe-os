@@ -36,6 +36,8 @@ jobs:
           command: './packages/cli/bin/run env:create -n v030-production -t testing -d && ./packages/cli/bin/run daemon:setup --bin-path=./packages/daemon/bin/run'
       - run:
           name: Integration tests
+          environment:
+            USE_HARD_LINKS: 'false'
           command: cd ./packages/launcher && yarn run dist:ci && yarn run test
       - store_test_results:
           path: /tmp/test-reports
