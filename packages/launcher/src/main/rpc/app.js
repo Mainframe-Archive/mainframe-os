@@ -420,10 +420,11 @@ export const sandboxed = {
       try {
         const { feedHash, manifestHash } = await getStorageManifestHash(ctx)
         const newManifestHash = await ctx.bzz.deleteResource(manifestHash, params.key)
-        await ctx.client.app.setFeedHash({
-          sessID: ctx.appSession.session.sessID,
-          feedHash: feedHash,
-        })
+        const [dataHash, feedMetadata] = await Promise.all([
+          ctx.bzz.deleteResource(manifestHash, params.key),
+          ctx.bzz.getFeedMetadata(feedHash),
+        ])
+        await ctx.bzz.postFeedValue(feedMetadata, `0x${dataHash}`)
         ctx.storage.manifestHash = newManifestHash
       } catch (error) {
         throw new Error('Failed to access storage')
