@@ -419,7 +419,10 @@ export const sandboxed = {
     ): Promise<void> => {
       try {
         const { feedHash, manifestHash } = await getStorageManifestHash(ctx)
-        const newManifestHash = await ctx.bzz.deleteResource(manifestHash, params.key)
+        const newManifestHash = await ctx.bzz.deleteResource(
+          manifestHash,
+          params.key,
+        )
         const [dataHash, feedMetadata] = await Promise.all([
           ctx.bzz.deleteResource(manifestHash, params.key),
           ctx.bzz.getFeedMetadata(feedHash),
