@@ -111,7 +111,7 @@ export const appUser = new GraphQLObjectType({
     },
     identity: {
       type: new GraphQLNonNull(ownUserIdentity),
-      resolve: (self, args, ctx: GrahpQLContext) => {
+      resolve: (self, args, ctx: GraphQLContext) => {
         return ctx.getDoc('users', self.localID)
       },
     },
@@ -891,9 +891,6 @@ export const user = new GraphQLObjectType({
     },
     defaultEthAddress: {
       type: GraphQLString,
-      resolve: (self, args, ctx) => {
-        return ctx.queries.getUserDefaultEthAccount(self.localID)
-      },
     },
     ethWallets: {
       type: new GraphQLNonNull(ethWallets),

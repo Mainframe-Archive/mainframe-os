@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash e0707d2d245f91aa73e2cb03cc317113
+ * @relayHash 6796ccb928e96391167fb01f641b94ca
  */
 
 /* eslint-disable */
@@ -9,7 +9,7 @@
 
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
-type WalletsView_user$ref = any;
+type WalletsScreen_user$ref = any;
 export type SupportedWallets = "ETHEREUM" | "%future added value";
 export type CreateHDWalletInput = {
   blockchain: SupportedWallets,
@@ -29,7 +29,7 @@ export type WalletCreateModalCreateHDWalletMutationResponse = {|
       +localID: string,
     |},
     +viewer: {|
-      +$fragmentRefs: WalletsView_user$ref
+      +$fragmentRefs: WalletsScreen_user$ref
     |},
   |}
 |};
@@ -54,13 +54,14 @@ mutation WalletCreateModalCreateHDWalletMutation(
       id
     }
     viewer {
-      ...WalletsView_user
+      ...WalletsScreen_user
       id
     }
   }
 }
 
-fragment WalletsView_user on User {
+fragment WalletsScreen_user on User {
+  defaultEthAddress
   ethWallets {
     hd {
       name
@@ -200,7 +201,7 @@ return {
   "operationKind": "mutation",
   "name": "WalletCreateModalCreateHDWalletMutation",
   "id": null,
-  "text": "mutation WalletCreateModalCreateHDWalletMutation(\n  $input: CreateHDWalletInput!\n) {\n  createHDWallet(input: $input) {\n    hdWallet {\n      accounts {\n        address\n      }\n      mnemonic\n      localID\n      id\n    }\n    viewer {\n      ...WalletsView_user\n      id\n    }\n  }\n}\n\nfragment WalletsView_user on User {\n  ethWallets {\n    hd {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n    ledger {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n  }\n}\n",
+  "text": "mutation WalletCreateModalCreateHDWalletMutation(\n  $input: CreateHDWalletInput!\n) {\n  createHDWallet(input: $input) {\n    hdWallet {\n      accounts {\n        address\n      }\n      mnemonic\n      localID\n      id\n    }\n    viewer {\n      ...WalletsScreen_user\n      id\n    }\n  }\n}\n\nfragment WalletsScreen_user on User {\n  defaultEthAddress\n  ethWallets {\n    hd {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n    ledger {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -243,7 +244,7 @@ return {
             "selections": [
               {
                 "kind": "FragmentSpread",
-                "name": "WalletsView_user",
+                "name": "WalletsScreen_user",
                 "args": null
               }
             ]
@@ -291,6 +292,13 @@ return {
             "plural": false,
             "selections": [
               {
+                "kind": "ScalarField",
+                "alias": null,
+                "name": "defaultEthAddress",
+                "args": null,
+                "storageKey": null
+              },
+              {
                 "kind": "LinkedField",
                 "alias": null,
                 "name": "ethWallets",
@@ -331,5 +339,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = 'a8868f2649523fee7e774d75f4229a07';
+(node/*: any*/).hash = '462bef3452ad0763284c91602129d44b';
 module.exports = node;

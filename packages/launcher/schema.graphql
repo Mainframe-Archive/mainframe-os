@@ -27,7 +27,6 @@ type AddContactPayload {
 input AddHDWalletAccountInput {
   walletID: String!
   index: Int!
-  userID: String
   clientMutationId: String
 }
 
@@ -328,7 +327,6 @@ input ImportHDWalletInput {
   blockchain: SupportedWallets!
   mnemonic: String!
   name: String!
-  userID: String
   clientMutationId: String
 }
 

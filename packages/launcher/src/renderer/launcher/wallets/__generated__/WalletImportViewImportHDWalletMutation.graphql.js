@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 0935fe17a8d47c5b511a19c07e809c73
+ * @relayHash 25c4010d262d1891e5cae002394247f1
  */
 
 /* eslint-disable */
@@ -9,13 +9,12 @@
 
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
-type WalletsView_user$ref = any;
+type WalletsScreen_user$ref = any;
 export type SupportedWallets = "ETHEREUM" | "%future added value";
 export type ImportHDWalletInput = {
   blockchain: SupportedWallets,
   mnemonic: string,
   name: string,
-  userID?: ?string,
   clientMutationId?: ?string,
 };
 export type WalletImportViewImportHDWalletMutationVariables = {|
@@ -30,7 +29,7 @@ export type WalletImportViewImportHDWalletMutationResponse = {|
       +localID: string,
     |},
     +viewer: {|
-      +$fragmentRefs: WalletsView_user$ref
+      +$fragmentRefs: WalletsScreen_user$ref
     |},
   |}
 |};
@@ -54,13 +53,14 @@ mutation WalletImportViewImportHDWalletMutation(
       id
     }
     viewer {
-      ...WalletsView_user
+      ...WalletsScreen_user
       id
     }
   }
 }
 
-fragment WalletsView_user on User {
+fragment WalletsScreen_user on User {
+  defaultEthAddress
   ethWallets {
     hd {
       name
@@ -193,7 +193,7 @@ return {
   "operationKind": "mutation",
   "name": "WalletImportViewImportHDWalletMutation",
   "id": null,
-  "text": "mutation WalletImportViewImportHDWalletMutation(\n  $input: ImportHDWalletInput!\n) {\n  importHDWallet(input: $input) {\n    hdWallet {\n      accounts {\n        address\n      }\n      localID\n      id\n    }\n    viewer {\n      ...WalletsView_user\n      id\n    }\n  }\n}\n\nfragment WalletsView_user on User {\n  ethWallets {\n    hd {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n    ledger {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n  }\n}\n",
+  "text": "mutation WalletImportViewImportHDWalletMutation(\n  $input: ImportHDWalletInput!\n) {\n  importHDWallet(input: $input) {\n    hdWallet {\n      accounts {\n        address\n      }\n      localID\n      id\n    }\n    viewer {\n      ...WalletsScreen_user\n      id\n    }\n  }\n}\n\nfragment WalletsScreen_user on User {\n  defaultEthAddress\n  ethWallets {\n    hd {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n    ledger {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -235,7 +235,7 @@ return {
             "selections": [
               {
                 "kind": "FragmentSpread",
-                "name": "WalletsView_user",
+                "name": "WalletsScreen_user",
                 "args": null
               }
             ]
@@ -282,6 +282,13 @@ return {
             "plural": false,
             "selections": [
               {
+                "kind": "ScalarField",
+                "alias": null,
+                "name": "defaultEthAddress",
+                "args": null,
+                "storageKey": null
+              },
+              {
                 "kind": "LinkedField",
                 "alias": null,
                 "name": "ethWallets",
@@ -322,5 +329,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '962f93dc962d6ba2e7f70cf423a0f85a';
+(node/*: any*/).hash = '0e48d2b605c3ba8520d7dce119f6a353';
 module.exports = node;

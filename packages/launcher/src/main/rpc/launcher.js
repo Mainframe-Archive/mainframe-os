@@ -123,7 +123,29 @@ export default {
       ctx: LauncherContext,
       params: GraphQLRequestParams,
     ): Promise<ExecutionResult> {
-      return await ctx.query(params.query, params.variables)
+      ctx.logger.log({
+        level: 'debug',
+        message: 'GraphQL query',
+        params,
+      })
+      try {
+        const result = await ctx.query(params.query, params.variables)
+        ctx.logger.log({
+          level: 'debug',
+          message: 'GraphQL query result',
+          params,
+          result,
+        })
+        return result
+      } catch (error) {
+        ctx.logger.log({
+          level: 'error',
+          message: 'GraphQL query failed',
+          error: error.toString(),
+          params,
+        })
+        throw new Error('GraphQL query failed')
+      }
     },
   },
 

@@ -168,7 +168,6 @@ export default class WalletCreateModal extends Component<Props, State> {
                       variant={['no-border', 'grey', 'modalButton']}
                       onPress={this.toggleAlert}
                     />
-
                     <Button
                       title="YES"
                       variant={['red', 'modalButton']}

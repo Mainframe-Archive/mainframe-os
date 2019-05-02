@@ -36,7 +36,6 @@ type State = {
 }
 
 type Props = {
-  userID: string,
   onClose?: () => void,
   onSetupWallet: (address: string) => void,
   full?: boolean,
@@ -100,7 +99,7 @@ const createWalletMutation = graphql`
         localID
       }
       viewer {
-        ...WalletsView_user
+        ...WalletsScreen_user
       }
     }
   }
@@ -123,15 +122,14 @@ export default class WalletCreateModal extends Component<Props, State> {
   }
 
   createWallet = async (name: string) => {
-    const input = {
-      name,
-      blockchain: 'ETHEREUM',
-      userID: this.props.userID,
-    }
     commitMutation(this.context, {
       mutation: createWalletMutation,
-      // $FlowFixMe: Relay type
-      variables: { input, userID: this.props.userID },
+      variables: {
+        input: {
+          name,
+          blockchain: 'ETHEREUM',
+        },
+      },
       onError: err => {
         const msg =
           err.message || 'Sorry, there was a problem creating the wallet.'

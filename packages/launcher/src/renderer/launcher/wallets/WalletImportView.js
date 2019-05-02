@@ -16,7 +16,6 @@ type Props = {
   currentWalletID?: ?string,
   onClose: () => void,
   onSuccess?: (address: string) => void,
-  userID: string,
   full?: boolean,
 }
 
@@ -44,7 +43,7 @@ const walletImportMutation = graphql`
         localID
       }
       viewer {
-        ...WalletsView_user
+        ...WalletsScreen_user
       }
     }
   }
@@ -54,7 +53,7 @@ const deleteWalletMutation = graphql`
   mutation WalletImportViewDeleteWalletMutation($input: DeleteWalletInput!) {
     deleteWallet(input: $input) {
       viewer {
-        ...WalletsView_user
+        ...WalletsScreen_user
       }
     }
   }
@@ -78,14 +77,14 @@ export default class WalletImportView extends Component<Props, State> {
     }
 
     if (this.props.currentWalletID) {
-      const deleteInput = {
-        type: 'hd',
-        walletID: this.props.currentWalletID,
-      }
-
       commitMutation(this.context, {
         mutation: deleteWalletMutation,
-        variables: { input: deleteInput, userID: this.props.userID },
+        variables: {
+          input: {
+            type: 'hd',
+            walletID: this.props.currentWalletID,
+          },
+        },
         onCompleted: (response, errors) => {
           if (errors || !response) {
             const error =
@@ -105,16 +104,15 @@ export default class WalletImportView extends Component<Props, State> {
   }
 
   commitImportMutation = (name: string, seed: string) => {
-    const importInput = {
-      blockchain: 'ETHEREUM',
-      mnemonic: seed,
-      name: name,
-      userID: this.props.userID,
-    }
-
     commitMutation(this.context, {
       mutation: walletImportMutation,
-      variables: { input: importInput, userID: this.props.userID },
+      variables: {
+        input: {
+          blockchain: 'ETHEREUM',
+          mnemonic: seed,
+          name: name,
+        },
+      },
       onCompleted: ({ importHDWallet }, errors) => {
         if (errors || !importHDWallet) {
           const error =

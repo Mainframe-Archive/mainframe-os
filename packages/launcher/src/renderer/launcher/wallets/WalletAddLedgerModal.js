@@ -73,7 +73,7 @@ const addLedgerWalletMutation = graphql`
     addLedgerWalletAccounts(input: $input) {
       addresses
       viewer {
-        ...WalletsView_user
+        ...WalletsScreen_user
       }
     }
   }

@@ -8,6 +8,7 @@ import styled from 'styled-components/native'
 import THEME from '../theme'
 import { ROUTES } from './constants'
 
+import HomeRouter from './HomeRouter'
 import OnboardingRouter from './onboarding/Router'
 
 const Container = styled.View`
@@ -35,14 +36,7 @@ export default function Root({ route }: Props) {
           <TitleBar className="draggable" />
           <Switch>
             <Route path="/onboarding" component={OnboardingRouter} />
-            <Route
-              path="/"
-              render={() => (
-                <div>
-                  <h1>Home</h1>
-                </div>
-              )}
-            />
+            <Route path="/" component={HomeRouter} />
           </Switch>
         </Container>
       </MemoryRouter>

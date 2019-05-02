@@ -43,8 +43,41 @@ const deleteWalletMutation = mutationWithClientMutationId({
     viewer: viewerField,
   },
   mutateAndGetPayload: async (args, ctx) => {
-    await ctx.mutations.deleteWallet('ethereum', args.type, args.walletID)
-    return {}
+    ctx.logger.log({
+      level: 'debug',
+      message: 'DeleteWallet mutation called',
+      args,
+    })
+
+    try {
+      let wallet
+      if (args.type === 'hd') {
+        wallet = await ctx.getDoc('eth_wallets_hd', args.walletID)
+      } else if (args.type === 'ledger') {
+        wallet = await ctx.getDoc('eth_wallets_ledger', args.walletID)
+      } else {
+        throw new Error('Unsupported wallet type')
+      }
+      if (wallet == null) {
+        throw new Error('Wallet not found')
+      }
+
+      await wallet.safeRemove()
+      ctx.logger.log({
+        level: 'debug',
+        message: 'DeleteWallet mutation complete',
+        walletID: args.walletID,
+      })
+      return {}
+    } catch (error) {
+      ctx.logger.log({
+        level: 'error',
+        message: 'DeleteWallet mutation failed',
+        error: error.toString(),
+        args,
+      })
+      throw new Error('Failed to delete wallet')
+    }
   },
 })
 
@@ -57,9 +90,6 @@ const addHDWalletAccountMutation = mutationWithClientMutationId({
     index: {
       type: new GraphQLNonNull(GraphQLInt),
     },
-    userID: {
-      type: GraphQLString,
-    },
   },
   outputFields: {
     address: {
@@ -69,8 +99,37 @@ const addHDWalletAccountMutation = mutationWithClientMutationId({
     viewer: viewerField,
   },
   mutateAndGetPayload: async (args, ctx) => {
-    const address = await ctx.mutations.addHDWalletAccount(args)
-    return { address }
+    ctx.logger.log({
+      level: 'debug',
+      message: 'AddHDWalletAccount mutation called',
+      args,
+    })
+    try {
+      const wallet = await ctx.getDoc('eth_wallets_hd', args.walletID)
+      if (wallet == null) {
+        throw new Error('Wallet not found')
+      }
+
+      await wallet.addAccounts([args.index])
+      const account = wallet.activeAccounts.find(acc => {
+        return acc.index === args.index
+      })
+      ctx.logger.log({
+        level: 'debug',
+        message: 'AddHDWalletAccount mutation complete',
+        walletID: wallet.localID,
+        account,
+      })
+      return { address: account.address }
+    } catch (error) {
+      ctx.logger.log({
+        level: 'error',
+        message: 'AddHDWalletAccount mutation failed',
+        error: error.toString(),
+        args,
+      })
+      throw new Error('Failed to add wallet account')
+    }
   },
 })
 
@@ -86,9 +145,6 @@ const importHDWalletMutation = mutationWithClientMutationId({
     name: {
       type: new GraphQLNonNull(GraphQLString),
     },
-    userID: {
-      type: GraphQLString,
-    },
   },
   outputFields: {
     hdWallet: {
@@ -98,15 +154,32 @@ const importHDWalletMutation = mutationWithClientMutationId({
     viewer: viewerField,
   },
   mutateAndGetPayload: async (args, ctx) => {
-    const wallet = await ctx.mutations.importHDWallet({
-      blockchain: args.blockchain,
-      mnemonic: args.mnemonic,
-      name: args.name,
-      userID: args.userID,
+    ctx.logger.log({
+      level: 'debug',
+      message: 'ImportHDWallet mutation called',
     })
-    return {
-      localID: wallet.localID,
-      accounts: wallet.getAccounts(),
+    try {
+      const [user, wallet] = await Promise.all([
+        ctx.getUser(),
+        ctx.db.eth_wallets_hd.create({
+          name: args.name,
+          mnemonic: args.mnemonic,
+        }),
+      ])
+      await user.addEthHDWallet(wallet.localID)
+      ctx.logger.log({
+        level: 'debug',
+        message: 'ImportHDWallet mutation complete',
+        walletID: wallet.localID,
+      })
+      return { wallet }
+    } catch (error) {
+      ctx.logger.log({
+        level: 'error',
+        message: 'ImportHDWallet mutation failed',
+        error: error.toString(),
+      })
+      throw new Error('Failed to import wallet')
     }
   },
 })

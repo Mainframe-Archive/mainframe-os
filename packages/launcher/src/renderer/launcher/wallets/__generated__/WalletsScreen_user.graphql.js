@@ -9,8 +9,9 @@
 /*::
 import type { ConcreteFragment } from 'relay-runtime';
 import type { FragmentReference } from "relay-runtime";
-declare export opaque type WalletsView_user$ref: FragmentReference;
-export type WalletsView_user = {|
+declare export opaque type WalletsScreen_user$ref: FragmentReference;
+export type WalletsScreen_user = {|
+  +defaultEthAddress: ?string,
   +ethWallets: {|
     +hd: $ReadOnlyArray<{|
       +name: ?string,
@@ -35,7 +36,7 @@ export type WalletsView_user = {|
       |}>,
     |}>,
   |},
-  +$refType: WalletsView_user$ref,
+  +$refType: WalletsScreen_user$ref,
 |};
 */
 
@@ -102,11 +103,18 @@ var v0 = [
 ];
 return {
   "kind": "Fragment",
-  "name": "WalletsView_user",
+  "name": "WalletsScreen_user",
   "type": "User",
   "metadata": null,
   "argumentDefinitions": [],
   "selections": [
+    {
+      "kind": "ScalarField",
+      "alias": null,
+      "name": "defaultEthAddress",
+      "args": null,
+      "storageKey": null
+    },
     {
       "kind": "LinkedField",
       "alias": null,
@@ -142,5 +150,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '1410b74219b6c1281679bebfa295429d';
+(node/*: any*/).hash = 'd03e959063f05d88fc608ed0ed43737b';
 module.exports = node;

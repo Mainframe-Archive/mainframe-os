@@ -6,10 +6,12 @@
   "private": true,
   "workspaces": {
     "packages": [
-      "applications/*",
       "packages/*"
     ],
     "nohoist": []
+  },
+  "resolutions": {
+    "graphql": "^0.13.2"
   },
   "scripts": {
     "flow:install": "lerna exec --concurrency 1 -- flow-typed install --ignoreDeps=dev",
