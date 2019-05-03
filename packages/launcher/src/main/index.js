@@ -68,6 +68,9 @@ const newWindow = (params: Object = {}) => {
     })
     window.loadURL(formattedUrl)
   }
+  // hide the menu (Win and Linux)
+  window.setAutoHideMenuBar(true)
+
   return window
 }
 
@@ -172,6 +175,7 @@ const launchApp = async (
   }
 
   const appWindow = newWindow()
+
   if (appSession.isDev) {
     appWindow.webContents.on('did-attach-webview', () => {
       // Open a separate developer tools window for the app
@@ -259,6 +263,13 @@ const setupClient = async () => {
   }
 
   // Start daemon and connect local client to it
+  try {
+    await shutdownDaemon()
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.err(err.message)
+  }
+
   if (daemonConfig.runStatus !== 'running') {
     daemonConfig.runStatus = 'stopped'
     await startDaemon(env.name)
@@ -279,8 +290,8 @@ const createLauncherWindow = async () => {
   await setupClient()
 
   launcherWindow = newWindow({
-    width: 900,
-    height: 760,
+    width: 1024,
+    height: 768,
     minWidth: 900,
     minHeight: 600,
   })
@@ -341,6 +352,8 @@ app.on('will-quit', async event => {
 
 ipcMain.on('init-window', event => {
   const window = BrowserWindow.fromWebContents(event.sender)
+  window.setAutoHideMenuBar(true)
+
   if (window === launcherWindow) {
     window.webContents.send('start', { type: 'launcher' })
   } else {

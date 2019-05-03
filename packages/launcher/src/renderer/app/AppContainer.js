@@ -2,6 +2,8 @@
 
 import path from 'path'
 import url from 'url'
+import { remote } from 'electron'
+import Helmet from 'react-helmet'
 import Store from 'electron-store'
 import type { ID } from '@mainframe/utils-id'
 import React, { Component } from 'react'
@@ -256,10 +258,17 @@ export default class AppContainer extends Component<Props, State> {
     return (
       <MFThemeProvider theme={THEME}>
         <OuterContainer>
+          <Helmet>
+            <title>{appSession.app.manifest.name}</title>
+          </Helmet>
           <Header>
-            <TitleBar className="draggable">
-              <Text variant="TuiAppTitle">{appSession.app.manifest.name}</Text>
-            </TitleBar>
+            {remote.process.platform === 'macos' ? (
+              <TitleBar className="draggable">
+                <Text variant="TuiAppTitle">
+                  {appSession.app.manifest.name}
+                </Text>
+              </TitleBar>
+            ) : null}
             <ActionBar>
               <EthNetwork>
                 <NetworkIcon color="#808080" width={14} height={14} />
