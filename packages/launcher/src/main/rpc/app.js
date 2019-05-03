@@ -419,15 +419,11 @@ export const sandboxed = {
     ): Promise<void> => {
       try {
         const { feedHash, manifestHash } = await getStorageManifestHash(ctx)
-        const newManifestHash = await ctx.bzz.deleteResource(
-          manifestHash,
-          params.key,
-        )
-        const [dataHash, feedMetadata] = await Promise.all([
+        const [newManifestHash, feedMetadata] = await Promise.all([
           ctx.bzz.deleteResource(manifestHash, params.key),
           ctx.bzz.getFeedMetadata(feedHash),
         ])
-        await ctx.bzz.postFeedValue(feedMetadata, `0x${dataHash}`)
+        await ctx.bzz.postFeedValue(feedMetadata, `0x${newManifestHash}`)
         ctx.storage.manifestHash = newManifestHash
       } catch (error) {
         throw new Error('Failed to access storage')
