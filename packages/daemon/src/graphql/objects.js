@@ -650,6 +650,19 @@ export const contact = new GraphQLObjectType({
 export const contacts = new GraphQLObjectType({
   name: 'Contacts',
   fields: () => ({
+    inviteStake: {
+      type: GraphQLInt,
+      resolve: async (self, args, ctx) => {
+        try {
+          const stake = await ctx.invitesHandler.getRequiredStake()
+          return Number(stake)
+        } catch (err) {
+          // Will error on unsupported networks
+          ctx.log(err)
+          return null
+        }
+      },
+    },
     invitesCount: {
       type: new GraphQLNonNull(GraphQLInt),
       args: {

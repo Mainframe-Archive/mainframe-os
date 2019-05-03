@@ -22,6 +22,7 @@ type Props = ContextProps & {
   closeModal: () => void,
   contact: Contact,
   type: TransactionType,
+  inviteStakeValue: ?number,
 }
 
 type TXParams = {
@@ -395,10 +396,12 @@ class InviteContactModal extends Component<Props, State> {
       invite && invite.stake && invite.stake.reclaimedTX ? (
         <Text>TX hash: {invite.stake.reclaimedTX}</Text>
       ) : null
+    const amount = this.props.inviteStakeValue || ''
+
     return (
       <>
         {this.renderContactSection('SEND BLOCKCHAIN INVITATION TO')}
-        {this.renderTransactionSection('APPROVE AND STAKE 100 MFT FROM')}
+        {this.renderTransactionSection(`APPROVE AND STAKE ${amount} MFT FROM`)}
         {reclaimedTX}
         {activity}
       </>
@@ -422,11 +425,12 @@ class InviteContactModal extends Component<Props, State> {
 
   renderInvite() {
     const activity = this.state.txProcessing && <Loader />
+    const amount = this.props.inviteStakeValue || ''
 
     return (
       <>
         {this.renderContactSection('SEND BLOCKCHAIN INVITATION TO')}
-        {this.renderTransactionSection('APPROVE AND STAKE 100 MFT FROM')}
+        {this.renderTransactionSection(`APPROVE AND STAKE ${amount} MFT FROM`)}
         {activity}
       </>
     )

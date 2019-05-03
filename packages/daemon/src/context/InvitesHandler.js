@@ -701,6 +701,11 @@ export default class InvitesHandler {
 
   // ESTIMATE TX GAS
 
+  async getRequiredStake(): Promise<string> {
+    const stake = await this.invitesContract.call('requiredStake')
+    return utils.formatUnits(stake, 'ether').toString()
+  }
+
   async formatGasValues(txParams: {
     gas: string,
     gasPrice: string,

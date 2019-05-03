@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 32d5e199adf84e35232c331a1a2ba40e
+ * @relayHash 9844a65a8a2a6adb65d799baa5b7657f
  */
 
 /* eslint-disable */
@@ -44,6 +44,7 @@ subscription ContactsViewContactsChangedSubscription(
 }
 
 fragment ContactsView_contacts_3iqrP on Contacts {
+  inviteStake
   userContacts(userID: $userID) {
     ...InviteContactModal_contact
     peerID
@@ -108,7 +109,7 @@ return {
   "operationKind": "subscription",
   "name": "ContactsViewContactsChangedSubscription",
   "id": null,
-  "text": "subscription ContactsViewContactsChangedSubscription(\n  $userID: String!\n) {\n  contactsChanged {\n    viewer {\n      contacts {\n        ...ContactsView_contacts_3iqrP\n      }\n      id\n    }\n  }\n}\n\nfragment ContactsView_contacts_3iqrP on Contacts {\n  userContacts(userID: $userID) {\n    ...InviteContactModal_contact\n    peerID\n    localID\n    connectionState\n    publicFeed\n    invite {\n      ethNetwork\n      inviteTX\n      stake {\n        reclaimedTX\n        amount\n        state\n      }\n    }\n    profile {\n      name\n      ethAddress\n    }\n    id\n  }\n}\n\nfragment InviteContactModal_contact on Contact {\n  peerID\n  localID\n  connectionState\n  publicFeed\n  invite {\n    inviteTX\n    stake {\n      reclaimedTX\n      amount\n      state\n    }\n  }\n  profile {\n    name\n    ethAddress\n  }\n}\n",
+  "text": "subscription ContactsViewContactsChangedSubscription(\n  $userID: String!\n) {\n  contactsChanged {\n    viewer {\n      contacts {\n        ...ContactsView_contacts_3iqrP\n      }\n      id\n    }\n  }\n}\n\nfragment ContactsView_contacts_3iqrP on Contacts {\n  inviteStake\n  userContacts(userID: $userID) {\n    ...InviteContactModal_contact\n    peerID\n    localID\n    connectionState\n    publicFeed\n    invite {\n      ethNetwork\n      inviteTX\n      stake {\n        reclaimedTX\n        amount\n        state\n      }\n    }\n    profile {\n      name\n      ethAddress\n    }\n    id\n  }\n}\n\nfragment InviteContactModal_contact on Contact {\n  peerID\n  localID\n  connectionState\n  publicFeed\n  invite {\n    inviteTX\n    stake {\n      reclaimedTX\n      amount\n      state\n    }\n  }\n  profile {\n    name\n    ethAddress\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -196,6 +197,13 @@ return {
                 "concreteType": "Contacts",
                 "plural": false,
                 "selections": [
+                  {
+                    "kind": "ScalarField",
+                    "alias": null,
+                    "name": "inviteStake",
+                    "args": null,
+                    "storageKey": null
+                  },
                   {
                     "kind": "LinkedField",
                     "alias": null,
