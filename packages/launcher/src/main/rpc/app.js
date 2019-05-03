@@ -323,7 +323,7 @@ export const sandboxed = {
           ctx.window,
           { title: 'Select file to upload', buttonLabel: 'Upload' },
           async filePaths => {
-            if (filePaths.length === 0) {
+            if (filePaths === undefined) {
               // No file selected
               resolve(false)
             } else {
@@ -403,6 +403,28 @@ export const sandboxed = {
         if (stream !== null) {
           return await getStream(stream)
         }
+      } catch (error) {
+        throw new Error('Failed to access storage')
+      }
+    },
+  },
+
+  storage_delete: {
+    params: {
+      key: STORAGE_KEY_PARAM,
+    },
+    handler: async (
+      ctx: AppContext,
+      params: { key: string },
+    ): Promise<void> => {
+      try {
+        const { feedHash, manifestHash } = await getStorageManifestHash(ctx)
+        const [newManifestHash, feedMetadata] = await Promise.all([
+          ctx.bzz.deleteResource(manifestHash, params.key),
+          ctx.bzz.getFeedMetadata(feedHash),
+        ])
+        await ctx.bzz.postFeedValue(feedMetadata, `0x${newManifestHash}`)
+        ctx.storage.manifestHash = newManifestHash
       } catch (error) {
         throw new Error('Failed to access storage')
       }

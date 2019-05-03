@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 64068b4d3ac05956331d4bce1de6d933
+ * @relayHash 61cf4a93ccb2790a9a94c7dd53b54ac6
  */
 
 /* eslint-disable */
@@ -21,6 +21,7 @@ export type AppPermissionsRequirementsInput = {
 };
 export type AppPermissionDefinitionsInput = {
   BLOCKCHAIN_SEND?: ?boolean,
+  BLOCKCHAIN_SIGN?: ?boolean,
   COMMS_CONTACT?: ?boolean,
   CONTACTS_READ?: ?boolean,
   WEB_REQUEST?: ?$ReadOnlyArray<?string>,
@@ -96,12 +97,14 @@ fragment OwnAppDetailView_ownApp on OwnApp {
       optional {
         WEB_REQUEST
         BLOCKCHAIN_SEND
+        BLOCKCHAIN_SIGN
         COMMS_CONTACT
         CONTACTS_READ
       }
       required {
         WEB_REQUEST
         BLOCKCHAIN_SEND
+        BLOCKCHAIN_SIGN
         COMMS_CONTACT
         CONTACTS_READ
       }
@@ -159,6 +162,13 @@ v4 = [
   {
     "kind": "ScalarField",
     "alias": null,
+    "name": "BLOCKCHAIN_SIGN",
+    "args": null,
+    "storageKey": null
+  },
+  {
+    "kind": "ScalarField",
+    "alias": null,
     "name": "COMMS_CONTACT",
     "args": null,
     "storageKey": null
@@ -176,7 +186,7 @@ return {
   "operationKind": "mutation",
   "name": "OwnAppDetailViewSetAppPermissionsRequirementsMutation",
   "id": null,
-  "text": "mutation OwnAppDetailViewSetAppPermissionsRequirementsMutation(\n  $input: SetAppPermissionsRequirementsInput!\n) {\n  setAppPermissionsRequirements(input: $input) {\n    viewer {\n      apps {\n        ...OwnAppsView_apps\n      }\n      id\n    }\n  }\n}\n\nfragment OwnAppsView_apps on Apps {\n  own {\n    localID\n    name\n    ...AppItem_ownApp\n    ...OwnAppDetailView_ownApp\n    id\n  }\n}\n\nfragment AppItem_ownApp on OwnApp {\n  mfid\n  localID\n  name\n  developer {\n    id\n    name\n  }\n}\n\nfragment OwnAppDetailView_ownApp on OwnApp {\n  localID\n  mfid\n  name\n  contentsPath\n  updateFeedHash\n  developer {\n    id\n    name\n  }\n  publishedVersion\n  currentVersionData {\n    version\n    versionHash\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        COMMS_CONTACT\n        CONTACTS_READ\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        COMMS_CONTACT\n        CONTACTS_READ\n      }\n    }\n  }\n}\n",
+  "text": "mutation OwnAppDetailViewSetAppPermissionsRequirementsMutation(\n  $input: SetAppPermissionsRequirementsInput!\n) {\n  setAppPermissionsRequirements(input: $input) {\n    viewer {\n      apps {\n        ...OwnAppsView_apps\n      }\n      id\n    }\n  }\n}\n\nfragment OwnAppsView_apps on Apps {\n  own {\n    localID\n    name\n    ...AppItem_ownApp\n    ...OwnAppDetailView_ownApp\n    id\n  }\n}\n\nfragment AppItem_ownApp on OwnApp {\n  mfid\n  localID\n  name\n  developer {\n    id\n    name\n  }\n}\n\nfragment OwnAppDetailView_ownApp on OwnApp {\n  localID\n  mfid\n  name\n  contentsPath\n  updateFeedHash\n  developer {\n    id\n    name\n  }\n  publishedVersion\n  currentVersionData {\n    version\n    versionHash\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        BLOCKCHAIN_SIGN\n        COMMS_CONTACT\n        CONTACTS_READ\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        BLOCKCHAIN_SIGN\n        COMMS_CONTACT\n        CONTACTS_READ\n      }\n    }\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",

@@ -128,12 +128,14 @@ input AppManifestInput {
 type AppPermissionDefinitions {
   WEB_REQUEST: [String]
   BLOCKCHAIN_SEND: Boolean
+  BLOCKCHAIN_SIGN: Boolean
   COMMS_CONTACT: Boolean
   CONTACTS_READ: Boolean
 }
 
 input AppPermissionDefinitionsInput {
   BLOCKCHAIN_SEND: Boolean
+  BLOCKCHAIN_SIGN: Boolean
   COMMS_CONTACT: Boolean
   CONTACTS_READ: Boolean
   WEB_REQUEST: [String]
@@ -141,6 +143,7 @@ input AppPermissionDefinitionsInput {
 
 type AppPermissions {
   BLOCKCHAIN_SEND: Boolean
+  BLOCKCHAIN_SIGN: Boolean
   CONTACTS_READ: Boolean
   WEB_REQUEST: WebRequestGrants!
 }

@@ -10,7 +10,6 @@ import type Client, {
 } from '@mainframe/client'
 import type { VaultConfig } from '@mainframe/config'
 import type StreamRPC from '@mainframe/rpc-stream'
-import { decodeBase64 } from '@mainframe/utils-base64'
 import { uniqueID } from '@mainframe/utils-id'
 import type { BrowserWindow, WebContents } from 'electron'
 
@@ -128,7 +127,10 @@ export class AppContext extends Context {
       this._storage = {
         contentHash: null,
         address: pubKeyToAddress(keyPair.getPublic().encode()),
-        encryptionKey: decodeBase64(this.appSession.storage.encryptionKey),
+        encryptionKey: Buffer.from(
+          this.appSession.storage.encryptionKey,
+          'base64',
+        ),
         feedHash: this.appSession.storage.feedHash,
         signBytes: async bytes => sign(bytes, privKey),
       }

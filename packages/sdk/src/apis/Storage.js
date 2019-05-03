@@ -22,4 +22,8 @@ export default class StorageAPIs extends ClientAPIs {
   get(key: string): Promise<?string> {
     return this._rpc.request('storage_get', { key })
   }
+
+  delete(key: string): Promise<?string> {
+    return this._rpc.request('storage_delete', { key })
+  }
 }
