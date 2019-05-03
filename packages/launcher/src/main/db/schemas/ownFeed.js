@@ -1,6 +1,7 @@
 // @flow
 
 import bzzHash from './bzzHash'
+import ethAddress from './ethAddress'
 
 export default {
   title: 'own Swarm feed',
@@ -8,14 +9,17 @@ export default {
   encrypted: true,
   type: 'object',
   properties: {
-    ethPrivKey: {
+    privateKey: {
       type: 'string', // hex
       final: true,
     },
-    topic: {
-      type: 'string',
+    address: {
+      ...ethAddress,
       final: true,
     },
-    feedHash: bzzHash,
+    contentHash: bzzHash,
+    contentValue: {
+      type: 'string', // JSON-stringified object
+    },
   },
 }

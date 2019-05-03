@@ -9,14 +9,13 @@ import { is } from 'electron-util'
 import { APP_TRUSTED_REQUEST_CHANNEL } from '../constants'
 import type { AppSession } from '../types'
 
+import './menu'
 import { AppContext } from './contexts'
-import { setMenu } from './menu'
 import { interceptWebRequests } from './permissions'
 import { registerStreamProtocol } from './storage'
 import createElectronTransport from './createElectronTransport'
 import { createChannels } from './rpc'
 
-import { LauncherContext } from './context/launcher'
 import { SystemContext } from './context/system'
 import { Environment } from './environment'
 import { createLogger } from './logger'
@@ -36,9 +35,8 @@ if (
 
 const env = Environment.get(ENV_NAME, ENV_TYPE)
 const logger = createLogger(env)
-const systemContext = new SystemContext({ env, logger })
+const system = new SystemContext({ env, logger })
 
-const launcherContexts: WeakMap<WebContents, LauncherContext> = new WeakMap()
 createChannels({
   logger,
   getAppSanboxedContext: (_contents: WebContents) => {
@@ -48,43 +46,13 @@ createChannels({
     throw new Error('Must be implemented')
   },
   getLauncherContext: (contents: WebContents) => {
-    const context = launcherContexts.get(contents)
+    const context = system.getLauncherContext(contents)
     if (context == null) {
       throw new Error('Failed to retrieve launcher context')
     }
     return context
   },
 })
-
-let systemInitialized = false
-const initSystem = async () => {
-  logger.debug('Initialize system')
-
-  setMenu()
-
-  if (systemContext.config.get('savePassword') === true) {
-    try {
-      const password = await systemContext.getPassword()
-      if (password == null) {
-        logger.warn('Context password not found even though it should be saved')
-      } else {
-        await systemContext.openDB(password)
-        logger.debug('Database opened using saved password')
-      }
-    } catch (error) {
-      logger.log({
-        level: 'error',
-        message: 'Failed to open database using saved password',
-        error,
-      })
-    }
-  } else {
-    logger.debug('No saved password to open database')
-  }
-
-  systemInitialized = true
-  logger.debug('System initialized')
-}
 
 // type AppContexts = { [appID: string]: { [userID: string]: AppContext } }
 //
@@ -207,12 +175,8 @@ const newWindow = (params: Object = {}) => {
 // }
 
 const createLauncherWindow = async (userID?: ?string) => {
-  if (systemInitialized === false) {
-    await initSystem()
-  }
-
-  if (userID == null) {
-    userID = systemContext.defaultUser
+  if (!system.initialized) {
+    await system.initialize()
   }
 
   const launcherWindow = newWindow({
@@ -222,12 +186,10 @@ const createLauncherWindow = async (userID?: ?string) => {
     minHeight: 600,
   })
 
-  const launcherContext = new LauncherContext({
-    system: systemContext,
-    userID,
+  const launcherContext = system.addLauncherContext({
+    userID: userID || system.defaultUser,
     window: launcherWindow,
   })
-  launcherContexts.set(launcherWindow.webContents, launcherContext)
 
   // Emitted when the window is closed.
   launcherWindow.on('closed', async () => {
@@ -257,7 +219,7 @@ ipcMain.on('window-exception', (event, error) => {
 })
 
 ipcMain.on('window-opened', async event => {
-  const launcherContext = launcherContexts.get(event.sender)
+  const launcherContext = system.getLauncherContext(event.sender)
   if (launcherContext != null) {
     event.sender.send('window-start', {
       type: 'launcher',

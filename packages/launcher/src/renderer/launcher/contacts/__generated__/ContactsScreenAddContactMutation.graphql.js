@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 86e3f9b3cc0e1d8a8f0737a7c1a1f68a
+ * @relayHash 9b6fc599b33381d54ca2e1015212236c
  */
 
 /* eslint-disable */
@@ -17,10 +17,10 @@ export type AddContactInput = {
   sendInvite?: ?boolean,
   clientMutationId?: ?string,
 };
-export type ContactsViewAddContactMutationVariables = {|
+export type ContactsScreenAddContactMutationVariables = {|
   input: AddContactInput
 |};
-export type ContactsViewAddContactMutationResponse = {|
+export type ContactsScreenAddContactMutationResponse = {|
   +addContact: ?{|
     +contact: ?{|
       +$fragmentRefs: InviteContactModal_contact$ref
@@ -30,15 +30,15 @@ export type ContactsViewAddContactMutationResponse = {|
     |},
   |}
 |};
-export type ContactsViewAddContactMutation = {|
-  variables: ContactsViewAddContactMutationVariables,
-  response: ContactsViewAddContactMutationResponse,
+export type ContactsScreenAddContactMutation = {|
+  variables: ContactsScreenAddContactMutationVariables,
+  response: ContactsScreenAddContactMutationResponse,
 |};
 */
 
 
 /*
-mutation ContactsViewAddContactMutation(
+mutation ContactsScreenAddContactMutation(
   $input: AddContactInput!
 ) {
   addContact(input: $input) {
@@ -53,10 +53,10 @@ mutation ContactsViewAddContactMutation(
 }
 
 fragment InviteContactModal_contact on Contact {
-  peerID
   localID
+  localPeerID
+  publicID
   connectionState
-  publicFeed
   invite {
     inviteTX
     stake {
@@ -111,13 +111,13 @@ v3 = {
 return {
   "kind": "Request",
   "operationKind": "mutation",
-  "name": "ContactsViewAddContactMutation",
+  "name": "ContactsScreenAddContactMutation",
   "id": null,
-  "text": "mutation ContactsViewAddContactMutation(\n  $input: AddContactInput!\n) {\n  addContact(input: $input) {\n    contact {\n      ...InviteContactModal_contact\n      id\n    }\n    viewer {\n      id\n    }\n  }\n}\n\nfragment InviteContactModal_contact on Contact {\n  peerID\n  localID\n  connectionState\n  publicFeed\n  invite {\n    inviteTX\n    stake {\n      reclaimedTX\n      amount\n      state\n    }\n  }\n  profile {\n    name\n    ethAddress\n  }\n}\n",
+  "text": "mutation ContactsScreenAddContactMutation(\n  $input: AddContactInput!\n) {\n  addContact(input: $input) {\n    contact {\n      ...InviteContactModal_contact\n      id\n    }\n    viewer {\n      id\n    }\n  }\n}\n\nfragment InviteContactModal_contact on Contact {\n  localID\n  localPeerID\n  publicID\n  connectionState\n  invite {\n    inviteTX\n    stake {\n      reclaimedTX\n      amount\n      state\n    }\n  }\n  profile {\n    name\n    ethAddress\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
-    "name": "ContactsViewAddContactMutation",
+    "name": "ContactsScreenAddContactMutation",
     "type": "Mutation",
     "metadata": null,
     "argumentDefinitions": v0,
@@ -154,7 +154,7 @@ return {
   },
   "operation": {
     "kind": "Operation",
-    "name": "ContactsViewAddContactMutation",
+    "name": "ContactsScreenAddContactMutation",
     "argumentDefinitions": v0,
     "selections": [
       {
@@ -178,13 +178,6 @@ return {
               {
                 "kind": "ScalarField",
                 "alias": null,
-                "name": "peerID",
-                "args": null,
-                "storageKey": null
-              },
-              {
-                "kind": "ScalarField",
-                "alias": null,
                 "name": "localID",
                 "args": null,
                 "storageKey": null
@@ -192,14 +185,21 @@ return {
               {
                 "kind": "ScalarField",
                 "alias": null,
-                "name": "connectionState",
+                "name": "localPeerID",
                 "args": null,
                 "storageKey": null
               },
               {
                 "kind": "ScalarField",
                 "alias": null,
-                "name": "publicFeed",
+                "name": "publicID",
+                "args": null,
+                "storageKey": null
+              },
+              {
+                "kind": "ScalarField",
+                "alias": null,
+                "name": "connectionState",
                 "args": null,
                 "storageKey": null
               },
@@ -289,5 +289,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = 'aa2084657bcd15f6772d505c0b8f7262';
+(node/*: any*/).hash = '6346f3ec1dcaea6760ae6d36a4967ea8';
 module.exports = node;

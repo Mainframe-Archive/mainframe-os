@@ -1,6 +1,7 @@
 // @flow
 
 import keyPair from './keyPair'
+import ownFeed from './ownFeed'
 
 export default {
   title: 'own app developer',
@@ -12,6 +13,7 @@ export default {
       primary: true,
     },
     keyPair,
+    publicFeed: ownFeed,
     name: {
       type: 'string',
     },

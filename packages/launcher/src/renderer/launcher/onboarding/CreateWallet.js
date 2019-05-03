@@ -5,39 +5,23 @@ import LedgerIcon from '@morpheus-ui/icons/Ledger'
 import PlusSymbolMdIcon from '@morpheus-ui/icons/PlusSymbolMd'
 import DownloadMdIcon from '@morpheus-ui/icons/DownloadMd'
 import React, { Component } from 'react'
-import { graphql, commitMutation } from 'react-relay'
+import { Redirect } from 'react-router-dom'
 import styled from 'styled-components/native'
 
-import Loader from '../../UIComponents/Loader'
-import { EnvironmentContext } from '../RelayEnvironment'
+import { ROUTES } from '../constants'
+
 import WalletCreateModal from '../wallets/WalletCreateModal'
 import WalletImportView from '../wallets/WalletImportView'
 import WalletAddLedgerModal from '../wallets/WalletAddLedgerModal'
-
 import FlowContainer from './FlowContainer'
 
-type Props = {
-  onSetupWallet: () => void,
-  userID: string,
-}
-
 type State = {
-  view: 'start' | 'create' | 'import' | 'ledger' | 'saving',
+  view: 'start' | 'create' | 'import' | 'ledger' | 'redirect',
   error?: string,
 }
 
 const ButtonWrapper = styled.View`
   margin-right: 20px;
-`
-
-const updateProfileMutation = graphql`
-  mutation CreateWalletUpdateProfileMutation($input: UpdateProfileInput!) {
-    updateProfile(input: $input) {
-      viewer {
-        id
-      }
-    }
-  }
 `
 
 const ToolTipContent = (
@@ -58,65 +42,33 @@ const ToolTipContent = (
   </>
 )
 
-export default class OnboardingCreateWallet extends Component<Props, State> {
-  static contextType = EnvironmentContext
-
+export default class OnboardingCreateWallet extends Component<{}, State> {
   state = {
     view: 'start',
   }
 
+  closeModal = () => {
+    this.setState({ view: 'start' })
+  }
+
   onPressCreate = () => {
-    this.setState({
-      view: 'create',
-    })
+    this.setState({ view: 'create' })
   }
 
   onPressImport = () => {
-    this.setState({
-      view: 'import',
-    })
+    this.setState({ view: 'import' })
   }
 
   onPressLedger = () => {
-    this.setState({
-      view: 'ledger',
-    })
+    this.setState({ view: 'ledger' })
   }
 
-  onSetupWallet = (address: string) => {
-    const input = {
-      userID: this.props.userID,
-      profile: {
-        ethAddress: address,
-      },
-    }
-
-    this.setState({
-      view: 'saving',
-    })
-
-    commitMutation(this.context, {
-      mutation: updateProfileMutation,
-      variables: { input },
-      onCompleted: (res, errors) => {
-        if (errors && errors.length) {
-          this.setState({
-            error: errors[0].message,
-          })
-        } else {
-          this.props.onSetupWallet()
-        }
-      },
-      onError: err => {
-        this.setState({
-          error: err.message,
-        })
-      },
-    })
+  onSetupWallet = () => {
+    this.setState({ view: 'redirect' })
   }
 
   renderStart() {
-    return this.state.view === 'start' ? (
+    return (
       <Row inner>
         <ButtonWrapper>
           <Button
@@ -144,15 +96,7 @@ export default class OnboardingCreateWallet extends Component<Props, State> {
           />
         </ButtonWrapper>
       </Row>
-    ) : (
-      <Loader />
     )
-  }
-
-  closeModal = () => {
-    this.setState({
-      view: 'start',
-    })
   }
 
   renderCreate() {
@@ -172,7 +116,6 @@ export default class OnboardingCreateWallet extends Component<Props, State> {
         wallets={[]}
         onSuccess={this.onSetupWallet}
         onClose={this.closeModal}
-        userID={this.props.userID}
       />
     )
   }
@@ -183,24 +126,23 @@ export default class OnboardingCreateWallet extends Component<Props, State> {
         full
         onSuccess={this.onSetupWallet}
         onClose={this.closeModal}
-        userID={this.props.userID}
       />
     )
   }
 
   renderContent() {
     switch (this.state.view) {
-      case 'start':
-      case 'saving':
-        return this.renderStart()
+      case 'redirect':
+        return <Redirect to={ROUTES.HOME} />
       case 'import':
         return this.renderImport()
       case 'ledger':
         return this.renderLedger()
       case 'create':
         return this.renderCreate()
+      case 'start':
       default:
-        return null
+        return this.renderStart()
     }
   }
 

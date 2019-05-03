@@ -1,5 +1,7 @@
 // @flow
 
+import ethAddress from './ethAddress'
+
 export default {
   title: 'Ethereum Ledger wallet',
   version: 0,
@@ -10,7 +12,7 @@ export default {
       primary: true,
     },
     firstAddress: {
-      type: 'string',
+      ...ethAddress,
       final: true,
     },
     name: {
@@ -25,9 +27,7 @@ export default {
             type: 'integer',
             minimum: 0,
           },
-          address: {
-            type: 'string',
-          },
+          address: ethAddress,
         },
       },
     },

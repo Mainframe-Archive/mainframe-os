@@ -1,5 +1,6 @@
 // @flow
 
+import ethAddress from './ethAddress'
 import profile from './userProfile'
 
 export default {
@@ -11,7 +12,27 @@ export default {
       type: 'string',
       primary: true,
     },
+    publicFeed: {
+      ...ethAddress,
+      final: true,
+    },
+    otherFeeds: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          type: {
+            type: 'string',
+          },
+          address: ethAddress,
+        },
+      },
+      default: [],
+    },
+    firstContactAddress: ethAddress,
+    publicKey: {
+      type: 'string',
+    },
     profile,
-    // TODO: other fields
   },
 }

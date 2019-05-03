@@ -8,6 +8,7 @@ export default {
   version: 0,
   type: 'object',
   properties: {
+    // TODO: replace by "key" (MFID)
     id: {
       type: 'string',
       final: true,
@@ -15,10 +16,12 @@ export default {
     author: {
       type: 'object',
       properties: {
+        // TODO: replace by "key" (MFID)
         id: {
           type: 'string',
           final: true,
         },
+        // TODO: replace by developer address (feed)
         name: {
           type: 'string',
           min: 3,
@@ -33,6 +36,8 @@ export default {
       type: 'string', // semver
     },
     contentsHash: bzzHash,
+    // TODO: replace by app address, or even remove?
+    // Should it be "publicID"?
     updateHash: {
       ...bzzHash,
       final: true,

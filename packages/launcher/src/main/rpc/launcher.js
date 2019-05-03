@@ -87,31 +87,49 @@ export default {
       params: UserCreateRequestParams,
     ): Promise<string> {
       ctx.logger.log({ level: 'debug', message: 'Create user request', params })
-      if (ctx.db == null) {
-        throw new Error('Cannot create user before database is opened')
-      }
+      try {
+        if (ctx.db == null) {
+          throw new Error('Cannot create user before database is opened')
+        }
 
-      const user = await ctx.db.users.create({
-        profile: params.profile,
-        privateProfile: params.isPrivate,
-      })
-      ctx.logger.log({
-        level: 'debug',
-        message: 'Created user',
-        id: user.localID,
-      })
-
-      if (ctx.system.defaultUser == null) {
-        ctx.system.defaultUser = user.localID
-        ctx.userID = user.localID
+        const user = await ctx.db.users.create({
+          profile: params.profile,
+          privateProfile: params.isPrivate,
+        })
         ctx.logger.log({
           level: 'debug',
-          message: 'Created user set as system default',
+          message: 'Created user',
           id: user.localID,
         })
-      }
 
-      return user.localID
+        if (ctx.userID == null) {
+          ctx.userID = user.localID
+          ctx.logger.log({
+            level: 'debug',
+            message: 'Created user set as context user',
+            id: user.localID,
+          })
+        }
+
+        if (ctx.system.defaultUser == null) {
+          ctx.system.defaultUser = user.localID
+          ctx.logger.log({
+            level: 'debug',
+            message: 'Created user set as system default',
+            id: user.localID,
+          })
+        }
+
+        return user.localID
+      } catch (error) {
+        ctx.logger.log({
+          level: 'error',
+          message: 'User creation failed',
+          error: error.toString(),
+          params,
+        })
+        throw new Error('Failed to create user')
+      }
     },
   },
 

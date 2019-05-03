@@ -27,17 +27,19 @@ export default {
     firstContactFeed: ownFeed,
     contacts: {
       type: 'array',
+      ref: COLLECTION_NAMES.CONTACTS,
       items: {
         type: 'string',
-        ref: COLLECTION_NAMES.CONTACTS,
       },
+      default: [],
     },
     contactsRequests: {
       type: 'array',
+      ref: COLLECTION_NAMES.CONTACT_REQUESTS,
       items: {
         type: 'string',
-        ref: COLLECTION_NAMES.CONTACT_REQUESTS,
       },
+      default: [],
     },
     ethWallets: {
       type: 'object',
@@ -74,5 +76,5 @@ export default {
       default: 'http://mainframe-gateways.net:8500',
     },
   },
-  required: ['localID', 'keyPair', 'profile'],
+  required: ['localID', 'keyPair', 'profile', 'publicFeed', 'firstContactFeed'],
 }

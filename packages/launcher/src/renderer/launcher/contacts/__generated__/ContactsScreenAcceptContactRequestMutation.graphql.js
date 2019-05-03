@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 51fa29b66538f87a052ab5772e78755f
+ * @relayHash d08a7f7c2629dbbc5c7923696f8dff07
  */
 
 /* eslint-disable */
@@ -14,25 +14,25 @@ export type AcceptContactRequestInput = {
   userID: string,
   clientMutationId?: ?string,
 };
-export type ContactsViewAcceptContactRequestMutationVariables = {|
+export type ContactsScreenAcceptContactRequestMutationVariables = {|
   input: AcceptContactRequestInput
 |};
-export type ContactsViewAcceptContactRequestMutationResponse = {|
+export type ContactsScreenAcceptContactRequestMutationResponse = {|
   +acceptContactRequest: ?{|
     +viewer: {|
       +id: string
     |}
   |}
 |};
-export type ContactsViewAcceptContactRequestMutation = {|
-  variables: ContactsViewAcceptContactRequestMutationVariables,
-  response: ContactsViewAcceptContactRequestMutationResponse,
+export type ContactsScreenAcceptContactRequestMutation = {|
+  variables: ContactsScreenAcceptContactRequestMutationVariables,
+  response: ContactsScreenAcceptContactRequestMutationResponse,
 |};
 */
 
 
 /*
-mutation ContactsViewAcceptContactRequestMutation(
+mutation ContactsScreenAcceptContactRequestMutation(
   $input: AcceptContactRequestInput!
 ) {
   acceptContactRequest(input: $input) {
@@ -93,13 +93,13 @@ v1 = [
 return {
   "kind": "Request",
   "operationKind": "mutation",
-  "name": "ContactsViewAcceptContactRequestMutation",
+  "name": "ContactsScreenAcceptContactRequestMutation",
   "id": null,
-  "text": "mutation ContactsViewAcceptContactRequestMutation(\n  $input: AcceptContactRequestInput!\n) {\n  acceptContactRequest(input: $input) {\n    viewer {\n      id\n    }\n  }\n}\n",
+  "text": "mutation ContactsScreenAcceptContactRequestMutation(\n  $input: AcceptContactRequestInput!\n) {\n  acceptContactRequest(input: $input) {\n    viewer {\n      id\n    }\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
-    "name": "ContactsViewAcceptContactRequestMutation",
+    "name": "ContactsScreenAcceptContactRequestMutation",
     "type": "Mutation",
     "metadata": null,
     "argumentDefinitions": v0,
@@ -107,12 +107,12 @@ return {
   },
   "operation": {
     "kind": "Operation",
-    "name": "ContactsViewAcceptContactRequestMutation",
+    "name": "ContactsScreenAcceptContactRequestMutation",
     "argumentDefinitions": v0,
     "selections": v1
   }
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '053deec531119bea2a7f873c9908b11a';
+(node/*: any*/).hash = '7a97e45a3b96dc7ff7d2c890377374cd';
 module.exports = node;

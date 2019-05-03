@@ -1,5 +1,12 @@
 // @flow
 
+export const MF_PREFIX = {
+  APP: 'ma',
+  CONTACT: 'mc',
+  DEVELOPER: 'md',
+  PEER: 'mp',
+}
+
 export const APP_SANDBOXED_CHANNEL = 'rpc-app-sandboxed'
 
 export const APP_TRUSTED_CHANNEL = 'rpc-app-trusted'

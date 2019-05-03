@@ -6,6 +6,7 @@ import styled from 'styled-components/native'
 
 import { ROUTES } from './constants'
 import SideMenu from './SideMenu'
+import ContactsScreen from './contacts/ContactsScreen'
 import WalletsScreen from './wallets/WalletsScreen'
 
 const Container = styled.View`
@@ -27,7 +28,7 @@ export default function HomeRouter() {
       <ContentContainer>
         <Switch>
           <Route path={ROUTES.APPS} component={() => <h1>Apps</h1>} />
-          <Route path={ROUTES.CONTACTS} component={() => <h1>Contacts</h1>} />
+          <Route path={ROUTES.CONTACTS} component={ContactsScreen} />
           <Route path={ROUTES.WALLETS} component={WalletsScreen} />
           <Redirect to={ROUTES.APPS} />
         </Switch>

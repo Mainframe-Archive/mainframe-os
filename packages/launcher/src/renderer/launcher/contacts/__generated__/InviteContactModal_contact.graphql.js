@@ -13,10 +13,10 @@ export type StakeState = "RECLAIMED" | "RECLAIMING" | "SEIZED" | "STAKED" | "%fu
 import type { FragmentReference } from "relay-runtime";
 declare export opaque type InviteContactModal_contact$ref: FragmentReference;
 export type InviteContactModal_contact = {|
-  +peerID: string,
   +localID: string,
+  +localPeerID: string,
+  +publicID: string,
   +connectionState: ConnectionState,
-  +publicFeed: string,
   +invite: ?{|
     +inviteTX: ?string,
     +stake: {|
@@ -44,13 +44,6 @@ const node/*: ConcreteFragment*/ = {
     {
       "kind": "ScalarField",
       "alias": null,
-      "name": "peerID",
-      "args": null,
-      "storageKey": null
-    },
-    {
-      "kind": "ScalarField",
-      "alias": null,
       "name": "localID",
       "args": null,
       "storageKey": null
@@ -58,14 +51,21 @@ const node/*: ConcreteFragment*/ = {
     {
       "kind": "ScalarField",
       "alias": null,
-      "name": "connectionState",
+      "name": "localPeerID",
       "args": null,
       "storageKey": null
     },
     {
       "kind": "ScalarField",
       "alias": null,
-      "name": "publicFeed",
+      "name": "publicID",
+      "args": null,
+      "storageKey": null
+    },
+    {
+      "kind": "ScalarField",
+      "alias": null,
+      "name": "connectionState",
       "args": null,
       "storageKey": null
     },
@@ -147,5 +147,5 @@ const node/*: ConcreteFragment*/ = {
   ]
 };
 // prettier-ignore
-(node/*: any*/).hash = '89d4f2247c9410aa775c7e4e951a03c7';
+(node/*: any*/).hash = '6422b163900eae9a71683fec05b8788e';
 module.exports = node;

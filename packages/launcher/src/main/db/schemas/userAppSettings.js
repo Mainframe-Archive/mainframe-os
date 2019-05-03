@@ -3,7 +3,7 @@
 import { COLLECTION_NAMES } from '../constants'
 
 import permissionsGrants from './appPermissionsGrants'
-import bzzHash from './bzzHash'
+import ownFeed from './ownFeed'
 
 // These settings should be shared by both own apps and installed ones
 
@@ -31,6 +31,7 @@ export default {
           },
         },
       },
+      default: [],
     },
     defaultEthAccount: {
       type: 'string',
@@ -44,10 +45,6 @@ export default {
       type: 'string',
       final: true,
     },
-    storageFeedHash: bzzHash,
-    storageFeedKey: {
-      type: 'string',
-      final: true,
-    },
+    storageFeed: ownFeed,
   },
 }

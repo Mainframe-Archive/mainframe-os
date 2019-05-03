@@ -1,14 +1,18 @@
 // @flow
 
-import { GraphQLObjectType, GraphQLSchema } from 'graphql'
+import { GraphQLNonNull, GraphQLObjectType, GraphQLSchema } from 'graphql'
 
 import mutation from './mutation'
-import { nodeField, viewerField } from './objects'
+import { lookup, nodeField, viewerField } from './objects'
 import subscription from './subscription'
 
 const query = new GraphQLObjectType({
   name: 'Query',
   fields: () => ({
+    lookup: {
+      type: new GraphQLNonNull(lookup),
+      resolve: () => ({}),
+    },
     node: nodeField,
     viewer: viewerField,
     // peers: {

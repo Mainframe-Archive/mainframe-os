@@ -8,9 +8,12 @@ import {
   GraphQLList,
   GraphQLObjectType,
   GraphQLNonNull,
+  type GraphQLScalarType,
   GraphQLString,
 } from 'graphql'
 import { fromGlobalId, globalIdField, nodeDefinitions } from 'graphql-relay'
+
+import { isValidContactID } from '../../validation'
 
 import type { GraphQLContext } from '../context/graphql'
 
@@ -53,20 +56,20 @@ export const { nodeInterface, nodeField } = nodeDefinitions<GraphQLContext>(
   },
 )
 
-export const idResolver = globalIdField(null, obj => obj.localID)
+const idResolver = globalIdField(null, obj => obj.localID)
+
+const list = (type: GraphQLObjectType | GraphQLScalarType) => {
+  return new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(type)))
+}
 
 export const webRequestGrants = new GraphQLObjectType({
   name: 'WebRequestGrants',
   fields: () => ({
     granted: {
-      type: new GraphQLNonNull(
-        new GraphQLList(new GraphQLNonNull(GraphQLString)),
-      ),
+      type: list(GraphQLString),
     },
     denied: {
-      type: new GraphQLNonNull(
-        new GraphQLList(new GraphQLNonNull(GraphQLString)),
-      ),
+      type: list(GraphQLString),
     },
   }),
 })
@@ -248,7 +251,7 @@ export const app = new GraphQLObjectType({
       type: new GraphQLNonNull(installationState),
     },
     users: {
-      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(appUser))),
+      type: list(appUser),
       resolve: ({ settings }) => {
         return Object.keys(settings).map(id => ({
           localID: id,
@@ -300,9 +303,7 @@ export const ownApp = new GraphQLObjectType({
       },
     },
     versions: {
-      type: new GraphQLNonNull(
-        new GraphQLList(new GraphQLNonNull(appVersionData)),
-      ),
+      type: list(appVersionData),
       resolve: self => self.getSortedVersions(),
     },
     developer: {
@@ -318,7 +319,7 @@ export const ownApp = new GraphQLObjectType({
       },
     },
     users: {
-      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(appUser))),
+      type: list(appUser),
       resolve: ({ settings }) => {
         return Object.keys(settings).map(id => ({
           localID: id,
@@ -428,7 +429,7 @@ export const ownUserIdentity = new GraphQLObjectType({
       resolve: self => self.id,
     },
     apps: {
-      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(app))),
+      type: list(app),
       resolve: (self, args, ctx: GraphQLContext) => {
         return ctx.openVault.apps.getInstalledAppsForUser(self.localID)
       },
@@ -504,7 +505,12 @@ export const peerUserIdentity = new GraphQLObjectType({
 
 export const peer = new GraphQLObjectType({
   name: 'Peer',
+  interfaces: () => [nodeInterface],
   fields: () => ({
+    id: idResolver,
+    localID: {
+      type: new GraphQLNonNull(GraphQLID),
+    },
     publicKey: {
       type: new GraphQLNonNull(GraphQLString),
     },
@@ -578,13 +584,15 @@ export const contact = new GraphQLObjectType({
     localID: {
       type: new GraphQLNonNull(GraphQLID),
     },
-    peerID: {
+    localPeerID: {
       type: new GraphQLNonNull(GraphQLID),
+      resolve: doc => doc.peer,
     },
-    publicFeed: {
+    publicID: {
       type: new GraphQLNonNull(GraphQLString),
+      resolve: doc => doc.getPublicID(),
     },
-    pubKey: {
+    publicKey: {
       type: new GraphQLNonNull(GraphQLString),
     },
     invite: {
@@ -593,13 +601,33 @@ export const contact = new GraphQLObjectType({
     profile: {
       type: new GraphQLNonNull(genericProfile),
       resolve: (self, args, ctx: GraphQLContext) => {
-        const profile = ctx.openVault.identities.getContactProfile(self.localID)
-        return { ...self.profile, ...profile }
+        // TODO: merge peer and contact profile in contact collection
+        return {}
       },
     },
     connectionState: {
       type: new GraphQLNonNull(connectionState),
     },
+  }),
+})
+
+export const contactRequest = new GraphQLObjectType({
+  name: 'ContactRequest',
+  interfaces: () => [nodeInterface],
+  fields: () => ({
+    id: idResolver,
+    localID: {
+      type: new GraphQLNonNull(GraphQLID),
+    },
+    localPeerID: {
+      type: new GraphQLNonNull(GraphQLID),
+      resolve: doc => doc.peer,
+    },
+    publicID: {
+      type: new GraphQLNonNull(GraphQLString),
+      resolve: doc => doc.getPublicID(),
+    },
+    // TODO: other fields
   }),
 })
 
@@ -616,7 +644,7 @@ export const contacts = new GraphQLObjectType({
       },
     },
     userContacts: {
-      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(contact))),
+      type: list(contact),
       args: {
         userID: { type: new GraphQLNonNull(GraphQLString) },
       },
@@ -631,13 +659,13 @@ export const apps = new GraphQLObjectType({
   name: 'Apps',
   fields: () => ({
     installed: {
-      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(app))),
+      type: list(app),
       resolve: (self, args, ctx: GraphQLContext) => {
         return Object.values(ctx.openVault.apps.apps)
       },
     },
     own: {
-      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(ownApp))),
+      type: list(ownApp),
       resolve: (self, args, ctx: GraphQLContext) => {
         return Object.values(ctx.openVault.apps.ownApps)
       },
@@ -655,45 +683,15 @@ export const identities = new GraphQLObjectType({
   name: 'Identities',
   fields: () => ({
     ownUsers: {
-      type: new GraphQLNonNull(
-        new GraphQLList(new GraphQLNonNull(ownUserIdentity)),
-      ),
+      type: list(ownUserIdentity),
       resolve: (self, args, ctx: GraphQLContext) => {
         return Object.values(ctx.openVault.identities.ownUsers)
       },
     },
     ownDevelopers: {
-      type: new GraphQLNonNull(
-        new GraphQLList(new GraphQLNonNull(ownDeveloperIdentity)),
-      ),
+      type: list(ownDeveloperIdentity),
       resolve: (self, args, ctx: GraphQLContext) => {
         return Object.values(ctx.openVault.identities.ownDevelopers)
-      },
-    },
-  }),
-})
-
-export const peers = new GraphQLObjectType({
-  name: 'Peers',
-  fields: () => ({
-    peerLookupByFeed: {
-      type: peer,
-      args: {
-        feedHash: { type: new GraphQLNonNull(GraphQLString) },
-      },
-      resolve: async (self, args, ctx: GraphQLContext) => {
-        try {
-          const peerPublicRes = await ctx.io.bzz.download(args.feedHash)
-          const data = await peerPublicRes.json()
-          return {
-            profile: data.profile,
-            publicFeed: args.feedHash,
-            publicKey: data.publicKey,
-          }
-        } catch (err) {
-          ctx.log(err)
-          return null
-        }
       },
     },
   }),
@@ -756,9 +754,7 @@ export const ethLedgerWallet = new GraphQLObjectType({
       type: GraphQLString,
     },
     accounts: {
-      type: new GraphQLNonNull(
-        new GraphQLList(new GraphQLNonNull(walletAccount)),
-      ),
+      type: list(walletAccount),
       resolve: doc => doc.activeAccounts,
     },
   }),
@@ -779,9 +775,7 @@ export const ethHdWallet = new GraphQLObjectType({
       type: GraphQLString,
     },
     accounts: {
-      type: new GraphQLNonNull(
-        new GraphQLList(new GraphQLNonNull(walletAccount)),
-      ),
+      type: list(walletAccount),
       resolve: doc => doc.activeAccounts,
     },
   }),
@@ -791,15 +785,11 @@ export const ethWallets = new GraphQLObjectType({
   name: 'EthWallets',
   fields: () => ({
     hd: {
-      type: new GraphQLNonNull(
-        new GraphQLList(new GraphQLNonNull(ethHdWallet)),
-      ),
+      type: list(ethHdWallet),
       resolve: doc => doc.populate('ethWallets.hd'),
     },
     ledger: {
-      type: new GraphQLNonNull(
-        new GraphQLList(new GraphQLNonNull(ethLedgerWallet)),
-      ),
+      type: list(ethLedgerWallet),
       resolve: doc => doc.populate('ethWallets.ledger'),
     },
   }),
@@ -864,6 +854,68 @@ export const settings = new GraphQLObjectType({
 
 // NEW OBJECTS BELOW
 
+export const peerLookupResult = new GraphQLObjectType({
+  name: 'PeerLookupResult',
+  fields: () => ({
+    publicKey: {
+      type: GraphQLString,
+    },
+    publicID: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    profile: {
+      type: new GraphQLNonNull(genericProfile),
+    },
+  }),
+})
+
+export const lookup = new GraphQLObjectType({
+  name: 'Lookup',
+  fields: () => ({
+    peerByID: {
+      type: peerLookupResult,
+      args: {
+        publicID: { type: new GraphQLNonNull(GraphQLString) },
+      },
+      resolve: async (self, args, ctx: GraphQLContext) => {
+        ctx.logger.log({
+          level: 'debug',
+          message: 'Lookup peer by ID',
+          args,
+        })
+        try {
+          if (!isValidContactID(args.publicID)) {
+            throw new Error('Invalid contact ID')
+          }
+          const bzz = await ctx.user.getBzz()
+          // TODO?: move this replacement logic to validation/utility functions
+          const res = await bzz.download(args.publicID.replace('mc', '0x'))
+          const data = await res.json()
+          ctx.logger.log({
+            level: 'debug',
+            message: 'Lookup peer by ID result',
+            args,
+            data,
+          })
+          return {
+            profile: data.profile || {},
+            publicID: args.publicID,
+            publicKey: data.publicKey,
+          }
+        } catch (error) {
+          ctx.logger.log({
+            level: 'warn',
+            message: 'Lookup peer by ID failed',
+            args,
+            error: error.toString(),
+          })
+          return null
+        }
+      },
+    },
+  }),
+})
+
 export const user = new GraphQLObjectType({
   name: 'User',
   interfaces: () => [nodeInterface],
@@ -880,14 +932,19 @@ export const user = new GraphQLObjectType({
     },
     publicID: {
       type: new GraphQLNonNull(GraphQLID),
-      resolve: self => self.publicFeed.feedHash,
+      resolve: doc => doc.getPublicID(),
     },
     apps: {
-      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(app))),
-      resolve: (self, args, ctx: GraphQLContext) => {
-        // TODO
-        return []
-      },
+      type: list(app),
+      resolve: doc => doc.populate('apps'),
+    },
+    contacts: {
+      type: list(contact),
+      resolve: doc => doc.populate('contacts'),
+    },
+    contactRequests: {
+      type: list(contactRequest),
+      resolve: doc => doc.populate('contactRequests'),
     },
     defaultEthAddress: {
       type: GraphQLString,

@@ -9,7 +9,7 @@ import DownloadMdIcon from '@morpheus-ui/icons/DownloadMd'
 import EthCircledIcon from '@morpheus-ui/icons/EthCircled'
 import MftCircledIcon from '@morpheus-ui/icons/MftCircled'
 import { sortBy } from 'lodash'
-import React, { Component, type ElementRef } from 'react'
+import React, { Component } from 'react'
 import {
   commitMutation,
   createFragmentContainer,

@@ -1,5 +1,7 @@
 // @flow
 
+import ethAddress from './ethAddress'
+
 export default {
   title: 'Ethereum HD wallet',
   version: 0,
@@ -29,12 +31,9 @@ export default {
             type: 'integer',
             minimum: 0,
           },
-          address: {
-            type: 'string',
-          },
+          address: ethAddress,
         },
       },
-      default: [],
     },
   },
 }

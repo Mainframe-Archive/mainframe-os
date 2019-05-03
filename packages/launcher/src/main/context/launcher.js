@@ -15,7 +15,7 @@ import schema from '../graphql/schema'
 import type { Logger } from '../logger'
 
 import { GraphQLContext } from './graphql'
-import type { SystemContext } from './system'
+import { SystemContext } from './system'
 
 type NotifyFunc = (id: string, result?: Object) => void
 
@@ -53,6 +53,7 @@ class GraphQLSubscription {
 }
 
 export type ContextParams = {
+  launcherID: string,
   system: SystemContext,
   userID: ?string,
   window: BrowserWindow,
@@ -62,23 +63,23 @@ export class LauncherContext {
   _graphqlContext: ?GraphQLContext
   _graphqlSubscriptions: { [id: string]: GraphQLSubscription }
 
+  launcherID: string
   logger: Logger
   system: SystemContext
   userID: ?string
   window: BrowserWindow
 
   constructor(params: ContextParams) {
-    this.logger = params.system.logger.child({
-      context: `launcher-${params.window.id}`,
-    })
-    this.system = params.system
+    this.launcherID = params.launcherID
     this.userID = params.userID
+    this.system = params.system
     this.window = params.window
-    this.logger.log({
-      level: 'debug',
-      message: 'Launcher context created',
-      userID: params.userID,
+    this.logger = params.system.logger.child({
+      context: 'launcher',
+      launcherID: this.launcherID,
+      userID: this.userID,
     })
+    this.logger.debug('Launcher context created')
   }
 
   get config(): Config {
@@ -103,7 +104,7 @@ export class LauncherContext {
       this._graphqlContext = new GraphQLContext({
         db: this.db,
         logger: this.logger,
-        userID: this.userID,
+        user: this.system.getUserContext(this.userID),
       })
     }
     return this._graphqlContext

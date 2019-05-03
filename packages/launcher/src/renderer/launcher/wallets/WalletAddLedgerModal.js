@@ -15,7 +15,6 @@ import { EnvironmentContext } from '../RelayEnvironment'
 import { type Wallet } from './WalletsView'
 
 type Props = {
-  userID: string,
   wallets: Array<Wallet>,
   full?: boolean,
   onClose: () => void,

@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 7d7980f0117ce5e4217bf2388e62b0de
+ * @relayHash 682e18fef4058979756e6e79175b84ec
  */
 
 /* eslint-disable */
@@ -9,23 +9,23 @@
 
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
-export type ContactsViewContactsChangedSubscriptionVariables = {||};
-export type ContactsViewContactsChangedSubscriptionResponse = {|
+export type ContactsScreenContactsChangedSubscriptionVariables = {||};
+export type ContactsScreenContactsChangedSubscriptionResponse = {|
   +contactsChanged: {|
     +viewer: {|
       +id: string
     |}
   |}
 |};
-export type ContactsViewContactsChangedSubscription = {|
-  variables: ContactsViewContactsChangedSubscriptionVariables,
-  response: ContactsViewContactsChangedSubscriptionResponse,
+export type ContactsScreenContactsChangedSubscription = {|
+  variables: ContactsScreenContactsChangedSubscriptionVariables,
+  response: ContactsScreenContactsChangedSubscriptionResponse,
 |};
 */
 
 
 /*
-subscription ContactsViewContactsChangedSubscription {
+subscription ContactsScreenContactsChangedSubscription {
   contactsChanged {
     viewer {
       id
@@ -69,13 +69,13 @@ var v0 = [
 return {
   "kind": "Request",
   "operationKind": "subscription",
-  "name": "ContactsViewContactsChangedSubscription",
+  "name": "ContactsScreenContactsChangedSubscription",
   "id": null,
-  "text": "subscription ContactsViewContactsChangedSubscription {\n  contactsChanged {\n    viewer {\n      id\n    }\n  }\n}\n",
+  "text": "subscription ContactsScreenContactsChangedSubscription {\n  contactsChanged {\n    viewer {\n      id\n    }\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
-    "name": "ContactsViewContactsChangedSubscription",
+    "name": "ContactsScreenContactsChangedSubscription",
     "type": "Subscription",
     "metadata": null,
     "argumentDefinitions": [],
@@ -83,12 +83,12 @@ return {
   },
   "operation": {
     "kind": "Operation",
-    "name": "ContactsViewContactsChangedSubscription",
+    "name": "ContactsScreenContactsChangedSubscription",
     "argumentDefinitions": [],
     "selections": v0
   }
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '5fb1c250e7c4f2fe64250faed757563c';
+(node/*: any*/).hash = '3d975d9d6774f4046e8ca5ea226419dd';
 module.exports = node;

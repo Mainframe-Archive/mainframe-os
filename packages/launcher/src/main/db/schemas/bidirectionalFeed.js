@@ -1,6 +1,6 @@
 // @flow
 
-import bzzHash from './bzzHash'
+import ethAddress from './ethAddress'
 import ownFeed from './ownFeed'
 
 export default {
@@ -9,10 +9,7 @@ export default {
   encrypted: true,
   type: 'object',
   properties: {
-    localFeed: ownFeed,
-    localFeedData: {
-      type: 'string', // JSON-stringified object
-    },
-    remoteFeed: bzzHash,
+    readAddress: ethAddress,
+    writeFeed: ownFeed,
   },
 }

@@ -220,9 +220,9 @@ type Contact implements Node {
   """The ID of an object"""
   id: ID!
   localID: ID!
-  peerID: ID!
-  publicFeed: String!
-  pubKey: String!
+  localPeerID: ID!
+  publicID: String!
+  publicKey: String!
   invite: ContactInviteData
   profile: GenericProfile!
   connectionState: ConnectionState!
@@ -237,6 +237,14 @@ type ContactInviteData {
   inviteTX: String
   ethNetwork: String
   stake: InviteStake!
+}
+
+type ContactRequest implements Node {
+  """The ID of an object"""
+  id: ID!
+  localID: ID!
+  localPeerID: ID!
+  publicID: String!
 }
 
 input CreateDeveloperIdentityInput {
@@ -348,6 +356,10 @@ type InviteStake {
   reclaimedTX: String
 }
 
+type Lookup {
+  peerByID(publicID: String!): PeerLookupResult
+}
+
 input ManifestAuthorInput {
   id: String!
   name: String!
@@ -428,6 +440,12 @@ type OwnUserIdentity implements Node {
   privateProfile: Boolean
 }
 
+type PeerLookupResult {
+  publicKey: String
+  publicID: String!
+  profile: GenericProfile!
+}
+
 input PermissionGrantsInput {
   BLOCKCHAIN_SEND: Boolean
   COMMS_CONTACT: Boolean
@@ -448,6 +466,8 @@ type PublishAppVersionPayload {
 }
 
 type Query {
+  lookup: Lookup!
+
   """Fetches an object given its ID"""
   node(
     """The ID of an object"""
@@ -555,6 +575,8 @@ type User implements Node {
   privateProfile: Boolean!
   publicID: ID!
   apps: [App!]!
+  contacts: [Contact!]!
+  contactRequests: [ContactRequest!]!
   defaultEthAddress: String
   ethWallets: EthWallets!
   ethURL: String!

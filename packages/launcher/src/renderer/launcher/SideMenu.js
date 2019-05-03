@@ -42,11 +42,7 @@ export type ScreenNames =
   | 'settings'
   | 'notifications'
 
-type Props = {
-  relay: {
-    environment: Environment,
-  },
-}
+type Props = {}
 
 const MENU_ITEMS: Array<ScreenNames> = [
   'apps',

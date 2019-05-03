@@ -3,6 +3,7 @@
 import { COLLECTION_NAMES } from '../constants'
 
 import permissionsRequirements from './appPermissionsRequirements'
+import bzzHash from './bzzHash'
 import keyPair from './keyPair'
 import ownFeed from './ownFeed'
 
@@ -14,12 +15,8 @@ const appVersion = {
     version: {
       type: 'string', // semver
     },
-    contentsHash: {
-      type: 'string',
-    },
-    versionHash: {
-      type: 'string',
-    },
+    contentsHash: bzzHash,
+    versionHash: bzzHash,
     permissions: permissionsRequirements,
   },
   required: ['permissionsRequirements'],
@@ -47,13 +44,14 @@ export default {
     name: {
       type: 'string',
     },
-    updateFeed: ownFeed,
+    feed: ownFeed,
     version: {
       type: 'string',
     },
     versions: {
       type: 'array',
       items: appVersion,
+      default: [],
     },
   },
   required: ['keyPair', 'name', 'version'],

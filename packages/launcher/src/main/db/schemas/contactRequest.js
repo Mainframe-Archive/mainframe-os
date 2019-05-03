@@ -2,7 +2,6 @@
 
 import { COLLECTION_NAMES } from '../constants'
 
-import bzzHash from './bzzHash'
 import ethAddress from './ethAddress'
 
 export default {
@@ -23,7 +22,7 @@ export default {
       final: true,
     },
     privateFeed: {
-      ...bzzHash,
+      ...ethAddress,
       final: true,
     },
     receivedAddress: {
@@ -38,4 +37,5 @@ export default {
       type: 'string',
     },
   },
+  required: ['peer'],
 }
