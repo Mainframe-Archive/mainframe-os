@@ -323,7 +323,7 @@ export const sandboxed = {
           ctx.window,
           { title: 'Select file to upload', buttonLabel: 'Upload' },
           async filePaths => {
-            if (filePaths.length === 0) {
+            if (filePaths === undefined) {
               // No file selected
               resolve(false)
             } else {
