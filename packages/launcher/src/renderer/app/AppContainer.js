@@ -226,7 +226,6 @@ export default class AppContainer extends Component<Props, State> {
     if (!appSession) {
       return <OuterContainer />
     }
-
     const appUrl = this.state.contentsPath || this.state.bundleUrl
 
     const urlBar = this.props.appSession.isDev ? (
@@ -262,7 +261,7 @@ export default class AppContainer extends Component<Props, State> {
             <title>{appSession.app.manifest.name}</title>
           </Helmet>
           <Header>
-            {remote.process.platform === 'macos' ? (
+            {remote.process.platform === 'darwin' ? (
               <TitleBar className="draggable">
                 <Text variant="TuiAppTitle">
                   {appSession.app.manifest.name}

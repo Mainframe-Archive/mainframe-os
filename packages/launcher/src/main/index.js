@@ -113,7 +113,7 @@ const template = [
       {
         label: 'Learn More',
         click() {
-          require('electron').shell.openExternal('https://electronjs.org')
+          require('electron').shell.openExternal('https://mainframeos.com')
         },
       },
     ],
@@ -267,7 +267,7 @@ const setupClient = async () => {
     await shutdownDaemon()
   } catch (err) {
     // eslint-disable-next-line no-console
-    console.err(err.message)
+    console.error(err.message)
   }
 
   if (daemonConfig.runStatus !== 'running') {
