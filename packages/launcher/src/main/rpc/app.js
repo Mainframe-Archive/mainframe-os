@@ -408,6 +408,28 @@ export const sandboxed = {
       }
     },
   },
+
+  storage_delete: {
+    params: {
+      key: STORAGE_KEY_PARAM,
+    },
+    handler: async (
+      ctx: AppContext,
+      params: { key: string },
+    ): Promise<void> => {
+      try {
+        const { feedHash, manifestHash } = await getStorageManifestHash(ctx)
+        const [newManifestHash, feedMetadata] = await Promise.all([
+          ctx.bzz.deleteResource(manifestHash, params.key),
+          ctx.bzz.getFeedMetadata(feedHash),
+        ])
+        await ctx.bzz.postFeedValue(feedMetadata, `0x${newManifestHash}`)
+        ctx.storage.manifestHash = newManifestHash
+      } catch (error) {
+        throw new Error('Failed to access storage')
+      }
+    },
+  },
 }
 
 export const trusted = {
