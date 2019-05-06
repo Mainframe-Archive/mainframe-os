@@ -249,6 +249,7 @@ type ContactInviteData {
 }
 
 type Contacts {
+  inviteStake: Int
   invitesCount(userID: String!): Int!
   userContacts(userID: String!): [Contact!]!
 }
@@ -461,6 +462,7 @@ type Peers {
 
 input PermissionGrantsInput {
   BLOCKCHAIN_SEND: Boolean
+  BLOCKCHAIN_SIGN: Boolean
   COMMS_CONTACT: Boolean
   CONTACTS_READ: Boolean
   WEB_REQUEST: WebRequestGrantInput!
