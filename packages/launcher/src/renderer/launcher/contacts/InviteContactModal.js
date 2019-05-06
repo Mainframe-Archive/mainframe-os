@@ -1,7 +1,7 @@
 //@flow
 import React, { Component } from 'react'
 import styled from 'styled-components/native'
-import { Text, Tooltip } from '@morpheus-ui/core'
+import { Text, Tooltip, DropDown } from '@morpheus-ui/core'
 import { graphql, createFragmentContainer } from 'react-relay'
 import Loader from '../../UIComponents/Loader'
 
@@ -76,6 +76,7 @@ const AddContactDetail = styled.View`
   flex-direction: row;
   align-items: center;
   ${props => props.border && `border-width: 1px;`}
+  ${props => props.noMarginTop && `margin-top: 0px; padding: 5px;`}
 `
 
 const AddContactDetailText = styled.View`
@@ -340,53 +341,110 @@ class InviteContactModal extends Component<Props, State> {
     )
   }
 
-  renderTransactionSection(title: string) {
+  renderTransactionSection(title: string, dropdown?: boolean) {
     const { balances } = this.state
     const balanceLabel = balances ? (
       <Text variant="greyDark23" size={11}>{`MFT: ${balances.mft}, ETH: ${
         balances.eth
       }`}</Text>
     ) : null
-    return (
-      <Section>
-        <Text
-          bold
-          variant="smallTitle"
-          color="#585858"
-          theme={{
-            display: 'flex',
-            flexDirection: 'row',
-            alignItems: 'center',
-          }}>
-          {title}{' '}
-          <Tooltip>
-            <Text variant="tooltipTitle">
-              Where did this address come from?
-            </Text>
-            <Text variant="tooltipText">
-              This is your default ETH address. You can change it in the Wallets
-              tab by selecting another address and designating it as default
-              instead.
-            </Text>
-          </Tooltip>
-        </Text>
-        <AddContactDetail border>
-          <Blocky>
-            <WalletIcon
-              address={this.props.user.profile.ethAddress || ''}
-              size="small"
-            />
-          </Blocky>
-          <AddContactDetailText>
-            <Text variant={['greyDark23', 'ellipsis', 'mono']} size={12}>
-              {this.props.user.profile.ethAddress}
-            </Text>
-            {balanceLabel}
-          </AddContactDetailText>
-        </AddContactDetail>
-        {this.renderGasData()}
-      </Section>
-    )
+
+    if (dropdown) {
+      const options = this.props.wallets.map(w => {
+        return {
+          key: w.address,
+          data: (
+            <AddContactDetail noMarginTop>
+              <Blocky>
+                <WalletIcon address={w.address} size="small" />
+              </Blocky>
+              <AddContactDetailText>
+                <Text variant={['greyDark23', 'ellipsis', 'mono']} size={12}>
+                  {w.address}
+                </Text>
+                <Text variant="greyDark23" size={11}>{`MFT: ${
+                  w.balances.mft
+                }, ETH: ${w.balances.eth}`}</Text>
+              </AddContactDetailText>
+            </AddContactDetail>
+          ),
+        }
+      })
+      console.log(options)
+      return (
+        <Section>
+          <Text
+            bold
+            variant="smallTitle"
+            color="#585858"
+            theme={{
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'center',
+            }}>
+            {title}{' '}
+            <Tooltip>
+              <Text variant="tooltipTitle">
+                Where did this address come from?
+              </Text>
+              <Text variant="tooltipText">
+                This is your default ETH address. You can change it in the
+                Wallets tab by selecting another address and designating it as
+                default instead.
+              </Text>
+            </Tooltip>
+          </Text>
+          <DropDown
+            options={options}
+            valueKey="key"
+            displayKey="data"
+            defaultValue={this.props.user.profile.ethAddress}
+          />
+          {this.renderGasData()}
+        </Section>
+      )
+    } else {
+      return (
+        <Section>
+          <Text
+            bold
+            variant="smallTitle"
+            color="#585858"
+            theme={{
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'center',
+            }}>
+            {title}{' '}
+            <Tooltip>
+              <Text variant="tooltipTitle">
+                Where did this address come from?
+              </Text>
+              <Text variant="tooltipText">
+                This is your default ETH address. You can change it in the
+                Wallets tab by selecting another address and designating it as
+                default instead.
+              </Text>
+            </Tooltip>
+          </Text>
+          <AddContactDetail border>
+            <Blocky>
+              <WalletIcon
+                address={this.props.user.profile.ethAddress || ''}
+                size="small"
+              />
+            </Blocky>
+            <AddContactDetailText>
+              <Text variant={['greyDark23', 'ellipsis', 'mono']} size={12}>
+                {this.props.user.profile.ethAddress}
+              </Text>
+              {balanceLabel}
+            </AddContactDetailText>
+          </AddContactDetail>
+          {this.renderGasData()}
+        </Section>
+      )
+    }
   }
 
   renderRetrieveStake() {
@@ -401,7 +459,10 @@ class InviteContactModal extends Component<Props, State> {
     return (
       <>
         {this.renderContactSection('SEND BLOCKCHAIN INVITATION TO')}
-        {this.renderTransactionSection(`APPROVE AND STAKE ${amount} MFT FROM`)}
+        {this.renderTransactionSection(
+          `APPROVE AND STAKE ${amount} MFT FROM`,
+          true,
+        )}
         {reclaimedTX}
         {activity}
       </>
@@ -430,7 +491,10 @@ class InviteContactModal extends Component<Props, State> {
     return (
       <>
         {this.renderContactSection('SEND BLOCKCHAIN INVITATION TO')}
-        {this.renderTransactionSection(`APPROVE AND STAKE ${amount} MFT FROM`)}
+        {this.renderTransactionSection(
+          `APPROVE AND STAKE ${amount} MFT FROM`,
+          true,
+        )}
         {activity}
       </>
     )

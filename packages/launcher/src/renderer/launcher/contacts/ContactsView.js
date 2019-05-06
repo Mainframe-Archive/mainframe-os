@@ -25,6 +25,7 @@ import {
   Radio,
 } from '@morpheus-ui/core'
 import { type FormSubmitPayload } from '@morpheus-ui/forms'
+import { sortBy } from 'lodash'
 
 import PlusIcon from '@morpheus-ui/icons/PlusSymbolSm'
 import SearchIcon from '@morpheus-ui/icons/SearchSm'
@@ -284,6 +285,15 @@ const peerLookupQuery = graphql`
     }
   }
 `
+
+const getWalletsArray = (props: Props): Array<Wallet> => {
+  const { ethWallets } = props.wallets
+  const wallets: Array<Wallet> = [
+    ...ethWallets.hd.flatMap(w => w.accounts),
+    ...ethWallets.ledger.flatMap(w => w.accounts),
+  ]
+  return wallets
+}
 
 class ContactsViewComponent extends Component<Props, State> {
   static contextType = EnvironmentContext
@@ -1122,16 +1132,35 @@ class ContactsViewComponent extends Component<Props, State> {
   }
 
   renderInviteModal() {
+    // return (
+    //   this.state.inviteModalOpen && (
+    //     <InviteContactModal
+    //       closeModal={this.closeModal}
+    //       contact={this.state.inviteModalOpen.contact}
+    //       user={this.props.user}
+    //       type={this.state.inviteModalOpen.type}
+    //       inviteStakeValue={this.props.contacts.inviteStake}
+    //     />
+    //   )
+    // )
+    const walletsArray = getWalletsArray(this.props)
     return (
-      this.state.inviteModalOpen && (
-        <InviteContactModal
-          closeModal={this.closeModal}
-          contact={this.state.inviteModalOpen.contact}
-          user={this.props.user}
-          type={this.state.inviteModalOpen.type}
-          inviteStakeValue={this.props.contacts.inviteStake}
-        />
-      )
+      <InviteContactModal
+        closeModal={this.closeModal}
+        contact={{
+          localID: 'TLWkMfYJ769WaL0SP8lrc',
+          publicFeed:
+            '0e7fdbb8a5172cd7bf367a6c73f82ecd3449c630cd32860d33d9c6ef716fc7ec',
+          profile: {
+            name: 'Megan Jezewski',
+            ethAddress: '0x75bdf6a2ced3a0d0eff704555e3350b5010f5e00',
+          },
+        }}
+        user={this.props.user}
+        type={'invite'}
+        inviteStakeValue={this.props.contacts.inviteStake}
+        wallets={walletsArray}
+      />
     )
   }
 
@@ -1188,10 +1217,10 @@ class ContactsViewComponent extends Component<Props, State> {
   render() {
     return (
       <Container>
-        {this.renderContactsList()}
+        {/*    {this.renderContactsList()}
         {this.renderRightSide()}
         {this.renderAddNewContactForm()}
-        {this.renderEditModal()}
+      {this.renderEditModal()}*/}
         {this.renderInviteModal()}
       </Container>
     )
@@ -1221,6 +1250,35 @@ const ContactsView = createFragmentContainer(ContactsViewComponent, {
         profile {
           name
           ethAddress
+        }
+      }
+    }
+  `,
+  wallets: graphql`
+    fragment ContactsView_wallets on Wallets
+      @argumentDefinitions(userID: { type: "String!" }) {
+      ethWallets(userID: $userID) {
+        hd {
+          name
+          localID
+          accounts {
+            address
+            balances {
+              eth
+              mft
+            }
+          }
+        }
+        ledger {
+          name
+          localID
+          accounts {
+            address
+            balances {
+              eth
+              mft
+            }
+          }
         }
       }
     }
