@@ -195,6 +195,7 @@ type Props = {
   },
   user: CurrentUser,
   contacts: {
+    inviteStake: ?number,
     userContacts: Array<Contact>,
   },
 }
@@ -736,13 +737,17 @@ class ContactsViewComponent extends Component<Props, State> {
       </RadioContainer>
     )
 
+    const stakeLabel = this.props.contacts.inviteStake
+      ? `Stake ${this.props.contacts.inviteStake} MFT`
+      : 'Stake MFT'
+
     const BlockchainOption = (
       <RadioContainer>
         <RadioTextContainer>
           <Text size={12} color="#232323">
             Blockchain invitation .{' '}
             <Text size={12} color="#DA1157">
-              Stake 100 MFT
+              {stakeLabel}
             </Text>
           </Text>
           <Text color="#585858" size={11}>
@@ -1125,6 +1130,7 @@ class ContactsViewComponent extends Component<Props, State> {
           contact={this.state.inviteModalOpen.contact}
           user={this.props.user}
           type={this.state.inviteModalOpen.type}
+          inviteStakeValue={this.props.contacts.inviteStake}
         />
       )
     )
@@ -1197,6 +1203,7 @@ const ContactsView = createFragmentContainer(ContactsViewComponent, {
   contacts: graphql`
     fragment ContactsView_contacts on Contacts
       @argumentDefinitions(userID: { type: "String!" }) {
+      inviteStake
       userContacts(userID: $userID) {
         ...InviteContactModal_contact
         peerID

@@ -14,6 +14,7 @@ export type StakeState = "RECLAIMED" | "RECLAIMING" | "SEIZED" | "STAKED" | "%fu
 import type { FragmentReference } from "relay-runtime";
 declare export opaque type ContactsView_contacts$ref: FragmentReference;
 export type ContactsView_contacts = {|
+  +inviteStake: string,
   +userContacts: $ReadOnlyArray<{|
     +peerID: string,
     +localID: string,
@@ -53,6 +54,13 @@ const node/*: ConcreteFragment*/ = {
     }
   ],
   "selections": [
+    {
+      "kind": "ScalarField",
+      "alias": null,
+      "name": "inviteStake",
+      "args": null,
+      "storageKey": null
+    },
     {
       "kind": "LinkedField",
       "alias": null,
@@ -189,5 +197,5 @@ const node/*: ConcreteFragment*/ = {
   ]
 };
 // prettier-ignore
-(node/*: any*/).hash = 'c22cf4752d0f607334d15ac0152fdc7c';
+(node/*: any*/).hash = 'e1e837510e074b329c1b55264239fb25';
 module.exports = node;
