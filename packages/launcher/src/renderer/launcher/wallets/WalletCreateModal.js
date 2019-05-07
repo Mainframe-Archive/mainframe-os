@@ -39,6 +39,7 @@ type Props = {
   userID: string,
   onClose?: () => void,
   onSetupWallet: (address: string) => void,
+  onWalletCreated?: (address: string) => void,
   full?: boolean,
 }
 
@@ -151,6 +152,11 @@ export default class WalletCreateModal extends Component<Props, State> {
             errorMsg: errors[0].message,
           })
         } else {
+          if (this.props.onWalletCreated) {
+            this.props.onWalletCreated(
+              res.createHDWallet.hdWallet.accounts[0].address,
+            )
+          }
           const words = res.createHDWallet.hdWallet.mnemonic
             .split(' ')
             .map((w, i) => ({
