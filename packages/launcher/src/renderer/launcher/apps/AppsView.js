@@ -28,8 +28,7 @@ import type { AppsView_apps as Apps } from './__generated__/AppsView_apps.graphq
 type InstalledApps = $PropertyType<Apps, 'installed'>
 type AppData = $Call<<T>($ReadOnlyArray<T>) => T, InstalledApps>
 
-const SUGGESTED_APPS_URL =
-  'https://s3-us-west-2.amazonaws.com/suggested-apps/suggested-apps-v2.json'
+const SUGGESTED_APPS_URL = `https://mainframehq.github.io/suggested-apps/apps.json?timestamp=${new Date().toString()}`
 
 const Container = styled.View`
   padding: 40px 50px 20px 50px;
