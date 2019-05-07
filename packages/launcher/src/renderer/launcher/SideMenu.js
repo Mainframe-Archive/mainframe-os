@@ -110,8 +110,9 @@ const Container = styled.View`
   background-color: ${props => props.theme.colors.LIGHT_GREY_F5};
 `
 
-const ScrollView = styled.ScrollView`
-  padding: ${props => props.theme.spacing * 2}px;
+const View = styled.View`
+  padding: 10px 20px
+  overflow: hidden;
 `
 
 const MenuItem = styled.View`
@@ -219,7 +220,7 @@ class SideMenu extends Component<Props, State> {
   render() {
     return (
       <Container>
-        <ScrollView>{MENU_ITEMS.map(i => this.renderMenuItem(i))}</ScrollView>
+        <View>{MENU_ITEMS.map(i => this.renderMenuItem(i))}</View>
       </Container>
     )
   }

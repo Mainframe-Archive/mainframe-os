@@ -55,6 +55,7 @@ const newWindow = (params: Object = {}) => {
     height: 702,
     show: false,
     titleBarStyle: 'hidden',
+    title: 'Mainframe',
     ...params,
   })
 
@@ -68,6 +69,9 @@ const newWindow = (params: Object = {}) => {
     })
     window.loadURL(formattedUrl)
   }
+  // hide the menu (Win and Linux)
+  window.setAutoHideMenuBar(true)
+
   return window
 }
 
@@ -110,7 +114,7 @@ const template = [
       {
         label: 'Learn More',
         click() {
-          require('electron').shell.openExternal('https://electronjs.org')
+          require('electron').shell.openExternal('https://mainframeos.com')
         },
       },
     ],
@@ -171,7 +175,8 @@ const launchApp = async (
     return
   }
 
-  const appWindow = newWindow()
+  const appWindow = newWindow({ title: appSession.app.manifest.name })
+
   if (appSession.isDev) {
     appWindow.webContents.on('did-attach-webview', () => {
       // Open a separate developer tools window for the app
@@ -279,8 +284,8 @@ const createLauncherWindow = async () => {
   await setupClient()
 
   launcherWindow = newWindow({
-    width: 900,
-    height: 600,
+    width: 1024,
+    height: 768,
     minWidth: 900,
     minHeight: 600,
   })
@@ -341,6 +346,8 @@ app.on('will-quit', async event => {
 
 ipcMain.on('init-window', event => {
   const window = BrowserWindow.fromWebContents(event.sender)
+  window.setAutoHideMenuBar(true)
+
   if (window === launcherWindow) {
     window.webContents.send('start', { type: 'launcher' })
   } else {
