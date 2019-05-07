@@ -264,13 +264,6 @@ const setupClient = async () => {
   }
 
   // Start daemon and connect local client to it
-  try {
-    await shutdownDaemon()
-  } catch (err) {
-    // eslint-disable-next-line no-console
-    console.error(err.message)
-  }
-
   if (daemonConfig.runStatus !== 'running') {
     daemonConfig.runStatus = 'stopped'
     await startDaemon(env.name)
