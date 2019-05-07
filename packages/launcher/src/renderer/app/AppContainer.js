@@ -3,7 +3,6 @@
 import path from 'path'
 import url from 'url'
 import { remote } from 'electron'
-import Helmet from 'react-helmet'
 import Store from 'electron-store'
 import type { ID } from '@mainframe/utils-id'
 import React, { Component } from 'react'
@@ -257,9 +256,6 @@ export default class AppContainer extends Component<Props, State> {
     return (
       <MFThemeProvider theme={THEME}>
         <OuterContainer>
-          <Helmet>
-            <title>{appSession.app.manifest.name}</title>
-          </Helmet>
           <Header>
             {remote.process.platform === 'darwin' ? (
               <TitleBar className="draggable">

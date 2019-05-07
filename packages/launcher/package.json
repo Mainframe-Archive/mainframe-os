@@ -21,7 +21,6 @@
     "test": "mocha"
   },
   "electronWebpack": {
-    "title": "Mainframe",
     "whiteListedModules": [
       "@mainframe/app-manifest",
       "@mainframe/app-permissions",
@@ -65,7 +64,6 @@
     "react-art": "^16.8.5",
     "react-blockies": "^1.4.0",
     "react-dom": "^16.8.5",
-    "react-helmet": "^5.2.1",
     "react-modal": "^3.6.1",
     "react-native-web": "^0.10.0",
     "react-relay": "^1.7.0",

@@ -55,6 +55,7 @@ const newWindow = (params: Object = {}) => {
     height: 702,
     show: false,
     titleBarStyle: 'hidden',
+    title: 'Mainframe',
     ...params,
   })
 
@@ -174,7 +175,7 @@ const launchApp = async (
     return
   }
 
-  const appWindow = newWindow()
+  const appWindow = newWindow({ title: appSession.app.manifest.name })
 
   if (appSession.isDev) {
     appWindow.webContents.on('did-attach-webview', () => {
