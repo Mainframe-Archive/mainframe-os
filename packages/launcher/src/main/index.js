@@ -41,6 +41,20 @@ let client
 let launcherWindow
 let localDaemon = false
 
+if (envType === 'production') {
+  if (app.requestSingleInstanceLock()) {
+    app.on('second-instance', () => {
+      // Someone tried to run a second instance, we should focus our window.
+      if (launcherWindow) {
+        if (launcherWindow.isMinimized()) launcherWindow.restore()
+        launcherWindow.focus()
+      }
+    })
+  } else {
+    app.exit()
+  }
+}
+
 type AppContexts = { [appID: string]: { [userID: string]: AppContext } }
 
 const appContexts: AppContexts = {}
@@ -56,6 +70,10 @@ const newWindow = (params: Object = {}) => {
     show: false,
     titleBarStyle: 'hidden',
     title: 'Mainframe',
+    icon:
+      process.platform === 'linux'
+        ? path.join(__dirname, '/build/icon/Icon-512x512.png')
+        : undefined,
     ...params,
   })
 
@@ -259,8 +277,7 @@ const setupClient = async () => {
   }
 
   if (envType === 'production') {
-    daemonConfig.runStatus = 'stopped'
-    await stopDaemon(env.name)
+    await shutdownDaemon()
   }
 
   // Start daemon and connect local client to it
