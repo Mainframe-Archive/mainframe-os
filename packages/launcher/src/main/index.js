@@ -41,6 +41,20 @@ let client
 let launcherWindow
 let localDaemon = false
 
+if (envType === 'production') {
+  if (app.requestSingleInstanceLock()) {
+    app.on('second-instance', () => {
+      // Someone tried to run a second instance, we should focus our window.
+      if (launcherWindow) {
+        if (launcherWindow.isMinimized()) launcherWindow.restore()
+        launcherWindow.focus()
+      }
+    })
+  } else {
+    app.exit()
+  }
+}
+
 type AppContexts = { [appID: string]: { [userID: string]: AppContext } }
 
 const appContexts: AppContexts = {}
