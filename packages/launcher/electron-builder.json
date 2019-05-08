@@ -16,6 +16,10 @@
     "icon": "build/icon/",
     "target": ["AppImage", "dir"]
   },
+  "dmg": {
+    "icon": "build/dmg/icon.png",
+    "background": "build/dmg/background.png"
+  },
   "mac": {
     "icon": "build/icon.icns",
     "target": ["dmg", "dir"]
