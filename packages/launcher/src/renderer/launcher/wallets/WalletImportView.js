@@ -15,7 +15,7 @@ import { EnvironmentContext } from '../RelayEnvironment'
 type Props = {
   currentWalletID?: ?string,
   onClose: () => void,
-  onSuccess?: (address: string) => void,
+  onSuccess?: (address: string) => Promise<void>,
   userID: string,
   full?: boolean,
 }

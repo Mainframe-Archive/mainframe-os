@@ -84,17 +84,21 @@ export default class OnboardWalletView extends Component<Props, State> {
     })
   }
 
-  onSetupWallet = (address: string) => {
+  onSetupWallet = async (address: string) => {
+    this.setState({
+      view: 'saving',
+    })
+    await this.updateProfile(address)
+    this.props.onSetupWallet()
+  }
+
+  updateProfile = (address: string) => {
     const input = {
       userID: this.props.userID,
       profile: {
         ethAddress: address,
       },
     }
-
-    this.setState({
-      view: 'saving',
-    })
 
     commitMutation(this.context, {
       mutation: updateProfileMutation,
@@ -104,8 +108,6 @@ export default class OnboardWalletView extends Component<Props, State> {
           this.setState({
             error: errors[0].message,
           })
-        } else {
-          this.props.onSetupWallet()
         }
       },
       onError: err => {
@@ -160,7 +162,8 @@ export default class OnboardWalletView extends Component<Props, State> {
     return (
       <WalletCreateModal
         onClose={this.closeModal}
-        onSetupWallet={this.onSetupWallet}
+        onWalletCreated={this.updateProfile}
+        onSetupWallet={this.props.onSetupWallet}
         userID={this.props.userID}
         full
       />

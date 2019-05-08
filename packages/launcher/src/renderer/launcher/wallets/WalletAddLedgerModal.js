@@ -19,7 +19,7 @@ type Props = {
   wallets: Array<Wallet>,
   full?: boolean,
   onClose: () => void,
-  onSuccess?: (address: string) => void,
+  onSuccess?: (address: string) => Promise<void>,
 }
 
 type State = {
