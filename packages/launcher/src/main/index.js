@@ -56,6 +56,10 @@ const newWindow = (params: Object = {}) => {
     show: false,
     titleBarStyle: 'hidden',
     title: 'Mainframe',
+    icon:
+      process.platform === 'linux'
+        ? path.join(__dirname, '/build/icon/Icon-512x512.png')
+        : undefined,
     ...params,
   })
 
@@ -259,8 +263,7 @@ const setupClient = async () => {
   }
 
   if (envType === 'production') {
-    daemonConfig.runStatus = 'stopped'
-    await stopDaemon(env.name)
+    await shutdownDaemon()
   }
 
   // Start daemon and connect local client to it
