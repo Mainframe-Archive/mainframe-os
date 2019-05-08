@@ -14,7 +14,7 @@ export type StakeState = "RECLAIMED" | "RECLAIMING" | "SEIZED" | "STAKED" | "%fu
 import type { FragmentReference } from "relay-runtime";
 declare export opaque type ContactsView_contacts$ref: FragmentReference;
 export type ContactsView_contacts = {|
-  +inviteStake: string,
+  +inviteStake: ?number,
   +userContacts: $ReadOnlyArray<{|
     +peerID: string,
     +localID: string,
