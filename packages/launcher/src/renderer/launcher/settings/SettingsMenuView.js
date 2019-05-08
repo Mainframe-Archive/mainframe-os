@@ -1,4 +1,6 @@
 // @flow
+
+import { remote } from 'electron'
 import React, { Component } from 'react'
 import { Text, Button, DropDown } from '@morpheus-ui/core'
 import styled from 'styled-components/native'
@@ -152,7 +154,7 @@ export default class SettingsMenuView extends Component<Props, State> {
               RightElement={ExportIcon}
             />
             <SettingsItem
-              title="Alpha version 0.3"
+              title={`Alpha version ${remote.app.getVersion()}`}
               Icon={MainframeLogoIcon}
               RightElement={() => (
                 <Button

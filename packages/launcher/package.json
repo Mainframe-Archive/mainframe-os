@@ -1,6 +1,6 @@
 {
   "name": "Mainframe",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "main": "main/index.js",
   "license": "MIT",
   "scripts": {
@@ -43,8 +43,8 @@
     "@mainframe/app-permissions": "^0.3.0",
     "@mainframe/client": "^0.3.0",
     "@mainframe/config": "^0.3.0",
-    "@mainframe/daemon": "^0.3.0",
-    "@mainframe/eth": "^0.3.0",
+    "@mainframe/daemon": "^0.3.2",
+    "@mainframe/eth": "^0.3.3",
     "@mainframe/rpc-electron": "^0.2.0",
     "@mainframe/rpc-handler": "^0.3.0",
     "@mainframe/toolbox": "*",
