@@ -1,7 +1,7 @@
 {
   "name": "@mainframe/eth",
   "description": "Mainframe Ethereum API and utilities",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "author": "Mainframe",
   "license": "MIT",
   "main": "cjs/index.js",
