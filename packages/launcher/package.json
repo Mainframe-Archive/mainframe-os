@@ -21,7 +21,6 @@
     "test": "mocha"
   },
   "electronWebpack": {
-    "title": "Mainframe",
     "whiteListedModules": [
       "@mainframe/app-manifest",
       "@mainframe/app-permissions",

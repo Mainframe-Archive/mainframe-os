@@ -5,6 +5,9 @@ body,
   flex: 1;
   height: 100%;
   font-family: 'Poppins', sans-serif;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
 }
 
 
@@ -86,3 +89,21 @@ body,
   -moz-box-shadow: -2px -30px 98px 34px rgba(255,255,255,1);
   box-shadow: -2px -30px 98px 34px rgba(255,255,255,1);
 }
+
+
+::-webkit-scrollbar {
+  background-color:#fff;
+  width:16px
+}
+
+::-webkit-scrollbar-track {
+  background-color:#fff
+}
+
+::-webkit-scrollbar-thumb {
+  background-color:#babac0;
+  border-radius:16px;
+  border:4px solid #fff
+}
+
+::-webkit-scrollbar-button {display:none}

@@ -60,11 +60,12 @@ type State = {
 
 const Container = styled.View`
   flex: 1;
-  padding: 54px 54px 40px 54px;
+  padding: 54px 0 40px 54px;
 `
 
 const Buttons = styled.View`
   padding-top: 20px;
+  padding-right: 50px;
   flex-direction: row;
   align-items: center;
   justify-content: flex-end;
@@ -75,6 +76,7 @@ const WalletsContainer = styled.View`
 `
 
 const ScrollView = styled.ScrollView`
+  padding-right: 50px;
   padding-bottom: 100px;
 `
 
