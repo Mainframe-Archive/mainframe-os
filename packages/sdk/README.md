@@ -249,7 +249,7 @@ tx.on('hash', hash => ... )
 
 Will show a file upload window to the user, they can select one file they wish to upload.
 
-**returns:** Promise<boolean>
+**returns:** Promise<true> if the file was successfully uploaded, Promise<false> if the upload window was closed.
 
 **Example:**
 
@@ -263,7 +263,7 @@ await sdk.storage.promptUpload(key)
 
 Will show a save file window to the user, they can select where they wish to save the file.
 
-**returns:** Promise<boolean>
+**returns:** Promise<true> if the file was successfully saved, Promise<false> if the save window was closed.
 
 **Example:**
 
