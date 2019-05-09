@@ -259,6 +259,20 @@ const key = 'example.jpg' // name that is going to be used in the app
 await sdk.storage.promptUpload(key)
 ```
 
+### storage.promptDownload()
+
+Will show a save file window to the user, they can select where they wish to save the file.
+
+**returns:** Promise<boolean>
+
+**Example:**
+
+```
+const key = 'example.jpg' // key of the file user wants to download
+
+await sdk.storage.promptDownload(key)
+```
+
 ### storage.list()
 
 Fetches keys for all the files your app has previously uploaded.
