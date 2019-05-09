@@ -300,7 +300,7 @@ const data = await sdk.storage.get(key)
 
 ### storage.delete()
 
-Deletes a file from the app's manifest.
+Deletes the key from the list of files available to the app.
 
 **returns:** Promise<void>
 
