@@ -54,6 +54,9 @@ const setEthNetworkMutation = graphql`
 const NETWORK_NAMES = {
   mainnet: 'Mainnet',
   ropsten: 'Testnet (Ropsten)',
+  kovan: 'Testnet (Kovan)',
+  rinkeby: 'Testnet (Rinkeby)',
+  goerli: 'Testnet (Goerli)',
   ganache: 'Ganache (localhost:8545)',
   custom: 'Custom (MFT transfers disabled)',
 }
@@ -137,6 +140,9 @@ export default class SettingsMenuView extends Component<Props, State> {
                     NETWORK_NAMES.mainnet,
                     NETWORK_NAMES.ropsten,
                     NETWORK_NAMES.ganache,
+                    NETWORK_NAMES.kovan,
+                    NETWORK_NAMES.rinkeby,
+                    NETWORK_NAMES.goerli,
                   ]}
                   defaultValue={this.getNetworkName()}
                 />
