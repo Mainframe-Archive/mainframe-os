@@ -16,6 +16,7 @@ import {
   app,
   contact,
   ethHdWallet,
+  ethLedgerWallet,
   ownApp,
   ownDeveloperIdentity,
   ownUserIdentity,
@@ -244,23 +245,43 @@ const addLedgerWalletAccountsMutation = mutationWithClientMutationId({
     },
   },
   outputFields: {
-    addresses: {
-      type: new GraphQLList(GraphQLString),
-      resolve: payload => payload.addresses,
-    },
-    localID: {
-      type: new GraphQLNonNull(GraphQLString),
-      resolve: payload => payload.localID,
+    ledgerWallet: {
+      type: ethLedgerWallet,
+      resolve: payload => payload.wallet,
     },
     viewer: viewerField,
   },
   mutateAndGetPayload: async (args, ctx) => {
-    const res = await ctx.mutations.addLedgerWalletAccounts(
-      args.indexes,
-      args.name,
-      args.userID,
-    )
-    return res
+    ctx.logger.log({
+      level: 'debug',
+      message: 'CreateLedgerWallet mutation called',
+      args,
+    })
+    try {
+      const wallet = await ctx.db.eth_wallets_ledger.getOrCreate({
+        name: args.name,
+      })
+
+      const [user] = await Promise.all([
+        ctx.getUser(),
+        wallet.addAccounts(args.indexes),
+      ])
+      await user.addEthLedgerWallet(wallet.localID)
+
+      ctx.logger.log({
+        level: 'debug',
+        message: 'CreateLedgerWallet mutation complete',
+        walletID: wallet.localID,
+      })
+      return { wallet }
+    } catch (err) {
+      ctx.logger.log({
+        level: 'error',
+        message: 'CreateLedgerWallet mutation failed',
+        error: err.toString(),
+      })
+      throw new Error('Failed to create wallet')
+    }
   },
 })
 

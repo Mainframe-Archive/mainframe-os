@@ -44,8 +44,7 @@ input AddLedgerWalletAccountsInput {
 }
 
 type AddLedgerWalletAccountsPayload {
-  addresses: [String]
-  localID: String!
+  ledgerWallet: EthLedgerWallet
   viewer: User!
   clientMutationId: String
 }
