@@ -1,14 +1,18 @@
 //@flow
 import React, { Component } from 'react'
 import styled from 'styled-components/native'
-import { Text, Tooltip, DropDown } from '@morpheus-ui/core'
+import { Text, Tooltip, DropDown, Button, TextField } from '@morpheus-ui/core'
+import { Form } from '@morpheus-ui/forms'
+
 import { graphql, createFragmentContainer } from 'react-relay'
+import { filter } from 'lodash'
+import CircleCheck from '../../UIComponents/Icons/Circlecheck'
 import Loader from '../../UIComponents/Loader'
+import CircleLoader from '../../UIComponents/CircleLoader'
 
 import rpc from '../rpc'
 import FormModalView from '../../UIComponents/FormModalView'
 import Avatar from '../../UIComponents/Avatar'
-
 import WalletIcon from '../wallets/WalletIcon'
 
 import applyContext, { type ContextProps } from '../LauncherContext'
@@ -75,6 +79,7 @@ const AddContactDetail = styled.View`
   border-color: #efefef;
   flex-direction: row;
   align-items: center;
+  max-height: 46px;
   ${props => props.border && `border-width: 1px;`}
   ${props => props.noMarginTop && `margin-top: 0px; padding: 5px;`}
 `
@@ -89,8 +94,30 @@ const Blocky = styled.View`
   margin-right: 15px;
 `
 
+const GasContainer = styled.View`
+  display: flex;
+  max-width: 100%;
+  flex-direction: row;
+`
+
+const TitleTooltipContainer = styled.View`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 10px;
+  ${props => props.paddingTop && `padding-top: 30px;`}
+`
+
 class InviteContactModal extends Component<Props, State> {
-  state = {}
+  constructor(props: Props) {
+    super(props)
+    const { user } = this.props
+    this.state = {
+      selectedAddress: user.profile.ethAddress,
+      insufficientFunds: false,
+      txScreen: false,
+    }
+  }
 
   componentDidMount() {
     if (this.props.type === 'invite') {
@@ -99,6 +126,17 @@ class InviteContactModal extends Component<Props, State> {
       this.getTXDetails(this.props.type)
     }
     this.getBalances()
+
+    //initial check for sufficient funds
+    const mft = filter(
+      this.props.wallets,
+      w => w.address === this.state.selectedAddress,
+    )[0].balances.mft
+    if (Number(mft) < 100) {
+      this.setState({ insufficientFunds: true })
+    } else {
+      this.setState({ insufficientFunds: false })
+    }
   }
 
   async getBalances() {
@@ -185,6 +223,9 @@ class InviteContactModal extends Component<Props, State> {
   sendApproveTX = async () => {
     const { user, contact } = this.props
     try {
+      // this.checkSufficientBalance()
+      // console.log(this.state.insufficientFunds)
+      // if (!this.state.insufficientFunds) {
       this.setState({ txProcessing: true, error: null })
       await rpc.sendInviteApprovalTX({
         userID: user.localID,
@@ -197,16 +238,31 @@ class InviteContactModal extends Component<Props, State> {
         },
       })
       this.getInviteSendTXDetails()
+      // }
     } catch (err) {
       this.setState({
         error: err.message,
         txProcessing: false,
         invitePending: {
-          state: 'approved',
+          state: 'error',
         },
       })
     }
   }
+
+  // checkSufficientBalance = () => {
+  //   const mft = filter(
+  //     this.props.wallets,
+  //     w => w.address === this.state.selectedAddress,
+  //   )[0].balances.mft
+  //   console.log(mft)
+  //   console.log(this.state.selectedAddress)
+  //   if (Number(mft) < 100) {
+  //     this.setState({ insufficientFunds: true })
+  //   } else {
+  //     this.setState({ insufficientFunds: false })
+  //   }
+  // }
 
   sendInvite = async () => {
     const { user, contact } = this.props
@@ -215,6 +271,11 @@ class InviteContactModal extends Component<Props, State> {
       await rpc.sendInviteTX({
         userID: user.localID,
         contactID: contact.localID,
+      })
+      this.setState({
+        invitePending: {
+          state: 'invite_sent',
+        },
       })
       this.props.closeModal()
     } catch (err) {
@@ -270,19 +331,45 @@ class InviteContactModal extends Component<Props, State> {
     }
   }
 
-  // RENDER
+  onDropDownChange = newAddr => {
+    const mft = filter(this.props.wallets, w => w.address === newAddr)[0]
+      .balances.mft
+    if (Number(mft) < 100) {
+      console.log('setting to true')
+      this.setState({ insufficientFunds: true, selectedAddress: newAddr })
+    } else {
+      console.log('setting to false')
+      this.setState({ insufficientFunds: false, selectedAddress: newAddr })
+    }
+  }
 
+  validateBalance = feedback => {
+    const addr = feedback.value
+    const mft = filter(this.props.wallets, w => w.address === addr)[0].balances
+      .mft
+    if (Number(mft) < 100) {
+      return 'Insufficient MFT funds in this wallet'
+    }
+  }
+
+  showTransactions = () => {
+    this.setState({ txScreen: true })
+  }
+
+  // RENDER
   renderGasData() {
     const { txParams } = this.state
+
     if (txParams) {
       const { gasPriceGwei, maxCost, stakeAmount } = txParams
       const gasLabel = `Gas price: ${gasPriceGwei}`
       const costlabel = `Max Cost: ${maxCost} ETH`
       const mftLabel = `Stake: ${stakeAmount} MFT`
+
       return (
         <Text color="#303030" variant="marginTop10" size={11}>
           {`${gasLabel}, ${costlabel}, ${mftLabel}`}
-          <Tooltip>
+          <Tooltip top>
             <Text variant="tooltipTitle">What is gas?</Text>
             <Text variant="tooltipText">
               When you send tokens, interact with a contract, or do anything
@@ -343,11 +430,27 @@ class InviteContactModal extends Component<Props, State> {
 
   renderTransactionSection(title: string, dropdown?: boolean) {
     const { balances } = this.state
-    const balanceLabel = balances ? (
-      <Text variant="greyDark23" size={11}>{`MFT: ${balances.mft}, ETH: ${
-        balances.eth
-      }`}</Text>
-    ) : null
+    const tooltipTitle = (
+      <Text
+        bold
+        variant="smallTitle"
+        color="#585858"
+        theme={{
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+        }}>
+        {title}{' '}
+        <Tooltip>
+          <Text variant="tooltipTitle">Where did this address come from?</Text>
+          <Text variant="tooltipText">
+            This is your default ETH address. You can change it in the Wallets
+            tab by selecting another address and designating it as default
+            instead.
+          </Text>
+        </Tooltip>
+      </Text>
+    )
 
     if (dropdown) {
       const options = this.props.wallets.map(w => {
@@ -370,63 +473,31 @@ class InviteContactModal extends Component<Props, State> {
           ),
         }
       })
-      console.log(options)
       return (
         <Section>
-          <Text
-            bold
-            variant="smallTitle"
-            color="#585858"
-            theme={{
-              display: 'flex',
-              flexDirection: 'row',
-              alignItems: 'center',
-            }}>
-            {title}{' '}
-            <Tooltip>
-              <Text variant="tooltipTitle">
-                Where did this address come from?
-              </Text>
-              <Text variant="tooltipText">
-                This is your default ETH address. You can change it in the
-                Wallets tab by selecting another address and designating it as
-                default instead.
-              </Text>
-            </Tooltip>
-          </Text>
+          {tooltipTitle}
           <DropDown
             options={options}
             valueKey="key"
             displayKey="data"
-            defaultValue={this.props.user.profile.ethAddress}
+            name="dropdown"
+            defaultValue={this.state.selectedAddress}
+            validation={value => this.validateBalance(value)}
+            // onChange={this.onDropDownChange}
           />
           {this.renderGasData()}
         </Section>
       )
     } else {
+      const balanceLabel = balances ? (
+        <Text variant="greyDark23" size={11}>{`MFT: ${balances.mft}, ETH: ${
+          balances.eth
+        }`}</Text>
+      ) : null
+
       return (
         <Section>
-          <Text
-            bold
-            variant="smallTitle"
-            color="#585858"
-            theme={{
-              display: 'flex',
-              flexDirection: 'row',
-              alignItems: 'center',
-            }}>
-            {title}{' '}
-            <Tooltip>
-              <Text variant="tooltipTitle">
-                Where did this address come from?
-              </Text>
-              <Text variant="tooltipText">
-                This is your default ETH address. You can change it in the
-                Wallets tab by selecting another address and designating it as
-                default instead.
-              </Text>
-            </Tooltip>
-          </Text>
+          {tooltipTitle}
           <AddContactDetail border>
             <Blocky>
               <WalletIcon
@@ -445,6 +516,125 @@ class InviteContactModal extends Component<Props, State> {
         </Section>
       )
     }
+  }
+
+  getButtonStatus = (firstAction, secondAction) => {
+    const { invitePending, txProcessing } = this.state
+
+    if (invitePending && invitePending.state === 'awaiting_approval') {
+      if (txProcessing) {
+        return [<CircleLoader width={24} height={24} />, <></>]
+      } else {
+        return [
+          <Button
+            title="APPROVE"
+            variant={['small', 'red']}
+            onPress={firstAction}
+          />,
+          <></>,
+        ]
+      }
+    } else if (invitePending && invitePending.state === 'approved') {
+      if (txProcessing) {
+        return [
+          <CircleCheck width={24} height={24} color="#00a7e7" />,
+          <CircleLoader width={24} height={24} />,
+        ]
+      } else {
+        return [
+          <CircleCheck width={24} height={24} color="#00a7e7" />,
+          <Button
+            title="APPROVE"
+            variant={['small', 'red']}
+            onPress={secondAction}
+          />,
+        ]
+      }
+    } else if (invitePending && invitePending.state === 'invite_sent') {
+      return [
+        <CircleCheck width={24} height={24} color="#00a7e7" />,
+        <CircleCheck width={24} height={24} color="#00a7e7" />,
+      ]
+    }
+  }
+
+  renderInviteTransactions(title: string, dropdown?: boolean) {
+    const { balances, invitePending, txParams } = this.state
+
+    const balanceLabel = balances ? (
+      <Text variant="greyDark23" size={11}>{`MFT: ${balances.mft}, ETH: ${
+        balances.eth
+      }`}</Text>
+    ) : null
+
+    const buttons = this.getButtonStatus(this.sendApproveTX, this.sendInvite)
+
+    return (
+      <Section>
+        <TitleTooltipContainer>
+          <Text variant="smallTitle">{'TRANSACTION 1/2'}</Text>
+          <Tooltip>
+            <Text variant="tooltipTitle">What does this mean?</Text>
+            <Text variant="tooltipText">
+              To send an invite you must first grant approve the contract.
+            </Text>
+          </Tooltip>
+        </TitleTooltipContainer>
+        <AddContactDetail border>
+          <AddContactDetailText>
+            <Text variant={['greyDark23', 'bold']} size={12}>
+              {'Contract'}
+            </Text>
+            {txParams && (
+              <GasContainer>
+                <Text color="#303030" size={11} variant="marginRight15">
+                  {'Gas price: ' + txParams.gasPriceGwei}
+                </Text>
+                <Text color="#303030" size={11}>
+                  {'Max Cost: ' + txParams.maxCost + ' ETH'}
+                </Text>
+              </GasContainer>
+            )}
+          </AddContactDetailText>
+          {buttons && buttons[0]}
+        </AddContactDetail>
+        {invitePending && invitePending.state === 'approved' && (
+          <>
+            <TitleTooltipContainer paddingTop>
+              <Text variant="smallTitle">{'TRANSACTION 2/2'}</Text>
+              <Tooltip>
+                <Text variant="tooltipTitle">What is this?</Text>
+                <Text variant="tooltipText">
+                  This transaction will actually stake the MFT by calling the
+                  contract.
+                </Text>
+              </Tooltip>
+            </TitleTooltipContainer>
+            <AddContactDetail border>
+              <AddContactDetailText>
+                <Text variant={['greyDark23', 'bold']} size={12}>
+                  {'Staking'}
+                </Text>
+                {txParams && (
+                  <GasContainer>
+                    <Text color="#303030" size={11} variant="marginRight10">
+                      {'Gas price: ' + txParams.gasPriceGwei}
+                    </Text>
+                    <Text color="#303030" size={11} variant="marginRight10">
+                      {'Max Cost: ' + txParams.maxCost + ' ETH'}
+                    </Text>
+                    <Text color="#303030" size={11}>
+                      {'Stake: ' + txParams.stakeAmount + ' MFT'}
+                    </Text>
+                  </GasContainer>
+                )}
+              </AddContactDetailText>
+              {buttons && buttons[1]}
+            </AddContactDetail>
+          </>
+        )}
+      </Section>
+    )
   }
 
   renderRetrieveStake() {
@@ -488,16 +678,20 @@ class InviteContactModal extends Component<Props, State> {
     const activity = this.state.txProcessing && <Loader />
     const amount = this.props.inviteStakeValue || ''
 
-    return (
-      <>
-        {this.renderContactSection('SEND BLOCKCHAIN INVITATION TO')}
-        {this.renderTransactionSection(
-          `APPROVE AND STAKE ${amount} MFT FROM`,
-          true,
-        )}
-        {activity}
-      </>
-    )
+    if (!this.state.txScreen) {
+      return (
+        <>
+          {this.renderContactSection('SEND BLOCKCHAIN INVITATION TO')}
+          {this.renderTransactionSection(
+            `APPROVE AND STAKE ${amount} MFT FROM`,
+            true,
+          )}
+          {activity}
+        </>
+      )
+    } else {
+      return this.renderInviteTransactions()
+    }
   }
 
   render() {
@@ -506,18 +700,21 @@ class InviteContactModal extends Component<Props, State> {
     let btnTitle
     let action
     let screenTitle
+
     switch (this.props.type) {
       case 'invite':
         content = this.renderInvite()
-        screenTitle = 'SEND BLOCKCHAIN INVITATION'
-        if (!this.state.txProcessing) {
-          if (invitePending && invitePending.state === 'awaiting_approval') {
-            action = this.sendApproveTX
-            btnTitle = 'APPROVE TRANSACTION'
-          } else if (invitePending && invitePending.state === 'approved') {
-            action = this.sendInvite
-            btnTitle = 'SEND INVITATION'
-          }
+        screenTitle = 'ADD A NEW CONTACT'
+        console.log(this.state.invitePending)
+        if (!this.state.txScreen) {
+          action = this.showTransactions
+          btnTitle = 'INVITE'
+        } else if (
+          this.state.invitePending &&
+          this.state.invitePending.state === 'invite_sent'
+        ) {
+          action = this.props.closeModal
+          btnTitle = 'DONE'
         }
         break
       case 'retrieveStake':
@@ -567,6 +764,7 @@ class InviteContactModal extends Component<Props, State> {
         confirmButton={btnTitle}
         dismissButton="CANCEL"
         onRequestClose={this.props.closeModal}
+        noButtons={this.state.txScreen}
         onSubmitForm={action}>
         <FormContainer modal>{render}</FormContainer>
       </FormModalView>

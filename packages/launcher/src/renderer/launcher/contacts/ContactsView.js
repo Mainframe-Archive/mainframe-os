@@ -1132,36 +1132,41 @@ class ContactsViewComponent extends Component<Props, State> {
   }
 
   renderInviteModal() {
-    // return (
-    //   this.state.inviteModalOpen && (
-    //     <InviteContactModal
-    //       closeModal={this.closeModal}
-    //       contact={this.state.inviteModalOpen.contact}
-    //       user={this.props.user}
-    //       type={this.state.inviteModalOpen.type}
-    //       inviteStakeValue={this.props.contacts.inviteStake}
-    //     />
-    //   )
-    // )
     const walletsArray = getWalletsArray(this.props)
+    const contact = this.getSelectedContact()
+
     return (
-      <InviteContactModal
-        closeModal={this.closeModal}
-        contact={{
-          localID: 'TLWkMfYJ769WaL0SP8lrc',
-          publicFeed:
-            '0e7fdbb8a5172cd7bf367a6c73f82ecd3449c630cd32860d33d9c6ef716fc7ec',
-          profile: {
-            name: 'Megan Jezewski',
-            ethAddress: '0x75bdf6a2ced3a0d0eff704555e3350b5010f5e00',
-          },
-        }}
-        user={this.props.user}
-        type={'invite'}
-        inviteStakeValue={this.props.contacts.inviteStake}
-        wallets={walletsArray}
-      />
+      this.state.inviteModalOpen && (
+        <InviteContactModal
+          closeModal={this.closeModal}
+          contact={this.state.inviteModalOpen.contact}
+          user={this.props.user}
+          type={this.state.inviteModalOpen.type}
+          inviteStakeValue={this.props.contacts.inviteStake}
+          wallets={walletsArray}
+        />
+      )
     )
+    // return (
+    //   <InviteContactModal
+    //     closeModal={this.closeModal}
+    //     contact={{
+    //       localID: 'TLWkMfYJ769WaL0SP8lrc',
+    //       peerID: 'TLWkMfYJ769WaL0SP8lrc',
+    //       publicFeed:
+    //         '0e7fdbb8a5172cd7bf367a6c73f82ecd3449c630cd32860d33d9c6ef716fc7ec',
+    //       profile: {
+    //         name: 'Megan Jezewski',
+    //         ethAddress: '0x75bdf6a2ced3a0d0eff704555e3350b5010f5e00',
+    //       },
+    //     }}
+    //     showTxScreen={() => this.showTxScreen(contact)}
+    //     user={this.props.user}
+    //     type={'transactions'}
+    //     inviteStakeValue={this.props.contacts.inviteStake}
+    //     wallets={walletsArray}
+    //   />
+    // )
   }
 
   renderEditModal() {
@@ -1217,10 +1222,10 @@ class ContactsViewComponent extends Component<Props, State> {
   render() {
     return (
       <Container>
-        {/*    {this.renderContactsList()}
+        {this.renderContactsList()}
         {this.renderRightSide()}
         {this.renderAddNewContactForm()}
-      {this.renderEditModal()}*/}
+        {this.renderEditModal()}
         {this.renderInviteModal()}
       </Container>
     )
