@@ -230,7 +230,6 @@ export class SystemContext {
 
     ctx.window.on('closed', async () => {
       // await ctx.clear()
-      this._launchersByContents.delete(ctx.window.webContents)
       delete this._launchers[ctx.launcherID]
     })
 

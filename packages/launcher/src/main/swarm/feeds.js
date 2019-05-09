@@ -18,13 +18,9 @@ export type PublisherParams<T> = {
 }
 
 export const createPublisher = <T: any>(params: PublisherParams<T>) => {
-  const feed = { user: params.feed.address }
-  const key = params.feed.keyPair.getPrivate()
   const transform = params.transform || identity
-
   return async (data: T): Promise<string> => {
-    const body = JSON.stringify(transform(data))
-    return await params.bzz.uploadFeedValue(feed, body, { mode: 'raw' }, key)
+    return await params.feed.publishJSON(params.bzz, transform(data))
   }
 }
 

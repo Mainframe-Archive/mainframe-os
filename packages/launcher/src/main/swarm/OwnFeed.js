@@ -33,7 +33,7 @@ export default class OwnFeed {
     return await bzz.uploadFeedValue(
       { user: this.address },
       JSON.stringify(payload),
-      { contentType: 'application/json' },
+      { mode: 'raw' },
       this.keyPair.getPrivate(),
     )
   }

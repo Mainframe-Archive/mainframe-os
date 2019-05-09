@@ -21,17 +21,29 @@ export default async (params: CollectionParams) => {
     schema,
     statics: {
       async setupSync(bzz: Bzz) {
-        logger.log({
-          level: 'debug',
-          message: 'Setup collection sync',
-        })
+        logger.debug('Setup collection sync')
+
         const docs = await this.find().exec()
         docs.forEach(doc => {
           doc.setupSync(bzz)
         })
-        this.insert$.subscribe(event => {
-          event.doc.setupSync(bzz)
-        })
+
+        this.insert$
+          .pipe(
+            flatMap(async event => {
+              const doc = await this.findOne(event.doc).exec()
+              doc.setupSync()
+            }),
+          )
+          .subscribe({
+            error: err => {
+              logger.log({
+                level: 'error',
+                message: 'Collection sync error with added doc',
+                error: err.toString(),
+              })
+            },
+          })
       },
     },
     methods: {
@@ -61,9 +73,17 @@ export default async (params: CollectionParams) => {
           transform: readProfile,
         })
           .pipe(
-            flatMap(async profile => {
-              await this.atomicSet('profile', profile)
-              return profile
+            flatMap(async data => {
+              await this.atomicUpdate(doc => {
+                if (data.profile != null) {
+                  doc.profile = data.profile
+                }
+                if (data.publicKey != null) {
+                  doc.publicKey = data.publicKey
+                }
+                return doc
+              })
+              return data
             }),
           )
           .subscribe({

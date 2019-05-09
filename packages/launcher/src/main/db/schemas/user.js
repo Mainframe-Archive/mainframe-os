@@ -26,7 +26,6 @@ export default {
       type: 'boolean',
       default: true,
     },
-    publicFeed: ownFeed,
     firstContactFeed: ownFeed,
     contacts: {
       type: 'array',
@@ -79,5 +78,5 @@ export default {
       default: 'http://mainframe-gateways.net:8500',
     },
   },
-  required: ['localID', 'keyPair', 'profile', 'publicFeed', 'firstContactFeed'],
+  required: ['localID', 'keyPair', 'profile', 'firstContactFeed'],
 }

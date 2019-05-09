@@ -1,14 +1,13 @@
 // @flow
 
 import Bzz from '@erebos/api-bzz-node'
-import { sign } from '@erebos/secp256k1'
+import { createKeyPair, sign } from '@erebos/secp256k1'
 import nanoid from 'nanoid'
 import objectHash from 'object-hash'
 import { debounceTime, filter, flatMap, map } from 'rxjs/operators'
 
 import { MF_PREFIX } from '../../../constants'
 
-import { createKeyPair, serializeKeyPair } from '../../crypto/ed25519'
 import { writeProfile } from '../../data/protocols'
 import OwnFeed from '../../swarm/OwnFeed'
 import { createPublisher } from '../../swarm/feeds'
@@ -27,27 +26,42 @@ export default async (params: CollectionParams) => {
     schema,
     statics: {
       async create(data: { profile: UserProfile, privateProfile?: boolean }) {
+        const keyPair = createKeyPair()
         return await this.insert({
           ...data,
           localID: nanoid(),
-          keyPair: serializeKeyPair(createKeyPair()),
-          publicFeed: OwnFeed.createJSON(),
+          keyPair: {
+            publicKey: keyPair.getPublic('hex'),
+            privateKey: keyPair.getPrivate('hex'),
+          },
           firstContactFeed: OwnFeed.createJSON(),
         })
       },
 
       async setupSync() {
-        logger.log({
-          level: 'debug',
-          message: 'Setup collection sync',
-        })
+        logger.debug('Setup collection sync')
+
         const docs = await this.find().exec()
         docs.forEach(doc => {
           doc.setupSync()
         })
-        this.insert$.subscribe(event => {
-          event.doc.setupSync()
-        })
+
+        this.insert$
+          .pipe(
+            flatMap(async event => {
+              const doc = await this.findOne(event.doc).exec()
+              doc.setupSync()
+            }),
+          )
+          .subscribe({
+            error: err => {
+              logger.log({
+                level: 'error',
+                message: 'Collection sync error with added doc',
+                error: err.toString(),
+              })
+            },
+          })
       },
     },
     methods: {
@@ -73,7 +87,7 @@ export default async (params: CollectionParams) => {
 
       getPublicFeed(): OwnFeed {
         if (this._publicFeed == null) {
-          this._publicFeed = new OwnFeed(this.publicFeed.privateKey)
+          this._publicFeed = new OwnFeed(this.keyPair.privateKey)
         }
         return this._publicFeed
       },
@@ -120,7 +134,10 @@ export default async (params: CollectionParams) => {
             map(profile => ({ hash: objectHash(profile), profile })),
             filter(data => data.hash !== this.profileHash),
             flatMap(async data => {
-              const hash = await publish(data.profile)
+              const hash = await publish({
+                publicKey: this.keyPair.publicKey,
+                profile: data.profile,
+              })
               await this.atomicSet('profileHash', data.hash)
               return { hash, profile: data.profile }
             }),
