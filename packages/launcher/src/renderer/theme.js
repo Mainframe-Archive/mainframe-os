@@ -582,6 +582,12 @@ export default {
       padding: '5px 10px',
       menuItemPadding: '5px 10px',
     },
+    maxWidth440: {
+      maxWidth: 440,
+    },
+    error: {
+      borderColor: COLORS.ERROR_RED,
+    },
   },
   Tooltip: {
     default: {

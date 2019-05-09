@@ -79,9 +79,13 @@ const AddContactDetail = styled.View`
   border-color: #efefef;
   flex-direction: row;
   align-items: center;
-  max-height: 46px;
+  ${props => props.maxHeight && `max-height: 46px;`}
   ${props => props.border && `border-width: 1px;`}
   ${props => props.noMarginTop && `margin-top: 0px; padding: 5px;`}
+`
+
+const DropDownContainer = styled.View`
+  width: 440px;
 `
 
 const AddContactDetailText = styled.View`
@@ -116,6 +120,7 @@ class InviteContactModal extends Component<Props, State> {
       selectedAddress: user.profile.ethAddress,
       insufficientFunds: false,
       txScreen: false,
+      dropdownError: false,
     }
   }
 
@@ -223,9 +228,6 @@ class InviteContactModal extends Component<Props, State> {
   sendApproveTX = async () => {
     const { user, contact } = this.props
     try {
-      // this.checkSufficientBalance()
-      // console.log(this.state.insufficientFunds)
-      // if (!this.state.insufficientFunds) {
       this.setState({ txProcessing: true, error: null })
       await rpc.sendInviteApprovalTX({
         userID: user.localID,
@@ -238,7 +240,6 @@ class InviteContactModal extends Component<Props, State> {
         },
       })
       this.getInviteSendTXDetails()
-      // }
     } catch (err) {
       this.setState({
         error: err.message,
@@ -249,20 +250,6 @@ class InviteContactModal extends Component<Props, State> {
       })
     }
   }
-
-  // checkSufficientBalance = () => {
-  //   const mft = filter(
-  //     this.props.wallets,
-  //     w => w.address === this.state.selectedAddress,
-  //   )[0].balances.mft
-  //   console.log(mft)
-  //   console.log(this.state.selectedAddress)
-  //   if (Number(mft) < 100) {
-  //     this.setState({ insufficientFunds: true })
-  //   } else {
-  //     this.setState({ insufficientFunds: false })
-  //   }
-  // }
 
   sendInvite = async () => {
     const { user, contact } = this.props
@@ -331,24 +318,20 @@ class InviteContactModal extends Component<Props, State> {
     }
   }
 
-  onDropDownChange = newAddr => {
-    const mft = filter(this.props.wallets, w => w.address === newAddr)[0]
-      .balances.mft
-    if (Number(mft) < 100) {
-      console.log('setting to true')
-      this.setState({ insufficientFunds: true, selectedAddress: newAddr })
-    } else {
-      console.log('setting to false')
-      this.setState({ insufficientFunds: false, selectedAddress: newAddr })
-    }
-  }
-
   validateBalance = feedback => {
     const addr = feedback.value
     const mft = filter(this.props.wallets, w => w.address === addr)[0].balances
       .mft
+    const eth = filter(this.props.wallets, w => w.address === addr)[0].balances
+      .eth
     if (Number(mft) < 100) {
+      this.setState({ dropdownError: true })
       return 'Insufficient MFT funds in this wallet'
+    } else if (!(Number(eth) > 0)) {
+      this.setState({ dropdownError: true })
+      return 'Insufficient ETH funds in this wallet'
+    } else {
+      this.setState({ dropdownError: false })
     }
   }
 
@@ -476,15 +459,17 @@ class InviteContactModal extends Component<Props, State> {
       return (
         <Section>
           {tooltipTitle}
-          <DropDown
-            options={options}
-            valueKey="key"
-            displayKey="data"
-            name="dropdown"
-            defaultValue={this.state.selectedAddress}
-            validation={value => this.validateBalance(value)}
-            // onChange={this.onDropDownChange}
-          />
+          <DropDownContainer>
+            <DropDown
+              options={options}
+              valueKey="key"
+              displayKey="data"
+              name="walletDropdown"
+              defaultValue={this.state.selectedAddress}
+              variant={[this.state.dropdownError ? 'error' : '', 'maxWidth440']}
+              validation={feedback => this.validateBalance(feedback)}
+            />
+          </DropDownContainer>
           {this.renderGasData()}
         </Section>
       )
@@ -580,7 +565,7 @@ class InviteContactModal extends Component<Props, State> {
             </Text>
           </Tooltip>
         </TitleTooltipContainer>
-        <AddContactDetail border>
+        <AddContactDetail border maxHeight>
           <AddContactDetailText>
             <Text variant={['greyDark23', 'bold']} size={12}>
               {'Contract'}
@@ -610,7 +595,7 @@ class InviteContactModal extends Component<Props, State> {
                 </Text>
               </Tooltip>
             </TitleTooltipContainer>
-            <AddContactDetail border>
+            <AddContactDetail border maxHeight>
               <AddContactDetailText>
                 <Text variant={['greyDark23', 'bold']} size={12}>
                   {'Staking'}
@@ -700,12 +685,11 @@ class InviteContactModal extends Component<Props, State> {
     let btnTitle
     let action
     let screenTitle
-
+    console.log(this.props.user)
     switch (this.props.type) {
       case 'invite':
         content = this.renderInvite()
         screenTitle = 'ADD A NEW CONTACT'
-        console.log(this.state.invitePending)
         if (!this.state.txScreen) {
           action = this.showTransactions
           btnTitle = 'INVITE'
@@ -723,10 +707,10 @@ class InviteContactModal extends Component<Props, State> {
         if (!this.state.txProcessing) {
           if (this.state.withdrawTXHash) {
             action = this.props.closeModal
-            btnTitle = 'Done'
+            btnTitle = 'DONE'
           } else {
             action = this.withdrawStake
-            btnTitle = 'Withdraw'
+            btnTitle = 'WITHDRAW'
           }
         }
         break
@@ -736,10 +720,10 @@ class InviteContactModal extends Component<Props, State> {
         if (!this.state.txProcessing) {
           if (this.state.declinedTXHash) {
             action = this.props.closeModal
-            btnTitle = 'Done'
+            btnTitle = 'DONE'
           } else {
             action = this.sendDeclineTX
-            btnTitle = 'Decline & Withdraw'
+            btnTitle = 'DECLINE & WITHDRAW'
           }
         }
         break

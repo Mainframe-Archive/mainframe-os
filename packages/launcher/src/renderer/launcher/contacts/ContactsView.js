@@ -1133,8 +1133,6 @@ class ContactsViewComponent extends Component<Props, State> {
 
   renderInviteModal() {
     const walletsArray = getWalletsArray(this.props)
-    const contact = this.getSelectedContact()
-
     return (
       this.state.inviteModalOpen && (
         <InviteContactModal
