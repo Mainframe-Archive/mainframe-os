@@ -1,26 +1,24 @@
 // @flow
 
-import path from 'path'
-import url from 'url'
-import StreamRPC from '@mainframe/rpc-stream'
+// import StreamRPC from '@mainframe/rpc-stream'
 import { app, BrowserWindow, WebContents, ipcMain } from 'electron'
 import { is } from 'electron-util'
 
-import { APP_TRUSTED_REQUEST_CHANNEL } from '../constants'
-import type { AppSession } from '../types'
+// import { APP_TRUSTED_REQUEST_CHANNEL } from '../constants'
+// import type { AppSession } from '../types'
 
 import './menu'
-import { AppContext } from './contexts'
-import { interceptWebRequests } from './permissions'
-import { registerStreamProtocol } from './storage'
-import createElectronTransport from './createElectronTransport'
+// import { AppContext } from './contexts'
+// import { interceptWebRequests } from './permissions'
+// import { registerStreamProtocol } from './storage'
+// import createElectronTransport from './createElectronTransport'
 import { createChannels } from './rpc'
+import { createLauncherWindow } from './windows'
 
 import { SystemContext } from './context/system'
 import { Environment } from './environment'
 import { createLogger } from './logger'
 
-const PORT = process.env.ELECTRON_WEBPACK_WDS_PORT || ''
 const { MAINFRAME_ENV, NODE_ENV } = process.env
 
 const ENV_NAME = MAINFRAME_ENV || 'local-test'
@@ -59,31 +57,6 @@ createChannels({
 // const appContexts: AppContexts = {}
 // const contextsBySandbox: WeakMap<WebContents, AppContext> = new WeakMap()
 // const contextsByWindow: WeakMap<BrowserWindow, AppContext> = new WeakMap()
-
-const newWindow = (params: Object = {}) => {
-  const window = new BrowserWindow({
-    minWidth: 1020,
-    minHeight: 702,
-    width: 1020,
-    height: 702,
-    show: false,
-    titleBarStyle: 'hidden',
-    ...params,
-  })
-
-  if (is.development) {
-    window.loadURL(`http://localhost:${PORT}`)
-  } else {
-    const formattedUrl = url.format({
-      pathname: path.join(__dirname, `index.html`),
-      protocol: 'file:',
-      slashes: true,
-    })
-    window.loadURL(formattedUrl)
-  }
-
-  return window
-}
 
 // App Lifecycle
 
@@ -174,32 +147,17 @@ const newWindow = (params: Object = {}) => {
 //   })
 // }
 
-const createLauncherWindow = async (userID?: ?string) => {
-  if (!system.initialized) {
+app.on('ready', async () => {
+  try {
     await system.initialize()
+    system.openLauncher(system.defaultUser)
+  } catch (err) {
+    logger.log({
+      level: 'error',
+      message: 'Could not start system',
+      error: err.toString(),
+    })
   }
-
-  const launcherWindow = newWindow({
-    width: 900,
-    height: 600,
-    minWidth: 900,
-    minHeight: 600,
-  })
-
-  const launcherContext = system.addLauncherContext({
-    userID: userID || system.defaultUser,
-    window: launcherWindow,
-  })
-
-  // Emitted when the window is closed.
-  launcherWindow.on('closed', async () => {
-    // launcherWindow = null
-    await launcherContext.clear()
-  })
-}
-
-app.on('ready', () => {
-  createLauncherWindow()
 })
 
 // Quit when all windows are closed.

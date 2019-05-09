@@ -64,9 +64,26 @@ export default {
           : { user: true, wallet: user.hasEthWallet() }
       } catch (error) {
         const message = 'Failed to open DB'
-        ctx.logger.log({ level: 'error', message, error })
+        ctx.logger.log({ level: 'error', message, error: error.toString() })
         throw new Error(message)
       }
+    },
+  },
+
+  // Windows management
+
+  launcher_open: {
+    params: {
+      userID: {
+        type: 'string',
+        optional: true,
+      },
+    },
+    async handler(
+      ctx: LauncherContext,
+      params: { userID?: ?string },
+    ): Promise<void> {
+      ctx.system.openLauncher(params.userID)
     },
   },
 
@@ -118,6 +135,10 @@ export default {
             message: 'Created user set as system default',
             id: user.localID,
           })
+
+          if (!ctx.system.syncing) {
+            await ctx.system.setupSync()
+          }
         }
 
         return user.localID

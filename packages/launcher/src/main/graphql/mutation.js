@@ -172,7 +172,7 @@ const importHDWalletMutation = mutationWithClientMutationId({
         message: 'ImportHDWallet mutation complete',
         walletID: wallet.localID,
       })
-      return { wallet }
+      return wallet
     } catch (error) {
       ctx.logger.log({
         level: 'error',

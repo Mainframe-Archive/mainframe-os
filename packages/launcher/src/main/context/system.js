@@ -1,6 +1,6 @@
 // @flow
 
-import type { BrowserWindow, WebContents } from 'electron'
+import type { WebContents } from 'electron'
 import { getPassword, setPassword } from 'keytar'
 import nanoid from 'nanoid'
 
@@ -9,6 +9,7 @@ import { createDB } from '../db'
 import type { DB } from '../db/types'
 import type { Environment } from '../environment'
 import type { Logger } from '../logger'
+import { createLauncherWindow } from '../windows'
 
 import { LauncherContext } from './launcher'
 import { UserContext } from './user'
@@ -18,12 +19,6 @@ const PASSWORD_SERVICE = 'MainframeOS'
 export type ContextParams = {
   env: Environment,
   logger: Logger,
-}
-
-export type AddLauncherParams = {
-  launcherID?: ?string,
-  userID?: ?string,
-  window: BrowserWindow,
 }
 
 export class SystemContext {
@@ -36,6 +31,7 @@ export class SystemContext {
   dbReady: Promise<DB>
   env: Environment
   initialized: boolean = false
+  syncing: boolean = false
   logger: Logger
 
   constructor(params: ContextParams) {
@@ -55,6 +51,8 @@ export class SystemContext {
       config: this.config.store,
     })
   }
+
+  // Getters
 
   get config(): Config {
     return this.env.config
@@ -77,6 +75,8 @@ export class SystemContext {
     }
   }
 
+  // Lifecycle
+
   async initialize() {
     this.logger.debug('Initialize')
 
@@ -91,6 +91,9 @@ export class SystemContext {
           } else {
             await this.openDB(password)
             this.logger.debug('Database opened using saved password')
+            if (this.config.has('defaultUser')) {
+              await this.setupSync()
+            }
           }
         } catch (error) {
           this.logger.log({
@@ -108,6 +111,36 @@ export class SystemContext {
 
     this.initialized = true
   }
+
+  async setupSync() {
+    if (this.syncing) {
+      this.logger.warn('Already syncing, ignoring call to setup sync')
+      return
+    }
+
+    this.logger.debug('Setup sync')
+
+    const db = this.db
+    if (db == null) {
+      throw new Error('Could not setup syncing without an opened database')
+    }
+    if (this.defaultUser == null) {
+      throw new Error('Could not setup syncing without a default user')
+    }
+
+    const user = await db.users.findOne(this.defaultUser).exec()
+    if (user == null) {
+      throw new Error('Default user not found')
+    }
+
+    const bzz = user.getBzz()
+    db.peers.setupSync(bzz)
+    db.users.setupSync()
+
+    this.syncing = true
+  }
+
+  // DB
 
   async getPassword(): Promise<string | null> {
     try {
@@ -161,6 +194,8 @@ export class SystemContext {
     return db
   }
 
+  // Contexts and windows
+
   getLauncherContext(idOrContents: string | WebContents): ?LauncherContext {
     const id =
       typeof idOrContents === 'string'
@@ -171,39 +206,33 @@ export class SystemContext {
     }
   }
 
-  addLauncherContext(params: AddLauncherParams): LauncherContext {
-    const info = { launcherID: params.launcherID, windowID: params.window.id }
-
-    if (params.launcherID != null) {
-      const byID = this.getLauncherContext(params.launcherID)
-      if (byID != null) {
-        this.logger.log({
-          ...info,
-          level: 'warn',
-          message: 'A launcher context with this ID already exists',
-        })
-        return byID
+  openLauncher(userID?: ?string): LauncherContext {
+    if (userID != null) {
+      // $FlowFixMe: Object.values losing type
+      const existing: ?LauncherContext = Object.values(this._launchers).find(
+        // $FlowFixMe: Object.values losing type
+        ctx => ctx.userID === userID,
+      )
+      if (existing != null) {
+        existing.showWindow()
+        return existing
       }
     }
 
-    const byContents = this.getLauncherContext(params.window.webContents)
-    if (byContents != null) {
-      this.logger.log({
-        ...info,
-        level: 'warn',
-        message: 'A launcher context with this window already exists',
-      })
-      return byContents
-    }
-
     const ctx = new LauncherContext({
-      launcherID: params.launcherID || nanoid(),
+      launcherID: nanoid(),
       system: this,
-      userID: params.userID,
-      window: params.window,
+      userID,
+      window: createLauncherWindow(),
     })
     this._launchers[ctx.launcherID] = ctx
-    this._launchersByContents.set(params.window.webContents, ctx.launcherID)
+    this._launchersByContents.set(ctx.window.webContents, ctx.launcherID)
+
+    ctx.window.on('closed', async () => {
+      // await ctx.clear()
+      this._launchersByContents.delete(ctx.window.webContents)
+      delete this._launchers[ctx.launcherID]
+    })
 
     return ctx
   }

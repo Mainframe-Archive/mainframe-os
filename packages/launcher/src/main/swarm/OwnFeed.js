@@ -9,7 +9,7 @@ export type OwnFeedParams = {
   privateKey: string,
 }
 
-export class OwnFeed {
+export default class OwnFeed {
   static createJSON() {
     const feed = new OwnFeed()
     return feed.toJSON()

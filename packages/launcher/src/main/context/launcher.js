@@ -110,6 +110,13 @@ export class LauncherContext {
     return this._graphqlContext
   }
 
+  showWindow() {
+    if (this.window.isMinimized()) {
+      this.window.restore()
+    }
+    this.window.show()
+  }
+
   async getUserChecked(): Promise<?Object> {
     if (this.db == null || this.userID == null) {
       return

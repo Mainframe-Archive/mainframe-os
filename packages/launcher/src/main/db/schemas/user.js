@@ -19,6 +19,9 @@ export default {
     },
     keyPair,
     profile: userProfile,
+    profileHash: {
+      type: 'string',
+    },
     privateProfile: {
       type: 'boolean',
       default: true,
