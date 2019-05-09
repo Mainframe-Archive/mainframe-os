@@ -314,6 +314,20 @@ const key = 'my-key'
 const data = await sdk.storage.get(key)
 ```
 
+### storage.delete()
+
+Deletes a file from the app's manifest.
+
+**returns:** Promise<void>
+
+**Example:**
+
+```
+const key = 'my-key'
+
+const data = await sdk.storage.delete(key)
+```
+
 ## Types
 
 ### Contact:
