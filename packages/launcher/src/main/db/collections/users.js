@@ -4,11 +4,12 @@ import Bzz from '@erebos/api-bzz-node'
 import { createKeyPair, sign } from '@erebos/secp256k1'
 import nanoid from 'nanoid'
 import objectHash from 'object-hash'
+import { Subscription } from 'rxjs'
 import { debounceTime, filter, flatMap, map } from 'rxjs/operators'
 
 import { MF_PREFIX } from '../../../constants'
 
-import { writeProfile } from '../../data/protocols'
+import { writePeer } from '../../data/protocols'
 import OwnFeed from '../../swarm/OwnFeed'
 import { createPublisher } from '../../swarm/feeds'
 
@@ -17,6 +18,7 @@ import type { CollectionParams } from '../types'
 
 import schema from '../schemas/user'
 import type { UserProfile } from '../schemas/userProfile'
+import { generateKeyPair } from '../utils'
 
 export default async (params: CollectionParams) => {
   const logger = params.logger.child({ collection: COLLECTION_NAMES.USERS })
@@ -26,42 +28,54 @@ export default async (params: CollectionParams) => {
     schema,
     statics: {
       async create(data: { profile: UserProfile, privateProfile?: boolean }) {
-        const keyPair = createKeyPair()
         return await this.insert({
           ...data,
           localID: nanoid(),
-          keyPair: {
-            publicKey: keyPair.getPublic('hex'),
-            privateKey: keyPair.getPrivate('hex'),
-          },
+          keyPair: generateKeyPair(),
           firstContactFeed: OwnFeed.createJSON(),
         })
       },
 
-      async setupSync() {
-        logger.debug('Setup collection sync')
+      async startSync() {
+        if (this._sync != null) {
+          logger.warn('Collection already syncing, ignoring startSync() call')
+          return
+        }
+
+        logger.debug('Start collection sync')
+        this._sync = new Subscription()
 
         const docs = await this.find().exec()
         docs.forEach(doc => {
-          doc.setupSync()
+          this._sync.add(doc.startSync())
         })
 
-        this.insert$
-          .pipe(
-            flatMap(async event => {
-              const doc = await this.findOne(event.doc).exec()
-              doc.setupSync()
+        this._sync.add(
+          this.insert$
+            .pipe(
+              flatMap(async event => {
+                const doc = await this.findOne(event.doc).exec()
+                this._sync.add(doc.startSync())
+              }),
+            )
+            .subscribe({
+              error: err => {
+                logger.log({
+                  level: 'error',
+                  message: 'Collection sync error with added doc',
+                  error: err.toString(),
+                })
+              },
             }),
-          )
-          .subscribe({
-            error: err => {
-              logger.log({
-                level: 'error',
-                message: 'Collection sync error with added doc',
-                error: err.toString(),
-              })
-            },
-          })
+        )
+      },
+
+      async stopSync() {
+        if (this._sync != null) {
+          logger.debug('Stop collection sync')
+          this._sync.unsubscribe()
+          this._sync = null
+        }
       },
     },
     methods: {
@@ -82,7 +96,7 @@ export default async (params: CollectionParams) => {
       },
 
       getPublicID(): string {
-        return this.getPublicFeed().address.replace('0x', MF_PREFIX.CONTACT)
+        return this.getPublicFeed().address.replace('0x', MF_PREFIX.PEER)
       },
 
       getPublicFeed(): OwnFeed {
@@ -97,6 +111,12 @@ export default async (params: CollectionParams) => {
           this._firstContactFeed = new OwnFeed(this.firstContactFeed.privateKey)
         }
         return this._firstContactFeed
+      },
+
+      getSharedKey(peerKey: any): Buffer {
+        return createKeyPair(this.keyPair.privateKey)
+          .derive(peerKey)
+          .toBuffer()
       },
 
       async addEthHDWallet(id: string): Promise<void> {
@@ -126,7 +146,7 @@ export default async (params: CollectionParams) => {
         const publish = createPublisher({
           bzz: this.getBzz(),
           feed: this.getPublicFeed(),
-          transform: writeProfile,
+          transform: writePeer,
         })
         this._publicProfilePublication = this.profile$
           .pipe(
@@ -160,6 +180,10 @@ export default async (params: CollectionParams) => {
               })
             },
           })
+
+        return () => {
+          this.stopPublicProfilePublication()
+        }
       },
 
       stopPublicProfilePublication() {
@@ -174,11 +198,11 @@ export default async (params: CollectionParams) => {
         }
       },
 
-      setupPublicProfilePublication() {
+      startPublicProfileToggle() {
         if (this._publicProfilePublicationToggle == null) {
           logger.log({
             level: 'debug',
-            message: 'Setup public profile publication',
+            message: 'Start public profile toggle',
             id: this.localID,
           })
           this._publicProfilePublicationToggle = this.privateProfile$.subscribe(
@@ -211,18 +235,42 @@ export default async (params: CollectionParams) => {
             id: this.localID,
           })
         }
+
+        return () => {
+          this.stopPublicProfileToggle()
+        }
       },
 
-      setupSync() {
+      stopPublicProfileToggle() {
+        this.stopPublicProfilePublication()
+        if (this._publicProfilePublicationToggle != null) {
+          logger.log({
+            level: 'debug',
+            message: 'Stop public profile toggle',
+            id: this.localID,
+          })
+          this._publicProfilePublicationToggle.unsubscribe()
+          this._publicProfilePublicationToggle = null
+        }
+      },
+
+      startSync() {
+        if (this._sync != null) {
+          logger.log({
+            level: 'warn',
+            message: 'Document is already syncinc, ignoring startSync() call',
+            id: this.localID,
+          })
+          return
+        }
+
         logger.log({
           level: 'debug',
-          message: 'Setup document sync',
+          message: 'Start document sync',
           id: this.localID,
         })
 
-        this.setupPublicProfilePublication()
-
-        this.deleted$.subscribe(deleted => {
+        const deletedSub = this.deleted$.subscribe(deleted => {
           if (deleted) {
             logger.log({
               level: 'debug',
@@ -230,12 +278,29 @@ export default async (params: CollectionParams) => {
               id: this.localID,
             })
             this.stopPublicProfilePublication()
-            if (this._publicProfilePublicationToggle != null) {
-              this._publicProfilePublicationToggle.unsubscribe()
-              this._publicProfilePublicationToggle = null
-            }
+            this.stopPublicProfileToggle()
           }
         })
+
+        this._sync = new Subscription()
+        this._sync.add(deletedSub)
+        this._sync.add(this.startPublicProfileToggle())
+
+        return () => {
+          this.stopSync()
+        }
+      },
+
+      stopSync() {
+        if (this._sync != null) {
+          logger.log({
+            level: 'debug',
+            message: 'Stop document sync',
+            id: this.localID,
+          })
+          this._sync.unsubscribe()
+          this._sync = null
+        }
       },
     },
   })

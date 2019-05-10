@@ -1,11 +1,13 @@
 // @flow
 
 import type Bzz from '@erebos/api-bzz-node'
+import { createPublic } from '@erebos/secp256k1'
+import { Subscription } from 'rxjs'
 import { flatMap } from 'rxjs/operators'
 
 import { MF_PREFIX } from '../../../constants'
 
-import { readProfile } from '../../data/protocols'
+import { readPeer } from '../../data/protocols'
 import { createSubscriber } from '../../swarm/feeds'
 
 import { COLLECTION_NAMES } from '../constants'
@@ -20,35 +22,58 @@ export default async (params: CollectionParams) => {
     name: COLLECTION_NAMES.PEERS,
     schema,
     statics: {
-      async setupSync(bzz: Bzz) {
-        logger.debug('Setup collection sync')
+      async startSync(bzz: Bzz) {
+        if (this._sync != null) {
+          logger.warn('Collection already syncing, ignoring startSync() call')
+          return
+        }
+
+        logger.debug('Start collection sync')
+        this._sync = new Subscription()
 
         const docs = await this.find().exec()
         docs.forEach(doc => {
-          doc.setupSync(bzz)
+          this._sync.add(doc.startSync(bzz))
         })
 
-        this.insert$
-          .pipe(
-            flatMap(async event => {
-              const doc = await this.findOne(event.doc).exec()
-              doc.setupSync()
+        this._sync.add(
+          this.insert$
+            .pipe(
+              flatMap(async event => {
+                const doc = await this.findOne(event.doc).exec()
+                this.__sync.add(doc.startSync(bzz))
+              }),
+            )
+            .subscribe({
+              error: err => {
+                logger.log({
+                  level: 'error',
+                  message: 'Collection sync error with added doc',
+                  error: err.toString(),
+                })
+              },
             }),
-          )
-          .subscribe({
-            error: err => {
-              logger.log({
-                level: 'error',
-                message: 'Collection sync error with added doc',
-                error: err.toString(),
-              })
-            },
-          })
+        )
+      },
+
+      async stopSync() {
+        if (this._sync != null) {
+          logger.debug('Stop collection sync')
+          this._sync.unsubscribe()
+          this._sync = null
+        }
       },
     },
     methods: {
       getPublicID(): string {
-        return this.publicFeed.replace('0x', MF_PREFIX.CONTACT)
+        return this.publicFeed.replace('0x', MF_PREFIX.PEER)
+      },
+
+      getPublicKey(): ?string {
+        if (this._publicKey == null && this.publicKey != null) {
+          this._publicKey = createPublic(this.publicKey).getPublic()
+        }
+        return this._publicKey
       },
 
       startPublicFeedSubscription(bzz: Bzz) {
@@ -70,7 +95,7 @@ export default async (params: CollectionParams) => {
         this._publicFeedSubscription = createSubscriber({
           bzz,
           feed: { user: this.publicFeed },
-          transform: readProfile,
+          transform: readPeer,
         })
           .pipe(
             flatMap(async data => {
@@ -104,30 +129,32 @@ export default async (params: CollectionParams) => {
               })
             },
           })
+
+        return () => {
+          this.stopPublicFeedSubscription()
+        }
       },
 
-      stopPublicFeedPublication() {
-        if (this._publicFeedPublication != null) {
+      stopPublicFeedSubscription() {
+        if (this._publicFeedSubscription != null) {
           logger.log({
             level: 'debug',
             message: 'Stop public profile subscription',
             id: this.localID,
           })
-          this._publicFeedPublication.unsubscribe()
-          this._publicFeedPublication = null
+          this._publicFeedSubscription.unsubscribe()
+          this._publicFeedSubscription = null
         }
       },
 
-      setupSync(bzz: Bzz) {
+      startSync(bzz: Bzz) {
         logger.log({
           level: 'debug',
-          message: 'Setup document sync',
+          message: 'Start document sync',
           id: this.localID,
         })
 
-        this.startPublicFeedSubscription(bzz)
-
-        this.deleted$.subscribe(deleted => {
+        const deletedSub = this.deleted$.subscribe(deleted => {
           if (deleted) {
             logger.log({
               level: 'debug',
@@ -137,6 +164,26 @@ export default async (params: CollectionParams) => {
             this.stopPublicFeedSubscription()
           }
         })
+
+        this._sync = new Subscription()
+        this._sync.add(deletedSub)
+        this._sync.add(this.startPublicFeedSubscription(bzz))
+
+        return () => {
+          this.stopSync()
+        }
+      },
+
+      stopSync() {
+        if (this._sync != null) {
+          logger.log({
+            level: 'debug',
+            message: 'Stop document sync',
+            id: this.localID,
+          })
+          this._sync.unsubscribe()
+          this._sync = null
+        }
       },
     },
   })

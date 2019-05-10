@@ -137,7 +137,7 @@ export default {
           })
 
           if (!ctx.system.syncing) {
-            await ctx.system.setupSync()
+            await ctx.system.startSync()
           }
         }
 

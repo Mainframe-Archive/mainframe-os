@@ -4,11 +4,6 @@ import type Bzz from '@erebos/api-bzz-node'
 import { pubKeyToAddress } from '@erebos/keccak256'
 import { createKeyPair, type KeyPair } from '@erebos/secp256k1'
 
-export type OwnFeedParams = {
-  address?: ?string,
-  privateKey: string,
-}
-
 export default class OwnFeed {
   static createJSON() {
     const feed = new OwnFeed()

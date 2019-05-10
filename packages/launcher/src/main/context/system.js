@@ -92,7 +92,7 @@ export class SystemContext {
             await this.openDB(password)
             this.logger.debug('Database opened using saved password')
             if (this.config.has('defaultUser')) {
-              await this.setupSync()
+              await this.startSync()
             }
           }
         } catch (error) {
@@ -112,13 +112,11 @@ export class SystemContext {
     this.initialized = true
   }
 
-  async setupSync() {
+  async startSync() {
     if (this.syncing) {
-      this.logger.warn('Already syncing, ignoring call to setup sync')
+      this.logger.warn('Already syncing, ignoring startSync() call')
       return
     }
-
-    this.logger.debug('Setup sync')
 
     const db = this.db
     if (db == null) {
@@ -133,11 +131,29 @@ export class SystemContext {
       throw new Error('Default user not found')
     }
 
-    const bzz = user.getBzz()
-    db.peers.setupSync(bzz)
-    db.users.setupSync()
+    this.logger.debug('Start sync')
+
+    db.peers.startSync(user.getBzz())
+    db.users.startSync()
 
     this.syncing = true
+  }
+
+  stopSync() {
+    if (!this.syncing) {
+      return
+    }
+
+    const db = this.db
+    if (db == null) {
+      this.logger.debug('No opened database to stop sync')
+    } else {
+      this.logger.debug('Stop sync')
+      db.peers.stopSync()
+      db.users.stopSync()
+    }
+
+    this.syncing = false
   }
 
   // DB

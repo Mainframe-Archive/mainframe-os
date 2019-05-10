@@ -14,7 +14,7 @@ import {
 import { fromGlobalId, globalIdField, nodeDefinitions } from 'graphql-relay'
 
 import { MF_PREFIX } from '../../constants'
-import { isValidContactID } from '../../validation'
+import { isValidPeerID } from '../../validation'
 
 import type { GraphQLContext } from '../context/graphql'
 import { readProfile } from '../data/protocols'
@@ -886,8 +886,8 @@ export const lookup = new GraphQLObjectType({
           args,
         })
         try {
-          if (!isValidContactID(args.publicID)) {
-            throw new Error('Invalid contact ID')
+          if (!isValidPeerID(args.publicID)) {
+            throw new Error('Invalid peer ID')
           }
           const bzz = await ctx.user.getBzz()
           const hash = await bzz.getFeedValue(

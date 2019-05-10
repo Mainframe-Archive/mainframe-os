@@ -2,11 +2,24 @@
 
 import semver from 'semver'
 
+const validatePeer = (data: Object = {}) => {
+  if (data.publicKey == null) {
+    throw new Error('Missing peer public key')
+  }
+  return data
+}
+
 export const PROTOCOLS = {
-  profile_v1: {
-    name: 'profile',
-    readVersion: '^1.0.0',
-    writeVersion: '1.0.0',
+  peer_v1: {
+    name: 'peer',
+    read: {
+      process: validatePeer,
+      version: '^1.0.0',
+    },
+    write: {
+      process: validatePeer,
+      version: '1.0.0',
+    },
   },
 }
 
@@ -21,8 +34,8 @@ export const createWriter = (key: Protocol) => {
 
   return (data: any): Payload => ({
     mainframe: protocol.name,
-    version: protocol.writeVersion,
-    data,
+    version: protocol.write.version,
+    data: protocol.write.process(data),
   })
 }
 
@@ -32,19 +45,19 @@ export const createReader = (key: Protocol) => {
     throw new Error(`Unsupported protocol: ${key}`)
   }
 
-  return (payload: Object) => {
+  return (payload: Payload) => {
     if (payload.mainframe !== protocol.name) {
       throw new Error('Unsupported payload')
     }
     if (!semver.valid(payload.version)) {
       throw new Error(`Invalid version: ${payload.version}`)
     }
-    if (!semver.satisfies(payload.version, protocol.readVersion)) {
+    if (!semver.satisfies(payload.version, protocol.read.version)) {
       throw new Error(`Unsupported version: ${payload.version}`)
     }
-    return payload.data
+    return protocol.read.process(payload.data)
   }
 }
 
-export const readProfile = createReader('profile_v1')
-export const writeProfile = createWriter('profile_v1')
+export const readPeer = createReader('peer_v1')
+export const writePeer = createWriter('peer_v1')

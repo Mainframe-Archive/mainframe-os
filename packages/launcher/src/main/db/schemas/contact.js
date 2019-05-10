@@ -2,8 +2,8 @@
 
 import { COLLECTION_NAMES } from '../constants'
 
-import bidirectionalFeed from './bidirectionalFeed'
 import ethAddress from './ethAddress'
+import keyPair from './keyPair'
 import userProfile from './userProfile'
 
 const invite = {
@@ -60,20 +60,22 @@ export default {
     peer: {
       type: 'string',
       ref: COLLECTION_NAMES.PEERS,
+      final: true,
     },
+    keyPair: keyPair,
     profile: userProfile,
-    aliasName: {
-      type: 'string',
-    },
-    sharedFeed: bidirectionalFeed,
+    readAddress: ethAddress,
     feedRequestSent: {
       type: 'boolean',
       default: false,
+    },
+    aliasName: {
+      type: 'string',
     },
     invite,
     acceptanceSignature: {
       type: 'string',
     },
   },
-  required: ['peer', 'profile', 'sharedFeed'],
+  required: ['keyPair', 'profile', 'readAddress'],
 }
