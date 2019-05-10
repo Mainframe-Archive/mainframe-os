@@ -28,6 +28,7 @@ export const NETWORKS = {
   '2': 'morden',
   '3': 'ropsten',
   '4': 'rinkeby',
+  '5': 'goerli',
   '42': 'kovan',
   ganache: 'ganache',
 }
