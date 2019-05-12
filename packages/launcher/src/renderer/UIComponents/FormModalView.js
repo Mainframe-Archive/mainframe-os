@@ -38,7 +38,6 @@ const ChildrenContainer = styled.View`
 
 export default class FormModalView extends Component<Props> {
   render() {
-    console.log(this.props.noButtons)
     return (
       <ModalView
         title={this.props.title}

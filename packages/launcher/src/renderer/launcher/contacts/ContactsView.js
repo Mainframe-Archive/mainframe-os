@@ -12,7 +12,8 @@ import {
   type Environment,
 } from 'react-relay'
 import { fetchQuery } from 'relay-runtime'
-import { debounce } from 'lodash'
+import { debounce, sortBy, filter } from 'lodash'
+
 import { shell } from 'electron'
 import {
   Text,
@@ -25,7 +26,6 @@ import {
   Radio,
 } from '@morpheus-ui/core'
 import { type FormSubmitPayload } from '@morpheus-ui/forms'
-import { sortBy } from 'lodash'
 
 import PlusIcon from '@morpheus-ui/icons/PlusSymbolSm'
 import SearchIcon from '@morpheus-ui/icons/SearchSm'
@@ -35,6 +35,7 @@ import { EnvironmentContext } from '../RelayEnvironment'
 import Avatar from '../../UIComponents/Avatar'
 import SvgSelectedPointer from '../../UIComponents/SVGSelectedPointer'
 
+import Notification from '../../UIComponents/Notification'
 import FormModalView from '../../UIComponents/FormModalView'
 import Loader from '../../UIComponents/Loader'
 import { InformationBox } from '../identities/IdentitiesView'
@@ -166,6 +167,11 @@ const AvatarWrapper = styled.View`
   flex-direction: row;
   align-items: center;
   margin-bottom: 20px;
+  ${props =>
+    props.marginTop &&
+    `  margin-bottom: 0px;
+      margin-top: 10px;
+    `}
 `
 
 const ContactName = styled.View``
@@ -184,10 +190,34 @@ const RadioTextContainer = styled.View`
   flex: 1;
 `
 
+const WalletContainer = styled.View`
+  display: flex;
+  flex-direction: column;
+`
+
 export type SubmitContactInput = {
   feedHash: string,
   name: String,
 }
+
+export type Wallet = {
+  localID: string,
+  name: ?string,
+  accounts: WalletAccounts,
+  type?: 'hd' | 'ledger',
+}
+
+export type Wallets = {
+  ethWallets: {
+    hd: Array<Wallet>,
+    ledger: Array<Wallet>,
+  },
+}
+
+export type WalletAccounts = Array<{
+  address: string,
+  balances: { mft: string, eth: string },
+}>
 
 type Props = {
   relay: {
@@ -198,6 +228,7 @@ type Props = {
     inviteStake: ?number,
     userContacts: Array<Contact>,
   },
+  wallets: Wallets,
 }
 
 type State = {
@@ -225,6 +256,8 @@ type State = {
     publicFeed: string,
     publicKey: string,
   },
+  showDeleteNotification: boolean,
+  showDeclineNotification: boolean,
 }
 
 const CONTACTS_CHANGED_SUBSCRIPTION = graphql`
@@ -289,7 +322,9 @@ const peerLookupQuery = graphql`
 const getWalletsArray = (props: Props): Array<Wallet> => {
   const { ethWallets } = props.wallets
   const wallets: Array<Wallet> = [
+    // $FlowFixMe: no flatmap support
     ...ethWallets.hd.flatMap(w => w.accounts),
+    // $FlowFixMe: no flatmap support
     ...ethWallets.ledger.flatMap(w => w.accounts),
   ]
   return wallets
@@ -304,6 +339,8 @@ class ContactsViewComponent extends Component<Props, State> {
     const { user } = this.props
     this.state = {
       selectedContact: user.localID,
+      showDeclineNotification: false,
+      showDeleteNotification: false,
     }
   }
 
@@ -545,6 +582,18 @@ class ContactsViewComponent extends Component<Props, State> {
     this.setState({ radio: value })
   }
 
+  closeNotification = () => {
+    this.setState({
+      showDeclineNotification: false,
+      showDeleteNotification: false,
+    })
+  }
+
+  showDeclineNotification = () => {
+    // TODO pass correct wallet info
+    this.setState({ showDeclineNotification: true })
+  }
+
   // RENDER
 
   renderContactsList() {
@@ -645,7 +694,7 @@ class ContactsViewComponent extends Component<Props, State> {
           </Column>
           <Column>
             <Button
-              variant={['mediumUppercase', 'marginLeftt10']}
+              variant={['mediumUppercase', 'marginLeftt10', 'hoverShadow']}
               theme={{ minWidth: '100%' }}
               title="DECLINE & CLAIM MFT"
               onPress={() => this.rejectContact(contact)}
@@ -658,6 +707,7 @@ class ContactsViewComponent extends Component<Props, State> {
   }
 
   renderDelete = (contact: Contact) => {
+    // TODO trigger notification after delete actually happens
     if (contact.connectionState === 'DECLINED') {
       return (
         <Row size={1}>
@@ -1127,7 +1177,96 @@ class ContactsViewComponent extends Component<Props, State> {
               </Column>
             </Row> */}
         </ScrollView>
+        {this.renderWithdrawNotificationModal()}
       </RightContainer>
+    )
+  }
+
+  renderWithdrawNotificationModal() {
+    const walletsArray = getWalletsArray(this.props)
+    const mft = filter(
+      walletsArray,
+      w => w.address === this.props.user.defaultEthAddress,
+    )[0].balances.mft
+    const eth = filter(
+      walletsArray,
+      w => w.address === this.props.user.defaultEthAddress,
+    )[0].balances.eth
+
+    return (
+      this.state.showDeclineNotification && (
+        <Notification onRequestClose={this.closeNotification}>
+          <Text color="#fff" size={13} variant={('bold', 'marginTop5')}>
+            {this.props.contacts
+              ? this.props.contacts.inviteStake
+              : '' + ' MFT have been added to your wallet.'}
+          </Text>
+          <AvatarWrapper marginTop>
+            <Blocky>
+              <Avatar id={this.props.user.defaultEthAddress} size="small" />
+            </Blocky>
+            <WalletContainer>
+              <Text
+                color="#fff"
+                variant={['greyDark23', 'ellipsis']}
+                theme={{ fontStyle: 'normal' }}
+                size={12}>
+                {this.props.user.defaultEthAddress}
+              </Text>
+              <Text
+                color="#fff"
+                variant={['greyDark23', 'mono']}
+                theme={{ fontStyle: 'normal' }}
+                size={12}>
+                {Number(eth)
+                  .toFixed(4)
+                  .toString()
+                  .slice(0, 10) +
+                  ' ETH   ' +
+                  Number(mft)
+                    .toFixed(4)
+                    .toString()
+                    .slice(0, 10) +
+                  ' MFT'}
+              </Text>
+            </WalletContainer>
+          </AvatarWrapper>
+        </Notification>
+      )
+    )
+  }
+
+  renderDeleteNotificationModal(deletedContact) {
+    console.log(deletedContact)
+    return (
+      this.state.showDeleteNotification && (
+        <Notification onRequestClose={this.closeNotification}>
+          <Text color="#fff" size={13} variant={('bold', 'marginTop5')}>
+            {deletedContact.name + ' has been deleted.'}
+          </Text>
+          <AvatarWrapper marginTop>
+            <Blocky>
+              <Avatar id={deletedContact.ethAddress} size="small" />
+            </Blocky>
+            <WalletContainer>
+              <Text
+                color="#fff"
+                variant={['greyDark23']}
+                theme={{ fontStyle: 'normal' }}
+                size={12}>
+                {deletedContact.name}
+              </Text>
+              <Text
+                color="#fff"
+                variant={['greyDark23', 'mono']}
+                theme={{ fontStyle: 'normal' }}
+                size={12}>
+                {deletedContact.ethAddress}
+              </Text>
+            </WalletContainer>
+          </AvatarWrapper>
+        </Notification>
+      )
     )
   }
 
@@ -1137,6 +1276,7 @@ class ContactsViewComponent extends Component<Props, State> {
       this.state.inviteModalOpen && (
         <InviteContactModal
           closeModal={this.closeModal}
+          showNotification={this.showDeclineNotification}
           contact={this.state.inviteModalOpen.contact}
           user={this.props.user}
           type={this.state.inviteModalOpen.type}

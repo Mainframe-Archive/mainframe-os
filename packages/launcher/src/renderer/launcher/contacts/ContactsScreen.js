@@ -6,7 +6,7 @@ import { graphql, createFragmentContainer, QueryRenderer } from 'react-relay'
 import { EnvironmentContext } from '../RelayEnvironment'
 import applyContext, { type CurrentUser } from '../LauncherContext'
 import RelayLoaderView from '../RelayLoaderView'
-import ContactsView from './ContactsView'
+import ContactsView, { type Wallets } from './ContactsView'
 
 import type { ContactsView_contacts as Contacts } from './__generated__/ContactsView_contacts.graphql'
 
@@ -18,6 +18,7 @@ type Props = QueryProps & {
   contacts: {
     userContacts: Contacts,
   },
+  wallets: Wallets,
 }
 
 type State = {

@@ -298,6 +298,10 @@ export default {
       iconColor: COLORS.PRIMARY_RED,
       iconHoverColor: COLORS.PRIMARY_RED,
     },
+    hoverShadow: {
+      hoverShadow: true,
+      borderHoverColor: 'transparent',
+    },
     modalButton: {
       titlePadding: '10px 30px',
       fontSize: 12,

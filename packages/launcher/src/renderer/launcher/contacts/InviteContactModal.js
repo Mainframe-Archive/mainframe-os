@@ -19,6 +19,7 @@ import applyContext, { type ContextProps } from '../LauncherContext'
 import { MFT_TOKEN_ADDRESSES } from '../../../constants'
 
 import type { InviteContactModal_contact as Contact } from './__generated__/InviteContactModal_contact.graphql.js'
+import type { WalletAccounts } from './ContactsView'
 
 export type TransactionType = 'invite' | 'retrieveStake' | 'declineInvite'
 
@@ -27,6 +28,8 @@ type Props = ContextProps & {
   contact: Contact,
   type: TransactionType,
   inviteStakeValue: ?number,
+  wallets: WalletAccounts,
+  showNotification: () => void,
 }
 
 type TXParams = {
@@ -55,6 +58,10 @@ type State = {
       | 'invite_sent'
       | 'error',
   },
+  txScreen: boolean,
+  selectedAddress: ?string,
+  dropdownError: boolean,
+  insufficientFunds: boolean,
 }
 
 const FormContainer = styled.View`
@@ -117,6 +124,7 @@ class InviteContactModal extends Component<Props, State> {
     super(props)
     const { user } = this.props
     this.state = {
+      txProcessing: false,
       selectedAddress: user.profile.ethAddress,
       insufficientFunds: false,
       txScreen: false,
@@ -182,12 +190,16 @@ class InviteContactModal extends Component<Props, State> {
 
   async getInviteApproveTXDetails() {
     const { user, contact } = this.props
+    console.log('ici')
+
     try {
       const res = await rpc.getInviteTXDetails({
         type: 'approve',
         userID: user.localID,
         contactID: contact.localID,
       })
+      console.log(res)
+
       this.setState({
         txParams: res,
         invitePending: {
@@ -289,6 +301,7 @@ class InviteContactModal extends Component<Props, State> {
         declinedTXHash: res,
       })
       this.props.closeModal()
+      this.props.showNotification()
     } catch (err) {
       this.setState({
         txProcessing: false,
@@ -467,7 +480,10 @@ class InviteContactModal extends Component<Props, State> {
               name="walletDropdown"
               defaultValue={this.state.selectedAddress}
               variant={[this.state.dropdownError ? 'error' : '', 'maxWidth440']}
-              validation={feedback => this.validateBalance(feedback)}
+              validation={
+                this.state.invitePending &&
+                (feedback => this.validateBalance(feedback))
+              }
             />
           </DropDownContainer>
           {this.renderGasData()}
@@ -543,15 +559,8 @@ class InviteContactModal extends Component<Props, State> {
     }
   }
 
-  renderInviteTransactions(title: string, dropdown?: boolean) {
+  renderInviteTransactions() {
     const { balances, invitePending, txParams } = this.state
-
-    const balanceLabel = balances ? (
-      <Text variant="greyDark23" size={11}>{`MFT: ${balances.mft}, ETH: ${
-        balances.eth
-      }`}</Text>
-    ) : null
-
     const buttons = this.getButtonStatus(this.sendApproveTX, this.sendInvite)
 
     return (
@@ -652,7 +661,7 @@ class InviteContactModal extends Component<Props, State> {
     return (
       <>
         {this.renderContactSection('DECLINE INVITATION FROM')}
-        {this.renderTransactionSection('CLAIM 100 MFT ON')}
+        {this.renderTransactionSection('CLAIM 100 MFT ON', true)}
         {declinedTXHash}
         {activity}
       </>
@@ -685,7 +694,7 @@ class InviteContactModal extends Component<Props, State> {
     let btnTitle
     let action
     let screenTitle
-    console.log(this.props.user)
+    console.log(this.props.wallets)
     switch (this.props.type) {
       case 'invite':
         content = this.renderInvite()
@@ -723,7 +732,7 @@ class InviteContactModal extends Component<Props, State> {
             btnTitle = 'DONE'
           } else {
             action = this.sendDeclineTX
-            btnTitle = 'DECLINE & WITHDRAW'
+            btnTitle = 'DECLINE / CLAIM'
           }
         }
         break
