@@ -14,10 +14,10 @@ import type { FragmentReference } from "relay-runtime";
 declare export opaque type ContactsScreen_user$ref: FragmentReference;
 export type ContactsScreen_user = {|
   +localID: string,
-  +defaultEthAddress: ?string,
   +publicID: string,
   +profile: {|
-    +name: string
+    +name: string,
+    +ethAddress: ?string,
   |},
   +contacts: $ReadOnlyArray<{|
     +localID: string,
@@ -58,13 +58,22 @@ v1 = {
   "args": null,
   "storageKey": null
 },
-v2 = {
-  "kind": "ScalarField",
-  "alias": null,
-  "name": "name",
-  "args": null,
-  "storageKey": null
-};
+v2 = [
+  {
+    "kind": "ScalarField",
+    "alias": null,
+    "name": "name",
+    "args": null,
+    "storageKey": null
+  },
+  {
+    "kind": "ScalarField",
+    "alias": null,
+    "name": "ethAddress",
+    "args": null,
+    "storageKey": null
+  }
+];
 return {
   "kind": "Fragment",
   "name": "ContactsScreen_user",
@@ -73,13 +82,6 @@ return {
   "argumentDefinitions": [],
   "selections": [
     v0,
-    {
-      "kind": "ScalarField",
-      "alias": null,
-      "name": "defaultEthAddress",
-      "args": null,
-      "storageKey": null
-    },
     v1,
     {
       "kind": "LinkedField",
@@ -89,9 +91,7 @@ return {
       "args": null,
       "concreteType": "NamedProfile",
       "plural": false,
-      "selections": [
-        v2
-      ]
+      "selections": v2
     },
     {
       "kind": "LinkedField",
@@ -183,16 +183,7 @@ return {
           "args": null,
           "concreteType": "GenericProfile",
           "plural": false,
-          "selections": [
-            v2,
-            {
-              "kind": "ScalarField",
-              "alias": null,
-              "name": "ethAddress",
-              "args": null,
-              "storageKey": null
-            }
-          ]
+          "selections": v2
         }
       ]
     }
@@ -200,5 +191,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = 'b65243dd5d0af84a97cc16732cf8f723';
+(node/*: any*/).hash = '61e15b0d905373af0502f2f84a711424';
 module.exports = node;

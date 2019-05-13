@@ -150,11 +150,11 @@ const addWalletMutation = graphql`
   }
 `
 
-const setDefaultWalletMutation = graphql`
-  mutation WalletsScreenSetDefaultWalletMutation(
-    $input: SetDefaultWalletInput!
+const setProfileWalletMutation = graphql`
+  mutation WalletsScreenSetProfileWalletMutation(
+    $input: SetProfileWalletInput!
   ) {
-    setDefaultWallet(input: $input) {
+    setProfileWallet(input: $input) {
       viewer {
         ...WalletsScreen_user
       }
@@ -191,7 +191,7 @@ class WalletsView extends Component<Props, State> {
 
   onPressSetDefault = () => {
     commitMutation(this.props.relay.environment, {
-      mutation: setDefaultWalletMutation,
+      mutation: setProfileWalletMutation,
       variables: {
         input: {
           address: this.state.selectedAddress,
@@ -270,7 +270,7 @@ class WalletsView extends Component<Props, State> {
       const selectAddress = () => this.setState({ selectedAddress: a.address })
 
       const hover = this.state.hoverAddress === a.address
-      const isDefault = a.address === this.props.user.defaultEthAddress
+      const isDefault = a.address === this.props.user.profile.ethAddress
       const defaultFlag = isDefault ? (
         <Text
           variant={hover ? 'red' : 'greyMed'}
@@ -428,7 +428,7 @@ class WalletsView extends Component<Props, State> {
         onCheckDefault={this.onPressSetDefault}
         address={this.state.selectedAddress}
         default={
-          this.state.selectedAddress === this.props.user.defaultEthAddress
+          this.state.selectedAddress === this.props.user.profile.ethAddress
         }
       />
     )
@@ -486,7 +486,9 @@ class WalletsView extends Component<Props, State> {
 const RelayContainer = createFragmentContainer(WalletsView, {
   user: graphql`
     fragment WalletsScreen_user on User {
-      defaultEthAddress
+      profile {
+        ethAddress
+      }
       ethWallets {
         hd {
           name

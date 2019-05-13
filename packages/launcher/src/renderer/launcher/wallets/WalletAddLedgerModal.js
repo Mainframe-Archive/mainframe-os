@@ -19,6 +19,7 @@ type Props = {
   full?: boolean,
   onClose: () => void,
   onSuccess?: (address: string) => void,
+  setAsDefault?: boolean,
 }
 
 type State = {
@@ -141,6 +142,7 @@ export default class WalletAddLedgerModal extends Component<Props, State> {
     const input = {
       indexes: [...this.state.selectedItems],
       name: this.state.ledgerName,
+      setAsDefault: this.props.setAsDefault,
     }
 
     commitMutation(this.context, {

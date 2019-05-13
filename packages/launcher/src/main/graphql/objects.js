@@ -434,12 +434,6 @@ export const ownUserIdentity = new GraphQLObjectType({
         return ctx.openVault.apps.getInstalledAppsForUser(self.localID)
       },
     },
-    defaultEthAddress: {
-      type: GraphQLString,
-      resolve: (self, args, ctx) => {
-        return ctx.queries.getUserDefaultEthAccount(self.localID)
-      },
-    },
     wallets: {
       type: new GraphQLNonNull(ethWallets),
       resolve: (self, args, ctx) => {
@@ -945,9 +939,6 @@ export const user = new GraphQLObjectType({
     contactRequests: {
       type: list(contactRequest),
       resolve: doc => doc.populate('contactRequests'),
-    },
-    defaultEthAddress: {
-      type: GraphQLString,
     },
     ethWallets: {
       type: new GraphQLNonNull(ethWallets),

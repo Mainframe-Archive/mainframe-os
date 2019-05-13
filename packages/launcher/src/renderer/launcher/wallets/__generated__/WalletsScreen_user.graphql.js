@@ -11,7 +11,9 @@ import type { ConcreteFragment } from 'relay-runtime';
 import type { FragmentReference } from "relay-runtime";
 declare export opaque type WalletsScreen_user$ref: FragmentReference;
 export type WalletsScreen_user = {|
-  +defaultEthAddress: ?string,
+  +profile: {|
+    +ethAddress: ?string
+  |},
   +ethWallets: {|
     +hd: $ReadOnlyArray<{|
       +name: ?string,
@@ -109,11 +111,22 @@ return {
   "argumentDefinitions": [],
   "selections": [
     {
-      "kind": "ScalarField",
+      "kind": "LinkedField",
       "alias": null,
-      "name": "defaultEthAddress",
+      "name": "profile",
+      "storageKey": null,
       "args": null,
-      "storageKey": null
+      "concreteType": "NamedProfile",
+      "plural": false,
+      "selections": [
+        {
+          "kind": "ScalarField",
+          "alias": null,
+          "name": "ethAddress",
+          "args": null,
+          "storageKey": null
+        }
+      ]
     },
     {
       "kind": "LinkedField",
@@ -150,5 +163,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = 'd03e959063f05d88fc608ed0ed43737b';
+(node/*: any*/).hash = 'a47e909f26e8dd47a8be7c9565b07076';
 module.exports = node;

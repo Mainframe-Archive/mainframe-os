@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 5057ebf008bf26eb9fd6769104311dfb
+ * @relayHash f119a11d58c49a388c65edabc7d526d9
  */
 
 /* eslint-disable */
@@ -10,33 +10,32 @@
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
 type WalletsScreen_user$ref = any;
-export type SetDefaultWalletInput = {
-  userID: string,
+export type SetProfileWalletInput = {
   address: string,
   clientMutationId?: ?string,
 };
-export type WalletsScreenSetDefaultWalletMutationVariables = {|
-  input: SetDefaultWalletInput
+export type WalletsScreenSetProfileWalletMutationVariables = {|
+  input: SetProfileWalletInput
 |};
-export type WalletsScreenSetDefaultWalletMutationResponse = {|
-  +setDefaultWallet: ?{|
+export type WalletsScreenSetProfileWalletMutationResponse = {|
+  +setProfileWallet: ?{|
     +viewer: {|
       +$fragmentRefs: WalletsScreen_user$ref
     |}
   |}
 |};
-export type WalletsScreenSetDefaultWalletMutation = {|
-  variables: WalletsScreenSetDefaultWalletMutationVariables,
-  response: WalletsScreenSetDefaultWalletMutationResponse,
+export type WalletsScreenSetProfileWalletMutation = {|
+  variables: WalletsScreenSetProfileWalletMutationVariables,
+  response: WalletsScreenSetProfileWalletMutationResponse,
 |};
 */
 
 
 /*
-mutation WalletsScreenSetDefaultWalletMutation(
-  $input: SetDefaultWalletInput!
+mutation WalletsScreenSetProfileWalletMutation(
+  $input: SetProfileWalletInput!
 ) {
-  setDefaultWallet(input: $input) {
+  setProfileWallet(input: $input) {
     viewer {
       ...WalletsScreen_user
       id
@@ -45,7 +44,9 @@ mutation WalletsScreenSetDefaultWalletMutation(
 }
 
 fragment WalletsScreen_user on User {
-  defaultEthAddress
+  profile {
+    ethAddress
+  }
   ethWallets {
     hd {
       name
@@ -80,7 +81,7 @@ var v0 = [
   {
     "kind": "LocalArgument",
     "name": "input",
-    "type": "SetDefaultWalletInput!",
+    "type": "SetProfileWalletInput!",
     "defaultValue": null
   }
 ],
@@ -89,7 +90,7 @@ v1 = [
     "kind": "Variable",
     "name": "input",
     "variableName": "input",
-    "type": "SetDefaultWalletInput!"
+    "type": "SetProfileWalletInput!"
   }
 ],
 v2 = {
@@ -162,13 +163,13 @@ v3 = [
 return {
   "kind": "Request",
   "operationKind": "mutation",
-  "name": "WalletsScreenSetDefaultWalletMutation",
+  "name": "WalletsScreenSetProfileWalletMutation",
   "id": null,
-  "text": "mutation WalletsScreenSetDefaultWalletMutation(\n  $input: SetDefaultWalletInput!\n) {\n  setDefaultWallet(input: $input) {\n    viewer {\n      ...WalletsScreen_user\n      id\n    }\n  }\n}\n\nfragment WalletsScreen_user on User {\n  defaultEthAddress\n  ethWallets {\n    hd {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n    ledger {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n  }\n}\n",
+  "text": "mutation WalletsScreenSetProfileWalletMutation(\n  $input: SetProfileWalletInput!\n) {\n  setProfileWallet(input: $input) {\n    viewer {\n      ...WalletsScreen_user\n      id\n    }\n  }\n}\n\nfragment WalletsScreen_user on User {\n  profile {\n    ethAddress\n  }\n  ethWallets {\n    hd {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n    ledger {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
-    "name": "WalletsScreenSetDefaultWalletMutation",
+    "name": "WalletsScreenSetProfileWalletMutation",
     "type": "Mutation",
     "metadata": null,
     "argumentDefinitions": v0,
@@ -176,10 +177,10 @@ return {
       {
         "kind": "LinkedField",
         "alias": null,
-        "name": "setDefaultWallet",
+        "name": "setProfileWallet",
         "storageKey": null,
         "args": v1,
-        "concreteType": "SetDefaultWalletPayload",
+        "concreteType": "SetProfileWalletPayload",
         "plural": false,
         "selections": [
           {
@@ -204,16 +205,16 @@ return {
   },
   "operation": {
     "kind": "Operation",
-    "name": "WalletsScreenSetDefaultWalletMutation",
+    "name": "WalletsScreenSetProfileWalletMutation",
     "argumentDefinitions": v0,
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
-        "name": "setDefaultWallet",
+        "name": "setProfileWallet",
         "storageKey": null,
         "args": v1,
-        "concreteType": "SetDefaultWalletPayload",
+        "concreteType": "SetProfileWalletPayload",
         "plural": false,
         "selections": [
           {
@@ -226,11 +227,22 @@ return {
             "plural": false,
             "selections": [
               {
-                "kind": "ScalarField",
+                "kind": "LinkedField",
                 "alias": null,
-                "name": "defaultEthAddress",
+                "name": "profile",
+                "storageKey": null,
                 "args": null,
-                "storageKey": null
+                "concreteType": "NamedProfile",
+                "plural": false,
+                "selections": [
+                  {
+                    "kind": "ScalarField",
+                    "alias": null,
+                    "name": "ethAddress",
+                    "args": null,
+                    "storageKey": null
+                  }
+                ]
               },
               {
                 "kind": "LinkedField",
@@ -273,5 +285,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '6cffe7af2acfaaaea35583a327299584';
+(node/*: any*/).hash = 'd598262f41f4b5dd086afdf201a83b66';
 module.exports = node;

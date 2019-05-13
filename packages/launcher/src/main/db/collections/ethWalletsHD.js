@@ -152,8 +152,12 @@ export default async (params: CollectionParams) => {
 
         const users = await this.getUsers()
         const filter = id => id !== this.localID
+        const addresses = this.activeAccounts.map(a => a.address)
         await Promise.all(
           users.map(async u => {
+            if (this.addresses.includes(u.profile.ethAddress)) {
+              await u.setProfileEthAddress(null)
+            }
             await u.update({
               $set: { 'ethWallets.hd': u.ethWallets.hd.filter(filter) },
             })

@@ -17,6 +17,7 @@ type Props = {
   onClose: () => void,
   onSuccess?: (address: string) => void,
   full?: boolean,
+  setAsDefault?: boolea,
 }
 
 type State = {
@@ -111,6 +112,7 @@ export default class WalletImportView extends Component<Props, State> {
           blockchain: 'ETHEREUM',
           mnemonic: seed,
           name: name,
+          setAsDefault: this.props.setAsDefault,
         },
       },
       onCompleted: ({ importHDWallet }, errors) => {

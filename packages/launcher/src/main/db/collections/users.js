@@ -72,6 +72,12 @@ export default async (params: CollectionParams) => {
       async addEthLedgerWallet(id: string) {
         await this.update({ $push: { 'ethWallets.ledger': id } })
       },
+
+      async setProfileEthAddress(address: string) {
+        const profile = { ...this.profile }
+        profile.ethAddress = address
+        await this.update({ $set: { profile } })
+      },
     },
   })
 }

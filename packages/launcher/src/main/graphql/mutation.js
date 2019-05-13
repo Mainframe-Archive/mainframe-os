@@ -146,11 +146,14 @@ const importHDWalletMutation = mutationWithClientMutationId({
     name: {
       type: new GraphQLNonNull(GraphQLString),
     },
+    setAsDefault: {
+      type: GraphQLBoolean,
+    },
   },
   outputFields: {
     hdWallet: {
       type: ethHdWallet,
-      resolve: payload => payload,
+      resolve: payload => payload.wallet,
     },
     viewer: viewerField,
   },
@@ -168,6 +171,9 @@ const importHDWalletMutation = mutationWithClientMutationId({
         }),
       ])
       await user.addEthHDWallet(wallet.localID)
+      if (args.setAsDefault) {
+        await user.setProfileEthAddress(wallet.activeAccounts[0].address)
+      }
       ctx.logger.log({
         level: 'debug',
         message: 'ImportHDWallet mutation complete',
@@ -194,6 +200,9 @@ const createHDWalletMutation = mutationWithClientMutationId({
     name: {
       type: new GraphQLNonNull(GraphQLString),
     },
+    setAsDefault: {
+      type: GraphQLBoolean,
+    },
   },
   outputFields: {
     hdWallet: {
@@ -214,6 +223,9 @@ const createHDWalletMutation = mutationWithClientMutationId({
         ctx.db.eth_wallets_hd.create({ name: args.name }),
       ])
       await user.addEthHDWallet(wallet.localID)
+      if (args.setAsDefault) {
+        await user.setProfileEthAddress(wallet.activeAccounts[0].address)
+      }
       ctx.logger.log({
         level: 'debug',
         message: 'CreateHDWallet mutation complete',
@@ -243,6 +255,9 @@ const addLedgerWalletAccountsMutation = mutationWithClientMutationId({
     userID: {
       type: GraphQLString,
     },
+    setAsDefault: {
+      type: GraphQLBoolean,
+    },
   },
   outputFields: {
     ledgerWallet: {
@@ -267,7 +282,9 @@ const addLedgerWalletAccountsMutation = mutationWithClientMutationId({
         wallet.addAccounts(args.indexes),
       ])
       await user.addEthLedgerWallet(wallet.localID)
-
+      if (args.setAsDefault) {
+        await user.setProfileEthAddress(wallet.activeAccounts[0].address)
+      }
       ctx.logger.log({
         level: 'debug',
         message: 'CreateLedgerWallet mutation complete',
@@ -285,12 +302,9 @@ const addLedgerWalletAccountsMutation = mutationWithClientMutationId({
   },
 })
 
-const setDefaultWalletMutation = mutationWithClientMutationId({
-  name: 'SetDefaultWallet',
+const setProfileWalletMutation = mutationWithClientMutationId({
+  name: 'SetProfileWallet',
   inputFields: {
-    userID: {
-      type: new GraphQLNonNull(GraphQLString),
-    },
     address: {
       type: new GraphQLNonNull(GraphQLString),
     },
@@ -299,8 +313,23 @@ const setDefaultWalletMutation = mutationWithClientMutationId({
     viewer: viewerField,
   },
   mutateAndGetPayload: async (args, ctx) => {
-    await ctx.mutations.setUsersDefaultWallet(args.userID, args.address)
-    return {}
+    const user = await ctx.getUser()
+    try {
+      ctx.logger.log({
+        level: 'debug',
+        message: 'SetProfileWalletMutation mutation called',
+        address: args.address,
+      })
+      await user.setProfileEthAddress(args.address)
+      return {}
+    } catch (err) {
+      ctx.logger.log({
+        level: 'error',
+        message: 'SetProfileWalletMutation mutation failed',
+        error: err.toString(),
+      })
+      throw err
+    }
   },
 })
 
@@ -815,7 +844,7 @@ export default new GraphQLObjectType({
     createUserIdentity: createUserIdentityMutation,
     createDeveloperIdentity: createDeveloperIdentityMutation,
     deleteContact: deleteContactMutation,
-    setDefaultWallet: setDefaultWalletMutation,
+    setProfileWallet: setProfileWalletMutation,
     setUserProfileVisibility: setUserProfileVisibilityMutation,
     updateProfile: updateProfileMutation,
     // Wallets
