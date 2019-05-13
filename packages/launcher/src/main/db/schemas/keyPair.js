@@ -1,20 +1,16 @@
 // @flow
 
-import type { KeyPairSerialized } from '../../crypto/ed25519'
-
-export type KeyPair = KeyPairSerialized
-
 export default {
-  title: 'base64-encoded key pair',
+  title: 'hex-encoded secp256k1 key pair',
   encrypted: true,
   version: 0,
   type: 'object',
   properties: {
-    publicKey: {
+    privateKey: {
       type: 'string',
       final: true,
     },
-    secretKey: {
+    publicKey: {
       type: 'string',
       final: true,
     },

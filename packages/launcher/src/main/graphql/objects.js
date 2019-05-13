@@ -13,9 +13,11 @@ import {
 } from 'graphql'
 import { fromGlobalId, globalIdField, nodeDefinitions } from 'graphql-relay'
 
-import { isValidContactID } from '../../validation'
+import { MF_PREFIX } from '../../constants'
+import { isValidPeerID } from '../../validation'
 
 import type { GraphQLContext } from '../context/graphql'
+import { readProfile } from '../data/protocols'
 
 const TYPE_COLLECTION = {
   App: 'apps',
@@ -878,13 +880,17 @@ export const lookup = new GraphQLObjectType({
           args,
         })
         try {
-          if (!isValidContactID(args.publicID)) {
-            throw new Error('Invalid contact ID')
+          if (!isValidPeerID(args.publicID)) {
+            throw new Error('Invalid peer ID')
           }
           const bzz = await ctx.user.getBzz()
-          // TODO?: move this replacement logic to validation/utility functions
-          const res = await bzz.download(args.publicID.replace('mc', '0x'))
-          const data = await res.json()
+          const hash = await bzz.getFeedValue(
+            { user: args.publicID.replace(MF_PREFIX.CONTACT, '0x') },
+            { mode: 'content-hash' },
+          )
+          const res = await bzz.download(hash, { mode: 'raw' })
+          const payload = await res.json()
+          const data = readProfile(payload)
           ctx.logger.log({
             level: 'debug',
             message: 'Lookup peer by ID result',

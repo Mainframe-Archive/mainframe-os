@@ -18,6 +18,10 @@ export default {
     rpc.notify('log', info)
   },
 
+  async openLauncher(userID?: ?string): Promise<void> {
+    await rpc.request('launcher_open', { userID })
+  },
+
   // DB
 
   async createDB(password: string, save?: boolean = false): Promise<void> {

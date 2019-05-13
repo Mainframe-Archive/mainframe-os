@@ -30,6 +30,7 @@ import SvgSelectedPointer from '../UIComponents/SVGSelectedPointer'
 import { ROUTES } from './constants'
 import RelayLoaderView from './RelayLoaderView'
 import { EnvironmentContext } from './RelayEnvironment'
+import rpc from './rpc'
 
 import type { SideMenu_contacts as Contacts } from './__generated__/SideMenu_contacts.graphql'
 import type { SideMenu_apps as Apps } from './__generated__/SideMenu_apps.graphql'
@@ -197,7 +198,15 @@ export default class SideMenu extends Component<Props> {
   render() {
     return (
       <Container>
-        <ScrollView>{MENU_ITEMS.map(i => this.renderMenuItem(i))}</ScrollView>
+        <ScrollView>
+          {MENU_ITEMS.map(i => this.renderMenuItem(i))}
+          <Button
+            title="New window"
+            onPress={() => {
+              rpc.openLauncher()
+            }}
+          />
+        </ScrollView>
       </Container>
     )
   }

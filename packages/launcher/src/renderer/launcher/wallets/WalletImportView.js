@@ -17,7 +17,7 @@ type Props = {
   onClose: () => void,
   onSuccess?: (address: string) => void,
   full?: boolean,
-  setAsDefault?: boolea,
+  setAsDefault?: boolean,
 }
 
 type State = {
