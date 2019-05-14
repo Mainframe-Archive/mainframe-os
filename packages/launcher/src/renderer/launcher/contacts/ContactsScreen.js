@@ -510,10 +510,7 @@ class ContactsView extends Component<Props, State> {
       localID: user.localID,
       localPeerID: user.localID,
       publicID: user.publicID,
-      profile: {
-        name: user.profile.name,
-        ethAddress: user.defaultEthAddress,
-      },
+      profile: user.profile,
     }
   }
 
@@ -1190,10 +1187,10 @@ const RelayContainer = createFragmentContainer(ContactsView, {
   user: graphql`
     fragment ContactsScreen_user on User {
       localID
-      defaultEthAddress
       publicID
       profile {
         name
+        ethAddress
       }
       contacts {
         # ...InviteContactModal_contact

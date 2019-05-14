@@ -224,9 +224,9 @@ export default {
   // ethSend: async (params: Object) => {
   //   return rpc.request('blockchain_ethSend', params)
   // },
-  // getLedgerAccounts: (pageNum: number) => {
-  //   return rpc.request('wallet_getLedgerAccounts', { pageNum })
-  // },
+  getLedgerAccounts: (pageNum: number) => {
+    return rpc.request('wallet_getLedgerAccounts', { pageNum })
+  },
   // ethereumRequest: (params: Object) => {
   //   return rpc.request('blockchain_ethSend', params)
   // },

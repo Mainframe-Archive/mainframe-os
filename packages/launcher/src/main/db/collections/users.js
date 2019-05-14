@@ -127,6 +127,10 @@ export default async (params: CollectionParams) => {
         await this.update({ $push: { 'ethWallets.ledger': id } })
       },
 
+      async setProfileEthAddress(address: string) {
+        await this.atomicSet('profile.ethAddress', address)
+      },
+
       startPublicProfilePublication() {
         if (this._publicProfilePublication != null) {
           logger.log({

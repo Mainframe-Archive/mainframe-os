@@ -44,8 +44,7 @@ input AddLedgerWalletAccountsInput {
 }
 
 type AddLedgerWalletAccountsPayload {
-  addresses: [String]
-  localID: String!
+  ledgerWallet: EthLedgerWallet
   viewer: User!
   clientMutationId: String
 }
@@ -378,7 +377,7 @@ type Mutation {
   createUserIdentity(input: CreateUserIdentityInput!): CreateUserIdentityPayload
   createDeveloperIdentity(input: CreateDeveloperIdentityInput!): CreateDeveloperIdentityPayload
   deleteContact(input: DeleteContactInput!): DeleteContactPayload
-  setDefaultWallet(input: SetDefaultWalletInput!): SetDefaultWalletPayload
+  setProfileWallet(input: SetProfileWalletInput!): SetProfileWalletPayload
   setUserProfileVisibility(input: SetUserProfileVisibilityInput!): SetUserProfileVisibilityPayload
   updateProfile(input: UpdateProfileInput!): UpdateProfilePayload
   addHDWalletAccount(input: AddHDWalletAccountInput!): AddHDWalletAccountPayload
@@ -433,7 +432,6 @@ type OwnUserIdentity implements Node {
   feedHash: String
   mfid: ID!
   apps: [App!]!
-  defaultEthAddress: String
   wallets: EthWallets!
   profile: NamedProfile!
   pubKey: String!
@@ -487,23 +485,22 @@ type SetAppPermissionsRequirementsPayload {
   clientMutationId: String
 }
 
-input SetDefaultWalletInput {
-  userID: String!
-  address: String!
-  clientMutationId: String
-}
-
-type SetDefaultWalletPayload {
-  viewer: User!
-  clientMutationId: String
-}
-
 input SetEthNetworkInput {
   url: String!
   clientMutationId: String
 }
 
 type SetEthNetworkPayload {
+  viewer: User!
+  clientMutationId: String
+}
+
+input SetProfileWalletInput {
+  address: String!
+  clientMutationId: String
+}
+
+type SetProfileWalletPayload {
   viewer: User!
   clientMutationId: String
 }
@@ -577,7 +574,6 @@ type User implements Node {
   apps: [App!]!
   contacts: [Contact!]!
   contactRequests: [ContactRequest!]!
-  defaultEthAddress: String
   ethWallets: EthWallets!
   ethURL: String!
   bzzURL: String!

@@ -19,6 +19,7 @@ type Props = {
   full?: boolean,
   onClose: () => void,
   onSuccess?: (address: string) => void,
+  setAsDefault?: boolean,
 }
 
 type State = {
@@ -70,7 +71,11 @@ const addLedgerWalletMutation = graphql`
     $input: AddLedgerWalletAccountsInput!
   ) {
     addLedgerWalletAccounts(input: $input) {
-      addresses
+      ledgerWallet {
+        accounts {
+          address
+        }
+      }
       viewer {
         ...WalletsScreen_user
       }
@@ -137,12 +142,12 @@ export default class WalletAddLedgerModal extends Component<Props, State> {
     const input = {
       indexes: [...this.state.selectedItems],
       name: this.state.ledgerName,
-      userID: this.props.userID,
+      setAsDefault: this.props.setAsDefault,
     }
 
     commitMutation(this.context, {
       mutation: addLedgerWalletMutation,
-      variables: { input, userID: this.props.userID },
+      variables: { input },
       onCompleted: ({ addLedgerWalletAccounts }, errors) => {
         if (errors || !addLedgerWalletAccounts) {
           const error =
@@ -151,7 +156,9 @@ export default class WalletAddLedgerModal extends Component<Props, State> {
           this.displayError(error)
         } else {
           this.props.onSuccess
-            ? this.props.onSuccess(addLedgerWalletAccounts.addresses[0])
+            ? this.props.onSuccess(
+                addLedgerWalletAccounts.ledgerWallet.accounts[0].address,
+              )
             : this.props.onClose()
         }
       },
