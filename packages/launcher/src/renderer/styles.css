@@ -33,6 +33,24 @@ body,
   border: none !important;
 }
 
+.alert-toast-enter {
+  opacity: 0.01;
+}
+
+.alert-toast-enter.alert-toast-enter-active {
+  opacity: 1;
+  transition: opacity 150ms;
+}
+
+.alert-toast-leave {
+  opacity: 1;
+}
+
+.alert-toast-leave.alert-toast-leave-active {
+  opacity: 0.01;
+  transition: opacity 300ms;
+}
+
 .inner-modal {
   position: fixed !important;
   top: 0 !important;

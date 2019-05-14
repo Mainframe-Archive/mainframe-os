@@ -61,6 +61,7 @@
     "mime": "^2.4.0",
     "qrcode.react": "^0.9.3",
     "react": "^16.8.5",
+    "react-addons-css-transition-group": "^15.6.2",
     "react-art": "^16.8.5",
     "react-blockies": "^1.4.0",
     "react-copy-to-clipboard": "^5.0.1",
