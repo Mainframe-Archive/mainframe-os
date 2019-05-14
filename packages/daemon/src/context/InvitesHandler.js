@@ -330,13 +330,16 @@ export default class InvitesHandler {
     userID: string,
     contactID: string,
     gasPrice?: string,
+    fromAddress?: string,
   ) {
     const { user } = this.getUserObjects(userID, contactID)
     if (!user.profile.ethAddress) {
       throw new Error('No public ETH address found on profile')
     }
 
-    const hasAllowance = await this.checkAllowance(user.profile.ethAddress)
+    const hasAllowance = await this.checkAllowance(
+      fromAddress ? fromAddress : user.profile.ethAddress,
+    )
     if (hasAllowance) {
       return
     }
@@ -345,19 +348,25 @@ export default class InvitesHandler {
     const stakeBN = utils.bigNumberify(stake)
     const mftBalance = await this.tokenContract.getBalance(
       // $FlowFixMe address checked above
-      user.profile.ethAddress,
+      fromAddress ? fromAddress : user.profile.ethAddress,
     )
 
     const balanceBN = utils.parseUnits(mftBalance, 'ether')
 
     if (stakeBN.gt(balanceBN)) {
       const formattedStake = utils.formatUnits(stakeBN, 'ether')
+      this._context.log('HIIIIIIIII')
+      console.log('HELLEr')
+      console.log(stakeBN)
+
       throw new Error(
         `Insufficient MFT balance of ${balanceBN.toString()} for required stake ${formattedStake}`,
       )
     }
 
-    const txOptions: Object = { from: user.profile.ethAddress }
+    const txOptions: Object = {
+      from: fromAddress ? fromAddress : user.profile.ethAddress,
+    }
     // TODO: check high gasPrice
 
     const approveValue = utils.formatUnits(stake, 'ether')
@@ -416,7 +425,11 @@ export default class InvitesHandler {
     })
   }
 
-  async sendInviteTX(userID: string, contactID: string): Promise<void> {
+  async sendInviteTX(
+    userID: string,
+    contactID: string,
+    fromAddress?: string,
+  ): Promise<void> {
     const { user, peer, contact } = this.getUserObjects(userID, contactID)
     if (!user.profile.ethAddress) {
       throw new Error('No public ETH address found in profile')
@@ -428,7 +441,7 @@ export default class InvitesHandler {
     const stake = await this.invitesContract.call('requiredStake')
     const mftBalance = await this.tokenContract.getBalance(
       // $FlowFixMe address checked above
-      user.profile.ethAddress,
+      fromAddress ? fromAddress : user.profile.ethAddress,
     )
     const stakeBN = utils.bigNumberify(stake)
     const balanceBN = utils.parseUnits(mftBalance, 'ether')
@@ -455,7 +468,7 @@ export default class InvitesHandler {
         inviteTX: inviteTXHash,
         ethNetwork: this._context.io.eth.networkName,
         // $FlowFixMe address already checked
-        fromAddress: user.profile.ethAddress,
+        fromAddress: fromAddress ? fromAddress : user.profile.ethAddress,
         // $FlowFixMe address already checked
         toAddress: peer.profile.ethAddress,
         stake: {
@@ -507,7 +520,11 @@ export default class InvitesHandler {
     return { vNum, r, s }
   }
 
-  async retrieveStake(userID: string, contactID: string) {
+  async retrieveStake(
+    userID: string,
+    contactID: string,
+    recipientAddress?: string,
+  ) {
     const { peer, contact, user } = this.getUserObjects(userID, contactID)
     const invite = contact._invite
     if (invite != null && invite.stake && invite.acceptedSignature) {
@@ -515,7 +532,9 @@ export default class InvitesHandler {
 
       // $FlowFixMe will have feedHash by this point
       const fromFeedHash = hash(Buffer.from(user.publicFeed.feedHash))
-      const toAddrHash = hash(bufferFromHex(invite.toAddress))
+      const toAddrHash = hash(
+        bufferFromHex(recipientAddress ? recipientAddress : invite.toAddress),
+      )
       const toFeedHash = hash(Buffer.from(peer.publicFeed))
 
       const txOptions = { from: invite.fromAddress }
@@ -814,6 +833,7 @@ export default class InvitesHandler {
   async getSendInviteTXDetails(
     user: OwnUserIdentity,
     peer: PeerUserIdentity,
+    fromAddress?: string,
   ): Promise<Object> {
     const { eth } = this._context.io
 
@@ -827,7 +847,7 @@ export default class InvitesHandler {
 
     const data = this.invitesContract.encodeCall('sendInvite', params)
     const txOptions = {
-      from: user.profile.ethAddress,
+      from: fromAddress ? fromAddress : user.profile.ethAddress,
       to: this.invitesContract.address,
       data,
     }

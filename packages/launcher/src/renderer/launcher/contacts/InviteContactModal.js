@@ -145,7 +145,7 @@ class InviteContactModal extends Component<Props, State> {
       this.props.wallets,
       w => w.address === this.state.selectedAddress,
     )[0].balances.mft
-    if (Number(mft) < 100) {
+    if (Number(mft) < this.props.inviteStakeValue) {
       this.setState({ insufficientFunds: true })
     } else {
       this.setState({ insufficientFunds: false })
@@ -182,6 +182,7 @@ class InviteContactModal extends Component<Props, State> {
         txParams: res,
       })
     } catch (err) {
+      console.log(err)
       this.setState({
         error: err.message,
       })
@@ -207,6 +208,8 @@ class InviteContactModal extends Component<Props, State> {
         },
       })
     } catch (err) {
+      console.log(err)
+
       this.setState({
         error: err.message,
       })
@@ -244,6 +247,7 @@ class InviteContactModal extends Component<Props, State> {
       await rpc.sendInviteApprovalTX({
         userID: user.localID,
         contactID: contact.localID,
+        fromAddress: this.state.selectedAddress,
       })
       this.setState({
         txProcessing: false,
@@ -253,6 +257,8 @@ class InviteContactModal extends Component<Props, State> {
       })
       this.getInviteSendTXDetails()
     } catch (err) {
+      console.log(err)
+
       this.setState({
         error: err.message,
         txProcessing: false,
@@ -270,6 +276,7 @@ class InviteContactModal extends Component<Props, State> {
       await rpc.sendInviteTX({
         userID: user.localID,
         contactID: contact.localID,
+        fromAddress: this.state.selectedAddress,
       })
       this.setState({
         invitePending: {
@@ -278,6 +285,8 @@ class InviteContactModal extends Component<Props, State> {
       })
       this.props.closeModal()
     } catch (err) {
+      console.log(err)
+
       this.setState({
         error: err.message,
         txProcessing: false,
@@ -295,13 +304,15 @@ class InviteContactModal extends Component<Props, State> {
       const res = await rpc.sendDeclineInviteTX({
         userID: user.localID,
         peerID: contact.localID,
+        // recipientAddress: this.state.selectedAddress
       })
       this.setState({
         txProcessing: false,
         declinedTXHash: res,
       })
       this.props.closeModal()
-      this.props.showNotification()
+      // TODO
+      // this.props.showNotification()
     } catch (err) {
       this.setState({
         txProcessing: false,
@@ -317,6 +328,7 @@ class InviteContactModal extends Component<Props, State> {
       const res = await rpc.sendWithdrawInviteTX({
         userID: user.localID,
         contactID: contact.localID,
+        recipientAddress: this.state.selectedAddress,
       })
       this.setState({
         txProcessing: false,
@@ -324,6 +336,8 @@ class InviteContactModal extends Component<Props, State> {
       })
       this.props.closeModal()
     } catch (err) {
+      console.log(err)
+
       this.setState({
         txProcessing: false,
         error: err.message,
@@ -337,7 +351,7 @@ class InviteContactModal extends Component<Props, State> {
       .mft
     const eth = filter(this.props.wallets, w => w.address === addr)[0].balances
       .eth
-    if (Number(mft) < 100) {
+    if (Number(mft) < this.props.inviteStakeValue) {
       this.setState({ dropdownError: true })
       return 'Insufficient MFT funds in this wallet'
     } else if (!(Number(eth) > 0)) {
@@ -570,7 +584,8 @@ class InviteContactModal extends Component<Props, State> {
           <Tooltip>
             <Text variant="tooltipTitle">What does this mean?</Text>
             <Text variant="tooltipText">
-              To send an invite you must first grant approve the contract.
+              To send an invite you must first grant approval to the contract to
+              use your tokens.
             </Text>
           </Tooltip>
         </TitleTooltipContainer>
@@ -661,7 +676,10 @@ class InviteContactModal extends Component<Props, State> {
     return (
       <>
         {this.renderContactSection('DECLINE INVITATION FROM')}
-        {this.renderTransactionSection('CLAIM 100 MFT ON', true)}
+        {this.renderTransactionSection(
+          'CLAIM ' + this.props.inviteStakeValue + ' MFT ON',
+          true,
+        )}
         {declinedTXHash}
         {activity}
       </>
@@ -694,7 +712,6 @@ class InviteContactModal extends Component<Props, State> {
     let btnTitle
     let action
     let screenTitle
-    console.log(this.props.wallets)
     switch (this.props.type) {
       case 'invite':
         content = this.renderInvite()

@@ -83,10 +83,12 @@ export const sendInviteApprovalTX = async (
   ctx: ClientContext,
   params: SendInviteTXParams,
 ): Promise<void> => {
+  console.log('blockchain js sendInviteApprovalTX')
   return ctx.invitesHandler.sendInviteApprovalTX(
     params.userID,
     params.contactID,
     params.gasPrice,
+    params.fromAddress,
   )
 }
 
@@ -94,7 +96,11 @@ export const sendInviteTX = async (
   ctx: ClientContext,
   params: SendInviteTXParams,
 ): Promise<void> => {
-  return ctx.invitesHandler.sendInviteTX(params.userID, params.contactID)
+  return ctx.invitesHandler.sendInviteTX(
+    params.userID,
+    params.contactID,
+    params.fromAddress,
+  )
 }
 
 export const sendDeclineInviteTX = async (
@@ -108,7 +114,11 @@ export const sendWithdrawInviteTX = async (
   ctx: ClientContext,
   params: SendWithdrawInviteTXParams,
 ) => {
-  return ctx.invitesHandler.retrieveStake(params.userID, params.contactID)
+  return ctx.invitesHandler.retrieveStake(
+    params.userID,
+    params.contactID,
+    params.recipientAddress,
+  )
 }
 
 export const subEthNetworkChanged = {
