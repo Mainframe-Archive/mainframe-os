@@ -128,9 +128,7 @@ export default async (params: CollectionParams) => {
       },
 
       async setProfileEthAddress(address: string) {
-        const profile = { ...this.profile }
-        profile.ethAddress = address
-        await this.update({ $set: { profile } })
+        await this.atomicSet('profile.ethAddress', address)
       },
 
       startPublicProfilePublication() {
