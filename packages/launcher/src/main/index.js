@@ -41,6 +41,20 @@ let client
 let launcherWindow
 let localDaemon = false
 
+if (envType === 'production') {
+  if (app.requestSingleInstanceLock()) {
+    app.on('second-instance', () => {
+      // Someone tried to run a second instance, we should focus our window.
+      if (launcherWindow) {
+        if (launcherWindow.isMinimized()) launcherWindow.restore()
+        launcherWindow.focus()
+      }
+    })
+  } else {
+    app.exit()
+  }
+}
+
 type AppContexts = { [appID: string]: { [userID: string]: AppContext } }
 
 const appContexts: AppContexts = {}
@@ -55,6 +69,11 @@ const newWindow = (params: Object = {}) => {
     height: 702,
     show: false,
     titleBarStyle: 'hidden',
+    title: 'Mainframe',
+    icon:
+      process.platform === 'linux'
+        ? path.join(__dirname, '/build/icon/Icon-512x512.png')
+        : undefined,
     ...params,
   })
 
@@ -68,6 +87,9 @@ const newWindow = (params: Object = {}) => {
     })
     window.loadURL(formattedUrl)
   }
+  // hide the menu (Win and Linux)
+  window.setAutoHideMenuBar(true)
+
   return window
 }
 
@@ -110,7 +132,7 @@ const template = [
       {
         label: 'Learn More',
         click() {
-          require('electron').shell.openExternal('https://electronjs.org')
+          require('electron').shell.openExternal('https://mainframeos.com')
         },
       },
     ],
@@ -171,7 +193,8 @@ const launchApp = async (
     return
   }
 
-  const appWindow = newWindow()
+  const appWindow = newWindow({ title: appSession.app.manifest.name })
+
   if (appSession.isDev) {
     appWindow.webContents.on('did-attach-webview', () => {
       // Open a separate developer tools window for the app
@@ -254,8 +277,7 @@ const setupClient = async () => {
   }
 
   if (envType === 'production') {
-    daemonConfig.runStatus = 'stopped'
-    await stopDaemon(env.name)
+    await shutdownDaemon()
   }
 
   // Start daemon and connect local client to it
@@ -279,8 +301,8 @@ const createLauncherWindow = async () => {
   await setupClient()
 
   launcherWindow = newWindow({
-    width: 900,
-    height: 600,
+    width: 1024,
+    height: 768,
     minWidth: 900,
     minHeight: 600,
   })
@@ -341,6 +363,8 @@ app.on('will-quit', async event => {
 
 ipcMain.on('init-window', event => {
   const window = BrowserWindow.fromWebContents(event.sender)
+  window.setAutoHideMenuBar(true)
+
   if (window === launcherWindow) {
     window.webContents.send('start', { type: 'launcher' })
   } else {

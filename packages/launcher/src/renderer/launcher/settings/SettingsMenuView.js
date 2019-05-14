@@ -1,4 +1,6 @@
 // @flow
+
+import { remote } from 'electron'
 import React, { Component } from 'react'
 import { Text, Button, DropDown } from '@morpheus-ui/core'
 import styled from 'styled-components/native'
@@ -52,6 +54,9 @@ const setEthNetworkMutation = graphql`
 const NETWORK_NAMES = {
   mainnet: 'Mainnet',
   ropsten: 'Testnet (Ropsten)',
+  kovan: 'Testnet (Kovan)',
+  rinkeby: 'Testnet (Rinkeby)',
+  goerli: 'Testnet (Goerli)',
   ganache: 'Ganache (localhost:8545)',
   custom: 'Custom (MFT transfers disabled)',
 }
@@ -135,6 +140,9 @@ export default class SettingsMenuView extends Component<Props, State> {
                     NETWORK_NAMES.mainnet,
                     NETWORK_NAMES.ropsten,
                     NETWORK_NAMES.ganache,
+                    NETWORK_NAMES.kovan,
+                    NETWORK_NAMES.rinkeby,
+                    NETWORK_NAMES.goerli,
                   ]}
                   defaultValue={this.getNetworkName()}
                 />
@@ -152,7 +160,7 @@ export default class SettingsMenuView extends Component<Props, State> {
               RightElement={ExportIcon}
             />
             <SettingsItem
-              title="Alpha version 0.3"
+              title={`Alpha version ${remote.app.getVersion()}`}
               Icon={MainframeLogoIcon}
               RightElement={() => (
                 <Button

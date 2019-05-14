@@ -12,6 +12,9 @@ export const ETH_RPC_URLS = {
   WS: {
     ropsten: 'wss://ropsten.infura.io/ws/v3/8ec0911ee74c4583b1346bbc1afdf22d',
     mainnet: 'wss://mainnet.infura.io/ws/v3/8ec0911ee74c4583b1346bbc1afdf22d',
+    kovan: 'wss://kovan.infura.io/ws/v3/8ec0911ee74c4583b1346bbc1afdf22d',
+    rinkeby: 'wss://rinkeby.infura.io/ws/v3/8ec0911ee74c4583b1346bbc1afdf22d',
+    goerli: 'wss://goerli.infura.io/ws/v3/8ec0911ee74c4583b1346bbc1afdf22d',
     ganache: 'ws://localhost:8545',
   },
   HTTP: {

@@ -76,6 +76,7 @@ const ContactsListContainer = styled.View`
   height: 100vh;
   position: absolute;
   z-index: 1;
+  overflow-x: hidden;
   overflow-y: auto;
 `
 
