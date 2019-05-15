@@ -67,7 +67,7 @@
     "react-modal": "^3.6.1",
     "react-native-web": "^0.10.0",
     "react-relay": "^1.7.0",
-    "react-transition-group": "1.x",
+    "react-transition-group": "^4.0.1",
     "relay-runtime": "^1.7.0",
     "rxjs": "^6.3.3",
     "semver": "^6.0.0",
