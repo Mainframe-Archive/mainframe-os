@@ -2,7 +2,7 @@
 
 import React, { Component } from 'react'
 import { Text, Button } from '@morpheus-ui/core'
-import { CopyToClipboard } from 'react-copy-to-clipboard'
+import { clipboard } from 'electron'
 import styled from 'styled-components/native'
 
 import LauncherContext from '../launcher/LauncherContext'
@@ -40,6 +40,7 @@ class CopyableBlock extends Component<Props, State> {
   state = {}
 
   onCopy = () => {
+    clipboard.writeText(this.props.value)
     this.props.showAlert('Copied to clipboard')
   }
 
@@ -52,9 +53,11 @@ class CopyableBlock extends Component<Props, State> {
           </Text>
         </TextContainer>
         <ButtonContainer>
-          <CopyToClipboard onCopy={this.onCopy} text={this.props.value}>
-            <Button title="COPY" variant={['small', 'completeOnboarding']} />
-          </CopyToClipboard>
+          <Button
+            title="COPY"
+            onPress={this.onCopy}
+            variant={['small', 'completeOnboarding']}
+          />
         </ButtonContainer>
       </Container>
     )
