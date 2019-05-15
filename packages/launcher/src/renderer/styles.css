@@ -66,6 +66,7 @@ body,
   outline: none !important;
   padding: 0px !important;
 }
+
 .no-skew {
   transition: all 0.3s;
   transform: perspective(400px) rotateY(0deg);
@@ -78,6 +79,19 @@ body,
 .skew-right {
   transition: all 0.3s;
   transform: perspective(400px) rotateY(15deg);
+}
+
+.app-editing {
+  transition: all 0.3s;
+  transform: perspective(400px) rotateY(-18deg);
+  animation: pulse 0.8s infinite both;
+}
+
+@keyframes pulse {
+
+	0% {  transform: perspective(400px) rotateY(-18deg); }
+	
+	50% {  transform: perspective(400px) rotateY(18deg); }
 }
 
 .draggable {

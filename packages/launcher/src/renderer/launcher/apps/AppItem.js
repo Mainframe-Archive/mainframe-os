@@ -4,6 +4,7 @@ import React, { Component } from 'react'
 import { createFragmentContainer, graphql } from 'react-relay'
 import styled from 'styled-components/native'
 import { Button, Text } from '@morpheus-ui/core'
+import CloseIcon from '@morpheus-ui/icons/Close'
 
 import CircleLoader from '../../UIComponents/CircleLoader'
 import type { AppItem_installedApp as InstalledApp } from './__generated__/AppItem_installedApp.graphql.js'
@@ -93,6 +94,23 @@ const UpdateBadge = styled.View`
   shadow-radius: 10;
 `
 
+const DeleteBadge = styled.TouchableOpacity`
+  position: absolute;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  top: 12px;
+  right: 12px;
+  width: 20px;
+  height: 20px;
+  background-color: #FFF;
+  border-radius: 100%;
+  shadow-color: #000;
+  shadow-offset: {width: 0, height: 0};
+  shadow-opacity: 0.1;
+  shadow-radius: 10;
+`
+
 const UpdateButton = styled.View`
   opacity: 0;
   position: absolute;
@@ -101,11 +119,13 @@ const UpdateButton = styled.View`
 `
 
 type SharedProps = {
+  editing?: boolean,
   icon?: ?string,
   onOpenApp: (appID: string, own: boolean) => any,
 }
 
 type InstalledProps = SharedProps & {
+  editing: boolean,
   installedApp: InstalledApp,
   onPressUpdate: (appID: string) => void,
 }
@@ -115,6 +135,7 @@ type OwnProps = SharedProps & {
 }
 
 type Props = {
+  editing?: boolean,
   appID: string,
   appName: string,
   devName: ?string,
@@ -183,6 +204,7 @@ export default class AppItem extends Component<Props, State> {
       onUpdate,
       testID,
       installing,
+      editing,
     } = this.props
 
     return (
@@ -197,7 +219,7 @@ export default class AppItem extends Component<Props, State> {
         <IconContainer
           disabled={installing}
           hover={this.state.hover}
-          className={this.state.direction}
+          className={editing ? 'app-editing' : this.state.direction}
           onMouseMove={this.setDirection}
           onMouseOver={this.startMoving}
           onMouseOut={this.stopMoving}>
@@ -207,8 +229,17 @@ export default class AppItem extends Component<Props, State> {
               this.state.hover ? 'app-shadow app-shadow-hover' : 'app-shadow'
             }
           />
-          {onUpdate && <UpdateBadge />}
+          {!installing && !editing && onUpdate && <UpdateBadge />}
         </IconContainer>
+        {editing && (
+          <DeleteBadge>
+            <CloseIcon
+              color={this.state.hover ? '#DA1157' : '#000000'}
+              width={10}
+              height={10}
+            />
+          </DeleteBadge>
+        )}
         <Text
           variant={[
             'appButtonName',
@@ -254,6 +285,7 @@ const InstalledView = (props: InstalledProps) => {
 
   return (
     <AppItem
+      editing={props.editing}
       installing={app.installationState === 'DOWNLOADING'}
       icon={props.icon}
       appID={app.mfid}
@@ -274,6 +306,7 @@ const OwnView = (props: OwnProps) => {
 
   return (
     <AppItem
+      editing={props.editing}
       appID={app.mfid}
       appName={app.name}
       devName={app.developer.name}
