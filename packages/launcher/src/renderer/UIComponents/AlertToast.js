@@ -2,7 +2,7 @@
 
 import React, { Component } from 'react'
 import ReactModal from 'react-modal'
-import { CSSTransitionGroup } from 'react-transition-group'
+import { CSSTransition } from 'react-transition-group'
 import { Text } from '@morpheus-ui/core'
 import styled from 'styled-components/native'
 import CloseIcon from '@morpheus-ui/icons/Close'
@@ -48,19 +48,18 @@ export default class ModalView extends Component<Props> {
         overlayClassName="alert-modal"
         isOpen={true}
         onRequestClose={this.props.onRequestClose}>
-        <CSSTransitionGroup
-          transitionName="alert-toast"
-          transitionEnterTimeout={100}
-          transitionLeaveTimeout={300}>
-          {this.props.message ? (
-            <Message className="transition" visible={this.props.message}>
-              <Text bold color="white" size={13}>
-                {this.props.message}
-              </Text>
-              {closeButton}
-            </Message>
-          ) : null}
-        </CSSTransitionGroup>
+        <CSSTransition
+          in={!!this.props.message}
+          classNames="alert-toast"
+          timeout={300}
+          unmountOnExit>
+          <Message visible={this.props.message}>
+            <Text bold color="white" size={13}>
+              {this.props.message}
+            </Text>
+            {closeButton}
+          </Message>
+        </CSSTransition>
       </ReactModal>
     )
   }

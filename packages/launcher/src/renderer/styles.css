@@ -34,21 +34,21 @@ body,
 }
 
 .alert-toast-enter {
-  opacity: 0.01;
+  opacity: 0;
 }
 
-.alert-toast-enter.alert-toast-enter-active {
+.alert-toast-enter-active {
   opacity: 1;
   transition: opacity 150ms;
 }
 
-.alert-toast-leave {
+.alert-toast-exit {
   opacity: 1;
 }
 
-.alert-toast-leave.alert-toast-leave-active {
-  opacity: 0.01;
-  transition: opacity 300ms;
+.alert-toast-exit-active {
+  opacity: 0;
+  transition: opacity 500mss;
 }
 
 .inner-modal {
