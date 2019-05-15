@@ -3,9 +3,13 @@
 import Transport from '@ledgerhq/hw-transport-node-hid'
 import LedgerAppEth from '@ledgerhq/hw-app-eth'
 
-const ITEMS_PER_PAGE = 10
-const HD_PATH = "m/44'/60'/0'/"
+const ITEMS_PER_PAGE = 5
+
 let ledgerApp
+
+const getPath = (index: number, legacyPath?: boolean) => {
+  return legacyPath ? `m/44'/60'/0'/${index}` : `m/44'/60'/${index}'/0/0`
+}
 
 const getLedgerApp = async (): Promise<LedgerAppEth> => {
   if (ledgerApp) {
@@ -16,52 +20,57 @@ const getLedgerApp = async (): Promise<LedgerAppEth> => {
   return ledgerApp
 }
 
-export const getAddressAtIndex = async (params: {
+export const getAddressAtIndex = async (
   index: number,
-}): Promise<string> => {
+  legacyPath?: boolean,
+): Promise<string> => {
   const app = await getLedgerApp()
-  const path = HD_PATH + params.index
+  const path = getPath(index, legacyPath)
   const account = await app.getAddress(path)
   return account.address
 }
 
-export const getAccounts = async (params: {
+export const getAccounts = async (
   from: number,
   to: number,
-}): Promise<Array<string>> => {
+  legacyPath?: boolean,
+): Promise<Array<string>> => {
   const app = await getLedgerApp()
   const accounts = []
-  for (let i = params.from; i < params.to; i++) {
-    const path = HD_PATH + i
+  for (let i = from; i < to; i++) {
+    const path = getPath(i, legacyPath)
     const account = await app.getAddress(path)
     accounts.push(account)
   }
   return accounts.map(a => a.address)
 }
 
-export const getAccountsByPage = async (params: {
+export const getAccountsByPage = async (
   pageNum: number,
-}): Promise<Array<string>> => {
-  const from = (params.pageNum - 1) * ITEMS_PER_PAGE
+  legacyPath: boolean,
+): Promise<Array<string>> => {
+  const from = (pageNum - 1) * ITEMS_PER_PAGE
   const to = from + ITEMS_PER_PAGE
-  const accounts = await getAccounts({ from, to })
+  const accounts = await getAccounts(from, to, legacyPath)
   return accounts
 }
 
 export const signTransaction = async (
   accountIndex: number,
   txHex: string,
+  legacyPath?: boolean,
 ): Promise<{ r: string, s: string, v: string }> => {
   const app = await getLedgerApp()
-  const path = HD_PATH + accountIndex
+  const path = getPath(accountIndex, legacyPath)
   return app.signTransaction(path, txHex)
 }
 
 export const signPersonalMessage = async (
   accountIndex: number,
   hexData: string,
+  legacyPath?: boolea,
 ): Promise<{ r: string, s: string, v: number }> => {
   const app = await getLedgerApp()
-  const path = HD_PATH + accountIndex
+  const path = getPath(accountIndex, legacyPath)
   return app.signPersonalMessage(path, hexData)
 }

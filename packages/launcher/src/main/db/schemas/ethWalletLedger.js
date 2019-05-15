@@ -18,6 +18,9 @@ export default {
     name: {
       type: 'string',
     },
+    legacyPath: {
+      type: 'boolean',
+    },
     activeAccounts: {
       type: 'array',
       items: {

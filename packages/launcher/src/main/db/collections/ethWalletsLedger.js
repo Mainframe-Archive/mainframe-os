@@ -17,7 +17,11 @@ export default async (params: CollectionParams) => {
     name: COLLECTION_NAMES.ETH_WALLETS_LEDGER,
     schema,
     statics: {
-      async create(data: { name: string, firstAddress: string }) {
+      async create(data: {
+        name: string,
+        firstAddress: string,
+        legacyPath: boolean,
+      }) {
         const localID = nanoid()
         logger.log({
           level: 'debug',
@@ -42,15 +46,15 @@ export default async (params: CollectionParams) => {
         await doc.save()
         return doc
       },
-      async getOrCreate(data: { name: string }) {
-        const rootAddress = await getAddressAtIndex({ index: 0 })
+      async getOrCreate(data: { name: string, legacyPath?: boolean }) {
+        const rootAddr = await getAddressAtIndex(0, data.legacyPath)
         let wallet = await params.db.eth_wallets_ledger
           .findOne()
           .where('firstAddress')
-          .eq(rootAddress)
+          .eq(rootAddr)
           .exec()
         if (!wallet) {
-          data['firstAddress'] = rootAddress
+          data['firstAddress'] = rootAddr
           wallet = await this.create(data)
         }
         return wallet
@@ -63,7 +67,7 @@ export default async (params: CollectionParams) => {
           const index = indexes[i]
           const stringIndex = String(index)
           if (!this.activeAccounts[stringIndex]) {
-            const address = await getAddressAtIndex({ index: index })
+            const address = await getAddressAtIndex(index, this.legacyPath)
             newAccounts.push({
               index,
               address,
@@ -88,7 +92,9 @@ export default async (params: CollectionParams) => {
           indexes,
         })
 
-        await this.update({ $addToSet: { activeAccounts: newAccounts } })
+        const accounts = this.activeAccounts.concat(newAccounts)
+
+        await this.atomicSet('activeAccounts', accounts)
 
         logger.log({
           level: 'debug',

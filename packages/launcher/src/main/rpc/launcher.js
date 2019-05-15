@@ -372,7 +372,7 @@ export default {
     params: WalletGetLedgerEthAccountsParams,
   ): Promise<WalletGetLedgerEthAccountsResult> => {
     try {
-      return getAccountsByPage(params)
+      return getAccountsByPage(params.pageNum, params.legacyPath)
     } catch (err) {
       ctx.logger.log({
         level: 'error',
