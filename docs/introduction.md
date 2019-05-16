@@ -11,21 +11,12 @@ Mainframe OS is an integrated development and execution environment that dramati
 
 ## Install Mainframe OS
 
-#### MacOS
-**[Download](https://download.mainframeos.com/os/releases/MainframeOS.dmg)** Mainframe OS Installer
+Download & install production releases:
+* **[MacOS](https://download.mainframeos.com/os/releases/mac/latest/MainframeOS.dmg)**
+* **[Linux](https://download.mainframeos.com/os/releases/linux/latest/MainframeOS.AppImage)**
+* **[Windows](https://download.mainframeos.com/os/releases/windows/latest/MainframeOS.exe)**
 
-Run the 2 steps outlined in the installer package:
-
-**Step 1:** Click on the Setup.command script to initialize your environment
-
-**Step 2:** Drag the app icon to the Applications folder.
-
-Now you should be able to run it as usual from the Applications folder.
-
-
-#### Windows & Unix
-
-Go to [Mainframe Platform](platform.md) for instructions to compile and run Mainframe OS from source.
+For developer setup/to build and run from source, follow [platform setup instructions](platform.md).
 
 ## Mainframe OS Setup
 Follow onscreen instructions to secure your vault, setup your identity, and create a new software wallet (or import/connect an existing wallet).
@@ -55,7 +46,7 @@ The Application ID is displayed to the developer in the **App Development Tool**
 
 On the **Applications** tab, choose one of the icons in the Suggested Apps section and click **Install**. Review and approve the list of permissions requested by the app.
 
-This will move it out of sugested apps and into the list of your installed apps.
+This will move it out of suggested apps and into the list of your installed apps.
 
 ## Run a Dapp
 Once the app is installed, click the app icon to run the app. A new window will open with the app contents.
@@ -63,12 +54,14 @@ Once the app is installed, click the app icon to run the app. A new window will 
 ## Create a Dapp
 Use [create-mainframe-dapp](create-mainframe-dapp.md) to setup your dapp for easy integration with Mainframe OS.
 
-## Launch your dapp in Mainframe OS
+>Note: If you try to open your new dapp in a standard browser (e.g. Chrome), you will get the following error: `Error: Cannot find expected mainframe client instance`. Dapps that integrate with the Mainframe SDK can only be opened in Mainframe OS. See instructions below.
+
+## Launch your Dapp in Mainframe OS
 
 Next, __launch Mainframe OS__ and go to the **More** tab and click the **App Development Tool** link.
 
 #### Create a developer identity
- * choose a name for the identity that you will use to publish dapps under
+ * choose a name for the identity that you will use to publish dapps
  * select **create**
 
 Once you have created your Developer Identity, click **Add** to
@@ -93,7 +86,6 @@ Click the icon to view/edit dapp details. Then launch the app by clicking **Open
 
 You will initially see the pre-built version of your dapp display in the new window.
 
-***Note:** there is a known issue on Windows and Unix systems where the app window for a built or installed app opens, but is blank/only white. See steps below to host locally for a workaround. For end-users, only Mac OS is supported.*
 
 #### Host locally
  * In a terminal window run `yarn start` if it isn't still running.
@@ -106,14 +98,14 @@ The Chrome Developer Tools window will automatically open to enable debugging yo
 ## Publish your Dapp
 From the app details view in Mainframe OS, click **Publish**.
 
-The resulting App ID is what is needed to share and install your dapp.
+The resulting App ID is what is needed to share for others to install your dapp.
 
 ## Update your Dapp
 Once the app has been published, on the app details screen choose **New Version +**.
 
-Bump the version number and Add. You should now see an entry for that version in draft form. You can work on the changes and when ready choose **Publish Update**.
+Bump the version number and **Add**. You should now see an entry for that version in draft form. You can work on the changes and when ready choose **Publish Update**.
 
-Users who have already installed the app will be notified there is an available update and guided through installing it.
+Users who have already installed the app will be notified there is an update available and guided through installing it.
 
 New users will automatically have access to the latest version.
 
@@ -122,3 +114,4 @@ New users will automatically have access to the latest version.
 *coming soon*
 
 Submit your dapp to be considered for the Mainframe Suggested Apps list. MFT staking required.
+
