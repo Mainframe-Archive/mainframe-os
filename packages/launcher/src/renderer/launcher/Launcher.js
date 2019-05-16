@@ -89,6 +89,7 @@ type Props = {
   relay: {
     environment: Environment,
   },
+  showAlert: (message: string, timeout?: number) => void,
 }
 
 type OnboardSteps = 'identity' | 'wallet'
@@ -183,7 +184,12 @@ class Launcher extends Component<Props, State> {
     }
 
     return (
-      <Provider value={{ user: ownUsers[0], ethClient: this._ethClient }}>
+      <Provider
+        value={{
+          user: ownUsers[0],
+          ethClient: this._ethClient,
+          showAlert: this.props.showAlert,
+        }}>
         <Container testID="launcher-view">
           <SideMenu
             selected={this.state.openScreen}

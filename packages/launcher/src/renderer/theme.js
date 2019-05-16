@@ -480,14 +480,12 @@ export default {
       overflow: 'hidden',
       textOverflow: 'ellipsis',
     },
-    addressLarge: {
+    copyableBlock: {
       fontFamily: 'IBM Plex Mono',
-      backgroundColor: '#F9F9F9',
       padding: '30px 20px',
       textAlign: 'center',
       color: '#303030',
       fontSize: 13,
-      borderRadius: '3px',
     },
     center: {
       textAlign: 'center',

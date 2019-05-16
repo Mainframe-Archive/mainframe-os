@@ -8,6 +8,7 @@ import { createFragmentContainer, graphql, commitMutation } from 'react-relay'
 
 import { EnvironmentContext } from '../RelayEnvironment'
 import FormModalView from '../../UIComponents/FormModalView'
+import CopyableBlock from '../../UIComponents/CopyableBlock'
 import { type OwnUserIdentity } from './__generated__/IdentityEditModal_ownUserIdentity.graphql.js'
 
 type Props = {
@@ -129,9 +130,7 @@ class IdentityEditModal extends Component<Props, State> {
                 <Text variant="smallTitle" theme={{ padding: '20px 0 10px 0' }}>
                   Mainframe ID
                 </Text>
-                <Text variant="addressLarge">
-                  {this.props.ownUserIdentity.feedHash}
-                </Text>
+                <CopyableBlock value={this.props.ownUserIdentity.feedHash} />
               </>
             )}
           </FormContainer>
