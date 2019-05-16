@@ -3,8 +3,6 @@
 import Transport from '@ledgerhq/hw-transport-node-hid'
 import LedgerAppEth from '@ledgerhq/hw-app-eth'
 
-const ITEMS_PER_PAGE = 5
-
 let ledgerApp
 
 const getPath = (index: number, legacyPath?: boolean) => {
@@ -48,9 +46,10 @@ export const getAccounts = async (
 export const getAccountsByPage = async (
   pageNum: number,
   legacyPath: boolean,
+  itemsPerPage: number = 5,
 ): Promise<Array<string>> => {
-  const from = (pageNum - 1) * ITEMS_PER_PAGE
-  const to = from + ITEMS_PER_PAGE
+  const from = (pageNum - 1) * itemsPerPage
+  const to = from + itemsPerPage
   const accounts = await getAccounts(from, to, legacyPath)
   return accounts
 }
