@@ -3,7 +3,14 @@
 import React, { Component } from 'react'
 import { graphql, commitMutation, type PayloadError } from 'react-relay'
 import styled from 'styled-components/native'
-import { Row, Column, Text, Checkbox, Pagination } from '@morpheus-ui/core'
+import {
+  Row,
+  Column,
+  Text,
+  Checkbox,
+  Pagination,
+  DropDown,
+} from '@morpheus-ui/core'
 import memoize from 'memoize-one'
 import { flatten } from 'lodash'
 
@@ -32,6 +39,7 @@ type State = {
   accounts?: ?Array<string>,
   ledgerName: string,
   hover: ?string,
+  hdPath: string,
 }
 
 const Container = styled.View`
@@ -60,6 +68,9 @@ const ActivityContainer = styled.View`
   align-items: center;
   justify-content: center;
 `
+
+const LEDGER_LIVE_PATH = `Ledger Live - m/44'/60'`
+const LEDGER_LEGACY_PATH = `Ethereum - m/44'/60'/0'`
 
 const MUTATION_ERR_MSG =
   'Sorry, there was a problem connecting your ledger wallet.'
@@ -91,6 +102,7 @@ export default class WalletAddLedgerModal extends Component<Props, State> {
     ledgerName: '',
     hover: '',
     saving: false,
+    hdPath: LEDGER_LEGACY_PATH,
   }
 
   componentDidMount() {
@@ -98,21 +110,30 @@ export default class WalletAddLedgerModal extends Component<Props, State> {
   }
 
   onChangePage = (pageNumber: number) => {
-    this.fetchAccounts(pageNumber)
+    this.setState({ currentPage: pageNumber }, () => {
+      this.fetchAccounts()
+    })
   }
 
-  fetchAccounts = async (pageNumber: number = 1) => {
+  onSelectPath = (hdPath: string) => {
+    this.setState({ hdPath }, () => {
+      this.fetchAccounts()
+    })
+  }
+
+  fetchAccounts = async () => {
     this.setState({ fetchingAccounts: true })
+    const { currentPage } = this.state
     try {
-      const accounts = await rpc.getLedgerAccounts(pageNumber)
+      const legacyPath = this.state.hdPath === LEDGER_LEGACY_PATH
+      const accounts = await rpc.getLedgerAccounts(currentPage, legacyPath)
       const name =
-        pageNumber === 1 && accounts.length
+        currentPage === 1 && accounts.length
           ? `Ledger ${accounts[0].substring(0, 4)}`
           : this.state.ledgerName
 
       this.setState({
         ledgerName: name,
-        currentPage: pageNumber,
         connected: true,
         accounts,
         fetchingAccounts: false,
@@ -143,6 +164,7 @@ export default class WalletAddLedgerModal extends Component<Props, State> {
       indexes: [...this.state.selectedItems],
       name: this.state.ledgerName,
       setAsDefault: this.props.setAsDefault,
+      legacyPath: this.state.hdPath === LEDGER_LEGACY_PATH,
     }
 
     commitMutation(this.context, {
@@ -251,6 +273,13 @@ export default class WalletAddLedgerModal extends Component<Props, State> {
           <Text variant={['center', 'modalText', 'marginBottom20']}>
             Select one or multiple addresses
           </Text>
+          <DropDown
+            theme={{ minWidth: 150 }}
+            label="Select"
+            onChange={this.onSelectPath}
+            options={[LEDGER_LIVE_PATH, LEDGER_LEGACY_PATH]}
+            defaultValue={this.state.hdPath}
+          />
           <AccountsContainer>
             <ScrollView>{accounts}</ScrollView>
           </AccountsContainer>

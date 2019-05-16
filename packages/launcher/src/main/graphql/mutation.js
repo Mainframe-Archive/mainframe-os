@@ -258,6 +258,9 @@ const addLedgerWalletAccountsMutation = mutationWithClientMutationId({
     setAsDefault: {
       type: GraphQLBoolean,
     },
+    legacyPath: {
+      type: GraphQLBoolean,
+    },
   },
   outputFields: {
     ledgerWallet: {
@@ -275,6 +278,7 @@ const addLedgerWalletAccountsMutation = mutationWithClientMutationId({
     try {
       const wallet = await ctx.db.eth_wallets_ledger.getOrCreate({
         name: args.name,
+        legacyPath: args.legacyPath,
       })
 
       const [user] = await Promise.all([
