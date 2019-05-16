@@ -199,11 +199,19 @@ tx.<span class="hljs-literal">on</span>(<span class="hljs-string">'hash'</span>,
 <h1><a class="anchor" aria-hidden="true" id="storage"></a><a href="#storage" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Storage</h1>
 <h3><a class="anchor" aria-hidden="true" id="storagepromptupload"></a><a href="#storagepromptupload" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>storage.promptUpload()</h3>
 <p>Will show a file upload window to the user, they can select one file they wish to upload.</p>
-<p><strong>returns:</strong> Promise<boolean></p>
+<p><strong>returns:</strong> Promise<true> if the file was successfully uploaded, Promise<false> if the upload window was closed.</p>
 <p><strong>Example:</strong></p>
 <pre><code class="hljs"><span class="hljs-keyword">const</span> <span class="hljs-built_in">key</span> = <span class="hljs-string">'example.jpg'</span> <span class="hljs-comment">// name that is going to be used in the app</span>
 
 await sdk.storage.promptUpload(<span class="hljs-built_in">key</span>)
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="storagepromptdownload"></a><a href="#storagepromptdownload" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>storage.promptDownload()</h3>
+<p>Will show a save file window to the user, they can select where they wish to save the file.</p>
+<p><strong>returns:</strong> Promise<true> if the file was successfully saved, Promise<false> if the save window was closed.</p>
+<p><strong>Example:</strong></p>
+<pre><code class="hljs"><span class="hljs-keyword">const</span> <span class="hljs-built_in">key</span> = <span class="hljs-string">'example.jpg'</span> <span class="hljs-comment">// key of the file user wants to download</span>
+
+await sdk.storage.promptDownload(<span class="hljs-built_in">key</span>)
 </code></pre>
 <h3><a class="anchor" aria-hidden="true" id="storagelist"></a><a href="#storagelist" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>storage.list()</h3>
 <p>Fetches keys for all the files your app has previously uploaded.</p>
@@ -227,6 +235,14 @@ await sdk.storage.<span class="hljs-keyword">set</span>(key, <span class="hljs-k
 <pre><code class="hljs"><span class="hljs-keyword">const</span> <span class="hljs-built_in">key</span> = <span class="hljs-string">'my-key'</span>
 
 <span class="hljs-keyword">const</span> data = await sdk.storage.<span class="hljs-built_in">get</span>(<span class="hljs-built_in">key</span>)
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="storagedelete"></a><a href="#storagedelete" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>storage.delete()</h3>
+<p>Deletes the key from the list of files available to the app.</p>
+<p><strong>returns:</strong> Promise<void></p>
+<p><strong>Example:</strong></p>
+<pre><code class="hljs"><span class="hljs-keyword">const</span> <span class="hljs-built_in">key</span> = <span class="hljs-string">'my-key'</span>
+
+<span class="hljs-keyword">const</span> data = await sdk.storage.delete(<span class="hljs-built_in">key</span>)
 </code></pre>
 <h1><a class="anchor" aria-hidden="true" id="types"></a><a href="#types" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Types</h1>
 <h3><a class="anchor" aria-hidden="true" id="contact"></a><a href="#contact" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Contact:</h3>
