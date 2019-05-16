@@ -54,7 +54,7 @@ Once the app is installed, click the app icon to run the app. A new window will 
 ## Create a Dapp
 Use [create-mainframe-dapp](create-mainframe-dapp.md) to setup your dapp for easy integration with Mainframe OS.
 
->Note: If you try to open your new dapp in a standard browser (e.g. Chrome), you will get the following error: `Error: Cannot find expected mainframe client instance`. Dapps that integrate with the Mainframe SDK can only be opened in Mainframe OS. See instructions below.
+>**Note:** If you try to open your new dapp in a standard browser (e.g. Chrome), you will get the following error: `Error: Cannot find expected mainframe client instance`. Dapps that integrate with the Mainframe SDK can only be opened in Mainframe OS. See instructions below.
 
 ## Launch your Dapp in Mainframe OS
 
