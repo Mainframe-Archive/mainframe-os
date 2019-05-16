@@ -29,7 +29,6 @@ type Props = ContextProps & {
   type: TransactionType,
   inviteStakeValue: ?number,
   wallets: WalletAccounts,
-  showNotification: () => void,
 }
 
 type TXParams = {
@@ -177,12 +176,12 @@ class InviteContactModal extends Component<Props, State> {
         type: type,
         userID: user.localID,
         contactID: contact.localID,
+        customAddress: this.state.selectedAddress,
       })
       this.setState({
         txParams: res,
       })
     } catch (err) {
-      console.log(err)
       this.setState({
         error: err.message,
       })
@@ -191,16 +190,14 @@ class InviteContactModal extends Component<Props, State> {
 
   async getInviteApproveTXDetails() {
     const { user, contact } = this.props
-    console.log('ici')
 
     try {
       const res = await rpc.getInviteTXDetails({
         type: 'approve',
         userID: user.localID,
         contactID: contact.localID,
+        customAddress: this.state.selectedAddress,
       })
-      console.log(res)
-
       this.setState({
         txParams: res,
         invitePending: {
@@ -208,8 +205,6 @@ class InviteContactModal extends Component<Props, State> {
         },
       })
     } catch (err) {
-      console.log(err)
-
       this.setState({
         error: err.message,
       })
@@ -223,6 +218,7 @@ class InviteContactModal extends Component<Props, State> {
         type: 'sendInvite',
         userID: user.localID,
         contactID: contact.localID,
+        customAddress: this.state.selectedAddress,
       })
       this.setState({
         invitePending: {
@@ -247,7 +243,7 @@ class InviteContactModal extends Component<Props, State> {
       await rpc.sendInviteApprovalTX({
         userID: user.localID,
         contactID: contact.localID,
-        fromAddress: this.state.selectedAddress,
+        customAddress: this.state.selectedAddress,
       })
       this.setState({
         txProcessing: false,
@@ -257,8 +253,6 @@ class InviteContactModal extends Component<Props, State> {
       })
       this.getInviteSendTXDetails()
     } catch (err) {
-      console.log(err)
-
       this.setState({
         error: err.message,
         txProcessing: false,
@@ -276,7 +270,7 @@ class InviteContactModal extends Component<Props, State> {
       await rpc.sendInviteTX({
         userID: user.localID,
         contactID: contact.localID,
-        fromAddress: this.state.selectedAddress,
+        customAddress: this.state.selectedAddress,
       })
       this.setState({
         invitePending: {
@@ -285,8 +279,6 @@ class InviteContactModal extends Component<Props, State> {
       })
       this.props.closeModal()
     } catch (err) {
-      console.log(err)
-
       this.setState({
         error: err.message,
         txProcessing: false,
@@ -311,8 +303,7 @@ class InviteContactModal extends Component<Props, State> {
         declinedTXHash: res,
       })
       this.props.closeModal()
-      // TODO
-      // this.props.showNotification()
+      this.props.showNotification('decline')
     } catch (err) {
       this.setState({
         txProcessing: false,
@@ -328,16 +319,15 @@ class InviteContactModal extends Component<Props, State> {
       const res = await rpc.sendWithdrawInviteTX({
         userID: user.localID,
         contactID: contact.localID,
-        recipientAddress: this.state.selectedAddress,
+        customAddress: this.state.selectedAddress,
       })
       this.setState({
         txProcessing: false,
         withdrawTXHash: res,
       })
       this.props.closeModal()
+      this.props.showNotification('withdraw')
     } catch (err) {
-      console.log(err)
-
       this.setState({
         txProcessing: false,
         error: err.message,
@@ -358,7 +348,7 @@ class InviteContactModal extends Component<Props, State> {
       this.setState({ dropdownError: true })
       return 'Insufficient ETH funds in this wallet'
     } else {
-      this.setState({ dropdownError: false })
+      this.setState({ dropdownError: false, selectedAddress: addr })
     }
   }
 
@@ -377,7 +367,7 @@ class InviteContactModal extends Component<Props, State> {
       const mftLabel = `Stake: ${stakeAmount} MFT`
 
       return (
-        <Text color="#303030" variant="marginTop10" size={11}>
+        <Text color="#303030" variant={['marginTop10', 'ellipsis']} size={11}>
           {`${gasLabel}, ${costlabel}, ${mftLabel}`}
           <Tooltip top>
             <Text variant="tooltipTitle">What is gas?</Text>
@@ -493,6 +483,7 @@ class InviteContactModal extends Component<Props, State> {
               displayKey="data"
               name="walletDropdown"
               defaultValue={this.state.selectedAddress}
+              // value={this.state.selectedAddress}
               variant={[this.state.dropdownError ? 'error' : '', 'maxWidth440']}
               validation={
                 this.state.invitePending &&

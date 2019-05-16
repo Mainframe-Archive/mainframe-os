@@ -76,6 +76,7 @@ export const getInviteTXDetails = async (
     params.type,
     params.userID,
     params.contactID,
+    params.customAddress,
   )
 }
 
@@ -83,12 +84,11 @@ export const sendInviteApprovalTX = async (
   ctx: ClientContext,
   params: SendInviteTXParams,
 ): Promise<void> => {
-  console.log('blockchain js sendInviteApprovalTX')
   return ctx.invitesHandler.sendInviteApprovalTX(
     params.userID,
     params.contactID,
     params.gasPrice,
-    params.fromAddress,
+    params.customAddress,
   )
 }
 
@@ -99,7 +99,7 @@ export const sendInviteTX = async (
   return ctx.invitesHandler.sendInviteTX(
     params.userID,
     params.contactID,
-    params.fromAddress,
+    params.customAddress,
   )
 }
 
@@ -117,7 +117,7 @@ export const sendWithdrawInviteTX = async (
   return ctx.invitesHandler.retrieveStake(
     params.userID,
     params.contactID,
-    params.recipientAddress,
+    params.customAddress,
   )
 }
 

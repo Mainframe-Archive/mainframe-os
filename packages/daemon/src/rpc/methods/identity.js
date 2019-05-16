@@ -180,6 +180,7 @@ export const createContactFromPeer = {
     const contact = await ctx.mutations.createContactFromPeer(
       fromClientID(params.userID),
       fromClientID(params.peerID),
+      params.customAddress,
     )
     return { id: toClientID(contact.localID) }
   },

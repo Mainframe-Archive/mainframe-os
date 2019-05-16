@@ -257,8 +257,7 @@ type State = {
     publicFeed: string,
     publicKey: string,
   },
-  showDeleteNotification: boolean,
-  showDeclineNotification: boolean,
+  notification: string,
 }
 
 const CONTACTS_CHANGED_SUBSCRIPTION = graphql`
@@ -340,8 +339,7 @@ class ContactsViewComponent extends Component<Props, State> {
     const { user } = this.props
     this.state = {
       selectedContact: user.localID,
-      showDeclineNotification: false,
-      showDeleteNotification: false,
+      notification: '',
     }
   }
 
@@ -549,11 +547,16 @@ class ContactsViewComponent extends Component<Props, State> {
 
   rejectContact = (contact: Contact) => {
     this.setState({
+      // notification: 'decline',
       inviteModalOpen: {
         contact,
         type: 'declineInvite',
       },
     })
+  }
+
+  showNotification = (notification: string) => {
+    this.setState({ notification })
   }
 
   getIdentity = () => {
@@ -585,8 +588,7 @@ class ContactsViewComponent extends Component<Props, State> {
 
   closeNotification = () => {
     this.setState({
-      showDeclineNotification: false,
-      showDeleteNotification: false,
+      notification: '',
     })
   }
 
@@ -1179,6 +1181,7 @@ class ContactsViewComponent extends Component<Props, State> {
             </Row> */}
         </ScrollView>
         {this.renderWithdrawNotificationModal()}
+        {this.renderDeleteNotificationModal()}
       </RightContainer>
     )
   }
@@ -1195,7 +1198,7 @@ class ContactsViewComponent extends Component<Props, State> {
     )[0].balances.eth
 
     return (
-      this.state.showDeclineNotification && (
+      this.state.notification === 'withdraw' && (
         <Notification onRequestClose={this.closeNotification}>
           <Text color="#fff" size={13} variant={('bold', 'marginTop5')}>
             {this.props.contacts
@@ -1237,10 +1240,13 @@ class ContactsViewComponent extends Component<Props, State> {
     )
   }
 
-  renderDeleteNotificationModal(deletedContact) {
+  renderDeleteNotificationModal() {
+    const deletedContact = this.state.inviteContactModal
+      ? this.state.InviteContactModal.contact
+      : null
     console.log(deletedContact)
     return (
-      this.state.showDeleteNotification && (
+      this.state.notification === 'delete' && (
         <Notification onRequestClose={this.closeNotification}>
           <Text color="#fff" size={13} variant={('bold', 'marginTop5')}>
             {deletedContact.name + ' has been deleted.'}
@@ -1277,7 +1283,7 @@ class ContactsViewComponent extends Component<Props, State> {
       this.state.inviteModalOpen && (
         <InviteContactModal
           closeModal={this.closeModal}
-          showNotification={this.showDeclineNotification}
+          showNotification={this.showNotification}
           contact={this.state.inviteModalOpen.contact}
           user={this.props.user}
           type={this.state.inviteModalOpen.type}
