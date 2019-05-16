@@ -5,9 +5,10 @@ title: Building Mainframe Apps
 
 You can build a Mainframe app using any Web technology supported by Electron v2 (Chromium v61).
 
-The Mainframe teams build apps using [React Native Web](https://github.com/necolas/react-native-web). You can see a sample setup in the reference apps, [Payments](https://github.com/MainframeHQ/payments) and [onyx-stats](https://github.com/MainframeHQ/mainframe-os/tree/master/applications/onyx-stats).
+The Mainframe teams build apps using [React Native Web](https://github.com/necolas/react-native-web). You can see a sample setup in the reference app [Payments](https://github.com/MainframeHQ/payments).
 
 ### Morpheus UI
+
 [Morpheus UI](https://github.com/MainframeHQ/morpheus-ui) is a React Native Web UI toolkit to make it easier for developers to build Mainframe app interfaces.
 
 Available packages include @morpheus-ui/core, @morpheus-ui/fonts, @morpheus-ui/forms, and @morpheus-ui/icons.
@@ -31,15 +32,16 @@ function App() {
 ReactDOM.render(<App />, document.querySelector('#app'))
 ```
 
-
 ## Mainframe SDK
 
 Your app will need to use the [Mainframe SDK](https://github.com/MainframeHQ/mainframe-os/tree/master/packages/sdk) to interact with the daemon and get access to user data, blockchain interfaces, and integrated storage and communication services. You can view the available API's in the [SDK package](sdk.md).
 
 #### Install from NPM
+
 ```
 npm install @mainframe/sdk
 ```
+
 [npm docs](https://www.npmjs.com/package/@mainframe/sdk)
 
 #### Example SDK usage:
@@ -49,8 +51,6 @@ import MainframeSDK from '@mainframe/sdk'
 const sdk = new MainframeSDK()
 const res = await sdk.apiVersion()
 ```
-
-
 
 ## create-mainframe-dapp
 
