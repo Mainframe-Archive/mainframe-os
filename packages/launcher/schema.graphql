@@ -11,8 +11,7 @@ type AcceptContactRequestPayload {
 }
 
 input AddContactInput {
-  userID: String!
-  publicFeed: String!
+  publicID: String!
   aliasName: String
   sendInvite: Boolean
   clientMutationId: String
@@ -220,12 +219,11 @@ type Contact implements Node {
   """The ID of an object"""
   id: ID!
   localID: ID!
-  localPeerID: ID!
+  peerID: ID!
   publicID: String!
-  publicKey: String!
-  invite: ContactInviteData
   profile: GenericProfile!
   connectionState: ConnectionState!
+  invite: ContactInviteData
 }
 
 type ContactChangedPayload {

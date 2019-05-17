@@ -5,7 +5,6 @@ import { ETH_RPC_URLS } from '@mainframe/eth'
 import { COLLECTION_NAMES } from '../constants'
 
 import keyPair from './keyPair'
-import ownFeed from './ownFeed'
 import userProfile from './userProfile'
 
 export default {
@@ -26,7 +25,6 @@ export default {
       type: 'boolean',
       default: true,
     },
-    firstContactFeed: ownFeed,
     contacts: {
       type: 'array',
       ref: COLLECTION_NAMES.CONTACTS,
@@ -78,5 +76,5 @@ export default {
       default: 'http://mainframe-gateways.net:8500',
     },
   },
-  required: ['localID', 'keyPair', 'profile', 'firstContactFeed'],
+  required: ['localID', 'keyPair', 'profile'],
 }

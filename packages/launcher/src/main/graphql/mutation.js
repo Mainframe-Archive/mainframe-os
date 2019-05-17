@@ -418,10 +418,7 @@ const setUserProfileVisibilityMutation = mutationWithClientMutationId({
 const addContactMutation = mutationWithClientMutationId({
   name: 'AddContact',
   inputFields: {
-    userID: {
-      type: new GraphQLNonNull(GraphQLString),
-    },
-    publicFeed: {
+    publicID: {
       type: new GraphQLNonNull(GraphQLString),
     },
     aliasName: {
@@ -439,16 +436,15 @@ const addContactMutation = mutationWithClientMutationId({
     viewer: viewerField,
   },
   mutateAndGetPayload: async (args, ctx) => {
-    const contact = await ctx.mutations.createContactFromFeed(
-      args.userID,
-      args.publicFeed,
-      args.aliasName,
-    )
-    if (args.sendInvite) {
-      await ctx.invitesHandler.sendInvite(args.userID, contact)
-    }
-    const contactData = ctx.queries.mergePeerContactData(contact)
-    return { contact: contactData }
+    const user = await ctx.getUser()
+    const contact = await user.addContact(args.publicID, {
+      aliasName: args.aliasName,
+    })
+    // TODO: implement blockchain invite
+    // if (args.sendInvite) {
+    //   await ctx.invitesHandler.sendInvite(args.userID, contact)
+    // }
+    return { contact: await contact.getInfo() }
   },
 })
 

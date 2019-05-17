@@ -40,7 +40,7 @@ export default {
         }
       } catch (error) {
         const message = 'Failed to create DB'
-        ctx.logger.log({ level: 'error', message, error })
+        ctx.logger.log({ level: 'error', message, error: error.toString() })
         throw new Error(message)
       }
     },
@@ -154,7 +154,7 @@ export default {
     },
   },
 
-  // GrahpQL
+  // GraphQL
 
   graphql_query: {
     params: GRAPHQL_PARAMS,

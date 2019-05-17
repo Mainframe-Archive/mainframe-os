@@ -29,7 +29,6 @@ export default {
       },
       default: [],
     },
-    firstContactAddress: ethAddress,
     publicKey: {
       type: 'string',
     },

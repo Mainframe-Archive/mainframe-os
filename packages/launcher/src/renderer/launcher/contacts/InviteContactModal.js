@@ -231,7 +231,7 @@ class InviteContactModal extends Component<Props, State> {
     try {
       this.setState({ txProcessing: true, error: null })
       const res = await rpc.sendDeclineInviteTX({
-        localPeerID: contact.localPeerID,
+        peerID: contact.peerID,
       })
       this.setState({
         txProcessing: false,
@@ -511,7 +511,7 @@ const InviteContactRelayContainer = createFragmentContainer(
     contact: graphql`
       fragment InviteContactModal_contact on Contact {
         localID
-        localPeerID
+        peerID
         publicID
         connectionState
         invite {

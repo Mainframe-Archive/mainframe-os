@@ -64,18 +64,21 @@ export default {
     },
     keyPair: keyPair,
     profile: userProfile,
-    readAddress: ethAddress,
-    feedRequestSent: {
-      type: 'boolean',
-      default: false,
-    },
     aliasName: {
       type: 'string',
+    },
+    // Public key of the connected feed - part of first contact data
+    publicKey: {
+      type: 'string',
+    },
+    firstContactFeedCreated: {
+      type: 'boolean',
+      default: false,
     },
     invite,
     acceptanceSignature: {
       type: 'string',
     },
   },
-  required: ['keyPair', 'profile', 'readAddress'],
+  required: ['keyPair', 'profile'],
 }

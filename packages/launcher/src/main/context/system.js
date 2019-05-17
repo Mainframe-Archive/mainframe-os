@@ -63,14 +63,15 @@ export class SystemContext {
   }
 
   set defaultUser(id: ?string): void {
-    this.logger.log({
-      level: 'debug',
-      message: 'Set default user',
-      id,
-    })
     if (id == null) {
+      this.logger.debug('Remove default user')
       this.config.delete('defaultUser')
     } else {
+      this.logger.log({
+        level: 'debug',
+        message: 'Set default user',
+        id,
+      })
       this.config.set('defaultUser', id)
     }
   }
@@ -164,11 +165,11 @@ export class SystemContext {
         PASSWORD_SERVICE,
         `${this.env.name}-${this.env.type}`,
       )
-    } catch (error) {
+    } catch (err) {
       this.logger.log({
         level: 'error',
         message: 'Failed to retrieve password from keychain',
-        error,
+        error: err.toString(),
       })
       return null
     }
@@ -182,11 +183,11 @@ export class SystemContext {
         password,
       )
       this.env.config.set('savePassword', true)
-    } catch (error) {
+    } catch (err) {
       this.logger.log({
         level: 'error',
         message: 'Failed to save password to keychain',
-        error,
+        error: err.toString(),
       })
     }
   }

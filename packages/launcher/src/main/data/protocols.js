@@ -2,14 +2,43 @@
 
 import semver from 'semver'
 
-const validatePeer = (data: Object = {}) => {
+const validateHasPublicKey = (data: Object = {}) => {
   if (data.publicKey == null) {
-    throw new Error('Missing peer public key')
+    throw new Error('Missing public key')
   }
   return data
 }
 
+const validatePeer = (data: Object = {}) => {
+  validateHasPublicKey(data)
+  if (data.profile == null) {
+    data.profile = {}
+  }
+  return data
+}
+
+const validateFirstContact = (data: Object = {}) => {
+  validateHasPublicKey(data.contact)
+
+  if (data.peer == null || data.peer.publicFeed == null) {
+    throw new Error('Missing peer public feed')
+  }
+
+  return data
+}
+
 export const PROTOCOLS = {
+  firstContact_v1: {
+    name: 'first-contact',
+    read: {
+      process: validateFirstContact,
+      version: '^1.0.0',
+    },
+    write: {
+      process: validateFirstContact,
+      version: '1.0.0',
+    },
+  },
   peer_v1: {
     name: 'peer',
     read: {
@@ -58,6 +87,9 @@ export const createReader = (key: Protocol) => {
     return protocol.read.process(payload.data)
   }
 }
+
+export const readFirstContact = createReader('firstContact_v1')
+export const writeFirstContact = createWriter('firstContact_v1')
 
 export const readPeer = createReader('peer_v1')
 export const writePeer = createWriter('peer_v1')

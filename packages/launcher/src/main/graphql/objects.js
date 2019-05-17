@@ -17,7 +17,8 @@ import { MF_PREFIX } from '../../constants'
 import { isValidPeerID } from '../../validation'
 
 import type { GraphQLContext } from '../context/graphql'
-import { readProfile } from '../data/protocols'
+import { readPeer } from '../data/protocols'
+import { readJSON } from '../swarm/feeds'
 
 const TYPE_COLLECTION = {
   App: 'apps',
@@ -586,29 +587,20 @@ export const contact = new GraphQLObjectType({
     localID: {
       type: new GraphQLNonNull(GraphQLID),
     },
-    localPeerID: {
+    peerID: {
       type: new GraphQLNonNull(GraphQLID),
-      resolve: doc => doc.peer,
     },
     publicID: {
       type: new GraphQLNonNull(GraphQLString),
-      resolve: doc => doc.getPublicID(),
-    },
-    publicKey: {
-      type: new GraphQLNonNull(GraphQLString),
-    },
-    invite: {
-      type: contactInviteData,
     },
     profile: {
       type: new GraphQLNonNull(genericProfile),
-      resolve: (self, args, ctx: GraphQLContext) => {
-        // TODO: merge peer and contact profile in contact collection
-        return {}
-      },
     },
     connectionState: {
       type: new GraphQLNonNull(connectionState),
+    },
+    invite: {
+      type: contactInviteData,
     },
   }),
 })
@@ -890,13 +882,13 @@ export const lookup = new GraphQLObjectType({
             throw new Error('Invalid peer ID')
           }
           const bzz = await ctx.user.getBzz()
-          const hash = await bzz.getFeedValue(
-            { user: args.publicID.replace(MF_PREFIX.CONTACT, '0x') },
-            { mode: 'content-hash' },
-          )
-          const res = await bzz.download(hash, { mode: 'raw' })
-          const payload = await res.json()
-          const data = readProfile(payload)
+          const payload = await readJSON(bzz, {
+            user: args.publicID.replace(MF_PREFIX.PEER, '0x'),
+          })
+          if (payload == null) {
+            return null
+          }
+          const data = readPeer(payload)
           ctx.logger.log({
             level: 'debug',
             message: 'Lookup peer by ID result',
@@ -946,7 +938,10 @@ export const user = new GraphQLObjectType({
     },
     contacts: {
       type: list(contact),
-      resolve: doc => doc.populate('contacts'),
+      resolve: async doc => {
+        const contacts = await doc.populate('contacts')
+        return await Promise.all(contacts.map(c => c.getInfo()))
+      },
     },
     contactRequests: {
       type: list(contactRequest),

@@ -22,10 +22,10 @@ import type { DB, DBParams } from './types'
 RxDB.plugin(levelAdapter)
 
 export const createDB = async (params: DBParams): Promise<DB> => {
+  await ensureDir(dirname(params.location))
+
   // Uncomment the following line to reset the DB in development
   // await RxDB.removeDatabase(params.location, leveldown)
-
-  await ensureDir(dirname(params.location))
 
   const db = await RxDB.create({
     name: params.location,

@@ -21,7 +21,7 @@ export type ContactsScreen_user = {|
   |},
   +contacts: $ReadOnlyArray<{|
     +localID: string,
-    +localPeerID: string,
+    +peerID: string,
     +publicID: string,
     +connectionState: ConnectionState,
     +invite: ?{|
@@ -106,7 +106,7 @@ return {
         {
           "kind": "ScalarField",
           "alias": null,
-          "name": "localPeerID",
+          "name": "peerID",
           "args": null,
           "storageKey": null
         },
@@ -200,5 +200,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = 'b65243dd5d0af84a97cc16732cf8f723';
+(node/*: any*/).hash = 'f41a9b28b99d01415aca492a07257377';
 module.exports = node;

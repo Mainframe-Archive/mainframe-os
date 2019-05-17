@@ -4,10 +4,10 @@ import { generateMnemonic, mnemonicToSeed } from 'bip39'
 import sigUtil from 'eth-sig-util'
 import type EthWallet from 'ethereumjs-wallet'
 import HDkey from 'ethereumjs-wallet/hdkey'
-import nanoid from 'nanoid'
 
 import { COLLECTION_NAMES } from '../constants'
 import type { CollectionParams } from '../types'
+import { generateLocalID } from '../utils'
 
 import schema from '../schemas/ethWalletHD'
 
@@ -30,7 +30,7 @@ export default async (params: CollectionParams) => {
     schema,
     statics: {
       async create(data: { name: string, mnemonic?: ?string }) {
-        const localID = nanoid()
+        const localID = generateLocalID()
         logger.log({
           level: 'debug',
           message: 'Create HD wallet',

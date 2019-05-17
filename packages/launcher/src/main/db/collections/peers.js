@@ -8,10 +8,11 @@ import { flatMap } from 'rxjs/operators'
 import { MF_PREFIX } from '../../../constants'
 
 import { readPeer } from '../../data/protocols'
-import { createSubscriber } from '../../swarm/feeds'
+import { createSubscriber, readJSON } from '../../swarm/feeds'
 
 import { COLLECTION_NAMES } from '../constants'
 import type { CollectionParams } from '../types'
+import { generateLocalID } from '../utils'
 
 import schema from '../schemas/peer'
 
@@ -22,6 +23,28 @@ export default async (params: CollectionParams) => {
     name: COLLECTION_NAMES.PEERS,
     schema,
     statics: {
+      async createFromID(bzz: Bzz, publicID: string) {
+        const publicFeed = publicID.replace(MF_PREFIX.PEER, '0x')
+        const payload = await readJSON(bzz, { user: publicFeed })
+        if (payload == null) {
+          throw new Error('Peer data not found')
+        }
+
+        const data = readPeer(payload)
+        return await this.insert({
+          localID: generateLocalID(),
+          publicFeed,
+          publicKey: data.publicKey,
+          profile: data.profile,
+        })
+      },
+
+      async findByPublicID(publicID: string) {
+        return await this.findOne({
+          publicFeed: publicID.replace(MF_PREFIX.PEER, '0x'),
+        }).exec()
+      },
+
       async startSync(bzz: Bzz) {
         if (this._sync != null) {
           logger.warn('Collection already syncing, ignoring startSync() call')
@@ -40,8 +63,8 @@ export default async (params: CollectionParams) => {
           this.insert$
             .pipe(
               flatMap(async event => {
-                const doc = await this.findOne(event.doc).exec()
-                this.__sync.add(doc.startSync(bzz))
+                const doc = await this.findOne(event.data.doc).exec()
+                this._sync.add(doc.startSync(bzz))
               }),
             )
             .subscribe({
@@ -148,6 +171,15 @@ export default async (params: CollectionParams) => {
       },
 
       startSync(bzz: Bzz) {
+        if (this._sync != null) {
+          logger.log({
+            level: 'warn',
+            message: 'Document is already syncing, ignoring startSync() call',
+            id: this.localID,
+          })
+          return
+        }
+
         logger.log({
           level: 'debug',
           message: 'Start document sync',
@@ -161,7 +193,7 @@ export default async (params: CollectionParams) => {
               message: 'Cleanup deleted document sync',
               id: this.localID,
             })
-            this.stopPublicFeedSubscription()
+            this.stopSync()
           }
         })
 

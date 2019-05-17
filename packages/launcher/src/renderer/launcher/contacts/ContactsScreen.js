@@ -28,7 +28,7 @@ import {
 } from 'react-relay'
 import { fetchQuery } from 'relay-runtime'
 
-import { isValidContactID } from '../../../validation'
+import { isValidPeerID } from '../../../validation'
 
 import Avatar from '../../UIComponents/Avatar'
 import SvgSelectedPointer from '../../UIComponents/SVGSelectedPointer'
@@ -344,7 +344,7 @@ class ContactsView extends Component<Props, State> {
   }
 
   lookupPeer = async (publicID: string) => {
-    if (!isValidContactID(publicID)) {
+    if (!isValidPeerID(publicID)) {
       this.setState({
         foundPeer: undefined,
         queryInProgress: false,
@@ -387,13 +387,8 @@ class ContactsView extends Component<Props, State> {
   }
 
   submitNewContact = (payload: FormSubmitPayload) => {
-    const { user } = this.props
-
     if (payload.valid) {
       this.setState({ error: null, addingContact: true })
-      const input = {
-        publicID: payload.fields.peerLookupID,
-      }
 
       const requestComplete = error => {
         this.setState({
@@ -405,22 +400,24 @@ class ContactsView extends Component<Props, State> {
 
       commitMutation(this.props.relay.environment, {
         mutation: addContactMutation,
-        variables: { input, userID: user.localID },
+        variables: {
+          input: {
+            publicID: payload.fields.peerLookupID,
+          },
+        },
         onCompleted: (response, errors) => {
           if (errors && errors.length) {
             requestComplete(errors[0].message)
+          } else if (this.state.radio === 'blockchain') {
+            this.setState({
+              addModalState: 2,
+              inviteModalOpen: {
+                contact: response.addContact.contact,
+                type: 'invite',
+              },
+            })
           } else {
-            if (this.state.radio === 'blockchain') {
-              this.setState({
-                addModalState: 2,
-                inviteModalOpen: {
-                  contact: response.addContact.contact,
-                  type: 'invite',
-                },
-              })
-            } else {
-              requestComplete()
-            }
+            requestComplete()
           }
         },
         onError: err => {
@@ -468,7 +465,7 @@ class ContactsView extends Component<Props, State> {
       mutation: acceptContactRequestMutation,
       variables: {
         input: {
-          localPeerID: contact.localPeerID,
+          peerID: contact.peerID,
         },
       },
       onCompleted: (contact, errors) => {
@@ -508,7 +505,7 @@ class ContactsView extends Component<Props, State> {
     return {
       connectionState: 'CONNECTED',
       localID: user.localID,
-      localPeerID: user.localID,
+      peerID: user.localID,
       publicID: user.publicID,
       profile: {
         name: user.profile.name,
@@ -1198,7 +1195,7 @@ const RelayContainer = createFragmentContainer(ContactsView, {
       contacts {
         # ...InviteContactModal_contact
         localID
-        localPeerID
+        peerID
         publicID
         connectionState
         invite {

@@ -14,7 +14,7 @@ import type { FragmentReference } from "relay-runtime";
 declare export opaque type InviteContactModal_contact$ref: FragmentReference;
 export type InviteContactModal_contact = {|
   +localID: string,
-  +localPeerID: string,
+  +peerID: string,
   +publicID: string,
   +connectionState: ConnectionState,
   +invite: ?{|
@@ -51,7 +51,7 @@ const node/*: ConcreteFragment*/ = {
     {
       "kind": "ScalarField",
       "alias": null,
-      "name": "localPeerID",
+      "name": "peerID",
       "args": null,
       "storageKey": null
     },
@@ -147,5 +147,5 @@ const node/*: ConcreteFragment*/ = {
   ]
 };
 // prettier-ignore
-(node/*: any*/).hash = '6422b163900eae9a71683fec05b8788e';
+(node/*: any*/).hash = '664acbd0911aeea85d5f2174a2eb9610';
 module.exports = node;

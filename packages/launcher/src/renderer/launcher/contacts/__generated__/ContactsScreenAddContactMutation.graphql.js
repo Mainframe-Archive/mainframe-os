@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 9b6fc599b33381d54ca2e1015212236c
+ * @relayHash 5669f2db0640cbbd299703ecd912a593
  */
 
 /* eslint-disable */
@@ -11,8 +11,7 @@
 import type { ConcreteRequest } from 'relay-runtime';
 type InviteContactModal_contact$ref = any;
 export type AddContactInput = {
-  userID: string,
-  publicFeed: string,
+  publicID: string,
   aliasName?: ?string,
   sendInvite?: ?boolean,
   clientMutationId?: ?string,
@@ -54,7 +53,7 @@ mutation ContactsScreenAddContactMutation(
 
 fragment InviteContactModal_contact on Contact {
   localID
-  localPeerID
+  peerID
   publicID
   connectionState
   invite {
@@ -113,7 +112,7 @@ return {
   "operationKind": "mutation",
   "name": "ContactsScreenAddContactMutation",
   "id": null,
-  "text": "mutation ContactsScreenAddContactMutation(\n  $input: AddContactInput!\n) {\n  addContact(input: $input) {\n    contact {\n      ...InviteContactModal_contact\n      id\n    }\n    viewer {\n      id\n    }\n  }\n}\n\nfragment InviteContactModal_contact on Contact {\n  localID\n  localPeerID\n  publicID\n  connectionState\n  invite {\n    inviteTX\n    stake {\n      reclaimedTX\n      amount\n      state\n    }\n  }\n  profile {\n    name\n    ethAddress\n  }\n}\n",
+  "text": "mutation ContactsScreenAddContactMutation(\n  $input: AddContactInput!\n) {\n  addContact(input: $input) {\n    contact {\n      ...InviteContactModal_contact\n      id\n    }\n    viewer {\n      id\n    }\n  }\n}\n\nfragment InviteContactModal_contact on Contact {\n  localID\n  peerID\n  publicID\n  connectionState\n  invite {\n    inviteTX\n    stake {\n      reclaimedTX\n      amount\n      state\n    }\n  }\n  profile {\n    name\n    ethAddress\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -185,7 +184,7 @@ return {
               {
                 "kind": "ScalarField",
                 "alias": null,
-                "name": "localPeerID",
+                "name": "peerID",
                 "args": null,
                 "storageKey": null
               },

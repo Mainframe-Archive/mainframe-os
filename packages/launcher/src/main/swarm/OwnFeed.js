@@ -1,5 +1,6 @@
 // @flow
 
+import type { FeedParams } from '@erebos/api-bzz-base'
 import type Bzz from '@erebos/api-bzz-node'
 import { pubKeyToAddress } from '@erebos/keccak256'
 import { createKeyPair, type KeyPair } from '@erebos/secp256k1'
@@ -11,10 +12,17 @@ export default class OwnFeed {
   }
 
   _address: ?string
+  _feed: ?FeedParams
   keyPair: KeyPair
 
-  constructor(privateKey?: ?string) {
+  constructor(privateKey?: ?string, feed?: ?$Shape<FeedParams>) {
     this.keyPair = createKeyPair(privateKey)
+    if (feed != null) {
+      this._feed = feed
+      if (this._feed.user == null) {
+        this._feed.user = this.address
+      }
+    }
   }
 
   get address(): string {
@@ -24,9 +32,13 @@ export default class OwnFeed {
     return this._address
   }
 
+  get feed(): FeedParams {
+    return this._feed || { user: this.address }
+  }
+
   async publishJSON(bzz: Bzz, payload: Object): Promise<string> {
     return await bzz.uploadFeedValue(
-      { user: this.address },
+      this.feed,
       JSON.stringify(payload),
       { mode: 'raw' },
       this.keyPair.getPrivate(),

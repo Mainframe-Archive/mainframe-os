@@ -51,3 +51,15 @@ export const createSubscriber = <T: any>(
       }),
     )
 }
+
+export const readJSON = async (
+  bzz: Bzz,
+  feed: string | FeedParams,
+): Promise<Object | null> => {
+  const hash = await bzz.getFeedValue(feed, { mode: 'content-hash' })
+  if (hash == null) {
+    return null
+  }
+  const res = await bzz.download(hash, { mode: 'raw' })
+  return res.ok ? await res.json() : null
+}

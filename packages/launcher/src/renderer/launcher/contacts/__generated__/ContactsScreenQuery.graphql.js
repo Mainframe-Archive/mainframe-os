@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash ae7940a6bbc382d3b4e86b40b23ec2aa
+ * @relayHash 43ba36dae6f441130a7ffc0c05514091
  */
 
 /* eslint-disable */
@@ -40,7 +40,7 @@ fragment ContactsScreen_user on User {
   }
   contacts {
     localID
-    localPeerID
+    peerID
     publicID
     connectionState
     invite {
@@ -95,7 +95,7 @@ return {
   "operationKind": "query",
   "name": "ContactsScreenQuery",
   "id": null,
-  "text": "query ContactsScreenQuery {\n  user: viewer {\n    ...ContactsScreen_user\n    id\n  }\n}\n\nfragment ContactsScreen_user on User {\n  localID\n  defaultEthAddress\n  publicID\n  profile {\n    name\n  }\n  contacts {\n    localID\n    localPeerID\n    publicID\n    connectionState\n    invite {\n      ethNetwork\n      inviteTX\n      stake {\n        reclaimedTX\n        amount\n        state\n      }\n    }\n    profile {\n      name\n      ethAddress\n    }\n    id\n  }\n}\n",
+  "text": "query ContactsScreenQuery {\n  user: viewer {\n    ...ContactsScreen_user\n    id\n  }\n}\n\nfragment ContactsScreen_user on User {\n  localID\n  defaultEthAddress\n  publicID\n  profile {\n    name\n  }\n  contacts {\n    localID\n    peerID\n    publicID\n    connectionState\n    invite {\n      ethNetwork\n      inviteTX\n      stake {\n        reclaimedTX\n        amount\n        state\n      }\n    }\n    profile {\n      name\n      ethAddress\n    }\n    id\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -170,7 +170,7 @@ return {
               {
                 "kind": "ScalarField",
                 "alias": null,
-                "name": "localPeerID",
+                "name": "peerID",
                 "args": null,
                 "storageKey": null
               },

@@ -2,7 +2,6 @@
 
 import Bzz from '@erebos/api-bzz-node'
 import { createKeyPair, sign } from '@erebos/secp256k1'
-import nanoid from 'nanoid'
 import objectHash from 'object-hash'
 import { Subscription } from 'rxjs'
 import { debounceTime, filter, flatMap, map } from 'rxjs/operators'
@@ -15,24 +14,24 @@ import { createPublisher } from '../../swarm/feeds'
 
 import { COLLECTION_NAMES } from '../constants'
 import type { CollectionParams } from '../types'
+import { generateKeyPair, generateLocalID } from '../utils'
 
 import schema from '../schemas/user'
 import type { UserProfile } from '../schemas/userProfile'
-import { generateKeyPair } from '../utils'
 
 export default async (params: CollectionParams) => {
+  const db = params.db
   const logger = params.logger.child({ collection: COLLECTION_NAMES.USERS })
 
-  return await params.db.collection({
+  return await db.collection({
     name: COLLECTION_NAMES.USERS,
     schema,
     statics: {
       async create(data: { profile: UserProfile, privateProfile?: boolean }) {
         return await this.insert({
           ...data,
-          localID: nanoid(),
+          localID: generateLocalID(),
           keyPair: generateKeyPair(),
-          firstContactFeed: OwnFeed.createJSON(),
         })
       },
 
@@ -54,7 +53,7 @@ export default async (params: CollectionParams) => {
           this.insert$
             .pipe(
               flatMap(async event => {
-                const doc = await this.findOne(event.doc).exec()
+                const doc = await this.findOne(event.data.doc).exec()
                 this._sync.add(doc.startSync())
               }),
             )
@@ -106,17 +105,80 @@ export default async (params: CollectionParams) => {
         return this._publicFeed
       },
 
-      getFirstContactFeed(): OwnFeed {
-        if (this._firstContactFeed == null) {
-          this._firstContactFeed = new OwnFeed(this.firstContactFeed.privateKey)
-        }
-        return this._firstContactFeed
-      },
-
       getSharedKey(peerKey: any): Buffer {
         return createKeyPair(this.keyPair.privateKey)
           .derive(peerKey)
           .toBuffer()
+      },
+
+      async addContact(publicID: string, data: Object = {}): Promise<Object> {
+        logger.log({
+          level: 'debug',
+          message: 'Add contact for user',
+          userID: this.localID,
+          contactPublicID: publicID,
+        })
+
+        const bzz = this.getBzz()
+
+        let peer = await db.peers.findByPublicID(publicID)
+        if (peer == null) {
+          logger.log({
+            level: 'debug',
+            message: 'No existing peer for this contact, creating it',
+            userID: this.localID,
+            contactPublicID: publicID,
+          })
+          peer = await db.peers.createFromID(bzz, publicID)
+          logger.log({
+            level: 'debug',
+            message: 'Peer created',
+            userID: this.localID,
+            contactPublicID: publicID,
+            peerID: peer.localID,
+          })
+        } else {
+          logger.log({
+            level: 'debug',
+            message: 'Peer found',
+            userID: this.localID,
+            contactPublicID: publicID,
+            peerID: peer.localID,
+          })
+        }
+
+        const contact = db.contacts.newDocument({
+          profile: {},
+          ...data,
+          localID: generateLocalID(),
+          keyPair: generateKeyPair(),
+          peer: peer.localID,
+          firstContactFeedCreated: true, // Created below, before saving doc
+        })
+        await contact.createFirstContactFeed(this)
+        await contact.save()
+        logger.log({
+          level: 'debug',
+          message: 'Contact created',
+          userID: this.localID,
+          contactID: contact.localID,
+          contactPublicID: publicID,
+          peerID: peer.localID,
+        })
+
+        await this.update({ $addToSet: { contacts: contact.localID } })
+        logger.log({
+          level: 'debug',
+          message: 'Contact added to user',
+          userID: this.localID,
+          contactID: contact.localID,
+          contactPublicID: publicID,
+          peerID: peer.localID,
+        })
+
+        this._contactsSync.add(contact.startSync(this))
+
+        return contact
       },
 
       async addEthHDWallet(id: string): Promise<void> {
@@ -254,11 +316,52 @@ export default async (params: CollectionParams) => {
         }
       },
 
+      startContactsSync() {
+        if (this._contactsSync != null) {
+          logger.log({
+            level: 'warn',
+            message: 'Contacts sync is already started',
+            id: this.localID,
+          })
+          return
+        }
+
+        logger.log({
+          level: 'debug',
+          message: 'Start contacts sync',
+          id: this.localID,
+        })
+
+        this._contactsSync = new Subscription()
+
+        this.populate('contacts').then(contacts => {
+          contacts.forEach(contact => {
+            this._contactsSync.add(contact.startSync(this))
+          })
+        })
+
+        return () => {
+          this.stopContactsSync()
+        }
+      },
+
+      stopContactsSync() {
+        if (this._contactsSync != null) {
+          logger.log({
+            level: 'debug',
+            message: 'Stop contacts sync',
+            id: this.localID,
+          })
+          this._contactsSync.unsubscribe()
+          this._contactsSync = null
+        }
+      },
+
       startSync() {
         if (this._sync != null) {
           logger.log({
             level: 'warn',
-            message: 'Document is already syncinc, ignoring startSync() call',
+            message: 'Document is already syncing, ignoring startSync() call',
             id: this.localID,
           })
           return
@@ -277,14 +380,14 @@ export default async (params: CollectionParams) => {
               message: 'Cleanup deleted document sync',
               id: this.localID,
             })
-            this.stopPublicProfilePublication()
-            this.stopPublicProfileToggle()
+            this.stopSync()
           }
         })
 
         this._sync = new Subscription()
         this._sync.add(deletedSub)
         this._sync.add(this.startPublicProfileToggle())
+        this._sync.add(this.startContactsSync())
 
         return () => {
           this.stopSync()
