@@ -104,6 +104,7 @@ export default class OnboardingCreateWallet extends Component<{}, State> {
       <WalletCreateModal
         onClose={this.closeModal}
         onSetupWallet={this.onSetupWallet}
+        setAsDefault
         full
       />
     )
@@ -113,6 +114,7 @@ export default class OnboardingCreateWallet extends Component<{}, State> {
     return (
       <WalletAddLedgerModal
         full
+        setAsDefault
         wallets={[]}
         onSuccess={this.onSetupWallet}
         onClose={this.closeModal}
@@ -124,6 +126,7 @@ export default class OnboardingCreateWallet extends Component<{}, State> {
     return (
       <WalletImportView
         full
+        setAsDefault
         onSuccess={this.onSetupWallet}
         onClose={this.closeModal}
       />

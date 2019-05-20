@@ -38,6 +38,7 @@ type State = {
 type Props = {
   onClose?: () => void,
   onSetupWallet: (address: string) => void,
+  setAsDefault?: boolean,
   full?: boolean,
 }
 
@@ -128,6 +129,7 @@ export default class WalletCreateModal extends Component<Props, State> {
         input: {
           name,
           blockchain: 'ETHEREUM',
+          setAsDefault: this.props.setAsDefault,
         },
       },
       onError: err => {

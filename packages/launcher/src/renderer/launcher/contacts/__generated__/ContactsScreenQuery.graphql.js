@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 43ba36dae6f441130a7ffc0c05514091
+ * @relayHash de49ba3a256ddc073f8e55d29e4e355c
  */
 
 /* eslint-disable */
@@ -33,10 +33,10 @@ query ContactsScreenQuery {
 
 fragment ContactsScreen_user on User {
   localID
-  defaultEthAddress
   publicID
   profile {
     name
+    ethAddress
   }
   contacts {
     localID
@@ -76,13 +76,22 @@ v1 = {
   "args": null,
   "storageKey": null
 },
-v2 = {
-  "kind": "ScalarField",
-  "alias": null,
-  "name": "name",
-  "args": null,
-  "storageKey": null
-},
+v2 = [
+  {
+    "kind": "ScalarField",
+    "alias": null,
+    "name": "name",
+    "args": null,
+    "storageKey": null
+  },
+  {
+    "kind": "ScalarField",
+    "alias": null,
+    "name": "ethAddress",
+    "args": null,
+    "storageKey": null
+  }
+],
 v3 = {
   "kind": "ScalarField",
   "alias": null,
@@ -95,7 +104,7 @@ return {
   "operationKind": "query",
   "name": "ContactsScreenQuery",
   "id": null,
-  "text": "query ContactsScreenQuery {\n  user: viewer {\n    ...ContactsScreen_user\n    id\n  }\n}\n\nfragment ContactsScreen_user on User {\n  localID\n  defaultEthAddress\n  publicID\n  profile {\n    name\n  }\n  contacts {\n    localID\n    peerID\n    publicID\n    connectionState\n    invite {\n      ethNetwork\n      inviteTX\n      stake {\n        reclaimedTX\n        amount\n        state\n      }\n    }\n    profile {\n      name\n      ethAddress\n    }\n    id\n  }\n}\n",
+  "text": "query ContactsScreenQuery {\n  user: viewer {\n    ...ContactsScreen_user\n    id\n  }\n}\n\nfragment ContactsScreen_user on User {\n  localID\n  publicID\n  profile {\n    name\n    ethAddress\n  }\n  contacts {\n    localID\n    peerID\n    publicID\n    connectionState\n    invite {\n      ethNetwork\n      inviteTX\n      stake {\n        reclaimedTX\n        amount\n        state\n      }\n    }\n    profile {\n      name\n      ethAddress\n    }\n    id\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -137,13 +146,6 @@ return {
         "plural": false,
         "selections": [
           v0,
-          {
-            "kind": "ScalarField",
-            "alias": null,
-            "name": "defaultEthAddress",
-            "args": null,
-            "storageKey": null
-          },
           v1,
           {
             "kind": "LinkedField",
@@ -153,9 +155,7 @@ return {
             "args": null,
             "concreteType": "NamedProfile",
             "plural": false,
-            "selections": [
-              v2
-            ]
+            "selections": v2
           },
           {
             "kind": "LinkedField",
@@ -247,16 +247,7 @@ return {
                 "args": null,
                 "concreteType": "GenericProfile",
                 "plural": false,
-                "selections": [
-                  v2,
-                  {
-                    "kind": "ScalarField",
-                    "alias": null,
-                    "name": "ethAddress",
-                    "args": null,
-                    "storageKey": null
-                  }
-                ]
+                "selections": v2
               },
               v3
             ]

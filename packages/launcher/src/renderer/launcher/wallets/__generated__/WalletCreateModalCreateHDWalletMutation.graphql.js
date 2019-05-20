@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 6796ccb928e96391167fb01f641b94ca
+ * @relayHash da1b3ae87742c55cadfd800b61795aac
  */
 
 /* eslint-disable */
@@ -14,6 +14,7 @@ export type SupportedWallets = "ETHEREUM" | "%future added value";
 export type CreateHDWalletInput = {
   blockchain: SupportedWallets,
   name: string,
+  setAsDefault?: ?boolean,
   clientMutationId?: ?string,
 };
 export type WalletCreateModalCreateHDWalletMutationVariables = {|
@@ -61,7 +62,9 @@ mutation WalletCreateModalCreateHDWalletMutation(
 }
 
 fragment WalletsScreen_user on User {
-  defaultEthAddress
+  profile {
+    ethAddress
+  }
   ethWallets {
     hd {
       name
@@ -201,7 +204,7 @@ return {
   "operationKind": "mutation",
   "name": "WalletCreateModalCreateHDWalletMutation",
   "id": null,
-  "text": "mutation WalletCreateModalCreateHDWalletMutation(\n  $input: CreateHDWalletInput!\n) {\n  createHDWallet(input: $input) {\n    hdWallet {\n      accounts {\n        address\n      }\n      mnemonic\n      localID\n      id\n    }\n    viewer {\n      ...WalletsScreen_user\n      id\n    }\n  }\n}\n\nfragment WalletsScreen_user on User {\n  defaultEthAddress\n  ethWallets {\n    hd {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n    ledger {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n  }\n}\n",
+  "text": "mutation WalletCreateModalCreateHDWalletMutation(\n  $input: CreateHDWalletInput!\n) {\n  createHDWallet(input: $input) {\n    hdWallet {\n      accounts {\n        address\n      }\n      mnemonic\n      localID\n      id\n    }\n    viewer {\n      ...WalletsScreen_user\n      id\n    }\n  }\n}\n\nfragment WalletsScreen_user on User {\n  profile {\n    ethAddress\n  }\n  ethWallets {\n    hd {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n    ledger {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -292,11 +295,22 @@ return {
             "plural": false,
             "selections": [
               {
-                "kind": "ScalarField",
+                "kind": "LinkedField",
                 "alias": null,
-                "name": "defaultEthAddress",
+                "name": "profile",
+                "storageKey": null,
                 "args": null,
-                "storageKey": null
+                "concreteType": "NamedProfile",
+                "plural": false,
+                "selections": [
+                  {
+                    "kind": "ScalarField",
+                    "alias": null,
+                    "name": "ethAddress",
+                    "args": null,
+                    "storageKey": null
+                  }
+                ]
               },
               {
                 "kind": "LinkedField",

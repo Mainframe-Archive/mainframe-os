@@ -8,6 +8,7 @@ import type {
   GraphQLRequestParams,
   UserCreateRequestParams,
 } from '../../types'
+import { getAccountsByPage } from '../wallets/ledgerClient'
 
 import type { LauncherContext } from '../context/launcher'
 
@@ -366,15 +367,21 @@ export default {
   //
   // // Wallets & Blockchain
   //
-  // wallet_getLedgerAccounts: {
-  //   params: WALLET_GET_LEDGER_ETH_ACCOUNTS_SCHEMA,
-  //   handler: (
-  //     ctx: LauncherContext,
-  //     params: WalletGetLedgerEthAccountsParams,
-  //   ): Promise<WalletGetLedgerEthAccountsResult> => {
-  //     return ctx.client.wallet.getLedgerEthAccounts(params)
-  //   },
-  // },
+  wallet_getLedgerAccounts: (
+    ctx: LauncherContext,
+    params: WalletGetLedgerEthAccountsParams,
+  ): Promise<WalletGetLedgerEthAccountsResult> => {
+    try {
+      return getAccountsByPage(params.pageNum, params.legacyPath)
+    } catch (err) {
+      ctx.logger.log({
+        level: 'error',
+        message: 'Failed to get ledger accounts',
+        err,
+      })
+      throw err
+    }
+  },
   //
   // blockchain_ethSend: async (
   //   ctx: LauncherContext,

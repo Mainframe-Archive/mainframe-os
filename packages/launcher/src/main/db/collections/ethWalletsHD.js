@@ -99,7 +99,7 @@ export default async (params: CollectionParams) => {
 
       async addAccounts(indexes: Array<number>) {
         const existingIndexes = this.activeAccounts.map(a => a.index)
-        const addIndexes = indexes.filter(i => !existingIndexes.contains(i))
+        const addIndexes = indexes.filter(i => !existingIndexes.includes(i))
 
         if (addIndexes.length === 0) {
           logger.log({
@@ -121,17 +121,19 @@ export default async (params: CollectionParams) => {
           addIndexes,
         })
         const root = await this.getRoot()
-        const accounts = addIndexes.map(index => ({
+        const addAccounts = addIndexes.map(index => ({
           index,
           address: getAddress(getWallet(root, index)),
         }))
 
-        await this.update({ $addToSet: { activeAccounts: accounts } })
+        const accounts = this.activeAccounts.concat(addAccounts)
+
+        await this.atomicSet('activeAccounts', accounts)
         logger.log({
           level: 'debug',
           message: 'Accounts added',
           localID: this.localID,
-          accounts,
+          addAccounts,
         })
       },
 
@@ -150,8 +152,12 @@ export default async (params: CollectionParams) => {
 
         const users = await this.getUsers()
         const filter = id => id !== this.localID
+        const addresses = this.activeAccounts.map(a => a.address)
         await Promise.all(
           users.map(async u => {
+            if (this.addresses.includes(u.profile.ethAddress)) {
+              await u.setProfileEthAddress(null)
+            }
             await u.update({
               $set: { 'ethWallets.hd': u.ethWallets.hd.filter(filter) },
             })

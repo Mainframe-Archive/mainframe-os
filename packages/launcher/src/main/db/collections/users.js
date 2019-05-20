@@ -182,11 +182,15 @@ export default async (params: CollectionParams) => {
       },
 
       async addEthHDWallet(id: string): Promise<void> {
-        await this.update({ $push: { 'ethWallets.hd': id } })
+        await this.update({ $addToSet: { 'ethWallets.hd': id } })
       },
 
       async addEthLedgerWallet(id: string): Promise<void> {
-        await this.update({ $push: { 'ethWallets.ledger': id } })
+        await this.update({ $addToSet: { 'ethWallets.ledger': id } })
+      },
+
+      async setProfileEthAddress(address: string) {
+        await this.atomicSet('profile.ethAddress', address)
       },
 
       startPublicProfilePublication() {

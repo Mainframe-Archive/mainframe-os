@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 52d53cf7e74170dbfb30ba196ec540a2
+ * @relayHash e41958c4a5519ff4fbe60d0247087bdf
  */
 
 /* eslint-disable */
@@ -47,7 +47,9 @@ mutation WalletsScreenAddHDWalletAccountMutation(
 }
 
 fragment WalletsScreen_user on User {
-  defaultEthAddress
+  profile {
+    ethAddress
+  }
   ethWallets {
     hd {
       name
@@ -167,7 +169,7 @@ return {
   "operationKind": "mutation",
   "name": "WalletsScreenAddHDWalletAccountMutation",
   "id": null,
-  "text": "mutation WalletsScreenAddHDWalletAccountMutation(\n  $input: AddHDWalletAccountInput!\n) {\n  addHDWalletAccount(input: $input) {\n    address\n    viewer {\n      ...WalletsScreen_user\n      id\n    }\n  }\n}\n\nfragment WalletsScreen_user on User {\n  defaultEthAddress\n  ethWallets {\n    hd {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n    ledger {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n  }\n}\n",
+  "text": "mutation WalletsScreenAddHDWalletAccountMutation(\n  $input: AddHDWalletAccountInput!\n) {\n  addHDWalletAccount(input: $input) {\n    address\n    viewer {\n      ...WalletsScreen_user\n      id\n    }\n  }\n}\n\nfragment WalletsScreen_user on User {\n  profile {\n    ethAddress\n  }\n  ethWallets {\n    hd {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n    ledger {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -231,11 +233,22 @@ return {
             "plural": false,
             "selections": [
               {
-                "kind": "ScalarField",
+                "kind": "LinkedField",
                 "alias": null,
-                "name": "defaultEthAddress",
+                "name": "profile",
+                "storageKey": null,
                 "args": null,
-                "storageKey": null
+                "concreteType": "NamedProfile",
+                "plural": false,
+                "selections": [
+                  {
+                    "kind": "ScalarField",
+                    "alias": null,
+                    "name": "ethAddress",
+                    "args": null,
+                    "storageKey": null
+                  }
+                ]
               },
               {
                 "kind": "LinkedField",
