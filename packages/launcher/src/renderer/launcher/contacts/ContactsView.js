@@ -592,11 +592,6 @@ class ContactsViewComponent extends Component<Props, State> {
     })
   }
 
-  showDeclineNotification = () => {
-    // TODO pass correct wallet info
-    this.setState({ showDeclineNotification: true })
-  }
-
   // RENDER
 
   renderContactsList() {
