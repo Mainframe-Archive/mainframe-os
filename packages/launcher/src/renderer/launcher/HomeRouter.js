@@ -2,12 +2,41 @@
 
 import React from 'react'
 import { Redirect, Route, Switch } from 'react-router-dom'
+import { graphql } from 'relay-runtime'
 import styled from 'styled-components/native'
 
 import { ROUTES } from './constants'
+import { useSubscription } from './RelayEnvironment'
+
 import SideMenu from './SideMenu'
 import ContactsScreen from './contacts/ContactsScreen'
 import WalletsScreen from './wallets/WalletsScreen'
+
+const CONTACT_CHANGED_SUBSCRIPTION = graphql`
+  subscription HomeRouterContactChangedSubscription {
+    contactChanged {
+      contact {
+        localID
+        peerID
+        publicID
+        connectionState
+        invite {
+          ethNetwork
+          inviteTX
+          stake {
+            reclaimedTX
+            amount
+            state
+          }
+        }
+        profile {
+          name
+          ethAddress
+        }
+      }
+    }
+  }
+`
 
 const Container = styled.View`
   flex-direction: row;
@@ -22,6 +51,8 @@ const ContentContainer = styled.View`
 `
 
 export default function HomeRouter() {
+  useSubscription(CONTACT_CHANGED_SUBSCRIPTION)
+
   return (
     <Container testID="launcher-view">
       <SideMenu />

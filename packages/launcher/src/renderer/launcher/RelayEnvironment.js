@@ -1,7 +1,14 @@
 // @flow
 
-import { createContext, useContext } from 'react'
-import { Environment, Network, RecordSource, Store } from 'relay-runtime'
+import { createContext, useContext, useEffect } from 'react'
+import {
+  Environment,
+  type GraphQLTaggedNode,
+  Network,
+  RecordSource,
+  Store,
+  requestSubscription,
+} from 'relay-runtime'
 
 import rpc from './rpc'
 
@@ -25,3 +32,14 @@ export const EnvironmentContext = createContext<Environment>(
 )
 
 export const useEnvironment = () => useContext(EnvironmentContext)
+
+export const useSubscription = (subscription: GraphQLTaggedNode) => {
+  const env = useEnvironment()
+
+  useEffect(() => {
+    const sub = requestSubscription(env, { subscription })
+    return () => {
+      sub.dispose()
+    }
+  }, [])
+}

@@ -226,10 +226,7 @@ const CONTACTS_CHANGED_SUBSCRIPTION = graphql`
   subscription ContactsScreenContactsChangedSubscription {
     contactsChanged {
       viewer {
-        id
-        # contacts {
-        #   ...ContactsView_contacts @arguments(userID: $userID)
-        # }
+        ...ContactsScreen_user
       }
     }
   }
@@ -242,10 +239,7 @@ export const addContactMutation = graphql`
         ...InviteContactModal_contact
       }
       viewer {
-        id
-        # contacts {
-        #   ...ContactsView_contacts @arguments(userID: $userID)
-        # }
+        ...ContactsScreen_user
       }
     }
   }
@@ -257,10 +251,7 @@ export const acceptContactRequestMutation = graphql`
   ) {
     acceptContactRequest(input: $input) {
       viewer {
-        id
-        # contacts {
-        #   ...ContactsView_contacts @arguments(userID: $userID)
-        # }
+        ...ContactsScreen_user
       }
     }
   }
@@ -292,18 +283,15 @@ class ContactsView extends Component<Props, State> {
   }
 
   componentDidMount() {
-    // this._subscription = requestSubscription(this.props.relay.environment, {
-    //   subscription: CONTACTS_CHANGED_SUBSCRIPTION,
-    //   variables: {
-    //     userID: this.props.user.localID,
-    //   },
-    // })
+    this._subscription = requestSubscription(this.props.relay.environment, {
+      subscription: CONTACTS_CHANGED_SUBSCRIPTION,
+    })
   }
 
   componentWillUnmount() {
-    // if (this._subscription != null) {
-    //   this._subscription.dispose()
-    // }
+    if (this._subscription != null) {
+      this._subscription.dispose()
+    }
   }
 
   getSelectedContact(): Contact {

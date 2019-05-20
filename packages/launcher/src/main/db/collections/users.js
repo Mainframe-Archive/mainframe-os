@@ -3,7 +3,7 @@
 import Bzz from '@erebos/api-bzz-node'
 import { createKeyPair, sign } from '@erebos/secp256k1'
 import objectHash from 'object-hash'
-import { Subscription } from 'rxjs'
+import { Subject, Subscription } from 'rxjs'
 import { debounceTime, filter, flatMap, map } from 'rxjs/operators'
 
 import { MF_PREFIX } from '../../../constants'
@@ -111,6 +111,13 @@ export default async (params: CollectionParams) => {
           .toBuffer()
       },
 
+      observeContactAdded() {
+        if (this._contactAdded$ == null) {
+          this._contactAdded$ = new Subject()
+        }
+        return this._contactAdded$.asObservable()
+      },
+
       async addContact(publicID: string, data: Object = {}): Promise<Object> {
         logger.log({
           level: 'debug',
@@ -176,7 +183,9 @@ export default async (params: CollectionParams) => {
           peerID: peer.localID,
         })
 
-        this._contactsSync.add(contact.startSync(this))
+        if (this._contactAdded$ != null) {
+          this._contactAdded$.next(contact)
+        }
 
         return contact
       },
@@ -337,11 +346,15 @@ export default async (params: CollectionParams) => {
         })
 
         this._contactsSync = new Subscription()
-
+        // Sync existing contacts
         this.populate('contacts').then(contacts => {
           contacts.forEach(contact => {
             this._contactsSync.add(contact.startSync(this))
           })
+        })
+        // Sync new contacts
+        this.observeContactAdded().subscribe(contact => {
+          this._contactsSync.add(contact.startSync(this))
         })
 
         return () => {

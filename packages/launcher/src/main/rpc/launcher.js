@@ -195,7 +195,29 @@ export default {
       ctx: LauncherContext,
       params: GraphQLRequestParams,
     ): Promise<string> {
-      return await ctx.subscribe(params.query, params.variables)
+      ctx.logger.log({
+        level: 'debug',
+        message: 'GraphQL subscription',
+        params,
+      })
+      try {
+        const result = await ctx.subscribe(params.query, params.variables)
+        ctx.logger.log({
+          level: 'debug',
+          message: 'GraphQL subscription result',
+          params,
+          result,
+        })
+        return result
+      } catch (error) {
+        ctx.logger.log({
+          level: 'error',
+          message: 'GraphQL subscription failed',
+          error: error.toString(),
+          params,
+        })
+        throw new Error('GraphQL subscription failed')
+      }
     },
   },
 

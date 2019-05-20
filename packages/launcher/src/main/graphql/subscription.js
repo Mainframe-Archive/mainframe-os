@@ -1,9 +1,9 @@
 // @flow
 
 import { GraphQLObjectType, GraphQLNonNull } from 'graphql'
-import { map } from 'rxjs/operators'
+import { filter, flatMap, map } from 'rxjs/operators'
 
-import type ClientContext from '../context/ClientContext'
+import type { GraphQLContext } from '../context/graphql'
 
 import { app, contact, viewerField } from './objects'
 import observableToAsyncIterator from './observableToAsyncIterator'
@@ -34,9 +34,6 @@ const contactChangedPayload = new GraphQLObjectType({
   fields: () => ({
     contact: {
       type: new GraphQLNonNull(contact),
-      resolve: (self, args, ctx) => {
-        return ctx.queries.mergePeerContactData(self.contact)
-      },
     },
     viewer: viewerField,
   }),
@@ -44,32 +41,35 @@ const contactChangedPayload = new GraphQLObjectType({
 
 const contactChanged = {
   type: new GraphQLNonNull(contactChangedPayload),
-  subscribe: (self, args, ctx: ClientContext) => {
-    const { source, dispose } = ctx.contactsFeeds.observe()
-    const observable = source.pipe(
-      map(e => ({
+  subscribe: async (self, args, ctx: GraphQLContext) => {
+    const user = await ctx.getUser()
+    const observable = ctx.db.contacts.update$.pipe(
+      filter(event => user.contacts.includes(event.data.doc)),
+      flatMap(event => ctx.getDoc('contacts', event.data.doc)),
+      filter(contact => contact != null),
+      flatMap(async contact => ({
         contactChanged: {
-          contact: e.contact,
+          contact: await contact.getInfo(),
           viewer: {},
         },
       })),
     )
-    return observableToAsyncIterator(observable, dispose)
+    return observableToAsyncIterator(observable)
   },
 }
 
 const contactsChanged = {
   type: new GraphQLNonNull(contactChangedPayload),
-  subscribe: (self, args, ctx: ClientContext) => {
-    const { source, dispose } = ctx.invitesHandler.observe()
-    const contactsChanged = source.pipe(
+  subscribe: async (self, args, ctx: GraphQLContext) => {
+    const user = await ctx.getUser()
+    const observable = user.contacts$.pipe(
       map(() => ({
         contactsChanged: {
           viewer: {},
         },
       })),
     )
-    return observableToAsyncIterator(contactsChanged, dispose)
+    return observableToAsyncIterator(observable)
   },
 }
 

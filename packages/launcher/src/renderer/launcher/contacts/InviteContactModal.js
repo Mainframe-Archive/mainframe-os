@@ -319,7 +319,7 @@ class InviteContactModal extends Component<Props, State> {
         </Text>
         <AddContactDetail border>
           <Blocky>
-            <Avatar id={this.props.contact.publicFeed} size="small" />
+            <Avatar id={this.props.contact.publicID} size="small" />
           </Blocky>
           <AddContactDetailText>
             <Text bold variant="greyDark23" size={13}>
@@ -327,7 +327,7 @@ class InviteContactModal extends Component<Props, State> {
                 'This user has a private profile'}
             </Text>
             <Text variant={['greyDark23', 'ellipsis']} size={12}>
-              {this.props.contact.publicFeed}
+              {this.props.contact.publicID}
             </Text>
             <Text variant={['greyDark23', 'ellipsis']} size={12}>
               {this.props.contact.profile.ethAddress}

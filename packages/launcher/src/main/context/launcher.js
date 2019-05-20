@@ -1,8 +1,7 @@
 // @flow
 
 import type { BrowserWindow } from 'electron'
-import { graphql, parse } from 'graphql'
-import { subscribe } from 'graphql/subscription'
+import { graphql, parse, subscribe } from 'graphql'
 import nanoid from 'nanoid'
 
 import { LAUNCHER_CHANNEL } from '../../constants'
@@ -61,7 +60,7 @@ export type ContextParams = {
 
 export class LauncherContext {
   _graphqlContext: ?GraphQLContext
-  _graphqlSubscriptions: { [id: string]: GraphQLSubscription }
+  _graphqlSubscriptions: { [id: string]: GraphQLSubscription } = {}
 
   launcherID: string
   logger: Logger
@@ -223,7 +222,7 @@ export class LauncherContext {
       this.logger.log({
         level: 'error',
         message: 'Failed to clear subscriptions',
-        error,
+        error: error.toString(),
       })
     }
 
