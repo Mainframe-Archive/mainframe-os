@@ -120,6 +120,8 @@ If you don't have brew installed, or want to try reinstalling, go to https://bre
 
 ##### Node & NPM
 
+**Node Version**
+
 `node -v`
 
 should have output similar to this:
@@ -131,6 +133,8 @@ v11.14.0
 
 Other versions of Node greater than 10 are also acceptable.
 
+**NPM installed**
+
 `echo $(npm config get prefix)`
 
 should have output similar to this:
@@ -141,7 +145,7 @@ should have output similar to this:
 
 If you don't have Node or NPM, then you can try to get it from nodejs.org, or homebrew, or nvm.
 
-Make sure Node/NPM is in your path
+**Make sure Node/NPM is in your path**
 
 `echo $PATH`
 

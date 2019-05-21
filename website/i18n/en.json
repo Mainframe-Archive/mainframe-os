@@ -12,6 +12,10 @@
         "title": "create-mainframe-dapp",
         "sidebar_label": "create-mainframe-dapp"
       },
+      "faq": {
+        "title": "Mainframe OS FAQ",
+        "sidebar_label": "FAQ"
+      },
       "introduction": {
         "title": "Getting Started with Mainframe OS",
         "sidebar_label": "Getting Started"
@@ -27,9 +31,16 @@
       "publish": {
         "title": "Publish Your Dapp"
       },
+      "readme": {
+        "title": "readme"
+      },
       "sdk": {
         "title": "Mainframe SDK",
         "sidebar_label": "Mainframe SDK"
+      },
+      "troubleshooting": {
+        "title": "Troubleshooting Mainframe OS installation (macOS only)",
+        "sidebar_label": "troubleshooting"
       },
       "unix": {
         "title": "Unix Instructions",
@@ -47,7 +58,8 @@
     "links": {
       "Quick Start": "Quick Start",
       "Platform": "Platform",
-      "SDK": "SDK"
+      "SDK": "SDK",
+      "FAQ": "FAQ"
     },
     "categories": {
       "Mainframe OS": "Mainframe OS",

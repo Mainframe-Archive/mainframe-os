@@ -132,18 +132,14 @@ export default class Contract {
       },
       ...abi.inputs,
     ]
-    if (params.topics) {
-      params.topics.unshift(encodedSig)
-    } else {
-      params.topics = [encodedSig]
-    }
+    const topics = [encodedSig].concat(params.topics || [])
     params.address = this.address
 
-    const res = await this.ethClient.getPastEvents(params)
+    const res = await this.ethClient.getPastEvents({ ...params, topics })
     const events = []
     res.forEach(log => {
       try {
-        const event = Web3EthAbi.decodeLog(inputs, log.data, log.topics)
+        const event = Web3EthAbi.decodeLog(inputs, log.data, params.topics)
         events.push(event)
       } catch (err) {
         // eslint-disable-next-line no-console

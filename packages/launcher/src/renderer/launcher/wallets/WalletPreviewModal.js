@@ -9,6 +9,7 @@ import { shell } from 'electron'
 import EtherscanIcon from '@morpheus-ui/icons/Etherscan'
 
 import FormModalView from '../../UIComponents/FormModalView'
+import CopyableBlock from '../../UIComponents/CopyableBlock'
 
 type Props = {
   address: string,
@@ -25,7 +26,7 @@ type State = {
 
 const Container = styled.View`
   width: 100%;
-  max-width: 450px;
+  max-width: 600px;
   min-width: 300px;
   flex: 1;
   align-items: center;
@@ -126,9 +127,11 @@ export default class WalletCreateModal extends Component<Props, State> {
             <QRContainer>
               <QRCode value={this.props.address} />
             </QRContainer>
-            <Text size={13} variant={['mono', 'greyMed', 'center']}>
-              {this.props.address}
-            </Text>
+            <CopyableBlock
+              value={this.props.address}
+              noStyles
+              variant={['mono', 'greyMed', 'paddingLeft20', 'center']}
+            />
           </Address>
           <Buttons>
             <Button
