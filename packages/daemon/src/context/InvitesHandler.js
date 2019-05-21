@@ -147,10 +147,7 @@ export default class InvitesHandler {
         topics: [userFeedHash],
       }
       const events = await this.invitesContract.getPastEvents(type, params)
-      console.log(user)
-      console.log(type)
-      console.log('EVENTS ')
-      console.log(events)
+
       for (let i = 0; i < events.length; i++) {
         await handler(user, events[i])
       }
@@ -174,19 +171,7 @@ export default class InvitesHandler {
       recipientAddrHash,
       recipientFeedHash,
     ]
-    console.log('params')
-    console.log(params)
     const res = await this.invitesContract.call('getInviteState', params)
-
-    console.log('res')
-    console.log(res)
-    console.log('typeof')
-    console.log(typeof res)
-    console.log('utils')
-    console.log(utils.parseBytes32String(res))
-    const test = utils.formatBytes32String('hellow world')
-    console.log(test)
-    console.log(utils.parseBytes32String(test))
     return utils.parseBytes32String(res)
   }
 
@@ -229,12 +214,8 @@ export default class InvitesHandler {
   ): Promise<void> => {
     const { identities } = this._context.openVault
     if (contractEvent.senderFeed) {
-      console.log('ContractEvent')
-      console.log(contractEvent)
       try {
         let peer = identities.getPeerByFeed(contractEvent.senderFeed)
-        console.log('peer')
-        console.log(peer)
         if (peer) {
           const contact = identities.getContactByPeerID(
             user.localID,
@@ -255,8 +236,6 @@ export default class InvitesHandler {
             mode: 'content-response',
           },
         )
-        console.log('feedValue')
-        console.log(feedValue)
         if (feedValue) {
           const feed = await feedValue.json()
 
@@ -269,11 +248,8 @@ export default class InvitesHandler {
             contractEvent.recipientAddressHash,
             contractEvent.recipientFeedHash,
           )
-          console.log('inviteState')
-          console.log(inviteState)
           const storedInvites = identities.getInvites(user.localID)
           if (inviteState === 'PENDING' && !storedInvites[peer.localID]) {
-            console.log('inside if')
             const accounts = this._context.queries.getUserEthAccounts(
               user.localID,
             )
@@ -281,11 +257,6 @@ export default class InvitesHandler {
               contractEvent.recipientAddressHash,
               accounts,
             )
-            console.log('accounts')
-            console.log(accounts)
-
-            console.log('receivedAddress')
-            console.log(receivedAddress)
 
             if (!receivedAddress) {
               this._context.log(
@@ -304,8 +275,6 @@ export default class InvitesHandler {
             const eventContact = this._context.queries.getContactFromInvite(
               contactInvite,
             )
-            console.log('eventContact')
-            console.log(eventContact)
             if (eventContact) {
               this._context.next({
                 type: 'invites_changed',
@@ -435,19 +404,9 @@ export default class InvitesHandler {
       const toFeedHash = hash(Buffer.from(peer.publicFeed))
       const params = [toAddrHash, toFeedHash, user.publicFeed.feedHash]
 
-      console.log('PARAMS!')
-      console.log(params)
-
       const txOptions = {
         from: customAddress ? customAddress : user.profile.ethAddress,
       }
-
-      // const inviteState = await this.checkInviteState(
-      //   senderAddrHash,
-      //   hash(Buffer.from(contractEvent.senderFeed)),
-      //   contractEvent.recipientAddressHash,
-      //   contractEvent.recipientFeedHash,
-      // )
 
       this.invitesContract
         .send('sendInvite', params, txOptions)
