@@ -788,16 +788,22 @@ export default class InvitesHandler {
     customAddress?: string,
   ): Promise<Object> {
     const invite = contact._invite
-
+    console.log(invite)
     if (invite != null && invite.stake && invite.acceptedSignature) {
       const sigParams = this.signatureParams(invite.acceptedSignature)
 
       // $FlowFixMe will have feedHash by this point
       const fromFeedHash = hash(Buffer.from(user.publicFeed.feedHash))
-      const toAddrHash = hash(
-        bufferFromHex(customAddress ? customAddress : invite.toAddress),
-      )
+      console.log('fromFeedHash')
+      console.log(fromFeedHash)
+
+      const toAddrHash = hash(bufferFromHex(invite.toAddress))
+      console.log('toAddrHash')
+      console.log(toAddrHash)
+
       const toFeedHash = hash(Buffer.from(peer.publicFeed))
+      console.log('toFeedHash')
+      console.log(toFeedHash)
 
       const txParams = [
         toAddrHash,
@@ -809,13 +815,22 @@ export default class InvitesHandler {
       ]
       this.validateInviteOriginNetwork(invite.ethNetwork)
       const data = this.invitesContract.encodeCall('retrieveStake', txParams)
+      console.log('data')
+      console.log(data)
+
       const txOptions = {
         from: invite.fromAddress,
         to: this.invitesContract.address,
         data,
       }
       const params = await this._context.io.eth.completeTxParams(txOptions)
+      console.log('params')
+      console.log(params)
+
       const formattedParams = await this.formatGasValues(params)
+      console.log('formattedParams')
+      console.log(formattedParams)
+
       return { ...params, ...formattedParams }
     }
     throw new Error('Accepted signature not found')
@@ -883,6 +898,7 @@ export default class InvitesHandler {
       case 'sendInvite':
         return this.getSendInviteTXDetails(user, peer, customAddress)
       case 'retrieveStake':
+        console.log('retrieveStake arrived')
         return this.getRetrieveStakeTXDetails(
           user,
           peer,

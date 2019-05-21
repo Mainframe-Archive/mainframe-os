@@ -171,13 +171,16 @@ class InviteContactModal extends Component<Props, State> {
 
   async getTXDetails(type: string) {
     const { user, contact } = this.props
+    console.log('hiiiii')
     try {
+      console.log('yo')
       const res = await rpc.getInviteTXDetails({
         type: type,
         userID: user.localID,
         contactID: contact.localID,
         customAddress: this.state.selectedAddress,
       })
+      console.log(res)
       this.setState({
         txParams: res,
       })
@@ -359,7 +362,7 @@ class InviteContactModal extends Component<Props, State> {
   // RENDER
   renderGasData() {
     const { txParams } = this.state
-
+    console.log(txParams)
     if (txParams) {
       const { gasPriceGwei, maxCost, stakeAmount } = txParams
       const gasLabel = `Gas price: ${gasPriceGwei}`
@@ -428,7 +431,7 @@ class InviteContactModal extends Component<Props, State> {
     )
   }
 
-  renderTransactionSection(title: string, dropdown?: boolean) {
+  renderTransactionSection(title: string) {
     const { balances } = this.state
     const tooltipTitle = (
       <Text
@@ -452,76 +455,47 @@ class InviteContactModal extends Component<Props, State> {
       </Text>
     )
 
-    if (dropdown) {
-      const options = this.props.wallets.map(w => {
-        return {
-          key: w.address,
-          data: (
-            <AddContactDetail noMarginTop>
-              <Blocky>
-                <WalletIcon address={w.address} size="small" />
-              </Blocky>
-              <AddContactDetailText>
-                <Text variant={['greyDark23', 'ellipsis', 'mono']} size={12}>
-                  {w.address}
-                </Text>
-                <Text variant="greyDark23" size={11}>{`MFT: ${
-                  w.balances.mft
-                }, ETH: ${w.balances.eth}`}</Text>
-              </AddContactDetailText>
-            </AddContactDetail>
-          ),
-        }
-      })
-      return (
-        <Section>
-          {tooltipTitle}
-          <DropDownContainer>
-            <DropDown
-              options={options}
-              valueKey="key"
-              displayKey="data"
-              name="walletDropdown"
-              defaultValue={this.state.selectedAddress}
-              // value={this.state.selectedAddress}
-              variant={[this.state.dropdownError ? 'error' : '', 'maxWidth440']}
-              validation={
-                this.state.invitePending &&
-                (feedback => this.validateBalance(feedback))
-              }
-            />
-          </DropDownContainer>
-          {this.renderGasData()}
-        </Section>
-      )
-    } else {
-      const balanceLabel = balances ? (
-        <Text variant="greyDark23" size={11}>{`MFT: ${balances.mft}, ETH: ${
-          balances.eth
-        }`}</Text>
-      ) : null
-
-      return (
-        <Section>
-          {tooltipTitle}
-          <AddContactDetail border>
+    const options = this.props.wallets.map(w => {
+      return {
+        key: w.address,
+        data: (
+          <AddContactDetail noMarginTop>
             <Blocky>
-              <WalletIcon
-                address={this.props.user.profile.ethAddress || ''}
-                size="small"
-              />
+              <WalletIcon address={w.address} size="small" />
             </Blocky>
             <AddContactDetailText>
               <Text variant={['greyDark23', 'ellipsis', 'mono']} size={12}>
-                {this.props.user.profile.ethAddress}
+                {w.address}
               </Text>
-              {balanceLabel}
+              <Text variant="greyDark23" size={11}>{`MFT: ${
+                w.balances.mft
+              }, ETH: ${w.balances.eth}`}</Text>
             </AddContactDetailText>
           </AddContactDetail>
-          {this.renderGasData()}
-        </Section>
-      )
-    }
+        ),
+      }
+    })
+    return (
+      <Section>
+        {tooltipTitle}
+        <DropDownContainer>
+          <DropDown
+            options={options}
+            valueKey="key"
+            displayKey="data"
+            name="walletDropdown"
+            defaultValue={this.state.selectedAddress}
+            // value={this.state.selectedAddress}
+            variant={[this.state.dropdownError ? 'error' : '', 'maxWidth440']}
+            validation={
+              this.state.invitePending &&
+              (feedback => this.validateBalance(feedback))
+            }
+          />
+        </DropDownContainer>
+        {this.renderGasData()}
+      </Section>
+    )
   }
 
   getButtonStatus = (firstAction, secondAction) => {
@@ -648,11 +622,8 @@ class InviteContactModal extends Component<Props, State> {
 
     return (
       <>
-        {this.renderContactSection('SEND BLOCKCHAIN INVITATION TO')}
-        {this.renderTransactionSection(
-          `APPROVE AND STAKE ${amount} MFT FROM`,
-          true,
-        )}
+        {this.renderContactSection('YOUR INVITATION HAS BEEN ACCEPTED FROM')}
+        {this.renderTransactionSection(`WITHDRAW YOUR ${amount} MFT ON`)}
         {reclaimedTX}
         {activity}
       </>
@@ -661,16 +632,14 @@ class InviteContactModal extends Component<Props, State> {
 
   renderDeclineInvite() {
     const activity = this.state.txProcessing && <Loader />
+    const amount = this.props.inviteStakeValue || ''
     const declinedTXHash = this.state.declinedTXHash ? (
       <Text>TX hash: {this.state.declinedTXHash}</Text>
     ) : null
     return (
       <>
         {this.renderContactSection('DECLINE INVITATION FROM')}
-        {this.renderTransactionSection(
-          'CLAIM ' + this.props.inviteStakeValue + ' MFT ON',
-          true,
-        )}
+        {this.renderTransactionSection('CLAIM ' + amount + ' MFT ON')}
         {declinedTXHash}
         {activity}
       </>
@@ -687,7 +656,6 @@ class InviteContactModal extends Component<Props, State> {
           {this.renderContactSection('SEND BLOCKCHAIN INVITATION TO')}
           {this.renderTransactionSection(
             `APPROVE AND STAKE ${amount} MFT FROM`,
-            true,
           )}
           {activity}
         </>
