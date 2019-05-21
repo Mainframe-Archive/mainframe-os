@@ -276,9 +276,9 @@ const setupClient = async () => {
     fixPath()
   }
 
-  // if (envType === 'production') {
-  await shutdownDaemon()
-  // }
+  if (envType === 'production') {
+    await shutdownDaemon()
+  }
 
   // Start daemon and connect local client to it
   if (daemonConfig.runStatus !== 'running') {
