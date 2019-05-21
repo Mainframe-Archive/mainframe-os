@@ -157,6 +157,7 @@ type State = {
   showOnboarding: boolean,
   suggestedApps: Array<SuggestedAppData>,
   editing: boolean,
+  deleting?: ?string,
 }
 
 class AppsView extends Component<Props, State> {
@@ -186,6 +187,7 @@ class AppsView extends Component<Props, State> {
   toggleEditing = () => {
     this.setState({
       editing: !this.state.editing,
+      deleting: null,
     })
   }
 
@@ -221,6 +223,29 @@ class AppsView extends Component<Props, State> {
         showModal: { type: 'app_update', appID },
       })
     }
+  }
+
+  onStartDeleting = (appID: string) => {
+    this.setState({
+      deleting: appID,
+    })
+  }
+
+  onStartDeleting = (appID: string) => {
+    this.setState({
+      deleting: appID,
+    })
+  }
+
+  onCancelDelete = () => {
+    this.setState({
+      deleting: null,
+    })
+  }
+
+  onPressDelete = () => {
+    // to be Implemented --- Temporarily just cancel
+    this.onCancelDelete()
   }
 
   previewSuggested = (app: Object) => {
@@ -319,10 +344,14 @@ class AppsView extends Component<Props, State> {
       <InstalledAppItem
         icon={this.getIcon(app.mfid, this.state.suggestedApps)}
         editing={this.state.editing}
+        deleting={this.state.deleting && this.state.deleting === app.mfid}
         key={app.localID}
         installedApp={app}
         onOpenApp={this.onOpenApp}
         onPressUpdate={this.onPressUpdate}
+        onStartDeleting={this.onStartDeleting}
+        onCancelDelete={this.onCancelDelete}
+        onPressDelete={this.onPressDelete}
       />
     ))
     const suggested = this.getSuggestedList(apps, this.state.suggestedApps)
@@ -445,6 +474,12 @@ class AppsView extends Component<Props, State> {
           modal = null
       }
     }
+
+    const editButtonVariants = ['xSmallIconOnly', 'noTitle', 'marginRight10']
+    if (this.state.editing) {
+      editButtonVariants.push('editRedButton')
+    }
+
     return (
       <Container>
         <Header>
@@ -455,7 +490,7 @@ class AppsView extends Component<Props, State> {
             <ButtonsContainer>
               <Button
                 onPress={this.toggleEditing}
-                variant={['xSmallIconOnly', 'noTitle', 'marginRight10']}
+                variant={editButtonVariants}
                 Icon={EditIcon}
               />
               <Button

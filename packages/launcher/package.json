@@ -49,7 +49,7 @@
     "@mainframe/rpc-handler": "^0.3.0",
     "@mainframe/toolbox": "*",
     "@mainframe/utils-id": "^0.1.0",
-    "@morpheus-ui/core": "^0.0.41",
+    "@morpheus-ui/core": "^0.0.45",
     "@morpheus-ui/fonts": "0.0.1",
     "@morpheus-ui/icons": "0.0.16",
     "electron-store": "^3.0.0",
