@@ -45,25 +45,29 @@ yarn build
 Next, a local environment must be created. An environment contains references to all the vaults created and stores the downloaded application contents. To create a new environment, run the following command:
 
 ```
-packages/cli/bin/run env:create
+./packages/cli/bin/run env:create
 ```
 
 This first environment should be created with the `development` type and set as default environment.
 The newly created environment then needs to be configured using the CLI:
 
 ```
-packages/cli/bin/run daemon:setup --bin-path=./packages/daemon/bin/run
+./packages/cli/bin/run daemon:setup --bin-path=./packages/daemon/bin/run
 ```
 
 ### Run Mainframe OS
 
-From the project root folder, run the daemon (backend) and the launcher (frontend):
+From the project root folder, run the daemon (backend) in one tab:
 
 ```
-yarn dev
+./packages/cli/bin/run daemon:start -e <your_env_name>
 ```
 
+and from another tab run the launcher (frontend):
 
+```
+MAINFRAME_ENV=<your_env_name> cd packages/launcher && yarn deps:build && yarn run dev
+```
 
 ## Mainframe Platform Components
 

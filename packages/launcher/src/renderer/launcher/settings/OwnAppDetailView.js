@@ -17,6 +17,7 @@ import applyContext, { type CurrentUser } from '../LauncherContext'
 import AppIcon from '../apps/AppIcon'
 
 import ArrowLeft from '../../UIComponents/Icons/ArrowLeft'
+import CopyableBlock from '../../UIComponents/CopyableBlock'
 import EditAppDetailsModal, {
   type CompleteAppData,
 } from './EditAppDetailsModal'
@@ -25,7 +26,6 @@ import PermissionsRequirementsView from './PermissionsRequirements'
 import AppSummary from './AppSummary'
 
 import type { OwnAppDetailView_ownApp as OwnApp } from './__generated__/OwnAppDetailView_ownApp.graphql'
-
 const Container = styled.View`
   flex: 1;
   flex-direction: column;
@@ -437,13 +437,11 @@ class OwnAppDetailView extends Component<Props, State> {
           <Text theme={detailTextStyle}>{ownApp.publishedVersion}</Text>
 
           <Text variant="smallLabel">App Id</Text>
-          <Text theme={detailTextStyle}>
+          <Text variant="marginBottom10" theme={detailTextStyle}>
             Share this app ID to allow users to install your app in Mainframe
             OS.
           </Text>
-          <Text variant={['addressLarge', 'marginTop10']}>
-            {ownApp.updateFeedHash}
-          </Text>
+          <CopyableBlock value={ownApp.updateFeedHash} />
           {!hasDraftVersion && (
             <ButtonsContainer>
               {openButton}

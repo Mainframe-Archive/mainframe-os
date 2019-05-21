@@ -39,8 +39,8 @@ import Notification from '../../UIComponents/Notification'
 import FormModalView from '../../UIComponents/FormModalView'
 import Loader from '../../UIComponents/Loader'
 import { InformationBox } from '../identities/IdentitiesView'
+import CopyableBlock from '../../UIComponents/CopyableBlock'
 import InviteContactModal, { type TransactionType } from './InviteContactModal'
-
 import type { ContactsView_contacts as Contacts } from './__generated__/ContactsView_contacts.graphql'
 
 type UserContacts = $PropertyType<Contacts, 'userContacts'>
@@ -1131,7 +1131,7 @@ class ContactsViewComponent extends Component<Props, State> {
               <Text variant="smallTitle" theme={{ padding: '20px 0 10px 0' }}>
                 Mainframe ID
               </Text>
-              <Text variant="addressLarge">{selectedContact.publicFeed}</Text>
+              <CopyableBlock value={selectedContact.publicFeed} />
             </Column>
           </Row>
           {this.isIdentitySelected() && (
@@ -1156,9 +1156,7 @@ class ContactsViewComponent extends Component<Props, State> {
                     theme={{ padding: '20px 0 10px 0' }}>
                     ETH Address
                   </Text>
-                  <Text variant="addressLarge">
-                    {selectedContact.profile.ethAddress}
-                  </Text>
+                  <CopyableBlock value={selectedContact.profile.ethAddress} />
                 </Column>
               </Row>
             )}
