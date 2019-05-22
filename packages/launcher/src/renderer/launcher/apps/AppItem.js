@@ -266,10 +266,6 @@ export default class AppItem extends Component<Props, State> {
             <Text variant="tooltipTitle">
               Do you really want to delete {appName}?
             </Text>
-            <Text variant="tooltipText">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin
-              consectetur mi in malesuada porttitor.
-            </Text>
             <DeleteButtons>
               <Button
                 title="CANCEL"
@@ -344,8 +340,6 @@ const InstalledView = (props: InstalledProps) => {
   return (
     <AppItem
       {...props}
-      editing={props.editing}
-      deleting={props.deleting}
       installing={app.installationState === 'DOWNLOADING'}
       icon={props.icon}
       appID={app.mfid}

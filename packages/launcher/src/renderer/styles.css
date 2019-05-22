@@ -119,10 +119,8 @@ body,
 }
 
 @keyframes pulse {
-
-	0% {  transform: perspective(400px) rotateY(-18deg); }
-	
-	50% {  transform: perspective(400px) rotateY(18deg); }
+	0% { transform: perspective(400px) rotateY(-18deg); }
+	50% { transform: perspective(400px) rotateY(18deg); }
 }
 
 .draggable {
