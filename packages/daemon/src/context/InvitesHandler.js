@@ -625,6 +625,8 @@ export default class InvitesHandler {
 
     console.log('txOptions.from')
     console.log(txOptions.from)
+    console.log(inviteRequest.receivedAddress)
+    console.log(customAddress)
 
     const res = await this.invitesContract.send(
       'declineAndWithdraw',
@@ -874,7 +876,6 @@ export default class InvitesHandler {
     const params = [toAddrHash, toAddrFeed, user.publicFeed.feedHash]
 
     const data = this.invitesContract.encodeCall('sendInvite', params)
-    const stake = await this.invitesContract.call('requiredStake')
 
     const txOptions = {
       from: user.profile.ethAddress,
