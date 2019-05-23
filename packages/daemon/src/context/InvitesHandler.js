@@ -536,12 +536,12 @@ export default class InvitesHandler {
 
       // $FlowFixMe will have feedHash by this point
       const fromFeedHash = hash(Buffer.from(user.publicFeed.feedHash))
-      const toAddrHash = hash(
-        bufferFromHex(customAddress ? customAddress : invite.toAddress),
-      )
+      const toAddrHash = hash(bufferFromHex(invite.toAddress))
       const toFeedHash = hash(Buffer.from(peer.publicFeed))
 
-      const txOptions = { from: invite.fromAddress }
+      const txOptions = {
+        from: customAddress ? customAddress : invite.fromAddress,
+      }
       this.validateInviteOriginNetwork(invite.ethNetwork)
 
       const res = await this.invitesContract.send(
@@ -591,7 +591,11 @@ export default class InvitesHandler {
     }
   }
 
-  async declineContactInvite(userID: string, peerID: string): Promise<string> {
+  async declineContactInvite(
+    userID: string,
+    peerID: string,
+    customAddress?: string,
+  ): Promise<string> {
     const { identities } = this._context.openVault
     const inviteRequest = identities.getInviteRequest(userID, peerID)
     const peer = identities.getPeerUser(peerID)
@@ -612,16 +616,29 @@ export default class InvitesHandler {
     const fromAddressHash = hash(bufferFromHex(inviteRequest.senderAddress))
     const fromFeedHash = hash(Buffer.from(peer.publicFeed))
 
-    const txOptions = { from: inviteRequest.receivedAddress }
+    console.log('inviteRequest.senderAddress')
+    console.log(inviteRequest.senderAddress)
+
+    const txOptions = {
+      from: customAddress ? customAddress : inviteRequest.receivedAddress,
+    }
+
+    console.log('txOptions.from')
+    console.log(txOptions.from)
+
     const res = await this.invitesContract.send(
       'declineAndWithdraw',
       [fromAddressHash, fromFeedHash, myFeedHash],
       txOptions,
     )
 
+    console.log('res')
+    console.log(res)
+
     return new Promise((resolve, reject) => {
       res
         .on('mined', async hash => {
+          console.log(hash)
           inviteRequest.rejectedTXHash = hash
           await this._context.openVault.save()
 
@@ -633,6 +650,7 @@ export default class InvitesHandler {
           resolve(hash)
         })
         .on('error', err => {
+          console.log(err)
           reject(err)
         })
     })
@@ -777,6 +795,8 @@ export default class InvitesHandler {
       data,
     }
     const params = await this._context.io.eth.completeTxParams(txOptions)
+    console.log('params')
+    console.log(params)
     const formattedParams = await this.formatGasValues(params)
     return { ...params, ...formattedParams }
   }
@@ -785,25 +805,17 @@ export default class InvitesHandler {
     user: OwnUserIdentity,
     peer: PeerUserIdentity,
     contact: Contact,
-    customAddress?: string,
   ): Promise<Object> {
     const invite = contact._invite
-    console.log(invite)
     if (invite != null && invite.stake && invite.acceptedSignature) {
       const sigParams = this.signatureParams(invite.acceptedSignature)
 
       // $FlowFixMe will have feedHash by this point
       const fromFeedHash = hash(Buffer.from(user.publicFeed.feedHash))
-      console.log('fromFeedHash')
-      console.log(fromFeedHash)
 
       const toAddrHash = hash(bufferFromHex(invite.toAddress))
-      console.log('toAddrHash')
-      console.log(toAddrHash)
 
       const toFeedHash = hash(Buffer.from(peer.publicFeed))
-      console.log('toFeedHash')
-      console.log(toFeedHash)
 
       const txParams = [
         toAddrHash,
@@ -815,8 +827,6 @@ export default class InvitesHandler {
       ]
       this.validateInviteOriginNetwork(invite.ethNetwork)
       const data = this.invitesContract.encodeCall('retrieveStake', txParams)
-      console.log('data')
-      console.log(data)
 
       const txOptions = {
         from: invite.fromAddress,
@@ -824,12 +834,8 @@ export default class InvitesHandler {
         data,
       }
       const params = await this._context.io.eth.completeTxParams(txOptions)
-      console.log('params')
-      console.log(params)
 
       const formattedParams = await this.formatGasValues(params)
-      console.log('formattedParams')
-      console.log(formattedParams)
 
       return { ...params, ...formattedParams }
     }
@@ -856,7 +862,6 @@ export default class InvitesHandler {
   async getSendInviteTXDetails(
     user: OwnUserIdentity,
     peer: PeerUserIdentity,
-    customAddress?: string,
   ): Promise<Object> {
     const { eth } = this._context.io
 
@@ -872,7 +877,7 @@ export default class InvitesHandler {
     const stake = await this.invitesContract.call('requiredStake')
 
     const txOptions = {
-      from: customAddress ? customAddress : user.profile.ethAddress,
+      from: user.profile.ethAddress,
       to: this.invitesContract.address,
       data,
     }
@@ -885,26 +890,19 @@ export default class InvitesHandler {
     type: string,
     userID: string,
     contactOrPeerID: string,
-    customAddress?: string,
   ) {
     this.validateNetwork()
     if (type === 'declineInvite') {
-      return this.getDeclineTXDetails(userID, contactOrPeerID, customAddress)
+      return this.getDeclineTXDetails(userID, contactOrPeerID)
     }
     const { user, peer, contact } = this.getUserObjects(userID, contactOrPeerID)
     switch (type) {
       case 'approve':
-        return this.getApproveTXDetails(user, customAddress)
+        return this.getApproveTXDetails(user)
       case 'sendInvite':
-        return this.getSendInviteTXDetails(user, peer, customAddress)
+        return this.getSendInviteTXDetails(user, peer)
       case 'retrieveStake':
-        console.log('retrieveStake arrived')
-        return this.getRetrieveStakeTXDetails(
-          user,
-          peer,
-          contact,
-          customAddress,
-        )
+        return this.getRetrieveStakeTXDetails(user, peer, contact)
       default:
         throw new Error('Unknown transaction type')
     }

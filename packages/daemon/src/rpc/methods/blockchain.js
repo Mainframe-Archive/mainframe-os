@@ -76,7 +76,6 @@ export const getInviteTXDetails = async (
     params.type,
     params.userID,
     params.contactID,
-    params.customAddress,
   )
 }
 
@@ -107,7 +106,11 @@ export const sendDeclineInviteTX = async (
   ctx: ClientContext,
   params: SendDeclineTXParams,
 ) => {
-  return ctx.invitesHandler.declineContactInvite(params.userID, params.peerID)
+  return ctx.invitesHandler.declineContactInvite(
+    params.userID,
+    params.peerID,
+    params.customAddress,
+  )
 }
 
 export const sendWithdrawInviteTX = async (

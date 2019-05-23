@@ -339,6 +339,7 @@ class ContactsViewComponent extends Component<Props, State> {
     const { user } = this.props
     this.state = {
       selectedContact: user.localID,
+      selectedAddress: user.profile.ethAddress,
       notification: '',
     }
   }
@@ -384,6 +385,10 @@ class ContactsViewComponent extends Component<Props, State> {
 
   openEditModal = () => {
     this.setState({ editModalOpen: true })
+  }
+
+  updateSelectedAddress = (selectedAddress: string) => {
+    this.setState({ selectedAddress })
   }
 
   closeModal = () => {
@@ -547,7 +552,7 @@ class ContactsViewComponent extends Component<Props, State> {
 
   rejectContact = (contact: Contact) => {
     this.setState({
-      // notification: 'decline',
+      notification: 'decline',
       inviteModalOpen: {
         contact,
         type: 'declineInvite',
@@ -555,8 +560,8 @@ class ContactsViewComponent extends Component<Props, State> {
     })
   }
 
-  showNotification = (notification: string) => {
-    this.setState({ notification })
+  showNotification = (notification: string, selectedAddress: string) => {
+    this.setState({ notification, selectedAddress })
   }
 
   getIdentity = () => {
@@ -1183,24 +1188,23 @@ class ContactsViewComponent extends Component<Props, State> {
     const walletsArray = getWalletsArray(this.props)
     const mft = filter(
       walletsArray,
-      w => w.address === this.props.user.defaultEthAddress,
+      w => w.address === this.state.selectedAddress,
     )[0].balances.mft
     const eth = filter(
       walletsArray,
-      w => w.address === this.props.user.defaultEthAddress,
+      w => w.address === this.state.selectedAddress,
     )[0].balances.eth
 
     return (
       this.state.notification === 'withdraw' && (
         <Notification onRequestClose={this.closeNotification}>
           <Text color="#fff" size={13} variant={('bold', 'marginTop5')}>
-            {this.props.contacts
-              ? this.props.contacts.inviteStake
-              : '' + ' MFT have been added to your wallet.'}
+            {(this.props.contacts ? this.props.contacts.inviteStake : '') +
+              ' MFT have been added to your wallet.'}
           </Text>
           <AvatarWrapper marginTop>
             <Blocky>
-              <Avatar id={this.props.user.defaultEthAddress} size="small" />
+              <Avatar id={this.state.selectedAddress} size="small" />
             </Blocky>
             <WalletContainer>
               <Text
@@ -1208,7 +1212,7 @@ class ContactsViewComponent extends Component<Props, State> {
                 variant={['greyDark23', 'ellipsis']}
                 theme={{ fontStyle: 'normal' }}
                 size={12}>
-                {this.props.user.defaultEthAddress}
+                {this.state.selectedAddress}
               </Text>
               <Text
                 color="#fff"
@@ -1237,7 +1241,6 @@ class ContactsViewComponent extends Component<Props, State> {
     const deletedContact = this.state.inviteContactModal
       ? this.state.InviteContactModal.contact
       : null
-    console.log(deletedContact)
     return (
       this.state.notification === 'delete' && (
         <Notification onRequestClose={this.closeNotification}>
@@ -1270,6 +1273,59 @@ class ContactsViewComponent extends Component<Props, State> {
     )
   }
 
+  renderDeclineNotificationModal() {
+    const walletsArray = getWalletsArray(this.props)
+    const mft = filter(
+      walletsArray,
+      w => w.address === this.state.selectedAddress,
+    )[0].balances.mft
+    const eth = filter(
+      walletsArray,
+      w => w.address === this.state.selectedAddress,
+    )[0].balances.eth
+
+    return (
+      this.state.notification === 'decline' && (
+        <Notification onRequestClose={this.closeNotification}>
+          <Text color="#fff" size={13} variant={('bold', 'marginTop5')}>
+            {(this.props.contacts ? this.props.contacts.inviteStake : '') +
+              ' MFT have been added to your wallet.'}
+          </Text>
+          <AvatarWrapper marginTop>
+            <Blocky>
+              <Avatar id={this.state.selectedAddress} size="small" />
+            </Blocky>
+            <WalletContainer>
+              <Text
+                color="#fff"
+                variant={['greyDark23', 'ellipsis']}
+                theme={{ fontStyle: 'normal' }}
+                size={12}>
+                {this.state.selectedAddress}
+              </Text>
+              <Text
+                color="#fff"
+                variant={['greyDark23', 'mono']}
+                theme={{ fontStyle: 'normal' }}
+                size={12}>
+                {Number(eth)
+                  .toFixed(4)
+                  .toString()
+                  .slice(0, 10) +
+                  ' ETH   ' +
+                  Number(mft)
+                    .toFixed(4)
+                    .toString()
+                    .slice(0, 10) +
+                  ' MFT'}
+              </Text>
+            </WalletContainer>
+          </AvatarWrapper>
+        </Notification>
+      )
+    )
+  }
+
   renderInviteModal() {
     const walletsArray = getWalletsArray(this.props)
     return (
@@ -1281,6 +1337,8 @@ class ContactsViewComponent extends Component<Props, State> {
           user={this.props.user}
           type={this.state.inviteModalOpen.type}
           inviteStakeValue={this.props.contacts.inviteStake}
+          updateSelectedAddress={this.updateSelectedAddress}
+          selectedAddress={this.state.selectedAddress}
           wallets={walletsArray}
         />
       )
