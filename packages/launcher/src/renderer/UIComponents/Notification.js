@@ -2,7 +2,6 @@
 
 import React, { Component, type Node } from 'react'
 import ReactModal from 'react-modal'
-import { Text } from '@morpheus-ui/core'
 import styled from 'styled-components/native'
 import CloseIcon from '@morpheus-ui/icons/Close'
 

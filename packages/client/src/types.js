@@ -275,18 +275,21 @@ export type SendInviteTXParams = {
   userID: string,
   contactID: string,
   gasPrice?: string,
+  customAddress?: string,
 }
 
 export type SendDeclineTXParams = {
   userID: string,
   peerID: string,
   gasPrice?: string,
+  customAddress?: string,
 }
 
 export type SendWithdrawInviteTXParams = {
   userID: string,
   contactID: string,
   gasPrice?: string,
+  customAddress?: string,
 }
 
 // Comms

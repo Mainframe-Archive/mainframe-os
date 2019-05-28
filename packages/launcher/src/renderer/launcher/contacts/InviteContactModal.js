@@ -1,8 +1,7 @@
 //@flow
 import React, { Component } from 'react'
 import styled from 'styled-components/native'
-import { Text, Tooltip, DropDown, Button, TextField } from '@morpheus-ui/core'
-import { Form } from '@morpheus-ui/forms'
+import { Text, Tooltip, DropDown, Button } from '@morpheus-ui/core'
 
 import { graphql, createFragmentContainer } from 'react-relay'
 import { filter } from 'lodash'
@@ -29,6 +28,9 @@ type Props = ContextProps & {
   type: TransactionType,
   inviteStakeValue: ?number,
   wallets: WalletAccounts,
+  selectedAddress: string,
+  updateSelectedAddress: string => void,
+  showNotification: (string, ?string) => void,
 }
 
 type TXParams = {
@@ -58,7 +60,6 @@ type State = {
       | 'error',
   },
   txScreen: boolean,
-  selectedAddress: ?string,
   dropdownError: boolean,
   insufficientFunds: boolean,
 }
@@ -72,6 +73,8 @@ const FormContainer = styled.View`
   align-items: center;
   margin-top: 15vh;
 `
+
+const View = styled.View``
 
 const Section = styled.View`
   margin-bottom: 20px;
@@ -121,10 +124,8 @@ const TitleTooltipContainer = styled.View`
 class InviteContactModal extends Component<Props, State> {
   constructor(props: Props) {
     super(props)
-    const { user } = this.props
     this.state = {
       txProcessing: false,
-      // selectedAddress: user.profile.ethAddress,
       insufficientFunds: false,
       txScreen: false,
       dropdownError: false,
@@ -144,7 +145,7 @@ class InviteContactModal extends Component<Props, State> {
       this.props.wallets,
       w => w.address === this.props.selectedAddress,
     )[0].balances.mft
-    if (Number(mft) < this.props.inviteStakeValue) {
+    if (Number(mft) < Number(this.props.inviteStakeValue)) {
       this.setState({ insufficientFunds: true })
     } else {
       this.setState({ insufficientFunds: false })
@@ -178,7 +179,6 @@ class InviteContactModal extends Component<Props, State> {
         contactID: contact.localID,
         customAddress: this.props.selectedAddress,
       })
-      console.log(res)
       this.setState({
         txParams: res,
       })
@@ -342,7 +342,7 @@ class InviteContactModal extends Component<Props, State> {
       .mft
     const eth = filter(this.props.wallets, w => w.address === addr)[0].balances
       .eth
-    if (Number(mft) < this.props.inviteStakeValue) {
+    if (Number(mft) < Number(this.props.inviteStakeValue)) {
       this.setState({ dropdownError: true })
       return 'Insufficient MFT funds in this wallet'
     } else if (!(Number(eth) > 0)) {
@@ -350,14 +350,7 @@ class InviteContactModal extends Component<Props, State> {
       return 'Insufficient ETH funds in this wallet'
     } else {
       this.setState({ dropdownError: false })
-      // this.props.updatedSelectedAddress(addr)
     }
-  }
-
-  setAddress = feedback => {
-    const selectedAddress = feedback.value
-    // STOPPED HERE
-    // this.props.updatedSelectedAddress(addr)
   }
 
   showTransactions = () => {
@@ -367,7 +360,6 @@ class InviteContactModal extends Component<Props, State> {
   // RENDER
   renderGasData() {
     const { txParams } = this.state
-    console.log(txParams)
     if (txParams) {
       const { gasPriceGwei, maxCost, stakeAmount } = txParams
       const gasLabel = `Gas price: ${gasPriceGwei}`
@@ -436,8 +428,7 @@ class InviteContactModal extends Component<Props, State> {
     )
   }
 
-  renderTransactionSection(title: string, validate: boolean) {
-    const { balances } = this.state
+  renderTransactionSection(title: string, validate?: boolean) {
     const titleSection = (
       <Text
         bold
@@ -502,43 +493,48 @@ class InviteContactModal extends Component<Props, State> {
 
     if (invitePending && invitePending.state === 'awaiting_approval') {
       if (txProcessing) {
-        return [<CircleLoader width={24} height={24} />, <></>]
+        return [
+          <CircleLoader width={24} height={24} key="c1" />,
+          <View key="v1" />,
+        ]
       } else {
         return [
           <Button
             title="APPROVE"
             variant={['small', 'red']}
             onPress={firstAction}
+            key="b1"
           />,
-          <></>,
+          <View key="v2" />,
         ]
       }
     } else if (invitePending && invitePending.state === 'approved') {
       if (txProcessing) {
         return [
-          <CircleCheck width={24} height={24} color="#00a7e7" />,
-          <CircleLoader width={24} height={24} />,
+          <CircleCheck width={24} height={24} color="#00a7e7" key="c2" />,
+          <CircleLoader width={24} height={24} key="c3" />,
         ]
       } else {
         return [
-          <CircleCheck width={24} height={24} color="#00a7e7" />,
+          <CircleCheck width={24} height={24} color="#00a7e7" key="c4" />,
           <Button
             title="APPROVE"
             variant={['small', 'red']}
             onPress={secondAction}
+            key="b2"
           />,
         ]
       }
     } else if (invitePending && invitePending.state === 'invite_sent') {
       return [
-        <CircleCheck width={24} height={24} color="#00a7e7" />,
-        <CircleCheck width={24} height={24} color="#00a7e7" />,
+        <CircleCheck width={24} height={24} color="#00a7e7" key="c5" />,
+        <CircleCheck width={24} height={24} color="#00a7e7" key="c6" />,
       ]
     }
   }
 
   renderInviteTransactions() {
-    const { balances, invitePending, txParams } = this.state
+    const { invitePending, txParams } = this.state
     const buttons = this.getButtonStatus(this.sendApproveTX, this.sendInvite)
 
     return (
@@ -666,7 +662,6 @@ class InviteContactModal extends Component<Props, State> {
   }
 
   render() {
-    const { invitePending } = this.state
     let content
     let btnTitle
     let action

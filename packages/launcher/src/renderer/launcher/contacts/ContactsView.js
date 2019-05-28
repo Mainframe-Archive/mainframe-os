@@ -12,7 +12,7 @@ import {
   type Environment,
 } from 'react-relay'
 import { fetchQuery } from 'relay-runtime'
-import { debounce, sortBy, filter } from 'lodash'
+import { debounce, filter } from 'lodash'
 
 import { shell } from 'electron'
 import {
@@ -201,6 +201,11 @@ export type SubmitContactInput = {
   name: String,
 }
 
+export type WalletAccounts = Array<{
+  address: string,
+  balances: { mft: string, eth: string },
+}>
+
 export type Wallet = {
   localID: string,
   name: ?string,
@@ -214,11 +219,6 @@ export type Wallets = {
     ledger: Array<Wallet>,
   },
 }
-
-export type WalletAccounts = Array<{
-  address: string,
-  balances: { mft: string, eth: string },
-}>
 
 type Props = {
   relay: {
@@ -236,6 +236,7 @@ type State = {
   searching?: boolean,
   searchTerm?: ?string,
   selectedContact: Object,
+  selectedAddress: string,
   addModalState?: number,
   editModalOpen?: boolean,
   radio?: ?string,
@@ -339,7 +340,7 @@ class ContactsViewComponent extends Component<Props, State> {
     const { user } = this.props
     this.state = {
       selectedContact: user.localID,
-      selectedAddress: user.profile.ethAddress,
+      selectedAddress: user.profile.ethAddress || '',
       notification: '',
     }
   }
@@ -1199,8 +1200,9 @@ class ContactsViewComponent extends Component<Props, State> {
       this.state.notification === 'withdraw' && (
         <Notification onRequestClose={this.closeNotification}>
           <Text color="#fff" size={13} variant={('bold', 'marginTop5')}>
-            {(this.props.contacts ? this.props.contacts.inviteStake : '') +
-              ' MFT have been added to your wallet.'}
+            {(this.props.contacts && this.props.contacts.inviteStake
+              ? this.props.contacts.inviteStake
+              : '') + ' MFT have been added to your wallet.'}
           </Text>
           <AvatarWrapper marginTop>
             <Blocky>
@@ -1238,18 +1240,23 @@ class ContactsViewComponent extends Component<Props, State> {
   }
 
   renderDeleteNotificationModal() {
-    const deletedContact = this.state.inviteContactModal
-      ? this.state.InviteContactModal.contact
+    const deletedContact = this.state.inviteModalOpen
+      ? this.state.inviteModalOpen.contact.profile
       : null
+    const name = deletedContact ? deletedContact.name : null
+    const ethAddress = deletedContact ? deletedContact.ethAddress : null
+
     return (
-      this.state.notification === 'delete' && (
+      this.state.notification === 'delete' &&
+      name &&
+      ethAddress && (
         <Notification onRequestClose={this.closeNotification}>
           <Text color="#fff" size={13} variant={('bold', 'marginTop5')}>
-            {deletedContact.name + ' has been deleted.'}
+            {name + ' has been deleted.'}
           </Text>
           <AvatarWrapper marginTop>
             <Blocky>
-              <Avatar id={deletedContact.ethAddress} size="small" />
+              <Avatar id={ethAddress} size="small" />
             </Blocky>
             <WalletContainer>
               <Text
@@ -1257,14 +1264,14 @@ class ContactsViewComponent extends Component<Props, State> {
                 variant={['greyDark23']}
                 theme={{ fontStyle: 'normal' }}
                 size={12}>
-                {deletedContact.name}
+                {name}
               </Text>
               <Text
                 color="#fff"
                 variant={['greyDark23', 'mono']}
                 theme={{ fontStyle: 'normal' }}
                 size={12}>
-                {deletedContact.ethAddress}
+                {ethAddress}
               </Text>
             </WalletContainer>
           </AvatarWrapper>
@@ -1274,26 +1281,26 @@ class ContactsViewComponent extends Component<Props, State> {
   }
 
   renderDeclineNotificationModal() {
+    const { contacts } = this.props
+    const { selectedAddress } = this.state
+
     const walletsArray = getWalletsArray(this.props)
-    const mft = filter(
-      walletsArray,
-      w => w.address === this.state.selectedAddress,
-    )[0].balances.mft
-    const eth = filter(
-      walletsArray,
-      w => w.address === this.state.selectedAddress,
-    )[0].balances.eth
+    const mft = filter(walletsArray, w => w.address === selectedAddress)[0]
+      .balances.mft
+    const eth = filter(walletsArray, w => w.address === selectedAddress)[0]
+      .balances.eth
+
+    const stake = contacts && contacts.inviteStake ? contacts.inviteStake : ''
 
     return (
       this.state.notification === 'decline' && (
         <Notification onRequestClose={this.closeNotification}>
           <Text color="#fff" size={13} variant={('bold', 'marginTop5')}>
-            {(this.props.contacts ? this.props.contacts.inviteStake : '') +
-              ' MFT have been added to your wallet.'}
+            {stake + ' MFT have been added to your wallet.'}
           </Text>
           <AvatarWrapper marginTop>
             <Blocky>
-              <Avatar id={this.state.selectedAddress} size="small" />
+              <Avatar id={selectedAddress} size="small" />
             </Blocky>
             <WalletContainer>
               <Text
@@ -1301,7 +1308,7 @@ class ContactsViewComponent extends Component<Props, State> {
                 variant={['greyDark23', 'ellipsis']}
                 theme={{ fontStyle: 'normal' }}
                 size={12}>
-                {this.state.selectedAddress}
+                {selectedAddress}
               </Text>
               <Text
                 color="#fff"
@@ -1327,42 +1334,25 @@ class ContactsViewComponent extends Component<Props, State> {
   }
 
   renderInviteModal() {
+    const { inviteModalOpen, selectedAddress } = this.state
+    const { user, contacts } = this.props
+
     const walletsArray = getWalletsArray(this.props)
     return (
-      this.state.inviteModalOpen && (
+      inviteModalOpen && (
         <InviteContactModal
           closeModal={this.closeModal}
           showNotification={this.showNotification}
-          contact={this.state.inviteModalOpen.contact}
-          user={this.props.user}
-          type={this.state.inviteModalOpen.type}
-          inviteStakeValue={this.props.contacts.inviteStake}
+          contact={inviteModalOpen.contact}
+          user={user}
+          type={inviteModalOpen.type}
+          inviteStakeValue={contacts.inviteStake}
           updateSelectedAddress={this.updateSelectedAddress}
-          selectedAddress={this.state.selectedAddress}
+          selectedAddress={selectedAddress}
           wallets={walletsArray}
         />
       )
     )
-    // return (
-    //   <InviteContactModal
-    //     closeModal={this.closeModal}
-    //     contact={{
-    //       localID: 'TLWkMfYJ769WaL0SP8lrc',
-    //       peerID: 'TLWkMfYJ769WaL0SP8lrc',
-    //       publicFeed:
-    //         '0e7fdbb8a5172cd7bf367a6c73f82ecd3449c630cd32860d33d9c6ef716fc7ec',
-    //       profile: {
-    //         name: 'Megan Jezewski',
-    //         ethAddress: '0x75bdf6a2ced3a0d0eff704555e3350b5010f5e00',
-    //       },
-    //     }}
-    //     showTxScreen={() => this.showTxScreen(contact)}
-    //     user={this.props.user}
-    //     type={'transactions'}
-    //     inviteStakeValue={this.props.contacts.inviteStake}
-    //     wallets={walletsArray}
-    //   />
-    // )
   }
 
   renderEditModal() {

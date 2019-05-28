@@ -616,17 +616,9 @@ export default class InvitesHandler {
     const fromAddressHash = hash(bufferFromHex(inviteRequest.senderAddress))
     const fromFeedHash = hash(Buffer.from(peer.publicFeed))
 
-    console.log('inviteRequest.senderAddress')
-    console.log(inviteRequest.senderAddress)
-
     const txOptions = {
       from: customAddress ? customAddress : inviteRequest.receivedAddress,
     }
-
-    console.log('txOptions.from')
-    console.log(txOptions.from)
-    console.log(inviteRequest.receivedAddress)
-    console.log(customAddress)
 
     const res = await this.invitesContract.send(
       'declineAndWithdraw',
@@ -634,13 +626,9 @@ export default class InvitesHandler {
       txOptions,
     )
 
-    console.log('res')
-    console.log(res)
-
     return new Promise((resolve, reject) => {
       res
         .on('mined', async hash => {
-          console.log(hash)
           inviteRequest.rejectedTXHash = hash
           await this._context.openVault.save()
 
@@ -652,7 +640,6 @@ export default class InvitesHandler {
           resolve(hash)
         })
         .on('error', err => {
-          console.log(err)
           reject(err)
         })
     })
@@ -797,8 +784,7 @@ export default class InvitesHandler {
       data,
     }
     const params = await this._context.io.eth.completeTxParams(txOptions)
-    console.log('params')
-    console.log(params)
+
     const formattedParams = await this.formatGasValues(params)
     return { ...params, ...formattedParams }
   }
