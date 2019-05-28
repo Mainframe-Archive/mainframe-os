@@ -2,7 +2,7 @@
 
 import { createKeyPair, sign } from '@erebos/secp256k1'
 import { pubKeyToAddress } from '@erebos/keccak256'
-import BzzAPI from '@erebos/api-bzz-node'
+import Bzz from '@erebos/api-bzz-node'
 import type Client, {
   AppOpenResult,
   VaultSettings,
@@ -98,7 +98,7 @@ export class AppContext extends Context {
   settings: VaultSettings
   trustedRPC: StreamRPC
   window: BrowserWindow
-  _bzz: ?BzzAPI
+  _bzz: ?Bzz
   _permissionDeniedID: ?string
   _storage: ?ContextStorageSettings
 
@@ -111,9 +111,9 @@ export class AppContext extends Context {
     this.window = params.window
   }
 
-  get bzz(): BzzAPI {
+  get bzz(): Bzz {
     if (this._bzz == null) {
-      this._bzz = new BzzAPI({
+      this._bzz = new Bzz({
         url: this.settings.bzzURL,
         signBytes: this.storage.signBytes,
       })

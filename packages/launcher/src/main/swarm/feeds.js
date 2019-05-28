@@ -37,15 +37,14 @@ export const createSubscriber = <T: any>(
   const transform = params.transform || identity
 
   return params.bzz
-    .pollFeedValue(params.feed, {
+    .pollFeedContent(params.feed, {
       interval: params.interval || DEFAULT_POLL_INTERVAL,
-      mode: 'content-hash',
+      mode: 'raw',
       whenEmpty: 'ignore',
-      contentChangedOnly: true,
+      changedOnly: true,
     })
     .pipe(
-      flatMap(async (hash: string) => {
-        const res = await params.bzz.download(hash, { mode: 'raw' })
+      flatMap(async res => {
         const data = await res.json()
         return transform(data)
       }),
@@ -56,10 +55,9 @@ export const readJSON = async (
   bzz: Bzz,
   feed: string | FeedParams,
 ): Promise<Object | null> => {
-  const hash = await bzz.getFeedValue(feed, { mode: 'content-hash' })
-  if (hash == null) {
+  const res = await bzz.getFeedContent(feed, { mode: 'raw' })
+  if (res == null) {
     return null
   }
-  const res = await bzz.download(hash, { mode: 'raw' })
   return res.ok ? await res.json() : null
 }

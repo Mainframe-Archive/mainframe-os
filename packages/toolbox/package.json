@@ -16,9 +16,9 @@
   "dependencies": {
     "@mainframe/config": "^0.3.0",
     "execa": "^1.0.0",
-    "fs-extra": "^7.0.0"
+    "fs-extra": "^8.0.1"
   },
   "devDependencies": {
-    "flow-bin": "^0.97.0"
+    "flow-bin": "^0.98.1"
   }
 }

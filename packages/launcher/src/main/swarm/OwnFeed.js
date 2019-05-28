@@ -37,7 +37,7 @@ export default class OwnFeed {
   }
 
   async publishJSON(bzz: Bzz, payload: Object): Promise<string> {
-    return await bzz.uploadFeedValue(
+    return await bzz.setFeedContent(
       this.feed,
       JSON.stringify(payload),
       { mode: 'raw' },

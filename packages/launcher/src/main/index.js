@@ -1,5 +1,8 @@
 // @flow
 
+// Needed to fix issue with Ledger: https://github.com/LedgerHQ/ledgerjs/issues/211
+import '@babel/polyfill'
+
 // import StreamRPC from '@mainframe/rpc-stream'
 import { app, BrowserWindow, WebContents, ipcMain } from 'electron'
 import { is } from 'electron-util'

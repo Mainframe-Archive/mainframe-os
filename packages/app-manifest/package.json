@@ -19,11 +19,11 @@
     "@mainframe/utils-base64": "^0.1.1",
     "es6-error": "^4.1.1",
     "fastest-validator": "^0.6.17",
-    "semver": "^6.0.0"
+    "semver": "^6.1.0"
   },
   "devDependencies": {
     "@mainframe/app-permissions": "*",
     "@mainframe/utils-crypto": "^0.4.0",
-    "flow-bin": "^0.97.0"
+    "flow-bin": "^0.98.1"
   }
 }

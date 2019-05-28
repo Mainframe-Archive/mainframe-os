@@ -16,11 +16,11 @@
   "dependencies": {
     "@mainframe/data-types": "^0.3.0",
     "@mainframe/utils-id": "^0.1.0",
-    "conf": "^4.0.1",
+    "conf": "^4.0.2",
     "env-paths": "^2.1.0",
-    "fs-extra": "^7.0.0"
+    "fs-extra": "^8.0.1"
   },
   "devDependencies": {
-    "flow-bin": "^0.97.0"
+    "flow-bin": "^0.98.1"
   }
 }
