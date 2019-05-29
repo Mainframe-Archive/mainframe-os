@@ -391,7 +391,7 @@ class ContactsViewComponent extends Component<Props, State> {
   }
 
   updateSelectedAddress = (selectedAddress: string) => {
-    this.setState({ selectedAddress, error: '' })
+    this.setState({ selectedAddress })
   }
 
   closeModal = () => {
@@ -1207,19 +1207,13 @@ class ContactsViewComponent extends Component<Props, State> {
   // }
 
   renderWithdrawNotificationModal() {
-    // const walletsArray = getWalletsArray(this.props)
-    const mft = '0'
-    const eth = '0'
-    // this.getBalances().then(
-    //   result => {
-    //     console.log(result)
-    //     // mft = result.value.mft
-    //     // eth = result.value.eth
-    //   },
-    //   error => console.log(error),
-    // )
-    // console.log(mft, eth)
-    // console.log(this.state.selectedAddress)
+    const { selectedAddress } = this.state
+    const walletsArray = getWalletsArray(this.props)
+    const mft = filter(walletsArray, w => w.address === selectedAddress)[0]
+      .balances.mft
+    const eth = filter(walletsArray, w => w.address === selectedAddress)[0]
+      .balances.eth
+
     return (
       this.state.notification === 'withdraw' && (
         <Notification onRequestClose={this.closeNotification}>

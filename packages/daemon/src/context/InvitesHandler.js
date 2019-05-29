@@ -787,6 +787,8 @@ export default class InvitesHandler {
       to: this.invitesContract.address,
       data,
     }
+
+    console.log(txOptions.from)
     const params = await this._context.io.eth.completeTxParams(txOptions)
 
     const formattedParams = await this.formatGasValues(params)
@@ -892,6 +894,11 @@ export default class InvitesHandler {
     if (type === 'declineInvite') {
       return this.getDeclineTXDetails(userID, contactOrPeerID, customAddress)
     }
+    console.log('HERE')
+    console.log(type)
+    console.log(userID)
+    console.log(contactOrPeerID)
+    console.log(customAddress)
     const { user, peer, contact } = this.getUserObjects(userID, contactOrPeerID)
     switch (type) {
       case 'approve':

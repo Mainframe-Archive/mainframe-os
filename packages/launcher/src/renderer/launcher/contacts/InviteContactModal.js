@@ -162,21 +162,24 @@ class InviteContactModal extends Component<Props, State> {
     this.setState({ balances })
   }
 
-  async getTXDetails(type: string) {
+  async getTXDetails(type: string, address?: string) {
     const { user, contact } = this.props
     console.log('getTXDetails called')
+    console.log(address ? address : '')
     try {
       const res = await rpc.getInviteTXDetails({
         type: type,
         userID: user.localID,
         contactID: contact.localID,
-        customAddress: this.props.selectedAddress,
+        customAddress: address ? address : this.props.selectedAddress,
       })
       this.setState({
         txParams: res,
         error: '',
       })
     } catch (err) {
+      console.log('err')
+      console.log(err)
       this.setState({
         error: err.message,
       })
@@ -225,6 +228,8 @@ class InviteContactModal extends Component<Props, State> {
         error: '',
       })
     } catch (err) {
+      console.log('err')
+      console.log(err)
       this.setState({
         error: err.message,
         invitePending: {
@@ -251,6 +256,8 @@ class InviteContactModal extends Component<Props, State> {
       })
       this.getInviteSendTXDetails()
     } catch (err) {
+      console.log('err')
+      console.log(err)
       this.setState({
         error: err.message,
         txProcessing: false,
@@ -364,7 +371,12 @@ class InviteContactModal extends Component<Props, State> {
   }
 
   updateSelectedAddress = (addr: string) => {
-    this.getTXDetails(this.props.type)
+    // refresh tx details
+    if (this.props.type === 'invite') {
+      this.getInviteApproveTXDetails()
+    } else {
+      this.getTXDetails(this.props.type, addr)
+    }
     this.props.updateSelectedAddress(addr)
   }
 
