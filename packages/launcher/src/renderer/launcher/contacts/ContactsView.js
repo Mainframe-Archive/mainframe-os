@@ -29,6 +29,7 @@ import { type FormSubmitPayload } from '@morpheus-ui/forms'
 
 import PlusIcon from '@morpheus-ui/icons/PlusSymbolSm'
 import SearchIcon from '@morpheus-ui/icons/SearchSm'
+import applyContext, { type ContextProps } from '../LauncherContext'
 
 import { type CurrentUser } from '../LauncherContext'
 import { EnvironmentContext } from '../RelayEnvironment'
@@ -40,6 +41,7 @@ import FormModalView from '../../UIComponents/FormModalView'
 import Loader from '../../UIComponents/Loader'
 import { InformationBox } from '../identities/IdentitiesView'
 import CopyableBlock from '../../UIComponents/CopyableBlock'
+import { MFT_TOKEN_ADDRESSES } from '../../../constants'
 import InviteContactModal, { type TransactionType } from './InviteContactModal'
 import type { ContactsView_contacts as Contacts } from './__generated__/ContactsView_contacts.graphql'
 
@@ -220,7 +222,7 @@ export type Wallets = {
   },
 }
 
-type Props = {
+type Props = ContextProps & {
   relay: {
     environment: Environment,
   },
@@ -389,7 +391,7 @@ class ContactsViewComponent extends Component<Props, State> {
   }
 
   updateSelectedAddress = (selectedAddress: string) => {
-    this.setState({ selectedAddress })
+    this.setState({ selectedAddress, error: '' })
   }
 
   closeModal = () => {
@@ -562,6 +564,8 @@ class ContactsViewComponent extends Component<Props, State> {
   }
 
   showNotification = (notification: string, selectedAddress: string) => {
+    console.log(notification)
+    console.log(selectedAddress)
     this.setState({ notification, selectedAddress })
   }
 
@@ -1185,17 +1189,37 @@ class ContactsViewComponent extends Component<Props, State> {
     )
   }
 
-  renderWithdrawNotificationModal() {
-    const walletsArray = getWalletsArray(this.props)
-    const mft = filter(
-      walletsArray,
-      w => w.address === this.state.selectedAddress,
-    )[0].balances.mft
-    const eth = filter(
-      walletsArray,
-      w => w.address === this.state.selectedAddress,
-    )[0].balances.eth
+  // async getBalances() {
+  //   const { ethAddress } = this.props.user.profile
+  //   const address = MFT_TOKEN_ADDRESSES[this.props.ethClient.networkName]
+  //   let balances = {
+  //     mft: '0',
+  //     eth: '0',
+  //   }
+  //   if (address && ethAddress) {
+  //     const token = this.props.ethClient.erc20Contract(address)
+  //     const [mft, eth] = await Promise.all([
+  //       token.getBalance(ethAddress),
+  //       this.props.ethClient.getETHBalance(ethAddress),
+  //     ])
+  //     balances = { mft, eth }
+  //   }
+  // }
 
+  renderWithdrawNotificationModal() {
+    // const walletsArray = getWalletsArray(this.props)
+    const mft = '0'
+    const eth = '0'
+    // this.getBalances().then(
+    //   result => {
+    //     console.log(result)
+    //     // mft = result.value.mft
+    //     // eth = result.value.eth
+    //   },
+    //   error => console.log(error),
+    // )
+    // console.log(mft, eth)
+    // console.log(this.state.selectedAddress)
     return (
       this.state.notification === 'withdraw' && (
         <Notification onRequestClose={this.closeNotification}>
@@ -1476,4 +1500,4 @@ const ContactsView = createFragmentContainer(ContactsViewComponent, {
   `,
 })
 
-export default ContactsView
+export default applyContext(ContactsView)

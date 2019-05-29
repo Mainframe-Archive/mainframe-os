@@ -76,6 +76,7 @@ export const getInviteTXDetails = async (
     params.type,
     params.userID,
     params.contactID,
+    params.customAddress,
   )
 }
 

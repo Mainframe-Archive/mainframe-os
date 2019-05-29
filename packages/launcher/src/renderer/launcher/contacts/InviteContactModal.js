@@ -42,6 +42,7 @@ type TXParams = {
 type State = {
   txProcessing: boolean,
   error?: ?string,
+  approvalTxParams?: ?TXParams,
   txParams?: ?TXParams,
   declinedTXHash?: ?string,
   withdrawTXHash?: ?string,
@@ -139,17 +140,6 @@ class InviteContactModal extends Component<Props, State> {
       this.getTXDetails(this.props.type)
     }
     this.getBalances()
-
-    //initial check for sufficient funds
-    const mft = filter(
-      this.props.wallets,
-      w => w.address === this.props.selectedAddress,
-    )[0].balances.mft
-    if (Number(mft) < Number(this.props.inviteStakeValue)) {
-      this.setState({ insufficientFunds: true })
-    } else {
-      this.setState({ insufficientFunds: false })
-    }
   }
 
   async getBalances() {
@@ -159,6 +149,7 @@ class InviteContactModal extends Component<Props, State> {
       mft: '0',
       eth: '0',
     }
+    console.log('BALANCES')
     if (address && ethAddress) {
       const token = this.props.ethClient.erc20Contract(address)
       const [mft, eth] = await Promise.all([
@@ -166,12 +157,14 @@ class InviteContactModal extends Component<Props, State> {
         this.props.ethClient.getETHBalance(ethAddress),
       ])
       balances = { mft, eth }
+      console.log(balances)
     }
     this.setState({ balances })
   }
 
   async getTXDetails(type: string) {
     const { user, contact } = this.props
+    console.log('getTXDetails called')
     try {
       const res = await rpc.getInviteTXDetails({
         type: type,
@@ -181,6 +174,7 @@ class InviteContactModal extends Component<Props, State> {
       })
       this.setState({
         txParams: res,
+        error: '',
       })
     } catch (err) {
       this.setState({
@@ -201,9 +195,11 @@ class InviteContactModal extends Component<Props, State> {
       })
       this.setState({
         txParams: res,
+        approvalTxParams: res,
         invitePending: {
           state: 'awaiting_approval',
         },
+        error: '',
       })
     } catch (err) {
       this.setState({
@@ -222,10 +218,11 @@ class InviteContactModal extends Component<Props, State> {
         customAddress: this.props.selectedAddress,
       })
       this.setState({
+        txParams: res,
         invitePending: {
           state: 'approved',
-          txParams: res,
         },
+        error: '',
       })
     } catch (err) {
       this.setState({
@@ -336,25 +333,39 @@ class InviteContactModal extends Component<Props, State> {
     }
   }
 
-  validateBalance = feedback => {
+  validate = feedback => {
     const addr = feedback.value
     const mft = filter(this.props.wallets, w => w.address === addr)[0].balances
       .mft
     const eth = filter(this.props.wallets, w => w.address === addr)[0].balances
       .eth
-    if (Number(mft) < Number(this.props.inviteStakeValue)) {
-      this.setState({ dropdownError: true })
-      return 'Insufficient MFT funds in this wallet'
-    } else if (!(Number(eth) > 0)) {
-      this.setState({ dropdownError: true })
-      return 'Insufficient ETH funds in this wallet'
+    if (this.props.type === 'invite') {
+      if (Number(mft) < Number(this.props.inviteStakeValue)) {
+        this.setState({ dropdownError: true })
+        return 'Insufficient MFT funds in this wallet'
+      } else if (!(Number(eth) > 0)) {
+        this.setState({ dropdownError: true })
+        return 'Insufficient ETH funds in this wallet'
+      } else {
+        this.setState({ dropdownError: false })
+      }
     } else {
-      this.setState({ dropdownError: false })
+      if (!(Number(eth) > 0)) {
+        this.setState({ dropdownError: true })
+        return 'Insufficient ETH funds in this wallet'
+      } else {
+        this.setState({ dropdownError: false })
+      }
     }
   }
 
   showTransactions = () => {
     this.setState({ txScreen: true })
+  }
+
+  updateSelectedAddress = (addr: string) => {
+    this.getTXDetails(this.props.type)
+    this.props.updateSelectedAddress(addr)
   }
 
   // RENDER
@@ -428,21 +439,7 @@ class InviteContactModal extends Component<Props, State> {
     )
   }
 
-  renderTransactionSection(title: string, validate?: boolean) {
-    const titleSection = (
-      <Text
-        bold
-        variant="smallTitle"
-        color="#585858"
-        theme={{
-          display: 'flex',
-          flexDirection: 'row',
-          alignItems: 'center',
-        }}>
-        {title}{' '}
-      </Text>
-    )
-
+  renderTransactionSection(title: string) {
     const options = this.props.wallets.map(w => {
       return {
         key: w.address,
@@ -464,28 +461,60 @@ class InviteContactModal extends Component<Props, State> {
       }
     })
 
-    return (
-      <Section>
-        {titleSection}
-        <DropDownContainer>
-          <DropDown
-            options={options}
-            valueKey="key"
-            displayKey="data"
-            name="walletDropdown"
-            defaultValue={this.props.selectedAddress}
-            onChange={this.props.updateSelectedAddress}
-            variant={[this.state.dropdownError ? 'error' : '', 'maxWidth440']}
-            validation={
-              this.state.invitePending &&
-              validate &&
-              (feedback => this.validateBalance(feedback))
-            }
-          />
-        </DropDownContainer>
-        {this.renderGasData()}
-      </Section>
+    const titleSection = (
+      <Text
+        bold
+        variant="smallTitle"
+        color="#585858"
+        theme={{
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+        }}>
+        {title}{' '}
+        {options.length < 2 && (
+          <Tooltip>
+            <Text variant="tooltipTitle">
+              Where did this address come from?
+            </Text>
+            <Text variant="tooltipText">
+              This is your default ETH address. You can change it in the Wallets
+              tab by selecting another address and designating it as default
+              instead.
+            </Text>
+          </Tooltip>
+        )}
+      </Text>
     )
+
+    if (options.length > 1) {
+      return (
+        <Section>
+          {titleSection}
+          <DropDownContainer>
+            <DropDown
+              options={options}
+              valueKey="key"
+              displayKey="data"
+              name="walletDropdown"
+              defaultValue={this.props.selectedAddress}
+              onChange={addr => this.updateSelectedAddress(addr)}
+              variant={[this.state.dropdownError ? 'error' : '', 'maxWidth440']}
+              validation={feedback => this.validate(feedback)}
+            />
+          </DropDownContainer>
+          {this.renderGasData()}
+        </Section>
+      )
+    } else {
+      return (
+        <Section>
+          {titleSection}
+          {options[0].data}
+          {this.renderGasData()}
+        </Section>
+      )
+    }
   }
 
   getButtonStatus = (firstAction, secondAction) => {
@@ -534,7 +563,7 @@ class InviteContactModal extends Component<Props, State> {
   }
 
   renderInviteTransactions() {
-    const { invitePending, txParams } = this.state
+    const { invitePending, txParams, approvalTxParams } = this.state
     const buttons = this.getButtonStatus(this.sendApproveTX, this.sendInvite)
 
     return (
@@ -554,13 +583,13 @@ class InviteContactModal extends Component<Props, State> {
             <Text variant={['greyDark23', 'bold']} size={12}>
               {'Contract'}
             </Text>
-            {txParams && (
+            {approvalTxParams && (
               <GasContainer>
                 <Text color="#303030" size={11} variant="marginRight15">
-                  {'Gas price: ' + txParams.gasPriceGwei}
+                  {'Gas price: ' + approvalTxParams.gasPriceGwei}
                 </Text>
                 <Text color="#303030" size={11}>
-                  {'Max Cost: ' + txParams.maxCost + ' ETH'}
+                  {'Max Cost: ' + approvalTxParams.maxCost + ' ETH'}
                 </Text>
               </GasContainer>
             )}
@@ -618,7 +647,7 @@ class InviteContactModal extends Component<Props, State> {
     return (
       <>
         {this.renderContactSection('YOUR INVITATION HAS BEEN ACCEPTED FROM')}
-        {this.renderTransactionSection(`WITHDRAW YOUR ${amount} MFT ON`, true)}
+        {this.renderTransactionSection(`WITHDRAW YOUR ${amount} MFT ON`)}
         {reclaimedTX}
         {activity}
       </>
@@ -651,7 +680,6 @@ class InviteContactModal extends Component<Props, State> {
           {this.renderContactSection('SEND BLOCKCHAIN INVITATION TO')}
           {this.renderTransactionSection(
             `APPROVE AND STAKE ${amount} MFT FROM`,
-            true,
           )}
           {activity}
         </>

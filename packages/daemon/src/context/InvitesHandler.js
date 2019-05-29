@@ -757,7 +757,11 @@ export default class InvitesHandler {
     }
   }
 
-  async getDeclineTXDetails(userID: string, peerID: string): Promise<Object> {
+  async getDeclineTXDetails(
+    userID: string,
+    peerID: string,
+    customAddress?: string,
+  ): Promise<Object> {
     const { identities } = this._context.openVault
     const user = identities.getOwnUser(userID)
     if (!user) throw new Error('User not found')
@@ -779,7 +783,7 @@ export default class InvitesHandler {
     ])
 
     const txOptions = {
-      from: inviteRequest.receivedAddress,
+      from: customAddress ? customAddress : inviteRequest.receivedAddress,
       to: this.invitesContract.address,
       data,
     }
@@ -793,6 +797,7 @@ export default class InvitesHandler {
     user: OwnUserIdentity,
     peer: PeerUserIdentity,
     contact: Contact,
+    customAddress?: string,
   ): Promise<Object> {
     const invite = contact._invite
     if (invite != null && invite.stake && invite.acceptedSignature) {
@@ -817,7 +822,7 @@ export default class InvitesHandler {
       const data = this.invitesContract.encodeCall('retrieveStake', txParams)
 
       const txOptions = {
-        from: invite.fromAddress,
+        from: customAddress ? customAddress : invite.fromAddress,
         to: this.invitesContract.address,
         data,
       }
@@ -830,7 +835,10 @@ export default class InvitesHandler {
     throw new Error('Accepted signature not found')
   }
 
-  async getApproveTXDetails(user: OwnUserIdentity): Promise<Object> {
+  async getApproveTXDetails(
+    user: OwnUserIdentity,
+    customAddress?: string,
+  ): Promise<Object> {
     const { eth } = this._context.io
     const stake = await this.invitesContract.call('requiredStake')
     const data = this.tokenContract.encodeCall('approve', [
@@ -838,7 +846,7 @@ export default class InvitesHandler {
       stake,
     ])
     const txOptions = {
-      from: user.profile.ethAddress,
+      from: customAddress ? customAddress : user.profile.ethAddress,
       to: this.tokenContract.address,
       data,
     }
@@ -850,6 +858,7 @@ export default class InvitesHandler {
   async getSendInviteTXDetails(
     user: OwnUserIdentity,
     peer: PeerUserIdentity,
+    customAddress?: string,
   ): Promise<Object> {
     const { eth } = this._context.io
 
@@ -864,7 +873,7 @@ export default class InvitesHandler {
     const data = this.invitesContract.encodeCall('sendInvite', params)
 
     const txOptions = {
-      from: user.profile.ethAddress,
+      from: customAddress ? customAddress : user.profile.ethAddress,
       to: this.invitesContract.address,
       data,
     }
@@ -877,19 +886,25 @@ export default class InvitesHandler {
     type: string,
     userID: string,
     contactOrPeerID: string,
+    customAddress?: string,
   ) {
     this.validateNetwork()
     if (type === 'declineInvite') {
-      return this.getDeclineTXDetails(userID, contactOrPeerID)
+      return this.getDeclineTXDetails(userID, contactOrPeerID, customAddress)
     }
     const { user, peer, contact } = this.getUserObjects(userID, contactOrPeerID)
     switch (type) {
       case 'approve':
-        return this.getApproveTXDetails(user)
+        return this.getApproveTXDetails(user, customAddress)
       case 'sendInvite':
-        return this.getSendInviteTXDetails(user, peer)
+        return this.getSendInviteTXDetails(user, peer, customAddress)
       case 'retrieveStake':
-        return this.getRetrieveStakeTXDetails(user, peer, contact)
+        return this.getRetrieveStakeTXDetails(
+          user,
+          peer,
+          contact,
+          customAddress,
+        )
       default:
         throw new Error('Unknown transaction type')
     }

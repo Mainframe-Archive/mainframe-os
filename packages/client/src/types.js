@@ -262,6 +262,7 @@ export type GetInviteTXDetailsParams = {
   type: 'approve' | 'sendInvite',
   userID: string,
   contactID: string,
+  customAddress?: string,
 }
 
 export type GetInviteTXDetailsResult = {
