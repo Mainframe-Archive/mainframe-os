@@ -51,7 +51,7 @@ const MENU_ITEMS: Array<ScreenNames> = [
   'contacts',
   'wallets',
   // 'notifications',
-  // 'settings',
+  'settings',
 ]
 
 const BUTTONS: Object = {
@@ -82,6 +82,7 @@ const BUTTONS: Object = {
     title: 'More',
     icon: SettingsIcon,
     activeIcon: SettingsFilledIcon,
+    path: ROUTES.SETTINGS,
   },
   notifications: {
     title: 'Notifications',

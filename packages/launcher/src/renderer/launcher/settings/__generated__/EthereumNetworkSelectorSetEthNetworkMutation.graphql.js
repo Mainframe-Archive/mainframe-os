@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 3dac3edf3e039c42dea639b2e8689a88
+ * @relayHash 7c4d19aa0a5e09f6771948fbf8cadcdd
  */
 
 /* eslint-disable */
@@ -9,37 +9,42 @@
 
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
+type EthereumNetworkSelector_user$ref = any;
 export type SetEthNetworkInput = {
   url: string,
   clientMutationId?: ?string,
 };
-export type SettingsMenuViewSetEthNetworkMutationVariables = {|
+export type EthereumNetworkSelectorSetEthNetworkMutationVariables = {|
   input: SetEthNetworkInput
 |};
-export type SettingsMenuViewSetEthNetworkMutationResponse = {|
+export type EthereumNetworkSelectorSetEthNetworkMutationResponse = {|
   +setEthNetwork: ?{|
-    +viewer: {|
-      +ethURL: string
+    +user: {|
+      +$fragmentRefs: EthereumNetworkSelector_user$ref
     |}
   |}
 |};
-export type SettingsMenuViewSetEthNetworkMutation = {|
-  variables: SettingsMenuViewSetEthNetworkMutationVariables,
-  response: SettingsMenuViewSetEthNetworkMutationResponse,
+export type EthereumNetworkSelectorSetEthNetworkMutation = {|
+  variables: EthereumNetworkSelectorSetEthNetworkMutationVariables,
+  response: EthereumNetworkSelectorSetEthNetworkMutationResponse,
 |};
 */
 
 
 /*
-mutation SettingsMenuViewSetEthNetworkMutation(
+mutation EthereumNetworkSelectorSetEthNetworkMutation(
   $input: SetEthNetworkInput!
 ) {
   setEthNetwork(input: $input) {
-    viewer {
-      ethURL
+    user: viewer {
+      ...EthereumNetworkSelector_user
       id
     }
   }
+}
+
+fragment EthereumNetworkSelector_user on User {
+  ethURL
 }
 */
 
@@ -59,24 +64,17 @@ v1 = [
     "variableName": "input",
     "type": "SetEthNetworkInput!"
   }
-],
-v2 = {
-  "kind": "ScalarField",
-  "alias": null,
-  "name": "ethURL",
-  "args": null,
-  "storageKey": null
-};
+];
 return {
   "kind": "Request",
   "operationKind": "mutation",
-  "name": "SettingsMenuViewSetEthNetworkMutation",
+  "name": "EthereumNetworkSelectorSetEthNetworkMutation",
   "id": null,
-  "text": "mutation SettingsMenuViewSetEthNetworkMutation(\n  $input: SetEthNetworkInput!\n) {\n  setEthNetwork(input: $input) {\n    viewer {\n      ethURL\n      id\n    }\n  }\n}\n",
+  "text": "mutation EthereumNetworkSelectorSetEthNetworkMutation(\n  $input: SetEthNetworkInput!\n) {\n  setEthNetwork(input: $input) {\n    user: viewer {\n      ...EthereumNetworkSelector_user\n      id\n    }\n  }\n}\n\nfragment EthereumNetworkSelector_user on User {\n  ethURL\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
-    "name": "SettingsMenuViewSetEthNetworkMutation",
+    "name": "EthereumNetworkSelectorSetEthNetworkMutation",
     "type": "Mutation",
     "metadata": null,
     "argumentDefinitions": v0,
@@ -92,14 +90,18 @@ return {
         "selections": [
           {
             "kind": "LinkedField",
-            "alias": null,
+            "alias": "user",
             "name": "viewer",
             "storageKey": null,
             "args": null,
             "concreteType": "User",
             "plural": false,
             "selections": [
-              v2
+              {
+                "kind": "FragmentSpread",
+                "name": "EthereumNetworkSelector_user",
+                "args": null
+              }
             ]
           }
         ]
@@ -108,7 +110,7 @@ return {
   },
   "operation": {
     "kind": "Operation",
-    "name": "SettingsMenuViewSetEthNetworkMutation",
+    "name": "EthereumNetworkSelectorSetEthNetworkMutation",
     "argumentDefinitions": v0,
     "selections": [
       {
@@ -122,14 +124,20 @@ return {
         "selections": [
           {
             "kind": "LinkedField",
-            "alias": null,
+            "alias": "user",
             "name": "viewer",
             "storageKey": null,
             "args": null,
             "concreteType": "User",
             "plural": false,
             "selections": [
-              v2,
+              {
+                "kind": "ScalarField",
+                "alias": null,
+                "name": "ethURL",
+                "args": null,
+                "storageKey": null
+              },
               {
                 "kind": "ScalarField",
                 "alias": null,
@@ -146,5 +154,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = 'c7fadb064f0135e390cf08ca37e87334';
+(node/*: any*/).hash = '7fcb9152bf8c1fe5059746ff35856643';
 module.exports = node;

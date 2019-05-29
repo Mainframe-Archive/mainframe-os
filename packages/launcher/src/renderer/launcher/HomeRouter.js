@@ -10,6 +10,7 @@ import { useSubscription } from './RelayEnvironment'
 
 import SideMenu from './SideMenu'
 import ContactsScreen from './contacts/ContactsScreen'
+import SettingsRouter from './settings/Router'
 import WalletsScreen from './wallets/WalletsScreen'
 
 const CONTACT_CHANGED_SUBSCRIPTION = graphql`
@@ -61,6 +62,7 @@ export default function HomeRouter() {
           <Route path={ROUTES.APPS} component={() => <h1>Apps</h1>} />
           <Route path={ROUTES.CONTACTS} component={ContactsScreen} />
           <Route path={ROUTES.WALLETS} component={WalletsScreen} />
+          <Route path={ROUTES.SETTINGS} component={SettingsRouter} />
           <Redirect to={ROUTES.APPS} />
         </Switch>
       </ContentContainer>

@@ -348,7 +348,8 @@ const setEthNetworkMutation = mutationWithClientMutationId({
     viewer: viewerField,
   },
   mutateAndGetPayload: async (args, ctx) => {
-    await ctx.mutations.setEthNetwork(args.url)
+    const user = await ctx.getUser()
+    await user.atomicSet('ethURL', args.url)
     return {}
   },
 })
