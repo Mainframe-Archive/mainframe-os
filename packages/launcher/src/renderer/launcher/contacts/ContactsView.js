@@ -36,7 +36,7 @@ import { EnvironmentContext } from '../RelayEnvironment'
 import Avatar from '../../UIComponents/Avatar'
 import SvgSelectedPointer from '../../UIComponents/SVGSelectedPointer'
 
-import Notification from '../../UIComponents/Notification'
+import AlertToast from '../../UIComponents/AlertToast'
 import FormModalView from '../../UIComponents/FormModalView'
 import Loader from '../../UIComponents/Loader'
 import { InformationBox } from '../identities/IdentitiesView'
@@ -555,7 +555,6 @@ class ContactsViewComponent extends Component<Props, State> {
 
   rejectContact = (contact: Contact) => {
     this.setState({
-      notification: 'decline',
       inviteModalOpen: {
         contact,
         type: 'declineInvite',
@@ -1184,6 +1183,7 @@ class ContactsViewComponent extends Component<Props, State> {
             </Row> */}
         </ScrollView>
         {this.renderWithdrawNotificationModal()}
+        {this.renderDeclineNotificationModal()}
         {this.renderDeleteNotificationModal()}
       </RightContainer>
     )
@@ -1216,43 +1216,45 @@ class ContactsViewComponent extends Component<Props, State> {
 
     return (
       this.state.notification === 'withdraw' && (
-        <Notification onRequestClose={this.closeNotification}>
-          <Text color="#fff" size={13} variant={('bold', 'marginTop5')}>
-            {(this.props.contacts && this.props.contacts.inviteStake
-              ? this.props.contacts.inviteStake
-              : '') + ' MFT have been added to your wallet.'}
-          </Text>
-          <AvatarWrapper marginTop>
-            <Blocky>
-              <Avatar id={this.state.selectedAddress} size="small" />
-            </Blocky>
-            <WalletContainer>
-              <Text
-                color="#fff"
-                variant={['greyDark23', 'ellipsis']}
-                theme={{ fontStyle: 'normal' }}
-                size={12}>
-                {this.state.selectedAddress}
-              </Text>
-              <Text
-                color="#fff"
-                variant={['greyDark23', 'mono']}
-                theme={{ fontStyle: 'normal' }}
-                size={12}>
-                {Number(eth)
-                  .toFixed(4)
-                  .toString()
-                  .slice(0, 10) +
-                  ' ETH   ' +
-                  Number(mft)
+        <AlertToast onRequestClose={this.closeNotification}>
+          <>
+            <Text color="#fff" size={13} variant={('bold', 'marginTop5')}>
+              {(this.props.contacts && this.props.contacts.inviteStake
+                ? this.props.contacts.inviteStake
+                : '') + ' MFT have been added to your wallet.'}
+            </Text>
+            <AvatarWrapper marginTop>
+              <Blocky>
+                <Avatar id={this.state.selectedAddress} size="small" />
+              </Blocky>
+              <WalletContainer>
+                <Text
+                  color="#fff"
+                  variant={['greyDark23', 'ellipsis']}
+                  theme={{ fontStyle: 'normal' }}
+                  size={12}>
+                  {this.state.selectedAddress}
+                </Text>
+                <Text
+                  color="#fff"
+                  variant={['greyDark23', 'mono']}
+                  theme={{ fontStyle: 'normal' }}
+                  size={12}>
+                  {Number(eth)
                     .toFixed(4)
                     .toString()
                     .slice(0, 10) +
-                  ' MFT'}
-              </Text>
-            </WalletContainer>
-          </AvatarWrapper>
-        </Notification>
+                    ' ETH   ' +
+                    Number(mft)
+                      .toFixed(4)
+                      .toString()
+                      .slice(0, 10) +
+                    ' MFT'}
+                </Text>
+              </WalletContainer>
+            </AvatarWrapper>
+          </>
+        </AlertToast>
       )
     )
   }
@@ -1268,32 +1270,34 @@ class ContactsViewComponent extends Component<Props, State> {
       this.state.notification === 'delete' &&
       name &&
       ethAddress && (
-        <Notification onRequestClose={this.closeNotification}>
-          <Text color="#fff" size={13} variant={('bold', 'marginTop5')}>
-            {name + ' has been deleted.'}
-          </Text>
-          <AvatarWrapper marginTop>
-            <Blocky>
-              <Avatar id={ethAddress} size="small" />
-            </Blocky>
-            <WalletContainer>
-              <Text
-                color="#fff"
-                variant={['greyDark23']}
-                theme={{ fontStyle: 'normal' }}
-                size={12}>
-                {name}
-              </Text>
-              <Text
-                color="#fff"
-                variant={['greyDark23', 'mono']}
-                theme={{ fontStyle: 'normal' }}
-                size={12}>
-                {ethAddress}
-              </Text>
-            </WalletContainer>
-          </AvatarWrapper>
-        </Notification>
+        <AlertToast onRequestClose={this.closeNotification}>
+          <>
+            <Text color="#fff" size={13} variant={('bold', 'marginTop5')}>
+              {name + ' has been deleted.'}
+            </Text>
+            <AvatarWrapper marginTop>
+              <Blocky>
+                <Avatar id={ethAddress} size="small" />
+              </Blocky>
+              <WalletContainer>
+                <Text
+                  color="#fff"
+                  variant={['greyDark23']}
+                  theme={{ fontStyle: 'normal' }}
+                  size={12}>
+                  {name}
+                </Text>
+                <Text
+                  color="#fff"
+                  variant={['greyDark23', 'mono']}
+                  theme={{ fontStyle: 'normal' }}
+                  size={12}>
+                  {ethAddress}
+                </Text>
+              </WalletContainer>
+            </AvatarWrapper>
+          </>
+        </AlertToast>
       )
     )
   }
@@ -1309,44 +1313,46 @@ class ContactsViewComponent extends Component<Props, State> {
       .balances.eth
 
     const stake = contacts && contacts.inviteStake ? contacts.inviteStake : ''
-
+    console.log(this.state.notification)
     return (
       this.state.notification === 'decline' && (
-        <Notification onRequestClose={this.closeNotification}>
-          <Text color="#fff" size={13} variant={('bold', 'marginTop5')}>
-            {stake + ' MFT have been added to your wallet.'}
-          </Text>
-          <AvatarWrapper marginTop>
-            <Blocky>
-              <Avatar id={selectedAddress} size="small" />
-            </Blocky>
-            <WalletContainer>
-              <Text
-                color="#fff"
-                variant={['greyDark23', 'ellipsis']}
-                theme={{ fontStyle: 'normal' }}
-                size={12}>
-                {selectedAddress}
-              </Text>
-              <Text
-                color="#fff"
-                variant={['greyDark23', 'mono']}
-                theme={{ fontStyle: 'normal' }}
-                size={12}>
-                {Number(eth)
-                  .toFixed(4)
-                  .toString()
-                  .slice(0, 10) +
-                  ' ETH   ' +
-                  Number(mft)
+        <AlertToast onRequestClose={this.closeNotification}>
+          <>
+            <Text color="#fff" size={13} variant={('bold', 'marginTop5')}>
+              {stake + ' MFT have been added to your wallet.'}
+            </Text>
+            <AvatarWrapper marginTop>
+              <Blocky>
+                <Avatar id={selectedAddress} size="small" />
+              </Blocky>
+              <WalletContainer>
+                <Text
+                  color="#fff"
+                  variant={['greyDark23', 'ellipsis']}
+                  theme={{ fontStyle: 'normal' }}
+                  size={12}>
+                  {selectedAddress}
+                </Text>
+                <Text
+                  color="#fff"
+                  variant={['greyDark23', 'mono']}
+                  theme={{ fontStyle: 'normal' }}
+                  size={12}>
+                  {Number(eth)
                     .toFixed(4)
                     .toString()
                     .slice(0, 10) +
-                  ' MFT'}
-              </Text>
-            </WalletContainer>
-          </AvatarWrapper>
-        </Notification>
+                    ' ETH   ' +
+                    Number(mft)
+                      .toFixed(4)
+                      .toString()
+                      .slice(0, 10) +
+                    ' MFT'}
+                </Text>
+              </WalletContainer>
+            </AvatarWrapper>
+          </>
+        </AlertToast>
       )
     )
   }

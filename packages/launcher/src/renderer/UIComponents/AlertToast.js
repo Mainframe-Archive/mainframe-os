@@ -10,6 +10,7 @@ import CloseIcon from '@morpheus-ui/icons/Close'
 type Props = {
   message?: ?string,
   onRequestClose?: () => void,
+  children?: ?Node,
 }
 
 const CloseButton = styled.TouchableOpacity`
@@ -35,6 +36,10 @@ const Message = styled.View`
   min-height: 40px;
 `
 
+const ChildrenContainer = styled.View`
+  padding: 0px 0px 5px 10px;
+`
+
 export default class ModalView extends Component<Props> {
   render() {
     const closeButton = this.props.onRequestClose ? (
@@ -49,14 +54,19 @@ export default class ModalView extends Component<Props> {
         isOpen={true}
         onRequestClose={this.props.onRequestClose}>
         <CSSTransition
-          in={!!this.props.message}
+          in={!!this.props.message || !!this.props.children}
           classNames="alert-toast"
           timeout={300}
           unmountOnExit>
-          <Message visible={this.props.message}>
-            <Text bold color="white" size={13}>
-              {this.props.message}
-            </Text>
+          <Message visible={this.props.message || this.props.children}>
+            {this.props.message && (
+              <Text bold color="white" size={13}>
+                {this.props.message}
+              </Text>
+            )}
+            {this.props.children && (
+              <ChildrenContainer>{this.props.children}</ChildrenContainer>
+            )}
             {closeButton}
           </Message>
         </CSSTransition>

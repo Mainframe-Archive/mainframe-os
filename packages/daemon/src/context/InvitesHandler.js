@@ -618,6 +618,7 @@ export default class InvitesHandler {
 
     const txOptions = {
       from: customAddress ? customAddress : inviteRequest.receivedAddress,
+      to: this.invitesContract.address,
     }
 
     const res = await this.invitesContract.send(
@@ -782,6 +783,8 @@ export default class InvitesHandler {
       myFeedHash,
     ])
 
+    console.log(inviteRequest)
+
     const txOptions = {
       from: customAddress ? customAddress : inviteRequest.receivedAddress,
       to: this.invitesContract.address,
@@ -790,6 +793,8 @@ export default class InvitesHandler {
 
     console.log(txOptions.from)
     const params = await this._context.io.eth.completeTxParams(txOptions)
+    console.log('params')
+    console.log(params)
 
     const formattedParams = await this.formatGasValues(params)
     return { ...params, ...formattedParams }
