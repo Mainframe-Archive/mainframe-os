@@ -195,7 +195,6 @@ export default createFragmentContainer(AppUpdateModal, {
   app: graphql`
     fragment AppUpdateModal_app on App {
       localID
-      mfid
       name
       manifest {
         version

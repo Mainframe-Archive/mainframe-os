@@ -37,9 +37,9 @@ const APP_UPDATE_CHANGED_SUBSCRIPTION = graphql`
         #   ...SideMenu_apps
         # }
       }
-      app {
-        ...AppItem_installedApp
-      }
+      # app {
+      #   ...AppItem_installedApp
+      # }
     }
   }
 `

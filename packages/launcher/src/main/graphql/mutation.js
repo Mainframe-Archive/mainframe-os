@@ -18,8 +18,7 @@ import {
   ethHdWallet,
   ethLedgerWallet,
   ownApp,
-  ownDeveloperIdentity,
-  ownUserIdentity,
+  ownDeveloper,
   viewerField,
 } from './objects'
 
@@ -366,40 +365,17 @@ const userProfileInput = new GraphQLInputObjectType({
   }),
 })
 
-const createUserIdentityMutation = mutationWithClientMutationId({
-  name: 'CreateUserIdentity',
-  inputFields: {
-    profile: {
-      type: new GraphQLNonNull(userProfileInput),
-    },
-    private: {
-      type: GraphQLBoolean,
-    },
-  },
-  outputFields: {
-    user: {
-      type: ownUserIdentity,
-      resolve: payload => payload.user,
-    },
-    viewer: viewerField,
-  },
-  mutateAndGetPayload: async (args, ctx) => {
-    const user = await ctx.mutations.createUser(args.profile, args.private)
-    return { user }
-  },
-})
-
-const createDeveloperIdentityMutation = mutationWithClientMutationId({
-  name: 'CreateDeveloperIdentity',
+const createDeveloperMutation = mutationWithClientMutationId({
+  name: 'CreateDeveloper',
   inputFields: {
     profile: {
       type: new GraphQLNonNull(userProfileInput),
     },
   },
   outputFields: {
-    user: {
-      type: ownDeveloperIdentity,
-      resolve: payload => payload.user,
+    developer: {
+      type: ownDeveloper,
+      resolve: payload => payload.developer,
     },
     viewer: viewerField,
   },
@@ -499,7 +475,7 @@ const addContactMutation = mutationWithClientMutationId({
     // if (args.sendInvite) {
     //   await ctx.invitesHandler.sendInvite(args.userID, contact)
     // }
-    return { contact: await contact.getInfo() }
+    return { contact }
   },
 })
 
@@ -842,8 +818,7 @@ export default new GraphQLObjectType({
     // Users
     acceptContactRequest: acceptContactRequestMutation,
     addContact: addContactMutation,
-    createUserIdentity: createUserIdentityMutation,
-    createDeveloperIdentity: createDeveloperIdentityMutation,
+    createDeveloper: createDeveloperMutation,
     deleteContact: deleteContactMutation,
     setProfileWallet: setProfileWalletMutation,
     setUserProfileVisibility: setUserProfileVisibilityMutation,

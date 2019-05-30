@@ -43,10 +43,10 @@ const DescriptionContainer = styled.View`
 `
 
 export const createDeveloperMutation = graphql`
-  mutation CreateDevIdentityViewCreateDeveloperIdentityMutation(
-    $input: CreateDeveloperIdentityInput!
+  mutation CreateDevIdentityViewCreateDeveloperMutation(
+    $input: CreateDeveloperInput!
   ) {
-    createDeveloperIdentity(input: $input) {
+    createDeveloper(input: $input) {
       viewer {
         id
         # identities {

@@ -2,47 +2,30 @@
 
 import permissionsRequirements from './appPermissionsRequirements'
 import bzzHash from './bzzHash'
+import ethAddress from './ethAddress'
+import profile from './genericProfile'
 
 export default {
   title: 'application manifest',
   version: 0,
   type: 'object',
   properties: {
-    // TODO: replace by "key" (MFID)
-    id: {
-      type: 'string',
+    publicFeed: {
+      ...ethAddress,
       final: true,
     },
-    author: {
-      type: 'object',
-      properties: {
-        // TODO: replace by "key" (MFID)
-        id: {
-          type: 'string',
-          final: true,
-        },
-        // TODO: replace by developer address (feed)
-        name: {
-          type: 'string',
-          min: 3,
-          max: 20,
-        },
-      },
+    authorFeed: {
+      ...ethAddress,
+      final: true,
     },
-    name: {
-      type: 'string',
-    },
+    profile,
     version: {
       type: 'string', // semver
-    },
-    contentsHash: bzzHash,
-    // TODO: replace by app address, or even remove?
-    // Should it be "publicID"?
-    updateHash: {
-      ...bzzHash,
       final: true,
     },
+    contentsHash: bzzHash,
     permissions: permissionsRequirements,
   },
-  required: ['author', 'name', 'version', 'permissions'],
+  required: ['profile', 'version', 'contentsHash', 'permissions'],
+  compoundIndexes: [['publicFeed', 'version']],
 }

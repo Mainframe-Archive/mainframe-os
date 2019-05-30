@@ -521,18 +521,19 @@ export default createFragmentContainer(OwnAppDetailViewWithContext, {
   ownApp: graphql`
     fragment OwnAppDetailView_ownApp on OwnApp {
       localID
-      mfid
-      name
-      contentsPath
-      updateFeedHash
-      developer {
-        id
+      publicID
+      profile {
         name
       }
-      publishedVersion
-      currentVersionData {
+      contentsPath
+      developer {
+        localID
+        profile {
+          name
+        }
+      }
+      inProgressVersion {
         version
-        versionHash
         permissions {
           optional {
             WEB_REQUEST
@@ -547,6 +548,9 @@ export default createFragmentContainer(OwnAppDetailViewWithContext, {
             CONTACTS_READ
           }
         }
+      }
+      latestPublishedVersion {
+        version
       }
     }
   `,

@@ -3,7 +3,6 @@
 import { COLLECTION_NAMES } from '../constants'
 
 import permissionsGrants from './appPermissionsGrants'
-import ownFeed from './ownFeed'
 
 // These settings should be shared by both own apps and installed ones
 
@@ -25,6 +24,7 @@ export default {
             type: 'string',
             final: true,
           },
+          // TODO: check if possible to populate when nested like this
           contact: {
             type: 'string',
             ref: COLLECTION_NAMES.CONTACTS,
@@ -41,10 +41,6 @@ export default {
       default: false,
     },
     permissionsGrants,
-    storageEncryptionKey: {
-      type: 'string',
-      final: true,
-    },
-    storageFeed: ownFeed,
+    // TODO: storage keyPair
   },
 }

@@ -285,20 +285,18 @@ const OwnView = (props: OwnProps) => {
 
 export const InstalledAppItem = createFragmentContainer(InstalledView, {
   installedApp: graphql`
-    fragment AppItem_installedApp on App {
-      mfid
+    fragment AppItem_installedApp on AppVersion {
       localID
-      name
       installationState
-      manifest {
-        author {
-          id
+      developer {
+        localID
+        profile {
           name
         }
       }
-      update {
-        manifest {
-          version
+      manifest {
+        profile {
+          name
         }
       }
     }
@@ -308,11 +306,14 @@ export const InstalledAppItem = createFragmentContainer(InstalledView, {
 export const OwnAppItem = createFragmentContainer(OwnView, {
   ownApp: graphql`
     fragment AppItem_ownApp on OwnApp {
-      mfid
       localID
-      name
       developer {
-        id
+        localID
+        profile {
+          name
+        }
+      }
+      profile {
         name
       }
     }

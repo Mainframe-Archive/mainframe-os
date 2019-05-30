@@ -91,33 +91,16 @@ export default async (params: CollectionParams) => {
         return this._publicKey
       },
 
-      // Used for the GraphQL object
-      async getInfo() {
-        const invite =
-          this.invite == null
-            ? null
-            : {
-                ethNetwork: this.invite.ethNetwork,
-                inviteTX: this.invite.inviteTX,
-                stake: this.invite.stake,
-              }
-        const peer = await this.populate('peer')
-        const name = this.aliasName || this.profile.name || peer.profile.name
-
-        return {
-          localID: this.localID,
-          peerID: peer.localID,
-          publicID: peer.getPublicID(),
-          profile: { ...peer.profile, ...this.profile, name },
-          connectionState: this.getConnectionState(),
-          invite,
-        }
-      },
-
       // Alias to ID of the peer
       async getPublicID(): Promise<string> {
         const peer = await this.populate('peer')
         return peer.getPublicID()
+      },
+
+      async getProfile(): Promise<GenericProfile> {
+        const peer = await this.populate('peer')
+        const name = this.aliasName || this.profile.name || peer.profile.name
+        return { ...peer.profile, ...this.profile, name }
       },
 
       async getUser(): Promise<Object | null> {

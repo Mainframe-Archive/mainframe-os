@@ -2,14 +2,14 @@
 
 import ethAddress from './ethAddress'
 
-export type UserProfile = {
+export type GenericProfile = {
   name?: ?string,
   avatar?: ?string,
   ethAddress?: ?string,
 }
 
 export default {
-  title: 'user profile',
+  title: 'generic profile',
   version: 0,
   type: 'object',
   properties: {

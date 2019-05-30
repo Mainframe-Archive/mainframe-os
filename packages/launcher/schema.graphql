@@ -53,18 +53,13 @@ type AddLedgerWalletAccountsPayload {
 type App implements Node {
   """The ID of an object"""
   id: ID!
-  mfid: String!
   localID: ID!
-  name: String!
-  manifest: AppManifestData!
-  update: AppUpdateData
-  installationState: InstallationState!
-  users: [AppUser!]!
+  versions: [AppVersion!]!
 }
 
-type AppAuthor {
-  id: String
-  name: String
+type AppApprovedContact {
+  aliasID: ID!
+  contactID: ID!
 }
 
 input AppCreateMutationInput {
@@ -94,6 +89,13 @@ type AppCreateVersionMutationPayload {
   clientMutationId: String
 }
 
+enum AppInstallationState {
+  PENDING
+  DOWNLOADING
+  FAILED
+  DONE
+}
+
 input AppInstallMutationInput {
   userID: String!
   manifest: AppManifestInput!
@@ -107,11 +109,13 @@ type AppInstallMutationPayload {
   clientMutationId: String
 }
 
-type AppManifestData {
-  name: String!
+type AppManifest {
+  publicFeed: String!
+  authorFeed: String!
+  profile: GenericProfile!
   version: String!
+  contentsHash: String!
   permissions: AppPermissionsRequirements!
-  author: AppAuthor!
 }
 
 input AppManifestInput {
@@ -155,19 +159,9 @@ input AppPermissionsRequirementsInput {
   required: AppPermissionDefinitionsInput!
 }
 
-type AppPermissionsSettings {
-  permissionsChecked: Boolean!
-  grants: AppPermissions!
-}
-
 input AppPermissionsSettingsInput {
   permissionsChecked: Boolean!
   grants: PermissionGrantsInput!
-}
-
-type AppUpdateData {
-  manifest: AppManifestData!
-  permissionsChanged: Boolean!
 }
 
 input AppUpdateMutationInput {
@@ -188,25 +182,36 @@ type AppUpdatePayload {
   viewer: User!
 }
 
-type AppUser {
+type AppVersion implements Node {
   """The ID of an object"""
   id: ID!
   localID: ID!
-  identity: OwnUserIdentity!
-  settings: AppUserSettings!
+  appID: ID!
+  app: App!
+  developerID: ID!
+  developer: Developer!
+  manifest: AppManifest!
+  installationState: AppInstallationState!
 }
 
-type AppUserSettings {
-  permissionsSettings: AppPermissionsSettings!
+type Contact implements Node {
+  """The ID of an object"""
+  id: ID!
+  localID: ID!
+  peerID: ID!
+  peer: Peer!
+  publicID: String!
+  profile: GenericProfile!
+  connectionState: ContactConnectionState!
+  invite: ContactInviteData
 }
 
-type AppVersionData {
-  version: String!
-  versionHash: String
-  permissions: AppPermissionsRequirements!
+type ContactChangedPayload {
+  contact: Contact!
+  viewer: User!
 }
 
-enum ConnectionState {
+enum ContactConnectionState {
   CONNECTED
   DECLINED
   RECEIVED
@@ -216,26 +221,16 @@ enum ConnectionState {
   SENT_BLOCKCHAIN
 }
 
-type Contact implements Node {
-  """The ID of an object"""
-  id: ID!
-  localID: ID!
-  peerID: ID!
-  publicID: String!
-  profile: GenericProfile!
-  connectionState: ConnectionState!
-  invite: ContactInviteData
-}
-
-type ContactChangedPayload {
-  contact: Contact!
-  viewer: User!
-}
-
 type ContactInviteData {
   inviteTX: String
   ethNetwork: String
-  stake: InviteStake!
+  stake: ContactInviteStake!
+}
+
+type ContactInviteStake {
+  amount: String
+  state: ContactStakeState!
+  reclaimedTX: String
 }
 
 type ContactRequest implements Node {
@@ -246,13 +241,20 @@ type ContactRequest implements Node {
   publicID: String!
 }
 
-input CreateDeveloperIdentityInput {
+enum ContactStakeState {
+  STAKED
+  RECLAIMING
+  RECLAIMED
+  SEIZED
+}
+
+input CreateDeveloperInput {
   profile: UserProfileInput!
   clientMutationId: String
 }
 
-type CreateDeveloperIdentityPayload {
-  user: OwnDeveloperIdentity
+type CreateDeveloperPayload {
+  developer: OwnDeveloper
   viewer: User!
   clientMutationId: String
 }
@@ -266,18 +268,6 @@ input CreateHDWalletInput {
 
 type CreateHDWalletPayload {
   hdWallet: EthHDWallet
-  viewer: User!
-  clientMutationId: String
-}
-
-input CreateUserIdentityInput {
-  profile: UserProfileInput!
-  private: Boolean
-  clientMutationId: String
-}
-
-type CreateUserIdentityPayload {
-  user: OwnUserIdentity
   viewer: User!
   clientMutationId: String
 }
@@ -301,6 +291,15 @@ input DeleteWalletInput {
 type DeleteWalletPayload {
   viewer: User!
   clientMutationId: String
+}
+
+type Developer implements Node {
+  """The ID of an object"""
+  id: ID!
+  localID: ID!
+  profile: GenericProfile!
+  publicID: ID!
+  apps: [App!]!
 }
 
 type EthHDWallet implements Node {
@@ -345,18 +344,6 @@ type ImportHDWalletPayload {
   clientMutationId: String
 }
 
-enum InstallationState {
-  READY
-  DOWNLOADING
-  ERROR
-}
-
-type InviteStake {
-  amount: String
-  state: StakeState!
-  reclaimedTX: String
-}
-
 type Lookup {
   peerByID(publicID: String!): PeerLookupResult
 }
@@ -376,8 +363,7 @@ type Mutation {
   updateAppDetails(input: UpdateAppDetailsInput!): UpdateAppDetailsPayload
   acceptContactRequest(input: AcceptContactRequestInput!): AcceptContactRequestPayload
   addContact(input: AddContactInput!): AddContactPayload
-  createUserIdentity(input: CreateUserIdentityInput!): CreateUserIdentityPayload
-  createDeveloperIdentity(input: CreateDeveloperIdentityInput!): CreateDeveloperIdentityPayload
+  createDeveloper(input: CreateDeveloperInput!): CreateDeveloperPayload
   deleteContact(input: DeleteContactInput!): DeleteContactPayload
   setProfileWallet(input: SetProfileWalletInput!): SetProfileWalletPayload
   setUserProfileVisibility(input: SetUserProfileVisibilityInput!): SetUserProfileVisibilityPayload
@@ -406,38 +392,38 @@ type OwnApp implements Node {
   """The ID of an object"""
   id: ID!
   localID: ID!
-  mfid: String!
-  name: String!
+  publicID: ID!
+  developer: OwnDeveloper!
+  profile: NamedProfile!
   contentsPath: String!
-  updateFeedHash: String!
-  currentVersion: String!
-  currentVersionData: AppVersionData!
-  publishedVersion: String
-  versions: [AppVersionData!]!
-  developer: AppAuthor!
-  users: [AppUser!]!
+  versions: [OwnAppVersion!]!
+  inProgressVersion: OwnAppVersion
+  latestPublishedVersion: OwnAppVersion
 }
 
-type OwnDeveloperIdentity implements Node {
+type OwnAppVersion {
+  version: String!
+  contentsHash: String
+  versionHash: String
+  permissions: AppPermissionsRequirements!
+}
+
+type OwnDeveloper implements Node {
   """The ID of an object"""
   id: ID!
   localID: ID!
-  mfid: ID!
-  pubKey: String!
   profile: NamedProfile!
+  publicID: ID!
+  apps: [OwnApp!]!
 }
 
-type OwnUserIdentity implements Node {
+type Peer implements Node {
   """The ID of an object"""
   id: ID!
   localID: ID!
-  feedHash: String
-  mfid: ID!
-  apps: [App!]!
-  wallets: EthWallets!
-  profile: NamedProfile!
-  pubKey: String!
-  privateProfile: Boolean
+  publicID: String!
+  publicFeed: String!
+  profile: GenericProfile!
 }
 
 type PeerLookupResult {
@@ -518,13 +504,6 @@ type SetUserProfileVisibilityPayload {
   clientMutationId: String
 }
 
-enum StakeState {
-  STAKED
-  RECLAIMING
-  RECLAIMED
-  SEIZED
-}
-
 type Subscription {
   appUpdateChanged: AppUpdatePayload!
   contactChanged: ContactChangedPayload!
@@ -573,12 +552,32 @@ type User implements Node {
   profile: NamedProfile!
   privateProfile: Boolean!
   publicID: ID!
-  apps: [App!]!
+  apps: [UserAppVersion!]!
   contacts: [Contact!]!
   contactRequests: [ContactRequest!]!
   ethWallets: EthWallets!
   ethURL: String!
   bzzURL: String!
+}
+
+type UserAppSettings implements Node {
+  """The ID of an object"""
+  id: ID!
+  localID: ID!
+  approvedContacts: [AppApprovedContact!]!
+  defaultEthAccount: String
+  permissionsChecked: Boolean!
+  permissionsGrants: AppPermissions!
+}
+
+type UserAppVersion implements Node {
+  """The ID of an object"""
+  id: ID!
+  localID: ID!
+  userID: ID!
+  user: User!
+  appVersion: AppVersion!
+  settings: UserAppSettings!
 }
 
 input UserProfileInput {

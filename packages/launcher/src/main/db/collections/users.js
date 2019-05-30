@@ -17,7 +17,7 @@ import type { CollectionParams } from '../types'
 import { generateKeyPair, generateLocalID } from '../utils'
 
 import schema from '../schemas/user'
-import type { UserProfile } from '../schemas/userProfile'
+import type { GenericProfile } from '../schemas/genericProfile'
 
 export default async (params: CollectionParams) => {
   const db = params.db
@@ -27,7 +27,10 @@ export default async (params: CollectionParams) => {
     name: COLLECTION_NAMES.USERS,
     schema,
     statics: {
-      async create(data: { profile: UserProfile, privateProfile?: boolean }) {
+      async create(data: {
+        profile: GenericProfile,
+        privateProfile?: boolean,
+      }) {
         return await this.insert({
           ...data,
           localID: generateLocalID(),
@@ -109,6 +112,10 @@ export default async (params: CollectionParams) => {
         return createKeyPair(this.keyPair.privateKey)
           .derive(peerKey)
           .toBuffer()
+      },
+
+      async getAppsVersions(): Promise<Array<Object>> {
+        return await db.user_app_versions.find({ user: this.localID }).exec()
       },
 
       observeContactAdded() {

@@ -3,8 +3,8 @@
 import { COLLECTION_NAMES } from '../constants'
 
 import ethAddress from './ethAddress'
+import profile from './genericProfile'
 import keyPair from './keyPair'
-import userProfile from './userProfile'
 
 const invite = {
   title: 'contact invite',
@@ -62,8 +62,8 @@ export default {
       ref: COLLECTION_NAMES.PEERS,
       final: true,
     },
-    keyPair: keyPair,
-    profile: userProfile,
+    keyPair,
+    profile,
     aliasName: {
       type: 'string',
     },

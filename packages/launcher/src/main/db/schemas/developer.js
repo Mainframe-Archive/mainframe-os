@@ -4,7 +4,7 @@ import ethAddress from './ethAddress'
 import profile from './genericProfile'
 
 export default {
-  title: 'peer',
+  title: 'developer',
   version: 0,
   type: 'object',
   properties: {
@@ -15,19 +15,6 @@ export default {
     publicFeed: {
       ...ethAddress,
       final: true,
-    },
-    otherFeeds: {
-      type: 'array',
-      items: {
-        type: 'object',
-        properties: {
-          type: {
-            type: 'string',
-          },
-          address: ethAddress,
-        },
-      },
-      default: [],
     },
     publicKey: {
       type: 'string',

@@ -1,7 +1,7 @@
 // @flow
 
 import keyPair from './keyPair'
-import ownFeed from './ownFeed'
+import profile from './genericProfile'
 
 export default {
   title: 'own app developer',
@@ -13,10 +13,10 @@ export default {
       primary: true,
     },
     keyPair,
-    publicFeed: ownFeed,
-    name: {
+    profile,
+    profileHash: {
       type: 'string',
     },
   },
-  required: ['keyPair', 'name'],
+  required: ['keyPair', 'profile'],
 }

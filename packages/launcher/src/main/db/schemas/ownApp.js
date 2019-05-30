@@ -4,8 +4,8 @@ import { COLLECTION_NAMES } from '../constants'
 
 import permissionsRequirements from './appPermissionsRequirements'
 import bzzHash from './bzzHash'
+import profile from './genericProfile'
 import keyPair from './keyPair'
-import ownFeed from './ownFeed'
 
 const appVersion = {
   title: 'own app version',
@@ -16,7 +16,7 @@ const appVersion = {
       type: 'string', // semver
     },
     contentsHash: bzzHash,
-    versionHash: bzzHash,
+    versionHash: bzzHash, // chapter ID
     permissions: permissionsRequirements,
   },
   required: ['permissionsRequirements'],
@@ -31,21 +31,14 @@ export default {
       type: 'string',
       primary: true,
     },
-    keyPair,
-    mfid: {
-      type: 'string',
-      final: true,
-      index: true,
-    },
     developer: {
       type: 'string',
       ref: COLLECTION_NAMES.OWN_DEVELOPERS,
+      index: true,
     },
-    name: {
-      type: 'string',
-    },
-    feed: ownFeed,
-    version: {
+    keyPair,
+    profile,
+    contentsPath: {
       type: 'string',
     },
     versions: {
@@ -54,5 +47,5 @@ export default {
       default: [],
     },
   },
-  required: ['keyPair', 'name', 'version'],
+  required: ['contentsPath', 'developer', 'keyPair', 'profile'],
 }

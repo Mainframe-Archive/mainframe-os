@@ -40,42 +40,42 @@ type State = {
   errorMsg?: ?string,
 }
 
-export const createUserMutation = graphql`
-  mutation IdentitySelectorViewCreateUserIdentityMutation(
-    $input: CreateUserIdentityInput!
-  ) {
-    createUserIdentity(input: $input) {
-      user {
-        localID
-        profile {
-          name
-        }
-      }
-      viewer {
-        id
-        # identities {
-        #   ownUsers {
-        #     profile {
-        #       name
-        #     }
-        #   }
-        #   ownDevelopers {
-        #     profile {
-        #       name
-        #     }
-        #   }
-        # }
-      }
-    }
-  }
-`
+// export const createUserMutation = graphql`
+//   mutation IdentitySelectorViewCreateUserIdentityMutation(
+//     $input: CreateUserIdentityInput!
+//   ) {
+//     createUserIdentity(input: $input) {
+//       user {
+//         localID
+//         profile {
+//           name
+//         }
+//       }
+//       viewer {
+//         id
+//         # identities {
+//         #   ownUsers {
+//         #     profile {
+//         #       name
+//         #     }
+//         #   }
+//         #   ownDevelopers {
+//         #     profile {
+//         #       name
+//         #     }
+//         #   }
+//         # }
+//       }
+//     }
+//   }
+// `
 
 export const createDeveloperMutation = graphql`
-  mutation IdentitySelectorViewCreateDeveloperIdentityMutation(
-    $input: CreateDeveloperIdentityInput!
+  mutation IdentitySelectorViewCreateDeveloperMutation(
+    $input: CreateDeveloperInput!
   ) {
-    createDeveloperIdentity(input: $input) {
-      user {
+    createDeveloper(input: $input) {
+      developer {
         localID
         profile {
           name
@@ -112,8 +112,7 @@ class IdentitySelectorView extends Component<Props, State> {
   }
 
   createId = async () => {
-    const mutation =
-      this.props.type === 'user' ? createUserMutation : createDeveloperMutation
+    const mutation = createDeveloperMutation
 
     const input = {
       profile: {
@@ -124,10 +123,10 @@ class IdentitySelectorView extends Component<Props, State> {
     commitMutation(this.context, {
       mutation: mutation,
       variables: { input },
-      onCompleted: ({ createDeveloperIdentity }) => {
+      onCompleted: ({ createDeveloper }) => {
         this.setState({ newName: '' })
         if (this.props.onCreatedId) {
-          this.props.onCreatedId(createDeveloperIdentity.user.localID)
+          this.props.onCreatedId(createDeveloper.developer.localID)
         }
       },
       onError: err => {

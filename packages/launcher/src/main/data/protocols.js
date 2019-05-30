@@ -9,6 +9,16 @@ const validateHasPublicKey = (data: Object = {}) => {
   return data
 }
 
+const validateDeveloper = (data: Object = {}) => {
+  if (data.apps == null) {
+    data.apps = []
+  }
+  if (data.profile == null) {
+    data.profile = {}
+  }
+  return data
+}
+
 const validatePeer = (data: Object = {}) => {
   validateHasPublicKey(data)
   if (data.profile == null) {
@@ -28,6 +38,17 @@ const validateFirstContact = (data: Object = {}) => {
 }
 
 export const PROTOCOLS = {
+  developer_v1: {
+    name: 'developer',
+    read: {
+      process: validateDeveloper,
+      version: '^1.0.0',
+    },
+    write: {
+      process: validateDeveloper,
+      version: '1.0.0',
+    },
+  },
   firstContact_v1: {
     name: 'first-contact',
     read: {
@@ -87,6 +108,9 @@ export const createReader = (key: Protocol) => {
     return protocol.read.process(payload.data)
   }
 }
+
+export const readDeveloper = createReader('developer_v1')
+export const writeDeveloper = createWriter('developer_v1')
 
 export const readFirstContact = createReader('firstContact_v1')
 export const writeFirstContact = createWriter('firstContact_v1')

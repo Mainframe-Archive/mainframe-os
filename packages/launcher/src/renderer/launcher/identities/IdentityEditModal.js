@@ -58,7 +58,7 @@ class IdentityEditModal extends Component<Props, State> {
   onSubmit = (payload: FormSubmitPayload) => {
     if (payload.valid) {
       const input = {
-        userID: this.props.ownUserIdentity.localID,
+        userID: this.props.user.localID,
         profile: {
           name: payload.fields.name,
         },
@@ -115,26 +115,19 @@ class IdentityEditModal extends Component<Props, State> {
               autoFocus
               name="name"
               required
-              defaultValue={this.props.ownUserIdentity.profile.name}
+              defaultValue={this.props.user.profile.name}
             />
             <Switch
               name="discoverable"
-              defaultValue={!this.props.ownUserIdentity.privateProfile}
+              defaultValue={!this.props.user.privateProfile}
               label="Make my name and ETH address discoverable to other users"
               onChange={this.onToggleDiscoverable}
             />
             {updateError}
-
-            {this.props.ownUserIdentity.feedHash && (
-              <>
-                <Text variant="smallTitle" theme={{ padding: '20px 0 10px 0' }}>
-                  Mainframe ID
-                </Text>
-                <Text variant="addressLarge">
-                  {this.props.ownUserIdentity.feedHash}
-                </Text>
-              </>
-            )}
+            <Text variant="smallTitle" theme={{ padding: '20px 0 10px 0' }}>
+              Mainframe ID
+            </Text>
+            <Text variant="addressLarge">{this.props.user.publicID}</Text>
           </FormContainer>
         </Container>
       </FormModalView>
@@ -143,10 +136,10 @@ class IdentityEditModal extends Component<Props, State> {
 }
 
 export default createFragmentContainer(IdentityEditModal, {
-  ownUserIdentity: graphql`
-    fragment IdentityEditModal_ownUserIdentity on OwnUserIdentity {
+  user: graphql`
+    fragment IdentityEditModal_user on User {
       localID
-      feedHash
+      publicID
       privateProfile
       profile {
         name

@@ -16,6 +16,12 @@ export default {
     app: {
       type: 'string',
       ref: COLLECTION_NAMES.APPS,
+      index: true,
+    },
+    developer: {
+      type: 'string',
+      ref: COLLECTION_NAMES.DEVELOPERS,
+      index: true,
     },
     manifest,
     installationState: {
@@ -24,4 +30,5 @@ export default {
       default: 'pending',
     },
   },
+  required: ['app', 'developer', 'manifest'],
 }

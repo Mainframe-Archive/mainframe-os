@@ -5,7 +5,7 @@ import { ETH_RPC_URLS } from '@mainframe/eth'
 import { COLLECTION_NAMES } from '../constants'
 
 import keyPair from './keyPair'
-import userProfile from './userProfile'
+import profile from './genericProfile'
 
 export default {
   title: 'local user schema',
@@ -17,7 +17,7 @@ export default {
       primary: true,
     },
     keyPair,
-    profile: userProfile,
+    profile,
     profileHash: {
       type: 'string',
     },
