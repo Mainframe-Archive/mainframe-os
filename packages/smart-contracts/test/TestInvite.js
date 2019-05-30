@@ -238,13 +238,16 @@ contract('ContactInvite', accounts => {
       stake,
       'Incorrect pending stake for invite',
     )
+    console.log('ACCOUNTS 3')
+    console.log(accounts[3])
 
     const res = await invites.declineAndWithdraw(
+      accounts[1],
       accountHashes[0],
       senderFeedHash,
       recipientFeedHash,
       {
-        from: accounts[1],
+        from: accounts[3],
       },
     )
 

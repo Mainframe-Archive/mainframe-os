@@ -498,6 +498,10 @@
       "constant": false,
       "inputs": [
         {
+          "name": "recipientIndexAddress",
+          "type": "address"
+        },
+        {
           "name": "senderAddressHash",
           "type": "bytes32"
         },
@@ -519,6 +523,10 @@
     {
       "constant": false,
       "inputs": [
+        {
+          "name": "recipientIndexAddress",
+          "type": "address"
+        },
         {
           "name": "recipientAddressHash",
           "type": "bytes32"

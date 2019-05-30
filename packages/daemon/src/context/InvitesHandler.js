@@ -33,7 +33,8 @@ const contracts = {
   },
   ropsten: {
     token: '0xa46f1563984209fe47f8236f8b01a03f03f957e4',
-    invites: '0x2f554d5Ff0108618985489850393EA4923d6a3c1',
+    // invites: '0x2f554d5Ff0108618985489850393EA4923d6a3c1',
+    invites: '0x60b2A5E90c4005087eaf7e90F6288391dEC65A6b',
   },
   ganache: {
     token: '0xB3E555c3dB7B983E46bf5a530ce1dac4087D2d8D',
@@ -253,6 +254,7 @@ export default class InvitesHandler {
             const accounts = this._context.queries.getUserEthAccounts(
               user.localID,
             )
+            console.log('we r here somehow')
             const receivedAddress = matchAddress(
               contractEvent.recipientAddressHash,
               accounts,
@@ -547,6 +549,7 @@ export default class InvitesHandler {
       const res = await this.invitesContract.send(
         'retrieveStake',
         [
+          invite.fromAddress,
           toAddrHash,
           toFeedHash,
           fromFeedHash,
@@ -623,7 +626,12 @@ export default class InvitesHandler {
 
     const res = await this.invitesContract.send(
       'declineAndWithdraw',
-      [fromAddressHash, fromFeedHash, myFeedHash],
+      [
+        inviteRequest.receivedAddress,
+        fromAddressHash,
+        fromFeedHash,
+        myFeedHash,
+      ],
       txOptions,
     )
 
@@ -778,12 +786,11 @@ export default class InvitesHandler {
     const fromFeedHash = hash(Buffer.from(peer.publicFeed))
 
     const data = this.invitesContract.encodeCall('declineAndWithdraw', [
+      inviteRequest.receivedAddress,
       fromAddressHash,
       fromFeedHash,
       myFeedHash,
     ])
-
-    console.log(inviteRequest)
 
     const txOptions = {
       from: customAddress ? customAddress : inviteRequest.receivedAddress,
@@ -818,6 +825,7 @@ export default class InvitesHandler {
       const toFeedHash = hash(Buffer.from(peer.publicFeed))
 
       const txParams = [
+        invite.fromAddress,
         toAddrHash,
         toFeedHash,
         fromFeedHash,
