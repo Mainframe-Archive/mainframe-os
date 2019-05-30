@@ -19,8 +19,7 @@
  */
 
 const HDWalletProvider = require('truffle-hdwallet-provider')
-const mnemonic =
-  'vague crazy maze dream close car carbon autumn drum person lesson nephew'
+const mnemonic = process.env.MNEMONIC
 
 module.exports = {
   /**
@@ -48,7 +47,7 @@ module.exports = {
       provider: function() {
         return new HDWalletProvider(
           mnemonic,
-          'https://ropsten.infura.io/v3/a80a500306c04b90a11be27bc9f88b60',
+          'https://ropsten.infura.io/v3/8ec0911ee74c4583b1346bbc1afdf22d',
         )
       },
       gasPrice: 5000000000,

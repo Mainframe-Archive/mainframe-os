@@ -103,6 +103,7 @@ contract('ContactInvite', accounts => {
 
     await truffleAssert.fails(
       invites.retrieveStake(
+        accounts[0],
         accountHashes[1],
         recipientFeedHash,
         senderFeedHash,
@@ -145,14 +146,12 @@ contract('ContactInvite', accounts => {
       EthUtil.toBuffer('MFOS Contact Accept:'),
       accountHashes[0],
     ])
-    console.log('message bytes', messageBytes, messageBytes.length)
+
     const msgHash = EthUtil.hashPersonalMessage(messageBytes)
     const signature = EthUtil.ecsign(msgHash, new Buffer(acc1PrivateKey, 'hex'))
-    console.log('msgHash: ', msgHash)
-
-    console.log('signature: ', signature)
 
     const res = await invites.retrieveStake(
+      accounts[0],
       accountHashes[1],
       recipientFeedHash,
       senderFeedHash,
@@ -238,8 +237,6 @@ contract('ContactInvite', accounts => {
       stake,
       'Incorrect pending stake for invite',
     )
-    console.log('ACCOUNTS 3')
-    console.log(accounts[3])
 
     const res = await invites.declineAndWithdraw(
       accounts[1],
@@ -247,7 +244,8 @@ contract('ContactInvite', accounts => {
       senderFeedHash,
       recipientFeedHash,
       {
-        from: accounts[3],
+        // can now withdraw to arbitrary acct
+        from: accounts[1],
       },
     )
 
@@ -374,8 +372,11 @@ contract('ContactInvite', accounts => {
 
     await invites.pause({ from: accounts[0] })
 
+    console.log('fhdjshf')
+    console.log(accounts[0])
     await truffleAssert.fails(
       invites.retrieveStake(
+        accounts[0],
         accountHashes[1],
         recipientFeedHash,
         senderFeedHash,
@@ -391,6 +392,7 @@ contract('ContactInvite', accounts => {
 
     await truffleAssert.fails(
       invites.declineAndWithdraw(
+        accounts[1],
         accountHashes[0],
         senderFeedHash,
         recipientFeedHash,
@@ -411,6 +413,7 @@ contract('ContactInvite', accounts => {
     await invites.unpause({ from: accounts[0] })
 
     await invites.retrieveStake(
+      accounts[0],
       accountHashes[1],
       recipientFeedHash,
       senderFeedHash,
