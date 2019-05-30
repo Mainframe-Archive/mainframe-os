@@ -43,7 +43,7 @@ class Footer extends React.Component {
           <div>
             <h5>Community</h5>
             <a
-              href="https://gitter.im/MainframeHQ/Lobby"
+              href="https://community.mainframe.com"
               target="_blank"
               rel="noreferrer noopener">
               Gitter
@@ -71,7 +71,7 @@ class Footer extends React.Component {
         </section>
 
         <a
-          href="https://www.mainframe.com/developers"
+          href="https://mainframeos.com/developers"
           target="_blank"
           rel="noreferrer noopener"
           className="fbOpenSource">
