@@ -1,6 +1,6 @@
 //@flow
 
-import React, { Component } from 'react'
+import React, { Component, type Node } from 'react'
 import ReactModal from 'react-modal'
 import { CSSTransition } from 'react-transition-group'
 import { Text } from '@morpheus-ui/core'

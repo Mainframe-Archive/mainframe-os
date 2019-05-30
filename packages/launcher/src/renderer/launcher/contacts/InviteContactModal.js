@@ -149,7 +149,6 @@ class InviteContactModal extends Component<Props, State> {
       mft: '0',
       eth: '0',
     }
-    console.log('BALANCES')
     if (address && ethAddress) {
       const token = this.props.ethClient.erc20Contract(address)
       const [mft, eth] = await Promise.all([
@@ -157,15 +156,12 @@ class InviteContactModal extends Component<Props, State> {
         this.props.ethClient.getETHBalance(ethAddress),
       ])
       balances = { mft, eth }
-      console.log(balances)
     }
     this.setState({ balances })
   }
 
   async getTXDetails(type: string, address?: string) {
     const { user, contact } = this.props
-    console.log('getTXDetails called')
-    console.log(address ? address : '')
     try {
       const res = await rpc.getInviteTXDetails({
         type: type,
@@ -178,8 +174,6 @@ class InviteContactModal extends Component<Props, State> {
         error: '',
       })
     } catch (err) {
-      console.log('err')
-      console.log(err)
       this.setState({
         error: err.message,
       })
@@ -228,8 +222,6 @@ class InviteContactModal extends Component<Props, State> {
         error: '',
       })
     } catch (err) {
-      console.log('err')
-      console.log(err)
       this.setState({
         error: err.message,
         invitePending: {
@@ -256,8 +248,6 @@ class InviteContactModal extends Component<Props, State> {
       })
       this.getInviteSendTXDetails()
     } catch (err) {
-      console.log('err')
-      console.log(err)
       this.setState({
         error: err.message,
         txProcessing: false,

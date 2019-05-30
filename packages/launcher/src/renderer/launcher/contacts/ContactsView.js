@@ -29,9 +29,11 @@ import { type FormSubmitPayload } from '@morpheus-ui/forms'
 
 import PlusIcon from '@morpheus-ui/icons/PlusSymbolSm'
 import SearchIcon from '@morpheus-ui/icons/SearchSm'
-import applyContext, { type ContextProps } from '../LauncherContext'
+import applyContext, {
+  type ContextProps,
+  type CurrentUser,
+} from '../LauncherContext'
 
-import { type CurrentUser } from '../LauncherContext'
 import { EnvironmentContext } from '../RelayEnvironment'
 import Avatar from '../../UIComponents/Avatar'
 import SvgSelectedPointer from '../../UIComponents/SVGSelectedPointer'
@@ -41,7 +43,6 @@ import FormModalView from '../../UIComponents/FormModalView'
 import Loader from '../../UIComponents/Loader'
 import { InformationBox } from '../identities/IdentitiesView'
 import CopyableBlock from '../../UIComponents/CopyableBlock'
-import { MFT_TOKEN_ADDRESSES } from '../../../constants'
 import InviteContactModal, { type TransactionType } from './InviteContactModal'
 import type { ContactsView_contacts as Contacts } from './__generated__/ContactsView_contacts.graphql'
 
@@ -563,8 +564,6 @@ class ContactsViewComponent extends Component<Props, State> {
   }
 
   showNotification = (notification: string, selectedAddress: string) => {
-    console.log(notification)
-    console.log(selectedAddress)
     this.setState({ notification, selectedAddress })
   }
 
@@ -1313,7 +1312,6 @@ class ContactsViewComponent extends Component<Props, State> {
       .balances.eth
 
     const stake = contacts && contacts.inviteStake ? contacts.inviteStake : ''
-    console.log(this.state.notification)
     return (
       this.state.notification === 'decline' && (
         <AlertToast onRequestClose={this.closeNotification}>
