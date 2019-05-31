@@ -38,7 +38,6 @@ import { EnvironmentContext } from '../RelayEnvironment'
 import Avatar from '../../UIComponents/Avatar'
 import SvgSelectedPointer from '../../UIComponents/SVGSelectedPointer'
 
-import AlertToast from '../../UIComponents/AlertToast'
 import FormModalView from '../../UIComponents/FormModalView'
 import Loader from '../../UIComponents/Loader'
 import { InformationBox } from '../identities/IdentitiesView'
@@ -193,11 +192,6 @@ const RadioContainer = styled.View`
 
 const RadioTextContainer = styled.View`
   flex: 1;
-`
-
-const WalletContainer = styled.View`
-  display: flex;
-  flex-direction: column;
 `
 
 export type SubmitContactInput = {
@@ -1223,12 +1217,15 @@ class ContactsViewComponent extends Component<Props, State> {
       )
     } else if (this.state.notification === 'delete' && deletedContact) {
       const name = deletedContact.name ? deletedContact.name : 'Contact'
+      const ethAddress = deletedContact.ethAddress
+        ? deletedContact.ethAddress
+        : ''
       return (
         <Notification
           message={name + ' has been deleted.'}
-          address={deletedContact.ethAddress}
+          address={ethAddress}
           firstLine={name}
-          secondLine={deletedContact.ethAddress}
+          secondLine={ethAddress}
           onRequestClose={this.closeNotification}
         />
       )

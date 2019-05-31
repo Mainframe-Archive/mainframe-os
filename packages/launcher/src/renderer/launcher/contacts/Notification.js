@@ -1,7 +1,7 @@
 //@flow
 
-import React, { Component, type Node } from 'react'
-import { Text, Tooltip } from '@morpheus-ui/core'
+import React, { Component } from 'react'
+import { Text } from '@morpheus-ui/core'
 import styled from 'styled-components/native'
 import AlertToast from '../../UIComponents/AlertToast'
 import Avatar from '../../UIComponents/Avatar'
