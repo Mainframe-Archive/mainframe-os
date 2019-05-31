@@ -494,7 +494,7 @@ class InviteContactModal extends Component<Props, State> {
       return (
         <Section>
           {titleSection}
-          {options[0].data}
+          <AddContactDetail border>{options[0].data}</AddContactDetail>
           {this.renderGasData()}
         </Section>
       )

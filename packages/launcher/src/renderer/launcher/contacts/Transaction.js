@@ -41,15 +41,17 @@ const TitleTooltipContainer = styled.View`
   flex-direction: row;
   align-items: center;
   margin-bottom: 10px;
-  ${props => props.paddingTop && `padding-top: 30px;`}
+`
+const Container = styled.View`
+  margin-bottom: 30px;
 `
 
 export default class Transaction extends Component<Props> {
   render() {
     const { title, tooltipInfo, txParam, button } = this.props
     return (
-      <>
-        <TitleTooltipContainer paddingTop>
+      <Container>
+        <TitleTooltipContainer>
           <Text variant="smallTitle">{tooltipInfo.title}</Text>
           <Tooltip>
             <Text variant="tooltipTitle">{tooltipInfo.question}</Text>
@@ -74,7 +76,7 @@ export default class Transaction extends Component<Props> {
           </AddContactDetailText>
           {button && button}
         </AddContactDetail>
-      </>
+      </Container>
     )
   }
 }

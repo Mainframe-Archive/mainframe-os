@@ -43,6 +43,7 @@ import FormModalView from '../../UIComponents/FormModalView'
 import Loader from '../../UIComponents/Loader'
 import { InformationBox } from '../identities/IdentitiesView'
 import CopyableBlock from '../../UIComponents/CopyableBlock'
+import Notification from './Notification'
 import InviteContactModal, { type TransactionType } from './InviteContactModal'
 import type { ContactsView_contacts as Contacts } from './__generated__/ContactsView_contacts.graphql'
 
@@ -1198,81 +1199,38 @@ class ContactsViewComponent extends Component<Props, State> {
       ? this.state.inviteModalOpen.contact.profile
       : null
 
-    const stakeAddedText = (
-      <Text color="#fff" size={13} variant={['bold', 'marginTop5']}>
-        {stake + ' MFT have been added to your wallet.'}
-      </Text>
-    )
-
-    const accountInfo = (
-      <AvatarWrapper marginTop>
-        <Blocky>
-          <Avatar id={selectedAddress} size="small" />
-        </Blocky>
-        <WalletContainer>
-          <Text
-            color="#fff"
-            variant={['greyDark23', 'ellipsis']}
-            theme={{ fontStyle: 'normal' }}
-            size={12}>
-            {selectedAddress}
-          </Text>
-          <Text
-            color="#fff"
-            variant={['greyDark23', 'mono']}
-            theme={{ fontStyle: 'normal' }}
-            size={12}>
-            {Number(eth)
-              .toFixed(4)
-              .toString()
-              .slice(0, 10) +
-              ' ETH   ' +
-              Number(mft)
-                .toFixed(4)
-                .toString()
-                .slice(0, 10) +
-              ' MFT'}
-          </Text>
-        </WalletContainer>
-      </AvatarWrapper>
-    )
+    const balances =
+      Number(eth)
+        .toFixed(4)
+        .toString()
+        .slice(0, 10) +
+      ' ETH   ' +
+      Number(mft)
+        .toFixed(4)
+        .toString()
+        .slice(0, 10) +
+      ' MFT'
 
     if (notification === 'withdraw' || notification === 'decline') {
       return (
-        <AlertToast onRequestClose={this.closeNotification}>
-          {stakeAddedText}
-          {accountInfo}
-        </AlertToast>
+        <Notification
+          message={stake + ' MFT have been added to your wallet.'}
+          address={selectedAddress}
+          firstLine={selectedAddress}
+          secondLine={balances}
+          onRequestClose={this.closeNotification}
+        />
       )
     } else if (this.state.notification === 'delete' && deletedContact) {
       const name = deletedContact.name ? deletedContact.name : 'Contact'
       return (
-        <AlertToast onRequestClose={this.closeNotification}>
-          <Text color="#fff" size={13} variant={'bold'}>
-            {name + ' has been deleted.'}
-          </Text>
-          <AvatarWrapper marginTop>
-            <Blocky>
-              <Avatar id={deletedContact.ethAddress} size="small" />
-            </Blocky>
-            <WalletContainer>
-              <Text
-                color="#fff"
-                variant={['greyDark23', 'bold']}
-                theme={{ fontStyle: 'normal' }}
-                size={12}>
-                {name}
-              </Text>
-              <Text
-                color="#fff"
-                variant={['greyDark23', 'mono']}
-                theme={{ fontStyle: 'normal' }}
-                size={12}>
-                {deletedContact.ethAddress}
-              </Text>
-            </WalletContainer>
-          </AvatarWrapper>
-        </AlertToast>
+        <Notification
+          message={name + ' has been deleted.'}
+          address={deletedContact.ethAddress}
+          firstLine={name}
+          secondLine={deletedContact.ethAddress}
+          onRequestClose={this.closeNotification}
+        />
       )
     }
   }
