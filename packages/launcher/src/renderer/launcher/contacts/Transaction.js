@@ -59,7 +59,7 @@ export default class Transaction extends Component<Props> {
         <AddContactDetail border maxHeight>
           <AddContactDetailText>
             <Text variant={['greyDark23', 'bold']} size={12}>
-              {'Contract'}
+              {title}
             </Text>
             {txParam && (
               <GasContainer>

@@ -564,7 +564,6 @@ class ContactsViewComponent extends Component<Props, State> {
   }
 
   showNotification = (notification: string) => {
-    console.log(this.state.selectedAddress)
     this.setState({ notification })
   }
 
@@ -1246,12 +1245,11 @@ class ContactsViewComponent extends Component<Props, State> {
         </AlertToast>
       )
     } else if (this.state.notification === 'delete' && deletedContact) {
+      const name = deletedContact.name ? deletedContact.name : 'Contact'
       return (
         <AlertToast onRequestClose={this.closeNotification}>
           <Text color="#fff" size={13} variant={'bold'}>
-            {deletedContact.name
-              ? deletedContact.name
-              : 'Contact' + ' has been deleted.'}
+            {name + ' has been deleted.'}
           </Text>
           <AvatarWrapper marginTop>
             <Blocky>
@@ -1263,7 +1261,7 @@ class ContactsViewComponent extends Component<Props, State> {
                 variant={['greyDark23', 'bold']}
                 theme={{ fontStyle: 'normal' }}
                 size={12}>
-                {deletedContact.name}
+                {name}
               </Text>
               <Text
                 color="#fff"

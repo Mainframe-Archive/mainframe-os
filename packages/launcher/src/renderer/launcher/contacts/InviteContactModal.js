@@ -77,8 +77,6 @@ const FormContainer = styled.View`
   margin-top: 15vh;
 `
 
-const View = styled.View``
-
 const Section = styled.View`
   margin-bottom: 20px;
 `
@@ -107,12 +105,6 @@ const AddContactDetailText = styled.View`
 
 const Blocky = styled.View`
   margin-right: 15px;
-`
-
-const GasContainer = styled.View`
-  display: flex;
-  max-width: 100%;
-  flex-direction: row;
 `
 
 class InviteContactModal extends Component<Props, State> {
