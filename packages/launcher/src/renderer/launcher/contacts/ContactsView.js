@@ -344,7 +344,7 @@ class ContactsViewComponent extends Component<Props, State> {
     this.state = {
       selectedContact: user.localID,
       selectedAddress: user.profile.ethAddress || '',
-      notification: '',
+      notification: 'delete',
     }
   }
 
@@ -563,8 +563,9 @@ class ContactsViewComponent extends Component<Props, State> {
     })
   }
 
-  showNotification = (notification: string, selectedAddress: string) => {
-    this.setState({ notification, selectedAddress })
+  showNotification = (notification: string) => {
+    console.log(this.state.selectedAddress)
+    this.setState({ notification })
   }
 
   getIdentity = () => {
@@ -713,7 +714,6 @@ class ContactsViewComponent extends Component<Props, State> {
   }
 
   renderDelete = (contact: Contact) => {
-    // TODO trigger notification after delete actually happens
     if (contact.connectionState === 'DECLINED') {
       return (
         <Row size={1}>
@@ -1181,9 +1181,7 @@ class ContactsViewComponent extends Component<Props, State> {
               </Column>
             </Row> */}
         </ScrollView>
-        {this.renderWithdrawNotificationModal()}
-        {this.renderDeclineNotificationModal()}
-        {this.renderDeleteNotificationModal()}
+        {this.renderNotificationModal()}
       </RightContainer>
     )
   }
@@ -1205,154 +1203,100 @@ class ContactsViewComponent extends Component<Props, State> {
   //   }
   // }
 
-  renderWithdrawNotificationModal() {
-    const { selectedAddress } = this.state
+  renderNotificationModal() {
+    const { contacts } = this.props
+    const { selectedAddress, notification } = this.state
     const walletsArray = getWalletsArray(this.props)
     const mft = filter(walletsArray, w => w.address === selectedAddress)[0]
       .balances.mft
     const eth = filter(walletsArray, w => w.address === selectedAddress)[0]
       .balances.eth
-
-    return (
-      this.state.notification === 'withdraw' && (
-        <AlertToast onRequestClose={this.closeNotification}>
-          <>
-            <Text color="#fff" size={13} variant={('bold', 'marginTop5')}>
-              {(this.props.contacts && this.props.contacts.inviteStake
-                ? this.props.contacts.inviteStake
-                : '') + ' MFT have been added to your wallet.'}
-            </Text>
-            <AvatarWrapper marginTop>
-              <Blocky>
-                <Avatar id={this.state.selectedAddress} size="small" />
-              </Blocky>
-              <WalletContainer>
-                <Text
-                  color="#fff"
-                  variant={['greyDark23', 'ellipsis']}
-                  theme={{ fontStyle: 'normal' }}
-                  size={12}>
-                  {this.state.selectedAddress}
-                </Text>
-                <Text
-                  color="#fff"
-                  variant={['greyDark23', 'mono']}
-                  theme={{ fontStyle: 'normal' }}
-                  size={12}>
-                  {Number(eth)
-                    .toFixed(4)
-                    .toString()
-                    .slice(0, 10) +
-                    ' ETH   ' +
-                    Number(mft)
-                      .toFixed(4)
-                      .toString()
-                      .slice(0, 10) +
-                    ' MFT'}
-                </Text>
-              </WalletContainer>
-            </AvatarWrapper>
-          </>
-        </AlertToast>
-      )
-    )
-  }
-
-  renderDeleteNotificationModal() {
+    const stake = contacts && contacts.inviteStake ? contacts.inviteStake : ''
     const deletedContact = this.state.inviteModalOpen
       ? this.state.inviteModalOpen.contact.profile
       : null
-    const name = deletedContact ? deletedContact.name : null
-    const ethAddress = deletedContact ? deletedContact.ethAddress : null
 
-    return (
-      this.state.notification === 'delete' &&
-      name &&
-      ethAddress && (
+    const stakeAddedText = (
+      <Text color="#fff" size={13} variant={['bold', 'marginTop5']}>
+        {stake + ' MFT have been added to your wallet.'}
+      </Text>
+    )
+    const deletedText = (
+      <Text color="#fff" size={13} variant={'bold'}>
+        {deletedContact.name
+          ? deletedContact.name
+          : 'Contact' + ' has been deleted.'}
+      </Text>
+    )
+
+    const accountInfo = (
+      <AvatarWrapper marginTop>
+        <Blocky>
+          <Avatar id={selectedAddress} size="small" />
+        </Blocky>
+        <WalletContainer>
+          <Text
+            color="#fff"
+            variant={['greyDark23', 'ellipsis']}
+            theme={{ fontStyle: 'normal' }}
+            size={12}>
+            {selectedAddress}
+          </Text>
+          <Text
+            color="#fff"
+            variant={['greyDark23', 'mono']}
+            theme={{ fontStyle: 'normal' }}
+            size={12}>
+            {Number(eth)
+              .toFixed(4)
+              .toString()
+              .slice(0, 10) +
+              ' ETH   ' +
+              Number(mft)
+                .toFixed(4)
+                .toString()
+                .slice(0, 10) +
+              ' MFT'}
+          </Text>
+        </WalletContainer>
+      </AvatarWrapper>
+    )
+
+    if (notification === 'withdraw' || notification === 'decline') {
+      return (
         <AlertToast onRequestClose={this.closeNotification}>
-          <>
-            <Text color="#fff" size={13} variant={('bold', 'marginTop5')}>
-              {name + ' has been deleted.'}
-            </Text>
-            <AvatarWrapper marginTop>
-              <Blocky>
-                <Avatar id={ethAddress} size="small" />
-              </Blocky>
-              <WalletContainer>
-                <Text
-                  color="#fff"
-                  variant={['greyDark23']}
-                  theme={{ fontStyle: 'normal' }}
-                  size={12}>
-                  {name}
-                </Text>
-                <Text
-                  color="#fff"
-                  variant={['greyDark23', 'mono']}
-                  theme={{ fontStyle: 'normal' }}
-                  size={12}>
-                  {ethAddress}
-                </Text>
-              </WalletContainer>
-            </AvatarWrapper>
-          </>
+          {stakeAddedText}
+          {accountInfo}
         </AlertToast>
       )
-    )
-  }
-
-  renderDeclineNotificationModal() {
-    const { contacts } = this.props
-    const { selectedAddress } = this.state
-
-    const walletsArray = getWalletsArray(this.props)
-    const mft = filter(walletsArray, w => w.address === selectedAddress)[0]
-      .balances.mft
-    const eth = filter(walletsArray, w => w.address === selectedAddress)[0]
-      .balances.eth
-
-    const stake = contacts && contacts.inviteStake ? contacts.inviteStake : ''
-    return (
-      this.state.notification === 'decline' && (
+    } else if (this.state.notification === 'delete' && deletedContact) {
+      return (
         <AlertToast onRequestClose={this.closeNotification}>
-          <>
-            <Text color="#fff" size={13} variant={('bold', 'marginTop5')}>
-              {stake + ' MFT have been added to your wallet.'}
-            </Text>
-            <AvatarWrapper marginTop>
-              <Blocky>
-                <Avatar id={selectedAddress} size="small" />
-              </Blocky>
-              <WalletContainer>
-                <Text
-                  color="#fff"
-                  variant={['greyDark23', 'ellipsis']}
-                  theme={{ fontStyle: 'normal' }}
-                  size={12}>
-                  {selectedAddress}
-                </Text>
-                <Text
-                  color="#fff"
-                  variant={['greyDark23', 'mono']}
-                  theme={{ fontStyle: 'normal' }}
-                  size={12}>
-                  {Number(eth)
-                    .toFixed(4)
-                    .toString()
-                    .slice(0, 10) +
-                    ' ETH   ' +
-                    Number(mft)
-                      .toFixed(4)
-                      .toString()
-                      .slice(0, 10) +
-                    ' MFT'}
-                </Text>
-              </WalletContainer>
-            </AvatarWrapper>
-          </>
+          {deletedText}
+          <AvatarWrapper marginTop>
+            <Blocky>
+              <Avatar id={deletedContact.ethAddress} size="small" />
+            </Blocky>
+            <WalletContainer>
+              <Text
+                color="#fff"
+                variant={['greyDark23', 'bold']}
+                theme={{ fontStyle: 'normal' }}
+                size={12}>
+                {deletedContact.name}
+              </Text>
+              <Text
+                color="#fff"
+                variant={['greyDark23', 'mono']}
+                theme={{ fontStyle: 'normal' }}
+                size={12}>
+                {deletedContact.ethAddress}
+              </Text>
+            </WalletContainer>
+          </AvatarWrapper>
         </AlertToast>
       )
-    )
+    }
   }
 
   renderInviteModal() {

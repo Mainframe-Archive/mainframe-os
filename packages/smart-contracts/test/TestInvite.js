@@ -146,9 +146,12 @@ contract('ContactInvite', accounts => {
       EthUtil.toBuffer('MFOS Contact Accept:'),
       accountHashes[0],
     ])
-
+    console.log('message bytes', messageBytes, messageBytes.length)
     const msgHash = EthUtil.hashPersonalMessage(messageBytes)
     const signature = EthUtil.ecsign(msgHash, new Buffer(acc1PrivateKey, 'hex'))
+    console.log('msgHash: ', msgHash)
+
+    console.log('signature: ', signature)
 
     const res = await invites.retrieveStake(
       accounts[0],
@@ -244,7 +247,6 @@ contract('ContactInvite', accounts => {
       senderFeedHash,
       recipientFeedHash,
       {
-        // can now withdraw to arbitrary acct
         from: accounts[1],
       },
     )
@@ -372,8 +374,6 @@ contract('ContactInvite', accounts => {
 
     await invites.pause({ from: accounts[0] })
 
-    console.log('fhdjshf')
-    console.log(accounts[0])
     await truffleAssert.fails(
       invites.retrieveStake(
         accounts[0],

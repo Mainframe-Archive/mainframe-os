@@ -30,7 +30,7 @@ type Props = ContextProps & {
   wallets: WalletAccounts,
   selectedAddress: string,
   updateSelectedAddress: string => void,
-  showNotification: (string, ?string) => void,
+  showNotification: string => void,
 }
 
 type TXParams = {
@@ -298,7 +298,7 @@ class InviteContactModal extends Component<Props, State> {
         declinedTXHash: res,
       })
       this.props.closeModal()
-      this.props.showNotification('decline', this.props.selectedAddress)
+      this.props.showNotification('decline')
     } catch (err) {
       this.setState({
         txProcessing: false,
@@ -321,7 +321,7 @@ class InviteContactModal extends Component<Props, State> {
         withdrawTXHash: res,
       })
       this.props.closeModal()
-      this.props.showNotification('withdraw', this.props.selectedAddress)
+      this.props.showNotification('withdraw')
     } catch (err) {
       this.setState({
         txProcessing: false,
@@ -524,10 +524,7 @@ class InviteContactModal extends Component<Props, State> {
 
     if (invitePending && invitePending.state === 'awaiting_approval') {
       if (txProcessing) {
-        return [
-          <CircleLoader width={24} height={24} key="c1" />,
-          <View key="v1" />,
-        ]
+        return [<CircleLoader width={24} height={24} key="c1" />, null]
       } else {
         return [
           <Button
@@ -536,7 +533,7 @@ class InviteContactModal extends Component<Props, State> {
             onPress={firstAction}
             key="b1"
           />,
-          <View key="v2" />,
+          null,
         ]
       }
     } else if (invitePending && invitePending.state === 'approved') {

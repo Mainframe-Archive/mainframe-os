@@ -15,4 +15,3 @@ dist/
 .idea
 shell.nix
 /website/build
-copy.txt

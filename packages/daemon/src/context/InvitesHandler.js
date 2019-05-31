@@ -33,7 +33,6 @@ const contracts = {
   },
   ropsten: {
     token: '0xa46f1563984209fe47f8236f8b01a03f03f957e4',
-    // invites: '0x2f554d5Ff0108618985489850393EA4923d6a3c1',
     invites: '0x60b2A5E90c4005087eaf7e90F6288391dEC65A6b',
   },
   ganache: {
@@ -258,7 +257,6 @@ export default class InvitesHandler {
               contractEvent.recipientAddressHash,
               accounts,
             )
-
             if (!receivedAddress) {
               this._context.log(
                 'Failed to add invite due to missing receiving address',
@@ -331,16 +329,14 @@ export default class InvitesHandler {
     userID: string,
     contactID: string,
     gasPrice?: string,
-    customAddress?: string,
+    customAddress: string,
   ) {
     const { user } = this.getUserObjects(userID, contactID)
     if (!user.profile.ethAddress) {
       throw new Error('No public ETH address found on profile')
     }
 
-    const hasAllowance = await this.checkAllowance(
-      customAddress ? customAddress : user.profile.ethAddress,
-    )
+    const hasAllowance = await this.checkAllowance(customAddress)
     if (hasAllowance) {
       return
     }
@@ -349,20 +345,19 @@ export default class InvitesHandler {
     const stakeBN = utils.bigNumberify(stake)
     const mftBalance = await this.tokenContract.getBalance(
       // $FlowFixMe address checked above
-      customAddress ? customAddress : user.profile.ethAddress,
+      customAddress,
     )
     const balanceBN = utils.parseUnits(mftBalance, 'ether')
 
     if (stakeBN.gt(balanceBN)) {
       const formattedStake = utils.formatUnits(stakeBN, 'ether')
-
       throw new Error(
         `Insufficient MFT balance of ${balanceBN.toString()} for required stake ${formattedStake}`,
       )
     }
 
     const txOptions: Object = {
-      from: customAddress ? customAddress : user.profile.ethAddress,
+      from: customAddress,
     }
     // TODO: check high gasPrice
 
@@ -392,7 +387,7 @@ export default class InvitesHandler {
   async processInviteTransaction(
     user: OwnUserIdentity,
     peer: PeerUserIdentity,
-    customAddress?: string,
+    customAddress: string,
   ) {
     return new Promise((resolve, reject) => {
       // TODO: Notify launcher and request permission from user?
@@ -406,7 +401,7 @@ export default class InvitesHandler {
       const params = [toAddrHash, toFeedHash, user.publicFeed.feedHash]
 
       const txOptions = {
-        from: customAddress ? customAddress : user.profile.ethAddress,
+        from: customAddress,
       }
 
       this.invitesContract
@@ -428,7 +423,7 @@ export default class InvitesHandler {
   async sendInviteTX(
     userID: string,
     contactID: string,
-    customAddress?: string,
+    customAddress: string,
   ): Promise<void> {
     const { user, peer, contact } = this.getUserObjects(userID, contactID)
     if (!user.profile.ethAddress) {
@@ -439,10 +434,7 @@ export default class InvitesHandler {
     }
 
     const stake = await this.invitesContract.call('requiredStake')
-    const mftBalance = await this.tokenContract.getBalance(
-      // $FlowFixMe address checked above
-      customAddress ? customAddress : user.profile.ethAddress,
-    )
+    const mftBalance = await this.tokenContract.getBalance(customAddress)
     const stakeBN = utils.bigNumberify(stake)
     const balanceBN = utils.parseUnits(mftBalance, 'ether')
 
@@ -473,7 +465,7 @@ export default class InvitesHandler {
         inviteTX: inviteTXHash,
         ethNetwork: this._context.io.eth.networkName,
         // $FlowFixMe address already checked
-        fromAddress: customAddress ? customAddress : user.profile.ethAddress,
+        fromAddress: customAddress,
         // $FlowFixMe address already checked
         toAddress: peer.profile.ethAddress,
         stake: {
@@ -528,7 +520,7 @@ export default class InvitesHandler {
   async retrieveStake(
     userID: string,
     contactID: string,
-    customAddress?: string,
+    customAddress: string,
   ) {
     const { peer, contact, user } = this.getUserObjects(userID, contactID)
     const invite = contact._invite
@@ -541,7 +533,7 @@ export default class InvitesHandler {
       const toFeedHash = hash(Buffer.from(peer.publicFeed))
 
       const txOptions = {
-        from: customAddress ? customAddress : invite.fromAddress,
+        from: customAddress,
       }
       this.validateInviteOriginNetwork(invite.ethNetwork)
 
@@ -596,7 +588,7 @@ export default class InvitesHandler {
   async declineContactInvite(
     userID: string,
     peerID: string,
-    customAddress?: string,
+    customAddress: string,
   ): Promise<string> {
     const { identities } = this._context.openVault
     const inviteRequest = identities.getInviteRequest(userID, peerID)
@@ -619,7 +611,7 @@ export default class InvitesHandler {
     const fromFeedHash = hash(Buffer.from(peer.publicFeed))
 
     const txOptions = {
-      from: customAddress ? customAddress : inviteRequest.receivedAddress,
+      from: customAddress,
       to: this.invitesContract.address,
     }
 
@@ -768,7 +760,7 @@ export default class InvitesHandler {
   async getDeclineTXDetails(
     userID: string,
     peerID: string,
-    customAddress?: string,
+    customAddress: string,
   ): Promise<Object> {
     const { identities } = this._context.openVault
     const user = identities.getOwnUser(userID)
@@ -792,13 +784,11 @@ export default class InvitesHandler {
     ])
 
     const txOptions = {
-      from: customAddress ? customAddress : inviteRequest.receivedAddress,
+      from: customAddress,
       to: this.invitesContract.address,
       data,
     }
-
     const params = await this._context.io.eth.completeTxParams(txOptions)
-
     const formattedParams = await this.formatGasValues(params)
     return { ...params, ...formattedParams }
   }
@@ -807,7 +797,7 @@ export default class InvitesHandler {
     user: OwnUserIdentity,
     peer: PeerUserIdentity,
     contact: Contact,
-    customAddress?: string,
+    customAddress: string,
   ): Promise<Object> {
     const invite = contact._invite
     if (invite != null && invite.stake && invite.acceptedSignature) {
@@ -815,9 +805,7 @@ export default class InvitesHandler {
 
       // $FlowFixMe will have feedHash by this point
       const fromFeedHash = hash(Buffer.from(user.publicFeed.feedHash))
-
       const toAddrHash = hash(bufferFromHex(invite.toAddress))
-
       const toFeedHash = hash(Buffer.from(peer.publicFeed))
 
       const txParams = [
@@ -831,16 +819,13 @@ export default class InvitesHandler {
       ]
       this.validateInviteOriginNetwork(invite.ethNetwork)
       const data = this.invitesContract.encodeCall('retrieveStake', txParams)
-
       const txOptions = {
-        from: customAddress ? customAddress : invite.fromAddress,
+        from: customAddress,
         to: this.invitesContract.address,
         data,
       }
       const params = await this._context.io.eth.completeTxParams(txOptions)
-
       const formattedParams = await this.formatGasValues(params)
-
       return { ...params, ...formattedParams }
     }
     throw new Error('Accepted signature not found')
@@ -848,7 +833,7 @@ export default class InvitesHandler {
 
   async getApproveTXDetails(
     user: OwnUserIdentity,
-    customAddress?: string,
+    customAddress: string,
   ): Promise<Object> {
     const { eth } = this._context.io
     const stake = await this.invitesContract.call('requiredStake')
@@ -857,7 +842,7 @@ export default class InvitesHandler {
       stake,
     ])
     const txOptions = {
-      from: customAddress ? customAddress : user.profile.ethAddress,
+      from: customAddress,
       to: this.tokenContract.address,
       data,
     }
@@ -869,7 +854,7 @@ export default class InvitesHandler {
   async getSendInviteTXDetails(
     user: OwnUserIdentity,
     peer: PeerUserIdentity,
-    customAddress?: string,
+    customAddress: string,
   ): Promise<Object> {
     const { eth } = this._context.io
 
@@ -884,7 +869,7 @@ export default class InvitesHandler {
     const data = this.invitesContract.encodeCall('sendInvite', params)
 
     const txOptions = {
-      from: customAddress ? customAddress : user.profile.ethAddress,
+      from: customAddress,
       to: this.invitesContract.address,
       data,
     }
@@ -897,13 +882,12 @@ export default class InvitesHandler {
     type: string,
     userID: string,
     contactOrPeerID: string,
-    customAddress?: string,
+    customAddress: string,
   ) {
     this.validateNetwork()
     if (type === 'declineInvite') {
       return this.getDeclineTXDetails(userID, contactOrPeerID, customAddress)
     }
-
     const { user, peer, contact } = this.getUserObjects(userID, contactOrPeerID)
     switch (type) {
       case 'approve':
