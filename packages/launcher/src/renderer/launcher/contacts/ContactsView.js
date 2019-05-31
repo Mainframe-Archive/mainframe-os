@@ -344,7 +344,7 @@ class ContactsViewComponent extends Component<Props, State> {
     this.state = {
       selectedContact: user.localID,
       selectedAddress: user.profile.ethAddress || '',
-      notification: 'delete',
+      notification: '',
     }
   }
 
@@ -1221,13 +1221,6 @@ class ContactsViewComponent extends Component<Props, State> {
         {stake + ' MFT have been added to your wallet.'}
       </Text>
     )
-    const deletedText = (
-      <Text color="#fff" size={13} variant={'bold'}>
-        {deletedContact.name
-          ? deletedContact.name
-          : 'Contact' + ' has been deleted.'}
-      </Text>
-    )
 
     const accountInfo = (
       <AvatarWrapper marginTop>
@@ -1272,7 +1265,11 @@ class ContactsViewComponent extends Component<Props, State> {
     } else if (this.state.notification === 'delete' && deletedContact) {
       return (
         <AlertToast onRequestClose={this.closeNotification}>
-          {deletedText}
+          <Text color="#fff" size={13} variant={'bold'}>
+            {deletedContact.name
+              ? deletedContact.name
+              : 'Contact' + ' has been deleted.'}
+          </Text>
           <AvatarWrapper marginTop>
             <Blocky>
               <Avatar id={deletedContact.ethAddress} size="small" />

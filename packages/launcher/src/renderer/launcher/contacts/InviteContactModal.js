@@ -16,6 +16,7 @@ import WalletIcon from '../wallets/WalletIcon'
 
 import applyContext, { type ContextProps } from '../LauncherContext'
 import { MFT_TOKEN_ADDRESSES } from '../../../constants'
+import Transaction from './Transaction'
 
 import type { InviteContactModal_contact as Contact } from './__generated__/InviteContactModal_contact.graphql.js'
 import type { WalletAccounts } from './ContactsView'
@@ -33,16 +34,17 @@ type Props = ContextProps & {
   showNotification: string => void,
 }
 
-type TXParams = {
+export type txParam = {
   gasPriceGwei: string,
   maxCost: string,
   stakeAmount: string,
 }
 
+type TXParams = Array<txParam>
+
 type State = {
   txProcessing: boolean,
   error?: ?string,
-  approvalTxParams?: ?TXParams,
   txParams?: ?TXParams,
   declinedTXHash?: ?string,
   withdrawTXHash?: ?string,
@@ -89,7 +91,6 @@ const AddContactDetail = styled.View`
   border-color: #efefef;
   flex-direction: row;
   align-items: center;
-  ${props => props.maxHeight && `max-height: 46px;`}
   ${props => props.border && `border-width: 1px;`}
   ${props => props.noMarginTop && `margin-top: 0px; padding: 5px;`}
 `
@@ -112,14 +113,6 @@ const GasContainer = styled.View`
   display: flex;
   max-width: 100%;
   flex-direction: row;
-`
-
-const TitleTooltipContainer = styled.View`
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  margin-bottom: 10px;
-  ${props => props.paddingTop && `padding-top: 30px;`}
 `
 
 class InviteContactModal extends Component<Props, State> {
@@ -170,7 +163,7 @@ class InviteContactModal extends Component<Props, State> {
         customAddress: address ? address : this.props.selectedAddress,
       })
       this.setState({
-        txParams: res,
+        txParams: [res],
         error: '',
       })
     } catch (err) {
@@ -180,7 +173,7 @@ class InviteContactModal extends Component<Props, State> {
     }
   }
 
-  async getInviteApproveTXDetails() {
+  async getInviteApproveTXDetails(address?: string) {
     const { user, contact } = this.props
 
     try {
@@ -188,11 +181,10 @@ class InviteContactModal extends Component<Props, State> {
         type: 'approve',
         userID: user.localID,
         contactID: contact.localID,
-        customAddress: this.props.selectedAddress,
+        customAddress: address ? address : this.props.selectedAddress,
       })
       this.setState({
-        txParams: res,
-        approvalTxParams: res,
+        txParams: [res],
         invitePending: {
           state: 'awaiting_approval',
         },
@@ -214,12 +206,17 @@ class InviteContactModal extends Component<Props, State> {
         contactID: contact.localID,
         customAddress: this.props.selectedAddress,
       })
-      this.setState({
-        txParams: res,
-        invitePending: {
-          state: 'approved',
-        },
-        error: '',
+      this.setState(prevState => {
+        if (prevState.txParams) {
+          const [previousTxParams] = prevState.txParams
+          return {
+            txParams: [previousTxParams, res],
+            invitePending: {
+              state: 'approved',
+            },
+            error: '',
+          }
+        }
       })
     } catch (err) {
       this.setState({
@@ -363,7 +360,7 @@ class InviteContactModal extends Component<Props, State> {
   updateSelectedAddress = (addr: string) => {
     // refresh tx details
     if (this.props.type === 'invite') {
-      this.getInviteApproveTXDetails()
+      this.getInviteApproveTXDetails(addr)
     } else {
       this.getTXDetails(this.props.type, addr)
     }
@@ -373,8 +370,8 @@ class InviteContactModal extends Component<Props, State> {
   // RENDER
   renderGasData() {
     const { txParams } = this.state
-    if (txParams) {
-      const { gasPriceGwei, maxCost, stakeAmount } = txParams
+    if (txParams && txParams[0]) {
+      const { gasPriceGwei, maxCost, stakeAmount } = txParams[0]
       const gasLabel = `Gas price: ${gasPriceGwei}`
       const costlabel = `Max Cost: ${maxCost} ETH`
       const mftLabel = `Stake: ${stakeAmount} MFT`
@@ -503,6 +500,7 @@ class InviteContactModal extends Component<Props, State> {
               onChange={addr => this.updateSelectedAddress(addr)}
               variant={[this.state.dropdownError ? 'error' : '', 'maxWidth440']}
               validation={feedback => this.validate(feedback)}
+              disabled={this.state.txProcessing}
             />
           </DropDownContainer>
           {this.renderGasData()}
@@ -562,73 +560,34 @@ class InviteContactModal extends Component<Props, State> {
   }
 
   renderInviteTransactions() {
-    const { invitePending, txParams, approvalTxParams } = this.state
+    const { invitePending, txParams } = this.state
     const buttons = this.getButtonStatus(this.sendApproveTX, this.sendInvite)
-
+    const approveInfo = {
+      title: 'TRANSACTION 1/2',
+      question: 'What does this mean?',
+      answer:
+        'To send an invite you must first grant approval to the contract to use your tokens.',
+    }
+    const sendInfo = {
+      title: 'TRANSACTION 2/2',
+      question: 'What does this mean?',
+      answer: 'This transaction will send the invite and withdraw your MFT.',
+    }
     return (
       <Section>
-        <TitleTooltipContainer>
-          <Text variant="smallTitle">{'TRANSACTION 1/2'}</Text>
-          <Tooltip>
-            <Text variant="tooltipTitle">What does this mean?</Text>
-            <Text variant="tooltipText">
-              To send an invite you must first grant approval to the contract to
-              use your tokens.
-            </Text>
-          </Tooltip>
-        </TitleTooltipContainer>
-        <AddContactDetail border maxHeight>
-          <AddContactDetailText>
-            <Text variant={['greyDark23', 'bold']} size={12}>
-              {'Contract'}
-            </Text>
-            {approvalTxParams && (
-              <GasContainer>
-                <Text color="#303030" size={11} variant="marginRight15">
-                  {'Gas price: ' + approvalTxParams.gasPriceGwei}
-                </Text>
-                <Text color="#303030" size={11}>
-                  {'Max Cost: ' + approvalTxParams.maxCost + ' ETH'}
-                </Text>
-              </GasContainer>
-            )}
-          </AddContactDetailText>
-          {buttons && buttons[0]}
-        </AddContactDetail>
+        <Transaction
+          title="Contract"
+          tooltipInfo={approveInfo}
+          txParam={txParams && txParams[0]}
+          button={buttons && buttons[0]}
+        />
         {invitePending && invitePending.state === 'approved' && (
-          <>
-            <TitleTooltipContainer paddingTop>
-              <Text variant="smallTitle">{'TRANSACTION 2/2'}</Text>
-              <Tooltip>
-                <Text variant="tooltipTitle">What is this?</Text>
-                <Text variant="tooltipText">
-                  This transaction will actually stake the MFT by calling the
-                  contract.
-                </Text>
-              </Tooltip>
-            </TitleTooltipContainer>
-            <AddContactDetail border maxHeight>
-              <AddContactDetailText>
-                <Text variant={['greyDark23', 'bold']} size={12}>
-                  {'Staking'}
-                </Text>
-                {txParams && (
-                  <GasContainer>
-                    <Text color="#303030" size={11} variant="marginRight10">
-                      {'Gas price: ' + txParams.gasPriceGwei}
-                    </Text>
-                    <Text color="#303030" size={11} variant="marginRight10">
-                      {'Max Cost: ' + txParams.maxCost + ' ETH'}
-                    </Text>
-                    <Text color="#303030" size={11}>
-                      {'Stake: ' + txParams.stakeAmount + ' MFT'}
-                    </Text>
-                  </GasContainer>
-                )}
-              </AddContactDetailText>
-              {buttons && buttons[1]}
-            </AddContactDetail>
-          </>
+          <Transaction
+            title="Staking"
+            tooltipInfo={sendInfo}
+            txParam={txParams && txParams[0]}
+            button={buttons && buttons[1]}
+          />
         )}
       </Section>
     )
