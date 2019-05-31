@@ -258,7 +258,7 @@ export const acceptContactRequestMutation = graphql`
 `
 
 const peerLookupQuery = graphql`
-  query ContactsScreenLookupPeerQuery($publicID: String!) {
+  query ContactsScreenLookupPeerQuery($publicID: ID!) {
     lookup {
       peerByID(publicID: $publicID) {
         profile {

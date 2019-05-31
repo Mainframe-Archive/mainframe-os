@@ -2,8 +2,7 @@
 
 import type { Logger } from '../logger'
 
-export type DB = {
-  collection: (params: Object) => Object,
+export type Collections = {
   apps: Object,
   app_versions: Object,
   contact_requests: Object,
@@ -14,10 +13,15 @@ export type DB = {
   own_developers: Object,
   peers: Object,
   user_app_settings: Object,
+  user_app_versions: Object,
   users: Object,
 }
 
-export type Collection = $Keys<DB>
+export type Collection = $Keys<Collections>
+
+export type DB = Collections & {
+  collection: (params: Object) => Object,
+}
 
 export type DBParams = {
   location: string,

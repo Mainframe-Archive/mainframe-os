@@ -276,6 +276,10 @@ export const appVersion = new GraphQLObjectType({
     installationState: {
       type: new GraphQLNonNull(appInstallationState),
     },
+    update: {
+      type: appVersion,
+      resolve: doc => doc.getUpdate(),
+    },
   }),
 })
 
@@ -287,9 +291,28 @@ export const app = new GraphQLObjectType({
     localID: {
       type: new GraphQLNonNull(GraphQLID),
     },
+    publicID: {
+      type: new GraphQLNonNull(GraphQLID),
+      resolve: doc => doc.getPublicID(),
+    },
     versions: {
       type: list(appVersion),
       resolve: doc => doc.getVersions(),
+    },
+  }),
+})
+
+export const appUpdate = new GraphQLObjectType({
+  name: 'AppUpdate',
+  fields: () => ({
+    fromVersion: {
+      type: new GraphQLNonNull(appVersion),
+    },
+    toVersion: {
+      type: new GraphQLNonNull(appVersion),
+    },
+    permissionsChanged: {
+      type: new GraphQLNonNull(GraphQLBoolean),
     },
   }),
 })
@@ -373,6 +396,34 @@ export const ownApp = new GraphQLObjectType({
   }),
 })
 
+export const devtools = new GraphQLObjectType({
+  name: 'Devtools',
+  fields: () => ({
+    apps: {
+      type: list(ownApp),
+      args: {
+        developerID: { type: GraphQLID },
+      },
+      resolve: async (doc, args, ctx) => {
+        const criteria =
+          args.developerID == null ? undefined : { developer: args.developerID }
+        return await ctx.db.own_apps.find(criteria).exec()
+      },
+    },
+    developers: {
+      type: list(ownDeveloper),
+      resolve: async (doc, args, ctx) => {
+        return await ctx.db.own_developers.find().exec()
+      },
+    },
+  }),
+})
+
+export const devtoolsField = {
+  type: new GraphQLNonNull(devtools),
+  resolve: () => ({}),
+}
+
 // Peers and contacts
 
 export const peer = new GraphQLObjectType({
@@ -384,7 +435,7 @@ export const peer = new GraphQLObjectType({
       type: new GraphQLNonNull(GraphQLID),
     },
     publicID: {
-      type: new GraphQLNonNull(GraphQLString),
+      type: new GraphQLNonNull(GraphQLID),
       resolve: doc => doc.getPublicID(),
     },
     publicFeed: {
@@ -466,7 +517,7 @@ export const contact = new GraphQLObjectType({
       resolve: doc => doc.populate('peer'),
     },
     publicID: {
-      type: new GraphQLNonNull(GraphQLString),
+      type: new GraphQLNonNull(GraphQLID),
       resolve: doc => doc.getPublicID(),
     },
     profile: {
@@ -500,7 +551,7 @@ export const contactRequest = new GraphQLObjectType({
       resolve: doc => doc.peer,
     },
     publicID: {
-      type: new GraphQLNonNull(GraphQLString),
+      type: new GraphQLNonNull(GraphQLID),
       resolve: doc => doc.getPublicID(),
     },
     // TODO: other fields
@@ -645,6 +696,26 @@ export const userAppVersion = new GraphQLObjectType({
       type: new GraphQLNonNull(userAppSettings),
       resolve: doc => doc.populate('settings'),
     },
+    update: {
+      type: appUpdate,
+      resolve: async doc => {
+        const appVersion = await doc.populate('appVersion')
+        const newVersion = await appVersion.getUpdate()
+
+        if (newVersion == null) {
+          return null
+        }
+
+        // TODO: compare current and new version manifest permissions
+        const permissionsChanged = false
+
+        return {
+          fromVersion: appVersion,
+          toVersion: newVersion,
+          permissionsChanged,
+        }
+      },
+    },
   }),
 })
 
@@ -693,7 +764,7 @@ export const user = new GraphQLObjectType({
 
 export const viewerField = {
   type: new GraphQLNonNull(user),
-  resolve: (self, args, ctx) => ctx.getUser(),
+  resolve: (self: Object, args: Object, ctx: GraphQLContext) => ctx.getUser(),
 }
 
 // Lookup (search)
@@ -705,7 +776,7 @@ export const peerLookupResult = new GraphQLObjectType({
       type: GraphQLString,
     },
     publicID: {
-      type: new GraphQLNonNull(GraphQLString),
+      type: new GraphQLNonNull(GraphQLID),
     },
     profile: {
       type: new GraphQLNonNull(genericProfile),
@@ -719,7 +790,9 @@ export const lookup = new GraphQLObjectType({
     peerByID: {
       type: peerLookupResult,
       args: {
-        publicID: { type: new GraphQLNonNull(GraphQLString) },
+        publicID: {
+          type: new GraphQLNonNull(GraphQLID),
+        },
       },
       resolve: async (self, args, ctx: GraphQLContext) => {
         ctx.logger.log({

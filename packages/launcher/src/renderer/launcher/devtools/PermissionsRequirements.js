@@ -1,20 +1,22 @@
-//@flow
-import React, { Component } from 'react'
-import {
-  type StrictPermissionsRequirements,
-  type PermissionRequirement,
-  type PermissionKey,
-  type PermissionKeyBasic,
-  isValidWebHost,
-} from '@mainframe/app-permissions'
+// @flow
 
-import styled from 'styled-components/native'
 import { TextField, Text, DropDown } from '@morpheus-ui/core'
 import {
   type FormSubmitPayload,
   type FieldValidateFunctionParams,
 } from '@morpheus-ui/forms'
 import CloseIcon from '@morpheus-ui/icons/Close'
+// TODO: remove dependency on this package, these types should be added in the OS package
+import type {
+  StrictPermissionsRequirements,
+  PermissionRequirement,
+  PermissionKey,
+  PermissionKeyBasic,
+} from '@mainframe/app-permissions'
+import React, { Component } from 'react'
+import styled from 'styled-components/native'
+
+import { isValidWebHost } from '../../../validation'
 
 import FormModalView from '../../UIComponents/FormModalView'
 

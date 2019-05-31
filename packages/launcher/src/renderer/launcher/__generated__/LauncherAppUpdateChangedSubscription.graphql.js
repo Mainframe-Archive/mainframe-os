@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 0abcd710dd8dab406b3fc2168e6109d0
+ * @relayHash 0b6c882ed73cf78cffe84345b89d3e48
  */
 
 /* eslint-disable */
@@ -9,16 +9,12 @@
 
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
-type AppItem_installedApp$ref = any;
 export type LauncherAppUpdateChangedSubscriptionVariables = {||};
 export type LauncherAppUpdateChangedSubscriptionResponse = {|
   +appUpdateChanged: {|
     +viewer: {|
       +id: string
-    |},
-    +app: {|
-      +$fragmentRefs: AppItem_installedApp$ref
-    |},
+    |}
   |}
 |};
 export type LauncherAppUpdateChangedSubscription = {|
@@ -34,65 +30,48 @@ subscription LauncherAppUpdateChangedSubscription {
     viewer {
       id
     }
-    app {
-      ...AppItem_installedApp
-      id
-    }
-  }
-}
-
-fragment AppItem_installedApp on App {
-  mfid
-  localID
-  name
-  installationState
-  manifest {
-    author {
-      id
-      name
-    }
-  }
-  update {
-    manifest {
-      version
-    }
   }
 }
 */
 
 const node/*: ConcreteRequest*/ = (function(){
-var v0 = {
-  "kind": "ScalarField",
-  "alias": null,
-  "name": "id",
-  "args": null,
-  "storageKey": null
-},
-v1 = {
-  "kind": "LinkedField",
-  "alias": null,
-  "name": "viewer",
-  "storageKey": null,
-  "args": null,
-  "concreteType": "User",
-  "plural": false,
-  "selections": [
-    v0
-  ]
-},
-v2 = {
-  "kind": "ScalarField",
-  "alias": null,
-  "name": "name",
-  "args": null,
-  "storageKey": null
-};
+var v0 = [
+  {
+    "kind": "LinkedField",
+    "alias": null,
+    "name": "appUpdateChanged",
+    "storageKey": null,
+    "args": null,
+    "concreteType": "AppUpdatePayload",
+    "plural": false,
+    "selections": [
+      {
+        "kind": "LinkedField",
+        "alias": null,
+        "name": "viewer",
+        "storageKey": null,
+        "args": null,
+        "concreteType": "User",
+        "plural": false,
+        "selections": [
+          {
+            "kind": "ScalarField",
+            "alias": null,
+            "name": "id",
+            "args": null,
+            "storageKey": null
+          }
+        ]
+      }
+    ]
+  }
+];
 return {
   "kind": "Request",
   "operationKind": "subscription",
   "name": "LauncherAppUpdateChangedSubscription",
   "id": null,
-  "text": "subscription LauncherAppUpdateChangedSubscription {\n  appUpdateChanged {\n    viewer {\n      id\n    }\n    app {\n      ...AppItem_installedApp\n      id\n    }\n  }\n}\n\nfragment AppItem_installedApp on App {\n  mfid\n  localID\n  name\n  installationState\n  manifest {\n    author {\n      id\n      name\n    }\n  }\n  update {\n    manifest {\n      version\n    }\n  }\n}\n",
+  "text": "subscription LauncherAppUpdateChangedSubscription {\n  appUpdateChanged {\n    viewer {\n      id\n    }\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -100,145 +79,16 @@ return {
     "type": "Subscription",
     "metadata": null,
     "argumentDefinitions": [],
-    "selections": [
-      {
-        "kind": "LinkedField",
-        "alias": null,
-        "name": "appUpdateChanged",
-        "storageKey": null,
-        "args": null,
-        "concreteType": "AppUpdatePayload",
-        "plural": false,
-        "selections": [
-          v1,
-          {
-            "kind": "LinkedField",
-            "alias": null,
-            "name": "app",
-            "storageKey": null,
-            "args": null,
-            "concreteType": "App",
-            "plural": false,
-            "selections": [
-              {
-                "kind": "FragmentSpread",
-                "name": "AppItem_installedApp",
-                "args": null
-              }
-            ]
-          }
-        ]
-      }
-    ]
+    "selections": v0
   },
   "operation": {
     "kind": "Operation",
     "name": "LauncherAppUpdateChangedSubscription",
     "argumentDefinitions": [],
-    "selections": [
-      {
-        "kind": "LinkedField",
-        "alias": null,
-        "name": "appUpdateChanged",
-        "storageKey": null,
-        "args": null,
-        "concreteType": "AppUpdatePayload",
-        "plural": false,
-        "selections": [
-          v1,
-          {
-            "kind": "LinkedField",
-            "alias": null,
-            "name": "app",
-            "storageKey": null,
-            "args": null,
-            "concreteType": "App",
-            "plural": false,
-            "selections": [
-              {
-                "kind": "ScalarField",
-                "alias": null,
-                "name": "mfid",
-                "args": null,
-                "storageKey": null
-              },
-              {
-                "kind": "ScalarField",
-                "alias": null,
-                "name": "localID",
-                "args": null,
-                "storageKey": null
-              },
-              v2,
-              {
-                "kind": "ScalarField",
-                "alias": null,
-                "name": "installationState",
-                "args": null,
-                "storageKey": null
-              },
-              {
-                "kind": "LinkedField",
-                "alias": null,
-                "name": "manifest",
-                "storageKey": null,
-                "args": null,
-                "concreteType": "AppManifestData",
-                "plural": false,
-                "selections": [
-                  {
-                    "kind": "LinkedField",
-                    "alias": null,
-                    "name": "author",
-                    "storageKey": null,
-                    "args": null,
-                    "concreteType": "AppAuthor",
-                    "plural": false,
-                    "selections": [
-                      v0,
-                      v2
-                    ]
-                  }
-                ]
-              },
-              {
-                "kind": "LinkedField",
-                "alias": null,
-                "name": "update",
-                "storageKey": null,
-                "args": null,
-                "concreteType": "AppUpdateData",
-                "plural": false,
-                "selections": [
-                  {
-                    "kind": "LinkedField",
-                    "alias": null,
-                    "name": "manifest",
-                    "storageKey": null,
-                    "args": null,
-                    "concreteType": "AppManifestData",
-                    "plural": false,
-                    "selections": [
-                      {
-                        "kind": "ScalarField",
-                        "alias": null,
-                        "name": "version",
-                        "args": null,
-                        "storageKey": null
-                      }
-                    ]
-                  }
-                ]
-              },
-              v0
-            ]
-          }
-        ]
-      }
-    ]
+    "selections": v0
   }
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = 'a9645635ebf05bf6c8d25170cccb28ba';
+(node/*: any*/).hash = '2d4b9dde90a9771106dd3d72fa43315f';
 module.exports = node;

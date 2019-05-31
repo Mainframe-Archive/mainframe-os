@@ -14,7 +14,9 @@ import { mutationWithClientMutationId } from 'graphql-relay'
 
 import {
   app,
+  appVersion,
   contact,
+  devtoolsField,
   ethHdWallet,
   ethLedgerWallet,
   ownApp,
@@ -377,12 +379,13 @@ const createDeveloperMutation = mutationWithClientMutationId({
       type: ownDeveloper,
       resolve: payload => payload.developer,
     },
-    viewer: viewerField,
+    devtools: devtoolsField,
   },
   mutateAndGetPayload: async (args, ctx) => {
-    const user = ctx.openVault.identities.createOwnDeveloper(args.profile)
-    await ctx.openVault.save()
-    return { user }
+    const developer = await ctx.db.own_developers.create({
+      profile: args.profile,
+    })
+    return { developer }
   },
 })
 
@@ -576,10 +579,18 @@ const appCreateMutation = mutationWithClientMutationId({
       type: new GraphQLNonNull(ownApp),
       resolve: payload => payload.app,
     },
-    viewer: viewerField,
+    devtools: devtoolsField,
   },
   mutateAndGetPayload: async (args, ctx) => {
-    const app = await ctx.mutations.createApp(args)
+    const app = await ctx.db.own_apps.create({
+      contentsPath: args.contentsPath,
+      developer: args.developerID,
+      profile: {
+        name: args.name,
+      },
+      version: args.version,
+      permissions: args.permissionsRequirements,
+    })
     return { app }
   },
 })
@@ -602,7 +613,11 @@ const appCreateVersionMutation = mutationWithClientMutationId({
     viewer: viewerField,
   },
   mutateAndGetPayload: async (args, ctx) => {
-    const app = await ctx.mutations.createAppVersion(args)
+    const app = await ctx.getDoc('own_apps', args.appID)
+    if (app == null) {
+      throw new Error('Application not found')
+    }
+    await app.addVersion({ version: args.version })
     return { app }
   },
 })
@@ -712,9 +727,9 @@ const appInstallMutation = mutationWithClientMutationId({
     },
   },
   outputFields: {
-    app: {
-      type: app,
-      resolve: payload => payload.app,
+    appVersion: {
+      type: appVersion,
+      resolve: payload => payload.appVersion,
     },
     viewer: viewerField,
   },

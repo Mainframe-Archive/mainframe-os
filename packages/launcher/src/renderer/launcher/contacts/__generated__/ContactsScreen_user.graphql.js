@@ -8,8 +8,8 @@
 
 /*::
 import type { ConcreteFragment } from 'relay-runtime';
-export type ConnectionState = "CONNECTED" | "DECLINED" | "RECEIVED" | "SENDING_BLOCKCHAIN" | "SENDING_FEED" | "SENT_BLOCKCHAIN" | "SENT_FEED" | "%future added value";
-export type StakeState = "RECLAIMED" | "RECLAIMING" | "SEIZED" | "STAKED" | "%future added value";
+export type ContactConnectionState = "CONNECTED" | "DECLINED" | "RECEIVED" | "SENDING_BLOCKCHAIN" | "SENDING_FEED" | "SENT_BLOCKCHAIN" | "SENT_FEED" | "%future added value";
+export type ContactStakeState = "RECLAIMED" | "RECLAIMING" | "SEIZED" | "STAKED" | "%future added value";
 import type { FragmentReference } from "relay-runtime";
 declare export opaque type ContactsScreen_user$ref: FragmentReference;
 export type ContactsScreen_user = {|
@@ -23,14 +23,14 @@ export type ContactsScreen_user = {|
     +localID: string,
     +peerID: string,
     +publicID: string,
-    +connectionState: ConnectionState,
+    +connectionState: ContactConnectionState,
     +invite: ?{|
       +ethNetwork: ?string,
       +inviteTX: ?string,
       +stake: {|
         +reclaimedTX: ?string,
         +amount: ?string,
-        +state: StakeState,
+        +state: ContactStakeState,
       |},
     |},
     +profile: {|
@@ -147,7 +147,7 @@ return {
               "name": "stake",
               "storageKey": null,
               "args": null,
-              "concreteType": "InviteStake",
+              "concreteType": "ContactInviteStake",
               "plural": false,
               "selections": [
                 {

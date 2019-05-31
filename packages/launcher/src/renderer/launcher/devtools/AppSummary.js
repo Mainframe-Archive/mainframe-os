@@ -1,14 +1,14 @@
-//@flow
-import React, { Component } from 'react'
+// @flow
 
+import { Text } from '@morpheus-ui/core'
+// TODO: replace by internal types
 import type {
   PermissionKey,
   PermissionRequirement,
   StrictPermissionsRequirements,
 } from '@mainframe/app-permissions'
-
+import React, { Component } from 'react'
 import styled from 'styled-components/native'
-import { Text } from '@morpheus-ui/core'
 
 import FormModalView from '../../UIComponents/FormModalView'
 import { PERMISSIONS_DESCRIPTIONS } from './PermissionsRequirements'

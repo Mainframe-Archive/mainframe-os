@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash a2eaa765940d9095554192f4d3f50663
+ * @relayHash 5d1bb4925e50ed34fc1942f919c32069
  */
 
 /* eslint-disable */
@@ -9,13 +9,13 @@
 
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
-export type ConnectionState = "CONNECTED" | "DECLINED" | "RECEIVED" | "SENDING_BLOCKCHAIN" | "SENDING_FEED" | "SENT_BLOCKCHAIN" | "SENT_FEED" | "%future added value";
-export type StakeState = "RECLAIMED" | "RECLAIMING" | "SEIZED" | "STAKED" | "%future added value";
+export type ContactConnectionState = "CONNECTED" | "DECLINED" | "RECEIVED" | "SENDING_BLOCKCHAIN" | "SENDING_FEED" | "SENT_BLOCKCHAIN" | "SENT_FEED" | "%future added value";
+export type ContactStakeState = "RECLAIMED" | "RECLAIMING" | "SEIZED" | "STAKED" | "%future added value";
 export type LauncherContactChangedSubscriptionVariables = {||};
 export type LauncherContactChangedSubscriptionResponse = {|
   +contactChanged: {|
     +contact: {|
-      +connectionState: ConnectionState,
+      +connectionState: ContactConnectionState,
       +profile: {|
         +name: ?string,
         +avatar: ?string,
@@ -26,7 +26,7 @@ export type LauncherContactChangedSubscriptionResponse = {|
         +stake: {|
           +reclaimedTX: ?string,
           +amount: ?string,
-          +state: StakeState,
+          +state: ContactStakeState,
         |},
       |},
     |}
@@ -125,7 +125,7 @@ v2 = {
       "name": "stake",
       "storageKey": null,
       "args": null,
-      "concreteType": "InviteStake",
+      "concreteType": "ContactInviteStake",
       "plural": false,
       "selections": [
         {

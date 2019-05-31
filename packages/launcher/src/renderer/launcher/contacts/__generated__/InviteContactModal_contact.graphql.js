@@ -8,21 +8,21 @@
 
 /*::
 import type { ConcreteFragment } from 'relay-runtime';
-export type ConnectionState = "CONNECTED" | "DECLINED" | "RECEIVED" | "SENDING_BLOCKCHAIN" | "SENDING_FEED" | "SENT_BLOCKCHAIN" | "SENT_FEED" | "%future added value";
-export type StakeState = "RECLAIMED" | "RECLAIMING" | "SEIZED" | "STAKED" | "%future added value";
+export type ContactConnectionState = "CONNECTED" | "DECLINED" | "RECEIVED" | "SENDING_BLOCKCHAIN" | "SENDING_FEED" | "SENT_BLOCKCHAIN" | "SENT_FEED" | "%future added value";
+export type ContactStakeState = "RECLAIMED" | "RECLAIMING" | "SEIZED" | "STAKED" | "%future added value";
 import type { FragmentReference } from "relay-runtime";
 declare export opaque type InviteContactModal_contact$ref: FragmentReference;
 export type InviteContactModal_contact = {|
   +localID: string,
   +peerID: string,
   +publicID: string,
-  +connectionState: ConnectionState,
+  +connectionState: ContactConnectionState,
   +invite: ?{|
     +inviteTX: ?string,
     +stake: {|
       +reclaimedTX: ?string,
       +amount: ?string,
-      +state: StakeState,
+      +state: ContactStakeState,
     |},
   |},
   +profile: {|
@@ -91,7 +91,7 @@ const node/*: ConcreteFragment*/ = {
           "name": "stake",
           "storageKey": null,
           "args": null,
-          "concreteType": "InviteStake",
+          "concreteType": "ContactInviteStake",
           "plural": false,
           "selections": [
             {

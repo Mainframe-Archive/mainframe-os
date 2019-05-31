@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash febccd4bc1b0e5b539e26d35621bcaef
+ * @relayHash 846c97550bcd1aed96d3812ded747998
  */
 
 /* eslint-disable */
@@ -32,7 +32,7 @@ export type ContactsScreenLookupPeerQuery = {|
 
 /*
 query ContactsScreenLookupPeerQuery(
-  $publicID: String!
+  $publicID: ID!
 ) {
   lookup {
     peerByID(publicID: $publicID) {
@@ -51,7 +51,7 @@ var v0 = [
   {
     "kind": "LocalArgument",
     "name": "publicID",
-    "type": "String!",
+    "type": "ID!",
     "defaultValue": null
   }
 ],
@@ -75,7 +75,7 @@ v1 = [
             "kind": "Variable",
             "name": "publicID",
             "variableName": "publicID",
-            "type": "String!"
+            "type": "ID!"
           }
         ],
         "concreteType": "PeerLookupResult",
@@ -123,7 +123,7 @@ return {
   "operationKind": "query",
   "name": "ContactsScreenLookupPeerQuery",
   "id": null,
-  "text": "query ContactsScreenLookupPeerQuery(\n  $publicID: String!\n) {\n  lookup {\n    peerByID(publicID: $publicID) {\n      profile {\n        name\n      }\n      publicID\n      publicKey\n    }\n  }\n}\n",
+  "text": "query ContactsScreenLookupPeerQuery(\n  $publicID: ID!\n) {\n  lookup {\n    peerByID(publicID: $publicID) {\n      profile {\n        name\n      }\n      publicID\n      publicKey\n    }\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -142,5 +142,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '50c8b4f3b5b9fd5370dc78d7ff6d4942';
+(node/*: any*/).hash = '7253a71acabe5bdfe4409de6edb2ec95';
 module.exports = node;

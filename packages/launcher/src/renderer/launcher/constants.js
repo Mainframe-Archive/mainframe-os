@@ -3,7 +3,9 @@
 export const ROUTES = {
   APPS: '/apps',
   CONTACTS: '/contacts',
-  DEVTOOLS: '/settings/dev',
+  DEVTOOLS: '/dev',
+  DEVTOOLS_APPS: '/dev/apps/:developerID?',
+  DEVTOOLS_DEVELOPERS_CREATE: '/dev/developers/create',
   HOME: '/',
   ONBOARDING_CREATE: '/onboarding/create',
   ONBOARDING_OPEN: '/onboarding/open',

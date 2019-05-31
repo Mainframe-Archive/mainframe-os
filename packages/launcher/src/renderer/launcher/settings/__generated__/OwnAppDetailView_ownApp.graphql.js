@@ -12,18 +12,19 @@ import type { FragmentReference } from "relay-runtime";
 declare export opaque type OwnAppDetailView_ownApp$ref: FragmentReference;
 export type OwnAppDetailView_ownApp = {|
   +localID: string,
-  +mfid: string,
-  +name: string,
-  +contentsPath: string,
-  +updateFeedHash: string,
-  +developer: {|
-    +id: ?string,
-    +name: ?string,
+  +publicID: string,
+  +profile: {|
+    +name: string
   |},
-  +publishedVersion: ?string,
-  +currentVersionData: {|
+  +contentsPath: string,
+  +developer: {|
+    +localID: string,
+    +profile: {|
+      +name: string
+    |},
+  |},
+  +inProgressVersion: ?{|
     +version: string,
-    +versionHash: ?string,
     +permissions: {|
       +optional: {|
         +WEB_REQUEST: ?$ReadOnlyArray<?string>,
@@ -39,6 +40,9 @@ export type OwnAppDetailView_ownApp = {|
       |},
     |},
   |},
+  +latestPublishedVersion: ?{|
+    +version: string
+  |},
   +$refType: OwnAppDetailView_ownApp$ref,
 |};
 */
@@ -48,11 +52,36 @@ const node/*: ConcreteFragment*/ = (function(){
 var v0 = {
   "kind": "ScalarField",
   "alias": null,
-  "name": "name",
+  "name": "localID",
   "args": null,
   "storageKey": null
 },
-v1 = [
+v1 = {
+  "kind": "LinkedField",
+  "alias": null,
+  "name": "profile",
+  "storageKey": null,
+  "args": null,
+  "concreteType": "NamedProfile",
+  "plural": false,
+  "selections": [
+    {
+      "kind": "ScalarField",
+      "alias": null,
+      "name": "name",
+      "args": null,
+      "storageKey": null
+    }
+  ]
+},
+v2 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "version",
+  "args": null,
+  "storageKey": null
+},
+v3 = [
   {
     "kind": "ScalarField",
     "alias": null,
@@ -89,32 +118,19 @@ return {
   "metadata": null,
   "argumentDefinitions": [],
   "selections": [
-    {
-      "kind": "ScalarField",
-      "alias": null,
-      "name": "localID",
-      "args": null,
-      "storageKey": null
-    },
-    {
-      "kind": "ScalarField",
-      "alias": null,
-      "name": "mfid",
-      "args": null,
-      "storageKey": null
-    },
     v0,
     {
       "kind": "ScalarField",
       "alias": null,
-      "name": "contentsPath",
+      "name": "publicID",
       "args": null,
       "storageKey": null
     },
+    v1,
     {
       "kind": "ScalarField",
       "alias": null,
-      "name": "updateFeedHash",
+      "name": "contentsPath",
       "args": null,
       "storageKey": null
     },
@@ -124,49 +140,23 @@ return {
       "name": "developer",
       "storageKey": null,
       "args": null,
-      "concreteType": "AppAuthor",
+      "concreteType": "OwnDeveloper",
       "plural": false,
       "selections": [
-        {
-          "kind": "ScalarField",
-          "alias": null,
-          "name": "id",
-          "args": null,
-          "storageKey": null
-        },
-        v0
+        v0,
+        v1
       ]
-    },
-    {
-      "kind": "ScalarField",
-      "alias": null,
-      "name": "publishedVersion",
-      "args": null,
-      "storageKey": null
     },
     {
       "kind": "LinkedField",
       "alias": null,
-      "name": "currentVersionData",
+      "name": "inProgressVersion",
       "storageKey": null,
       "args": null,
-      "concreteType": "AppVersionData",
+      "concreteType": "OwnAppVersion",
       "plural": false,
       "selections": [
-        {
-          "kind": "ScalarField",
-          "alias": null,
-          "name": "version",
-          "args": null,
-          "storageKey": null
-        },
-        {
-          "kind": "ScalarField",
-          "alias": null,
-          "name": "versionHash",
-          "args": null,
-          "storageKey": null
-        },
+        v2,
         {
           "kind": "LinkedField",
           "alias": null,
@@ -184,7 +174,7 @@ return {
               "args": null,
               "concreteType": "AppPermissionDefinitions",
               "plural": false,
-              "selections": v1
+              "selections": v3
             },
             {
               "kind": "LinkedField",
@@ -194,15 +184,27 @@ return {
               "args": null,
               "concreteType": "AppPermissionDefinitions",
               "plural": false,
-              "selections": v1
+              "selections": v3
             }
           ]
         }
+      ]
+    },
+    {
+      "kind": "LinkedField",
+      "alias": null,
+      "name": "latestPublishedVersion",
+      "storageKey": null,
+      "args": null,
+      "concreteType": "OwnAppVersion",
+      "plural": false,
+      "selections": [
+        v2
       ]
     }
   ]
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = 'be0e5ff3fb81bac3fbb214358530f3cd';
+(node/*: any*/).hash = 'b9371e6acec0a70370669abcf3ec2967';
 module.exports = node;

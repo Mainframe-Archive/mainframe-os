@@ -54,6 +54,7 @@ type App implements Node {
   """The ID of an object"""
   id: ID!
   localID: ID!
+  publicID: ID!
   versions: [AppVersion!]!
 }
 
@@ -73,7 +74,7 @@ input AppCreateMutationInput {
 
 type AppCreateMutationPayload {
   app: OwnApp!
-  viewer: User!
+  devtools: Devtools!
   clientMutationId: String
 }
 
@@ -104,7 +105,7 @@ input AppInstallMutationInput {
 }
 
 type AppInstallMutationPayload {
-  app: App
+  appVersion: AppVersion
   viewer: User!
   clientMutationId: String
 }
@@ -164,6 +165,12 @@ input AppPermissionsSettingsInput {
   grants: PermissionGrantsInput!
 }
 
+type AppUpdate {
+  fromVersion: AppVersion!
+  toVersion: AppVersion!
+  permissionsChanged: Boolean!
+}
+
 input AppUpdateMutationInput {
   appID: String!
   userID: String!
@@ -192,6 +199,7 @@ type AppVersion implements Node {
   developer: Developer!
   manifest: AppManifest!
   installationState: AppInstallationState!
+  update: AppVersion
 }
 
 type Contact implements Node {
@@ -200,7 +208,7 @@ type Contact implements Node {
   localID: ID!
   peerID: ID!
   peer: Peer!
-  publicID: String!
+  publicID: ID!
   profile: GenericProfile!
   connectionState: ContactConnectionState!
   invite: ContactInviteData
@@ -238,7 +246,7 @@ type ContactRequest implements Node {
   id: ID!
   localID: ID!
   localPeerID: ID!
-  publicID: String!
+  publicID: ID!
 }
 
 enum ContactStakeState {
@@ -255,7 +263,7 @@ input CreateDeveloperInput {
 
 type CreateDeveloperPayload {
   developer: OwnDeveloper
-  viewer: User!
+  devtools: Devtools!
   clientMutationId: String
 }
 
@@ -302,6 +310,11 @@ type Developer implements Node {
   apps: [App!]!
 }
 
+type Devtools {
+  apps(developerID: ID): [OwnApp!]!
+  developers: [OwnDeveloper!]!
+}
+
 type EthHDWallet implements Node {
   """The ID of an object"""
   id: ID!
@@ -345,7 +358,7 @@ type ImportHDWalletPayload {
 }
 
 type Lookup {
-  peerByID(publicID: String!): PeerLookupResult
+  peerByID(publicID: ID!): PeerLookupResult
 }
 
 input ManifestAuthorInput {
@@ -421,14 +434,14 @@ type Peer implements Node {
   """The ID of an object"""
   id: ID!
   localID: ID!
-  publicID: String!
+  publicID: ID!
   publicFeed: String!
   profile: GenericProfile!
 }
 
 type PeerLookupResult {
   publicKey: String
-  publicID: String!
+  publicID: ID!
   profile: GenericProfile!
 }
 
@@ -452,6 +465,7 @@ type PublishAppVersionPayload {
 }
 
 type Query {
+  devtools: Devtools!
   lookup: Lookup!
 
   """Fetches an object given its ID"""
@@ -578,6 +592,7 @@ type UserAppVersion implements Node {
   user: User!
   appVersion: AppVersion!
   settings: UserAppSettings!
+  update: AppUpdate
 }
 
 input UserProfileInput {

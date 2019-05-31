@@ -18,6 +18,7 @@ import { COLLECTION_NAMES } from '../constants'
 import type { CollectionParams } from '../types'
 
 import schema from '../schemas/contact'
+import type { GenericProfile } from '../schemas/genericProfile'
 import { generateKeyPair, generateLocalID } from '../utils'
 
 const FIRST_CONTACT_FEED_NAME = 'mf:first-contact:v1'

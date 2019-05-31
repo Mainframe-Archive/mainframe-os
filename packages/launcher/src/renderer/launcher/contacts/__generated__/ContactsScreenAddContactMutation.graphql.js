@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 7c2e77b7ca64c4c094eb54fe25d62972
+ * @relayHash cd328ecaa863ff91147da9704c692027
  */
 
 /* eslint-disable */
@@ -160,7 +160,7 @@ v7 = {
   "name": "stake",
   "storageKey": null,
   "args": null,
-  "concreteType": "InviteStake",
+  "concreteType": "ContactInviteStake",
   "plural": false,
   "selections": [
     {

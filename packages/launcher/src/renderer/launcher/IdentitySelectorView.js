@@ -81,21 +81,6 @@ export const createDeveloperMutation = graphql`
           name
         }
       }
-      viewer {
-        id
-        # identities {
-        #   ownUsers {
-        #     profile {
-        #       name
-        #     }
-        #   }
-        #   ownDevelopers {
-        #     profile {
-        #       name
-        #     }
-        #   }
-        # }
-      }
     }
   }
 `

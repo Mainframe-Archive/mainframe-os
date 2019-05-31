@@ -1,28 +1,42 @@
-//@flow
+// @flow
 
-import type { StrictPermissionsRequirements } from '@mainframe/app-permissions'
-import type { AppCreateParams, IdentityOwnData } from '@mainframe/client'
-import React, { Component } from 'react'
-import { graphql, QueryRenderer, commitMutation } from 'react-relay'
 import { Text } from '@morpheus-ui/core'
 
-import RelayLoaderView from '../RelayLoaderView'
+// TODO: use local type rather than library import
+import type { StrictPermissionsRequirements } from '@mainframe/app-permissions'
+import React, { Component } from 'react'
+import { graphql, commitMutation } from 'react-relay'
+
 import { EnvironmentContext } from '../RelayEnvironment'
-import { appCreateMutation } from '../apps/appMutations'
+
 import PermissionsRequirementsView from './PermissionsRequirements'
 import AppSummary, { type AppData } from './AppSummary'
 import EditAppDetailsModal, {
   type CompleteAppData,
 } from './EditAppDetailsModal'
 
-type RendererProps = {
+const createAppMutation = graphql`
+  mutation CreateAppModalMutation($input: AppCreateMutationInput!) {
+    createApp(input: $input) {
+      app {
+        id
+        localID
+        profile {
+          name
+        }
+      }
+      devtools {
+        ...OwnAppsScreen_devtools
+      }
+    }
+  }
+`
+
+type Props = {
+  developerID: string,
   onPressBack?: () => any,
   onRequestClose: () => void,
   onAppCreated: () => void,
-}
-
-type Props = RendererProps & {
-  ownDevelopers: Array<IdentityOwnData>,
 }
 
 type State = {
@@ -33,7 +47,7 @@ type State = {
   errorMsg?: string,
 }
 
-class CreateAppModal extends Component<Props, State> {
+export default class CreateAppModal extends Component<Props, State> {
   static contextType = EnvironmentContext
 
   state = {
@@ -54,39 +68,13 @@ class CreateAppModal extends Component<Props, State> {
 
   // HANDLERS
 
-  onSelectId = (id: string) => {
-    this.setState(({ appData }) => ({
-      screen: 'permissions',
-      appData: {
-        ...appData,
-        developerID: id,
-      },
-    }))
-  }
-
-  getCreateParams = (
-    appData: AppData,
-    permissions: StrictPermissionsRequirements,
-  ): ?AppCreateParams => {
-    if (
-      appData.name &&
-      appData.version &&
-      appData.contentsPath &&
-      appData.developerID
-    ) {
-      // $FlowFixMe: null checks
-      return {
-        ...appData,
-        permissionsRequirements: permissions,
-      }
-    }
-  }
-
   onPressCreateApp = async () => {
     const { appData, permissionsRequirements } = this.state
-
-    const params = this.getCreateParams(appData, permissionsRequirements)
-    if (!params) {
+    if (
+      appData.name == null ||
+      appData.version == null ||
+      appData.contentsPath == null
+    ) {
       this.setState({
         errorMsg: 'Unable to create app due to incomplete data.', // TODO: More specific error
       })
@@ -94,9 +82,15 @@ class CreateAppModal extends Component<Props, State> {
     }
 
     commitMutation(this.context, {
-      mutation: appCreateMutation,
-      // $FlowFixMe: Relay type
-      variables: { input: params },
+      mutation: createAppMutation,
+      variables: {
+        input: {
+          ...appData,
+          developerID: this.props.developerID,
+          // $FlowFixMe: Relay type
+          permissionsRequirements,
+        },
+      },
       onCompleted: () => {
         this.props.onAppCreated()
       },
@@ -111,13 +105,8 @@ class CreateAppModal extends Component<Props, State> {
   }
 
   onSetAppData = (appData: CompleteAppData) => {
-    const { ownDevelopers } = this.props
-
     this.setState({
-      appData: {
-        ...appData,
-        developerID: ownDevelopers[0].localID,
-      },
+      appData,
       screen: 'permissions',
     })
   }
@@ -189,39 +178,5 @@ class CreateAppModal extends Component<Props, State> {
       default:
         return this.renderInfoForm()
     }
-  }
-}
-
-export default class CreateAppModalRenderer extends Component<RendererProps> {
-  static contextType = EnvironmentContext
-
-  render() {
-    return (
-      <QueryRenderer
-        environment={this.context}
-        query={graphql`
-          query CreateAppModalQuery {
-            viewer {
-              id
-              # identities {
-              #   ownDevelopers {
-              #     localID
-              #   }
-              # }
-            }
-          }
-        `}
-        variables={{}}
-        render={({ error, props }) => {
-          if (error || !props) {
-            return <RelayLoaderView error={error ? error.message : undefined} />
-          } else {
-            return (
-              <CreateAppModal {...props.viewer.identities} {...this.props} />
-            )
-          }
-        }}
-      />
-    )
   }
 }

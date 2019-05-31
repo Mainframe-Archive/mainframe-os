@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 8cf83f262e8736adff8129c0ceb8916b
+ * @relayHash e2f5d89bd7bfbf871f9d7181f23408d8
  */
 
 /* eslint-disable */
@@ -57,10 +57,14 @@ export type appMutationsAppInstallMutationVariables = {|
 |};
 export type appMutationsAppInstallMutationResponse = {|
   +installApp: ?{|
-    +app: ?{|
+    +appVersion: ?{|
       +id: string,
       +localID: string,
-      +name: string,
+      +manifest: {|
+        +profile: {|
+          +name: ?string
+        |}
+      |},
     |},
     +viewer: {|
       +id: string
@@ -79,10 +83,14 @@ mutation appMutationsAppInstallMutation(
   $input: AppInstallMutationInput!
 ) {
   installApp(input: $input) {
-    app {
+    appVersion {
       id
       localID
-      name
+      manifest {
+        profile {
+          name
+        }
+      }
     }
     viewer {
       id
@@ -127,10 +135,10 @@ v2 = [
       {
         "kind": "LinkedField",
         "alias": null,
-        "name": "app",
+        "name": "appVersion",
         "storageKey": null,
         "args": null,
-        "concreteType": "App",
+        "concreteType": "AppVersion",
         "plural": false,
         "selections": [
           v1,
@@ -142,11 +150,33 @@ v2 = [
             "storageKey": null
           },
           {
-            "kind": "ScalarField",
+            "kind": "LinkedField",
             "alias": null,
-            "name": "name",
+            "name": "manifest",
+            "storageKey": null,
             "args": null,
-            "storageKey": null
+            "concreteType": "AppManifest",
+            "plural": false,
+            "selections": [
+              {
+                "kind": "LinkedField",
+                "alias": null,
+                "name": "profile",
+                "storageKey": null,
+                "args": null,
+                "concreteType": "GenericProfile",
+                "plural": false,
+                "selections": [
+                  {
+                    "kind": "ScalarField",
+                    "alias": null,
+                    "name": "name",
+                    "args": null,
+                    "storageKey": null
+                  }
+                ]
+              }
+            ]
           }
         ]
       },
@@ -170,7 +200,7 @@ return {
   "operationKind": "mutation",
   "name": "appMutationsAppInstallMutation",
   "id": null,
-  "text": "mutation appMutationsAppInstallMutation(\n  $input: AppInstallMutationInput!\n) {\n  installApp(input: $input) {\n    app {\n      id\n      localID\n      name\n    }\n    viewer {\n      id\n    }\n  }\n}\n",
+  "text": "mutation appMutationsAppInstallMutation(\n  $input: AppInstallMutationInput!\n) {\n  installApp(input: $input) {\n    appVersion {\n      id\n      localID\n      manifest {\n        profile {\n          name\n        }\n      }\n    }\n    viewer {\n      id\n    }\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -189,5 +219,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = 'f2089f790ece1c7536eab515580beb80';
+(node/*: any*/).hash = 'b2e57fa1712e73a15c0e1651ce63b1d9';
 module.exports = node;

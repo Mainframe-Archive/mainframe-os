@@ -6,7 +6,6 @@ import styled from 'styled-components/native'
 
 import { ROUTES } from '../constants'
 
-import OwnAppsView from './OwnAppsView'
 import SettingsMenu from './SettingsMenu'
 
 const Container = styled.View`
@@ -18,7 +17,6 @@ export default function SettingsRouter() {
   return (
     <Container>
       <Switch>
-        <Route path={ROUTES.DEVTOOLS} component={OwnAppsView} />
         <Route path={ROUTES.SETTINGS} component={SettingsMenu} />
         <Redirect to={ROUTES.SETTINGS} />
       </Switch>

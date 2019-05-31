@@ -1,14 +1,15 @@
 // @flow
 
-import React, { Component, createRef } from 'react'
 import { Text, Button, TextField } from '@morpheus-ui/core'
 import {
   type FormSubmitPayload,
   type FieldValidateFunctionParams,
 } from '@morpheus-ui/forms'
-import styled from 'styled-components/native'
-import { isValidSemver } from '@mainframe/app-manifest'
+import React, { Component, createRef } from 'react'
 import semver from 'semver'
+import styled from 'styled-components/native'
+
+import { isValidSemver } from '../../../validation'
 
 import FormModalView from '../../UIComponents/FormModalView'
 
@@ -56,7 +57,7 @@ const appNameValidaton = ({ value }: FieldValidateFunctionParams) => {
   }
 }
 
-export default class EditAppDetailsView extends Component<Props, State> {
+export default class EditAppDetailsModal extends Component<Props, State> {
   // $FlowFixMe: React Ref
   fileInput: ElementRef<'input'> = createRef()
 

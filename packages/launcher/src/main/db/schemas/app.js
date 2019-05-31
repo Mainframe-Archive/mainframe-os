@@ -2,6 +2,8 @@
 
 import { COLLECTION_NAMES } from '../constants'
 
+import ethAddress from './ethAddress'
+
 export default {
   title: 'app',
   version: 0,
@@ -10,6 +12,10 @@ export default {
     localID: {
       type: 'string',
       primary: true,
+    },
+    publicFeed: {
+      ...ethAddress,
+      final: true,
     },
     developer: {
       type: 'string',

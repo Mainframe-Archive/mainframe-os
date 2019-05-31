@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash db1075f9b2e12155ce2143addae2e3b9
+ * @relayHash 42f2134f72d716fe33530d4a9df388df
  */
 
 /* eslint-disable */
@@ -46,18 +46,20 @@ mutation OwnAppDetailViewAppCreateVersionMutation(
 
 fragment OwnAppDetailView_ownApp on OwnApp {
   localID
-  mfid
-  name
-  contentsPath
-  updateFeedHash
-  developer {
-    id
+  publicID
+  profile {
     name
   }
-  publishedVersion
-  currentVersionData {
+  contentsPath
+  developer {
+    localID
+    profile {
+      name
+    }
+    id
+  }
+  inProgressVersion {
     version
-    versionHash
     permissions {
       optional {
         WEB_REQUEST
@@ -72,6 +74,9 @@ fragment OwnAppDetailView_ownApp on OwnApp {
         CONTACTS_READ
       }
     }
+  }
+  latestPublishedVersion {
+    version
   }
 }
 */
@@ -96,18 +101,43 @@ v1 = [
 v2 = {
   "kind": "ScalarField",
   "alias": null,
-  "name": "name",
+  "name": "localID",
   "args": null,
   "storageKey": null
 },
 v3 = {
+  "kind": "LinkedField",
+  "alias": null,
+  "name": "profile",
+  "storageKey": null,
+  "args": null,
+  "concreteType": "NamedProfile",
+  "plural": false,
+  "selections": [
+    {
+      "kind": "ScalarField",
+      "alias": null,
+      "name": "name",
+      "args": null,
+      "storageKey": null
+    }
+  ]
+},
+v4 = {
   "kind": "ScalarField",
   "alias": null,
   "name": "id",
   "args": null,
   "storageKey": null
 },
-v4 = [
+v5 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "version",
+  "args": null,
+  "storageKey": null
+},
+v6 = [
   {
     "kind": "ScalarField",
     "alias": null,
@@ -142,7 +172,7 @@ return {
   "operationKind": "mutation",
   "name": "OwnAppDetailViewAppCreateVersionMutation",
   "id": null,
-  "text": "mutation OwnAppDetailViewAppCreateVersionMutation(\n  $input: AppCreateVersionMutationInput!\n) {\n  createAppVersion(input: $input) {\n    app {\n      ...OwnAppDetailView_ownApp\n      id\n    }\n  }\n}\n\nfragment OwnAppDetailView_ownApp on OwnApp {\n  localID\n  mfid\n  name\n  contentsPath\n  updateFeedHash\n  developer {\n    id\n    name\n  }\n  publishedVersion\n  currentVersionData {\n    version\n    versionHash\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        COMMS_CONTACT\n        CONTACTS_READ\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        COMMS_CONTACT\n        CONTACTS_READ\n      }\n    }\n  }\n}\n",
+  "text": "mutation OwnAppDetailViewAppCreateVersionMutation(\n  $input: AppCreateVersionMutationInput!\n) {\n  createAppVersion(input: $input) {\n    app {\n      ...OwnAppDetailView_ownApp\n      id\n    }\n  }\n}\n\nfragment OwnAppDetailView_ownApp on OwnApp {\n  localID\n  publicID\n  profile {\n    name\n  }\n  contentsPath\n  developer {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n  inProgressVersion {\n    version\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        COMMS_CONTACT\n        CONTACTS_READ\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        COMMS_CONTACT\n        CONTACTS_READ\n      }\n    }\n  }\n  latestPublishedVersion {\n    version\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -203,32 +233,19 @@ return {
             "concreteType": "OwnApp",
             "plural": false,
             "selections": [
-              {
-                "kind": "ScalarField",
-                "alias": null,
-                "name": "localID",
-                "args": null,
-                "storageKey": null
-              },
-              {
-                "kind": "ScalarField",
-                "alias": null,
-                "name": "mfid",
-                "args": null,
-                "storageKey": null
-              },
               v2,
               {
                 "kind": "ScalarField",
                 "alias": null,
-                "name": "contentsPath",
+                "name": "publicID",
                 "args": null,
                 "storageKey": null
               },
+              v3,
               {
                 "kind": "ScalarField",
                 "alias": null,
-                "name": "updateFeedHash",
+                "name": "contentsPath",
                 "args": null,
                 "storageKey": null
               },
@@ -238,43 +255,24 @@ return {
                 "name": "developer",
                 "storageKey": null,
                 "args": null,
-                "concreteType": "AppAuthor",
+                "concreteType": "OwnDeveloper",
                 "plural": false,
                 "selections": [
+                  v2,
                   v3,
-                  v2
+                  v4
                 ]
-              },
-              {
-                "kind": "ScalarField",
-                "alias": null,
-                "name": "publishedVersion",
-                "args": null,
-                "storageKey": null
               },
               {
                 "kind": "LinkedField",
                 "alias": null,
-                "name": "currentVersionData",
+                "name": "inProgressVersion",
                 "storageKey": null,
                 "args": null,
-                "concreteType": "AppVersionData",
+                "concreteType": "OwnAppVersion",
                 "plural": false,
                 "selections": [
-                  {
-                    "kind": "ScalarField",
-                    "alias": null,
-                    "name": "version",
-                    "args": null,
-                    "storageKey": null
-                  },
-                  {
-                    "kind": "ScalarField",
-                    "alias": null,
-                    "name": "versionHash",
-                    "args": null,
-                    "storageKey": null
-                  },
+                  v5,
                   {
                     "kind": "LinkedField",
                     "alias": null,
@@ -292,7 +290,7 @@ return {
                         "args": null,
                         "concreteType": "AppPermissionDefinitions",
                         "plural": false,
-                        "selections": v4
+                        "selections": v6
                       },
                       {
                         "kind": "LinkedField",
@@ -302,13 +300,25 @@ return {
                         "args": null,
                         "concreteType": "AppPermissionDefinitions",
                         "plural": false,
-                        "selections": v4
+                        "selections": v6
                       }
                     ]
                   }
                 ]
               },
-              v3
+              {
+                "kind": "LinkedField",
+                "alias": null,
+                "name": "latestPublishedVersion",
+                "storageKey": null,
+                "args": null,
+                "concreteType": "OwnAppVersion",
+                "plural": false,
+                "selections": [
+                  v5
+                ]
+              },
+              v4
             ]
           }
         ]

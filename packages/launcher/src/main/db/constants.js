@@ -8,7 +8,7 @@ export const COLLECTION_NAMES = {
   DEVELOPERS: 'developers',
   ETH_WALLETS_HD: 'eth_wallets_hd',
   ETH_WALLETS_LEDGER: 'eth_wallets_ledger',
-  OWN_APPS: 'own_app',
+  OWN_APPS: 'own_apps',
   OWN_DEVELOPERS: 'own_developers',
   PEERS: 'peers',
   USERS: 'users',

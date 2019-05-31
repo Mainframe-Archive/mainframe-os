@@ -10,6 +10,8 @@ export default {
   version: 0,
   type: 'object',
   properties: {
+    // TODO: does the publicFeed need to be provided in the manifest?
+    // It should be known in order to read the manifest in the first place...
     publicFeed: {
       ...ethAddress,
       final: true,

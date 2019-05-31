@@ -1,14 +1,15 @@
 // @flow
 
+import { Button, Text } from '@morpheus-ui/core'
 import React, { Component } from 'react'
 import { createFragmentContainer, graphql } from 'react-relay'
 import styled from 'styled-components/native'
-import { Button, Text } from '@morpheus-ui/core'
 
 import CircleLoader from '../../UIComponents/CircleLoader'
-import type { AppItem_installedApp as InstalledApp } from './__generated__/AppItem_installedApp.graphql.js'
-import type { AppItem_ownApp as OwnApp } from './__generated__/AppItem_ownApp.graphql.js'
 import AppIcon from './AppIcon'
+
+import type { AppItem_appVersion as AppVersion } from './__generated__/AppItem_appVersion.graphql.js'
+import type { AppItem_ownApp as OwnApp } from './__generated__/AppItem_ownApp.graphql.js'
 
 export const AppShadow = styled.View`
   margin-top: 2px;
@@ -106,7 +107,7 @@ type SharedProps = {
 }
 
 type InstalledProps = SharedProps & {
-  installedApp: InstalledApp,
+  appVersion: AppVersion,
   onPressUpdate: (appID: string) => void,
 }
 
@@ -240,25 +241,25 @@ export default class AppItem extends Component<Props, State> {
 }
 
 const InstalledView = (props: InstalledProps) => {
-  const app = props.installedApp
+  const version = props.appVersion
 
   const onOpen = () => {
-    props.onOpenApp(app.localID, false)
+    props.onOpenApp(version.localID, false)
   }
   const onUpdate =
-    app.update == null
+    version.update == null
       ? undefined
       : () => {
-          props.onPressUpdate(app.localID)
+          props.onPressUpdate(version.localID)
         }
 
   return (
     <AppItem
-      installing={app.installationState === 'DOWNLOADING'}
+      installing={version.installationState === 'DOWNLOADING'}
       icon={props.icon}
-      appID={app.mfid}
-      appName={app.name}
-      devName={app.manifest.author.name}
+      appID={version.app.publicID}
+      appName={version.manifest.profile.name || '(no name)'}
+      devName={version.developer.profile.name}
       onOpen={onOpen}
       onUpdate={onUpdate}
       testID="installed-app-item"
@@ -274,9 +275,9 @@ const OwnView = (props: OwnProps) => {
 
   return (
     <AppItem
-      appID={app.mfid}
-      appName={app.name}
-      devName={app.developer.name}
+      appID={app.publicID}
+      appName={app.profile.name}
+      devName={app.developer.profile.name}
       onOpen={onOpen}
       testID="own-app-item"
     />
@@ -284,10 +285,13 @@ const OwnView = (props: OwnProps) => {
 }
 
 export const InstalledAppItem = createFragmentContainer(InstalledView, {
-  installedApp: graphql`
-    fragment AppItem_installedApp on AppVersion {
+  appVersion: graphql`
+    fragment AppItem_appVersion on AppVersion {
       localID
       installationState
+      app {
+        publicID
+      }
       developer {
         localID
         profile {
@@ -299,6 +303,9 @@ export const InstalledAppItem = createFragmentContainer(InstalledView, {
           name
         }
       }
+      update {
+        id
+      }
     }
   `,
 })
@@ -307,6 +314,7 @@ export const OwnAppItem = createFragmentContainer(OwnView, {
   ownApp: graphql`
     fragment AppItem_ownApp on OwnApp {
       localID
+      publicID
       developer {
         localID
         profile {

@@ -192,42 +192,56 @@ class AppUpdateModal extends Component<Props, State> {
 }
 
 export default createFragmentContainer(AppUpdateModal, {
-  app: graphql`
-    fragment AppUpdateModal_app on App {
+  userAppVersion: graphql`
+    fragment AppUpdateModal_userAppVersion on UserAppVersion {
       localID
-      name
-      manifest {
-        version
+      settings {
+        permissionsGrants {
+          BLOCKCHAIN_SEND
+          WEB_REQUEST {
+            granted
+            denied
+          }
+        }
       }
       update {
-        manifest {
-          permissions {
-            optional {
-              WEB_REQUEST
-              BLOCKCHAIN_SEND
-            }
-            required {
-              WEB_REQUEST
-              BLOCKCHAIN_SEND
-            }
-          }
-          version
-        }
-        permissionsChanged
-      }
-      users {
-        localID
-        settings {
-          permissionsSettings {
-            grants {
-              BLOCKCHAIN_SEND
-              WEB_REQUEST {
-                granted
-                denied
+        fromVersion {
+          manifest {
+            permissions {
+              optional {
+                WEB_REQUEST
+                BLOCKCHAIN_SEND
+              }
+              required {
+                WEB_REQUEST
+                BLOCKCHAIN_SEND
               }
             }
+            profile {
+              name
+            }
+            version
           }
         }
+        toVersion {
+          manifest {
+            permissions {
+              optional {
+                WEB_REQUEST
+                BLOCKCHAIN_SEND
+              }
+              required {
+                WEB_REQUEST
+                BLOCKCHAIN_SEND
+              }
+            }
+            profile {
+              name
+            }
+            version
+          }
+        }
+        permissionsChanged
       }
     }
   `,

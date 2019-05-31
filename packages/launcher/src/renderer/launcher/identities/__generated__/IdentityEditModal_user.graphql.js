@@ -9,24 +9,24 @@
 /*::
 import type { ConcreteFragment } from 'relay-runtime';
 import type { FragmentReference } from "relay-runtime";
-declare export opaque type IdentityEditModal_ownUserIdentity$ref: FragmentReference;
-export type IdentityEditModal_ownUserIdentity = {|
+declare export opaque type IdentityEditModal_user$ref: FragmentReference;
+export type IdentityEditModal_user = {|
   +localID: string,
-  +feedHash: ?string,
-  +privateProfile: ?boolean,
+  +publicID: string,
+  +privateProfile: boolean,
   +profile: {|
     +name: string,
     +avatar: ?string,
   |},
-  +$refType: IdentityEditModal_ownUserIdentity$ref,
+  +$refType: IdentityEditModal_user$ref,
 |};
 */
 
 
 const node/*: ConcreteFragment*/ = {
   "kind": "Fragment",
-  "name": "IdentityEditModal_ownUserIdentity",
-  "type": "OwnUserIdentity",
+  "name": "IdentityEditModal_user",
+  "type": "User",
   "metadata": null,
   "argumentDefinitions": [],
   "selections": [
@@ -40,7 +40,7 @@ const node/*: ConcreteFragment*/ = {
     {
       "kind": "ScalarField",
       "alias": null,
-      "name": "feedHash",
+      "name": "publicID",
       "args": null,
       "storageKey": null
     },
@@ -79,5 +79,5 @@ const node/*: ConcreteFragment*/ = {
   ]
 };
 // prettier-ignore
-(node/*: any*/).hash = '51f231c6bf853eeb4250ee2673491610';
+(node/*: any*/).hash = 'd5f516e4dec0c9d375d445e3c326f336';
 module.exports = node;
