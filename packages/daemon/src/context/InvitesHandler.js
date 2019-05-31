@@ -343,10 +343,7 @@ export default class InvitesHandler {
 
     const stake = await this.invitesContract.call('requiredStake')
     const stakeBN = utils.bigNumberify(stake)
-    const mftBalance = await this.tokenContract.getBalance(
-      // $FlowFixMe address checked above
-      customAddress,
-    )
+    const mftBalance = await this.tokenContract.getBalance(customAddress)
     const balanceBN = utils.parseUnits(mftBalance, 'ether')
 
     if (stakeBN.gt(balanceBN)) {
@@ -464,7 +461,6 @@ export default class InvitesHandler {
       contact._invite = {
         inviteTX: inviteTXHash,
         ethNetwork: this._context.io.eth.networkName,
-        // $FlowFixMe address already checked
         fromAddress: customAddress,
         // $FlowFixMe address already checked
         toAddress: peer.profile.ethAddress,

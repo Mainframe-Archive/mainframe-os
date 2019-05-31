@@ -567,6 +567,12 @@ class ContactsViewComponent extends Component<Props, State> {
     this.setState({ notification })
   }
 
+  closeNotification = () => {
+    this.setState({
+      notification: '',
+    })
+  }
+
   getIdentity = () => {
     const { user } = this.props
     // $FlowFixMe Contact type
@@ -592,12 +598,6 @@ class ContactsViewComponent extends Component<Props, State> {
 
   onChangeRadio = (value: string) => {
     this.setState({ radio: value })
-  }
-
-  closeNotification = () => {
-    this.setState({
-      notification: '',
-    })
   }
 
   // RENDER
@@ -700,7 +700,7 @@ class ContactsViewComponent extends Component<Props, State> {
           </Column>
           <Column>
             <Button
-              variant={['mediumUppercase', 'marginLeftt10', 'hoverShadow']}
+              variant={['mediumUppercase', 'hoverShadow']}
               theme={{ minWidth: '100%' }}
               title="DECLINE & CLAIM MFT"
               onPress={() => this.rejectContact(contact)}

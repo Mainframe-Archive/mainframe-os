@@ -108,15 +108,7 @@ const Blocky = styled.View`
 `
 
 class InviteContactModal extends Component<Props, State> {
-  constructor(props: Props) {
-    super(props)
-    this.state = {
-      txProcessing: false,
-      insufficientFunds: false,
-      txScreen: false,
-      dropdownError: false,
-    }
-  }
+  state = {}
 
   componentDidMount() {
     if (this.props.type === 'invite') {
@@ -156,7 +148,7 @@ class InviteContactModal extends Component<Props, State> {
       })
       this.setState({
         txParams: [res],
-        error: '',
+        error: null,
       })
     } catch (err) {
       this.setState({
@@ -180,7 +172,7 @@ class InviteContactModal extends Component<Props, State> {
         invitePending: {
           state: 'awaiting_approval',
         },
-        error: '',
+        error: null,
       })
     } catch (err) {
       this.setState({
@@ -206,7 +198,7 @@ class InviteContactModal extends Component<Props, State> {
             invitePending: {
               state: 'approved',
             },
-            error: '',
+            error: null,
           }
         }
       })
@@ -624,7 +616,9 @@ class InviteContactModal extends Component<Props, State> {
     const activity = this.state.txProcessing && <Loader />
     const amount = this.props.inviteStakeValue || ''
 
-    if (!this.state.txScreen) {
+    if (this.state.txScreen) {
+      return this.renderInviteTransactions()
+    } else {
       return (
         <>
           {this.renderContactSection('SEND BLOCKCHAIN INVITATION TO')}
@@ -634,8 +628,6 @@ class InviteContactModal extends Component<Props, State> {
           {activity}
         </>
       )
-    } else {
-      return this.renderInviteTransactions()
     }
   }
 
