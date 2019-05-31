@@ -361,6 +361,10 @@ export default {
       fontWeight: 'bold',
       margin: '5px 0 0 0',
     },
+    editRedButton: {
+      iconColor: COLORS.PRIMARY_RED,
+      borderColor: COLORS.PRIMARY_RED,
+    },
     ...MARGINS,
   },
   Text: {

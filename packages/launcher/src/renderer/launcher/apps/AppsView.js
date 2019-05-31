@@ -7,7 +7,8 @@ import {
   type StrictPermissionsGrants,
 } from '@mainframe/app-permissions'
 import styled from 'styled-components/native'
-import { Text } from '@morpheus-ui/core'
+import { Text, Button } from '@morpheus-ui/core'
+
 import { findIndex } from 'lodash'
 import memoize from 'memoize-one'
 import PlusIcon from '../../UIComponents/Icons/PlusIcon'
@@ -15,6 +16,7 @@ import PlusIcon from '../../UIComponents/Icons/PlusIcon'
 import rpc from '../rpc'
 import PermissionsView from '../PermissionsView'
 import OSLogo from '../../UIComponents/MainframeOSLogo'
+import EditIcon from '../../UIComponents/Icons/EditIcon'
 import applyContext, { type CurrentUser } from '../LauncherContext'
 import CompleteOnboardSession from './CompleteOnboardSession'
 
@@ -31,12 +33,23 @@ type AppData = $Call<<T>($ReadOnlyArray<T>) => T, InstalledApps>
 const SUGGESTED_APPS_URL = `https://mainframehq.github.io/suggested-apps/apps.json?timestamp=${new Date().toString()}`
 
 const Container = styled.View`
-  padding: 40px 0 20px 50px;
+  padding: 0 0 20px 50px;
   flex: 1;
 `
 
 const Header = styled.View`
-  height: 50px;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 20px 20px 0 0;
+`
+
+const LogoContainer = styled.View`
+  padding-top: 10px;
+  padding-bottom: 20px;
+`
+
+const ButtonsContainer = styled.View`
+  flex-direction: row;
 `
 
 export const AppsGrid = styled.View`
@@ -143,6 +156,8 @@ type State = {
   hover: ?string,
   showOnboarding: boolean,
   suggestedApps: Array<SuggestedAppData>,
+  editing: boolean,
+  deleting?: ?string,
 }
 
 class AppsView extends Component<Props, State> {
@@ -151,6 +166,7 @@ class AppsView extends Component<Props, State> {
     showModal: null,
     showOnboarding: false,
     suggestedApps: [],
+    editing: false,
   }
 
   componentDidMount() {
@@ -166,6 +182,13 @@ class AppsView extends Component<Props, State> {
       // eslint-disable-next-line no-console
       console.error(err)
     }
+  }
+
+  toggleEditing = () => {
+    this.setState({
+      editing: !this.state.editing,
+      deleting: null,
+    })
   }
 
   onSkipOnboarding = () => {
@@ -200,6 +223,29 @@ class AppsView extends Component<Props, State> {
         showModal: { type: 'app_update', appID },
       })
     }
+  }
+
+  onStartDeleting = (appID: string) => {
+    this.setState({
+      deleting: appID,
+    })
+  }
+
+  onStartDeleting = (appID: string) => {
+    this.setState({
+      deleting: appID,
+    })
+  }
+
+  onCancelDelete = () => {
+    this.setState({
+      deleting: null,
+    })
+  }
+
+  onPressDelete = () => {
+    // to be Implemented --- Temporarily just cancel
+    this.onCancelDelete()
   }
 
   previewSuggested = (app: Object) => {
@@ -297,10 +343,15 @@ class AppsView extends Component<Props, State> {
       // $FlowFixMe: injected fragment type
       <InstalledAppItem
         icon={this.getIcon(app.mfid, this.state.suggestedApps)}
+        editing={this.state.editing}
+        deleting={this.state.deleting && this.state.deleting === app.mfid}
         key={app.localID}
         installedApp={app}
         onOpenApp={this.onOpenApp}
         onPressUpdate={this.onPressUpdate}
+        onStartDeleting={this.onStartDeleting}
+        onCancelDelete={this.onCancelDelete}
+        onPressDelete={this.onPressDelete}
       />
     ))
     const suggested = this.getSuggestedList(apps, this.state.suggestedApps)
@@ -310,11 +361,13 @@ class AppsView extends Component<Props, State> {
         <Text variant={['appsTitle', 'blue', 'bold']}>Installed</Text>
         <AppsGrid>
           {installed}
-          <NewAppButton
-            title="ADD"
-            onPress={this.onPressInstall}
-            testID="launcher-install-app-button"
-          />
+          {apps.length ? null : (
+            <NewAppButton
+              title="ADD"
+              onPress={this.onPressInstall}
+              testID="launcher-install-app-button"
+            />
+          )}
         </AppsGrid>
         {suggested.length ? (
           <>
@@ -421,10 +474,33 @@ class AppsView extends Component<Props, State> {
           modal = null
       }
     }
+
+    const editButtonVariants = ['xSmallIconOnly', 'noTitle', 'marginRight10']
+    if (this.state.editing) {
+      editButtonVariants.push('editRedButton')
+    }
+
     return (
       <Container>
         <Header>
-          <OSLogo />
+          <LogoContainer>
+            <OSLogo />
+          </LogoContainer>
+          {this.props.apps.installed.length ? (
+            <ButtonsContainer>
+              <Button
+                onPress={this.toggleEditing}
+                variant={editButtonVariants}
+                Icon={EditIcon}
+              />
+              <Button
+                variant={['xSmallIconOnly', 'noTitle']}
+                Icon={PlusIcon}
+                onPress={this.onPressInstall}
+                testID="launcher-install-app-button"
+              />
+            </ButtonsContainer>
+          ) : null}
         </Header>
         {this.state.showOnboarding && (
           <CompleteOnboardSession

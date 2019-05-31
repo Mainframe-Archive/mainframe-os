@@ -3,7 +3,8 @@
 import React, { Component } from 'react'
 import { createFragmentContainer, graphql } from 'react-relay'
 import styled from 'styled-components/native'
-import { Button, Text } from '@morpheus-ui/core'
+import { Button, Text, OverlayBaloon } from '@morpheus-ui/core'
+import CloseIcon from '@morpheus-ui/icons/Close'
 
 import CircleLoader from '../../UIComponents/CircleLoader'
 import type { AppItem_installedApp as InstalledApp } from './__generated__/AppItem_installedApp.graphql.js'
@@ -93,6 +94,30 @@ const UpdateBadge = styled.View`
   shadow-radius: 10;
 `
 
+const DeleteBadge = styled.TouchableOpacity`
+  position: absolute;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  top: 12px;
+  right: 12px;
+  width: 20px;
+  height: 20px;
+  background-color: #FFF;
+  border-radius: 100%;
+  shadow-color: #000;
+  shadow-offset: {width: 0, height: 0};
+  shadow-opacity: 0.1;
+  shadow-radius: 10;
+`
+
+const DeleteButtons = styled.View`
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+`
+
 const UpdateButton = styled.View`
   opacity: 0;
   position: absolute;
@@ -101,11 +126,17 @@ const UpdateButton = styled.View`
 `
 
 type SharedProps = {
+  editing?: boolean,
+  deleting?: boolean,
   icon?: ?string,
   onOpenApp: (appID: string, own: boolean) => any,
+  onStartDeleting?: (appId: string) => void,
+  onCancelDelete?: () => void,
+  onPressDelete?: () => void,
 }
 
 type InstalledProps = SharedProps & {
+  editing: boolean,
   installedApp: InstalledApp,
   onPressUpdate: (appID: string) => void,
 }
@@ -115,19 +146,25 @@ type OwnProps = SharedProps & {
 }
 
 type Props = {
+  editing?: boolean,
+  deleting?: boolean,
   appID: string,
   appName: string,
   devName: ?string,
-  onOpen: () => void,
-  onUpdate?: ?() => void,
   testID: string,
   icon?: ?string,
   installing?: ?boolean,
+  onOpen: () => void,
+  onStartDeleting?: (appId: string) => void,
+  onCancelDelete?: () => void,
+  onPressDelete?: () => void,
+  onUpdate?: ?() => void,
 }
 
 type State = {
   direction: string,
   hover: boolean,
+  deleteHover: boolean,
 }
 
 type MouseEvent = { clientX: number }
@@ -136,6 +173,7 @@ export default class AppItem extends Component<Props, State> {
   state = {
     direction: 'no-skew',
     hover: false,
+    deleteHover: false,
   }
 
   mousePosition: number = 0
@@ -173,6 +211,18 @@ export default class AppItem extends Component<Props, State> {
     this.setState({ hover: false })
   }
 
+  setDeleteHover = () => {
+    this.setState({ deleteHover: true })
+  }
+
+  releaseDeleteHover = () => {
+    this.setState({ deleteHover: false })
+  }
+
+  onStartDeleting = () => {
+    this.props.onStartDeleting && this.props.onStartDeleting(this.props.appID)
+  }
+
   render() {
     const {
       appID,
@@ -183,32 +233,65 @@ export default class AppItem extends Component<Props, State> {
       onUpdate,
       testID,
       installing,
+      editing,
+      deleting,
     } = this.props
 
     return (
       <AppButtonContainer
-        disabled={installing}
+        disabled={installing || deleting}
         onPress={onOpen}
         key={appID}
         testID={testID}
-        hover={this.state.hover}
+        hover={this.state.hover && !editing}
         onMouseOver={this.setHover}
         onMouseOut={this.releaseHover}>
         <IconContainer
           disabled={installing}
-          hover={this.state.hover}
-          className={this.state.direction}
+          hover={this.state.hover && !editing}
+          className={editing ? 'app-editing' : this.state.direction}
           onMouseMove={this.setDirection}
           onMouseOver={this.startMoving}
           onMouseOut={this.stopMoving}>
           <AppIcon url={icon} id={appID} />
           <AppShadow
             className={
-              this.state.hover ? 'app-shadow app-shadow-hover' : 'app-shadow'
+              this.state.hover && !editing
+                ? 'app-shadow app-shadow-hover'
+                : 'app-shadow'
             }
           />
-          {onUpdate && <UpdateBadge />}
+          {!installing && !editing && onUpdate && <UpdateBadge />}
+          <OverlayBaloon visible={deleting && editing}>
+            <Text variant="tooltipTitle">
+              Do you really want to delete {appName}?
+            </Text>
+            <DeleteButtons>
+              <Button
+                title="CANCEL"
+                variant={['no-border', 'grey', 'modalButton']}
+                onPress={this.props.onCancelDelete}
+              />
+              <Button
+                title="DELETE"
+                variant={['red', 'modalButton']}
+                onPress={this.props.onPressDelete}
+              />
+            </DeleteButtons>
+          </OverlayBaloon>
         </IconContainer>
+        {editing && (
+          <DeleteBadge
+            onMouseOver={this.setDeleteHover}
+            onMouseOut={this.releaseDeleteHover}
+            onPress={this.onStartDeleting}>
+            <CloseIcon
+              color={this.state.deleteHover ? '#DA1157' : '#000000'}
+              width={10}
+              height={10}
+            />
+          </DeleteBadge>
+        )}
         <Text
           variant={[
             'appButtonName',
@@ -219,7 +302,9 @@ export default class AppItem extends Component<Props, State> {
         </Text>
         <Text variant="appButtonId">{devName}</Text>
         {onUpdate && (
-          <UpdateButton className="transition" hover={this.state.hover}>
+          <UpdateButton
+            className="transition"
+            hover={this.state.hover && !editing}>
             <Button
               onPress={onUpdate}
               title="UPDATE"
@@ -254,6 +339,7 @@ const InstalledView = (props: InstalledProps) => {
 
   return (
     <AppItem
+      {...props}
       installing={app.installationState === 'DOWNLOADING'}
       icon={props.icon}
       appID={app.mfid}
@@ -274,6 +360,7 @@ const OwnView = (props: OwnProps) => {
 
   return (
     <AppItem
+      editing={props.editing}
       appID={app.mfid}
       appName={app.name}
       devName={app.developer.name}

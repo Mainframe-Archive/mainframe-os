@@ -2030,10 +2030,10 @@
   dependencies:
     nanoid "^1.0.7"
 
-"@morpheus-ui/core@^0.0.41":
-  version "0.0.41"
-  resolved "https://registry.yarnpkg.com/@morpheus-ui/core/-/core-0.0.41.tgz#6b5d23455c56649fc1ca59238f68a015f1017099"
-  integrity sha512-03p3+UwdR8VcGSHy0Rc22kvhqaMJ+U89eoEYoIDtFt0n+DdJatyIjy/v8F7lM8VDkGM8e8kYj8oRlh0Z2Z+7zg==
+"@morpheus-ui/core@^0.0.45":
+  version "0.0.45"
+  resolved "https://registry.yarnpkg.com/@morpheus-ui/core/-/core-0.0.45.tgz#afd890e6ec92fb30016614393ecb42d35d4c0c24"
+  integrity sha512-P/7dOYJGwTJbZYrBtW+YlbkKUoGcXfWo+g0kCjur35HUSsJRc3OepeWP064cf+3OqBAljOpOJ7e66HCVe1uGKg==
   dependencies:
     "@babel/runtime" "^7.0.0"
     "@morpheus-ui/forms" "0.0.6"
