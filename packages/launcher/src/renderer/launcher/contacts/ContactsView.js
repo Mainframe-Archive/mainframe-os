@@ -1186,23 +1186,6 @@ class ContactsViewComponent extends Component<Props, State> {
     )
   }
 
-  // async getBalances() {
-  //   const { ethAddress } = this.props.user.profile
-  //   const address = MFT_TOKEN_ADDRESSES[this.props.ethClient.networkName]
-  //   let balances = {
-  //     mft: '0',
-  //     eth: '0',
-  //   }
-  //   if (address && ethAddress) {
-  //     const token = this.props.ethClient.erc20Contract(address)
-  //     const [mft, eth] = await Promise.all([
-  //       token.getBalance(ethAddress),
-  //       this.props.ethClient.getETHBalance(ethAddress),
-  //     ])
-  //     balances = { mft, eth }
-  //   }
-  // }
-
   renderNotificationModal() {
     const { contacts } = this.props
     const { selectedAddress, notification } = this.state

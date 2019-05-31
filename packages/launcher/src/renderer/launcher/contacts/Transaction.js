@@ -3,7 +3,6 @@
 import React, { Component, type Node } from 'react'
 import { Text, Tooltip } from '@morpheus-ui/core'
 import styled from 'styled-components/native'
-import CloseIcon from '@morpheus-ui/icons/Close'
 import { type txParam } from './InviteContactModal'
 
 type Props = {
