@@ -103,7 +103,6 @@ contract('ContactInvite', accounts => {
 
     await truffleAssert.fails(
       invites.retrieveStake(
-        accounts[0],
         accountHashes[1],
         recipientFeedHash,
         senderFeedHash,
@@ -154,7 +153,6 @@ contract('ContactInvite', accounts => {
     console.log('signature: ', signature)
 
     const res = await invites.retrieveStake(
-      accounts[0],
       accountHashes[1],
       recipientFeedHash,
       senderFeedHash,
@@ -242,7 +240,6 @@ contract('ContactInvite', accounts => {
     )
 
     const res = await invites.declineAndWithdraw(
-      accounts[1],
       accountHashes[0],
       senderFeedHash,
       recipientFeedHash,
@@ -376,7 +373,6 @@ contract('ContactInvite', accounts => {
 
     await truffleAssert.fails(
       invites.retrieveStake(
-        accounts[0],
         accountHashes[1],
         recipientFeedHash,
         senderFeedHash,
@@ -392,7 +388,6 @@ contract('ContactInvite', accounts => {
 
     await truffleAssert.fails(
       invites.declineAndWithdraw(
-        accounts[1],
         accountHashes[0],
         senderFeedHash,
         recipientFeedHash,
@@ -413,7 +408,6 @@ contract('ContactInvite', accounts => {
     await invites.unpause({ from: accounts[0] })
 
     await invites.retrieveStake(
-      accounts[0],
       accountHashes[1],
       recipientFeedHash,
       senderFeedHash,

@@ -16,7 +16,6 @@ type Props = {
   title?: string,
   children?: ?Node,
   full?: boolean,
-  noButtons?: boolean,
   confirmButton?: ?string,
   dismissButton?: ?string,
   onPressConfirm?: ?() => any,
@@ -48,7 +47,7 @@ export default class FormModalView extends Component<Props> {
           onChange={this.props.onChangeForm}>
           <ChildrenContainer>
             <ChildrenContainer>{this.props.children}</ChildrenContainer>
-            {!this.props.noButtons && (
+            {!this.props.dismissButton && !this.props.confirmButton && (
               <Row className="white-shadow" size={1}>
                 <Column styles="align-items:center; margin-bottom: 20px; justify-content: center; flex-direction: row;">
                   {this.props.dismissButton &&

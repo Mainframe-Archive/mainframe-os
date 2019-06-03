@@ -353,9 +353,7 @@ export default class InvitesHandler {
       )
     }
 
-    const txOptions: Object = {
-      from: customAddress,
-    }
+    const txOptions: Object = { from: customAddress }
     // TODO: check high gasPrice
 
     const approveValue = utils.formatUnits(stake, 'ether')
@@ -524,9 +522,7 @@ export default class InvitesHandler {
       const toAddrHash = hash(bufferFromHex(invite.toAddress))
       const toFeedHash = hash(Buffer.from(peer.publicFeed))
 
-      const txOptions = {
-        from: invite.fromAddress,
-      }
+      const txOptions = { from: invite.fromAddress }
       this.validateInviteOriginNetwork(invite.ethNetwork)
 
       const res = await this.invitesContract.send(
