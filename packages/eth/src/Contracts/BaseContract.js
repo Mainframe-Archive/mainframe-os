@@ -68,7 +68,7 @@ export default class Contract {
     return this.ethClient.sendAndListen(txParams)
   }
 
-  decodeEventLog(eventName: string, log: Object) {
+  decodeEventLog(eventName: string, log: Object, topics: Array<string>) {
     const abi = this.abi.find(abi => {
       return abi.type === 'event' && abi.name === eventName
     })
@@ -83,7 +83,7 @@ export default class Contract {
       },
       ...abi.inputs,
     ]
-    return this.ethClient.decodeLog(log, inputs)
+    return Web3EthAbi.decodeLog(inputs, log.data, topics)
   }
 
   async subscribeToEvents(

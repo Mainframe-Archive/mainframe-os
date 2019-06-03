@@ -65,6 +65,7 @@ type State = {
   txScreen: boolean,
   dropdownError: boolean,
   insufficientFunds: boolean,
+  contractRecipientAddress?: ?string,
 }
 
 const FormContainer = styled.View`
@@ -110,10 +111,27 @@ const Blocky = styled.View`
 class InviteContactModal extends Component<Props, State> {
   state = {}
 
-  componentDidMount() {
-    if (this.props.type === 'invite') {
+  async componentDidMount() {
+    const { user, contact, type } = this.props
+
+    if (type === 'invite') {
       this.getInviteApproveTXDetails()
-    } else {
+    }
+    if (type === 'declineInvite') {
+      const contractRecipientAddress = await rpc.getContractRecipientAddress({
+        userID: user.localID,
+        peerID: contact.peerID,
+      })
+      contractRecipientAddress !== null &&
+        this.props.updateSelectedAddress(contractRecipientAddress)
+      this.getTXDetails(this.props.type)
+    } else if (type === 'retrieveStake') {
+      const contractOriginAddress = await rpc.getContractOriginAddress({
+        userID: user.localID,
+        peerID: contact.peerID,
+      })
+      contractOriginAddress !== null &&
+        this.props.updateSelectedAddress(contractOriginAddress)
       this.getTXDetails(this.props.type)
     }
     this.getBalances()
@@ -272,7 +290,6 @@ class InviteContactModal extends Component<Props, State> {
       const res = await rpc.sendDeclineInviteTX({
         userID: user.localID,
         peerID: contact.localID,
-        customAddress: this.props.selectedAddress,
       })
       this.setState({
         txProcessing: false,
@@ -295,7 +312,6 @@ class InviteContactModal extends Component<Props, State> {
       const res = await rpc.sendWithdrawInviteTX({
         userID: user.localID,
         contactID: contact.localID,
-        customAddress: this.props.selectedAddress,
       })
       this.setState({
         txProcessing: false,
@@ -423,7 +439,11 @@ class InviteContactModal extends Component<Props, State> {
   }
 
   renderTransactionSection(title: string) {
-    const options = this.props.wallets.map(w => {
+    let defaultIndex = 0
+    const options = this.props.wallets.map((w, index) => {
+      if (this.props.selectedAddress === w.address) {
+        defaultIndex = index
+      }
       return {
         key: w.address,
         data: (
@@ -455,22 +475,32 @@ class InviteContactModal extends Component<Props, State> {
           alignItems: 'center',
         }}>
         {title}{' '}
-        {options.length < 2 && (
+        {this.props.type === 'declineInvite' && (
           <Tooltip>
             <Text variant="tooltipTitle">
               Where did this address come from?
             </Text>
             <Text variant="tooltipText">
-              This is your default ETH address. You can change it in the Wallets
-              tab by selecting another address and designating it as default
-              instead.
+              This is/ was your default address at the time this contact sent
+              the blockchain invite.
+            </Text>
+          </Tooltip>
+        )}
+        {this.props.type === 'retrieveStake' && (
+          <Tooltip>
+            <Text variant="tooltipTitle">
+              Where did this address come from?
+            </Text>
+            <Text variant="tooltipText">
+              This is the address you chose to stake MFT from at the time the
+              blockchain invite was sent.
             </Text>
           </Tooltip>
         )}
       </Text>
     )
 
-    if (options.length > 1) {
+    if (this.props.type === 'invite') {
       return (
         <Section>
           {titleSection}
@@ -494,7 +524,9 @@ class InviteContactModal extends Component<Props, State> {
       return (
         <Section>
           {titleSection}
-          <AddContactDetail border>{options[0].data}</AddContactDetail>
+          <AddContactDetail border>
+            {options[defaultIndex].data}
+          </AddContactDetail>
           {this.renderGasData()}
         </Section>
       )

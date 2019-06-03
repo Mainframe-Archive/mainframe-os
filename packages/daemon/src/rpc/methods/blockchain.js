@@ -68,6 +68,26 @@ export const ethUnsubscribe = async (
   }
 }
 
+export const getContractRecipientAddress = (
+  ctx: ClientContext,
+  params: SendDeclineTXParams,
+): Promise<?string> => {
+  return ctx.invitesHandler.getContractRecipientAddress(
+    params.userID,
+    params.peerID,
+  )
+}
+
+export const getContractOriginAddress = (
+  ctx: ClientContext,
+  params: SendDeclineTXParams,
+): Promise<?string> => {
+  return ctx.invitesHandler.getContractOriginAddress(
+    params.userID,
+    params.peerID,
+  )
+}
+
 export const getInviteTXDetails = async (
   ctx: ClientContext,
   params: GetInviteTXDetailsParams,
@@ -107,22 +127,14 @@ export const sendDeclineInviteTX = async (
   ctx: ClientContext,
   params: SendDeclineTXParams,
 ) => {
-  return ctx.invitesHandler.declineContactInvite(
-    params.userID,
-    params.peerID,
-    params.customAddress,
-  )
+  return ctx.invitesHandler.declineContactInvite(params.userID, params.peerID)
 }
 
 export const sendWithdrawInviteTX = async (
   ctx: ClientContext,
   params: SendWithdrawInviteTXParams,
 ) => {
-  return ctx.invitesHandler.retrieveStake(
-    params.userID,
-    params.contactID,
-    params.customAddress,
-  )
+  return ctx.invitesHandler.retrieveStake(params.userID, params.contactID)
 }
 
 export const subEthNetworkChanged = {

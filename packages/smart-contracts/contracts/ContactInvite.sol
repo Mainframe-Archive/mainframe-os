@@ -81,12 +81,11 @@ contract ContactInvite is Ownable, Pausable {
   }
 
   function declineAndWithdraw(
-    address recipientIndexAddress,
     bytes32 senderAddressHash,
     bytes32 senderFeedHash,
     bytes32 recipientFeedHash
   ) external whenNotPaused {
-    bytes32 recipientAddressHash = keccak256(abi.encodePacked(recipientIndexAddress));
+    bytes32 recipientAddressHash = keccak256(abi.encodePacked(msg.sender));
     bytes32 recipientHash = keccak256(abi.encodePacked(recipientAddressHash, recipientFeedHash));
     bytes32 senderHash = keccak256(abi.encodePacked(senderAddressHash, senderFeedHash));
     require(inviteRequests[senderHash][recipientHash].stake > 0, 'No stake to withdraw');
@@ -98,7 +97,6 @@ contract ContactInvite is Ownable, Pausable {
   }
 
   function retrieveStake(
-    address recipientIndexAddress,
     bytes32 recipientAddressHash,
     bytes32 recipientFeedHash,
     bytes32 senderFeedHash,
@@ -106,7 +104,7 @@ contract ContactInvite is Ownable, Pausable {
     bytes32 r,
     bytes32 s
   ) external whenNotPaused {
-    bytes32 senderAddressHash = keccak256(abi.encodePacked(recipientIndexAddress));
+    bytes32 senderAddressHash = keccak256(abi.encodePacked(msg.sender));
     bytes32 senderHash = keccak256(abi.encodePacked(senderAddressHash, senderFeedHash));
     bytes32 recipientHash = keccak256(abi.encodePacked(recipientAddressHash, recipientFeedHash));
     require(inviteRequests[senderHash][recipientHash].stake > 0, 'No stake to withdraw');

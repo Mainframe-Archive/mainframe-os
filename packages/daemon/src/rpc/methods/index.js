@@ -40,6 +40,9 @@ export default {
   blockchain_ethSend: blockchain.ethSend,
   blockchain_ethSubscribe: blockchain.ethSubscribe,
   blockchain_ethUnsubscribe: blockchain.ethUnsubscribe,
+  blockchain_getContractRecipientAddress:
+    blockchain.getContractRecipientAddress,
+  blockchain_getContractOriginAddress: blockchain.getContractOriginAddress,
   blockchain_getInviteTXDetails: blockchain.getInviteTXDetails,
   blockchain_sendInviteApprovalTX: blockchain.sendInviteApprovalTX,
   blockchain_sendWithdrawInviteTX: blockchain.sendWithdrawInviteTX,

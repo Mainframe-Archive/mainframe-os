@@ -33,7 +33,7 @@ const contracts = {
   },
   ropsten: {
     token: '0xa46f1563984209fe47f8236f8b01a03f03f957e4',
-    invites: '0x60b2A5E90c4005087eaf7e90F6288391dEC65A6b',
+    invites: '0x2f554d5Ff0108618985489850393EA4923d6a3c1',
   },
   ganache: {
     token: '0xB3E555c3dB7B983E46bf5a530ce1dac4087D2d8D',
@@ -513,11 +513,7 @@ export default class InvitesHandler {
     return { vNum, r, s }
   }
 
-  async retrieveStake(
-    userID: string,
-    contactID: string,
-    customAddress: string,
-  ) {
+  async retrieveStake(userID: string, contactID: string) {
     const { peer, contact, user } = this.getUserObjects(userID, contactID)
     const invite = contact._invite
     if (invite != null && invite.stake && invite.acceptedSignature) {
@@ -529,14 +525,13 @@ export default class InvitesHandler {
       const toFeedHash = hash(Buffer.from(peer.publicFeed))
 
       const txOptions = {
-        from: customAddress,
+        from: invite.fromAddress,
       }
       this.validateInviteOriginNetwork(invite.ethNetwork)
 
       const res = await this.invitesContract.send(
         'retrieveStake',
         [
-          invite.fromAddress,
           toAddrHash,
           toFeedHash,
           fromFeedHash,
@@ -581,11 +576,7 @@ export default class InvitesHandler {
     }
   }
 
-  async declineContactInvite(
-    userID: string,
-    peerID: string,
-    customAddress: string,
-  ): Promise<string> {
+  async declineContactInvite(userID: string, peerID: string): Promise<string> {
     const { identities } = this._context.openVault
     const inviteRequest = identities.getInviteRequest(userID, peerID)
     const peer = identities.getPeerUser(peerID)
@@ -607,18 +598,13 @@ export default class InvitesHandler {
     const fromFeedHash = hash(Buffer.from(peer.publicFeed))
 
     const txOptions = {
-      from: customAddress,
+      from: inviteRequest.receivedAddress,
       to: this.invitesContract.address,
     }
 
     const res = await this.invitesContract.send(
       'declineAndWithdraw',
-      [
-        inviteRequest.receivedAddress,
-        fromAddressHash,
-        fromFeedHash,
-        myFeedHash,
-      ],
+      [fromAddressHash, fromFeedHash, myFeedHash],
       txOptions,
     )
 
@@ -669,6 +655,41 @@ export default class InvitesHandler {
     }
   }
 
+  getContractRecipientAddress(
+    userID: string,
+    peerID: string,
+  ): Promise<?string> {
+    const { identities } = this._context.openVault
+    const inviteRequest = identities.getInviteRequest(userID, peerID)
+
+    return new Promise((resolve, reject) => {
+      if (inviteRequest && inviteRequest.receivedAddress) {
+        resolve(inviteRequest.receivedAddress)
+      } else {
+        reject(null)
+      }
+    })
+  }
+
+  getContractOriginAddress(userID: string, peerID: string): Promise<?string> {
+    const { identities } = this._context.openVault
+    const contact = identities.getContactByPeerID(userID, peerID)
+
+    if (contact) {
+      const invite = contact._invite
+
+      return new Promise((resolve, reject) => {
+        if (invite != null && invite.fromAddress) {
+          resolve(invite.fromAddress)
+        } else {
+          reject(null)
+        }
+      })
+    } else {
+      return new Promise((resolve, reject) => reject(null))
+    }
+  }
+
   // SUBSCRIPTIONS
 
   async subscribeToEthEvents(user: OwnUserIdentity, userFeedHash: string) {
@@ -689,7 +710,9 @@ export default class InvitesHandler {
 
       const handleEvent = (name, log, handler) => {
         try {
-          const event = this.invitesContract.decodeEventLog(name, log.result)
+          const event = this.invitesContract.decodeEventLog(name, log.result, [
+            userFeedHash,
+          ])
           handler(user, event)
         } catch (err) {
           this._context.log(err.message)
@@ -753,11 +776,7 @@ export default class InvitesHandler {
     }
   }
 
-  async getDeclineTXDetails(
-    userID: string,
-    peerID: string,
-    customAddress: string,
-  ): Promise<Object> {
+  async getDeclineTXDetails(userID: string, peerID: string): Promise<Object> {
     const { identities } = this._context.openVault
     const user = identities.getOwnUser(userID)
     if (!user) throw new Error('User not found')
@@ -773,14 +792,13 @@ export default class InvitesHandler {
     const fromFeedHash = hash(Buffer.from(peer.publicFeed))
 
     const data = this.invitesContract.encodeCall('declineAndWithdraw', [
-      inviteRequest.receivedAddress,
       fromAddressHash,
       fromFeedHash,
       myFeedHash,
     ])
 
     const txOptions = {
-      from: customAddress,
+      from: inviteRequest.receivedAddress,
       to: this.invitesContract.address,
       data,
     }
@@ -793,7 +811,6 @@ export default class InvitesHandler {
     user: OwnUserIdentity,
     peer: PeerUserIdentity,
     contact: Contact,
-    customAddress: string,
   ): Promise<Object> {
     const invite = contact._invite
     if (invite != null && invite.stake && invite.acceptedSignature) {
@@ -805,7 +822,6 @@ export default class InvitesHandler {
       const toFeedHash = hash(Buffer.from(peer.publicFeed))
 
       const txParams = [
-        invite.fromAddress,
         toAddrHash,
         toFeedHash,
         fromFeedHash,
@@ -816,7 +832,7 @@ export default class InvitesHandler {
       this.validateInviteOriginNetwork(invite.ethNetwork)
       const data = this.invitesContract.encodeCall('retrieveStake', txParams)
       const txOptions = {
-        from: customAddress,
+        from: invite.fromAddress,
         to: this.invitesContract.address,
         data,
       }
@@ -882,7 +898,7 @@ export default class InvitesHandler {
   ) {
     this.validateNetwork()
     if (type === 'declineInvite') {
-      return this.getDeclineTXDetails(userID, contactOrPeerID, customAddress)
+      return this.getDeclineTXDetails(userID, contactOrPeerID)
     }
     const { user, peer, contact } = this.getUserObjects(userID, contactOrPeerID)
     switch (type) {
@@ -891,12 +907,7 @@ export default class InvitesHandler {
       case 'sendInvite':
         return this.getSendInviteTXDetails(user, peer, customAddress)
       case 'retrieveStake':
-        return this.getRetrieveStakeTXDetails(
-          user,
-          peer,
-          contact,
-          customAddress,
-        )
+        return this.getRetrieveStakeTXDetails(user, peer, contact)
       default:
         throw new Error('Unknown transaction type')
     }
