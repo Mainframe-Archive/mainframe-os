@@ -207,7 +207,7 @@ export type WalletAccounts = Array<{
   balances: { mft: string, eth: string },
 }>
 
-export type Wallet = {
+type Wallet = {
   localID: string,
   name: ?string,
   accounts: WalletAccounts,

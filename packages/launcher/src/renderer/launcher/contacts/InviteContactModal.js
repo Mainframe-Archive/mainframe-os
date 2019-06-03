@@ -388,27 +388,6 @@ class InviteContactModal extends Component<Props, State> {
     }
   }
 
-  getSendButton = () => {
-    const { invitePending, txProcessing } = this.state
-
-    if (invitePending && invitePending.state === 'approved') {
-      if (txProcessing) {
-        return <CircleLoader width={24} height={24} key="c3" />
-      } else {
-        return (
-          <Button
-            title="APPROVE"
-            variant={['small', 'red']}
-            onPress={this.sendInvite}
-            key="b2"
-          />
-        )
-      }
-    } else {
-      return null
-    }
-  }
-
   // RENDER
   renderGasData() {
     const { txParams } = this.state
@@ -576,7 +555,7 @@ class InviteContactModal extends Component<Props, State> {
   }
 
   renderInviteTransactions() {
-    const { invitePending, txParams } = this.state
+    const { invitePending, txProcessing, txParams } = this.state
     const approveInfo = {
       title: 'TRANSACTION 1/2',
       question: 'What does this mean?',
@@ -590,7 +569,16 @@ class InviteContactModal extends Component<Props, State> {
     }
 
     const approveButton = this.getApproveButton()
-    const sendButton = this.getSendButton()
+    const sendButton = txProcessing ? (
+      <CircleLoader width={24} height={24} key="c3" />
+    ) : (
+      <Button
+        title="APPROVE"
+        variant={['small', 'red']}
+        onPress={this.sendInvite}
+        key="b2"
+      />
+    )
 
     return (
       <Section>

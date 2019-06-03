@@ -395,9 +395,7 @@ export default class InvitesHandler {
       const toFeedHash = hash(Buffer.from(peer.publicFeed))
       const params = [toAddrHash, toFeedHash, user.publicFeed.feedHash]
 
-      const txOptions = {
-        from: customAddress,
-      }
+      const txOptions = { from: customAddress }
 
       this.invitesContract
         .send('sendInvite', params, txOptions)
