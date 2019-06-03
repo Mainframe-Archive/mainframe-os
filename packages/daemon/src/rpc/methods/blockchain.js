@@ -71,7 +71,7 @@ export const ethUnsubscribe = async (
 export const getContractRecipientAddress = (
   ctx: ClientContext,
   params: SendDeclineTXParams,
-): Promise<?string> => {
+): ?string => {
   return ctx.invitesHandler.getContractRecipientAddress(
     params.userID,
     params.peerID,
@@ -81,7 +81,7 @@ export const getContractRecipientAddress = (
 export const getContractOriginAddress = (
   ctx: ClientContext,
   params: SendDeclineTXParams,
-): Promise<?string> => {
+): ?string => {
   return ctx.invitesHandler.getContractOriginAddress(
     params.userID,
     params.peerID,

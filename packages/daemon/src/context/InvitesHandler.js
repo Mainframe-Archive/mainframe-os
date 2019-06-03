@@ -651,38 +651,30 @@ export default class InvitesHandler {
     }
   }
 
-  getContractRecipientAddress(
-    userID: string,
-    peerID: string,
-  ): Promise<?string> {
+  getContractRecipientAddress(userID: string, peerID: string): ?string {
     const { identities } = this._context.openVault
     const inviteRequest = identities.getInviteRequest(userID, peerID)
 
-    return new Promise((resolve, reject) => {
-      if (inviteRequest && inviteRequest.receivedAddress) {
-        resolve(inviteRequest.receivedAddress)
-      } else {
-        reject(null)
-      }
-    })
+    if (inviteRequest && inviteRequest.receivedAddress) {
+      return inviteRequest.receivedAddress
+    } else {
+      return null
+    }
   }
 
-  getContractOriginAddress(userID: string, peerID: string): Promise<?string> {
+  getContractOriginAddress(userID: string, peerID: string): ?string {
     const { identities } = this._context.openVault
     const contact = identities.getContactByPeerID(userID, peerID)
 
     if (contact) {
       const invite = contact._invite
-
-      return new Promise((resolve, reject) => {
-        if (invite != null && invite.fromAddress) {
-          resolve(invite.fromAddress)
-        } else {
-          reject(null)
-        }
-      })
+      if (invite != null && invite.fromAddress) {
+        return invite.fromAddress
+      } else {
+        return null
+      }
     } else {
-      return new Promise((resolve, reject) => reject(null))
+      return null
     }
   }
 

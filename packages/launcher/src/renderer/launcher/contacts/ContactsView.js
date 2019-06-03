@@ -44,7 +44,10 @@ import { InformationBox } from '../identities/IdentitiesView'
 import CopyableBlock from '../../UIComponents/CopyableBlock'
 import Notification from './Notification'
 import InviteContactModal, { type TransactionType } from './InviteContactModal'
-import type { ContactsView_contacts as Contacts } from './__generated__/ContactsView_contacts.graphql'
+import type {
+  ContactsView_contacts as Contacts,
+  ContactsView_wallets as Wallets,
+} from './__generated__/ContactsView_contacts.graphql'
 
 type UserContacts = $PropertyType<Contacts, 'userContacts'>
 type Contact = $Call<<T>($ReadOnlyArray<T>) => T, UserContacts>
@@ -209,13 +212,6 @@ export type Wallet = {
   name: ?string,
   accounts: WalletAccounts,
   type?: 'hd' | 'ledger',
-}
-
-export type Wallets = {
-  ethWallets: {
-    hd: Array<Wallet>,
-    ledger: Array<Wallet>,
-  },
 }
 
 type Props = ContextProps & {

@@ -111,14 +111,14 @@ const Blocky = styled.View`
 class InviteContactModal extends Component<Props, State> {
   state = {}
 
-  async componentDidMount() {
+  componentDidMount() {
     const { user, contact, type } = this.props
 
     if (type === 'invite') {
       this.getInviteApproveTXDetails()
     }
     if (type === 'declineInvite') {
-      const contractRecipientAddress = await rpc.getContractRecipientAddress({
+      const contractRecipientAddress = rpc.getContractRecipientAddress({
         userID: user.localID,
         peerID: contact.peerID,
       })
@@ -126,7 +126,7 @@ class InviteContactModal extends Component<Props, State> {
         this.props.updateSelectedAddress(contractRecipientAddress)
       this.getTXDetails(this.props.type)
     } else if (type === 'retrieveStake') {
-      const contractOriginAddress = await rpc.getContractOriginAddress({
+      const contractOriginAddress = rpc.getContractOriginAddress({
         userID: user.localID,
         peerID: contact.peerID,
       })
@@ -575,8 +575,52 @@ class InviteContactModal extends Component<Props, State> {
     }
   }
 
+  getApproveButton = () => {
+    const { invitePending, txProcessing } = this.state
+
+    if (invitePending && invitePending.state === 'awaiting_approval') {
+      if (txProcessing) {
+        return <CircleLoader width={24} height={24} key="c1" />
+      } else {
+        return (
+          <Button
+            title="APPROVE"
+            variant={['small', 'red']}
+            onPress={this.sendApproveTX}
+            key="b1"
+          />
+        )
+      }
+    } else if (invitePending && invitePending.state === 'approved') {
+      return <CircleCheck width={24} height={24} color="#00a7e7" key="c2" />
+    } else {
+      return null
+    }
+  }
+
+  getSendButton = () => {
+    const { invitePending, txProcessing } = this.state
+
+    if (invitePending && invitePending.state === 'approved') {
+      if (txProcessing) {
+        return <CircleLoader width={24} height={24} key="c3" />
+      } else {
+        return (
+          <Button
+            title="APPROVE"
+            variant={['small', 'red']}
+            onPress={this.sendInvite}
+            key="b2"
+          />
+        )
+      }
+    } else {
+      return null
+    }
+  }
+
   renderInviteTransactions() {
-    const { invitePending, txParams } = this.state
+    const { invitePending, txParams, txProcessing } = this.state
     const buttons = this.getButtonStatus(this.sendApproveTX, this.sendInvite)
     const approveInfo = {
       title: 'TRANSACTION 1/2',
@@ -589,20 +633,24 @@ class InviteContactModal extends Component<Props, State> {
       question: 'What does this mean?',
       answer: 'This transaction will send the invite and withdraw your MFT.',
     }
+
+    const approveButton = this.getApproveButton()
+    const sendButton = this.getSendButton()
+
     return (
       <Section>
         <Transaction
           title="Contract"
           tooltipInfo={approveInfo}
           txParam={txParams && txParams[0]}
-          button={buttons && buttons[0]}
+          button={approveButton && approveButton}
         />
         {invitePending && invitePending.state === 'approved' && (
           <Transaction
             title="Staking"
             tooltipInfo={sendInfo}
             txParam={txParams && txParams[0]}
-            button={buttons && buttons[1]}
+            button={sendButton && sendButton}
           />
         )}
       </Section>

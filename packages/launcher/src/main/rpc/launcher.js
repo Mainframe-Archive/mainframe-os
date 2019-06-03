@@ -238,20 +238,14 @@ export default {
 
   blockchain_getContractRecipientAddress: {
     params: DECLINE_INVITE_SCHEMA,
-    handler: (
-      ctx: LauncherContext,
-      params: SendDeclineTXParams,
-    ): Promise<?string> => {
+    handler: (ctx: LauncherContext, params: SendDeclineTXParams): ?string => {
       return ctx.client.blockchain.getContractRecipientAddress(params)
     },
   },
 
   blockchain_getContractOriginAddress: {
     params: DECLINE_INVITE_SCHEMA,
-    handler: (
-      ctx: LauncherContext,
-      params: SendDeclineTXParams,
-    ): Promise<?string> => {
+    handler: (ctx: LauncherContext, params: SendDeclineTXParams): ?string => {
       return ctx.client.blockchain.getContractOriginAddress(params)
     },
   },

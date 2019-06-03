@@ -47,7 +47,7 @@ export default class FormModalView extends Component<Props> {
           onChange={this.props.onChangeForm}>
           <ChildrenContainer>
             <ChildrenContainer>{this.props.children}</ChildrenContainer>
-            {!this.props.dismissButton && !this.props.confirmButton && (
+            {this.props.dismissButton && this.props.confirmButton && (
               <Row className="white-shadow" size={1}>
                 <Column styles="align-items:center; margin-bottom: 20px; justify-content: center; flex-direction: row;">
                   {this.props.dismissButton &&
