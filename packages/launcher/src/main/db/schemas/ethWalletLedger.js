@@ -2,6 +2,14 @@
 
 import ethAddress from './ethAddress'
 
+export type EthWalletLedgerData = {
+  localID: string,
+  firstAddress: string,
+  name: ?string,
+  legacyPath: ?boolean,
+  activeAccounts: Array<{ index: number, address: string }>,
+}
+
 export default {
   title: 'Ethereum Ledger wallet',
   version: 0,

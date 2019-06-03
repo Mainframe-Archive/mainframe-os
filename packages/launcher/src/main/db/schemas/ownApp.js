@@ -2,10 +2,28 @@
 
 import { COLLECTION_NAMES } from '../constants'
 
-import permissionsRequirements from './appPermissionsRequirements'
+import permissionsRequirements, {
+  type PermissionsRequirementsData,
+} from './appPermissionsRequirements'
 import bzzHash from './bzzHash'
-import profile from './genericProfile'
-import keyPair from './keyPair'
+import profile, { type GenericProfileData } from './genericProfile'
+import keyPair, { type KeyPairData } from './keyPair'
+
+export type OwnAppVersionData = {
+  version: string,
+  contentsHash: ?string,
+  versionHash: ?string,
+  permissions: PermissionsRequirementsData,
+}
+
+export type OwnAppData = {
+  localID: string,
+  developer: string,
+  keyPair: KeyPairData,
+  profile: GenericProfileData,
+  contentsPath: string,
+  versions: Array<OwnAppVersionData>,
+}
 
 const appVersion = {
   title: 'own app version',
@@ -19,7 +37,7 @@ const appVersion = {
     versionHash: bzzHash, // chapter ID
     permissions: permissionsRequirements,
   },
-  required: ['permissionsRequirements'],
+  required: ['permissions'],
 }
 
 export default {

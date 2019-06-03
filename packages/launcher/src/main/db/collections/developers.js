@@ -1,9 +1,17 @@
 // @flow
 
 import { COLLECTION_NAMES } from '../constants'
-import type { CollectionParams } from '../types'
+import type { Collection, CollectionParams } from '../types'
 
-import schema from '../schemas/developer'
+import schema, { type DeveloperData } from '../schemas/developer'
+
+import type { AppDoc } from './apps'
+
+export type DeveloperDoc = DeveloperData & {
+  getApps(): Promise<Array<AppDoc>>,
+}
+
+export type DevelopersCollection = Collection<DeveloperDoc, DeveloperData>
 
 export default async (params: CollectionParams) => {
   const db = params.db
@@ -12,7 +20,7 @@ export default async (params: CollectionParams) => {
     name: COLLECTION_NAMES.DEVELOPERS,
     schema,
     methods: {
-      async getApps(): Promise<Array<Object>> {
+      async getApps(): Promise<Array<AppDoc>> {
         return await db.apps.find({ developer: this.localID }).exec()
       },
     },

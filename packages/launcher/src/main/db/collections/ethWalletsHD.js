@@ -3,13 +3,14 @@
 import { generateMnemonic, mnemonicToSeed } from 'bip39'
 import sigUtil from 'eth-sig-util'
 import type EthWallet from 'ethereumjs-wallet'
-import HDkey from 'ethereumjs-wallet/hdkey'
+import HDKey from 'ethereumjs-wallet/hdkey'
 
 import { COLLECTION_NAMES } from '../constants'
-import type { CollectionParams } from '../types'
+import type { Collection, CollectionParams } from '../types'
 import { generateLocalID } from '../utils'
 
-import schema from '../schemas/ethWalletHD'
+import schema, { type EthWalletHDData } from '../schemas/ethWalletHD'
+import type { UserDoc } from './users'
 
 const getAddress = (wallet: EthWallet): string => {
   return sigUtil.normalize(wallet.getAddress().toString('hex'))
@@ -17,6 +18,22 @@ const getAddress = (wallet: EthWallet): string => {
 
 const getWallet = (root: any, index: number): EthWallet => {
   return root.deriveChild(index).getWallet()
+}
+
+export type EthWalletHDDoc = EthWalletHDData & {
+  getSeed(): Promise<Buffer>,
+  getHDKey(): Promise<HDKey>,
+  getRoot(): Promise<HDKey>,
+  addAccounts(indexes: Array<number>): Promise<void>,
+  getUsers(): Promise<Array<UserDoc>>,
+  safeRemove(): Promise<void>,
+}
+
+export type EthWalletsHDCollection = Collection<
+  EthWalletHDDoc,
+  EthWalletHDData,
+> & {
+  create(data: { name: string, mnemonic?: ?string }): Promise<EthWalletHDDoc>,
 }
 
 export default async (params: CollectionParams) => {
@@ -29,7 +46,10 @@ export default async (params: CollectionParams) => {
     name: COLLECTION_NAMES.ETH_WALLETS_HD,
     schema,
     statics: {
-      async create(data: { name: string, mnemonic?: ?string }) {
+      async create(data: {
+        name: string,
+        mnemonic?: ?string,
+      }): Promise<EthWalletHDDoc> {
         const localID = generateLocalID()
         logger.log({
           level: 'debug',
@@ -60,7 +80,7 @@ export default async (params: CollectionParams) => {
       },
     },
     methods: {
-      async getSeed() {
+      async getSeed(): Promise<Buffer> {
         if (this._seed == null) {
           logger.log({
             level: 'debug',
@@ -72,19 +92,19 @@ export default async (params: CollectionParams) => {
         return this._seed
       },
 
-      async getHDKey() {
+      async getHDKey(): Promise<HDKey> {
         if (this._hdKey == null) {
           logger.log({
             level: 'debug',
             message: 'Create HD key from seed',
             localID: this.localID,
           })
-          this._hdKey = HDkey.fromMasterSeed(await this.getSeed())
+          this._hdKey = HDKey.fromMasterSeed(await this.getSeed())
         }
         return this._hdKey
       },
 
-      async getRoot() {
+      async getRoot(): Promise<HDKey> {
         if (this._root == null) {
           logger.log({
             level: 'debug',
@@ -97,7 +117,7 @@ export default async (params: CollectionParams) => {
         return this._root
       },
 
-      async addAccounts(indexes: Array<number>) {
+      async addAccounts(indexes: Array<number>): Promise<void> {
         const existingIndexes = this.activeAccounts.map(a => a.index)
         const addIndexes = indexes.filter(i => !existingIndexes.includes(i))
 
@@ -137,13 +157,13 @@ export default async (params: CollectionParams) => {
         })
       },
 
-      async getUsers() {
+      async getUsers(): Promise<Array<UserDoc>> {
         return await db.users
           .find({ 'ethWallets.hd': { $in: [this.localID] } })
           .exec()
       },
 
-      async safeRemove() {
+      async safeRemove(): Promise<void> {
         logger.log({
           level: 'debug',
           message: 'Remove linked references to self',
@@ -155,7 +175,7 @@ export default async (params: CollectionParams) => {
         const addresses = this.activeAccounts.map(a => a.address)
         await Promise.all(
           users.map(async u => {
-            if (this.addresses.includes(u.profile.ethAddress)) {
+            if (addresses.includes(u.profile.ethAddress)) {
               await u.setProfileEthAddress(null)
             }
             await u.update({

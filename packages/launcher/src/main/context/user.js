@@ -2,6 +2,7 @@
 
 import type Bzz from '@erebos/api-bzz-node'
 
+import type { UserDoc } from '../db/collections/users'
 import type { DB } from '../db/types'
 import type { Logger } from '../logger'
 
@@ -21,10 +22,9 @@ export class UserContext {
     this.db = params.db
     this.logger = params.logger.child({ userID: params.userID })
     this.userID = params.userID
-    // TODO: handle subscriptions to Swarm / creation of the first contact feed as needed
   }
 
-  async getUser(): Promise<Object> {
+  async getUser(): Promise<UserDoc> {
     return await this.db.users.findOne(this.userID).exec()
   }
 

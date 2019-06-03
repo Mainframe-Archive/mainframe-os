@@ -1,5 +1,24 @@
 // @flow
 
+// TODO: define updated permissions keys
+export type PermissionsDefinitionsData = {
+  BLOCKCHAIN_SEND: ?boolean,
+  CONTACTS_READ: ?boolean,
+  COMMS_CONTACT: ?boolean,
+  WEB_REQUEST: ?Array<string>,
+}
+
+export type PermissionsRequirementsData = {
+  required: ?PermissionsDefinitionsData,
+  optional: ?PermissionsDefinitionsData,
+}
+
+export type PermissionsDefinitions = $Shape<PermissionsDefinitionsData>
+export type PermissionsRequirements = {
+  required?: ?PermissionsDefinitions,
+  optional?: ?PermissionsDefinitions,
+}
+
 const permissionsDefinitions = {
   title: 'web requests permissions grants',
   version: 0,

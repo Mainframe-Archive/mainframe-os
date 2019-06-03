@@ -9,45 +9,38 @@
 /*::
 import type { ConcreteFragment } from 'relay-runtime';
 type AppItem_ownApp$ref = any;
+type CreateAppModal_developer$ref = any;
 import type { FragmentReference } from "relay-runtime";
-declare export opaque type OwnAppsScreen_devtools$ref: FragmentReference;
-export type OwnAppsScreen_devtools = {|
+declare export opaque type DeveloperAppsScreen_developer$ref: FragmentReference;
+export type DeveloperAppsScreen_developer = {|
   +apps: $ReadOnlyArray<{|
-    +localID: string,
+    +id: string,
     +$fragmentRefs: AppItem_ownApp$ref,
   |}>,
-  +$refType: OwnAppsScreen_devtools$ref,
+  +$fragmentRefs: CreateAppModal_developer$ref,
+  +$refType: DeveloperAppsScreen_developer$ref,
 |};
 */
 
 
 const node/*: ConcreteFragment*/ = {
   "kind": "Fragment",
-  "name": "OwnAppsScreen_devtools",
-  "type": "Devtools",
+  "name": "DeveloperAppsScreen_developer",
+  "type": "OwnDeveloper",
   "metadata": null,
-  "argumentDefinitions": [
-    {
-      "kind": "LocalArgument",
-      "name": "developerID",
-      "type": "ID",
-      "defaultValue": null
-    }
-  ],
+  "argumentDefinitions": [],
   "selections": [
+    {
+      "kind": "FragmentSpread",
+      "name": "CreateAppModal_developer",
+      "args": null
+    },
     {
       "kind": "LinkedField",
       "alias": null,
       "name": "apps",
       "storageKey": null,
-      "args": [
-        {
-          "kind": "Variable",
-          "name": "developerID",
-          "variableName": "developerID",
-          "type": "ID"
-        }
-      ],
+      "args": null,
       "concreteType": "OwnApp",
       "plural": true,
       "selections": [
@@ -59,7 +52,7 @@ const node/*: ConcreteFragment*/ = {
         {
           "kind": "ScalarField",
           "alias": null,
-          "name": "localID",
+          "name": "id",
           "args": null,
           "storageKey": null
         }
@@ -68,5 +61,5 @@ const node/*: ConcreteFragment*/ = {
   ]
 };
 // prettier-ignore
-(node/*: any*/).hash = 'da22d1bf20893b44b94cf618ed31a2b1';
+(node/*: any*/).hash = '1dbb6ff0c835252b015c2a7a09b77dc1';
 module.exports = node;

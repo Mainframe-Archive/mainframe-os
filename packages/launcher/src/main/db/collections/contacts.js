@@ -15,11 +15,13 @@ import { createSubscriber } from '../../swarm/feeds'
 import OwnFeed from '../../swarm/OwnFeed'
 
 import { COLLECTION_NAMES } from '../constants'
-import type { CollectionParams } from '../types'
+import type { Collection, CollectionParams } from '../types'
 
-import schema from '../schemas/contact'
+import schema, { type ContactData } from '../schemas/contact'
 import type { GenericProfile } from '../schemas/genericProfile'
 import { generateKeyPair, generateLocalID } from '../utils'
+
+import type { UserDoc } from './users'
 
 const FIRST_CONTACT_FEED_NAME = 'mf:first-contact:v1'
 
@@ -28,13 +30,43 @@ const getFirstContactFeed = (from: string, to: string): FeedParams => ({
   topic: getFeedTopic({ name: FIRST_CONTACT_FEED_NAME, topic: to }),
 })
 
-export type ConnectionState =
+type FirstContactData = {
+  userAddress: string,
+  peerAddress: string,
+  sharedKey: Buffer,
+}
+
+export type ContactConnectionState =
   | 'connected'
   | 'sent_feed'
   | 'sending_feed'
   | 'declined'
   | 'sending_blockchain'
   | 'sent_blockchain'
+
+export type ContactDoc = ContactData & {
+  getConnectionState(): ContactConnectionState,
+  getPrivateID(): string,
+  getPublicKey(): ?string,
+  getPublicID(): Promise<string>,
+  getProfile(): Promise<GenericProfile>,
+  getUser(): Promise<UserDoc | null>,
+  getFirstContactData(user: UserDoc): Promise<FirstContactData>,
+  createFirstContactFeed(user: UserDoc): Promise<void>,
+  startConnectedSubscription(user: UserDoc): ?Subscription,
+  stopConnectedSubscription(): void,
+  startFirstContactSubscription(user: UserDoc): Promise<?Subscription>,
+  stopFirstContactSubscription(): void,
+  startStateToggle(user: UserDoc): Subscription,
+  stopStateToggle(): void,
+  startSync(bzz: Bzz): rxjs$TeardownLogic,
+  stopSync(): void,
+}
+
+export type ContactsCollection = Collection<ContactDoc, ContactData> & {
+  create(data: $Shape<ContactData>): Promise<ContactDoc>,
+  findByPeerID(peer: string): Promise<Array<ContactDoc>>,
+}
 
 export default async (params: CollectionParams) => {
   const db = params.db
@@ -53,12 +85,12 @@ export default async (params: CollectionParams) => {
       },
 
       // Return all contacts a peer has
-      async findByPeerID(peer: string) {
+      async findByPeerID(peer: string): Promise<Array<ContactDoc>> {
         return await this.find({ peer }).exec()
       },
     },
     methods: {
-      getConnectionState(): ConnectionState {
+      getConnectionState(): ContactConnectionState {
         if (!this.firstContactFeedCreated) {
           return 'sending_feed'
         }
@@ -104,7 +136,7 @@ export default async (params: CollectionParams) => {
         return { ...peer.profile, ...this.profile, name }
       },
 
-      async getUser(): Promise<Object | null> {
+      async getUser(): Promise<UserDoc | null> {
         const user = await db.users
           .findOne({ contacts: { $in: [this.localID] } })
           .exec()
@@ -118,13 +150,7 @@ export default async (params: CollectionParams) => {
         return user
       },
 
-      async getFirstContactData(
-        user: Object,
-      ): Promise<{
-        userAddress: string,
-        peerAddress: string,
-        sharedKey: Buffer,
-      }> {
+      async getFirstContactData(user: UserDoc): Promise<FirstContactData> {
         const peer = await this.populate('peer')
         const peerKey = peer.getPublicKey()
         if (peerKey == null) {
@@ -137,7 +163,7 @@ export default async (params: CollectionParams) => {
         }
       },
 
-      async createFirstContactFeed(user: Object) {
+      async createFirstContactFeed(user: UserDoc): Promise<void> {
         logger.log({
           level: 'debug',
           message: 'Create first contact feed',
@@ -180,7 +206,7 @@ export default async (params: CollectionParams) => {
         })
       },
 
-      startConnectedSubscription(user: Object) {
+      startConnectedSubscription(user: UserDoc): ?Subscription {
         if (this._connectedSubscription != null) {
           logger.log({
             level: 'warn',
@@ -244,7 +270,7 @@ export default async (params: CollectionParams) => {
         })
       },
 
-      stopConnectedSubscription() {
+      stopConnectedSubscription(): void {
         if (this._connectedSubscription != null) {
           logger.log({
             level: 'debug',
@@ -256,7 +282,9 @@ export default async (params: CollectionParams) => {
         }
       },
 
-      async startFirstContactSubscription(user: Object) {
+      async startFirstContactSubscription(
+        user: UserDoc,
+      ): Promise<?Subscription> {
         if (this._firstContactSubscription != null) {
           logger.log({
             level: 'warn',
@@ -353,7 +381,7 @@ export default async (params: CollectionParams) => {
         }
       },
 
-      startStateToggle(user: Object) {
+      startStateToggle(user: UserDoc): rxjs$TeardownLogic {
         if (this._stateToggle == null) {
           logger.log({
             level: 'debug',
@@ -410,7 +438,7 @@ export default async (params: CollectionParams) => {
         }
       },
 
-      startSync(bzz: Bzz) {
+      startSync(bzz: Bzz): rxjs$TeardownLogic {
         if (this._sync != null) {
           logger.log({
             level: 'warn',
@@ -446,7 +474,7 @@ export default async (params: CollectionParams) => {
         }
       },
 
-      stopSync() {
+      stopSync(): void {
         if (this._sync != null) {
           logger.log({
             level: 'debug',

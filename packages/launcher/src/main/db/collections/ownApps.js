@@ -5,11 +5,34 @@ import { MF_PREFIX } from '../../../constants'
 import OwnFeed from '../../swarm/OwnFeed'
 
 import { COLLECTION_NAMES } from '../constants'
-import type { CollectionParams } from '../types'
+import type { Collection, CollectionParams } from '../types'
 import { generateKeyPair, generateLocalID } from '../utils'
 
-import schema from '../schemas/ownApp'
+import schema, {
+  type OwnAppData,
+  type OwnAppVersionData,
+} from '../schemas/ownApp'
 import type { GenericProfile } from '../schemas/genericProfile'
+
+export type CreateOwnAppData = {
+  contentsPath: string,
+  developer: string,
+  permissions: Object,
+  profile: GenericProfile,
+  version: string,
+}
+
+export type OwnAppDoc = OwnAppData & {
+  getPublicID(): string,
+  getPublicFeed(): OwnFeed,
+  getLatestPublishedVersion(): ?OwnAppVersionData,
+  getInProgressVersion(): ?OwnAppVersionData,
+  addVersion(data: { version: string }): Promise<void>,
+}
+
+export type OwnAppsCollection = Collection<OwnAppDoc, OwnAppData> & {
+  create(data: CreateOwnAppData): Promise<OwnAppDoc>,
+}
 
 export default async (params: CollectionParams) => {
   const db = params.db
@@ -18,13 +41,7 @@ export default async (params: CollectionParams) => {
     name: COLLECTION_NAMES.OWN_APPS,
     schema,
     statics: {
-      async create(data: {
-        contentsPath: string,
-        developer: string,
-        permissions: Object,
-        profile: GenericProfile,
-        version: string,
-      }) {
+      async create(data: CreateOwnAppData): Promise<OwnAppDoc> {
         return await this.insert({
           localID: generateLocalID(),
           keyPair: generateKeyPair(),
@@ -52,11 +69,11 @@ export default async (params: CollectionParams) => {
         return this._publicFeed
       },
 
-      getLatestPublishedVersion(): ?Object {
+      getLatestPublishedVersion(): ?OwnAppVersionData {
         return this.versions.find(v => v.versionHash != null)
       },
 
-      getInProgressVersion(): ?Object {
+      getInProgressVersion(): ?OwnAppVersionData {
         return this.versions.find(v => v.versionHash == null)
       },
 

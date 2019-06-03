@@ -5,15 +5,20 @@ import { Text } from '@morpheus-ui/core'
 // TODO: use local type rather than library import
 import type { StrictPermissionsRequirements } from '@mainframe/app-permissions'
 import React, { Component } from 'react'
-import { graphql, commitMutation } from 'react-relay'
+import {
+  graphql,
+  commitMutation,
+  createFragmentContainer,
+  type Environment,
+} from 'react-relay'
 
-import { EnvironmentContext } from '../RelayEnvironment'
-
-import PermissionsRequirementsView from './PermissionsRequirements'
 import AppSummary, { type AppData } from './AppSummary'
 import EditAppDetailsModal, {
   type CompleteAppData,
 } from './EditAppDetailsModal'
+import SetPermissionsRequirements from './SetPermissionsRequirements'
+
+import type { CreateAppModal_developer as Developer } from './__generated__/CreateAppModal_developer.graphql'
 
 const createAppMutation = graphql`
   mutation CreateAppModalMutation($input: AppCreateMutationInput!) {
@@ -21,22 +26,25 @@ const createAppMutation = graphql`
       app {
         id
         localID
+        developer {
+          ...DeveloperAppsScreen_developer
+        }
         profile {
           name
         }
-      }
-      devtools {
-        ...OwnAppsScreen_devtools
       }
     }
   }
 `
 
 type Props = {
-  developerID: string,
+  developer: Developer,
   onPressBack?: () => any,
   onRequestClose: () => void,
   onAppCreated: () => void,
+  relay: {
+    environment: Environment,
+  },
 }
 
 type State = {
@@ -47,9 +55,7 @@ type State = {
   errorMsg?: string,
 }
 
-export default class CreateAppModal extends Component<Props, State> {
-  static contextType = EnvironmentContext
-
+class CreateAppModal extends Component<Props, State> {
   state = {
     screen: 'info',
     manifest: null,
@@ -81,12 +87,12 @@ export default class CreateAppModal extends Component<Props, State> {
       return
     }
 
-    commitMutation(this.context, {
+    commitMutation(this.props.relay.environment, {
       mutation: createAppMutation,
       variables: {
         input: {
           ...appData,
-          developerID: this.props.developerID,
+          developerID: this.props.developer.localID,
           // $FlowFixMe: Relay type
           permissionsRequirements,
         },
@@ -141,7 +147,7 @@ export default class CreateAppModal extends Component<Props, State> {
 
   renderPermissions() {
     return (
-      <PermissionsRequirementsView
+      <SetPermissionsRequirements
         onSetPermissions={this.onSetPermissions}
         onPressBack={this.onBackPermissions}
         onRequestClose={this.props.onRequestClose}
@@ -180,3 +186,11 @@ export default class CreateAppModal extends Component<Props, State> {
     }
   }
 }
+
+export default createFragmentContainer(CreateAppModal, {
+  developer: graphql`
+    fragment CreateAppModal_developer on OwnDeveloper {
+      localID
+    }
+  `,
+})

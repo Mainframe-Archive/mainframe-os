@@ -1,30 +1,36 @@
 // @flow
 
+// TODO: remove use of this library
+import type { StrictPermissionsRequirements } from '@mainframe/app-permissions'
+import { Text, Button } from '@morpheus-ui/core'
+import { shell } from 'electron'
 import React, { Component } from 'react'
 import { ActivityIndicator } from 'react-native'
+import {
+  graphql,
+  createFragmentContainer,
+  commitMutation,
+  type Environment,
+} from 'react-relay'
+import type { Match, RouterHistory } from 'react-router-dom'
 import styled from 'styled-components/native'
-import { Text, Button } from '@morpheus-ui/core'
-
-import { graphql, createFragmentContainer, commitMutation } from 'react-relay'
-import type { StrictPermissionsRequirements } from '@mainframe/app-permissions'
-import { shell } from 'electron'
-import PlusIcon from '../../UIComponents/Icons/PlusIcon'
-
-import colors from '../../colors'
-import rpc from '../rpc'
-import { EnvironmentContext } from '../RelayEnvironment'
-import applyContext, { type CurrentUser } from '../LauncherContext'
-import AppIcon from '../apps/AppIcon'
 
 import ArrowLeft from '../../UIComponents/Icons/ArrowLeft'
+import PlusIcon from '../../UIComponents/Icons/PlusIcon'
+import colors from '../../colors'
+
+import rpc from '../rpc'
+import AppIcon from '../apps/AppIcon'
+import RelayRenderer from '../RelayRenderer'
+
+import AppSummary from './AppSummary'
 import EditAppDetailsModal, {
   type CompleteAppData,
 } from './EditAppDetailsModal'
-import NewVersionModal from './NewVersionModal'
-import PermissionsRequirementsView from './PermissionsRequirements'
-import AppSummary from './AppSummary'
+import NewAppVersionModal from './NewAppVersionModal'
+import SetPermissionsRequirements from './SetPermissionsRequirements'
 
-import type { OwnAppDetailView_ownApp as OwnApp } from './__generated__/OwnAppDetailView_ownApp.graphql'
+import type { AppDetailsScreen_app as App } from './__generated__/AppDetailsScreen_app.graphql'
 
 const Container = styled.View`
   flex: 1;
@@ -87,7 +93,7 @@ const VersionContainer = styled.View`
 const detailTextStyle = { color: colors.GREY_DARK_38, paddingTop: 5 }
 
 const publishVersionMutation = graphql`
-  mutation OwnAppDetailViewPublishAppVersionMutation(
+  mutation AppDetailsScreenPublishAppVersionMutation(
     $input: PublishAppVersionInput!
   ) {
     publishAppVersion(input: $input) {
@@ -103,7 +109,7 @@ const publishVersionMutation = graphql`
 `
 
 const updateAppDetailsMutation = graphql`
-  mutation OwnAppDetailViewUpdateAppDetailsMutation(
+  mutation AppDetailsScreenUpdateAppDetailsMutation(
     $input: UpdateAppDetailsInput!
   ) {
     updateAppDetails(input: $input) {
@@ -118,7 +124,7 @@ const updateAppDetailsMutation = graphql`
 `
 
 const setAppPermissionsRequirementsMutation = graphql`
-  mutation OwnAppDetailViewSetAppPermissionsRequirementsMutation(
+  mutation AppDetailsScreenSetAppPermissionsRequirementsMutation(
     $input: SetAppPermissionsRequirementsInput!
   ) {
     setAppPermissionsRequirements(input: $input) {
@@ -133,21 +139,23 @@ const setAppPermissionsRequirementsMutation = graphql`
 `
 
 const createAppVersionMutation = graphql`
-  mutation OwnAppDetailViewAppCreateVersionMutation(
+  mutation AppDetailsScreenAppCreateVersionMutation(
     $input: AppCreateVersionMutationInput!
   ) {
     createAppVersion(input: $input) {
       app {
-        ...OwnAppDetailView_ownApp
+        ...AppDetailsScreen_app
       }
     }
   }
 `
 
 type Props = {
-  ownApp: OwnApp,
-  onClose: () => void,
-  user: CurrentUser,
+  app: App,
+  history: RouterHistory,
+  relay: {
+    environment: Environment,
+  },
 }
 
 type ModalType =
@@ -162,9 +170,7 @@ type State = {
   showModal?: ?ModalType,
 }
 
-class OwnAppDetailView extends Component<Props, State> {
-  static contextType = EnvironmentContext
-
+class AppDetails extends Component<Props, State> {
   state = {}
 
   // HANDLERS
@@ -176,11 +182,11 @@ class OwnAppDetailView extends Component<Props, State> {
   onSetNewVersion = (version: string) => {
     this.setState({ showModal: undefined })
 
-    commitMutation(this.context, {
+    commitMutation(this.props.relay.environment, {
       mutation: createAppVersionMutation,
       variables: {
         input: {
-          appID: this.props.ownApp.localID,
+          appID: this.props.app.localID,
           version,
         },
       },
@@ -205,18 +211,17 @@ class OwnAppDetailView extends Component<Props, State> {
   }
 
   onUpdateAppData = (appData: CompleteAppData) => {
-    const { ownApp } = this.props
-    const input = {
-      appID: ownApp.localID,
-      version: appData.version,
-      name: appData.name,
-      contentsPath: appData.contentsPath,
-    }
-
     this.setState({ showModal: undefined })
-    commitMutation(this.context, {
+    commitMutation(this.props.relay.environment, {
       mutation: updateAppDetailsMutation,
-      variables: { input },
+      variables: {
+        input: {
+          appID: this.props.app.localID,
+          version: appData.version,
+          name: appData.name,
+          contentsPath: appData.contentsPath,
+        },
+      },
       onCompleted: (res, errors) => {
         let errorMsg
         if (errors) {
@@ -235,20 +240,21 @@ class OwnAppDetailView extends Component<Props, State> {
   }
 
   publishApp = () => {
-    const { ownApp } = this.props
-    const input = {
-      appID: ownApp.localID,
-      version: ownApp.currentVersionData.version,
-    }
+    const { app, relay } = this.props
 
     this.setState({
       publishing: true,
       showModal: undefined,
     })
 
-    commitMutation(this.context, {
+    commitMutation(relay.environment, {
       mutation: publishVersionMutation,
-      variables: { input },
+      variables: {
+        input: {
+          appID: app.localID,
+          version: app.currentVersionData.version,
+        },
+      },
       onCompleted: (res, errors) => {
         let errorMsg
         if (errors) {
@@ -296,15 +302,15 @@ class OwnAppDetailView extends Component<Props, State> {
   }
 
   onSetPermissions = (requirements: StrictPermissionsRequirements) => {
-    const { ownApp } = this.props
-    const input = {
-      permissionsRequirements: requirements,
-      appID: ownApp.localID,
-    }
-    commitMutation(this.context, {
+    commitMutation(this.props.relay.environment, {
       mutation: setAppPermissionsRequirementsMutation,
-      // $FlowFixMe permission key
-      variables: { input },
+      variables: {
+        input: {
+          appID: this.props.app.localID,
+          // $FlowFixMe permission key
+          permissionsRequirements: requirements,
+        },
+      },
       onCompleted: (res, errors) => {
         if (errors) {
           const errorMsg = errors.length
@@ -332,20 +338,24 @@ class OwnAppDetailView extends Component<Props, State> {
   // RENDER
 
   render() {
-    const { ownApp } = this.props
-
+    const { app } = this.props
     const appData = {
-      name: ownApp.name,
-      contentsPath: ownApp.contentsPath,
-      version: ownApp.currentVersionData.version,
+      name: app.profile.name,
+      contentsPath: app.contentsPath,
+      version:
+        app.inProgressVersion == null
+          ? undefined
+          : app.inProgressVersion.version,
     }
+    const hasDraftVersion = app.inProgressVersion != null
+    const hasPublishedVersion = app.latestPublishedVersion != null
 
     switch (this.state.showModal) {
       case 'confirm_permissions':
         return (
-          <PermissionsRequirementsView
+          <SetPermissionsRequirements
             // $FlowFixMe: different definition between library-imported and Relay-generated one
-            permissionRequirements={ownApp.currentVersionData.permissions}
+            permissionRequirements={app.currentVersionData.permissions}
             onSetPermissions={this.onSetPermissions}
             onRequestClose={this.onCloseModal}
           />
@@ -355,7 +365,7 @@ class OwnAppDetailView extends Component<Props, State> {
           <AppSummary
             appData={appData}
             // $FlowFixMe: different definition between library-imported and Relay-generated one
-            permissionsRequirements={ownApp.currentVersionData.permissions}
+            permissionsRequirements={app.currentVersionData.permissions}
             onPressBack={this.onPressPublishVersion}
             onRequestClose={this.onCloseModal}
             onPressSave={this.publishApp}
@@ -370,13 +380,17 @@ class OwnAppDetailView extends Component<Props, State> {
             onRequestClose={this.onCloseModal}
             onSetAppData={this.onUpdateAppData}
             appData={appData}
-            previousVersion={ownApp.publishedVersion}
+            previousVersion={
+              app.latestPublishedVersion == null
+                ? undefined
+                : app.latestPublishedVersion.version
+            }
           />
         )
       case 'new_version':
         return (
-          <NewVersionModal
-            currentVersion={ownApp.currentVersionData.version}
+          <NewAppVersionModal
+            currentVersion={appData.version || '1.0.0'}
             onRequestClose={this.onCloseModal}
             onSetVersion={this.onSetNewVersion}
           />
@@ -384,13 +398,9 @@ class OwnAppDetailView extends Component<Props, State> {
       default:
     }
 
-    const hasDraftVersion =
-      ownApp.currentVersionData.version !== ownApp.publishedVersion
-    const hasPublishedVersion = ownApp.publishedVersion != null
-
     const headerPublished = hasPublishedVersion ? (
       <Text variant="mono" color="#00A7E7" size={10}>
-        App ID: {ownApp.updateFeedHash}
+        App ID: {app.publicID}
       </Text>
     ) : (
       <Text color="#da1157" size={12}>
@@ -404,10 +414,10 @@ class OwnAppDetailView extends Component<Props, State> {
           <ArrowLeft />
         </BackButton>
         <IconContainer>
-          <AppIcon size="small" id={ownApp.mfid} />
+          <AppIcon size="small" id={app.publicID} />
         </IconContainer>
         <HeaderLabels>
-          <Text variant={['mediumTitle', 'darkBlue']}>{ownApp.name}</Text>
+          <Text variant={['mediumTitle', 'darkBlue']}>{app.profile.name}</Text>
           {headerPublished}
         </HeaderLabels>
       </Header>
@@ -434,62 +444,64 @@ class OwnAppDetailView extends Component<Props, State> {
         />
       )
 
-      const publishedVersionInfo = hasPublishedVersion ? (
-        <VersionContainer border={hasDraftVersion}>
-          <Text variant="smallLabel">Published version</Text>
-          <Text theme={detailTextStyle}>{ownApp.publishedVersion}</Text>
+      const publishedVersionInfo =
+        app.latestPublishedVersion == null ? null : (
+          <VersionContainer border={hasDraftVersion}>
+            <Text variant="smallLabel">Published version</Text>
+            <Text theme={detailTextStyle}>
+              {app.latestPublishedVersion.version}
+            </Text>
 
-          <Text variant="smallLabel">App Id</Text>
-          <Text theme={detailTextStyle}>
-            Share this app ID to allow users to install your app in Mainframe
-            OS.
-          </Text>
-          <Text variant={['addressLarge', 'marginTop10']}>
-            {ownApp.updateFeedHash}
-          </Text>
-          {!hasDraftVersion && (
+            <Text variant="smallLabel">App Id</Text>
+            <Text theme={detailTextStyle}>
+              Share this app ID to allow users to install your app in Mainframe
+              OS.
+            </Text>
+            <Text variant={['addressLarge', 'marginTop10']}>
+              {app.publicID}
+            </Text>
+            {hasDraftVersion ? null : (
+              <ButtonsContainer>
+                {openButton}
+                <Button
+                  variant={['mediumUppercase', 'marginRight10']}
+                  title="SUBMIT TO MAINFRAME APP STORE"
+                  onPress={this.onPressSubmitFoReview}
+                />
+                <Button
+                  variant={['mediumUppercase', 'redOutline']}
+                  title="NEW VERSION"
+                  Icon={PlusIcon}
+                  onPress={this.onPressNewVersion}
+                />
+              </ButtonsContainer>
+            )}
+          </VersionContainer>
+        )
+
+      const versionContents =
+        app.inProgressVersion == null ? null : (
+          <VersionContainer>
+            <Text variant="smallLabel">Draft version</Text>
+            <Text theme={detailTextStyle}>{app.inProgressVersion.version}</Text>
+
+            <Text variant="smallLabel">CONTENT PATH</Text>
+            <Text theme={detailTextStyle}>{app.contentsPath}</Text>
             <ButtonsContainer>
               {openButton}
               <Button
+                title="EDIT"
                 variant={['mediumUppercase', 'marginRight10']}
-                title="SUBMIT TO MAINFRAME APP STORE"
-                onPress={this.onPressSubmitFoReview}
+                onPress={this.onPressEdit}
               />
               <Button
                 variant={['mediumUppercase', 'redOutline']}
-                title="NEW VERSION"
-                Icon={PlusIcon}
-                onPress={this.onPressNewVersion}
+                title={hasPublishedVersion ? 'PUBLISH UPDATE' : 'PUBLISH APP'}
+                onPress={this.onPressPublishVersion}
               />
             </ButtonsContainer>
-          )}
-        </VersionContainer>
-      ) : null
-
-      const versionContents = hasDraftVersion ? (
-        <VersionContainer>
-          <Text variant="smallLabel">Draft version</Text>
-          <Text theme={detailTextStyle}>
-            {ownApp.currentVersionData.version}
-          </Text>
-
-          <Text variant="smallLabel">CONTENT PATH</Text>
-          <Text theme={detailTextStyle}>{ownApp.contentsPath}</Text>
-          <ButtonsContainer>
-            {openButton}
-            <Button
-              title="EDIT"
-              variant={['mediumUppercase', 'marginRight10']}
-              onPress={this.onPressEdit}
-            />
-            <Button
-              variant={['mediumUppercase', 'redOutline']}
-              title={hasPublishedVersion ? 'PUBLISH UPDATE' : 'PUBLISH APP'}
-              onPress={this.onPressPublishVersion}
-            />
-          </ButtonsContainer>
-        </VersionContainer>
-      ) : null
+          </VersionContainer>
+        )
 
       const errorView = this.state.errorMsg ? (
         <ErrorView>
@@ -515,11 +527,9 @@ class OwnAppDetailView extends Component<Props, State> {
   }
 }
 
-const OwnAppDetailViewWithContext = applyContext(OwnAppDetailView)
-
-export default createFragmentContainer(OwnAppDetailViewWithContext, {
-  ownApp: graphql`
-    fragment OwnAppDetailView_ownApp on OwnApp {
+const RelayContainer = createFragmentContainer(AppDetails, {
+  app: graphql`
+    fragment AppDetailsScreen_app on OwnApp {
       localID
       publicID
       profile {
@@ -555,3 +565,30 @@ export default createFragmentContainer(OwnAppDetailViewWithContext, {
     }
   `,
 })
+
+type ScreenProps = {
+  match: Match,
+  history: RouterHistory,
+}
+
+export default function AppDetailsScreen(screenProps: ScreenProps) {
+  return (
+    <RelayRenderer
+      render={({ props }) => {
+        return props == null ? null : (
+          <RelayContainer {...props} history={screenProps.history} />
+        )
+      }}
+      query={graphql`
+        query AppDetailsScreenQuery($appID: ID!) {
+          app: node(id: $appID) {
+            ... on OwnApp {
+              ...AppDetailsScreen_app
+            }
+          }
+        }
+      `}
+      variables={{ appID: screenProps.match.params.appID }}
+    />
+  )
+}

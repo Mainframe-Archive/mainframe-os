@@ -2,11 +2,13 @@
 
 import ethAddress from './ethAddress'
 
-export type GenericProfile = {
-  name?: ?string,
-  avatar?: ?string,
-  ethAddress?: ?string,
+export type GenericProfileData = {
+  name: ?string,
+  avatar: ?string,
+  ethAddress: ?string,
 }
+
+export type GenericProfile = $Shape<GenericProfileData>
 
 export default {
   title: 'generic profile',

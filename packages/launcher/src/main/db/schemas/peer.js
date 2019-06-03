@@ -1,7 +1,15 @@
 // @flow
 
 import ethAddress from './ethAddress'
-import profile from './genericProfile'
+import profile, { type GenericProfileData } from './genericProfile'
+
+export type PeerData = {
+  localID: string,
+  publicFeed: string,
+  otherFeeds: Array<{ type: string, address: string }>,
+  publicKey: ?string,
+  profile: ?GenericProfileData,
+}
 
 export default {
   title: 'peer',

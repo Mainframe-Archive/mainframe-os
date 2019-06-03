@@ -2,9 +2,24 @@
 
 import { COLLECTION_NAMES } from '../constants'
 
-import permissionsGrants from './appPermissionsGrants'
+import permissionsGrants, {
+  type PermissionsGrantsData,
+} from './appPermissionsGrants'
 
 // These settings should be shared by both own apps and installed ones
+
+export type ApprovedContact = {
+  aliasID: string,
+  contact: string,
+}
+
+export type UserAppSettingsData = {
+  localID: string,
+  approvedContacts: Array<ApprovedContact>,
+  defaultEthAccount: ?string,
+  permissionsChecked: boolean,
+  permissionsGrants: PermissionsGrantsData,
+}
 
 export default {
   title: 'user app settings',

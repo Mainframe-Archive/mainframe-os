@@ -10,8 +10,8 @@ import { useSubscription } from './RelayEnvironment'
 
 import SideMenu from './SideMenu'
 import ContactsScreen from './contacts/ContactsScreen'
-import DevtoolsRouter from './devtools/Router'
-import SettingsRouter from './settings/Router'
+import DevtoolsRouter from './devtools/DevtoolsRouter'
+import SettingsRouter from './settings/SettingsRouter'
 import WalletsScreen from './wallets/WalletsScreen'
 
 const CONTACT_CHANGED_SUBSCRIPTION = graphql`

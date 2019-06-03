@@ -12,11 +12,32 @@ import OwnFeed from '../../swarm/OwnFeed'
 import { createPublisher } from '../../swarm/feeds'
 
 import { COLLECTION_NAMES } from '../constants'
-import type { CollectionParams } from '../types'
+import type { Collection, CollectionParams } from '../types'
 import { generateKeyPair, generateLocalID } from '../utils'
 
-import schema from '../schemas/ownDeveloper'
+import schema, { type OwnDeveloperData } from '../schemas/ownDeveloper'
 import type { GenericProfile } from '../schemas/genericProfile'
+
+import type { OwnAppDoc } from './ownApps'
+
+export type OwnDeveloperDoc = OwnDeveloperData & {
+  getPublicID(): string,
+  getPublicFeed(): OwnFeed,
+  getApps(): Promise<Array<OwnAppDoc>>,
+  startPublicProfilePublication(bzz: Bzz): rxjs$TeardownLogic,
+  stopPublicProfilePublication(): void,
+  startSync(bzz: Bzz): rxjs$TeardownLogic,
+  stopSync(): void,
+}
+
+export type OwnDevelopersCollection = Collection<
+  OwnDeveloperDoc,
+  OwnDeveloperData,
+> & {
+  create(data: { profile: GenericProfile }): Promise<OwnDeveloperDoc>,
+  startSync(bzz: Bzz): Promise<void>,
+  stopSync(): void,
+}
 
 export default async (params: CollectionParams) => {
   const db = params.db
@@ -28,7 +49,9 @@ export default async (params: CollectionParams) => {
     name: COLLECTION_NAMES.OWN_DEVELOPERS,
     schema,
     statics: {
-      async create(data: { profile: GenericProfile }) {
+      async create(data: {
+        profile: GenericProfile,
+      }): Promise<OwnDeveloperDoc> {
         return await this.insert({
           ...data,
           localID: generateLocalID(),
@@ -36,7 +59,7 @@ export default async (params: CollectionParams) => {
         })
       },
 
-      async startSync(bzz: Bzz) {
+      async startSync(bzz: Bzz): Promise<void> {
         if (this._sync != null) {
           logger.warn('Collection already syncing, ignoring startSync() call')
           return
@@ -70,7 +93,7 @@ export default async (params: CollectionParams) => {
         )
       },
 
-      async stopSync() {
+      stopSync(): void {
         if (this._sync != null) {
           logger.debug('Stop collection sync')
           this._sync.unsubscribe()
@@ -90,11 +113,11 @@ export default async (params: CollectionParams) => {
         return this._publicFeed
       },
 
-      getApps(): Promise<Array<Object>> {
+      getApps(): Promise<Array<OwnAppDoc>> {
         return db.own_apps.find({ developer: this.localID }).exec()
       },
 
-      startPublicProfilePublication(bzz: Bzz) {
+      startPublicProfilePublication(bzz: Bzz): rxjs$TeardownLogic {
         if (this._publicProfilePublication != null) {
           logger.log({
             level: 'warn',
@@ -169,7 +192,7 @@ export default async (params: CollectionParams) => {
         }
       },
 
-      startSync(bzz: Bzz) {
+      startSync(bzz: Bzz): rxjs$TeardownLogic {
         if (this._sync != null) {
           logger.log({
             level: 'warn',

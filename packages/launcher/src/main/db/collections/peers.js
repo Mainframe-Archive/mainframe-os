@@ -11,10 +11,26 @@ import { readPeer } from '../../data/protocols'
 import { createSubscriber, readJSON } from '../../swarm/feeds'
 
 import { COLLECTION_NAMES } from '../constants'
-import type { CollectionParams } from '../types'
+import type { Collection, CollectionParams } from '../types'
 import { generateLocalID } from '../utils'
 
-import schema from '../schemas/peer'
+import schema, { type PeerData } from '../schemas/peer'
+
+export type PeerDoc = PeerData & {
+  getPublicID(): string,
+  getPublicKey(): ?string,
+  startPublicFeedSubscription(bzz: Bzz): rxjs$TeardownLogic,
+  stopPublicFeedSubscription(): void,
+  startSync(bzz: Bzz): rxjs$TeardownLogic,
+  stopSync(): void,
+}
+
+export type PeersCollection = Collection<PeerDoc, PeerData> & {
+  createFromID(bzz: Bzz, publicID: string): Promise<PeerDoc>,
+  findByPublicID(publicID: string): Promise<PeerDoc | null>,
+  startSync(bzz: Bzz): Promise<void>,
+  stopSync(): void,
+}
 
 export default async (params: CollectionParams) => {
   const logger = params.logger.child({ collection: COLLECTION_NAMES.PEERS })
@@ -23,7 +39,7 @@ export default async (params: CollectionParams) => {
     name: COLLECTION_NAMES.PEERS,
     schema,
     statics: {
-      async createFromID(bzz: Bzz, publicID: string) {
+      async createFromID(bzz: Bzz, publicID: string): Promise<PeerDoc> {
         const publicFeed = publicID.replace(MF_PREFIX.PEER, '0x')
         const payload = await readJSON(bzz, { user: publicFeed })
         if (payload == null) {
@@ -39,13 +55,13 @@ export default async (params: CollectionParams) => {
         })
       },
 
-      async findByPublicID(publicID: string) {
+      async findByPublicID(publicID: string): Promise<PeerDoc | null> {
         return await this.findOne({
           publicFeed: publicID.replace(MF_PREFIX.PEER, '0x'),
         }).exec()
       },
 
-      async startSync(bzz: Bzz) {
+      async startSync(bzz: Bzz): Promise<void> {
         if (this._sync != null) {
           logger.warn('Collection already syncing, ignoring startSync() call')
           return
@@ -99,7 +115,7 @@ export default async (params: CollectionParams) => {
         return this._publicKey
       },
 
-      startPublicFeedSubscription(bzz: Bzz) {
+      startPublicFeedSubscription(bzz: Bzz): rxjs$TeardownLogic {
         if (this._publicFeedSubscription != null) {
           logger.log({
             level: 'warn',
@@ -158,7 +174,7 @@ export default async (params: CollectionParams) => {
         }
       },
 
-      stopPublicFeedSubscription() {
+      stopPublicFeedSubscription(): void {
         if (this._publicFeedSubscription != null) {
           logger.log({
             level: 'debug',
@@ -170,7 +186,7 @@ export default async (params: CollectionParams) => {
         }
       },
 
-      startSync(bzz: Bzz) {
+      startSync(bzz: Bzz): rxjs$TeardownLogic {
         if (this._sync != null) {
           logger.log({
             level: 'warn',
@@ -206,7 +222,7 @@ export default async (params: CollectionParams) => {
         }
       },
 
-      stopSync() {
+      stopSync(): void {
         if (this._sync != null) {
           logger.log({
             level: 'debug',

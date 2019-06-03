@@ -1,12 +1,31 @@
 // @flow
 
 import { COLLECTION_NAMES } from '../constants'
-import type { CollectionParams } from '../types'
+import type { Collection, CollectionParams } from '../types'
 import { getAddressAtIndex } from '../../wallets/ledgerClient'
 
 import { generateLocalID } from '../utils'
 
-import schema from '../schemas/ethWalletLedger'
+import schema, { type EthWalletLedgerData } from '../schemas/ethWalletLedger'
+
+export type EthWalletLedgerDoc = EthWalletLedgerData & {
+  addAccounts(indexes: Array<number>): Promise<void>,
+}
+
+export type EthWalletsLedgerCollection = Collection<
+  EthWalletLedgerDoc,
+  EthWalletLedgerData,
+> & {
+  create(data: {
+    name: string,
+    firstAddress: string,
+    legacyPath: boolean,
+  }): Promise<EthWalletLedgerDoc>,
+  getOrCreate(data: {
+    name: string,
+    legacyPath?: boolean,
+  }): Promise<EthWalletLedgerDoc>,
+}
 
 export default async (params: CollectionParams) => {
   const logger = params.logger.child({
@@ -46,7 +65,11 @@ export default async (params: CollectionParams) => {
         await doc.save()
         return doc
       },
-      async getOrCreate(data: { name: string, legacyPath?: boolean }) {
+
+      async getOrCreate(data: {
+        name: string,
+        legacyPath?: boolean,
+      }): Promise<EthWalletLedgerDoc> {
         const rootAddr = await getAddressAtIndex(0, data.legacyPath)
         let wallet = await params.db.eth_wallets_ledger
           .findOne()
@@ -60,7 +83,7 @@ export default async (params: CollectionParams) => {
       },
     },
     methods: {
-      async addAccounts(indexes: Array<number>) {
+      async addAccounts(indexes: Array<number>): Promise<void> {
         const newAccounts = []
         for (let i = 0; i < indexes.length; i++) {
           const index = indexes[i]

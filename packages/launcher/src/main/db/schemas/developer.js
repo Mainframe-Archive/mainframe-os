@@ -1,7 +1,14 @@
 // @flow
 
 import ethAddress from './ethAddress'
-import profile from './genericProfile'
+import profile, { type GenericProfileData } from './genericProfile'
+
+export type DeveloperData = {
+  localID: string,
+  publicFeed: string,
+  publicKey: ?string,
+  profile: ?GenericProfileData,
+}
 
 export default {
   title: 'developer',

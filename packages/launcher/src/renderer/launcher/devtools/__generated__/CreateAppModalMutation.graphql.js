@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash a8111ffc3e940c5f611b40b9cf87b3a4
+ * @relayHash 1ec1cea7c0992761f47c9a5374b71a9f
  */
 
 /* eslint-disable */
@@ -9,7 +9,7 @@
 
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
-type OwnAppsScreen_devtools$ref = any;
+type DeveloperAppsScreen_developer$ref = any;
 export type AppCreateMutationInput = {
   name: string,
   contentsPath: string,
@@ -36,13 +36,13 @@ export type CreateAppModalMutationResponse = {|
     +app: {|
       +id: string,
       +localID: string,
+      +developer: {|
+        +$fragmentRefs: DeveloperAppsScreen_developer$ref
+      |},
       +profile: {|
         +name: string
       |},
-    |},
-    +devtools: {|
-      +$fragmentRefs: OwnAppsScreen_devtools$ref
-    |},
+    |}
   |}
 |};
 export type CreateAppModalMutation = {|
@@ -60,22 +60,27 @@ mutation CreateAppModalMutation(
     app {
       id
       localID
+      developer {
+        ...DeveloperAppsScreen_developer
+        id
+      }
       profile {
         name
       }
     }
-    devtools {
-      ...OwnAppsScreen_devtools
-    }
   }
 }
 
-fragment OwnAppsScreen_devtools on Devtools {
+fragment DeveloperAppsScreen_developer on OwnDeveloper {
+  ...CreateAppModal_developer
   apps {
     ...AppItem_ownApp
-    localID
     id
   }
+}
+
+fragment CreateAppModal_developer on OwnDeveloper {
+  localID
 }
 
 fragment AppItem_ownApp on OwnApp {
@@ -142,27 +147,13 @@ v4 = {
       "storageKey": null
     }
   ]
-},
-v5 = {
-  "kind": "LinkedField",
-  "alias": null,
-  "name": "app",
-  "storageKey": null,
-  "args": null,
-  "concreteType": "OwnApp",
-  "plural": false,
-  "selections": [
-    v2,
-    v3,
-    v4
-  ]
 };
 return {
   "kind": "Request",
   "operationKind": "mutation",
   "name": "CreateAppModalMutation",
   "id": null,
-  "text": "mutation CreateAppModalMutation(\n  $input: AppCreateMutationInput!\n) {\n  createApp(input: $input) {\n    app {\n      id\n      localID\n      profile {\n        name\n      }\n    }\n    devtools {\n      ...OwnAppsScreen_devtools\n    }\n  }\n}\n\nfragment OwnAppsScreen_devtools on Devtools {\n  apps {\n    ...AppItem_ownApp\n    localID\n    id\n  }\n}\n\nfragment AppItem_ownApp on OwnApp {\n  localID\n  publicID\n  developer {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n  profile {\n    name\n  }\n}\n",
+  "text": "mutation CreateAppModalMutation(\n  $input: AppCreateMutationInput!\n) {\n  createApp(input: $input) {\n    app {\n      id\n      localID\n      developer {\n        ...DeveloperAppsScreen_developer\n        id\n      }\n      profile {\n        name\n      }\n    }\n  }\n}\n\nfragment DeveloperAppsScreen_developer on OwnDeveloper {\n  ...CreateAppModal_developer\n  apps {\n    ...AppItem_ownApp\n    id\n  }\n}\n\nfragment CreateAppModal_developer on OwnDeveloper {\n  localID\n}\n\nfragment AppItem_ownApp on OwnApp {\n  localID\n  publicID\n  developer {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n  profile {\n    name\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -180,21 +171,34 @@ return {
         "concreteType": "AppCreateMutationPayload",
         "plural": false,
         "selections": [
-          v5,
           {
             "kind": "LinkedField",
             "alias": null,
-            "name": "devtools",
+            "name": "app",
             "storageKey": null,
             "args": null,
-            "concreteType": "Devtools",
+            "concreteType": "OwnApp",
             "plural": false,
             "selections": [
+              v2,
+              v3,
               {
-                "kind": "FragmentSpread",
-                "name": "OwnAppsScreen_devtools",
-                "args": null
-              }
+                "kind": "LinkedField",
+                "alias": null,
+                "name": "developer",
+                "storageKey": null,
+                "args": null,
+                "concreteType": "OwnDeveloper",
+                "plural": false,
+                "selections": [
+                  {
+                    "kind": "FragmentSpread",
+                    "name": "DeveloperAppsScreen_developer",
+                    "args": null
+                  }
+                ]
+              },
+              v4
             ]
           }
         ]
@@ -215,51 +219,66 @@ return {
         "concreteType": "AppCreateMutationPayload",
         "plural": false,
         "selections": [
-          v5,
           {
             "kind": "LinkedField",
             "alias": null,
-            "name": "devtools",
+            "name": "app",
             "storageKey": null,
             "args": null,
-            "concreteType": "Devtools",
+            "concreteType": "OwnApp",
             "plural": false,
             "selections": [
+              v2,
+              v3,
               {
                 "kind": "LinkedField",
                 "alias": null,
-                "name": "apps",
+                "name": "developer",
                 "storageKey": null,
                 "args": null,
-                "concreteType": "OwnApp",
-                "plural": true,
+                "concreteType": "OwnDeveloper",
+                "plural": false,
                 "selections": [
                   v3,
                   {
-                    "kind": "ScalarField",
-                    "alias": null,
-                    "name": "publicID",
-                    "args": null,
-                    "storageKey": null
-                  },
-                  {
                     "kind": "LinkedField",
                     "alias": null,
-                    "name": "developer",
+                    "name": "apps",
                     "storageKey": null,
                     "args": null,
-                    "concreteType": "OwnDeveloper",
-                    "plural": false,
+                    "concreteType": "OwnApp",
+                    "plural": true,
                     "selections": [
                       v3,
+                      {
+                        "kind": "ScalarField",
+                        "alias": null,
+                        "name": "publicID",
+                        "args": null,
+                        "storageKey": null
+                      },
+                      {
+                        "kind": "LinkedField",
+                        "alias": null,
+                        "name": "developer",
+                        "storageKey": null,
+                        "args": null,
+                        "concreteType": "OwnDeveloper",
+                        "plural": false,
+                        "selections": [
+                          v3,
+                          v4,
+                          v2
+                        ]
+                      },
                       v4,
                       v2
                     ]
                   },
-                  v4,
                   v2
                 ]
-              }
+              },
+              v4
             ]
           }
         ]
@@ -269,5 +288,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '3b589606ba339c0e8dc82cf337fd9ede';
+(node/*: any*/).hash = '8d674fedf8f89ef9dcba2f7651342fee';
 module.exports = node;

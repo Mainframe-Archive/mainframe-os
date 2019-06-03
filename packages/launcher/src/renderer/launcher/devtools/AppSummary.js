@@ -11,7 +11,7 @@ import React, { Component } from 'react'
 import styled from 'styled-components/native'
 
 import FormModalView from '../../UIComponents/FormModalView'
-import { PERMISSIONS_DESCRIPTIONS } from './PermissionsRequirements'
+import { PERMISSIONS_DESCRIPTIONS } from './SetPermissionsRequirements'
 
 export type AppData = {
   name?: ?string,

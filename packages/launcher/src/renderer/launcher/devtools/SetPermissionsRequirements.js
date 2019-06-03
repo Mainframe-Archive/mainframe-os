@@ -97,7 +97,7 @@ const domainValidation = (params: FieldValidateFunctionParams) => {
   }
 }
 
-export default class PermissionsRequirementsView extends Component<
+export default class SetPermissionsRequirements extends Component<
   Props,
   State,
 > {

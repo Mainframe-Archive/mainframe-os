@@ -4,6 +4,16 @@ import { COLLECTION_NAMES } from '../constants'
 
 import ethAddress from './ethAddress'
 
+export type ContactRequestData = {
+  localID: string,
+  peer: string,
+  ethNetwork: string,
+  privateFeed: string,
+  receivedAddress: string,
+  senderAddress: string,
+  rejectedTXHash: ?string,
+}
+
 export default {
   title: 'contact request',
   version: 0,

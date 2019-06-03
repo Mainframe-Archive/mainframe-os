@@ -1,5 +1,26 @@
 // @flow
 
+// TODO: define updated permissions keys
+export type PermissionsGrantsData = {
+  BLOCKCHAIN_SEND: ?boolean,
+  CONTACTS_READ: ?boolean,
+  COMMS_CONTACT: ?boolean,
+  WEB_REQUEST: ?{
+    granted: ?Array<string>,
+    denied: ?Array<string>,
+  },
+}
+
+export type PermissionsGrants = {
+  BLOCKCHAIN_SEND?: ?boolean,
+  CONTACTS_READ?: ?boolean,
+  COMMS_CONTACT?: ?boolean,
+  WEB_REQUEST: ?{
+    granted?: ?Array<string>,
+    denied?: ?Array<string>,
+  },
+}
+
 export default {
   title: 'app permissions grants',
   version: 0,

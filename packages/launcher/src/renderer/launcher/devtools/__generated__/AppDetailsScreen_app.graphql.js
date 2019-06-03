@@ -9,8 +9,8 @@
 /*::
 import type { ConcreteFragment } from 'relay-runtime';
 import type { FragmentReference } from "relay-runtime";
-declare export opaque type OwnAppDetailView_ownApp$ref: FragmentReference;
-export type OwnAppDetailView_ownApp = {|
+declare export opaque type AppDetailsScreen_app$ref: FragmentReference;
+export type AppDetailsScreen_app = {|
   +localID: string,
   +publicID: string,
   +profile: {|
@@ -43,7 +43,7 @@ export type OwnAppDetailView_ownApp = {|
   +latestPublishedVersion: ?{|
     +version: string
   |},
-  +$refType: OwnAppDetailView_ownApp$ref,
+  +$refType: AppDetailsScreen_app$ref,
 |};
 */
 
@@ -113,7 +113,7 @@ v3 = [
 ];
 return {
   "kind": "Fragment",
-  "name": "OwnAppDetailView_ownApp",
+  "name": "AppDetailsScreen_app",
   "type": "OwnApp",
   "metadata": null,
   "argumentDefinitions": [],
@@ -206,5 +206,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = 'b9371e6acec0a70370669abcf3ec2967';
+(node/*: any*/).hash = '83b32c2d3e579edfd51490bfcdcb138c';
 module.exports = node;

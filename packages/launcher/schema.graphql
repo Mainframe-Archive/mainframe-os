@@ -311,7 +311,6 @@ type Developer implements Node {
 }
 
 type Devtools {
-  apps(developerID: ID): [OwnApp!]!
   developers: [OwnDeveloper!]!
 }
 

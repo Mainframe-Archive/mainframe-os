@@ -4,8 +4,24 @@ import { ETH_RPC_URLS } from '@mainframe/eth'
 
 import { COLLECTION_NAMES } from '../constants'
 
-import keyPair from './keyPair'
-import profile from './genericProfile'
+import keyPair, { type KeyPairData } from './keyPair'
+import profile, { type GenericProfileData } from './genericProfile'
+
+export type UserData = {
+  localID: string,
+  keyPair: KeyPairData,
+  profile: GenericProfileData,
+  profileHash: ?string,
+  privateProfile: boolean,
+  contacts: Array<string>,
+  contactRequests: Array<string>,
+  ethWallets: {
+    hd: Array<string>,
+    ledger: Array<string>,
+  },
+  ethURL: string,
+  bzzURL: string,
+}
 
 export default {
   title: 'local user schema',

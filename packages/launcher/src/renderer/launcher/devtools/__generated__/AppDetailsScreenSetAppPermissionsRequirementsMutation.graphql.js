@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash a0758461172f7aae806487df1e0e3379
+ * @relayHash b1697cd56b6b9ee0f616b348e9071515
  */
 
 /* eslint-disable */
@@ -24,25 +24,25 @@ export type AppPermissionDefinitionsInput = {
   CONTACTS_READ?: ?boolean,
   WEB_REQUEST?: ?$ReadOnlyArray<?string>,
 };
-export type OwnAppDetailViewSetAppPermissionsRequirementsMutationVariables = {|
+export type AppDetailsScreenSetAppPermissionsRequirementsMutationVariables = {|
   input: SetAppPermissionsRequirementsInput
 |};
-export type OwnAppDetailViewSetAppPermissionsRequirementsMutationResponse = {|
+export type AppDetailsScreenSetAppPermissionsRequirementsMutationResponse = {|
   +setAppPermissionsRequirements: ?{|
     +viewer: {|
       +id: string
     |}
   |}
 |};
-export type OwnAppDetailViewSetAppPermissionsRequirementsMutation = {|
-  variables: OwnAppDetailViewSetAppPermissionsRequirementsMutationVariables,
-  response: OwnAppDetailViewSetAppPermissionsRequirementsMutationResponse,
+export type AppDetailsScreenSetAppPermissionsRequirementsMutation = {|
+  variables: AppDetailsScreenSetAppPermissionsRequirementsMutationVariables,
+  response: AppDetailsScreenSetAppPermissionsRequirementsMutationResponse,
 |};
 */
 
 
 /*
-mutation OwnAppDetailViewSetAppPermissionsRequirementsMutation(
+mutation AppDetailsScreenSetAppPermissionsRequirementsMutation(
   $input: SetAppPermissionsRequirementsInput!
 ) {
   setAppPermissionsRequirements(input: $input) {
@@ -103,13 +103,13 @@ v1 = [
 return {
   "kind": "Request",
   "operationKind": "mutation",
-  "name": "OwnAppDetailViewSetAppPermissionsRequirementsMutation",
+  "name": "AppDetailsScreenSetAppPermissionsRequirementsMutation",
   "id": null,
-  "text": "mutation OwnAppDetailViewSetAppPermissionsRequirementsMutation(\n  $input: SetAppPermissionsRequirementsInput!\n) {\n  setAppPermissionsRequirements(input: $input) {\n    viewer {\n      id\n    }\n  }\n}\n",
+  "text": "mutation AppDetailsScreenSetAppPermissionsRequirementsMutation(\n  $input: SetAppPermissionsRequirementsInput!\n) {\n  setAppPermissionsRequirements(input: $input) {\n    viewer {\n      id\n    }\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
-    "name": "OwnAppDetailViewSetAppPermissionsRequirementsMutation",
+    "name": "AppDetailsScreenSetAppPermissionsRequirementsMutation",
     "type": "Mutation",
     "metadata": null,
     "argumentDefinitions": v0,
@@ -117,12 +117,12 @@ return {
   },
   "operation": {
     "kind": "Operation",
-    "name": "OwnAppDetailViewSetAppPermissionsRequirementsMutation",
+    "name": "AppDetailsScreenSetAppPermissionsRequirementsMutation",
     "argumentDefinitions": v0,
     "selections": v1
   }
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '67f55540f816680116fc48fd7c9bdb9f';
+(node/*: any*/).hash = 'dbb543babecf7a5f21fdfd7ec4de85dc';
 module.exports = node;

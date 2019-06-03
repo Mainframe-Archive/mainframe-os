@@ -3,8 +3,39 @@
 import { COLLECTION_NAMES } from '../constants'
 
 import ethAddress from './ethAddress'
-import profile from './genericProfile'
-import keyPair from './keyPair'
+import profile, { type GenericProfileData } from './genericProfile'
+import keyPair, { type KeyPairData } from './keyPair'
+
+export type ContactInviteStakeState =
+  | 'sending'
+  | 'staked'
+  | 'reclaiming'
+  | 'reclaimed'
+  | 'seized'
+
+export type ContactInviteData = {
+  chain: ?number,
+  inviteTX: string,
+  fromAddress: string,
+  toAddress: string,
+  acceptedSignature: ?string,
+  ethNetwork: string,
+  stakeAmount: string,
+  stakeState: ContactInviteStakeState,
+  stakeReclaimedTX: ?string,
+}
+
+export type ContactData = {
+  localID: string,
+  peer: string,
+  keyPair: KeyPairData,
+  profile: GenericProfileData,
+  aliasName: ?string,
+  publicKey: ?string,
+  firstContactFeedCreated: boolean,
+  invite: ?ContactInviteData,
+  acceptanceSignature: ?string,
+}
 
 const invite = {
   title: 'contact invite',

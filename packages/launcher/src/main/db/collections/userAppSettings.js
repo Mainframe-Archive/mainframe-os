@@ -1,9 +1,15 @@
 // @flow
 
 import { COLLECTION_NAMES } from '../constants'
-import type { CollectionParams } from '../types'
+import type { Collection, CollectionParams } from '../types'
 
-import schema from '../schemas/userAppSettings'
+import schema, { type UserAppSettingsData } from '../schemas/userAppSettings'
+
+export type UserAppsSettingsDoc = UserAppSettingsData
+export type UserAppSettingsCollection = Collection<
+  UserAppsSettingsDoc,
+  UserAppSettingsData,
+>
 
 export default async (params: CollectionParams) => {
   return await params.db.collection({

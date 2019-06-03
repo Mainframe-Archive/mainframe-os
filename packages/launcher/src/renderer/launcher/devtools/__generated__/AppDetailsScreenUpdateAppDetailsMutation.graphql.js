@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 85baa31ef4c354b411271354bf5262c6
+ * @relayHash 62d0490e5b1314cda8ed16ee57927d9c
  */
 
 /* eslint-disable */
@@ -9,35 +9,35 @@
 
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
-export type PublishAppVersionInput = {
+export type UpdateAppDetailsInput = {
   appID: string,
+  name: string,
+  contentsPath: string,
   version: string,
   clientMutationId?: ?string,
 };
-export type OwnAppDetailViewPublishAppVersionMutationVariables = {|
-  input: PublishAppVersionInput
+export type AppDetailsScreenUpdateAppDetailsMutationVariables = {|
+  input: UpdateAppDetailsInput
 |};
-export type OwnAppDetailViewPublishAppVersionMutationResponse = {|
-  +publishAppVersion: ?{|
-    +versionHash: string,
+export type AppDetailsScreenUpdateAppDetailsMutationResponse = {|
+  +updateAppDetails: ?{|
     +viewer: {|
       +id: string
-    |},
+    |}
   |}
 |};
-export type OwnAppDetailViewPublishAppVersionMutation = {|
-  variables: OwnAppDetailViewPublishAppVersionMutationVariables,
-  response: OwnAppDetailViewPublishAppVersionMutationResponse,
+export type AppDetailsScreenUpdateAppDetailsMutation = {|
+  variables: AppDetailsScreenUpdateAppDetailsMutationVariables,
+  response: AppDetailsScreenUpdateAppDetailsMutationResponse,
 |};
 */
 
 
 /*
-mutation OwnAppDetailViewPublishAppVersionMutation(
-  $input: PublishAppVersionInput!
+mutation AppDetailsScreenUpdateAppDetailsMutation(
+  $input: UpdateAppDetailsInput!
 ) {
-  publishAppVersion(input: $input) {
-    versionHash
+  updateAppDetails(input: $input) {
     viewer {
       id
     }
@@ -50,7 +50,7 @@ var v0 = [
   {
     "kind": "LocalArgument",
     "name": "input",
-    "type": "PublishAppVersionInput!",
+    "type": "UpdateAppDetailsInput!",
     "defaultValue": null
   }
 ],
@@ -58,26 +58,19 @@ v1 = [
   {
     "kind": "LinkedField",
     "alias": null,
-    "name": "publishAppVersion",
+    "name": "updateAppDetails",
     "storageKey": null,
     "args": [
       {
         "kind": "Variable",
         "name": "input",
         "variableName": "input",
-        "type": "PublishAppVersionInput!"
+        "type": "UpdateAppDetailsInput!"
       }
     ],
-    "concreteType": "PublishAppVersionPayload",
+    "concreteType": "UpdateAppDetailsPayload",
     "plural": false,
     "selections": [
-      {
-        "kind": "ScalarField",
-        "alias": null,
-        "name": "versionHash",
-        "args": null,
-        "storageKey": null
-      },
       {
         "kind": "LinkedField",
         "alias": null,
@@ -102,13 +95,13 @@ v1 = [
 return {
   "kind": "Request",
   "operationKind": "mutation",
-  "name": "OwnAppDetailViewPublishAppVersionMutation",
+  "name": "AppDetailsScreenUpdateAppDetailsMutation",
   "id": null,
-  "text": "mutation OwnAppDetailViewPublishAppVersionMutation(\n  $input: PublishAppVersionInput!\n) {\n  publishAppVersion(input: $input) {\n    versionHash\n    viewer {\n      id\n    }\n  }\n}\n",
+  "text": "mutation AppDetailsScreenUpdateAppDetailsMutation(\n  $input: UpdateAppDetailsInput!\n) {\n  updateAppDetails(input: $input) {\n    viewer {\n      id\n    }\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
-    "name": "OwnAppDetailViewPublishAppVersionMutation",
+    "name": "AppDetailsScreenUpdateAppDetailsMutation",
     "type": "Mutation",
     "metadata": null,
     "argumentDefinitions": v0,
@@ -116,12 +109,12 @@ return {
   },
   "operation": {
     "kind": "Operation",
-    "name": "OwnAppDetailViewPublishAppVersionMutation",
+    "name": "AppDetailsScreenUpdateAppDetailsMutation",
     "argumentDefinitions": v0,
     "selections": v1
   }
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = 'dd0b794ad50074efe115c4717eb6d007';
+(node/*: any*/).hash = '15533979856aefff661bd9b5c604e4a4';
 module.exports = node;

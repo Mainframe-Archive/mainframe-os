@@ -2,6 +2,13 @@
 
 import { COLLECTION_NAMES } from '../constants'
 
+export type UserOwnAppData = {
+  localID: string,
+  user: string,
+  ownApp: string,
+  settings: string,
+}
+
 export default {
   title: 'user own app',
   version: 0,

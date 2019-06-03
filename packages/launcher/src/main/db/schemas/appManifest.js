@@ -1,9 +1,20 @@
 // @flow
 
-import permissionsRequirements from './appPermissionsRequirements'
+import permissionsRequirements, {
+  type PermissionsRequirementsData,
+} from './appPermissionsRequirements'
 import bzzHash from './bzzHash'
 import ethAddress from './ethAddress'
-import profile from './genericProfile'
+import profile, { type GenericProfileData } from './genericProfile'
+
+export type AppManifestData = {
+  publicFeed: string,
+  authorFeed: string,
+  profile: GenericProfileData,
+  version: string,
+  contentsHash: string,
+  permissions: PermissionsRequirementsData,
+}
 
 export default {
   title: 'application manifest',

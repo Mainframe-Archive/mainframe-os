@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 42f2134f72d716fe33530d4a9df388df
+ * @relayHash 96988fdd1ba44b3c577aca989cd7a123
  */
 
 /* eslint-disable */
@@ -9,42 +9,36 @@
 
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
-type OwnAppDetailView_ownApp$ref = any;
-export type AppCreateVersionMutationInput = {
-  appID: string,
-  version: string,
-  clientMutationId?: ?string,
-};
-export type OwnAppDetailViewAppCreateVersionMutationVariables = {|
-  input: AppCreateVersionMutationInput
+type AppDetailsScreen_app$ref = any;
+export type AppDetailsScreenQueryVariables = {|
+  appID: string
 |};
-export type OwnAppDetailViewAppCreateVersionMutationResponse = {|
-  +createAppVersion: ?{|
-    +app: {|
-      +$fragmentRefs: OwnAppDetailView_ownApp$ref
-    |}
+export type AppDetailsScreenQueryResponse = {|
+  +app: ?{|
+    +$fragmentRefs: AppDetailsScreen_app$ref
   |}
 |};
-export type OwnAppDetailViewAppCreateVersionMutation = {|
-  variables: OwnAppDetailViewAppCreateVersionMutationVariables,
-  response: OwnAppDetailViewAppCreateVersionMutationResponse,
+export type AppDetailsScreenQuery = {|
+  variables: AppDetailsScreenQueryVariables,
+  response: AppDetailsScreenQueryResponse,
 |};
 */
 
 
 /*
-mutation OwnAppDetailViewAppCreateVersionMutation(
-  $input: AppCreateVersionMutationInput!
+query AppDetailsScreenQuery(
+  $appID: ID!
 ) {
-  createAppVersion(input: $input) {
-    app {
-      ...OwnAppDetailView_ownApp
-      id
+  app: node(id: $appID) {
+    __typename
+    ... on OwnApp {
+      ...AppDetailsScreen_app
     }
+    id
   }
 }
 
-fragment OwnAppDetailView_ownApp on OwnApp {
+fragment AppDetailsScreen_app on OwnApp {
   localID
   publicID
   profile {
@@ -85,27 +79,34 @@ const node/*: ConcreteRequest*/ = (function(){
 var v0 = [
   {
     "kind": "LocalArgument",
-    "name": "input",
-    "type": "AppCreateVersionMutationInput!",
+    "name": "appID",
+    "type": "ID!",
     "defaultValue": null
   }
 ],
 v1 = [
   {
     "kind": "Variable",
-    "name": "input",
-    "variableName": "input",
-    "type": "AppCreateVersionMutationInput!"
+    "name": "id",
+    "variableName": "appID",
+    "type": "ID!"
   }
 ],
 v2 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "id",
+  "args": null,
+  "storageKey": null
+},
+v3 = {
   "kind": "ScalarField",
   "alias": null,
   "name": "localID",
   "args": null,
   "storageKey": null
 },
-v3 = {
+v4 = {
   "kind": "LinkedField",
   "alias": null,
   "name": "profile",
@@ -122,13 +123,6 @@ v3 = {
       "storageKey": null
     }
   ]
-},
-v4 = {
-  "kind": "ScalarField",
-  "alias": null,
-  "name": "id",
-  "args": null,
-  "storageKey": null
 },
 v5 = {
   "kind": "ScalarField",
@@ -169,39 +163,34 @@ v6 = [
 ];
 return {
   "kind": "Request",
-  "operationKind": "mutation",
-  "name": "OwnAppDetailViewAppCreateVersionMutation",
+  "operationKind": "query",
+  "name": "AppDetailsScreenQuery",
   "id": null,
-  "text": "mutation OwnAppDetailViewAppCreateVersionMutation(\n  $input: AppCreateVersionMutationInput!\n) {\n  createAppVersion(input: $input) {\n    app {\n      ...OwnAppDetailView_ownApp\n      id\n    }\n  }\n}\n\nfragment OwnAppDetailView_ownApp on OwnApp {\n  localID\n  publicID\n  profile {\n    name\n  }\n  contentsPath\n  developer {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n  inProgressVersion {\n    version\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        COMMS_CONTACT\n        CONTACTS_READ\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        COMMS_CONTACT\n        CONTACTS_READ\n      }\n    }\n  }\n  latestPublishedVersion {\n    version\n  }\n}\n",
+  "text": "query AppDetailsScreenQuery(\n  $appID: ID!\n) {\n  app: node(id: $appID) {\n    __typename\n    ... on OwnApp {\n      ...AppDetailsScreen_app\n    }\n    id\n  }\n}\n\nfragment AppDetailsScreen_app on OwnApp {\n  localID\n  publicID\n  profile {\n    name\n  }\n  contentsPath\n  developer {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n  inProgressVersion {\n    version\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        COMMS_CONTACT\n        CONTACTS_READ\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        COMMS_CONTACT\n        CONTACTS_READ\n      }\n    }\n  }\n  latestPublishedVersion {\n    version\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
-    "name": "OwnAppDetailViewAppCreateVersionMutation",
-    "type": "Mutation",
+    "name": "AppDetailsScreenQuery",
+    "type": "Query",
     "metadata": null,
     "argumentDefinitions": v0,
     "selections": [
       {
         "kind": "LinkedField",
-        "alias": null,
-        "name": "createAppVersion",
+        "alias": "app",
+        "name": "node",
         "storageKey": null,
         "args": v1,
-        "concreteType": "AppCreateVersionMutationPayload",
+        "concreteType": null,
         "plural": false,
         "selections": [
           {
-            "kind": "LinkedField",
-            "alias": null,
-            "name": "app",
-            "storageKey": null,
-            "args": null,
-            "concreteType": "OwnApp",
-            "plural": false,
+            "kind": "InlineFragment",
+            "type": "OwnApp",
             "selections": [
               {
                 "kind": "FragmentSpread",
-                "name": "OwnAppDetailView_ownApp",
+                "name": "AppDetailsScreen_app",
                 "args": null
               }
             ]
@@ -212,28 +201,31 @@ return {
   },
   "operation": {
     "kind": "Operation",
-    "name": "OwnAppDetailViewAppCreateVersionMutation",
+    "name": "AppDetailsScreenQuery",
     "argumentDefinitions": v0,
     "selections": [
       {
         "kind": "LinkedField",
-        "alias": null,
-        "name": "createAppVersion",
+        "alias": "app",
+        "name": "node",
         "storageKey": null,
         "args": v1,
-        "concreteType": "AppCreateVersionMutationPayload",
+        "concreteType": null,
         "plural": false,
         "selections": [
           {
-            "kind": "LinkedField",
+            "kind": "ScalarField",
             "alias": null,
-            "name": "app",
-            "storageKey": null,
+            "name": "__typename",
             "args": null,
-            "concreteType": "OwnApp",
-            "plural": false,
+            "storageKey": null
+          },
+          v2,
+          {
+            "kind": "InlineFragment",
+            "type": "OwnApp",
             "selections": [
-              v2,
+              v3,
               {
                 "kind": "ScalarField",
                 "alias": null,
@@ -241,7 +233,7 @@ return {
                 "args": null,
                 "storageKey": null
               },
-              v3,
+              v4,
               {
                 "kind": "ScalarField",
                 "alias": null,
@@ -258,9 +250,9 @@ return {
                 "concreteType": "OwnDeveloper",
                 "plural": false,
                 "selections": [
-                  v2,
                   v3,
-                  v4
+                  v4,
+                  v2
                 ]
               },
               {
@@ -317,8 +309,7 @@ return {
                 "selections": [
                   v5
                 ]
-              },
-              v4
+              }
             ]
           }
         ]
@@ -328,5 +319,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = 'c2442f7674aec399d62740df720f4a89';
+(node/*: any*/).hash = 'c24a27bbefea89c69b88d79c2a20d687';
 module.exports = node;

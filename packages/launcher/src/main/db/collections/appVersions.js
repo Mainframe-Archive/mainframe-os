@@ -1,9 +1,16 @@
 // @flow
 
 import { COLLECTION_NAMES } from '../constants'
-import type { CollectionParams } from '../types'
+import type { Collection, CollectionParams } from '../types'
 
-import schema from '../schemas/appVersion'
+import schema, { type AppVersionData } from '../schemas/appVersion'
+
+export type AppVersionDoc = AppVersionData & {
+  getPublicID(): Promise<string>,
+  getUpdate(): Promise<AppVersionDoc | null>,
+}
+
+export type AppVersionsCollection = Collection<AppVersionDoc, AppVersionData>
 
 export default async (params: CollectionParams) => {
   return await params.db.collection({
@@ -15,7 +22,7 @@ export default async (params: CollectionParams) => {
         return app.getPublicID()
       },
 
-      async getUpdate(): Promise<Object | null> {
+      async getUpdate(): Promise<AppVersionDoc | null> {
         const app = await this.populate('app')
         return app.latestAvailableVersion == null ||
           app.latestAvailableVersion === this.manifest.version

@@ -399,17 +399,6 @@ export const ownApp = new GraphQLObjectType({
 export const devtools = new GraphQLObjectType({
   name: 'Devtools',
   fields: () => ({
-    apps: {
-      type: list(ownApp),
-      args: {
-        developerID: { type: GraphQLID },
-      },
-      resolve: async (doc, args, ctx) => {
-        const criteria =
-          args.developerID == null ? undefined : { developer: args.developerID }
-        return await ctx.db.own_apps.find(criteria).exec()
-      },
-    },
     developers: {
       type: list(ownDeveloper),
       resolve: async (doc, args, ctx) => {

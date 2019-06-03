@@ -2,6 +2,14 @@
 
 import ethAddress from './ethAddress'
 
+export type EthWalletHDData = {
+  localID: string,
+  mnemonic: string,
+  name: ?string,
+  hdPath: string,
+  activeAccounts: Array<{ index: number, address: string }>,
+}
+
 export default {
   title: 'Ethereum HD wallet',
   version: 0,

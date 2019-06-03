@@ -40,7 +40,7 @@ const createDeveloperMutation = graphql`
   mutation CreateDeveloperScreenMutation($input: CreateDeveloperInput!) {
     createDeveloper(input: $input) {
       developer {
-        localID
+        id
       }
       devtools {
         developers {
@@ -87,7 +87,7 @@ export default function CreateDeveloper() {
           } else {
             setState({
               status: 'done',
-              developerID: res.createDeveloper.developer.localID,
+              developerID: res.createDeveloper.developer.id,
             })
           }
         },
@@ -104,7 +104,10 @@ export default function CreateDeveloper() {
   if (state.status === 'done') {
     return (
       <Redirect
-        to={ROUTES.DEVTOOLS_APPS.replace(':developerID?', state.developerID)}
+        to={ROUTES.DEVTOOLS_DEVELOPER_APPS.replace(
+          ':developerID',
+          state.developerID,
+        )}
       />
     )
   }

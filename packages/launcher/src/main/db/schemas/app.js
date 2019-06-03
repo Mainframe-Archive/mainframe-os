@@ -4,6 +4,14 @@ import { COLLECTION_NAMES } from '../constants'
 
 import ethAddress from './ethAddress'
 
+export type AppData = {
+  localID: string,
+  publicFeed: string,
+  developer: string,
+  latestAvailableVersion: ?string,
+  latestDownloadedVersion: ?string,
+}
+
 export default {
   title: 'app',
   version: 0,

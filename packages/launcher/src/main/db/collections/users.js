@@ -3,7 +3,7 @@
 import Bzz from '@erebos/api-bzz-node'
 import { createKeyPair, sign } from '@erebos/secp256k1'
 import objectHash from 'object-hash'
-import { Subject, Subscription } from 'rxjs'
+import { type Observable, Subject, Subscription } from 'rxjs'
 import { debounceTime, filter, flatMap, map } from 'rxjs/operators'
 
 import { MF_PREFIX } from '../../../constants'
@@ -13,11 +13,46 @@ import OwnFeed from '../../swarm/OwnFeed'
 import { createPublisher } from '../../swarm/feeds'
 
 import { COLLECTION_NAMES } from '../constants'
-import type { CollectionParams } from '../types'
+import type { Collection, CollectionParams } from '../types'
 import { generateKeyPair, generateLocalID } from '../utils'
 
-import schema from '../schemas/user'
+import schema, { type UserData } from '../schemas/user'
+import type { ContactData } from '../schemas/contact'
 import type { GenericProfile } from '../schemas/genericProfile'
+
+import type { ContactDoc } from './contacts'
+import type { UserAppVersionDoc } from './userAppVersions'
+
+export type UserDoc = UserData & {
+  hasEthWallet(): boolean,
+  getBzz(): Bzz,
+  getPublicID(): string,
+  getPublicFeed(): OwnFeed,
+  getSharedKey(peerKey: any): Buffer,
+  getAppsVersions(): Promise<Array<UserAppVersionDoc>>,
+  observeContactAdded(): Observable<ContactDoc>,
+  addContact(publicID: string, data?: $Shape<ContactData>): Promise<ContactDoc>,
+  addEthHDWallet(id: string): Promise<void>,
+  addEthLedgerWallet(id: string): Promise<void>,
+  setProfileEthAddress(address: string): Promise<void>,
+  startPublicProfilePublication(): rxjs$TeardownLogic,
+  stopPublicProfilePublication(): void,
+  startPublicProfileToggle(): rxjs$TeardownLogic,
+  stopPublicProfileToggle(): void,
+  startContactsSync(): rxjs$TeardownLogic,
+  stopContactsSync(): void,
+  startSync(): rxjs$TeardownLogic,
+  stopSync(): void,
+}
+
+export type UsersCollection = Collection<UserDoc, UserData> & {
+  create(data: {
+    profile: GenericProfile,
+    privateProfile?: boolean,
+  }): Promise<UserDoc>,
+  startSync(): Promise<void>,
+  stopSync(): void,
+}
 
 export default async (params: CollectionParams) => {
   const db = params.db
@@ -30,7 +65,7 @@ export default async (params: CollectionParams) => {
       async create(data: {
         profile: GenericProfile,
         privateProfile?: boolean,
-      }) {
+      }): Promise<UserDoc> {
         return await this.insert({
           ...data,
           localID: generateLocalID(),
@@ -38,7 +73,7 @@ export default async (params: CollectionParams) => {
         })
       },
 
-      async startSync() {
+      async startSync(): Promise<void> {
         if (this._sync != null) {
           logger.warn('Collection already syncing, ignoring startSync() call')
           return
@@ -72,7 +107,7 @@ export default async (params: CollectionParams) => {
         )
       },
 
-      async stopSync() {
+      stopSync(): void {
         if (this._sync != null) {
           logger.debug('Stop collection sync')
           this._sync.unsubscribe()
@@ -114,18 +149,21 @@ export default async (params: CollectionParams) => {
           .toBuffer()
       },
 
-      async getAppsVersions(): Promise<Array<Object>> {
+      async getAppsVersions(): Promise<Array<UserAppVersionDoc>> {
         return await db.user_app_versions.find({ user: this.localID }).exec()
       },
 
-      observeContactAdded() {
+      observeContactAdded(): Observable<ContactDoc> {
         if (this._contactAdded$ == null) {
           this._contactAdded$ = new Subject()
         }
         return this._contactAdded$.asObservable()
       },
 
-      async addContact(publicID: string, data: Object = {}): Promise<Object> {
+      async addContact(
+        publicID: string,
+        data: $Shape<ContactData> = {},
+      ): Promise<ContactDoc> {
         logger.log({
           level: 'debug',
           message: 'Add contact for user',
@@ -205,11 +243,11 @@ export default async (params: CollectionParams) => {
         await this.update({ $addToSet: { 'ethWallets.ledger': id } })
       },
 
-      async setProfileEthAddress(address: string) {
+      async setProfileEthAddress(address: string): Promise<void> {
         await this.atomicSet('profile.ethAddress', address)
       },
 
-      startPublicProfilePublication() {
+      startPublicProfilePublication(): rxjs$TeardownLogic {
         if (this._publicProfilePublication != null) {
           logger.log({
             level: 'warn',
@@ -268,7 +306,7 @@ export default async (params: CollectionParams) => {
         }
       },
 
-      stopPublicProfilePublication() {
+      stopPublicProfilePublication(): void {
         if (this._publicProfilePublication != null) {
           logger.log({
             level: 'debug',
@@ -280,7 +318,7 @@ export default async (params: CollectionParams) => {
         }
       },
 
-      startPublicProfileToggle() {
+      startPublicProfileToggle(): rxjs$TeardownLogic {
         if (this._publicProfilePublicationToggle == null) {
           logger.log({
             level: 'debug',
@@ -323,7 +361,7 @@ export default async (params: CollectionParams) => {
         }
       },
 
-      stopPublicProfileToggle() {
+      stopPublicProfileToggle(): void {
         this.stopPublicProfilePublication()
         if (this._publicProfilePublicationToggle != null) {
           logger.log({
@@ -336,7 +374,7 @@ export default async (params: CollectionParams) => {
         }
       },
 
-      startContactsSync() {
+      startContactsSync(): rxjs$TeardownLogic {
         if (this._contactsSync != null) {
           logger.log({
             level: 'warn',
@@ -369,7 +407,7 @@ export default async (params: CollectionParams) => {
         }
       },
 
-      stopContactsSync() {
+      stopContactsSync(): void {
         if (this._contactsSync != null) {
           logger.log({
             level: 'debug',
@@ -381,7 +419,7 @@ export default async (params: CollectionParams) => {
         }
       },
 
-      startSync() {
+      startSync(): rxjs$TeardownLogic {
         if (this._sync != null) {
           logger.log({
             level: 'warn',
@@ -418,7 +456,7 @@ export default async (params: CollectionParams) => {
         }
       },
 
-      stopSync() {
+      stopSync(): void {
         if (this._sync != null) {
           logger.log({
             level: 'debug',
