@@ -68,6 +68,7 @@ export default class Contract {
     return this.ethClient.sendAndListen(txParams)
   }
 
+  // Topics should not include the event signature
   decodeEventLog(eventName: string, log: Object, topics: Array<string>) {
     const abi = this.abi.find(abi => {
       return abi.type === 'event' && abi.name === eventName
@@ -83,6 +84,8 @@ export default class Contract {
       },
       ...abi.inputs,
     ]
+    // Remove event sig topic as expected by decodeLog
+    const topics = log.topics.slice(1)
     return Web3EthAbi.decodeLog(inputs, log.data, topics)
   }
 
@@ -139,7 +142,7 @@ export default class Contract {
     const events = []
     res.forEach(log => {
       try {
-        const event = Web3EthAbi.decodeLog(inputs, log.data, params.topics)
+        const event = this.decodeEventLog(name, log)
         events.push(event)
       } catch (err) {
         // eslint-disable-next-line no-console

@@ -706,9 +706,7 @@ export default class InvitesHandler {
 
       const handleEvent = (name, log, handler) => {
         try {
-          const event = this.invitesContract.decodeEventLog(name, log.result, [
-            userFeedHash,
-          ])
+          const event = this.invitesContract.decodeEventLog(name, log.result)
           handler(user, event)
         } catch (err) {
           this._context.log(err.message)
