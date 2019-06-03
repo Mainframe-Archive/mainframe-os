@@ -4,6 +4,7 @@ import { generateMnemonic, mnemonicToSeed } from 'bip39'
 import sigUtil from 'eth-sig-util'
 import type EthWallet from 'ethereumjs-wallet'
 import HDkey from 'ethereumjs-wallet/hdkey'
+import EthereumTx from 'ethereumjs-tx'
 
 import { COLLECTION_NAMES } from '../constants'
 import type { CollectionParams } from '../types'
@@ -57,6 +58,9 @@ export default async (params: CollectionParams) => {
         })
         await doc.save()
         return doc
+      },
+      async getByAddress(address) {
+        return this.findOne({ activeAccounts: { $in: [address] } }).exec()
       },
     },
     methods: {
@@ -169,6 +173,35 @@ export default async (params: CollectionParams) => {
           level: 'debug',
           message: 'Removed',
           localID: this.localID,
+        })
+      },
+
+      async signTransaction(params: WalletEthSignTxParams): Promise<string> {
+        const account = this.activeAccounts.find(a => a.address === params.from)
+        if (!account) {
+          throw new Error(`wallet not found for ${params.from}`)
+        }
+        const root = await this.getRoot()
+        const accountWallet = getWallet(root, account.index)
+
+        const tx = new EthereumTx(params)
+        tx.sign(accountWallet.getPrivateKey())
+        return '0x' + tx.serialize().toString('hex')
+      },
+
+      async sign(params: WalletSignDataParams): Promise<string> {
+        console.log('signing eth hd', params, this.activeAccounts)
+        const account = this.activeAccounts.find(
+          a => a.address === params.address,
+        )
+        if (!account) {
+          throw new Error(`wallet not found for ${params.address}`)
+        }
+        const root = await this.getRoot()
+        const accountWallet = getWallet(root, account.index)
+
+        return sigUtil.personalSign(accountWallet.getPrivateKey(), {
+          data: params.data,
         })
       },
     },

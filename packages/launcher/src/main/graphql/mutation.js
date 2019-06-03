@@ -525,9 +525,6 @@ const acceptContactRequestMutation = mutationWithClientMutationId({
     peerID: {
       type: new GraphQLNonNull(GraphQLString),
     },
-    userID: {
-      type: new GraphQLNonNull(GraphQLString),
-    },
   },
   outputFields: {
     viewer: viewerField,
@@ -537,12 +534,13 @@ const acceptContactRequestMutation = mutationWithClientMutationId({
     },
   },
   mutateAndGetPayload: async (args, ctx) => {
-    const contact = await ctx.mutations.createContactFromPeer(
-      args.userID,
-      args.peerID,
-    )
-    const contactData = ctx.queries.mergePeerContactData(contact)
-    return { contact: contactData }
+    const user = await ctx.getUser()
+    const contactRequest = await user.findContactRequestByPeer(args.peerID)
+    if (!contactRequest) {
+      throw new Error('Contact request not found for peer: ' + args.peerID)
+    }
+    const contact = await user.addContactFromRequest(contactRequest)
+    return { contact: await contact.getInfo() }
   },
 })
 

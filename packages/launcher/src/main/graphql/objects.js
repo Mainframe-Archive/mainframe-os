@@ -543,32 +543,23 @@ export const stakeState = new GraphQLEnumType({
   },
 })
 
-export const stake = new GraphQLObjectType({
-  name: 'InviteStake',
-  fields: () => ({
-    amount: {
-      type: GraphQLString,
-    },
-    state: {
-      type: new GraphQLNonNull(stakeState),
-    },
-    reclaimedTX: {
-      type: GraphQLString,
-    },
-  }),
-})
-
 export const contactInviteData = new GraphQLObjectType({
   name: 'ContactInviteData',
   fields: () => ({
+    stakeAmount: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    stakeState: {
+      type: new GraphQLNonNull(stakeState),
+    },
     inviteTX: {
       type: GraphQLString,
     },
     ethNetwork: {
       type: GraphQLString,
     },
-    stake: {
-      type: new GraphQLNonNull(stake),
+    reclaimedStakeTX: {
+      type: GraphQLString,
     },
   }),
 })
@@ -609,13 +600,26 @@ export const contactRequest = new GraphQLObjectType({
     },
     localPeerID: {
       type: new GraphQLNonNull(GraphQLID),
-      resolve: doc => doc.peer,
+      resolve: doc => doc.peerID,
     },
     publicID: {
       type: new GraphQLNonNull(GraphQLString),
-      resolve: doc => doc.getPublicID(),
     },
-    // TODO: other fields
+    profile: {
+      type: new GraphQLNonNull(genericProfile),
+    },
+    stakeAmount: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    ethNetwork: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    receivedAddress: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    connectionState: {
+      type: new GraphQLNonNull(connectionState),
+    },
   }),
 })
 
@@ -934,12 +938,22 @@ export const user = new GraphQLObjectType({
       type: list(contact),
       resolve: async doc => {
         const contacts = await doc.populate('contacts')
-        return await Promise.all(contacts.map(c => c.getInfo()))
+        return await Promise.all(
+          contacts.map(c => {
+            return c.getInfo()
+          }),
+        )
       },
     },
     contactRequests: {
       type: list(contactRequest),
-      resolve: doc => doc.populate('contactRequests'),
+      resolve: async doc => {
+        const requests = await doc.populate('contactRequests')
+        // Only lists requests that haven't been declined
+        return await Promise.all(
+          requests.filter(c => !c.rejectedTXHash).map(r => r.getInfo()),
+        )
+      },
     },
     ethWallets: {
       type: new GraphQLNonNull(ethWallets),

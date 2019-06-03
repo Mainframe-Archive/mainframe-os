@@ -135,7 +135,7 @@ export class SystemContext {
     this.logger.debug('Start sync')
 
     db.peers.startSync(user.getBzz())
-    db.users.startSync()
+    db.users.startSync(this.env)
 
     this.syncing = true
   }

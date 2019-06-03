@@ -1,6 +1,5 @@
 input AcceptContactRequestInput {
   peerID: String!
-  userID: String!
   clientMutationId: String
 }
 
@@ -233,9 +232,11 @@ type ContactChangedPayload {
 }
 
 type ContactInviteData {
+  stakeAmount: String!
+  stakeState: StakeState!
   inviteTX: String
   ethNetwork: String
-  stake: InviteStake!
+  reclaimedStakeTX: String
 }
 
 type ContactRequest implements Node {
@@ -244,6 +245,11 @@ type ContactRequest implements Node {
   localID: ID!
   localPeerID: ID!
   publicID: String!
+  profile: GenericProfile!
+  stakeAmount: String!
+  ethNetwork: String!
+  receivedAddress: String!
+  connectionState: ConnectionState!
 }
 
 input CreateDeveloperIdentityInput {
@@ -349,12 +355,6 @@ enum InstallationState {
   READY
   DOWNLOADING
   ERROR
-}
-
-type InviteStake {
-  amount: String
-  state: StakeState!
-  reclaimedTX: String
 }
 
 type Lookup {

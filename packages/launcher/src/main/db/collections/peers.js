@@ -99,6 +99,24 @@ export default async (params: CollectionParams) => {
         return this._publicKey
       },
 
+      async getFirstContactData(
+        user: Object,
+      ): Promise<{
+        userAddress: string,
+        peerAddress: string,
+        sharedKey: Buffer,
+      }> {
+        const pubKey = this.getPublicKey()
+        if (pubKey == null) {
+          throw new Error('Missing peer public key')
+        }
+        return {
+          userAddress: user.getPublicFeed().address,
+          peerAddress: this.publicFeed,
+          sharedKey: user.getSharedKey(pubKey),
+        }
+      },
+
       startPublicFeedSubscription(bzz: Bzz) {
         if (this._publicFeedSubscription != null) {
           logger.log({
