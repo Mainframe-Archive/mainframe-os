@@ -598,14 +598,14 @@ class InviteContactModal extends Component<Props, State> {
           title="Contract"
           tooltipInfo={approveInfo}
           txParam={txParams && txParams[0]}
-          button={approveButton && approveButton}
+          button={approveButton}
         />
         {invitePending && invitePending.state === 'approved' && (
           <Transaction
             title="Staking"
             tooltipInfo={sendInfo}
             txParam={txParams && txParams[0]}
-            button={sendButton && sendButton}
+            button={sendButton}
           />
         )}
       </Section>

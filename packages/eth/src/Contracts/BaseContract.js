@@ -69,6 +69,7 @@ export default class Contract {
   }
 
   // Topics should not include the event signature
+
   decodeEventLog(eventName: string, log: Object) {
     const abi = this.abi.find(abi => {
       return abi.type === 'event' && abi.name === eventName
@@ -132,6 +133,7 @@ export default class Contract {
 
     const res = await this.ethClient.getPastEvents({ ...params, topics })
     const events = []
+
     res.forEach(log => {
       try {
         const event = this.decodeEventLog(name, log)
