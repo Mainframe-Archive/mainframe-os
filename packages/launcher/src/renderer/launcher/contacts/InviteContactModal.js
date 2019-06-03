@@ -122,7 +122,9 @@ class InviteContactModal extends Component<Props, State> {
         userID: user.localID,
         peerID: contact.peerID,
       })
-      contractRecipientAddress !== null && this.getTXDetails(this.props.type)
+      contractRecipientAddress !== null &&
+        this.props.updateSelectedAddress(contractRecipientAddress)
+      this.getTXDetails(this.props.type)
     } else if (type === 'retrieveStake') {
       const contractOriginAddress = await rpc.getContractOriginAddress({
         userID: user.localID,

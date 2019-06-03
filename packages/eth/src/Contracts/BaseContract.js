@@ -69,7 +69,7 @@ export default class Contract {
   }
 
   // Topics should not include the event signature
-  decodeEventLog(eventName: string, log: Object, topics: Array<string>) {
+  decodeEventLog(eventName: string, log: Object) {
     const abi = this.abi.find(abi => {
       return abi.type === 'event' && abi.name === eventName
     })
