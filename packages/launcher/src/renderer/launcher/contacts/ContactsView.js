@@ -12,7 +12,8 @@ import {
   type Environment,
 } from 'react-relay'
 import { fetchQuery } from 'relay-runtime'
-import { debounce, filter } from 'lodash'
+import { debounce } from 'lodash'
+import memoize from 'memoize-one'
 
 import { shell } from 'electron'
 import {
@@ -47,6 +48,8 @@ import InviteContactModal, { type TransactionType } from './InviteContactModal'
 import type {
   ContactsView_contacts as Contacts,
   ContactsView_wallets as Wallets,
+  EthWallets,
+  WalletAccount,
 } from './__generated__/ContactsView_contacts.graphql'
 
 type UserContacts = $PropertyType<Contacts, 'userContacts'>
@@ -202,18 +205,6 @@ export type SubmitContactInput = {
   name: String,
 }
 
-export type WalletAccounts = Array<{
-  address: string,
-  balances: { mft: string, eth: string },
-}>
-
-type Wallet = {
-  localID: string,
-  name: ?string,
-  accounts: WalletAccounts,
-  type?: 'hd' | 'ledger',
-}
-
 type Props = ContextProps & {
   relay: {
     environment: Environment,
@@ -314,15 +305,17 @@ const peerLookupQuery = graphql`
   }
 `
 
-const getWalletsArray = (props: Props): Array<Wallet> => {
-  const { ethWallets } = props.wallets
-  const wallets: Array<Wallet> = [
-    // $FlowFixMe: no flatmap support
-    ...ethWallets.hd.flatMap(w => w.accounts),
-    // $FlowFixMe: no flatmap support
-    ...ethWallets.ledger.flatMap(w => w.accounts),
-  ]
-  return wallets
+const formatBalance = (val: string): string => {
+  return parseFloat(val)
+    .toFixed(4)
+    .toString()
+    .slice(0, 10)
+}
+
+const formatBalances = balances => {
+  const eth = formatBalance(balances.eth)
+  const mft = formatBalance(balances.mft)
+  return eth + ' ETH   ' + mft + ' MFT'
 }
 
 class ContactsViewComponent extends Component<Props, State> {
@@ -590,6 +583,23 @@ class ContactsViewComponent extends Component<Props, State> {
   onChangeRadio = (value: string) => {
     this.setState({ radio: value })
   }
+
+  getWalletAccounts = memoize(
+    (ethWallets: EthWallets): { [address: string]: WalletAccount } => {
+      const wallets = {}
+      ethWallets.hd.forEach(w => {
+        w.accounts.forEach(a => {
+          wallets[a.address] = a
+        })
+      })
+      ethWallets.ledger.forEach(w => {
+        w.accounts.forEach(a => {
+          wallets[a.address] = a
+        })
+      })
+      return wallets
+    },
+  )
 
   // RENDER
 
@@ -1177,31 +1187,17 @@ class ContactsViewComponent extends Component<Props, State> {
   }
 
   renderNotificationModal() {
-    const { contacts } = this.props
+    const { contacts, wallets } = this.props
     const { selectedAddress, notification } = this.state
-    const walletsArray = getWalletsArray(this.props)
-    const mft = filter(walletsArray, w => w.address === selectedAddress)[0]
-      .balances.mft
-    const eth = filter(walletsArray, w => w.address === selectedAddress)[0]
-      .balances.eth
-    const stake = contacts && contacts.inviteStake ? contacts.inviteStake : ''
     const deletedContact = this.state.inviteModalOpen
       ? this.state.inviteModalOpen.contact.profile
       : null
 
-    const balances =
-      Number(eth)
-        .toFixed(4)
-        .toString()
-        .slice(0, 10) +
-      ' ETH   ' +
-      Number(mft)
-        .toFixed(4)
-        .toString()
-        .slice(0, 10) +
-      ' MFT'
-
     if (notification === 'withdraw' || notification === 'decline') {
+      const walletsArray = this.getWalletAccounts(wallets.ethWallets)
+      const balances = formatBalances(walletsArray[selectedAddress].balances)
+      const stake = contacts && contacts.inviteStake ? contacts.inviteStake : ''
+
       return (
         <Notification
           message={stake + ' MFT have been added to your wallet.'}
@@ -1230,9 +1226,9 @@ class ContactsViewComponent extends Component<Props, State> {
 
   renderInviteModal() {
     const { inviteModalOpen, selectedAddress } = this.state
-    const { user, contacts } = this.props
+    const { user, contacts, wallets } = this.props
+    const walletsArray = this.getWalletAccounts(wallets.ethWallets)
 
-    const walletsArray = getWalletsArray(this.props)
     return (
       inviteModalOpen && (
         <InviteContactModal

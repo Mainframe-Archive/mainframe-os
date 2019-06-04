@@ -4,7 +4,6 @@ import styled from 'styled-components/native'
 import { Text, Tooltip, DropDown, Button } from '@morpheus-ui/core'
 
 import { graphql, createFragmentContainer } from 'react-relay'
-import { filter } from 'lodash'
 import CircleCheck from '../../UIComponents/Icons/Circlecheck'
 import Loader from '../../UIComponents/Loader'
 import CircleLoader from '../../UIComponents/CircleLoader'
@@ -18,8 +17,8 @@ import applyContext, { type ContextProps } from '../LauncherContext'
 import { MFT_TOKEN_ADDRESSES } from '../../../constants'
 import Transaction from './Transaction'
 
+import type { EthWallets } from './__generated__/ContactsView_contacts.graphql'
 import type { InviteContactModal_contact as Contact } from './__generated__/InviteContactModal_contact.graphql.js'
-import type { WalletAccounts } from './ContactsView'
 
 export type TransactionType = 'invite' | 'retrieveStake' | 'declineInvite'
 
@@ -28,7 +27,7 @@ type Props = ContextProps & {
   contact: Contact,
   type: TransactionType,
   inviteStakeValue: ?number,
-  wallets: WalletAccounts,
+  wallets: EthWallets,
   selectedAddress: string,
   updateSelectedAddress: string => void,
   showNotification: string => void,
@@ -328,11 +327,11 @@ class InviteContactModal extends Component<Props, State> {
   }
 
   validate = feedback => {
+    const { wallets } = this.props
     const addr = feedback.value
-    const mft = filter(this.props.wallets, w => w.address === addr)[0].balances
-      .mft
-    const eth = filter(this.props.wallets, w => w.address === addr)[0].balances
-      .eth
+    const mft = wallets[addr].balances.mft
+    const eth = wallets[addr].balances.eth
+
     if (this.props.type === 'invite') {
       if (Number(mft) < Number(this.props.inviteStakeValue)) {
         this.setState({ dropdownError: true })
@@ -460,31 +459,7 @@ class InviteContactModal extends Component<Props, State> {
   }
 
   renderTransactionSection(title: string) {
-    let defaultIndex = 0
-    const options = this.props.wallets.map((w, index) => {
-      if (this.props.selectedAddress === w.address) {
-        defaultIndex = index
-      }
-      return {
-        key: w.address,
-        data: (
-          <AddContactDetail noMarginTop>
-            <Blocky>
-              <WalletIcon address={w.address} size="small" />
-            </Blocky>
-            <AddContactDetailText>
-              <Text variant={['greyDark23', 'ellipsis', 'mono']} size={12}>
-                {w.address}
-              </Text>
-              <Text variant="greyDark23" size={11}>{`MFT: ${
-                w.balances.mft
-              }, ETH: ${w.balances.eth}`}</Text>
-            </AddContactDetailText>
-          </AddContactDetail>
-        ),
-      }
-    })
-
+    const { wallets } = this.props
     const titleSection = (
       <Text
         bold
@@ -521,7 +496,28 @@ class InviteContactModal extends Component<Props, State> {
       </Text>
     )
 
-    if (this.props.type === 'invite') {
+    if (this.props.type === 'invite' && Object.values(wallets).length > 1) {
+      const options = Object.keys(wallets).map(address => {
+        const wallet = wallets[address]
+        return {
+          key: address,
+          data: (
+            <AddContactDetail noMarginTop>
+              <Blocky>
+                <WalletIcon address={address} size="small" />
+              </Blocky>
+              <AddContactDetailText>
+                <Text variant={['greyDark23', 'ellipsis', 'mono']} size={12}>
+                  {address}
+                </Text>
+                <Text variant="greyDark23" size={11}>{`MFT: ${
+                  wallet.balances.mft
+                }, ETH: ${wallet.balances.eth}`}</Text>
+              </AddContactDetailText>
+            </AddContactDetail>
+          ),
+        }
+      })
       return (
         <Section>
           {titleSection}
@@ -541,12 +537,24 @@ class InviteContactModal extends Component<Props, State> {
           {this.renderGasData()}
         </Section>
       )
-    } else {
+    } else if (wallets) {
+      const address = this.props.selectedAddress
+      const wallet = wallets[address]
       return (
         <Section>
           {titleSection}
           <AddContactDetail border>
-            {options[defaultIndex].data}
+            <Blocky>
+              <WalletIcon address={address} size="small" />
+            </Blocky>
+            <AddContactDetailText>
+              <Text variant={['greyDark23', 'ellipsis', 'mono']} size={12}>
+                {address}
+              </Text>
+              <Text variant="greyDark23" size={11}>{`MFT: ${
+                wallet.balances.mft
+              }, ETH: ${wallet.balances.eth}`}</Text>
+            </AddContactDetailText>
           </AddContactDetail>
           {this.renderGasData()}
         </Section>
