@@ -5,15 +5,20 @@ import { createKeyPair, sign } from '@erebos/secp256k1'
 import objectHash from 'object-hash'
 import { Subject, Subscription } from 'rxjs'
 import { debounceTime, filter, flatMap, map } from 'rxjs/operators'
+import { EthClient, ERC20 } from '@mainframe/eth'
+import { ETH_RPC_URLS } from '@mainframe/eth'
 
 import { MF_PREFIX } from '../../../constants'
 
 import { writePeer } from '../../data/protocols'
 import OwnFeed from '../../swarm/OwnFeed'
 import { createPublisher } from '../../swarm/feeds'
+import WalletProvider from '../../blockchain/WalletProvider'
+import InvitesHandler from '../../blockchain/InvitesHandler'
 
 import { COLLECTION_NAMES } from '../constants'
 import type { CollectionParams } from '../types'
+import type { Environment } from '../../environment'
 import { generateKeyPair, generateLocalID } from '../utils'
 
 import schema from '../schemas/user'
@@ -35,7 +40,7 @@ export default async (params: CollectionParams) => {
         })
       },
 
-      async startSync() {
+      async startSync(env: Environment) {
         if (this._sync != null) {
           logger.warn('Collection already syncing, ignoring startSync() call')
           return
@@ -46,7 +51,7 @@ export default async (params: CollectionParams) => {
 
         const docs = await this.find().exec()
         docs.forEach(doc => {
-          this._sync.add(doc.startSync())
+          this._sync.add(doc.startSync(env))
         })
 
         this._sync.add(
@@ -54,7 +59,7 @@ export default async (params: CollectionParams) => {
             .pipe(
               flatMap(async event => {
                 const doc = await this.findOne(event.data.doc).exec()
-                this._sync.add(doc.startSync())
+                this._sync.add(doc.startSync(env))
               }),
             )
             .subscribe({
@@ -94,6 +99,16 @@ export default async (params: CollectionParams) => {
         return this._bzz
       },
 
+      getEth(): EthClient {
+        if (this._ethClient == null) {
+          this._ethClient = this.initEthClient()
+        } else {
+          this.checkEthConnection() // Handle WS connection dropping
+        }
+        // $FlowFixMe null checked above
+        return this._ethClient
+      },
+
       getPublicID(): string {
         return this.getPublicFeed().address.replace('0x', MF_PREFIX.PEER)
       },
@@ -111,6 +126,35 @@ export default async (params: CollectionParams) => {
           .toBuffer()
       },
 
+      async getEthAccounts(): Array<string> {
+        let accounts = []
+        for (const type of ['hd', 'ledger']) {
+          const wallets = await this.populate(`ethWallets.${type}`)
+          for (const w of wallets) {
+            accounts = accounts.concat(w.activeAccounts.map(a => a.address))
+          }
+        }
+        return accounts
+      },
+
+      initEthClient() {
+        const walletProvider = new WalletProvider(this)
+        // return new EthClient(this.ethURL, walletProvider)
+        return new EthClient(ETH_RPC_URLS.WS.ropsten, walletProvider)
+      },
+
+      checkEthConnection() {
+        // Handle WS disconnects
+        if (
+          this._ethClient &&
+          this._ethClient.web3Provider.isConnecting &&
+          !this._ethClient.web3Provider.isConnecting() &&
+          !this._ethClient.web3Provider.connected
+        ) {
+          this._ethClient = this.initEthClient()
+        }
+      },
+
       observeContactAdded() {
         if (this._contactAdded$ == null) {
           this._contactAdded$ = new Subject()
@@ -118,7 +162,11 @@ export default async (params: CollectionParams) => {
         return this._contactAdded$.asObservable()
       },
 
-      async addContact(publicID: string, data: Object = {}): Promise<Object> {
+      async addContact(
+        publicID: string,
+        data: Object = {},
+        signature?: string,
+      ): Promise<Object> {
         logger.log({
           level: 'debug',
           message: 'Add contact for user',
@@ -129,6 +177,7 @@ export default async (params: CollectionParams) => {
         const bzz = this.getBzz()
 
         let peer = await db.peers.findByPublicID(publicID)
+
         if (peer == null) {
           logger.log({
             level: 'debug',
@@ -154,6 +203,8 @@ export default async (params: CollectionParams) => {
           })
         }
 
+        // TODO: check existing after schema change
+
         const contact = db.contacts.newDocument({
           profile: {},
           ...data,
@@ -162,7 +213,7 @@ export default async (params: CollectionParams) => {
           peer: peer.localID,
           firstContactFeedCreated: true, // Created below, before saving doc
         })
-        await contact.createFirstContactFeed(this)
+        await contact.createFirstContactFeed(this, signature)
         await contact.save()
         logger.log({
           level: 'debug',
@@ -190,6 +241,44 @@ export default async (params: CollectionParams) => {
         return contact
       },
 
+      async addContactFromRequest(request: Object): Promise<void> {
+        logger.log({
+          level: 'debug',
+          message: 'Adding contact from request',
+          peerID: request.peer,
+        })
+        const acceptSig = await this.invitesSync.signAccepted(request)
+        const data = {
+          publicKey: request.publicKey,
+        }
+        const publicID = await request.getPublicID()
+        const contact = await this.addContact(publicID, data, acceptSig)
+        await this.removeContactRequest(request)
+        return contact
+      },
+
+      async addContactRequest(id: string): Promise<void> {
+        await this.update({ $addToSet: { contactRequests: id } })
+      },
+
+      async removeContactRequest(request: Object): Promise<void> {
+        await this.atomicSet(
+          'contactRequests',
+          this.contactRequests.filter(cid => cid !== request.localID),
+        )
+        await request.remove()
+      },
+
+      async findContactRequestByPeer(peerID: string): Promise<?Object> {
+        const requests = await this.populate('contactRequests')
+        return requests.find(r => r.peer === peerID)
+      },
+
+      async findContactByPeer(peerID: string): Promise<?Object> {
+        const contacts = await this.populate('contacts')
+        return contacts.find(c => c.peer === peerID)
+      },
+
       async addEthHDWallet(id: string): Promise<void> {
         await this.update({ $addToSet: { 'ethWallets.hd': id } })
       },
@@ -200,6 +289,43 @@ export default async (params: CollectionParams) => {
 
       async setProfileEthAddress(address: string) {
         await this.atomicSet('profile.ethAddress', address)
+      },
+
+      async findHDWallet(address: string): Promise<Object> {
+        const wallets = await this.populate('ethWallets.hd')
+        return wallets.find(w => {
+          return w.activeAccounts.map(a => a.address).includes(address)
+        })
+      },
+
+      async findLedgerWallet(address: string): Promise<Object> {
+        const wallets = await this.populate('ethWallets.ledger')
+        return wallets.find(w => {
+          return w.activeAccounts.map(a => a.address).includes(address)
+        })
+      },
+
+      async findWalletOfAddress(address: string): Promise<Object> {
+        return (
+          (await this.findHDWallet(address)) ||
+          (await this.findLedgerWallet(address))
+        )
+      },
+
+      async signEthTransaction(params: Object) {
+        const wallet = await this.findWalletOfAddress(params.from)
+        if (!wallet) {
+          throw new Error(`No wallet found for user ${this.localID}`)
+        }
+        return wallet.signTransaction(params)
+      },
+
+      async signEthData(params: { address: string, data: string }) {
+        const wallet = await this.findWalletOfAddress(params.address)
+        if (!wallet) {
+          throw new Error(`No wallet found for address ${params.address}`)
+        }
+        return wallet.sign(params)
       },
 
       startPublicProfilePublication() {
@@ -329,6 +455,48 @@ export default async (params: CollectionParams) => {
         }
       },
 
+      startInvitesSync(env: Environment) {
+        if (this.invitesSync != null) {
+          logger.log({
+            level: 'warn',
+            message: 'Invites sync is already started',
+            id: this.localID,
+          })
+          return
+        }
+
+        logger.log({
+          level: 'debug',
+          message: 'Start invites sync',
+          id: this.localID,
+        })
+
+        const handlerParams = {
+          user: this,
+          logger,
+          env,
+          db,
+        }
+
+        this.invitesSync = new InvitesHandler(handlerParams)
+
+        // return () => {
+        //   this.stopInvitesSync()
+        // }
+      },
+
+      // stopInvitesSync() {
+      //   if (this.invitesSync != null) {
+      //     logger.log({
+      //       level: 'debug',
+      //       message: 'Stop invites sync',
+      //       id: this.localID,
+      //     })
+      //     this.invitesSync.unsubscribe()
+      //     this.invitesSync = null
+      //   }
+      // },
+
       startContactsSync() {
         if (this._contactsSync != null) {
           logger.log({
@@ -374,7 +542,7 @@ export default async (params: CollectionParams) => {
         }
       },
 
-      startSync() {
+      startSync(env: Environment) {
         if (this._sync != null) {
           logger.log({
             level: 'warn',
@@ -405,6 +573,7 @@ export default async (params: CollectionParams) => {
         this._sync.add(deletedSub)
         this._sync.add(this.startPublicProfileToggle())
         this._sync.add(this.startContactsSync())
+        this._sync.add(this.startInvitesSync(env))
 
         return () => {
           this.stopSync()

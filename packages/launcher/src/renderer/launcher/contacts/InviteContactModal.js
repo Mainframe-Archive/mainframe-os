@@ -122,7 +122,6 @@ class InviteContactModal extends Component<Props, State> {
     try {
       const res = await rpc.getInviteTXDetails({
         type: type,
-        userID: user.localID,
         contactID: contact.localID,
       })
       this.setState({
@@ -140,7 +139,6 @@ class InviteContactModal extends Component<Props, State> {
     try {
       const res = await rpc.getInviteTXDetails({
         type: 'approve',
-        userID: user.localID,
         contactID: contact.localID,
       })
       this.setState({
@@ -161,7 +159,6 @@ class InviteContactModal extends Component<Props, State> {
     try {
       const res = await rpc.getInviteTXDetails({
         type: 'sendInvite',
-        userID: user.localID,
         contactID: contact.localID,
       })
       this.setState({
@@ -231,7 +228,7 @@ class InviteContactModal extends Component<Props, State> {
     try {
       this.setState({ txProcessing: true, error: null })
       const res = await rpc.sendDeclineInviteTX({
-        peerID: contact.peerID,
+        requestID: contact.localID,
       })
       this.setState({
         txProcessing: false,
@@ -515,12 +512,11 @@ const InviteContactRelayContainer = createFragmentContainer(
         publicID
         connectionState
         invite {
+          ethNetwork
           inviteTX
-          stake {
-            reclaimedTX
-            amount
-            state
-          }
+          stakeState
+          stakeAmount
+          reclaimedStakeTX
         }
         profile {
           name

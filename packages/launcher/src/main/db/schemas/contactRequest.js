@@ -21,8 +21,8 @@ export default {
       type: 'string',
       final: true,
     },
-    privateFeed: {
-      ...ethAddress,
+    publicKey: {
+      type: 'string',
       final: true,
     },
     receivedAddress: {
@@ -32,6 +32,9 @@ export default {
     senderAddress: {
       ...ethAddress,
       final: true,
+    },
+    stakeAmount: {
+      type: 'string',
     },
     rejectedTXHash: {
       type: 'string',

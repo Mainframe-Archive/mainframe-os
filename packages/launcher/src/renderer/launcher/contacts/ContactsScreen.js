@@ -295,11 +295,20 @@ class ContactsView extends Component<Props, State> {
   }
 
   getSelectedContact(): Contact {
-    return this.getContact(this.state.selectedContact) || this.getIdentity()
+    const { selectedContact } = this.state
+    return (
+      this.getContact(selectedContact) ||
+      this.getContactRequest(selectedContact) ||
+      this.getIdentity()
+    )
   }
 
   getContact = (id: string) => {
     return this.props.user.contacts.find(c => c.localID === id)
+  }
+
+  getContactRequest = (id: string) => {
+    return this.props.user.contactRequests.find(c => c.localID === id)
   }
 
   startSearching = () => {
@@ -431,9 +440,9 @@ class ContactsView extends Component<Props, State> {
     { maxWait: 1000 },
   )
 
-  selectContact = (contact: Contact) => {
+  selectContact = (id: string) => {
     this.setState({
-      selectedContact: contact.localID,
+      selectedContact: id,
       error: null,
       inviteError: null,
     })
@@ -453,7 +462,7 @@ class ContactsView extends Component<Props, State> {
       mutation: acceptContactRequestMutation,
       variables: {
         input: {
-          peerID: contact.peerID,
+          peerID: contact.localPeerID,
         },
       },
       onCompleted: (contact, errors) => {
@@ -515,8 +524,11 @@ class ContactsView extends Component<Props, State> {
 
   renderContactsList() {
     const selectedContact = this.getSelectedContact()
-
-    const contacts = [this.getIdentity(), ...this.props.user.contacts]
+    const contacts = [
+      this.getIdentity(),
+      ...this.props.user.contacts,
+      ...this.props.user.contactRequests,
+    ]
     const list = this.state.searchTerm
       ? contacts.filter(
           cont =>
@@ -572,7 +584,7 @@ class ContactsView extends Component<Props, State> {
             return (
               <ContactCard
                 key={contact.localID}
-                onPress={() => this.selectContact(contact)}
+                onPress={() => this.selectContact(contact.localID)}
                 selected={selected}>
                 <ContactCardText>
                   <Text variant={['greyMed', 'ellipsis']} bold size={13}>
@@ -826,7 +838,7 @@ class ContactsView extends Component<Props, State> {
           contact.connectionState === 'CONNECTED' &&
           contact.invite
         ) {
-          if (contact.invite.stake.state === 'STAKED') {
+          if (contact.invite.stakeState === 'STAKED') {
             return (
               <Row size={1}>
                 <Column>
@@ -839,7 +851,7 @@ class ContactsView extends Component<Props, State> {
                 </Column>
               </Row>
             )
-          } else if (contact.invite.stake.state === 'RECLAIMING') {
+          } else if (contact.invite.stakeState === 'RECLAIMING') {
             return (
               <Row size={1}>
                 <Column>
@@ -935,16 +947,16 @@ class ContactsView extends Component<Props, State> {
           contact.invite
         ) {
           if (
-            contact.invite.stake &&
-            !contact.invite.stake.reclaimedTX &&
-            contact.invite.stake.state !== 'RECLAIMING'
+            contact.invite.stakeAmont &&
+            !contact.invite.reclaimedStakeTX &&
+            contact.invite.stakeState !== 'RECLAIMING'
           ) {
             return (
               <Text color="#DA1157" size={10}>
                 Has accepted your invitation
               </Text>
             )
-          } else if (contact.invite.stake.reclaimedTX && !forListItem) {
+          } else if (contact.invite.reclaimedStakeTX && !forListItem) {
             return (
               contact.invite &&
               contact.invite.inviteTX && (
@@ -954,7 +966,7 @@ class ContactsView extends Component<Props, State> {
                     onPress={() =>
                       this.openTransaction(
                         // $FlowFixMe already checked
-                        contact.invite.stake.reclaimedTX,
+                        contact.invite.reclaimedStakeTX,
                         // $FlowFixMe already checked
                         contact.invite.ethNetwork,
                       )
@@ -977,7 +989,6 @@ class ContactsView extends Component<Props, State> {
 
   renderRightSide() {
     const selectedContact = this.getSelectedContact()
-
     const inviteAction = this.renderInviteArea(selectedContact)
 
     const connectionStateLabel = this.renderConnectionStateLabel(
@@ -1059,22 +1070,18 @@ class ContactsView extends Component<Props, State> {
               </Column>
             </Row>
           )}
-          {(this.isIdentitySelected() ||
-            selectedContact.connectionState === 'CONNECTED') &&
-            selectedContact.profile.ethAddress && (
-              <Row size={1}>
-                <Column>
-                  <Text
-                    variant="smallTitle"
-                    theme={{ padding: '20px 0 10px 0' }}>
-                    ETH Address
-                  </Text>
-                  <Text variant="addressLarge">
-                    {selectedContact.profile.ethAddress}
-                  </Text>
-                </Column>
-              </Row>
-            )}
+          {selectedContact.profile.ethAddress && (
+            <Row size={1}>
+              <Column>
+                <Text variant="smallTitle" theme={{ padding: '20px 0 10px 0' }}>
+                  ETH Address
+                </Text>
+                <Text variant="addressLarge">
+                  {selectedContact.profile.ethAddress}
+                </Text>
+              </Column>
+            </Row>
+          )}
           <Row size={1}>
             <Column>{inviteError}</Column>
           </Row>
@@ -1177,6 +1184,19 @@ const RelayContainer = createFragmentContainer(ContactsView, {
         name
         ethAddress
       }
+      contactRequests {
+        localID
+        publicID
+        localPeerID
+        profile {
+          name
+          ethAddress
+        }
+        connectionState
+        ethNetwork
+        stakeAmount
+        receivedAddress
+      }
       contacts {
         # ...InviteContactModal_contact
         localID
@@ -1186,11 +1206,9 @@ const RelayContainer = createFragmentContainer(ContactsView, {
         invite {
           ethNetwork
           inviteTX
-          stake {
-            reclaimedTX
-            amount
-            state
-          }
+          stakeState
+          stakeAmount
+          reclaimedStakeTX
         }
         profile {
           name

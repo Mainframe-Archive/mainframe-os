@@ -22,7 +22,7 @@ import { generateKeyPair, generateLocalID } from '../utils'
 
 const FIRST_CONTACT_FEED_NAME = 'mf:first-contact:v1'
 
-const getFirstContactFeed = (from: string, to: string): FeedParams => ({
+export const getFirstContactFeed = (from: string, to: string): FeedParams => ({
   user: from,
   topic: getFeedTopic({ name: FIRST_CONTACT_FEED_NAME, topic: to }),
 })
@@ -99,17 +99,23 @@ export default async (params: CollectionParams) => {
             : {
                 ethNetwork: this.invite.ethNetwork,
                 inviteTX: this.invite.inviteTX,
-                stake: this.invite.stake,
+                stakeAmount: this.invite.stakeAmount,
+                stakeState: this.invite.stakeState,
               }
         const peer = await this.populate('peer')
-        const name = this.aliasName || this.profile.name || peer.profile.name
+
+        const profile = {
+          name: this.aliasName || this.profile.name || peer.profile.name,
+          ethAddress: this.profile.ethAddress || peer.profile.ethAddress,
+          avatar: this.profile.avatar || peer.profile.avatar,
+        }
 
         return {
           localID: this.localID,
           peerID: peer.localID,
           publicID: peer.getPublicID(),
-          profile: { ...peer.profile, ...this.profile, name },
           connectionState: this.getConnectionState(),
+          profile,
           invite,
         }
       },
@@ -142,18 +148,10 @@ export default async (params: CollectionParams) => {
         sharedKey: Buffer,
       }> {
         const peer = await this.populate('peer')
-        const peerKey = peer.getPublicKey()
-        if (peerKey == null) {
-          throw new Error('Missing peer public key')
-        }
-        return {
-          userAddress: user.getPublicFeed().address,
-          peerAddress: peer.publicFeed,
-          sharedKey: user.getSharedKey(peerKey),
-        }
+        return await peer.getFirstContactData(user)
       },
 
-      async createFirstContactFeed(user: Object) {
+      async createFirstContactFeed(user: Object, signature?: string) {
         logger.log({
           level: 'debug',
           message: 'Create first contact feed',
@@ -177,6 +175,7 @@ export default async (params: CollectionParams) => {
           sharedKey,
           writeFirstContact({
             contact: {
+              signature,
               publicKey: this.keyPair.publicKey,
             },
             peer: {
@@ -304,7 +303,7 @@ export default async (params: CollectionParams) => {
 
         this._firstContactSubscription = createSubscriber({
           bzz: user.getBzz(),
-          feed: getFirstContactFeed(peerAddress, userAddress),
+          feed: feed,
           interval: 60 * 1000, // 1 min
           transform: payload => {
             logger.log({
@@ -328,11 +327,13 @@ export default async (params: CollectionParams) => {
           .pipe(
             filter(data => data != null),
             flatMap(async data => {
-              logger.log({
-                level: 'debug',
-                message: 'Set contact public key',
-                id: this.localID,
-              })
+              console.log('contact data: ', data)
+              if (data.contact.signature) {
+                await this.atomicSet(
+                  'invite.acceptedSignature',
+                  data.contact.signature,
+                )
+              }
               await this.atomicSet('publicKey', data.contact.publicKey)
               return data
             }),

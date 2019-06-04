@@ -18,12 +18,11 @@ export type InviteContactModal_contact = {|
   +publicID: string,
   +connectionState: ConnectionState,
   +invite: ?{|
+    +ethNetwork: ?string,
     +inviteTX: ?string,
-    +stake: {|
-      +reclaimedTX: ?string,
-      +amount: ?string,
-      +state: StakeState,
-    |},
+    +stakeState: StakeState,
+    +stakeAmount: string,
+    +reclaimedStakeTX: ?string,
   |},
   +profile: {|
     +name: ?string,
@@ -81,41 +80,37 @@ const node/*: ConcreteFragment*/ = {
         {
           "kind": "ScalarField",
           "alias": null,
+          "name": "ethNetwork",
+          "args": null,
+          "storageKey": null
+        },
+        {
+          "kind": "ScalarField",
+          "alias": null,
           "name": "inviteTX",
           "args": null,
           "storageKey": null
         },
         {
-          "kind": "LinkedField",
+          "kind": "ScalarField",
           "alias": null,
-          "name": "stake",
-          "storageKey": null,
+          "name": "stakeState",
           "args": null,
-          "concreteType": "InviteStake",
-          "plural": false,
-          "selections": [
-            {
-              "kind": "ScalarField",
-              "alias": null,
-              "name": "reclaimedTX",
-              "args": null,
-              "storageKey": null
-            },
-            {
-              "kind": "ScalarField",
-              "alias": null,
-              "name": "amount",
-              "args": null,
-              "storageKey": null
-            },
-            {
-              "kind": "ScalarField",
-              "alias": null,
-              "name": "state",
-              "args": null,
-              "storageKey": null
-            }
-          ]
+          "storageKey": null
+        },
+        {
+          "kind": "ScalarField",
+          "alias": null,
+          "name": "stakeAmount",
+          "args": null,
+          "storageKey": null
+        },
+        {
+          "kind": "ScalarField",
+          "alias": null,
+          "name": "reclaimedStakeTX",
+          "args": null,
+          "storageKey": null
         }
       ]
     },
@@ -147,5 +142,5 @@ const node/*: ConcreteFragment*/ = {
   ]
 };
 // prettier-ignore
-(node/*: any*/).hash = '664acbd0911aeea85d5f2174a2eb9610';
+(node/*: any*/).hash = 'dfdf2db8fd2e6e85f90ab720f128f86e';
 module.exports = node;

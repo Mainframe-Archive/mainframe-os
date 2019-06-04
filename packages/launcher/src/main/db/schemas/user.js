@@ -33,7 +33,7 @@ export default {
       },
       default: [],
     },
-    contactsRequests: {
+    contactRequests: {
       type: 'array',
       ref: COLLECTION_NAMES.CONTACT_REQUESTS,
       items: {

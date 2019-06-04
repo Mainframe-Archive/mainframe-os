@@ -58,6 +58,9 @@ export default async (params: CollectionParams) => {
         }
         return wallet
       },
+      async getByAddress(address) {
+        return this.findOne({ activeAccounts: { $in: [address] } }).exec()
+      },
     },
     methods: {
       async addAccounts(indexes: Array<number>) {

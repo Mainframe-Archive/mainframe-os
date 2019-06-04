@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 6d1b57642e56db548e95580232252deb
+ * @relayHash 947fc9db7f2ea0533451cd9688ed1e49
  */
 
 /* eslint-disable */
@@ -12,7 +12,6 @@ import type { ConcreteRequest } from 'relay-runtime';
 type ContactsScreen_user$ref = any;
 export type AcceptContactRequestInput = {
   peerID: string,
-  userID: string,
   clientMutationId?: ?string,
 };
 export type ContactsScreenAcceptContactRequestMutationVariables = {|
@@ -51,6 +50,20 @@ fragment ContactsScreen_user on User {
     name
     ethAddress
   }
+  contactRequests {
+    localID
+    publicID
+    localPeerID
+    profile {
+      name
+      ethAddress
+    }
+    connectionState
+    ethNetwork
+    stakeAmount
+    receivedAddress
+    id
+  }
   contacts {
     localID
     peerID
@@ -59,11 +72,9 @@ fragment ContactsScreen_user on User {
     invite {
       ethNetwork
       inviteTX
-      stake {
-        reclaimedTX
-        amount
-        state
-      }
+      stakeState
+      stakeAmount
+      reclaimedStakeTX
     }
     profile {
       name
@@ -122,6 +133,37 @@ v4 = [
   }
 ],
 v5 = {
+  "kind": "LinkedField",
+  "alias": null,
+  "name": "profile",
+  "storageKey": null,
+  "args": null,
+  "concreteType": "GenericProfile",
+  "plural": false,
+  "selections": v4
+},
+v6 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "connectionState",
+  "args": null,
+  "storageKey": null
+},
+v7 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "ethNetwork",
+  "args": null,
+  "storageKey": null
+},
+v8 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "stakeAmount",
+  "args": null,
+  "storageKey": null
+},
+v9 = {
   "kind": "ScalarField",
   "alias": null,
   "name": "id",
@@ -133,7 +175,7 @@ return {
   "operationKind": "mutation",
   "name": "ContactsScreenAcceptContactRequestMutation",
   "id": null,
-  "text": "mutation ContactsScreenAcceptContactRequestMutation(\n  $input: AcceptContactRequestInput!\n) {\n  acceptContactRequest(input: $input) {\n    viewer {\n      ...ContactsScreen_user\n      id\n    }\n  }\n}\n\nfragment ContactsScreen_user on User {\n  localID\n  publicID\n  profile {\n    name\n    ethAddress\n  }\n  contacts {\n    localID\n    peerID\n    publicID\n    connectionState\n    invite {\n      ethNetwork\n      inviteTX\n      stake {\n        reclaimedTX\n        amount\n        state\n      }\n    }\n    profile {\n      name\n      ethAddress\n    }\n    id\n  }\n}\n",
+  "text": "mutation ContactsScreenAcceptContactRequestMutation(\n  $input: AcceptContactRequestInput!\n) {\n  acceptContactRequest(input: $input) {\n    viewer {\n      ...ContactsScreen_user\n      id\n    }\n  }\n}\n\nfragment ContactsScreen_user on User {\n  localID\n  publicID\n  profile {\n    name\n    ethAddress\n  }\n  contactRequests {\n    localID\n    publicID\n    localPeerID\n    profile {\n      name\n      ethAddress\n    }\n    connectionState\n    ethNetwork\n    stakeAmount\n    receivedAddress\n    id\n  }\n  contacts {\n    localID\n    peerID\n    publicID\n    connectionState\n    invite {\n      ethNetwork\n      inviteTX\n      stakeState\n      stakeAmount\n      reclaimedStakeTX\n    }\n    profile {\n      name\n      ethAddress\n    }\n    id\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -209,6 +251,38 @@ return {
               {
                 "kind": "LinkedField",
                 "alias": null,
+                "name": "contactRequests",
+                "storageKey": null,
+                "args": null,
+                "concreteType": "ContactRequest",
+                "plural": true,
+                "selections": [
+                  v2,
+                  v3,
+                  {
+                    "kind": "ScalarField",
+                    "alias": null,
+                    "name": "localPeerID",
+                    "args": null,
+                    "storageKey": null
+                  },
+                  v5,
+                  v6,
+                  v7,
+                  v8,
+                  {
+                    "kind": "ScalarField",
+                    "alias": null,
+                    "name": "receivedAddress",
+                    "args": null,
+                    "storageKey": null
+                  },
+                  v9
+                ]
+              },
+              {
+                "kind": "LinkedField",
+                "alias": null,
                 "name": "contacts",
                 "storageKey": null,
                 "args": null,
@@ -224,13 +298,7 @@ return {
                     "storageKey": null
                   },
                   v3,
-                  {
-                    "kind": "ScalarField",
-                    "alias": null,
-                    "name": "connectionState",
-                    "args": null,
-                    "storageKey": null
-                  },
+                  v6,
                   {
                     "kind": "LinkedField",
                     "alias": null,
@@ -240,13 +308,7 @@ return {
                     "concreteType": "ContactInviteData",
                     "plural": false,
                     "selections": [
-                      {
-                        "kind": "ScalarField",
-                        "alias": null,
-                        "name": "ethNetwork",
-                        "args": null,
-                        "storageKey": null
-                      },
+                      v7,
                       {
                         "kind": "ScalarField",
                         "alias": null,
@@ -255,53 +317,27 @@ return {
                         "storageKey": null
                       },
                       {
-                        "kind": "LinkedField",
+                        "kind": "ScalarField",
                         "alias": null,
-                        "name": "stake",
-                        "storageKey": null,
+                        "name": "stakeState",
                         "args": null,
-                        "concreteType": "InviteStake",
-                        "plural": false,
-                        "selections": [
-                          {
-                            "kind": "ScalarField",
-                            "alias": null,
-                            "name": "reclaimedTX",
-                            "args": null,
-                            "storageKey": null
-                          },
-                          {
-                            "kind": "ScalarField",
-                            "alias": null,
-                            "name": "amount",
-                            "args": null,
-                            "storageKey": null
-                          },
-                          {
-                            "kind": "ScalarField",
-                            "alias": null,
-                            "name": "state",
-                            "args": null,
-                            "storageKey": null
-                          }
-                        ]
+                        "storageKey": null
+                      },
+                      v8,
+                      {
+                        "kind": "ScalarField",
+                        "alias": null,
+                        "name": "reclaimedStakeTX",
+                        "args": null,
+                        "storageKey": null
                       }
                     ]
                   },
-                  {
-                    "kind": "LinkedField",
-                    "alias": null,
-                    "name": "profile",
-                    "storageKey": null,
-                    "args": null,
-                    "concreteType": "GenericProfile",
-                    "plural": false,
-                    "selections": v4
-                  },
-                  v5
+                  v5,
+                  v9
                 ]
               },
-              v5
+              v9
             ]
           }
         ]
