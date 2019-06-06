@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash d3dfcb97d07d488854ed0e1ca5408d50
+ * @relayHash 20299e4b357c3fd169546c08ae96be72
  */
 
 /* eslint-disable */
@@ -22,11 +22,9 @@ export type HomeRouterContactChangedSubscriptionResponse = {|
       +invite: ?{|
         +ethNetwork: ?string,
         +inviteTX: ?string,
-        +stake: {|
-          +reclaimedTX: ?string,
-          +amount: ?string,
-          +state: ContactStakeState,
-        |},
+        +stakeAmount: string,
+        +stakeState: ContactStakeState,
+        +reclaimedStakeTX: ?string,
       |},
       +profile: {|
         +name: ?string,
@@ -53,11 +51,9 @@ subscription HomeRouterContactChangedSubscription {
       invite {
         ethNetwork
         inviteTX
-        stake {
-          reclaimedTX
-          amount
-          state
-        }
+        stakeAmount
+        stakeState
+        reclaimedStakeTX
       }
       profile {
         name
@@ -104,7 +100,7 @@ v4 = {
   "name": "invite",
   "storageKey": null,
   "args": null,
-  "concreteType": "ContactInviteData",
+  "concreteType": "ContactInvite",
   "plural": false,
   "selections": [
     {
@@ -122,36 +118,25 @@ v4 = {
       "storageKey": null
     },
     {
-      "kind": "LinkedField",
+      "kind": "ScalarField",
       "alias": null,
-      "name": "stake",
-      "storageKey": null,
+      "name": "stakeAmount",
       "args": null,
-      "concreteType": "ContactInviteStake",
-      "plural": false,
-      "selections": [
-        {
-          "kind": "ScalarField",
-          "alias": null,
-          "name": "reclaimedTX",
-          "args": null,
-          "storageKey": null
-        },
-        {
-          "kind": "ScalarField",
-          "alias": null,
-          "name": "amount",
-          "args": null,
-          "storageKey": null
-        },
-        {
-          "kind": "ScalarField",
-          "alias": null,
-          "name": "state",
-          "args": null,
-          "storageKey": null
-        }
-      ]
+      "storageKey": null
+    },
+    {
+      "kind": "ScalarField",
+      "alias": null,
+      "name": "stakeState",
+      "args": null,
+      "storageKey": null
+    },
+    {
+      "kind": "ScalarField",
+      "alias": null,
+      "name": "reclaimedStakeTX",
+      "args": null,
+      "storageKey": null
     }
   ]
 },
@@ -185,7 +170,7 @@ return {
   "operationKind": "subscription",
   "name": "HomeRouterContactChangedSubscription",
   "id": null,
-  "text": "subscription HomeRouterContactChangedSubscription {\n  contactChanged {\n    contact {\n      localID\n      peerID\n      publicID\n      connectionState\n      invite {\n        ethNetwork\n        inviteTX\n        stake {\n          reclaimedTX\n          amount\n          state\n        }\n      }\n      profile {\n        name\n        ethAddress\n      }\n      id\n    }\n  }\n}\n",
+  "text": "subscription HomeRouterContactChangedSubscription {\n  contactChanged {\n    contact {\n      localID\n      peerID\n      publicID\n      connectionState\n      invite {\n        ethNetwork\n        inviteTX\n        stakeAmount\n        stakeState\n        reclaimedStakeTX\n      }\n      profile {\n        name\n        ethAddress\n      }\n      id\n    }\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -269,5 +254,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = 'dfc54317fff0c263022d4618052cb905';
+(node/*: any*/).hash = 'a2be13f359d36542e80eba921f5daab4';
 module.exports = node;

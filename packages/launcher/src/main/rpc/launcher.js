@@ -404,61 +404,70 @@ export default {
       throw err
     }
   },
-  //
-  // blockchain_ethSend: async (
-  //   ctx: LauncherContext,
-  //   params: BlockchainEthSendParams,
-  // ): Promise<Object> => {
-  //   return ctx.client.blockchain.ethSend(params)
-  // },
-  //
-  // blockchain_getInviteTXDetails: {
-  //   params: INVITE_TX_DETAILS_SCHEMA,
-  //   handler: (
-  //     ctx: LauncherContext,
-  //     params: GetInviteTXDetailsParams,
-  //   ): Promise<any> => {
-  //     return ctx.client.blockchain.getInviteTXDetails(params)
-  //   },
-  // },
-  //
-  // blockchain_sendInviteApprovalTX: {
-  //   params: INVITE_SEND_SCHEMA,
-  //   handler: (
-  //     ctx: LauncherContext,
-  //     params: SendInviteTXParams,
-  //   ): Promise<any> => {
-  //     return ctx.client.blockchain.sendInviteApprovalTX(params)
-  //   },
-  // },
-  //
-  // blockchain_sendInviteTX: {
-  //   params: INVITE_SEND_SCHEMA,
-  //   handler: (
-  //     ctx: LauncherContext,
-  //     params: SendInviteTXParams,
-  //   ): Promise<any> => {
-  //     return ctx.client.blockchain.sendInviteTX(params)
-  //   },
-  // },
-  //
-  // blockchain_sendDeclineInviteTX: {
-  //   params: DECLINE_INVITE_SCHEMA,
-  //   handler: (
-  //     ctx: LauncherContext,
-  //     params: SendDeclineTXParams,
-  //   ): Promise<any> => {
-  //     return ctx.client.blockchain.sendDeclineInviteTX(params)
-  //   },
-  // },
-  //
-  // blockchain_sendWithdrawInviteTX: {
-  //   params: INVITE_SEND_SCHEMA,
-  //   handler: (
-  //     ctx: LauncherContext,
-  //     params: SendWithdrawInviteTXParams,
-  //   ): Promise<any> => {
-  //     return ctx.client.blockchain.sendWithdrawInviteTX(params)
-  //   },
-  // },
+
+  blockchain_ethSend: async (
+    ctx: LauncherContext,
+    params: BlockchainEthSendParams,
+  ): Promise<Object> => {
+    const user = await ctx.getUserChecked()
+    if (user == null) {
+      throw new Error('No user')
+    }
+    return await user.getEth().send(params.method, params.params)
+  },
+
+  blockchain_getInviteTXDetails: async (
+    ctx: LauncherContext,
+    params: GetInviteTXDetailsParams,
+  ): Promise<any> => {
+    const user = await ctx.getUserChecked()
+    if (user == null) {
+      throw new Error('No user')
+    }
+    return user.invitesSync.getInviteTXDetails(params.type, params.contactID)
+  },
+
+  blockchain_sendInviteApprovalTX: async (
+    ctx: LauncherContext,
+    params: SendInviteTXParams,
+  ): Promise<any> => {
+    const user = await ctx.getUserChecked()
+    if (user == null) {
+      throw new Error('No user')
+    }
+    return user.invitesSync.sendInviteApprovalTX(params.contactID)
+  },
+
+  blockchain_sendInviteTX: async (
+    ctx: LauncherContext,
+    params: SendInviteTXParams,
+  ): Promise<any> => {
+    const user = await ctx.getUserChecked()
+    if (user == null) {
+      throw new Error('No user')
+    }
+    return user.invitesSync.sendInviteTX(params.contactID)
+  },
+
+  blockchain_sendDeclineInviteTX: async (
+    ctx: LauncherContext,
+    params: SendDeclineTXParams,
+  ): Promise<any> => {
+    const user = await ctx.getUserChecked()
+    if (user == null) {
+      throw new Error('No user')
+    }
+    return user.invitesSync.declineContactInvite(params.requestID)
+  },
+
+  blockchain_sendWithdrawInviteTX: async (
+    ctx: LauncherContext,
+    params: SendWithdrawInviteTXParams,
+  ): Promise<any> => {
+    const user = await ctx.getUserChecked()
+    if (user == null) {
+      throw new Error('No user')
+    }
+    return user.invitesSync.retrieveStake(params.contactID)
+  },
 }

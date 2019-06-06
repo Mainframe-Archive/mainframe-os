@@ -8,9 +8,10 @@ export type ContactRequestData = {
   localID: string,
   peer: string,
   ethNetwork: string,
-  privateFeed: string,
+  publicKey: string,
   receivedAddress: string,
   senderAddress: string,
+  stakeAmount: ?string,
   rejectedTXHash: ?string,
 }
 
@@ -26,13 +27,14 @@ export default {
     peer: {
       type: 'string',
       ref: COLLECTION_NAMES.PEERS,
+      final: true,
     },
     ethNetwork: {
       type: 'string',
       final: true,
     },
-    privateFeed: {
-      ...ethAddress,
+    publicKey: {
+      type: 'string',
       final: true,
     },
     receivedAddress: {
@@ -43,9 +45,11 @@ export default {
       ...ethAddress,
       final: true,
     },
+    stakeAmount: {
+      type: 'string',
+    },
     rejectedTXHash: {
       type: 'string',
     },
   },
-  required: ['peer'],
 }

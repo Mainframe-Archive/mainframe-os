@@ -1,6 +1,5 @@
 input AcceptContactRequestInput {
   peerID: String!
-  userID: String!
   clientMutationId: String
 }
 
@@ -211,7 +210,7 @@ type Contact implements Node {
   publicID: ID!
   profile: GenericProfile!
   connectionState: ContactConnectionState!
-  invite: ContactInviteData
+  invite: ContactInvite
 }
 
 type ContactChangedPayload {
@@ -229,24 +228,26 @@ enum ContactConnectionState {
   SENT_BLOCKCHAIN
 }
 
-type ContactInviteData {
+type ContactInvite {
+  stakeAmount: String!
+  stakeState: ContactStakeState!
   inviteTX: String
   ethNetwork: String
-  stake: ContactInviteStake!
-}
-
-type ContactInviteStake {
-  amount: String
-  state: ContactStakeState!
-  reclaimedTX: String
+  reclaimedStakeTX: String
 }
 
 type ContactRequest implements Node {
   """The ID of an object"""
   id: ID!
   localID: ID!
-  localPeerID: ID!
+  peerID: ID!
+  peer: Peer!
   publicID: ID!
+  profile: GenericProfile!
+  stakeAmount: String!
+  ethNetwork: String!
+  receivedAddress: String!
+  connectionState: ContactConnectionState!
 }
 
 enum ContactStakeState {

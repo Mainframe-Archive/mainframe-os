@@ -16,9 +16,18 @@ import { generateLocalID } from '../utils'
 
 import schema, { type PeerData } from '../schemas/peer'
 
+import type { UserDoc } from './users'
+
+export type FirstContactData = {
+  userAddress: string,
+  peerAddress: string,
+  sharedKey: Buffer,
+}
+
 export type PeerDoc = PeerData & {
   getPublicID(): string,
   getPublicKey(): ?string,
+  getFirstContactData(user: UserDoc): Promise<FirstContactData>,
   startPublicFeedSubscription(bzz: Bzz): rxjs$TeardownLogic,
   stopPublicFeedSubscription(): void,
   startSync(bzz: Bzz): rxjs$TeardownLogic,
@@ -113,6 +122,18 @@ export default async (params: CollectionParams) => {
           this._publicKey = createPublic(this.publicKey).getPublic()
         }
         return this._publicKey
+      },
+
+      async getFirstContactData(user: UserDoc): Promise<FirstContactData> {
+        const pubKey = this.getPublicKey()
+        if (pubKey == null) {
+          throw new Error('Missing peer public key')
+        }
+        return {
+          userAddress: user.getPublicFeed().address,
+          peerAddress: this.publicFeed,
+          sharedKey: user.getSharedKey(pubKey),
+        }
       },
 
       startPublicFeedSubscription(bzz: Bzz): rxjs$TeardownLogic {

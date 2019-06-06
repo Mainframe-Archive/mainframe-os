@@ -12,7 +12,7 @@ import {
 } from 'graphql'
 import { fromGlobalId, globalIdField, nodeDefinitions } from 'graphql-relay'
 
-import { MF_PREFIX } from '../../constants'
+import { MF_PREFIX, MFT_TOKEN_ADDRESSES } from '../../constants'
 import { isValidPeerID } from '../../validation'
 
 import type { GraphQLContext } from '../context/graphql'
@@ -459,32 +459,23 @@ export const contactStakeState = new GraphQLEnumType({
   },
 })
 
-export const contactInviteStake = new GraphQLObjectType({
-  name: 'ContactInviteStake',
+export const contactInvite = new GraphQLObjectType({
+  name: 'ContactInvite',
   fields: () => ({
-    amount: {
-      type: GraphQLString,
+    stakeAmount: {
+      type: new GraphQLNonNull(GraphQLString),
     },
-    state: {
+    stakeState: {
       type: new GraphQLNonNull(contactStakeState),
     },
-    reclaimedTX: {
-      type: GraphQLString,
-    },
-  }),
-})
-
-export const contactInviteData = new GraphQLObjectType({
-  name: 'ContactInviteData',
-  fields: () => ({
     inviteTX: {
       type: GraphQLString,
     },
     ethNetwork: {
       type: GraphQLString,
     },
-    stake: {
-      type: new GraphQLNonNull(contactInviteStake),
+    reclaimedStakeTX: {
+      type: GraphQLString,
     },
   }),
 })
@@ -522,7 +513,7 @@ export const contact = new GraphQLObjectType({
       resolve: doc => doc.getConnectionState(),
     },
     invite: {
-      type: contactInviteData,
+      type: contactInvite,
     },
   }),
 })
@@ -535,15 +526,35 @@ export const contactRequest = new GraphQLObjectType({
     localID: {
       type: new GraphQLNonNull(GraphQLID),
     },
-    localPeerID: {
+    peerID: {
       type: new GraphQLNonNull(GraphQLID),
       resolve: doc => doc.peer,
+    },
+    peer: {
+      type: new GraphQLNonNull(peer),
+      resolve: doc => doc.populate('peer'),
     },
     publicID: {
       type: new GraphQLNonNull(GraphQLID),
       resolve: doc => doc.getPublicID(),
     },
-    // TODO: other fields
+    profile: {
+      type: new GraphQLNonNull(genericProfile),
+      resolve: doc => doc.getProfile(),
+    },
+    stakeAmount: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    ethNetwork: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    receivedAddress: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    connectionState: {
+      type: new GraphQLNonNull(contactConnectionState),
+      resolve: () => 'received',
+    },
   }),
 })
 
@@ -555,27 +566,39 @@ export const walletBalances = new GraphQLObjectType({
     eth: {
       type: new GraphQLNonNull(GraphQLString),
       resolve: async (address, args, ctx) => {
-        // TODO
-        return 0
-        // try {
-        //   return await ctx.io.eth.getETHBalance(self)
-        // } catch (err) {
-        //   ctx.log(err)
-        //   return 0
-        // }
+        try {
+          const user = await ctx.getUser()
+          return await user.getEth().getETHBalance(address)
+        } catch (err) {
+          ctx.logger.log({
+            level: 'warn',
+            message: 'Failed to retrieve ETH balance',
+            error: err.toString(),
+            address,
+          })
+          return 0
+        }
       },
     },
     mft: {
       type: new GraphQLNonNull(GraphQLString),
       resolve: async (address, args, ctx) => {
-        // TODO
-        return 0
-        // try {
-        //   return await ctx.io.tokenContract.getBalance(self)
-        // } catch (err) {
-        //   ctx.log(err)
-        //   return 0
-        // }
+        try {
+          const user = await ctx.getUser()
+          const ethClient = user.getEth()
+          const contract = ethClient.erc20Contract(
+            MFT_TOKEN_ADDRESSES[ethClient.networkName],
+          )
+          return await contract.getBalance(address)
+        } catch (err) {
+          ctx.logger.log({
+            level: 'warn',
+            message: 'Failed to retrieve MFT balance',
+            error: err.toString(),
+            address,
+          })
+          return 0
+        }
       },
     },
   }),
@@ -736,7 +759,11 @@ export const user = new GraphQLObjectType({
     },
     contactRequests: {
       type: list(contactRequest),
-      resolve: doc => doc.populate('contactRequests'),
+      resolve: async doc => {
+        const requests = await doc.populate('contactRequests')
+        // Only lists requests that haven't been declined
+        return requests.filter(c => !c.rejectedTXHash)
+      },
     },
     ethWallets: {
       type: new GraphQLNonNull(ethWallets),

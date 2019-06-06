@@ -25,11 +25,9 @@ const CONTACT_CHANGED_SUBSCRIPTION = graphql`
         invite {
           ethNetwork
           inviteTX
-          stake {
-            reclaimedTX
-            amount
-            state
-          }
+          stakeAmount
+          stakeState
+          reclaimedStakeTX
         }
         profile {
           name

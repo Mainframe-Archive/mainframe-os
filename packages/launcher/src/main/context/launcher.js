@@ -8,6 +8,7 @@ import { LAUNCHER_CHANNEL } from '../../constants'
 import { ROUTES } from '../../renderer/launcher/constants'
 
 import type { Config } from '../config'
+import type { UserDoc } from '../db/collections/users'
 import type { DB } from '../db/types'
 import type { SubscriptionIterator } from '../graphql/observableToAsyncIterator'
 import schema from '../graphql/schema'
@@ -116,7 +117,7 @@ export class LauncherContext {
     this.window.show()
   }
 
-  async getUserChecked(): Promise<?Object> {
+  async getUserChecked(): Promise<?UserDoc> {
     if (this.db == null || this.userID == null) {
       return
     }

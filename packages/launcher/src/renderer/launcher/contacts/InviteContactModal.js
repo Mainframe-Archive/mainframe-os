@@ -1,18 +1,19 @@
-//@flow
-import React, { Component } from 'react'
-import styled from 'styled-components/native'
+// @flow
+
 import { Text, Tooltip } from '@morpheus-ui/core'
+import React, { Component } from 'react'
 import { graphql, createFragmentContainer } from 'react-relay'
-import Loader from '../../UIComponents/Loader'
+import styled from 'styled-components/native'
 
+import { MFT_TOKEN_ADDRESSES } from '../../../constants'
+
+import ethClient from '../ethClient'
 import rpc from '../rpc'
-import FormModalView from '../../UIComponents/FormModalView'
-import Avatar from '../../UIComponents/Avatar'
-
 import WalletIcon from '../wallets/WalletIcon'
 
-import applyContext, { type ContextProps } from '../LauncherContext'
-import { MFT_TOKEN_ADDRESSES } from '../../../constants'
+import Loader from '../../UIComponents/Loader'
+import FormModalView from '../../UIComponents/FormModalView'
+import Avatar from '../../UIComponents/Avatar'
 
 import type { InviteContactModal_contact as Contact } from './__generated__/InviteContactModal_contact.graphql.js'
 
@@ -101,7 +102,7 @@ class InviteContactModal extends Component<Props, State> {
 
   async getBalances() {
     const { ethAddress } = this.props.user.profile
-    const address = MFT_TOKEN_ADDRESSES[this.props.ethClient.networkName]
+    const address = MFT_TOKEN_ADDRESSES[ethClient.networkName]
     let balances = {
       mft: '0',
       eth: '0',
@@ -110,7 +111,7 @@ class InviteContactModal extends Component<Props, State> {
       const token = this.props.ethClient.erc20Contract(address)
       const [mft, eth] = await Promise.all([
         token.getBalance(ethAddress),
-        this.props.ethClient.getETHBalance(ethAddress),
+        ethClient.getETHBalance(ethAddress),
       ])
       balances = { mft, eth }
     }
@@ -118,12 +119,10 @@ class InviteContactModal extends Component<Props, State> {
   }
 
   async getTXDetails(type: string) {
-    const { user, contact } = this.props
     try {
       const res = await rpc.getInviteTXDetails({
-        type: type,
-        userID: user.localID,
-        contactID: contact.localID,
+        type,
+        contactID: this.props.contact.localID,
       })
       this.setState({
         txParams: res,
@@ -136,12 +135,10 @@ class InviteContactModal extends Component<Props, State> {
   }
 
   async getInviteApproveTXDetails() {
-    const { user, contact } = this.props
     try {
       const res = await rpc.getInviteTXDetails({
         type: 'approve',
-        userID: user.localID,
-        contactID: contact.localID,
+        contactID: this.props.contact.localID,
       })
       this.setState({
         txParams: res,
@@ -157,12 +154,10 @@ class InviteContactModal extends Component<Props, State> {
   }
 
   async getInviteSendTXDetails() {
-    const { user, contact } = this.props
     try {
       const res = await rpc.getInviteTXDetails({
         type: 'sendInvite',
-        userID: user.localID,
-        contactID: contact.localID,
+        contactID: this.props.contact.localID,
       })
       this.setState({
         invitePending: {
@@ -181,12 +176,10 @@ class InviteContactModal extends Component<Props, State> {
   }
 
   sendApproveTX = async () => {
-    const { user, contact } = this.props
     try {
       this.setState({ txProcessing: true, error: null })
       await rpc.sendInviteApprovalTX({
-        userID: user.localID,
-        contactID: contact.localID,
+        contactID: this.props.contact.localID,
       })
       this.setState({
         txProcessing: false,
@@ -207,12 +200,10 @@ class InviteContactModal extends Component<Props, State> {
   }
 
   sendInvite = async () => {
-    const { user, contact } = this.props
     try {
       this.setState({ txProcessing: true, error: null })
       await rpc.sendInviteTX({
-        userID: user.localID,
-        contactID: contact.localID,
+        contactID: this.props.contact.localID,
       })
       this.props.closeModal()
     } catch (err) {
@@ -227,11 +218,10 @@ class InviteContactModal extends Component<Props, State> {
   }
 
   sendDeclineTX = async () => {
-    const { contact } = this.props
     try {
       this.setState({ txProcessing: true, error: null })
       const res = await rpc.sendDeclineInviteTX({
-        peerID: contact.peerID,
+        requestID: this.props.contact.localID,
       })
       this.setState({
         txProcessing: false,
@@ -247,12 +237,10 @@ class InviteContactModal extends Component<Props, State> {
   }
 
   withdrawStake = async () => {
-    const { user, contact } = this.props
     try {
       this.setState({ txProcessing: true, error: null })
       const res = await rpc.sendWithdrawInviteTX({
-        userID: user.localID,
-        contactID: contact.localID,
+        contactID: this.props.contact.localID,
       })
       this.setState({
         txProcessing: false,
@@ -304,6 +292,8 @@ class InviteContactModal extends Component<Props, State> {
   }
 
   renderContactSection(title: string) {
+    const { contact } = this.props
+
     return (
       <Section>
         <Text
@@ -319,18 +309,17 @@ class InviteContactModal extends Component<Props, State> {
         </Text>
         <AddContactDetail border>
           <Blocky>
-            <Avatar id={this.props.contact.publicID} size="small" />
+            <Avatar id={contact.publicID} size="small" />
           </Blocky>
           <AddContactDetailText>
             <Text bold variant="greyDark23" size={13}>
-              {this.props.contact.profile.name ||
-                'This user has a private profile'}
+              {contact.profile.name || 'This user has a private profile'}
             </Text>
             <Text variant={['greyDark23', 'ellipsis']} size={12}>
-              {this.props.contact.publicID}
+              {contact.publicID}
             </Text>
             <Text variant={['greyDark23', 'ellipsis']} size={12}>
-              {this.props.contact.profile.ethAddress}
+              {contact.profile.ethAddress}
             </Text>
           </AddContactDetailText>
         </AddContactDetail>
@@ -505,30 +494,24 @@ class InviteContactModal extends Component<Props, State> {
   }
 }
 
-const InviteContactRelayContainer = createFragmentContainer(
-  InviteContactModal,
-  {
-    contact: graphql`
-      fragment InviteContactModal_contact on Contact {
-        localID
-        peerID
-        publicID
-        connectionState
-        invite {
-          inviteTX
-          stake {
-            reclaimedTX
-            amount
-            state
-          }
-        }
-        profile {
-          name
-          ethAddress
-        }
+export default createFragmentContainer(InviteContactModal, {
+  contact: graphql`
+    fragment InviteContactModal_contact on Contact {
+      localID
+      peerID
+      publicID
+      connectionState
+      invite {
+        ethNetwork
+        inviteTX
+        stakeState
+        stakeAmount
+        reclaimedStakeTX
       }
-    `,
-  },
-)
-
-export default applyContext(InviteContactRelayContainer)
+      profile {
+        name
+        ethAddress
+      }
+    }
+  `,
+})

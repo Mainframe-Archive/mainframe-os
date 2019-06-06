@@ -221,31 +221,31 @@ export default {
   // },
   //
   // // Wallets & Blockchain
-  // ethSend: async (params: Object) => {
-  //   return rpc.request('blockchain_ethSend', params)
-  // },
+  ethSend: async (params: Object) => {
+    return rpc.request('blockchain_ethSend', params)
+  },
   getLedgerAccounts: (pageNum: number, legacyPath: boolean) => {
     return rpc.request('wallet_getLedgerAccounts', { pageNum, legacyPath })
   },
   // ethereumRequest: (params: Object) => {
   //   return rpc.request('blockchain_ethSend', params)
   // },
-  // getInviteTXDetails: (params: Object) => {
-  //   return rpc.request('blockchain_getInviteTXDetails', params)
-  // },
-  // sendInviteApprovalTX: (params: Object) => {
-  //   return rpc.request('blockchain_sendInviteApprovalTX', params)
-  // },
-  //
-  // sendInviteTX: (params: Object) => {
-  //   return rpc.request('blockchain_sendInviteTX', params)
-  // },
-  //
-  // sendDeclineInviteTX: (params: { userID: string, peerID: string }) => {
-  //   return rpc.request('blockchain_sendDeclineInviteTX', params)
-  // },
-  //
-  // sendWithdrawInviteTX: (params: { userID: string, contactID: string }) => {
-  //   return rpc.request('blockchain_sendWithdrawInviteTX', params)
-  // },
+  getInviteTXDetails: (params: Object) => {
+    return rpc.request('blockchain_getInviteTXDetails', params)
+  },
+  sendInviteApprovalTX: (params: Object) => {
+    return rpc.request('blockchain_sendInviteApprovalTX', params)
+  },
+
+  sendInviteTX: (params: Object) => {
+    return rpc.request('blockchain_sendInviteTX', params)
+  },
+
+  sendDeclineInviteTX: (params: { requestID: string }) => {
+    return rpc.request('blockchain_sendDeclineInviteTX', params)
+  },
+
+  sendWithdrawInviteTX: (params: { contactID: string }) => {
+    return rpc.request('blockchain_sendWithdrawInviteTX', params)
+  },
 }

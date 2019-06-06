@@ -25,6 +25,7 @@ export type EthWalletsLedgerCollection = Collection<
     name: string,
     legacyPath?: boolean,
   }): Promise<EthWalletLedgerDoc>,
+  getByAddress(address: string): Promise<EthWalletLedgerDoc | null>,
 }
 
 export default async (params: CollectionParams) => {
@@ -80,6 +81,10 @@ export default async (params: CollectionParams) => {
           wallet = await this.create({ ...data, firstAddress: rootAddr })
         }
         return wallet
+      },
+
+      async getByAddress(address: string): Promise<EthWalletLedgerDoc | null> {
+        return this.findOne({ activeAccounts: { $in: [address] } }).exec()
       },
     },
     methods: {

@@ -72,7 +72,7 @@ const invite = {
       type: 'string',
       enum: ['sending', 'staked', 'reclaiming', 'reclaimed', 'seized'],
     },
-    stakeReclaimedTX: {
+    reclaimedStakeTX: {
       type: 'string',
     },
   },

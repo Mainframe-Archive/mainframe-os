@@ -4,6 +4,7 @@ import { generateMnemonic, mnemonicToSeed } from 'bip39'
 import sigUtil from 'eth-sig-util'
 import type EthWallet from 'ethereumjs-wallet'
 import HDKey from 'ethereumjs-wallet/hdkey'
+import EthereumTx from 'ethereumjs-tx'
 
 import { COLLECTION_NAMES } from '../constants'
 import type { Collection, CollectionParams } from '../types'
@@ -27,6 +28,8 @@ export type EthWalletHDDoc = EthWalletHDData & {
   addAccounts(indexes: Array<number>): Promise<void>,
   getUsers(): Promise<Array<UserDoc>>,
   safeRemove(): Promise<void>,
+  signTransaction(params: WalletEthSignTxParams): Promise<string>,
+  sign(params: WalletSignDataParams): Promise<string>,
 }
 
 export type EthWalletsHDCollection = Collection<
@@ -34,6 +37,7 @@ export type EthWalletsHDCollection = Collection<
   EthWalletHDData,
 > & {
   create(data: { name: string, mnemonic?: ?string }): Promise<EthWalletHDDoc>,
+  getByAddress(address: string): Promise<EthWalletHDDoc | null>,
 }
 
 export default async (params: CollectionParams) => {
@@ -77,6 +81,10 @@ export default async (params: CollectionParams) => {
         })
         await doc.save()
         return doc
+      },
+
+      async getByAddress(address: string): Promise<EthWalletHDDoc | null> {
+        return this.findOne({ activeAccounts: { $in: [address] } }).exec()
       },
     },
     methods: {
@@ -189,6 +197,34 @@ export default async (params: CollectionParams) => {
           level: 'debug',
           message: 'Removed',
           localID: this.localID,
+        })
+      },
+
+      async signTransaction(params: WalletEthSignTxParams): Promise<string> {
+        const account = this.activeAccounts.find(a => a.address === params.from)
+        if (!account) {
+          throw new Error(`wallet not found for ${params.from}`)
+        }
+        const root = await this.getRoot()
+        const accountWallet = getWallet(root, account.index)
+
+        const tx = new EthereumTx(params)
+        tx.sign(accountWallet.getPrivateKey())
+        return '0x' + tx.serialize().toString('hex')
+      },
+
+      async sign(params: WalletSignDataParams): Promise<string> {
+        const account = this.activeAccounts.find(
+          a => a.address === params.address,
+        )
+        if (!account) {
+          throw new Error(`wallet not found for ${params.address}`)
+        }
+        const root = await this.getRoot()
+        const accountWallet = getWallet(root, account.index)
+
+        return sigUtil.personalSign(accountWallet.getPrivateKey(), {
+          data: params.data,
         })
       },
     },

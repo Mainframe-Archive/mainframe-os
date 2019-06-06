@@ -49,7 +49,7 @@ const contactChanged = {
       filter(contact => contact != null),
       flatMap(async contact => ({
         contactChanged: {
-          contact: await contact.getInfo(),
+          contact,
           viewer: {},
         },
       })),
