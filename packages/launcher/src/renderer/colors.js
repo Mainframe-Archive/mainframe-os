@@ -30,6 +30,7 @@ export default {
   LIGHT_GREY_BLUE: '#9ba3b5',
   LIGHT_GREY_F5: '#F5F5F5',
   LIGHT_GREY_C0: '#C0C0C0',
+  ERROR_RED: '#FF0000',
   GREY_MED_81: '#818181',
   GREY_MED_75: '#757575',
   GREY_MED_58: '#585858',

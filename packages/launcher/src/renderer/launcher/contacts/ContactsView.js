@@ -13,6 +13,8 @@ import {
 } from 'react-relay'
 import { fetchQuery } from 'relay-runtime'
 import { debounce } from 'lodash'
+import memoize from 'memoize-one'
+
 import { shell } from 'electron'
 import {
   Text,
@@ -28,8 +30,11 @@ import { type FormSubmitPayload } from '@morpheus-ui/forms'
 
 import PlusIcon from '@morpheus-ui/icons/PlusSymbolSm'
 import SearchIcon from '@morpheus-ui/icons/SearchSm'
+import applyContext, {
+  type ContextProps,
+  type CurrentUser,
+} from '../LauncherContext'
 
-import { type CurrentUser } from '../LauncherContext'
 import { EnvironmentContext } from '../RelayEnvironment'
 import Avatar from '../../UIComponents/Avatar'
 import SvgSelectedPointer from '../../UIComponents/SVGSelectedPointer'
@@ -38,8 +43,14 @@ import FormModalView from '../../UIComponents/FormModalView'
 import Loader from '../../UIComponents/Loader'
 import { InformationBox } from '../identities/IdentitiesView'
 import CopyableBlock from '../../UIComponents/CopyableBlock'
+import Notification from './Notification'
 import InviteContactModal, { type TransactionType } from './InviteContactModal'
-import type { ContactsView_contacts as Contacts } from './__generated__/ContactsView_contacts.graphql'
+import type {
+  ContactsView_contacts as Contacts,
+  ContactsView_wallets as Wallets,
+  EthWallets,
+  WalletAccount,
+} from './__generated__/ContactsView_contacts.graphql'
 
 type UserContacts = $PropertyType<Contacts, 'userContacts'>
 type Contact = $Call<<T>($ReadOnlyArray<T>) => T, UserContacts>
@@ -166,6 +177,11 @@ const AvatarWrapper = styled.View`
   flex-direction: row;
   align-items: center;
   margin-bottom: 20px;
+  ${props =>
+    props.marginTop &&
+    `  margin-bottom: 0px;
+      margin-top: 10px;
+    `}
 `
 
 const ContactName = styled.View``
@@ -189,7 +205,7 @@ export type SubmitContactInput = {
   name: String,
 }
 
-type Props = {
+type Props = ContextProps & {
   relay: {
     environment: Environment,
   },
@@ -198,12 +214,14 @@ type Props = {
     inviteStake: ?number,
     userContacts: Array<Contact>,
   },
+  wallets: Wallets,
 }
 
 type State = {
   searching?: boolean,
   searchTerm?: ?string,
   selectedContact: Object,
+  selectedAddress: string,
   addModalState?: number,
   editModalOpen?: boolean,
   radio?: ?string,
@@ -225,6 +243,7 @@ type State = {
     publicFeed: string,
     publicKey: string,
   },
+  notification: string,
 }
 
 const CONTACTS_CHANGED_SUBSCRIPTION = graphql`
@@ -286,6 +305,19 @@ const peerLookupQuery = graphql`
   }
 `
 
+const formatBalance = (val: string): string => {
+  return parseFloat(val)
+    .toFixed(4)
+    .toString()
+    .slice(0, 10)
+}
+
+const formatBalances = balances => {
+  const eth = formatBalance(balances.eth)
+  const mft = formatBalance(balances.mft)
+  return eth + ' ETH   ' + mft + ' MFT'
+}
+
 class ContactsViewComponent extends Component<Props, State> {
   static contextType = EnvironmentContext
   _subscription: ?Disposable
@@ -295,6 +327,8 @@ class ContactsViewComponent extends Component<Props, State> {
     const { user } = this.props
     this.state = {
       selectedContact: user.localID,
+      selectedAddress: user.profile.ethAddress || '',
+      notification: '',
     }
   }
 
@@ -339,6 +373,10 @@ class ContactsViewComponent extends Component<Props, State> {
 
   openEditModal = () => {
     this.setState({ editModalOpen: true })
+  }
+
+  updateSelectedAddress = (selectedAddress: string) => {
+    this.setState({ selectedAddress })
   }
 
   closeModal = () => {
@@ -509,6 +547,16 @@ class ContactsViewComponent extends Component<Props, State> {
     })
   }
 
+  showNotification = (notification: string) => {
+    this.setState({ notification })
+  }
+
+  closeNotification = () => {
+    this.setState({
+      notification: '',
+    })
+  }
+
   getIdentity = () => {
     const { user } = this.props
     // $FlowFixMe Contact type
@@ -535,6 +583,23 @@ class ContactsViewComponent extends Component<Props, State> {
   onChangeRadio = (value: string) => {
     this.setState({ radio: value })
   }
+
+  getWalletAccounts = memoize(
+    (ethWallets: EthWallets): { [address: string]: WalletAccount } => {
+      const wallets = {}
+      ethWallets.hd.forEach(w => {
+        w.accounts.forEach(a => {
+          wallets[a.address] = a
+        })
+      })
+      ethWallets.ledger.forEach(w => {
+        w.accounts.forEach(a => {
+          wallets[a.address] = a
+        })
+      })
+      return wallets
+    },
+  )
 
   // RENDER
 
@@ -636,7 +701,7 @@ class ContactsViewComponent extends Component<Props, State> {
           </Column>
           <Column>
             <Button
-              variant={['mediumUppercase', 'marginLeftt10']}
+              variant={['mediumUppercase', 'hoverShadow']}
               theme={{ minWidth: '100%' }}
               title="DECLINE & CLAIM MFT"
               onPress={() => this.rejectContact(contact)}
@@ -1116,19 +1181,66 @@ class ContactsViewComponent extends Component<Props, State> {
               </Column>
             </Row> */}
         </ScrollView>
+        {this.renderNotificationModal()}
       </RightContainer>
     )
   }
 
+  renderNotificationModal() {
+    const { contacts, wallets } = this.props
+    const { selectedAddress, notification } = this.state
+    const deletedContact = this.state.inviteModalOpen
+      ? this.state.inviteModalOpen.contact.profile
+      : null
+
+    if (notification === 'withdraw' || notification === 'decline') {
+      const walletsArray = this.getWalletAccounts(wallets.ethWallets)
+      const balances = formatBalances(walletsArray[selectedAddress].balances)
+      const stake = contacts && contacts.inviteStake ? contacts.inviteStake : ''
+
+      return (
+        <Notification
+          message={stake + ' MFT have been added to your wallet.'}
+          address={selectedAddress}
+          firstLine={selectedAddress}
+          secondLine={balances}
+          onRequestClose={this.closeNotification}
+        />
+      )
+    } else if (this.state.notification === 'delete' && deletedContact) {
+      const name = deletedContact.name ? deletedContact.name : 'Contact'
+      const ethAddress = deletedContact.ethAddress
+        ? deletedContact.ethAddress
+        : ''
+      return (
+        <Notification
+          message={name + ' has been deleted.'}
+          address={ethAddress}
+          firstLine={name}
+          secondLine={ethAddress}
+          onRequestClose={this.closeNotification}
+        />
+      )
+    }
+  }
+
   renderInviteModal() {
+    const { inviteModalOpen, selectedAddress } = this.state
+    const { user, contacts, wallets } = this.props
+    const walletsArray = this.getWalletAccounts(wallets.ethWallets)
+
     return (
-      this.state.inviteModalOpen && (
+      inviteModalOpen && (
         <InviteContactModal
           closeModal={this.closeModal}
-          contact={this.state.inviteModalOpen.contact}
-          user={this.props.user}
-          type={this.state.inviteModalOpen.type}
-          inviteStakeValue={this.props.contacts.inviteStake}
+          showNotification={this.showNotification}
+          contact={inviteModalOpen.contact}
+          user={user}
+          type={inviteModalOpen.type}
+          inviteStakeValue={contacts.inviteStake}
+          updateSelectedAddress={this.updateSelectedAddress}
+          selectedAddress={selectedAddress}
+          wallets={walletsArray}
         />
       )
     )
@@ -1224,6 +1336,35 @@ const ContactsView = createFragmentContainer(ContactsViewComponent, {
       }
     }
   `,
+  wallets: graphql`
+    fragment ContactsView_wallets on Wallets
+      @argumentDefinitions(userID: { type: "String!" }) {
+      ethWallets(userID: $userID) {
+        hd {
+          name
+          localID
+          accounts {
+            address
+            balances {
+              eth
+              mft
+            }
+          }
+        }
+        ledger {
+          name
+          localID
+          accounts {
+            address
+            balances {
+              eth
+              mft
+            }
+          }
+        }
+      }
+    }
+  `,
 })
 
-export default ContactsView
+export default applyContext(ContactsView)

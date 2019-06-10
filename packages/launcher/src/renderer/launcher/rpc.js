@@ -135,6 +135,12 @@ export default {
   ethereumRequest: (params: Object) => {
     return rpc.request('blockchain_ethSend', params)
   },
+  getContractRecipientAddress: (params: Object) => {
+    return rpc.request('blockchain_getContractRecipientAddress', params)
+  },
+  getContractOriginAddress: (params: Object) => {
+    return rpc.request('blockchain_getContractOriginAddress', params)
+  },
   getInviteTXDetails: (params: Object) => {
     return rpc.request('blockchain_getInviteTXDetails', params)
   },

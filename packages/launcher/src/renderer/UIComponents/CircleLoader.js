@@ -4,14 +4,17 @@ import React, { Component } from 'react'
 
 type Props = {
   light?: boolean,
+  height?: number,
+  width?: number,
 }
 
 export default class Loader extends Component<Props> {
   render() {
+    const { light, height, width } = this.props
     return (
       <svg
-        width="35px"
-        height="35px"
+        width={width ? width : '35px'}
+        height={height ? height : '35px'}
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 100 100"
         preserveAspectRatio="xMidYMid"
@@ -29,7 +32,7 @@ export default class Loader extends Component<Props> {
           cy="50"
           fill="none"
           r="45"
-          stroke={this.props.light ? '#EFEFEF' : '#ffffff'}
+          stroke={light ? '#EFEFEF' : '#ffffff'}
           strokeWidth="6"
           strokeLinecap="square"
           transform="rotate(502.931 50 50)">

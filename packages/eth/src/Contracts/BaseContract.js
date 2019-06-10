@@ -68,6 +68,8 @@ export default class Contract {
     return this.ethClient.sendAndListen(txParams)
   }
 
+  // Topics should not include the event signature
+
   decodeEventLog(eventName: string, log: Object) {
     const abi = this.abi.find(abi => {
       return abi.type === 'event' && abi.name === eventName
@@ -83,7 +85,9 @@ export default class Contract {
       },
       ...abi.inputs,
     ]
-    return this.ethClient.decodeLog(log, inputs)
+    // Remove event sig topic as expected by decodeLog
+    const topics = log.topics.slice(1)
+    return Web3EthAbi.decodeLog(inputs, log.data, topics)
   }
 
   async subscribeToEvents(
@@ -124,22 +128,15 @@ export default class Contract {
     }
 
     const encodedSig = Web3EthAbi.encodeEventSignature(abi)
-    const inputs = [
-      {
-        indexed: true,
-        name: 'signature',
-        type: 'string',
-      },
-      ...abi.inputs,
-    ]
     const topics = [encodedSig].concat(params.topics || [])
     params.address = this.address
 
     const res = await this.ethClient.getPastEvents({ ...params, topics })
     const events = []
+
     res.forEach(log => {
       try {
-        const event = Web3EthAbi.decodeLog(inputs, log.data, params.topics)
+        const event = this.decodeEventLog(name, log)
         events.push(event)
       } catch (err) {
         // eslint-disable-next-line no-console

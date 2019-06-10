@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash e1037e0a2639c2952e15aa80c038a9f4
+ * @relayHash 3d9d58a3e7241c3b09794ad9abc68622
  */
 
 /* eslint-disable */
@@ -10,6 +10,7 @@
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
 type ContactsScreen_contacts$ref = any;
+type ContactsScreen_wallets$ref = any;
 export type ContactsScreenQueryVariables = {|
   userID: string
 |};
@@ -17,7 +18,10 @@ export type ContactsScreenQueryResponse = {|
   +viewer: {|
     +contacts: {|
       +$fragmentRefs: ContactsScreen_contacts$ref
-    |}
+    |},
+    +wallets: {|
+      +$fragmentRefs: ContactsScreen_wallets$ref
+    |},
   |}
 |};
 export type ContactsScreenQuery = {|
@@ -35,12 +39,48 @@ query ContactsScreenQuery(
     contacts {
       ...ContactsScreen_contacts_3iqrP
     }
+    wallets {
+      ...ContactsScreen_wallets_3iqrP
+    }
     id
   }
 }
 
 fragment ContactsScreen_contacts_3iqrP on Contacts {
   ...ContactsView_contacts_3iqrP
+}
+
+fragment ContactsScreen_wallets_3iqrP on Wallets {
+  ...ContactsView_wallets_3iqrP
+}
+
+fragment ContactsView_wallets_3iqrP on Wallets {
+  ethWallets(userID: $userID) {
+    hd {
+      name
+      localID
+      accounts {
+        address
+        balances {
+          eth
+          mft
+        }
+      }
+      id
+    }
+    ledger {
+      name
+      localID
+      accounts {
+        address
+        balances {
+          eth
+          mft
+        }
+      }
+      id
+    }
+  }
 }
 
 fragment ContactsView_contacts_3iqrP on Contacts {
@@ -97,19 +137,97 @@ var v0 = [
     "defaultValue": null
   }
 ],
-v1 = {
+v1 = [
+  {
+    "kind": "Variable",
+    "name": "userID",
+    "variableName": "userID",
+    "type": null
+  }
+],
+v2 = [
+  {
+    "kind": "Variable",
+    "name": "userID",
+    "variableName": "userID",
+    "type": "String!"
+  }
+],
+v3 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "localID",
+  "args": null,
+  "storageKey": null
+},
+v4 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "name",
+  "args": null,
+  "storageKey": null
+},
+v5 = {
   "kind": "ScalarField",
   "alias": null,
   "name": "id",
   "args": null,
   "storageKey": null
-};
+},
+v6 = [
+  v4,
+  v3,
+  {
+    "kind": "LinkedField",
+    "alias": null,
+    "name": "accounts",
+    "storageKey": null,
+    "args": null,
+    "concreteType": "WalletAccount",
+    "plural": true,
+    "selections": [
+      {
+        "kind": "ScalarField",
+        "alias": null,
+        "name": "address",
+        "args": null,
+        "storageKey": null
+      },
+      {
+        "kind": "LinkedField",
+        "alias": null,
+        "name": "balances",
+        "storageKey": null,
+        "args": null,
+        "concreteType": "WalletBalances",
+        "plural": false,
+        "selections": [
+          {
+            "kind": "ScalarField",
+            "alias": null,
+            "name": "eth",
+            "args": null,
+            "storageKey": null
+          },
+          {
+            "kind": "ScalarField",
+            "alias": null,
+            "name": "mft",
+            "args": null,
+            "storageKey": null
+          }
+        ]
+      }
+    ]
+  },
+  v5
+];
 return {
   "kind": "Request",
   "operationKind": "query",
   "name": "ContactsScreenQuery",
   "id": null,
-  "text": "query ContactsScreenQuery(\n  $userID: String!\n) {\n  viewer {\n    contacts {\n      ...ContactsScreen_contacts_3iqrP\n    }\n    id\n  }\n}\n\nfragment ContactsScreen_contacts_3iqrP on Contacts {\n  ...ContactsView_contacts_3iqrP\n}\n\nfragment ContactsView_contacts_3iqrP on Contacts {\n  inviteStake\n  userContacts(userID: $userID) {\n    ...InviteContactModal_contact\n    peerID\n    localID\n    connectionState\n    publicFeed\n    invite {\n      ethNetwork\n      inviteTX\n      stake {\n        reclaimedTX\n        amount\n        state\n      }\n    }\n    profile {\n      name\n      ethAddress\n    }\n    id\n  }\n}\n\nfragment InviteContactModal_contact on Contact {\n  peerID\n  localID\n  connectionState\n  publicFeed\n  invite {\n    inviteTX\n    stake {\n      reclaimedTX\n      amount\n      state\n    }\n  }\n  profile {\n    name\n    ethAddress\n  }\n}\n",
+  "text": "query ContactsScreenQuery(\n  $userID: String!\n) {\n  viewer {\n    contacts {\n      ...ContactsScreen_contacts_3iqrP\n    }\n    wallets {\n      ...ContactsScreen_wallets_3iqrP\n    }\n    id\n  }\n}\n\nfragment ContactsScreen_contacts_3iqrP on Contacts {\n  ...ContactsView_contacts_3iqrP\n}\n\nfragment ContactsScreen_wallets_3iqrP on Wallets {\n  ...ContactsView_wallets_3iqrP\n}\n\nfragment ContactsView_wallets_3iqrP on Wallets {\n  ethWallets(userID: $userID) {\n    hd {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n    ledger {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n  }\n}\n\nfragment ContactsView_contacts_3iqrP on Contacts {\n  inviteStake\n  userContacts(userID: $userID) {\n    ...InviteContactModal_contact\n    peerID\n    localID\n    connectionState\n    publicFeed\n    invite {\n      ethNetwork\n      inviteTX\n      stake {\n        reclaimedTX\n        amount\n        state\n      }\n    }\n    profile {\n      name\n      ethAddress\n    }\n    id\n  }\n}\n\nfragment InviteContactModal_contact on Contact {\n  peerID\n  localID\n  connectionState\n  publicFeed\n  invite {\n    inviteTX\n    stake {\n      reclaimedTX\n      amount\n      state\n    }\n  }\n  profile {\n    name\n    ethAddress\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -139,14 +257,23 @@ return {
               {
                 "kind": "FragmentSpread",
                 "name": "ContactsScreen_contacts",
-                "args": [
-                  {
-                    "kind": "Variable",
-                    "name": "userID",
-                    "variableName": "userID",
-                    "type": null
-                  }
-                ]
+                "args": v1
+              }
+            ]
+          },
+          {
+            "kind": "LinkedField",
+            "alias": null,
+            "name": "wallets",
+            "storageKey": null,
+            "args": null,
+            "concreteType": "Wallets",
+            "plural": false,
+            "selections": [
+              {
+                "kind": "FragmentSpread",
+                "name": "ContactsScreen_wallets",
+                "args": v1
               }
             ]
           }
@@ -189,14 +316,7 @@ return {
                 "alias": null,
                 "name": "userContacts",
                 "storageKey": null,
-                "args": [
-                  {
-                    "kind": "Variable",
-                    "name": "userID",
-                    "variableName": "userID",
-                    "type": "String!"
-                  }
-                ],
+                "args": v2,
                 "concreteType": "Contact",
                 "plural": true,
                 "selections": [
@@ -207,13 +327,7 @@ return {
                     "args": null,
                     "storageKey": null
                   },
-                  {
-                    "kind": "ScalarField",
-                    "alias": null,
-                    "name": "localID",
-                    "args": null,
-                    "storageKey": null
-                  },
+                  v3,
                   {
                     "kind": "ScalarField",
                     "alias": null,
@@ -294,13 +408,7 @@ return {
                     "concreteType": "GenericProfile",
                     "plural": false,
                     "selections": [
-                      {
-                        "kind": "ScalarField",
-                        "alias": null,
-                        "name": "name",
-                        "args": null,
-                        "storageKey": null
-                      },
+                      v4,
                       {
                         "kind": "ScalarField",
                         "alias": null,
@@ -310,12 +418,54 @@ return {
                       }
                     ]
                   },
-                  v1
+                  v5
                 ]
               }
             ]
           },
-          v1
+          {
+            "kind": "LinkedField",
+            "alias": null,
+            "name": "wallets",
+            "storageKey": null,
+            "args": null,
+            "concreteType": "Wallets",
+            "plural": false,
+            "selections": [
+              {
+                "kind": "LinkedField",
+                "alias": null,
+                "name": "ethWallets",
+                "storageKey": null,
+                "args": v2,
+                "concreteType": "EthWallets",
+                "plural": false,
+                "selections": [
+                  {
+                    "kind": "LinkedField",
+                    "alias": null,
+                    "name": "hd",
+                    "storageKey": null,
+                    "args": null,
+                    "concreteType": "EthHDWallet",
+                    "plural": true,
+                    "selections": v6
+                  },
+                  {
+                    "kind": "LinkedField",
+                    "alias": null,
+                    "name": "ledger",
+                    "storageKey": null,
+                    "args": null,
+                    "concreteType": "EthLedgerWallet",
+                    "plural": true,
+                    "selections": v6
+                  }
+                ]
+              }
+            ]
+          },
+          v5
         ]
       }
     ]
@@ -323,5 +473,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '5338a77b0109e329e2a17e138ff4f5e4';
+(node/*: any*/).hash = '22034e6b2a428c860228634489f16442';
 module.exports = node;

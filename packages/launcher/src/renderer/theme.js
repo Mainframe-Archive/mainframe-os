@@ -298,6 +298,10 @@ export default {
       iconColor: COLORS.PRIMARY_RED,
       iconHoverColor: COLORS.PRIMARY_RED,
     },
+    hoverShadow: {
+      hoverShadow: true,
+      borderHoverColor: 'transparent',
+    },
     modalButton: {
       titlePadding: '10px 30px',
       fontSize: 12,
@@ -583,6 +587,12 @@ export default {
     default: {
       padding: '5px 10px',
       menuItemPadding: '5px 10px',
+    },
+    maxWidth440: {
+      maxWidth: 440,
+    },
+    error: {
+      borderColor: COLORS.ERROR_RED,
     },
   },
   Tooltip: {

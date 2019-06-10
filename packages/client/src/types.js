@@ -262,6 +262,7 @@ export type GetInviteTXDetailsParams = {
   type: 'approve' | 'sendInvite',
   userID: string,
   contactID: string,
+  customAddress: string,
 }
 
 export type GetInviteTXDetailsResult = {
@@ -275,6 +276,7 @@ export type SendInviteTXParams = {
   userID: string,
   contactID: string,
   gasPrice?: string,
+  customAddress: string,
 }
 
 export type SendDeclineTXParams = {

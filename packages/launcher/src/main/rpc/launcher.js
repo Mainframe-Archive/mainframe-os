@@ -236,6 +236,20 @@ export default {
     return ctx.client.blockchain.ethSend(params)
   },
 
+  blockchain_getContractRecipientAddress: {
+    params: DECLINE_INVITE_SCHEMA,
+    handler: (ctx: LauncherContext, params: SendDeclineTXParams): ?string => {
+      return ctx.client.blockchain.getContractRecipientAddress(params)
+    },
+  },
+
+  blockchain_getContractOriginAddress: {
+    params: DECLINE_INVITE_SCHEMA,
+    handler: (ctx: LauncherContext, params: SendDeclineTXParams): ?string => {
+      return ctx.client.blockchain.getContractOriginAddress(params)
+    },
+  },
+
   blockchain_getInviteTXDetails: {
     params: INVITE_TX_DETAILS_SCHEMA,
     handler: (

@@ -16,7 +16,6 @@ type Props = {
   title?: string,
   children?: ?Node,
   full?: boolean,
-  noButtons?: boolean,
   confirmButton?: ?string,
   dismissButton?: ?string,
   onPressConfirm?: ?() => any,
@@ -48,33 +47,36 @@ export default class FormModalView extends Component<Props> {
           onChange={this.props.onChangeForm}>
           <ChildrenContainer>
             <ChildrenContainer>{this.props.children}</ChildrenContainer>
-            <Row className="white-shadow" size={1}>
-              <Column styles="align-items:center; margin-bottom: 20px; justify-content: center; flex-direction: row;">
-                {this.props.dismissButton &&
-                  (this.props.onPressDismiss || this.props.onRequestClose) && (
-                    <Button
-                      title={this.props.dismissButton}
-                      disabled={this.props.dismissButtonDisabled}
-                      variant={['no-border', 'grey', 'modalButton']}
-                      onPress={
-                        this.props.onPressDismiss || this.props.onRequestClose
-                      }
-                    />
-                  )}
-                {this.props.confirmButton &&
-                  (this.props.onPressConfirm || this.props.onSubmitForm) && (
-                    <Button
-                      disabled={this.props.confirmButtonDisabled}
-                      title={this.props.confirmButton}
-                      variant={['red', 'modalButton']}
-                      onPress={this.props.onPressConfirm}
-                      submit={!!this.props.onSubmitForm}
-                      testID={this.props.confirmTestID}
-                      invalidFormDisabled
-                    />
-                  )}
-              </Column>
-            </Row>
+            {(this.props.dismissButton || this.props.confirmButton) && (
+              <Row className="white-shadow" size={1}>
+                <Column styles="align-items:center; margin-bottom: 20px; justify-content: center; flex-direction: row;">
+                  {this.props.dismissButton &&
+                    (this.props.onPressDismiss ||
+                      this.props.onRequestClose) && (
+                      <Button
+                        title={this.props.dismissButton}
+                        disabled={this.props.dismissButtonDisabled}
+                        variant={['no-border', 'grey', 'modalButton']}
+                        onPress={
+                          this.props.onPressDismiss || this.props.onRequestClose
+                        }
+                      />
+                    )}
+                  {this.props.confirmButton &&
+                    (this.props.onPressConfirm || this.props.onSubmitForm) && (
+                      <Button
+                        disabled={this.props.confirmButtonDisabled}
+                        title={this.props.confirmButton}
+                        variant={['red', 'modalButton']}
+                        onPress={this.props.onPressConfirm}
+                        submit={!!this.props.onSubmitForm}
+                        testID={this.props.confirmTestID}
+                        invalidFormDisabled
+                      />
+                    )}
+                </Column>
+              </Row>
+            )}
           </ChildrenContainer>
         </Form>
       </ModalView>

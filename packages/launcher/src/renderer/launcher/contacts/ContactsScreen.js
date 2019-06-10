@@ -8,7 +8,10 @@ import applyContext, { type CurrentUser } from '../LauncherContext'
 import RelayLoaderView from '../RelayLoaderView'
 import ContactsView from './ContactsView'
 
-import type { ContactsView_contacts as Contacts } from './__generated__/ContactsView_contacts.graphql'
+import type {
+  ContactsScreen_contacts as Contacts,
+  ContactsScreen_wallets as Wallets,
+} from './__generated__/ContactsView_contacts.graphql'
 
 type QueryProps = {
   user: CurrentUser,
@@ -18,6 +21,7 @@ type Props = QueryProps & {
   contacts: {
     userContacts: Contacts,
   },
+  wallets: Wallets,
 }
 
 type State = {
@@ -30,7 +34,11 @@ class ContactsScreenComponent extends Component<Props, State> {
   render() {
     return (
       // $FlowFixMe: injected fragment type
-      <ContactsView user={this.props.user} contacts={this.props.contacts} />
+      <ContactsView
+        user={this.props.user}
+        contacts={this.props.contacts}
+        wallets={this.props.wallets}
+      />
     )
   }
 }
@@ -42,6 +50,12 @@ const ContactsScreenRelayContainer = createFragmentContainer(
       fragment ContactsScreen_contacts on Contacts
         @argumentDefinitions(userID: { type: "String!" }) {
         ...ContactsView_contacts @arguments(userID: $userID)
+      }
+    `,
+    wallets: graphql`
+      fragment ContactsScreen_wallets on Wallets
+        @argumentDefinitions(userID: { type: "String!" }) {
+        ...ContactsView_wallets @arguments(userID: $userID)
       }
     `,
   },
@@ -59,6 +73,9 @@ export class ContactsScreenRenderer extends Component<QueryProps> {
             viewer {
               contacts {
                 ...ContactsScreen_contacts @arguments(userID: $userID)
+              }
+              wallets {
+                ...ContactsScreen_wallets @arguments(userID: $userID)
               }
             }
           }
