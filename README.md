@@ -47,7 +47,7 @@ sudo apt install -y libudev-dev libtool libusb-1.0-0-dev build-essential
 ##### Windows
 
 ```
-npm install --global --production windows-build-tools`
+npm install --global --production windows-build-tools
 ```
 
 ### Setup
