@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 96988fdd1ba44b3c577aca989cd7a123
+ * @relayHash f7d5e49b9e8603db8750245272c0324b
  */
 
 /* eslint-disable */
@@ -56,16 +56,16 @@ fragment AppDetailsScreen_app on OwnApp {
     version
     permissions {
       optional {
+        CONTACT_COMMUNICATION
+        CONTACT_LIST
+        ETHEREUM_TRANSACTION
         WEB_REQUEST
-        BLOCKCHAIN_SEND
-        COMMS_CONTACT
-        CONTACTS_READ
       }
       required {
+        CONTACT_COMMUNICATION
+        CONTACT_LIST
+        ETHEREUM_TRANSACTION
         WEB_REQUEST
-        BLOCKCHAIN_SEND
-        COMMS_CONTACT
-        CONTACTS_READ
       }
     }
   }
@@ -135,28 +135,28 @@ v6 = [
   {
     "kind": "ScalarField",
     "alias": null,
+    "name": "CONTACT_COMMUNICATION",
+    "args": null,
+    "storageKey": null
+  },
+  {
+    "kind": "ScalarField",
+    "alias": null,
+    "name": "CONTACT_LIST",
+    "args": null,
+    "storageKey": null
+  },
+  {
+    "kind": "ScalarField",
+    "alias": null,
+    "name": "ETHEREUM_TRANSACTION",
+    "args": null,
+    "storageKey": null
+  },
+  {
+    "kind": "ScalarField",
+    "alias": null,
     "name": "WEB_REQUEST",
-    "args": null,
-    "storageKey": null
-  },
-  {
-    "kind": "ScalarField",
-    "alias": null,
-    "name": "BLOCKCHAIN_SEND",
-    "args": null,
-    "storageKey": null
-  },
-  {
-    "kind": "ScalarField",
-    "alias": null,
-    "name": "COMMS_CONTACT",
-    "args": null,
-    "storageKey": null
-  },
-  {
-    "kind": "ScalarField",
-    "alias": null,
-    "name": "CONTACTS_READ",
     "args": null,
     "storageKey": null
   }
@@ -166,7 +166,7 @@ return {
   "operationKind": "query",
   "name": "AppDetailsScreenQuery",
   "id": null,
-  "text": "query AppDetailsScreenQuery(\n  $appID: ID!\n) {\n  app: node(id: $appID) {\n    __typename\n    ... on OwnApp {\n      ...AppDetailsScreen_app\n    }\n    id\n  }\n}\n\nfragment AppDetailsScreen_app on OwnApp {\n  localID\n  publicID\n  profile {\n    name\n  }\n  contentsPath\n  developer {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n  inProgressVersion {\n    version\n    permissions {\n      optional {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        COMMS_CONTACT\n        CONTACTS_READ\n      }\n      required {\n        WEB_REQUEST\n        BLOCKCHAIN_SEND\n        COMMS_CONTACT\n        CONTACTS_READ\n      }\n    }\n  }\n  latestPublishedVersion {\n    version\n  }\n}\n",
+  "text": "query AppDetailsScreenQuery(\n  $appID: ID!\n) {\n  app: node(id: $appID) {\n    __typename\n    ... on OwnApp {\n      ...AppDetailsScreen_app\n    }\n    id\n  }\n}\n\nfragment AppDetailsScreen_app on OwnApp {\n  localID\n  publicID\n  profile {\n    name\n  }\n  contentsPath\n  developer {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n  inProgressVersion {\n    version\n    permissions {\n      optional {\n        CONTACT_COMMUNICATION\n        CONTACT_LIST\n        ETHEREUM_TRANSACTION\n        WEB_REQUEST\n      }\n      required {\n        CONTACT_COMMUNICATION\n        CONTACT_LIST\n        ETHEREUM_TRANSACTION\n        WEB_REQUEST\n      }\n    }\n  }\n  latestPublishedVersion {\n    version\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",

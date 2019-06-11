@@ -21,7 +21,7 @@ import SetPermissionsRequirements from './SetPermissionsRequirements'
 import type { CreateAppModal_developer as Developer } from './__generated__/CreateAppModal_developer.graphql'
 
 const createAppMutation = graphql`
-  mutation CreateAppModalMutation($input: AppCreateMutationInput!) {
+  mutation CreateAppModalMutation($input: CreateAppInput!) {
     createApp(input: $input) {
       app {
         id

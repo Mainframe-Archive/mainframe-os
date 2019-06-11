@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 1ec1cea7c0992761f47c9a5374b71a9f
+ * @relayHash 5f456d2c24ac30f247e46385cb715905
  */
 
 /* eslint-disable */
@@ -10,7 +10,7 @@
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
 type DeveloperAppsScreen_developer$ref = any;
-export type AppCreateMutationInput = {
+export type CreateAppInput = {
   name: string,
   contentsPath: string,
   version: string,
@@ -23,13 +23,13 @@ export type AppPermissionsRequirementsInput = {
   required: AppPermissionDefinitionsInput,
 };
 export type AppPermissionDefinitionsInput = {
-  BLOCKCHAIN_SEND?: ?boolean,
-  COMMS_CONTACT?: ?boolean,
-  CONTACTS_READ?: ?boolean,
+  CONTACT_COMMUNICATION?: ?boolean,
+  CONTACT_LIST?: ?boolean,
+  ETHEREUM_TRANSACTION?: ?boolean,
   WEB_REQUEST?: ?$ReadOnlyArray<?string>,
 };
 export type CreateAppModalMutationVariables = {|
-  input: AppCreateMutationInput
+  input: CreateAppInput
 |};
 export type CreateAppModalMutationResponse = {|
   +createApp: ?{|
@@ -54,7 +54,7 @@ export type CreateAppModalMutation = {|
 
 /*
 mutation CreateAppModalMutation(
-  $input: AppCreateMutationInput!
+  $input: CreateAppInput!
 ) {
   createApp(input: $input) {
     app {
@@ -104,7 +104,7 @@ var v0 = [
   {
     "kind": "LocalArgument",
     "name": "input",
-    "type": "AppCreateMutationInput!",
+    "type": "CreateAppInput!",
     "defaultValue": null
   }
 ],
@@ -113,7 +113,7 @@ v1 = [
     "kind": "Variable",
     "name": "input",
     "variableName": "input",
-    "type": "AppCreateMutationInput!"
+    "type": "CreateAppInput!"
   }
 ],
 v2 = {
@@ -153,7 +153,7 @@ return {
   "operationKind": "mutation",
   "name": "CreateAppModalMutation",
   "id": null,
-  "text": "mutation CreateAppModalMutation(\n  $input: AppCreateMutationInput!\n) {\n  createApp(input: $input) {\n    app {\n      id\n      localID\n      developer {\n        ...DeveloperAppsScreen_developer\n        id\n      }\n      profile {\n        name\n      }\n    }\n  }\n}\n\nfragment DeveloperAppsScreen_developer on OwnDeveloper {\n  ...CreateAppModal_developer\n  apps {\n    ...AppItem_ownApp\n    id\n  }\n}\n\nfragment CreateAppModal_developer on OwnDeveloper {\n  localID\n}\n\nfragment AppItem_ownApp on OwnApp {\n  localID\n  publicID\n  developer {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n  profile {\n    name\n  }\n}\n",
+  "text": "mutation CreateAppModalMutation(\n  $input: CreateAppInput!\n) {\n  createApp(input: $input) {\n    app {\n      id\n      localID\n      developer {\n        ...DeveloperAppsScreen_developer\n        id\n      }\n      profile {\n        name\n      }\n    }\n  }\n}\n\nfragment DeveloperAppsScreen_developer on OwnDeveloper {\n  ...CreateAppModal_developer\n  apps {\n    ...AppItem_ownApp\n    id\n  }\n}\n\nfragment CreateAppModal_developer on OwnDeveloper {\n  localID\n}\n\nfragment AppItem_ownApp on OwnApp {\n  localID\n  publicID\n  developer {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n  profile {\n    name\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -168,7 +168,7 @@ return {
         "name": "createApp",
         "storageKey": null,
         "args": v1,
-        "concreteType": "AppCreateMutationPayload",
+        "concreteType": "CreateAppPayload",
         "plural": false,
         "selections": [
           {
@@ -216,7 +216,7 @@ return {
         "name": "createApp",
         "storageKey": null,
         "args": v1,
-        "concreteType": "AppCreateMutationPayload",
+        "concreteType": "CreateAppPayload",
         "plural": false,
         "selections": [
           {
@@ -288,5 +288,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '8d674fedf8f89ef9dcba2f7651342fee';
+(node/*: any*/).hash = 'e45ea03d93a61965d3894a34d28b5318';
 module.exports = node;

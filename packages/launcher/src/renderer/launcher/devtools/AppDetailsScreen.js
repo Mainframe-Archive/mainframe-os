@@ -113,11 +113,8 @@ const updateAppDetailsMutation = graphql`
     $input: UpdateAppDetailsInput!
   ) {
     updateAppDetails(input: $input) {
-      viewer {
-        id
-        # apps {
-        #   ...OwnAppsView_apps
-        # }
+      app {
+        ...AppDetailsScreen_app
       }
     }
   }
@@ -128,19 +125,16 @@ const setAppPermissionsRequirementsMutation = graphql`
     $input: SetAppPermissionsRequirementsInput!
   ) {
     setAppPermissionsRequirements(input: $input) {
-      viewer {
-        id
-        # apps {
-        #   ...OwnAppsView_apps
-        # }
+      app {
+        ...AppDetailsScreen_app
       }
     }
   }
 `
 
 const createAppVersionMutation = graphql`
-  mutation AppDetailsScreenAppCreateVersionMutation(
-    $input: AppCreateVersionMutationInput!
+  mutation AppDetailsScreenCreateAppVersionMutation(
+    $input: CreateAppVersionInput!
   ) {
     createAppVersion(input: $input) {
       app {
@@ -272,6 +266,10 @@ class AppDetails extends Component<Props, State> {
         })
       },
     })
+  }
+
+  onPressGoBack = () => {
+    this.props.history.goBack()
   }
 
   onPressSubmitFoReview = () => {
@@ -410,7 +408,7 @@ class AppDetails extends Component<Props, State> {
 
     const header = (
       <Header>
-        <BackButton onPress={this.props.onClose}>
+        <BackButton onPress={this.onPressGoBack}>
           <ArrowLeft />
         </BackButton>
         <IconContainer>
@@ -546,16 +544,16 @@ const RelayContainer = createFragmentContainer(AppDetails, {
         version
         permissions {
           optional {
+            CONTACT_COMMUNICATION
+            CONTACT_LIST
+            ETHEREUM_TRANSACTION
             WEB_REQUEST
-            BLOCKCHAIN_SEND
-            COMMS_CONTACT
-            CONTACTS_READ
           }
           required {
+            CONTACT_COMMUNICATION
+            CONTACT_LIST
+            ETHEREUM_TRANSACTION
             WEB_REQUEST
-            BLOCKCHAIN_SEND
-            COMMS_CONTACT
-            CONTACTS_READ
           }
         }
       }

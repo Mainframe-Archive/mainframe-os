@@ -34,14 +34,16 @@ export type PeerDoc = PeerData & {
   stopSync(): void,
 }
 
-export type PeersCollection = Collection<PeerDoc, PeerData> & {
+type PeersStatics = {
   createFromID(bzz: Bzz, publicID: string): Promise<PeerDoc>,
   findByPublicID(publicID: string): Promise<PeerDoc | null>,
   startSync(bzz: Bzz): Promise<void>,
   stopSync(): void,
 }
 
-export default async (params: CollectionParams) => {
+export type PeersCollection = Collection<PeerData, PeerDoc> & PeersStatics
+
+export default async (params: CollectionParams): Promise<PeersCollection> => {
   const logger = params.logger.child({ collection: COLLECTION_NAMES.PEERS })
 
   return await params.db.collection({

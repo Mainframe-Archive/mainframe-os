@@ -13,15 +13,7 @@ import { generateLocalID } from '../utils'
 import schema, { type EthWalletHDData } from '../schemas/ethWalletHD'
 import type { UserDoc } from './users'
 
-const getAddress = (wallet: EthWallet): string => {
-  return sigUtil.normalize(wallet.getAddress().toString('hex'))
-}
-
-const getWallet = (root: any, index: number): EthWallet => {
-  return root.deriveChild(index).getWallet()
-}
-
-export type EthWalletHDDoc = EthWalletHDData & {
+type EthWalletHDMethods = {
   getSeed(): Promise<Buffer>,
   getHDKey(): Promise<HDKey>,
   getRoot(): Promise<HDKey>,
@@ -32,15 +24,30 @@ export type EthWalletHDDoc = EthWalletHDData & {
   sign(params: WalletSignDataParams): Promise<string>,
 }
 
-export type EthWalletsHDCollection = Collection<
-  EthWalletHDDoc,
-  EthWalletHDData,
-> & {
+export type EthWalletHDDoc = EthWalletHDData & EthWalletHDMethods
+
+type EthWalletsHDStatics = {
   create(data: { name: string, mnemonic?: ?string }): Promise<EthWalletHDDoc>,
   getByAddress(address: string): Promise<EthWalletHDDoc | null>,
 }
 
-export default async (params: CollectionParams) => {
+export type EthWalletsHDCollection = Collection<
+  EthWalletHDData,
+  EthWalletHDDoc,
+> &
+  EthWalletsHDStatics
+
+const getAddress = (wallet: EthWallet): string => {
+  return sigUtil.normalize(wallet.getAddress().toString('hex'))
+}
+
+const getWallet = (root: any, index: number): EthWallet => {
+  return root.deriveChild(index).getWallet()
+}
+
+export default async (
+  params: CollectionParams,
+): Promise<EthWalletsHDCollection> => {
   const db = params.db
   const logger = params.logger.child({
     collection: COLLECTION_NAMES.ETH_WALLETS_HD,

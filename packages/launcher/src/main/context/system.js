@@ -11,6 +11,7 @@ import type { Environment } from '../environment'
 import type { Logger } from '../logger'
 import { createLauncherWindow } from '../windows'
 
+import { AppContext } from './app'
 import { LauncherContext } from './launcher'
 import { UserContext } from './user'
 
@@ -212,6 +213,8 @@ export class SystemContext {
   }
 
   // Contexts and windows
+
+  // TODO: similar logic for apps
 
   getLauncherContext(idOrContents: string | WebContents): ?LauncherContext {
     const id =

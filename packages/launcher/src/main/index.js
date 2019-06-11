@@ -16,7 +16,7 @@ import './menu'
 // import { registerStreamProtocol } from './storage'
 // import createElectronTransport from './createElectronTransport'
 import { createChannels } from './rpc'
-import { createLauncherWindow } from './windows'
+// import { createLauncherWindow } from './windows'
 
 import { SystemContext } from './context/system'
 import { Environment } from './environment'

@@ -1,30 +1,43 @@
 // @flow
 
 import { COLLECTION_NAMES } from '../constants'
-import type { Collection, CollectionParams } from '../types'
+import type { Collection, CollectionParams, Populate } from '../types'
 import { generateLocalID } from '../utils'
 
 import schema, { type ContactRequestData } from '../schemas/contactRequest'
 import type { GenericProfile } from '../schemas/genericProfile'
 
-export type ContactRequestDoc = ContactRequestData & {
+import type { PeerDoc } from './peers'
+
+type ContactRequestMethods = {
   getPublicID(): Promise<string>,
   getProfile(): Promise<GenericProfile>,
 }
 
-export type ContactRequestsCollection = Collection<
-  ContactRequestDoc,
-  ContactRequestData,
-> & {
+export type ContactRequestDoc = ContactRequestData &
+  ContactRequestMethods &
+  Populate<{ peer: PeerDoc }>
+
+type ContactRequestsStatics = {
   create(data: $Shape<ContactRequestData>): Promise<ContactRequestDoc>,
 }
 
-export default async (params: CollectionParams) => {
+export type ContactRequestsCollection = Collection<
+  ContactRequestData,
+  ContactRequestDoc,
+> &
+  ContactRequestsStatics
+
+export default async (
+  params: CollectionParams,
+): Promise<ContactRequestsCollection> => {
   return await params.db.collection({
     name: COLLECTION_NAMES.CONTACT_REQUESTS,
     schema,
     statics: {
-      async create(data: Object = {}) {
+      async create(
+        data: $Shape<ContactRequestData> = {},
+      ): Promise<ContactRequestDoc> {
         return await this.insert({
           ...data,
           localID: generateLocalID(),

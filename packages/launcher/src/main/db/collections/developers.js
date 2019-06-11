@@ -7,18 +7,28 @@ import schema, { type DeveloperData } from '../schemas/developer'
 
 import type { AppDoc } from './apps'
 
-export type DeveloperDoc = DeveloperData & {
+type DeveloperMethods = {
   getApps(): Promise<Array<AppDoc>>,
 }
 
-export type DevelopersCollection = Collection<DeveloperDoc, DeveloperData>
+export type DeveloperDoc = DeveloperData & DeveloperMethods
 
-export default async (params: CollectionParams) => {
+export type DevelopersCollection = Collection<DeveloperData, DeveloperDoc>
+
+export default async (
+  params: CollectionParams,
+): Promise<DevelopersCollection> => {
   const db = params.db
 
-  return await params.db.collection({
+  return await params.db.collection<
+    DeveloperData,
+    DeveloperDoc,
+    DeveloperMethods,
+    {},
+  >({
     name: COLLECTION_NAMES.DEVELOPERS,
     schema,
+    statics: {},
     methods: {
       async getApps(): Promise<Array<AppDoc>> {
         return await db.apps.find({ developer: this.localID }).exec()

@@ -281,7 +281,6 @@ const addLedgerWalletAccountsMutation = mutationWithClientMutationId({
         name: args.name,
         legacyPath: args.legacyPath,
       })
-
       const [user] = await Promise.all([
         ctx.getUser(),
         wallet.addAccounts(args.indexes),
@@ -318,13 +317,13 @@ const setProfileWalletMutation = mutationWithClientMutationId({
     viewer: viewerField,
   },
   mutateAndGetPayload: async (args, ctx) => {
-    const user = await ctx.getUser()
+    ctx.logger.log({
+      level: 'debug',
+      message: 'SetProfileWalletMutation mutation called',
+      address: args.address,
+    })
     try {
-      ctx.logger.log({
-        level: 'debug',
-        message: 'SetProfileWalletMutation mutation called',
-        address: args.address,
-      })
+      const user = await ctx.getUser()
       await user.setProfileEthAddress(args.address)
       return {}
     } catch (err) {
@@ -349,9 +348,23 @@ const setEthNetworkMutation = mutationWithClientMutationId({
     viewer: viewerField,
   },
   mutateAndGetPayload: async (args, ctx) => {
-    const user = await ctx.getUser()
-    await user.atomicSet('ethURL', args.url)
-    return {}
+    ctx.logger.log({
+      level: 'debug',
+      message: 'SetEthNetwork mutation called',
+      url: args.url,
+    })
+    try {
+      const user = await ctx.getUser()
+      await user.atomicSet('ethURL', args.url)
+      return {}
+    } catch (err) {
+      ctx.logger.log({
+        level: 'error',
+        message: 'SetEthNetwork mutation failed',
+        error: err.toString(),
+      })
+      throw err
+    }
   },
 })
 
@@ -382,10 +395,30 @@ const createDeveloperMutation = mutationWithClientMutationId({
     devtools: devtoolsField,
   },
   mutateAndGetPayload: async (args, ctx) => {
-    const developer = await ctx.db.own_developers.create({
+    ctx.logger.log({
+      level: 'debug',
+      message: 'CreateDeveloper mutation called',
       profile: args.profile,
     })
-    return { developer }
+    try {
+      const developer = await ctx.db.own_developers.create({
+        profile: args.profile,
+      })
+      ctx.logger.log({
+        level: 'debug',
+        message: 'CreateDeveloper mutation complete',
+        profile: args.profile,
+        developerID: developer.localID,
+      })
+      return { developer }
+    } catch (err) {
+      ctx.logger.log({
+        level: 'error',
+        message: 'CreateDeveloper mutation failed',
+        error: err.toString(),
+      })
+      throw err
+    }
   },
 })
 
@@ -407,9 +440,6 @@ const updateProfileInput = new GraphQLInputObjectType({
 const updateProfileMutation = mutationWithClientMutationId({
   name: 'UpdateProfile',
   inputFields: {
-    userID: {
-      type: new GraphQLNonNull(GraphQLString),
-    },
     profile: {
       type: new GraphQLNonNull(updateProfileInput),
     },
@@ -421,31 +451,27 @@ const updateProfileMutation = mutationWithClientMutationId({
     viewer: viewerField,
   },
   mutateAndGetPayload: async (args, ctx) => {
-    await ctx.mutations.updateUser(
-      args.userID,
-      args.profile,
-      args.privateProfile,
-    )
-    return {}
-  },
-})
-
-const setUserProfileVisibilityMutation = mutationWithClientMutationId({
-  name: 'SetUserProfileVisibility',
-  inputFields: {
-    userID: {
-      type: new GraphQLNonNull(GraphQLString),
-    },
-    visibile: {
-      type: GraphQLBoolean,
-    },
-  },
-  outputFields: {
-    viewer: viewerField,
-  },
-  mutateAndGetPayload: async (args, ctx) => {
-    await ctx.mutations.setUserProfileVisibility(args.userID, args.visibile)
-    return {}
+    ctx.logger.log({
+      level: 'debug',
+      message: 'UpdateProfile mutation called',
+      profile: args.profile,
+      privateProfile: args.privateProfile,
+    })
+    try {
+      const user = await ctx.getUser()
+      await user.atomicUpdate(doc => {
+        doc.profile = args.profile
+        doc.privateProfile = args.privateProfile
+      })
+      return {}
+    } catch (err) {
+      ctx.logger.log({
+        level: 'error',
+        message: 'UpdateProfile mutation failed',
+        error: err.toString(),
+      })
+      throw err
+    }
   },
 })
 
@@ -458,9 +484,6 @@ const addContactMutation = mutationWithClientMutationId({
     aliasName: {
       type: GraphQLString,
     },
-    sendInvite: {
-      type: GraphQLBoolean,
-    },
   },
   outputFields: {
     contact: {
@@ -470,15 +493,31 @@ const addContactMutation = mutationWithClientMutationId({
     viewer: viewerField,
   },
   mutateAndGetPayload: async (args, ctx) => {
-    const user = await ctx.getUser()
-    const contact = await user.addContact(args.publicID, {
-      aliasName: args.aliasName,
+    ctx.logger.log({
+      level: 'debug',
+      message: 'AddContact mutation called',
+      publicID: args.publicID,
     })
-    // TODO: implement blockchain invite
-    // if (args.sendInvite) {
-    //   await ctx.invitesHandler.sendInvite(args.userID, contact)
-    // }
-    return { contact }
+    try {
+      const user = await ctx.getUser()
+      const contact = await user.addContact(args.publicID, {
+        aliasName: args.aliasName,
+      })
+      ctx.logger.log({
+        level: 'debug',
+        message: 'AddContact mutation complete',
+        publicID: args.publicID,
+        contactID: contact.localID,
+      })
+      return { contact }
+    } catch (err) {
+      ctx.logger.log({
+        level: 'error',
+        message: 'AddContact mutation failed',
+        error: err.toString(),
+      })
+      throw err
+    }
   },
 })
 
@@ -493,8 +532,23 @@ const deleteContactMutation = mutationWithClientMutationId({
     viewer: viewerField,
   },
   mutateAndGetPayload: async (args, ctx) => {
-    ctx.openVault.identities.deleteContact(args.userID, args.contactID)
-    await ctx.openVault.save()
+    ctx.logger.log({
+      level: 'debug',
+      message: 'DeleteContact mutation called',
+      contactID: args.contactID,
+    })
+    try {
+      const user = await ctx.getUser()
+      await user.removeContact(args.contactID)
+      return {}
+    } catch (err) {
+      ctx.logger.log({
+        level: 'error',
+        message: 'DeleteContact mutation failed',
+        error: err.toString(),
+      })
+      throw err
+    }
   },
 })
 
@@ -508,31 +562,51 @@ const acceptContactRequestMutation = mutationWithClientMutationId({
   outputFields: {
     viewer: viewerField,
     contact: {
-      type: contact,
+      type: new GraphQLNonNull(contact),
       resolve: payload => payload.contact,
     },
   },
   mutateAndGetPayload: async (args, ctx) => {
-    const user = await ctx.getUser()
-    const contactRequest = await user.findContactRequestByPeer(args.peerID)
-    if (!contactRequest) {
-      throw new Error('Contact request not found for peer: ' + args.peerID)
+    ctx.logger.log({
+      level: 'debug',
+      message: 'AcceptContactRequest mutation called',
+      peerID: args.peerID,
+    })
+    try {
+      const user = await ctx.getUser()
+      const contactRequest = await user.findContactRequestByPeer(args.peerID)
+      if (!contactRequest) {
+        throw new Error('Contact request not found for peer: ' + args.peerID)
+      }
+      const contact = await user.addContactFromRequest(contactRequest)
+      ctx.logger.log({
+        level: 'debug',
+        message: 'AcceptContactRequest mutation complete',
+        peerID: args.peerID,
+        contactID: contact.localID,
+      })
+      return { contact }
+    } catch (err) {
+      ctx.logger.log({
+        level: 'error',
+        message: 'AcceptContactRequest mutation failed',
+        error: err.toString(),
+      })
+      throw err
     }
-    const contact = await user.addContactFromRequest(contactRequest)
-    return { contact }
   },
 })
 
 const appPermissionDefinitionsInput = new GraphQLInputObjectType({
   name: 'AppPermissionDefinitionsInput',
   fields: () => ({
-    BLOCKCHAIN_SEND: {
+    CONTACT_COMMUNICATION: {
       type: GraphQLBoolean,
     },
-    COMMS_CONTACT: {
+    CONTACT_LIST: {
       type: GraphQLBoolean,
     },
-    CONTACTS_READ: {
+    ETHEREUM_TRANSACTION: {
       type: GraphQLBoolean,
     },
     WEB_REQUEST: {
@@ -553,8 +627,8 @@ const appPermissionsRequirementsInput = new GraphQLInputObjectType({
   }),
 })
 
-const appCreateMutation = mutationWithClientMutationId({
-  name: 'AppCreateMutation',
+const createAppMutation = mutationWithClientMutationId({
+  name: 'CreateApp',
   inputFields: {
     name: {
       type: new GraphQLNonNull(GraphQLString),
@@ -580,21 +654,41 @@ const appCreateMutation = mutationWithClientMutationId({
     devtools: devtoolsField,
   },
   mutateAndGetPayload: async (args, ctx) => {
-    const app = await ctx.db.own_apps.create({
-      contentsPath: args.contentsPath,
-      developer: args.developerID,
-      profile: {
-        name: args.name,
-      },
-      version: args.version,
-      permissions: args.permissionsRequirements,
+    ctx.logger.log({
+      level: 'debug',
+      message: 'CreateApp mutation called',
+      args,
     })
-    return { app }
+    try {
+      const app = await ctx.db.own_apps.create({
+        contentsPath: args.contentsPath,
+        developer: args.developerID,
+        profile: {
+          name: args.name,
+        },
+        version: args.version,
+        permissions: args.permissionsRequirements,
+      })
+      ctx.logger.log({
+        level: 'debug',
+        message: 'CreateApp mutation complete',
+        args,
+        appID: app.localID,
+      })
+      return { app }
+    } catch (err) {
+      ctx.logger.log({
+        level: 'error',
+        message: 'CreateApp mutation failed',
+        error: err.toString(),
+      })
+      throw err
+    }
   },
 })
 
-const appCreateVersionMutation = mutationWithClientMutationId({
-  name: 'AppCreateVersionMutation',
+const createAppVersionMutation = mutationWithClientMutationId({
+  name: 'CreateAppVersion',
   inputFields: {
     appID: {
       type: new GraphQLNonNull(GraphQLString),
@@ -611,12 +705,27 @@ const appCreateVersionMutation = mutationWithClientMutationId({
     viewer: viewerField,
   },
   mutateAndGetPayload: async (args, ctx) => {
-    const app = await ctx.getDoc('own_apps', args.appID)
-    if (app == null) {
-      throw new Error('Application not found')
+    ctx.logger.log({
+      level: 'debug',
+      message: 'CreateAppVersion mutation called',
+      appID: args.appID,
+      versions: args.version,
+    })
+    try {
+      const app = await ctx.getDoc('own_apps', args.appID)
+      if (app == null) {
+        throw new Error('Application not found')
+      }
+      await app.addVersion({ version: args.version })
+      return { app }
+    } catch (err) {
+      ctx.logger.log({
+        level: 'error',
+        message: 'CreateAppVersion mutation failed',
+        error: err.toString(),
+      })
+      throw err
     }
-    await app.addVersion({ version: args.version })
-    return { app }
   },
 })
 
@@ -631,14 +740,33 @@ const setAppPermissionsRequirementsMutation = mutationWithClientMutationId({
     },
   },
   outputFields: {
+    app: {
+      type: new GraphQLNonNull(ownApp),
+      resolve: payload => payload.app,
+    },
     viewer: viewerField,
   },
   mutateAndGetPayload: async (args, ctx) => {
-    await ctx.mutations.setAppPermissionsRequirements(
-      args.appID,
-      args.permissionsRequirements,
-    )
-    return {}
+    ctx.logger.log({
+      level: 'debug',
+      message: 'SetAppPermissionsRequirements mutation called',
+      appID: args.appID,
+    })
+    try {
+      const app = await ctx.getDoc('own_apps', args.appID)
+      if (app == null) {
+        throw new Error('Application not found')
+      }
+      await app.setPermissionsRequirements(args.permissionsRequirements)
+      return { app }
+    } catch (err) {
+      ctx.logger.log({
+        level: 'error',
+        message: 'SetAppPermissionsRequirements mutation failed',
+        error: err.toString(),
+      })
+      throw err
+    }
   },
 })
 
@@ -689,13 +817,21 @@ const webRequestGrantInput = new GraphQLInputObjectType({
   }),
 })
 
-const permissionGrantsInput = new GraphQLInputObjectType({
-  name: 'PermissionGrantsInput',
+const appPermissionGrantsInput = new GraphQLInputObjectType({
+  name: 'AppPermissionGrantsInput',
   fields: () => ({
-    BLOCKCHAIN_SEND: { type: GraphQLBoolean },
-    COMMS_CONTACT: { type: GraphQLBoolean },
-    CONTACTS_READ: { type: GraphQLBoolean },
-    WEB_REQUEST: { type: new GraphQLNonNull(webRequestGrantInput) },
+    CONTACT_COMMUNICATION: {
+      type: GraphQLBoolean,
+    },
+    CONTACT_LIST: {
+      type: GraphQLBoolean,
+    },
+    ETHEREUM_TRANSACTION: {
+      type: GraphQLBoolean,
+    },
+    WEB_REQUEST: {
+      type: new GraphQLNonNull(webRequestGrantInput),
+    },
   }),
 })
 
@@ -706,7 +842,7 @@ const appPermissionSettingsInput = new GraphQLInputObjectType({
       type: new GraphQLNonNull(GraphQLBoolean),
     },
     grants: {
-      type: new GraphQLNonNull(permissionGrantsInput),
+      type: new GraphQLNonNull(appPermissionGrantsInput),
     },
   }),
 })
@@ -759,7 +895,7 @@ const appUpdateMutation = mutationWithClientMutationId({
   },
   outputFields: {
     app: {
-      type: app,
+      type: new GraphQLNonNull(app),
       resolve: payload => payload.app,
     },
     viewer: viewerField,
@@ -787,11 +923,37 @@ export const updateAppDetailsMutation = mutationWithClientMutationId({
     },
   },
   outputFields: {
+    app: {
+      type: new GraphQLNonNull(ownApp),
+      resolve: payload => payload.app,
+    },
     viewer: viewerField,
   },
-  mutateAndGetPayload: async (params, ctx) => {
-    await ctx.mutations.updateAppDetails(params)
-    return {}
+  mutateAndGetPayload: async (args, ctx) => {
+    ctx.logger.log({
+      level: 'debug',
+      message: 'UpdateAppDetails mutation called',
+      appID: args.appID,
+    })
+    try {
+      const app = await ctx.getDoc('own_apps', args.appID)
+      if (app == null) {
+        throw new Error('Application not found')
+      }
+      await app.setDetails({
+        contentsPath: args.contentsPath,
+        profile: args.name ? { name: args.name } : undefined,
+        version: args.version,
+      })
+      return { app }
+    } catch (err) {
+      ctx.logger.log({
+        level: 'error',
+        message: 'UpdateAppDetails mutation failed',
+        error: err.toString(),
+      })
+      throw err
+    }
   },
 })
 
@@ -821,8 +983,8 @@ export default new GraphQLObjectType({
   name: 'Mutation',
   fields: () => ({
     // Apps
-    createApp: appCreateMutation,
-    createAppVersion: appCreateVersionMutation,
+    createApp: createAppMutation,
+    createAppVersion: createAppVersionMutation,
     installApp: appInstallMutation,
     updateApp: appUpdateMutation,
     setAppPermissionsRequirements: setAppPermissionsRequirementsMutation,
@@ -834,7 +996,6 @@ export default new GraphQLObjectType({
     createDeveloper: createDeveloperMutation,
     deleteContact: deleteContactMutation,
     setProfileWallet: setProfileWalletMutation,
-    setUserProfileVisibility: setUserProfileVisibilityMutation,
     updateProfile: updateProfileMutation,
     // Wallets
     addHDWalletAccount: addHDWalletAccountMutation,

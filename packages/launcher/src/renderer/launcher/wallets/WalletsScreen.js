@@ -27,6 +27,9 @@ import WallePreviewModal from './WalletPreviewModal'
 import WalletIcon from './WalletIcon'
 import type { WalletsScreen_user as User } from './__generated__/WalletsScreen_user.graphql'
 
+// TODO: getting the wallet balances involves external calls that can fail or take some time
+// these calls should be deferred or use their own query to avoid delaying the screen loading
+
 type Props = {
   relay: {
     environment: Environment,

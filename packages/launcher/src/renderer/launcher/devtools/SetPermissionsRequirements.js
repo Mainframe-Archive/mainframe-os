@@ -40,10 +40,10 @@ type State = {
 }
 
 export const PERMISSIONS_DESCRIPTIONS = {
-  BLOCKCHAIN_SEND: 'Make transactions to Ethereum blockchain',
-  BLOCKCHAIN_SIGN: 'Sign messages from Ethereum wallet',
-  COMMS_CONTACT: 'Communicate data with users contacts',
-  CONTACTS_READ: 'Read data from users contacts',
+  CONTACT_COMMUNICATION: 'Communicate data with contacts',
+  CONTACT_LIST: 'Access user contacts',
+  ETHEREUM_SIGN: 'Sign messages from Ethereum wallet',
+  ETHEREUM_TRANSACTION: 'Make transactions to Ethereum blockchain',
   WEB_REQUEST: 'Set required web request hosts',
 }
 

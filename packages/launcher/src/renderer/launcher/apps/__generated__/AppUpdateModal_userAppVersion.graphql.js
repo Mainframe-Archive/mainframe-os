@@ -14,7 +14,9 @@ export type AppUpdateModal_userAppVersion = {|
   +localID: string,
   +settings: {|
     +permissionsGrants: {|
-      +BLOCKCHAIN_SEND: ?boolean,
+      +CONTACT_COMMUNICATION: ?boolean,
+      +CONTACT_LIST: ?boolean,
+      +ETHEREUM_TRANSACTION: ?boolean,
       +WEB_REQUEST: {|
         +granted: $ReadOnlyArray<string>,
         +denied: $ReadOnlyArray<string>,
@@ -26,12 +28,16 @@ export type AppUpdateModal_userAppVersion = {|
       +manifest: {|
         +permissions: {|
           +optional: {|
+            +CONTACT_COMMUNICATION: ?boolean,
+            +CONTACT_LIST: ?boolean,
+            +ETHEREUM_TRANSACTION: ?boolean,
             +WEB_REQUEST: ?$ReadOnlyArray<?string>,
-            +BLOCKCHAIN_SEND: ?boolean,
           |},
           +required: {|
+            +CONTACT_COMMUNICATION: ?boolean,
+            +CONTACT_LIST: ?boolean,
+            +ETHEREUM_TRANSACTION: ?boolean,
             +WEB_REQUEST: ?$ReadOnlyArray<?string>,
-            +BLOCKCHAIN_SEND: ?boolean,
           |},
         |},
         +profile: {|
@@ -44,12 +50,16 @@ export type AppUpdateModal_userAppVersion = {|
       +manifest: {|
         +permissions: {|
           +optional: {|
+            +CONTACT_COMMUNICATION: ?boolean,
+            +CONTACT_LIST: ?boolean,
+            +ETHEREUM_TRANSACTION: ?boolean,
             +WEB_REQUEST: ?$ReadOnlyArray<?string>,
-            +BLOCKCHAIN_SEND: ?boolean,
           |},
           +required: {|
+            +CONTACT_COMMUNICATION: ?boolean,
+            +CONTACT_LIST: ?boolean,
+            +ETHEREUM_TRANSACTION: ?boolean,
             +WEB_REQUEST: ?$ReadOnlyArray<?string>,
-            +BLOCKCHAIN_SEND: ?boolean,
           |},
         |},
         +profile: {|
@@ -69,21 +79,37 @@ const node/*: ConcreteFragment*/ = (function(){
 var v0 = {
   "kind": "ScalarField",
   "alias": null,
-  "name": "BLOCKCHAIN_SEND",
+  "name": "CONTACT_COMMUNICATION",
   "args": null,
   "storageKey": null
 },
-v1 = [
+v1 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "CONTACT_LIST",
+  "args": null,
+  "storageKey": null
+},
+v2 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "ETHEREUM_TRANSACTION",
+  "args": null,
+  "storageKey": null
+},
+v3 = [
+  v0,
+  v1,
+  v2,
   {
     "kind": "ScalarField",
     "alias": null,
     "name": "WEB_REQUEST",
     "args": null,
     "storageKey": null
-  },
-  v0
+  }
 ],
-v2 = [
+v4 = [
   {
     "kind": "LinkedField",
     "alias": null,
@@ -110,7 +136,7 @@ v2 = [
             "args": null,
             "concreteType": "AppPermissionDefinitions",
             "plural": false,
-            "selections": v1
+            "selections": v3
           },
           {
             "kind": "LinkedField",
@@ -120,7 +146,7 @@ v2 = [
             "args": null,
             "concreteType": "AppPermissionDefinitions",
             "plural": false,
-            "selections": v1
+            "selections": v3
           }
         ]
       },
@@ -185,6 +211,8 @@ return {
           "plural": false,
           "selections": [
             v0,
+            v1,
+            v2,
             {
               "kind": "LinkedField",
               "alias": null,
@@ -231,7 +259,7 @@ return {
           "args": null,
           "concreteType": "AppVersion",
           "plural": false,
-          "selections": v2
+          "selections": v4
         },
         {
           "kind": "LinkedField",
@@ -241,7 +269,7 @@ return {
           "args": null,
           "concreteType": "AppVersion",
           "plural": false,
-          "selections": v2
+          "selections": v4
         },
         {
           "kind": "ScalarField",
@@ -256,5 +284,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = 'b5da99fff6384302147993de90077485';
+(node/*: any*/).hash = 'b893896ab294af772ea6db85e073ce8d';
 module.exports = node;

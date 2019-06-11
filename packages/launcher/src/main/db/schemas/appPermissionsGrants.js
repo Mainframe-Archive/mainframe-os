@@ -1,10 +1,9 @@
 // @flow
 
-// TODO: define updated permissions keys
 export type PermissionsGrantsData = {
-  BLOCKCHAIN_SEND: ?boolean,
-  CONTACTS_READ: ?boolean,
-  COMMS_CONTACT: ?boolean,
+  CONTACT_COMMUNICATION: ?boolean,
+  CONTACT_LIST: ?boolean,
+  ETHEREUM_TRANSACTION: ?boolean,
   WEB_REQUEST: ?{
     granted: ?Array<string>,
     denied: ?Array<string>,
@@ -12,9 +11,9 @@ export type PermissionsGrantsData = {
 }
 
 export type PermissionsGrants = {
-  BLOCKCHAIN_SEND?: ?boolean,
-  CONTACTS_READ?: ?boolean,
-  COMMS_CONTACT?: ?boolean,
+  CONTACT_COMMUNICATION?: ?boolean,
+  CONTACT_LIST?: ?boolean,
+  ETHEREUM_TRANSACTION?: ?boolean,
   WEB_REQUEST: ?{
     granted?: ?Array<string>,
     denied?: ?Array<string>,
@@ -26,13 +25,13 @@ export default {
   version: 0,
   type: 'object',
   properties: {
-    BLOCKCHAIN_SEND: {
+    CONTACT_COMMUNICATION: {
       type: 'boolean',
     },
-    CONTACTS_READ: {
+    CONTACT_LIST: {
       type: 'boolean',
     },
-    COMMS_CONTACT: {
+    ETHEREUM_TRANSACTION: {
       type: 'boolean',
     },
     WEB_REQUEST: {

@@ -5,14 +5,13 @@ input AcceptContactRequestInput {
 
 type AcceptContactRequestPayload {
   viewer: User!
-  contact: Contact
+  contact: Contact!
   clientMutationId: String
 }
 
 input AddContactInput {
   publicID: String!
   aliasName: String
-  sendInvite: Boolean
   clientMutationId: String
 }
 
@@ -62,33 +61,6 @@ type AppApprovedContact {
   contactID: ID!
 }
 
-input AppCreateMutationInput {
-  name: String!
-  contentsPath: String!
-  version: String!
-  developerID: String!
-  permissionsRequirements: AppPermissionsRequirementsInput!
-  clientMutationId: String
-}
-
-type AppCreateMutationPayload {
-  app: OwnApp!
-  devtools: Devtools!
-  clientMutationId: String
-}
-
-input AppCreateVersionMutationInput {
-  appID: String!
-  version: String!
-  clientMutationId: String
-}
-
-type AppCreateVersionMutationPayload {
-  app: OwnApp!
-  viewer: User!
-  clientMutationId: String
-}
-
 enum AppInstallationState {
   PENDING
   DOWNLOADING
@@ -129,23 +101,30 @@ input AppManifestInput {
 }
 
 type AppPermissionDefinitions {
+  CONTACT_COMMUNICATION: Boolean
+  CONTACT_LIST: Boolean
+  ETHEREUM_TRANSACTION: Boolean
   WEB_REQUEST: [String]
-  BLOCKCHAIN_SEND: Boolean
-  COMMS_CONTACT: Boolean
-  CONTACTS_READ: Boolean
 }
 
 input AppPermissionDefinitionsInput {
-  BLOCKCHAIN_SEND: Boolean
-  COMMS_CONTACT: Boolean
-  CONTACTS_READ: Boolean
+  CONTACT_COMMUNICATION: Boolean
+  CONTACT_LIST: Boolean
+  ETHEREUM_TRANSACTION: Boolean
   WEB_REQUEST: [String]
 }
 
+input AppPermissionGrantsInput {
+  CONTACT_COMMUNICATION: Boolean
+  CONTACT_LIST: Boolean
+  ETHEREUM_TRANSACTION: Boolean
+  WEB_REQUEST: WebRequestGrantInput!
+}
+
 type AppPermissions {
-  BLOCKCHAIN_SEND: Boolean
-  COMMS_CONTACT: Boolean
-  CONTACTS_READ: Boolean
+  CONTACT_COMMUNICATION: Boolean
+  CONTACT_LIST: Boolean
+  ETHEREUM_TRANSACTION: Boolean
   WEB_REQUEST: WebRequestGrants!
 }
 
@@ -161,7 +140,7 @@ input AppPermissionsRequirementsInput {
 
 input AppPermissionsSettingsInput {
   permissionsChecked: Boolean!
-  grants: PermissionGrantsInput!
+  grants: AppPermissionGrantsInput!
 }
 
 type AppUpdate {
@@ -178,7 +157,7 @@ input AppUpdateMutationInput {
 }
 
 type AppUpdateMutationPayload {
-  app: App
+  app: App!
   viewer: User!
   clientMutationId: String
 }
@@ -255,6 +234,33 @@ enum ContactStakeState {
   RECLAIMING
   RECLAIMED
   SEIZED
+}
+
+input CreateAppInput {
+  name: String!
+  contentsPath: String!
+  version: String!
+  developerID: String!
+  permissionsRequirements: AppPermissionsRequirementsInput!
+  clientMutationId: String
+}
+
+type CreateAppPayload {
+  app: OwnApp!
+  devtools: Devtools!
+  clientMutationId: String
+}
+
+input CreateAppVersionInput {
+  appID: String!
+  version: String!
+  clientMutationId: String
+}
+
+type CreateAppVersionPayload {
+  app: OwnApp!
+  viewer: User!
+  clientMutationId: String
 }
 
 input CreateDeveloperInput {
@@ -367,8 +373,8 @@ input ManifestAuthorInput {
 }
 
 type Mutation {
-  createApp(input: AppCreateMutationInput!): AppCreateMutationPayload
-  createAppVersion(input: AppCreateVersionMutationInput!): AppCreateVersionMutationPayload
+  createApp(input: CreateAppInput!): CreateAppPayload
+  createAppVersion(input: CreateAppVersionInput!): CreateAppVersionPayload
   installApp(input: AppInstallMutationInput!): AppInstallMutationPayload
   updateApp(input: AppUpdateMutationInput!): AppUpdateMutationPayload
   setAppPermissionsRequirements(input: SetAppPermissionsRequirementsInput!): SetAppPermissionsRequirementsPayload
@@ -379,7 +385,6 @@ type Mutation {
   createDeveloper(input: CreateDeveloperInput!): CreateDeveloperPayload
   deleteContact(input: DeleteContactInput!): DeleteContactPayload
   setProfileWallet(input: SetProfileWalletInput!): SetProfileWalletPayload
-  setUserProfileVisibility(input: SetUserProfileVisibilityInput!): SetUserProfileVisibilityPayload
   updateProfile(input: UpdateProfileInput!): UpdateProfilePayload
   addHDWalletAccount(input: AddHDWalletAccountInput!): AddHDWalletAccountPayload
   addLedgerWalletAccounts(input: AddLedgerWalletAccountsInput!): AddLedgerWalletAccountsPayload
@@ -445,13 +450,6 @@ type PeerLookupResult {
   profile: GenericProfile!
 }
 
-input PermissionGrantsInput {
-  BLOCKCHAIN_SEND: Boolean
-  COMMS_CONTACT: Boolean
-  CONTACTS_READ: Boolean
-  WEB_REQUEST: WebRequestGrantInput!
-}
-
 input PublishAppVersionInput {
   appID: String!
   version: String!
@@ -483,6 +481,7 @@ input SetAppPermissionsRequirementsInput {
 }
 
 type SetAppPermissionsRequirementsPayload {
+  app: OwnApp!
   viewer: User!
   clientMutationId: String
 }
@@ -507,17 +506,6 @@ type SetProfileWalletPayload {
   clientMutationId: String
 }
 
-input SetUserProfileVisibilityInput {
-  userID: String!
-  visibile: Boolean
-  clientMutationId: String
-}
-
-type SetUserProfileVisibilityPayload {
-  viewer: User!
-  clientMutationId: String
-}
-
 type Subscription {
   appUpdateChanged: AppUpdatePayload!
   contactChanged: ContactChangedPayload!
@@ -537,12 +525,12 @@ input UpdateAppDetailsInput {
 }
 
 type UpdateAppDetailsPayload {
+  app: OwnApp!
   viewer: User!
   clientMutationId: String
 }
 
 input UpdateProfileInput {
-  userID: String!
   profile: UpdateUserProfileInput!
   privateProfile: Boolean
   clientMutationId: String

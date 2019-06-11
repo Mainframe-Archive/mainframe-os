@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 8bedb1f790d7de6af392adfe416c8c73
+ * @relayHash 0024ffad7fb2008b7dd5a380f59c3df1
  */
 
 /* eslint-disable */
@@ -14,7 +14,6 @@ type InviteContactModal_contact$ref = any;
 export type AddContactInput = {
   publicID: string,
   aliasName?: ?string,
-  sendInvite?: ?boolean,
   clientMutationId?: ?string,
 };
 export type ContactsScreenAddContactMutationVariables = {|

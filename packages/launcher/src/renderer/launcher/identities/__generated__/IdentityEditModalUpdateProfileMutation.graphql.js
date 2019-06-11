@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 859f97819ad0746028f4f0e0f5307edf
+ * @relayHash 8be18b7beed38a2cbf7ad768f8baeb01
  */
 
 /* eslint-disable */
@@ -10,7 +10,6 @@
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
 export type UpdateProfileInput = {
-  userID: string,
   profile: UpdateUserProfileInput,
   privateProfile?: ?boolean,
   clientMutationId?: ?string,

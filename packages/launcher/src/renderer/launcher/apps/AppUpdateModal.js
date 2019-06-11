@@ -197,7 +197,9 @@ export default createFragmentContainer(AppUpdateModal, {
       localID
       settings {
         permissionsGrants {
-          BLOCKCHAIN_SEND
+          CONTACT_COMMUNICATION
+          CONTACT_LIST
+          ETHEREUM_TRANSACTION
           WEB_REQUEST {
             granted
             denied
@@ -209,12 +211,16 @@ export default createFragmentContainer(AppUpdateModal, {
           manifest {
             permissions {
               optional {
+                CONTACT_COMMUNICATION
+                CONTACT_LIST
+                ETHEREUM_TRANSACTION
                 WEB_REQUEST
-                BLOCKCHAIN_SEND
               }
               required {
+                CONTACT_COMMUNICATION
+                CONTACT_LIST
+                ETHEREUM_TRANSACTION
                 WEB_REQUEST
-                BLOCKCHAIN_SEND
               }
             }
             profile {
@@ -227,12 +233,16 @@ export default createFragmentContainer(AppUpdateModal, {
           manifest {
             permissions {
               optional {
+                CONTACT_COMMUNICATION
+                CONTACT_LIST
+                ETHEREUM_TRANSACTION
                 WEB_REQUEST
-                BLOCKCHAIN_SEND
               }
               required {
+                CONTACT_COMMUNICATION
+                CONTACT_LIST
+                ETHEREUM_TRANSACTION
                 WEB_REQUEST
-                BLOCKCHAIN_SEND
               }
             }
             profile {

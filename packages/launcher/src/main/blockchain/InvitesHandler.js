@@ -1,37 +1,19 @@
 // @flow
 
+import type Bzz from '@erebos/api-bzz-node'
 import { type BaseContract, type EthClient } from '@mainframe/eth'
-import { getFeedTopic } from '@erebos/api-bzz-base'
 import createKeccakHash from 'keccak'
 import { utils } from 'ethers'
-import { filter } from 'rxjs/operators'
-import { type Observable } from 'rxjs'
 
-import { readFirstContact } from '../data/protocols'
 import { decode } from '../crypto'
+import { readFirstContact } from '../data/protocols'
 import { getFirstContactFeed } from '../db/collections/contacts'
-import type { UserProfile } from '../db/schemas/userProfile'
+import type { UserDoc } from '../db/collections/users'
+import type { DB } from '../db/types'
+import type { Environment } from '../environment'
+import type { Logger } from '../logger'
 
-import type { DB } from '../types'
 const INVITE_ABI = require('./invitesABI.json')
-
-type ObserveInvites<T = Object> = {
-  dispose: () => void,
-  source: Observable<T>,
-}
-
-type OwnUser = {
-  localID: string,
-  profile: UserProfile,
-  getPublicID: () => string,
-  getEth: () => EthClient,
-}
-
-type PeerUser = {
-  localID: string,
-  publicFeed: string,
-  profile: UserProfile,
-}
 
 export type InviteData = {
   chain?: number,
@@ -45,12 +27,6 @@ export type InviteData = {
     state: 'sending' | 'staked' | 'reclaiming' | 'reclaimed' | 'seized',
     reclaimedStakeTX?: ?string,
   },
-}
-
-type Contact = {
-  localID: string,
-  peerID: string,
-  invite: InviteData,
 }
 
 const contracts = {
@@ -86,15 +62,16 @@ const matchAddress = (addressHash: string, addresses: Array<string>) => {
 }
 
 export default class InvitesHandler {
-  ethClient: EthClient
-  user: OwnUser
-  logger: Logger
-  db: DB
   bzz: Bzz
+  db: DB
+  env: Environment
+  ethClient: EthClient
+  logger: Logger
+  user: UserDoc
 
   constructor(params: {
     db: DB,
-    user: OwnUser,
+    user: UserDoc,
     env: Environment,
     logger: Logger,
   }) {

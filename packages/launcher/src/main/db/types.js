@@ -16,14 +16,19 @@ import type { UserAppSettingsCollection } from './collections/userAppSettings'
 import type { UserAppVersionsCollection } from './collections/userAppVersions'
 import type { UsersCollection } from './collections/users'
 
-export type Collection<DocType, DataType> = {
+export type Populate<T> = {
+  populate: <K: $Keys<T>>(field: K) => Promise<$ElementType<T, K>>,
+}
+
+export type Collection<DataType, DocType = DataType> = {
   _docType: DocType,
   insert: (data: DataType) => Promise<DocType>,
   find: Function,
   findOne: Function,
+  newDocument: (data: DataType) => DocType,
 }
 
-export type Collections = {
+export type Collections = {|
   apps: AppsCollection,
   app_versions: AppVersionsCollection,
   contact_requests: ContactRequestsCollection,
@@ -37,14 +42,24 @@ export type Collections = {
   user_app_settings: UserAppSettingsCollection,
   user_app_versions: UserAppVersionsCollection,
   users: UsersCollection,
-}
+|}
 
 export type CollectionKey = $Keys<Collections>
 
-export type DB = Collections & {
-  collection: <DocType, DataType>(
-    params: CollectionParams,
-  ) => Collection<DocType, DataType>,
+export type CollectionSpec<Methods = {}, Statics = {}> = {
+  name: string,
+  schema: Object,
+  statics: Statics,
+  methods: Methods,
+}
+
+export type CollectionFactory = <DataType, DocType, Methods, Statics>(
+  params: CollectionSpec<Methods, Statics>,
+) => Promise<Collection<DataType, DocType> & Statics>
+
+export type DB = {
+  ...Collections,
+  collection: CollectionFactory,
 }
 
 export type CollectionParams = { db: DB, logger: Logger }

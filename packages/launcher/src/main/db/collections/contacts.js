@@ -15,14 +15,14 @@ import { createSubscriber } from '../../swarm/feeds'
 import OwnFeed from '../../swarm/OwnFeed'
 
 import { COLLECTION_NAMES } from '../constants'
-import type { Collection, CollectionParams } from '../types'
+import type { Collection, CollectionParams, Populate } from '../types'
 
 import schema, { type ContactData } from '../schemas/contact'
 import type { GenericProfile } from '../schemas/genericProfile'
 import { generateKeyPair, generateLocalID } from '../utils'
 
 import type { UserDoc } from './users'
-import type { FirstContactData } from './peers'
+import type { FirstContactData, PeerDoc } from './peers'
 
 const FIRST_CONTACT_FEED_NAME = 'mf:first-contact:v1'
 
@@ -39,7 +39,7 @@ export type ContactConnectionState =
   | 'sending_blockchain'
   | 'sent_blockchain'
 
-export type ContactDoc = ContactData & {
+type ContactMethods = {
   getConnectionState(): ContactConnectionState,
   getPrivateID(): string,
   getPublicKey(): ?string,
@@ -52,26 +52,40 @@ export type ContactDoc = ContactData & {
   stopConnectedSubscription(): void,
   startFirstContactSubscription(user: UserDoc): Promise<?Subscription>,
   stopFirstContactSubscription(): void,
-  startStateToggle(user: UserDoc): Subscription,
+  startStateToggle(user: UserDoc): rxjs$TeardownLogic,
   stopStateToggle(): void,
   startSync(bzz: Bzz): rxjs$TeardownLogic,
   stopSync(): void,
 }
 
-export type ContactsCollection = Collection<ContactDoc, ContactData> & {
+export type ContactDoc = ContactData &
+  ContactMethods &
+  Populate<{ peer: PeerDoc }>
+
+type ContactsStatics = {
   create(data: $Shape<ContactData>): Promise<ContactDoc>,
   findByPeerID(peer: string): Promise<Array<ContactDoc>>,
 }
 
-export default async (params: CollectionParams) => {
+export type ContactsCollection = Collection<ContactData, ContactDoc> &
+  ContactsStatics
+
+export default async (
+  params: CollectionParams,
+): Promise<ContactsCollection> => {
   const db = params.db
   const logger = params.logger.child({ collection: COLLECTION_NAMES.CONTACTS })
 
-  return await db.collection({
+  return await db.collection<
+    ContactData,
+    ContactDoc,
+    ContactMethods,
+    ContactsStatics,
+  >({
     name: COLLECTION_NAMES.CONTACTS,
     schema,
     statics: {
-      async create(data: Object = {}) {
+      async create(data: $Shape<ContactData> = {}) {
         return await this.insert({
           ...data,
           localID: generateLocalID(),

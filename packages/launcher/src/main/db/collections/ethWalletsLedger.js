@@ -8,14 +8,13 @@ import { generateLocalID } from '../utils'
 
 import schema, { type EthWalletLedgerData } from '../schemas/ethWalletLedger'
 
-export type EthWalletLedgerDoc = EthWalletLedgerData & {
+type EthWalletLedgerMethods = {
   addAccounts(indexes: Array<number>): Promise<void>,
 }
 
-export type EthWalletsLedgerCollection = Collection<
-  EthWalletLedgerDoc,
-  EthWalletLedgerData,
-> & {
+export type EthWalletLedgerDoc = EthWalletLedgerData & EthWalletLedgerMethods
+
+type EthWalletLedgersStatics = {
   create(data: {
     name: string,
     firstAddress: string,
@@ -28,7 +27,15 @@ export type EthWalletsLedgerCollection = Collection<
   getByAddress(address: string): Promise<EthWalletLedgerDoc | null>,
 }
 
-export default async (params: CollectionParams) => {
+export type EthWalletsLedgerCollection = Collection<
+  EthWalletLedgerData,
+  EthWalletLedgerDoc,
+> &
+  EthWalletLedgersStatics
+
+export default async (
+  params: CollectionParams,
+): Promise<EthWalletsLedgerCollection> => {
   const logger = params.logger.child({
     collection: COLLECTION_NAMES.ETH_WALLETS_LEDGER,
   })

@@ -152,10 +152,18 @@ export const appApprovedContact = new GraphQLObjectType({
 export const appPermissionGrants = new GraphQLObjectType({
   name: 'AppPermissions',
   fields: () => ({
-    BLOCKCHAIN_SEND: { type: GraphQLBoolean },
-    COMMS_CONTACT: { type: GraphQLBoolean },
-    CONTACTS_READ: { type: GraphQLBoolean },
-    WEB_REQUEST: { type: new GraphQLNonNull(webRequestGrants) },
+    CONTACT_COMMUNICATION: {
+      type: GraphQLBoolean,
+    },
+    CONTACT_LIST: {
+      type: GraphQLBoolean,
+    },
+    ETHEREUM_TRANSACTION: {
+      type: GraphQLBoolean,
+    },
+    WEB_REQUEST: {
+      type: new GraphQLNonNull(webRequestGrants),
+    },
   }),
 })
 
@@ -185,17 +193,17 @@ export const userAppSettings = new GraphQLObjectType({
 export const appPermissionDefinitions = new GraphQLObjectType({
   name: 'AppPermissionDefinitions',
   fields: () => ({
+    CONTACT_COMMUNICATION: {
+      type: GraphQLBoolean,
+    },
+    CONTACT_LIST: {
+      type: GraphQLBoolean,
+    },
+    ETHEREUM_TRANSACTION: {
+      type: GraphQLBoolean,
+    },
     WEB_REQUEST: {
       type: new GraphQLList(GraphQLString),
-    },
-    BLOCKCHAIN_SEND: {
-      type: GraphQLBoolean,
-    },
-    COMMS_CONTACT: {
-      type: GraphQLBoolean,
-    },
-    CONTACTS_READ: {
-      type: GraphQLBoolean,
     },
   }),
 })

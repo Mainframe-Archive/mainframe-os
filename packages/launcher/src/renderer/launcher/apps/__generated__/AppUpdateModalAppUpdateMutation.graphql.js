@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 218b2766c8bed2f76754ba597eae0ccf
+ * @relayHash bccbc3b0cfa43f0d88dc3c26ebe5bd49
  */
 
 /* eslint-disable */
@@ -17,12 +17,12 @@ export type AppUpdateMutationInput = {
 };
 export type AppPermissionsSettingsInput = {
   permissionsChecked: boolean,
-  grants: PermissionGrantsInput,
+  grants: AppPermissionGrantsInput,
 };
-export type PermissionGrantsInput = {
-  BLOCKCHAIN_SEND?: ?boolean,
-  COMMS_CONTACT?: ?boolean,
-  CONTACTS_READ?: ?boolean,
+export type AppPermissionGrantsInput = {
+  CONTACT_COMMUNICATION?: ?boolean,
+  CONTACT_LIST?: ?boolean,
+  ETHEREUM_TRANSACTION?: ?boolean,
   WEB_REQUEST: WebRequestGrantInput,
 };
 export type WebRequestGrantInput = {

@@ -27,16 +27,16 @@ export type AppDetailsScreen_app = {|
     +version: string,
     +permissions: {|
       +optional: {|
+        +CONTACT_COMMUNICATION: ?boolean,
+        +CONTACT_LIST: ?boolean,
+        +ETHEREUM_TRANSACTION: ?boolean,
         +WEB_REQUEST: ?$ReadOnlyArray<?string>,
-        +BLOCKCHAIN_SEND: ?boolean,
-        +COMMS_CONTACT: ?boolean,
-        +CONTACTS_READ: ?boolean,
       |},
       +required: {|
+        +CONTACT_COMMUNICATION: ?boolean,
+        +CONTACT_LIST: ?boolean,
+        +ETHEREUM_TRANSACTION: ?boolean,
         +WEB_REQUEST: ?$ReadOnlyArray<?string>,
-        +BLOCKCHAIN_SEND: ?boolean,
-        +COMMS_CONTACT: ?boolean,
-        +CONTACTS_READ: ?boolean,
       |},
     |},
   |},
@@ -85,28 +85,28 @@ v3 = [
   {
     "kind": "ScalarField",
     "alias": null,
+    "name": "CONTACT_COMMUNICATION",
+    "args": null,
+    "storageKey": null
+  },
+  {
+    "kind": "ScalarField",
+    "alias": null,
+    "name": "CONTACT_LIST",
+    "args": null,
+    "storageKey": null
+  },
+  {
+    "kind": "ScalarField",
+    "alias": null,
+    "name": "ETHEREUM_TRANSACTION",
+    "args": null,
+    "storageKey": null
+  },
+  {
+    "kind": "ScalarField",
+    "alias": null,
     "name": "WEB_REQUEST",
-    "args": null,
-    "storageKey": null
-  },
-  {
-    "kind": "ScalarField",
-    "alias": null,
-    "name": "BLOCKCHAIN_SEND",
-    "args": null,
-    "storageKey": null
-  },
-  {
-    "kind": "ScalarField",
-    "alias": null,
-    "name": "COMMS_CONTACT",
-    "args": null,
-    "storageKey": null
-  },
-  {
-    "kind": "ScalarField",
-    "alias": null,
-    "name": "CONTACTS_READ",
     "args": null,
     "storageKey": null
   }
@@ -206,5 +206,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '83b32c2d3e579edfd51490bfcdcb138c';
+(node/*: any*/).hash = '30e8a428dc8a96767edffc72734fe3a6';
 module.exports = node;

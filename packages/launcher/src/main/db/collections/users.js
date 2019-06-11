@@ -17,17 +17,20 @@ import WalletProvider from '../../blockchain/WalletProvider'
 import InvitesHandler from '../../blockchain/InvitesHandler'
 
 import { COLLECTION_NAMES } from '../constants'
-import type { Collection, CollectionParams } from '../types'
+import type { Collection, CollectionParams, Populate } from '../types'
 import { generateKeyPair, generateLocalID } from '../utils'
 
 import schema, { type UserData } from '../schemas/user'
 import type { ContactData } from '../schemas/contact'
 import type { GenericProfile } from '../schemas/genericProfile'
 
+import type { ContactRequestDoc } from './contactRequests'
 import type { ContactDoc } from './contacts'
+import type { EthWalletHDDoc } from './ethWalletsHD'
+import type { EthWalletLedgerDoc } from './ethWalletsLedger'
 import type { UserAppVersionDoc } from './userAppVersions'
 
-export type UserDoc = UserData & {
+type UserMethods = {
   hasEthWallet(): boolean,
   getBzz(): Bzz,
   getEth(): EthClient,
@@ -54,24 +57,35 @@ export type UserDoc = UserData & {
   stopPublicProfileToggle(): void,
   startContactsSync(): rxjs$TeardownLogic,
   stopContactsSync(): void,
-  startSync(): rxjs$TeardownLogic,
-  stopSync(env: Environment): void,
+  startSync(env: Environment): rxjs$TeardownLogic,
+  stopSync(): void,
 }
 
-export type UsersCollection = Collection<UserDoc, UserData> & {
+type UserPopulate = Populate<{
+  contacts: Array<ContactDoc>,
+  contactRequests: Array<ContactRequestDoc>,
+  'ethWallets.hd': Array<EthWalletHDDoc>,
+  'ethWallets.ledger': Array<EthWalletLedgerDoc>,
+}>
+
+export type UserDoc = UserData & UserMethods & UserPopulate
+
+type UsersStatics = {
   create(data: {
     profile: GenericProfile,
     privateProfile?: boolean,
   }): Promise<UserDoc>,
-  startSync(): Promise<void>,
+  startSync(env: Environment): Promise<void>,
   stopSync(): void,
 }
 
-export default async (params: CollectionParams) => {
+export type UsersCollection = Collection<UserData, UserDoc> & UsersStatics
+
+export default async (params: CollectionParams): Promise<UsersCollection> => {
   const db = params.db
   const logger = params.logger.child({ collection: COLLECTION_NAMES.USERS })
 
-  return await db.collection({
+  return await db.collection<UserData, UserDoc, UserMethods, UsersStatics>({
     name: COLLECTION_NAMES.USERS,
     schema,
     statics: {
@@ -305,6 +319,18 @@ export default async (params: CollectionParams) => {
         const contact = await this.addContact(publicID, data, acceptSig)
         await this.removeContactRequest(request)
         return contact
+      },
+
+      async removeContact(id: string): Promise<void> {
+        await this.atomicSet(
+          'contacts',
+          this.contacts.filter(cid => cid !== id),
+        )
+        const contact = await db.contacts.findOne(id).exec()
+        if (contact != null) {
+          contact.stopSync()
+          await contact.remove()
+        }
       },
 
       async addContactRequest(id: string): Promise<void> {

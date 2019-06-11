@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash e2f5d89bd7bfbf871f9d7181f23408d8
+ * @relayHash e69239254252fe8ebb66ec97225a2e96
  */
 
 /* eslint-disable */
@@ -29,9 +29,9 @@ export type AppPermissionsRequirementsInput = {
   required: AppPermissionDefinitionsInput,
 };
 export type AppPermissionDefinitionsInput = {
-  BLOCKCHAIN_SEND?: ?boolean,
-  COMMS_CONTACT?: ?boolean,
-  CONTACTS_READ?: ?boolean,
+  CONTACT_COMMUNICATION?: ?boolean,
+  CONTACT_LIST?: ?boolean,
+  ETHEREUM_TRANSACTION?: ?boolean,
   WEB_REQUEST?: ?$ReadOnlyArray<?string>,
 };
 export type ManifestAuthorInput = {
@@ -40,12 +40,12 @@ export type ManifestAuthorInput = {
 };
 export type AppPermissionsSettingsInput = {
   permissionsChecked: boolean,
-  grants: PermissionGrantsInput,
+  grants: AppPermissionGrantsInput,
 };
-export type PermissionGrantsInput = {
-  BLOCKCHAIN_SEND?: ?boolean,
-  COMMS_CONTACT?: ?boolean,
-  CONTACTS_READ?: ?boolean,
+export type AppPermissionGrantsInput = {
+  CONTACT_COMMUNICATION?: ?boolean,
+  CONTACT_LIST?: ?boolean,
+  ETHEREUM_TRANSACTION?: ?boolean,
   WEB_REQUEST: WebRequestGrantInput,
 };
 export type WebRequestGrantInput = {

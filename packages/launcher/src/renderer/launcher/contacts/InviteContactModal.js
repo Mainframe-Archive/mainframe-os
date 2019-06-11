@@ -19,7 +19,7 @@ import type { InviteContactModal_contact as Contact } from './__generated__/Invi
 
 export type TransactionType = 'invite' | 'retrieveStake' | 'declineInvite'
 
-type Props = ContextProps & {
+type Props = {
   closeModal: () => void,
   contact: Contact,
   type: TransactionType,

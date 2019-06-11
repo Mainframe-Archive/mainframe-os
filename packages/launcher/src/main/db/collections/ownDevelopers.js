@@ -30,16 +30,21 @@ export type OwnDeveloperDoc = OwnDeveloperData & {
   stopSync(): void,
 }
 
-export type OwnDevelopersCollection = Collection<
-  OwnDeveloperDoc,
-  OwnDeveloperData,
-> & {
+type OwnDevelopersStatics = {
   create(data: { profile: GenericProfile }): Promise<OwnDeveloperDoc>,
   startSync(bzz: Bzz): Promise<void>,
   stopSync(): void,
 }
 
-export default async (params: CollectionParams) => {
+export type OwnDevelopersCollection = Collection<
+  OwnDeveloperData,
+  OwnDeveloperDoc,
+> &
+  OwnDevelopersStatics
+
+export default async (
+  params: CollectionParams,
+): Promise<OwnDevelopersCollection> => {
   const db = params.db
   const logger = params.logger.child({
     collection: COLLECTION_NAMES.OWN_DEVELOPERS,
