@@ -417,6 +417,7 @@ type OwnApp implements Node {
   versions: [OwnAppVersion!]!
   inProgressVersion: OwnAppVersion
   latestPublishedVersion: OwnAppVersion
+  viewerAppSettings: UserAppSettings
 }
 
 type OwnAppVersion {

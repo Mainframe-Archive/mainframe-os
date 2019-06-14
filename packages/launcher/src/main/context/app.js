@@ -1,51 +1,321 @@
 // @flow
 
-import type Bzz from '@erebos/api-bzz-node'
-import type { BrowserWindow } from 'electron'
+import { join } from 'path'
+import { format } from 'url'
+import StreamRPC from '@mainframe/rpc-stream'
+import type { BrowserWindow, WebContents } from 'electron'
+import type { Subscription } from 'rxjs'
 
+import {
+  APP_SANDBOXED_CHANNEL,
+  APP_TRUSTED_CHANNEL,
+  APP_TRUSTED_REQUEST_CHANNEL,
+} from '../../constants'
+import type { AppData, AppWindowSession } from '../../types'
+
+import type { UserAppSettingsDoc } from '../db/collections/userAppSettings'
 import type { UserDoc } from '../db/collections/users'
-import type { UserAppVersionDoc } from '../db/collections/userAppVersions'
-import type { DB } from '../db/types'
+import type { StrictPermissionsGrants } from '../db/schemas/appPermissionsGrants'
 import type { Logger } from '../logger'
+import { ElectronTransport } from '../rpc/ElectronTransport'
 
 import type { SystemContext } from './system'
 
+const PERMISSION_DENIED_METHOD = 'permission_denied'
+
+export type AppSessionParams = {
+  app: AppData,
+  isDevelopment: boolean,
+  settings: UserAppSettingsDoc,
+  user: UserDoc,
+}
+
+export class AppSession {
+  static async fromUserAppVersion(
+    system: SystemContext,
+    userAppVersionID: string,
+  ): Promise<AppSession> {
+    if (system.db == null) {
+      throw new Error('Database must be opened')
+    }
+
+    const userAppVersion = await system.db.user_app_versions
+      .findOne(userAppVersionID)
+      .exec()
+    if (userAppVersion == null) {
+      throw new Error('UserAppVersion not found')
+    }
+
+    const [app, settings, user] = await Promise.all([
+      userAppVersion.getAppData(),
+      userAppVersion.populate('settings'),
+      userAppVersion.populate('user'),
+    ])
+
+    return new AppSession({
+      app,
+      isDevelopment: false,
+      settings,
+      user,
+    })
+  }
+
+  static async fromUserOwnApp(
+    system: SystemContext,
+    userOwnAppID: string,
+  ): Promise<AppSession> {
+    if (system.db == null) {
+      throw new Error('Database must be opened')
+    }
+
+    const userOwnApp = await system.db.user_own_apps
+      .findOne(userOwnAppID)
+      .exec()
+    if (userOwnApp == null) {
+      throw new Error('UserOwnApp not found')
+    }
+
+    const [app, settings, user] = await Promise.all([
+      userOwnApp.getAppData(),
+      userOwnApp.populate('settings'),
+      userOwnApp.populate('user'),
+    ])
+
+    return new AppSession({
+      app,
+      isDevelopment: true,
+      settings,
+      user,
+    })
+  }
+
+  app: AppData
+  contentsURL: string
+  isDevelopment: boolean
+  permissions: StrictPermissionsGrants
+  publicID: string
+  settings: UserAppSettingsDoc
+  user: UserDoc
+
+  constructor(params: AppSessionParams) {
+    this.app = params.app
+    this.contentsURL = encodeURI(params.app.contentsPath)
+    this.permissions = params.settings.getPermissions()
+    this.settings = params.settings
+    this.user = params.user
+  }
+
+  toAppWindowSession(): AppWindowSession {
+    return {
+      app: {
+        contentsURL: format({
+          pathname: join(this.app.contentsPath, 'index.html'),
+          protocol: 'file:',
+          slashes: true,
+        }),
+        profile: this.app.profile,
+        publicID: this.app.publicID,
+      },
+      isDevelopment: this.isDevelopment,
+      partition: `persist:${this.app.publicID}/${this.user.localID}`,
+      permissions: this.permissions,
+      user: {
+        id: this.user.localID,
+        profile: this.user.profile,
+      },
+    }
+  }
+}
+
 export type ContextParams = {
-  db: DB,
-  logger: Logger,
+  session: AppSession,
   system: SystemContext,
-  userAppVersion: UserAppVersionDoc,
   window: BrowserWindow,
 }
 
 export class AppContext {
-  _bzz: ?Bzz
-  db: DB
+  _permissionDeniedID: ?string
+  _subscriptions: { [id: string]: Subscription }
   logger: Logger
+  sandbox: ?WebContents
+  session: AppSession
   system: SystemContext
-  userAppVersion: UserAppVersionDoc
+  trustedRPC: StreamRPC
   window: BrowserWindow
 
   constructor(params: ContextParams) {
-    this.db = params.db
-    this.logger = params.logger.child({
-      userAppVersionID: params.userAppVersion.localID,
-      userID: params.userAppVersion.user,
+    this.logger = params.system.logger.child({
+      context: 'app',
+      userID: params.session.user.localID,
     })
+    this.session = params.session
     this.system = params.system
-    this.userAppVersion = params.userAppVersion
+    this.trustedRPC = new StreamRPC(
+      new ElectronTransport(params.window, APP_TRUSTED_REQUEST_CHANNEL),
+    )
     this.window = params.window
+    this.logger.debug('App context created')
   }
 
-  async getUser(): Promise<UserDoc> {
-    return await this.userAppVersion.populate('user').exec()
-  }
+  handleSandboxWebRequest = async (request, callback) => {
+    try {
+      const url = new URL(request.url)
 
-  async getBzz(): Promise<Bzz> {
-    if (this._bzz == null) {
-      const user = await this.getUser()
-      this._bzz = user.getBzz()
+      // Allowing devtools requests
+      if (url.protocol === 'chrome-devtools:') {
+        callback({ cancel: false })
+        return
+      }
+
+      // Allowing files loaded from apps contents
+      if (url.protocol === 'file:') {
+        const isValidPath =
+          url.pathname != null &&
+          url.pathname.startsWith(this.session.contentsURL)
+        callback({ cancel: !isValidPath })
+        return
+      }
+
+      // Check domain validity
+      const domain = url.host
+      if (domain == null || domain.length === 0) {
+        this.notifyPermissionDenied({ key: 'WEB_REQUEST', domain })
+        callback({ cancel: true })
+        return
+      }
+
+      // Check if already granted
+      if (this.session.permissions.WEB_REQUEST.granted.includes(domain)) {
+        callback({ cancel: false })
+        return
+      }
+
+      // Check if already denied
+      if (this.session.permissions.WEB_REQUEST.denied.includes(domain)) {
+        this.notifyPermissionDenied({ key: 'WEB_REQUEST', domain })
+        callback({ cancel: true })
+        return
+      }
+
+      // Ask user for grant
+      const res = await this.trustedRPC.request('user_request', {
+        key: 'WEB_REQUEST',
+        domain,
+      })
+      const granted = res.granted ? 'granted' : 'denied'
+      if (
+        res.persist &&
+        !this.session.permissions.WEB_REQUEST[granted].includes(domain)
+      ) {
+        // Grant for session
+        this.session.permissions.WEB_REQUEST[granted].push(domain)
+        if (res.persist === 'always') {
+          // Grant for future sessions
+          await this.session.settings.setWebRequestPermission(granted, domain)
+        }
+      }
+
+      if (granted) {
+        callback({ cancel: false })
+      } else {
+        this.notifyPermissionDenied({ key: 'WEB_REQUEST', domain })
+        callback({ cancel: true })
+      }
+    } catch (err) {
+      this.logger.log({
+        level: 'error',
+        message: 'Failed to handle sandbox Web request',
+        error: err.toString(),
+        request,
+      })
+      callback({ cancel: true })
     }
-    return this._bzz
+  }
+
+  attachSandbox(sandbox: WebContents) {
+    this.sandbox = sandbox
+    sandbox.webRequest.onBeforeRequest([], this.handleSandboxWebRequest)
+  }
+
+  notifyTrusted(method: string, id: string, result?: Object = {}) {
+    this.logger.log({
+      level: 'debug',
+      message: 'Notify trusted channel',
+      method,
+      id,
+      result,
+    })
+    this.window.send(APP_TRUSTED_CHANNEL, {
+      jsonrpc: '2.0',
+      method,
+      params: { subscription: id, result },
+    })
+  }
+
+  notifyPermissionDenied(permission: { key: string, domain?: string }) {
+    const id = this._permissionDeniedID
+    if (id == null) {
+      this.logger.log({
+        level: 'warn',
+        message: 'Could not notify of permission denied: no subscription set',
+        permission,
+      })
+    } else {
+      this.notifyTrusted(PERMISSION_DENIED_METHOD, id, permission)
+    }
+  }
+
+  notifySandboxed(method: string, id: string, result?: Object = {}) {
+    const sandbox = this.sandbox
+    if (sandbox == null) {
+      this.logger.log({
+        level: 'warn',
+        message: 'No sandbox to notify',
+        method,
+        id,
+        result,
+      })
+    } else {
+      this.logger.log({
+        level: 'debug',
+        message: 'Notify sandbox channel',
+        method,
+        id,
+        result,
+      })
+      sandbox.send(APP_SANDBOXED_CHANNEL, {
+        jsonrpc: '2.0',
+        method,
+        params: { subscription: id, result },
+      })
+    }
+  }
+
+  addSubscription(id: string, subscription: Subscription): void {
+    this._subscriptions[id] = subscription
+  }
+
+  setPermissionDeniedSubscription(
+    id: string,
+    subscription: Subscription,
+  ): void {
+    this.addSubscription(id, subscription)
+    this._permissionDeniedID = id
+  }
+
+  removeSubscription(id: string): void {
+    const sub = this._subscriptions[id]
+    if (sub != null) {
+      sub.unsubscribe()
+      delete this._subscriptions[id]
+    }
+  }
+
+  clear() {
+    // $FlowFixMe: Object.values() losing type
+    Object.values(this._subscriptions).forEach((sub: Subscription) => {
+      sub.unsubscribe()
+    })
+    this._subscriptions = {}
   }
 }

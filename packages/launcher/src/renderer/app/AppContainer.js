@@ -15,13 +15,14 @@ import {
 import { Form, type FormSubmitPayload } from '@morpheus-ui/forms'
 import NetworkIcon from '@morpheus-ui/icons/NetworkSm'
 import CloseIcon from '@morpheus-ui/icons/Close'
-
 import styled from 'styled-components/native'
-import { EthClient } from '@mainframe/eth'
-import WalletIcon from '../UIComponents/Icons/Wallet'
 
+import type { AppWindowSession } from '../../types'
+
+import WalletIcon from '../UIComponents/Icons/Wallet'
 import THEME from '../theme'
-import rpc from './rpc'
+
+import rpc, { ethClient } from './rpc'
 import UserAlertView from './UserAlertView'
 
 declare var __static: string
@@ -56,14 +57,12 @@ export type AppSessionData = {
 }
 
 type Props = {
-  appSession: AppSessionData,
-  partition: string,
+  session: AppWindowSession,
 }
 
 type State = {
   urlInputValue: string,
   contentsPath: string,
-  bundleUrl: string,
   showUrlButtons?: ?boolean,
   ethNetwork: string,
   multipleWallets?: ?boolean,
@@ -121,40 +120,18 @@ const EthNetwork = styled.View`
   margin-left: 10px;
 `
 
-const ethClientProvider = {
-  send: async (method: string, params: Array<*>): Promise<*> => {
-    return rpc.ethSend({ method, params })
-  },
-}
-
-const subscriptions = {
-  networkChanged: rpc.ethNetworkChangedSubscription,
-  accountsChanged: rpc.ethAccountsChangedSubscription,
-}
-
 export default class AppContainer extends Component<Props, State> {
-  eth: EthClient
-
   constructor(props: Props) {
     super(props)
-    const bundleUrl = url.format({
-      pathname: path.join(props.appSession.app.contentsPath, 'index.html'),
-      protocol: 'file:',
-      slashes: true,
-    })
-    const cachedData = store.get(props.appSession.app.appID)
+    const cachedData = store.get(props.session.app.publicID)
     const customUrl = cachedData ? cachedData.customUrl : null
-    this.eth = new EthClient(ethClientProvider, null, subscriptions)
     this.state = {
-      bundleUrl,
-      urlInputValue: customUrl || bundleUrl,
-      contentsPath: customUrl || bundleUrl,
-      ethNetwork: this.eth.networkName,
+      urlInputValue: customUrl || props.session.app.contentsURL,
+      contentsPath: customUrl || props.session.app.contentsURL,
+      ethNetwork: ethClient.networkName,
     }
-    this.eth.on('networkChanged', () => {
-      this.setState({
-        ethNetwork: this.eth.networkName,
-      })
+    ethClient.on('networkChanged', () => {
+      this.setState({ ethNetwork: ethClient.networkName })
     })
   }
 
@@ -194,8 +171,8 @@ export default class AppContainer extends Component<Props, State> {
 
   resetUrl = () => {
     this.setState({
-      urlInputValue: this.state.bundleUrl,
-      contentsPath: this.state.bundleUrl,
+      urlInputValue: this.props.session.app.contentsURL,
+      contentsPath: this.props.session.app.contentsURL,
     })
     this.persistCustomUrl(null)
   }
@@ -208,7 +185,7 @@ export default class AppContainer extends Component<Props, State> {
   }
 
   persistCustomUrl(url: ?string) {
-    store.set(this.props.appSession.app.appID, {
+    store.set(this.props.session.app.publicID, {
       customUrl: url,
     })
   }
@@ -220,14 +197,9 @@ export default class AppContainer extends Component<Props, State> {
   // RENDER
 
   render() {
-    const { appSession } = this.props
-    if (!appSession) {
-      return <OuterContainer />
-    }
+    const { session } = this.props
 
-    const appUrl = this.state.contentsPath || this.state.bundleUrl
-
-    const urlBar = this.props.appSession.isDev ? (
+    const urlBar = session.isDevelopment ? (
       <URLContainer>
         <Form onSubmit={this.reloadContents}>
           <Text
@@ -258,7 +230,7 @@ export default class AppContainer extends Component<Props, State> {
         <OuterContainer>
           <Header>
             <TitleBar className="draggable">
-              <Text variant="TuiAppTitle">{appSession.app.manifest.name}</Text>
+              <Text variant="TuiAppTitle">{session.app.profile.name}</Text>
             </TitleBar>
             <ActionBar>
               <EthNetwork>
@@ -282,16 +254,15 @@ export default class AppContainer extends Component<Props, State> {
           </Header>
           <UserAlertView
             multipleWallets={this.state.multipleWallets}
-            ethClient={this.eth}
-            appSession={this.props.appSession}
+            session={session}
           />
           <webview
             id="sandbox-webview"
-            src={appUrl}
+            src={this.state.contentsPath || session.app.contentsURL}
             preload={PRELOAD_URL}
             style={{ flex: 1 }} // eslint-disable-line react-native/no-inline-styles
             sandboxed="true"
-            partition={this.props.partition}
+            partition={session.partition}
           />
         </OuterContainer>
       </MFThemeProvider>

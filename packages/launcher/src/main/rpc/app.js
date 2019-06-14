@@ -12,10 +12,16 @@ import {
   type WalletGetEthWalletsResult,
 } from '@mainframe/client'
 import { dialog } from 'electron'
-import type { Subscription as RxSubscription } from 'rxjs'
+import { fromEvent, type Subscription as RxSubscription } from 'rxjs'
 import * as mime from 'mime'
+import nanoid from 'nanoid'
 
-import { type AppContext, ContextSubscription } from '../contexts'
+import {
+  RPC_ETHEREUM_ACCOUNTS_CHANGED,
+  RPC_ETHEREUM_NETWORK_CHANGED,
+} from '../../constants'
+
+import type { AppContext } from '../context/app'
 import { withPermission } from '../permissions'
 import {
   getStorageManifestHash,
@@ -25,129 +31,138 @@ import {
 
 const STORAGE_KEY_PARAM = { type: 'string', pattern: /^([A-Za-z0-9_. =+-]+?)$/ }
 
-class CommsSubscription extends ContextSubscription<RxSubscription> {
-  constructor() {
-    super('comms_subscription')
-  }
-
-  async dispose() {
-    if (this.data != null) {
-      this.data.unsubscribe()
-    }
-  }
-}
-
-class EthNetworkSubscription extends ContextSubscription<RxSubscription> {
-  constructor() {
-    super('eth_network_subscription')
-  }
-
-  async dispose() {
-    if (this.data != null) {
-      this.data.unsubscribe()
-    }
-  }
-}
-
-class EthWalletSubscription extends ContextSubscription<RxSubscription> {
-  constructor() {
-    super('eth_accounts_subscription')
-  }
-
-  async dispose() {
-    if (this.data != null) {
-      this.data.unsubscribe()
-    }
-  }
-}
-
-class EthBlockchainSubscription extends ContextSubscription<RxSubscription> {
-  constructor(id: string) {
-    super('eth_blockchain_subscription', null, id)
-  }
-
-  async dispose() {
-    if (this.data != null) {
-      this.data.unsubscribe()
-    }
-  }
-}
-
 const sharedMethods = {
+  ethereum_send: async (
+    ctx: AppContext,
+    params: EthereumSendParams,
+  ): Promise<any> => {
+    return await ctx.session.user.getEth().send(params.method, params.params)
+  },
+
   wallet_getEthAccounts: async (ctx: AppContext): Promise<Array<string>> => {
-    // $FlowFixMe indexer property
-    const accounts = await ctx.client.wallet.getUserEthAccounts({
-      userID: ctx.appSession.user.localID,
-    })
-    if (
-      ctx.appSession.defaultEthAccount &&
-      accounts.includes(ctx.appSession.defaultEthAccount)
-    ) {
+    const accounts = await ctx.session.user.getEthAccounts()
+    const { defaultEthAccount } = ctx.session.settings
+    if (defaultEthAccount != null) {
       // Move default account to top
-      const defaultAccount = ctx.appSession.defaultEthAccount
-      accounts.splice(accounts.indexOf(defaultAccount), 1)
-      accounts.unshift(defaultAccount)
+      const accountIndex = accounts.indexOf(defaultEthAccount)
+      if (accountIndex !== -1) {
+        accounts.splice(accountIndex, 1)
+        accounts.unshift(defaultEthAccount)
+      }
     }
     return accounts
-  },
-  blockchain_ethSend: async (
-    ctx: AppContext,
-    params: BlockchainEthSendParams,
-  ): Promise<Object> => {
-    return ctx.client.blockchain.ethSend(params)
   },
 }
 
 export const sandboxed = {
   ...sharedMethods,
 
-  api_version: (ctx: AppContext) => ctx.client.apiVersion(),
+  ethereum_subscribe: async (
+    ctx: AppContext,
+    params: EthereumSubscribeParams,
+  ): Promise<{ id: string }> => {
+    const provider = ctx.session.user.getEth().web3Provider
+    if (provider.subscribe != null && provider.on != null) {
+      const subID = await provider.subscribe(
+        'eth_subscribe',
+        params.params[0],
+        params.params,
+      )
+      const subscription = fromEvent(provider, subID).subscribe(msg => {
+        if (msg.subscription === subID) {
+          ctx.notifySandboxed('eth_subscription', subID, msg)
+        }
+      })
+      ctx.addSubscription(subID, subscription)
+      return { id: subID }
+    }
+    throw new Error('Subscriptions not supported')
+  },
+
+  ethereum_subscribeAccountsChanged: async (
+    ctx: AppContext,
+  ): Promise<{ id: string }> => {
+    const id = nanoid()
+    const subscription = fromEvent(
+      ctx.session.user.getEth(),
+      'accountsChanged',
+    ).subscribe(event => {
+      ctx.notifySandboxed(RPC_ETHEREUM_ACCOUNTS_CHANGED, id, event)
+    })
+    ctx.addSubscription(id, subscription)
+    return { id }
+  },
+
+  ethereum_subscribeNetworkChanged: async (
+    ctx: AppContext,
+  ): Promise<{ id: string }> => {
+    const id = nanoid()
+    const subscription = fromEvent(
+      ctx.session.user.getEth(),
+      'networkChanged',
+    ).subscribe(event => {
+      ctx.notifySandboxed(RPC_ETHEREUM_NETWORK_CHANGED, id, event)
+    })
+    ctx.addSubscription(id, subscription)
+    return { id }
+  },
+
+  ethereum_unsubscribe: async (
+    ctx: AppContext,
+    params: { id: string },
+  ): Promise<void> => {
+    const provider = ctx.session.user.getEth().web3Provider
+    if (provider.unsubscribe != null) {
+      await provider.unsubscribe(params.id)
+    }
+    ctx.removeSubscription(params.id)
+  },
 
   // Blockchain
 
-  blockchain_ethSubscribe: async (
-    ctx: AppContext,
-    params: BlockchainEthSendParams,
-  ): Promise<Object> => {
-    const { subscription, id } = await ctx.client.blockchain.ethSubscribe(
-      params,
-    )
-    const sub = new EthBlockchainSubscription(id)
-    sub.data = subscription.subscribe(msg => {
-      ctx.notifySandboxed(sub.id, msg.result)
-    })
-    ctx.setSubscription(sub)
-    return sub.id
-  },
+  // blockchain_ethSubscribe: async (
+  //   ctx: AppContext,
+  //   params: BlockchainEthSendParams,
+  // ): Promise<Object> => {
+  //   const { subscription, id } = await ctx.client.blockchain.ethSubscribe(
+  //     params,
+  //   )
+  //   const sub = new EthBlockchainSubscription(id)
+  //   sub.data = subscription.subscribe(msg => {
+  //     ctx.notifySandboxed(sub.id, msg.result)
+  //   })
+  //   ctx.setSubscription(sub)
+  //   return sub.id
+  // },
 
-  blockchain_ethUnsubscribe: async (
-    ctx: AppContext,
-    params: EthUnsubscribeParams,
-  ): Promise<Object> => {
-    return ctx.client.blockchain.ethUnsubscribe(params)
-  },
+  // blockchain_ethUnsubscribe: async (
+  //   ctx: AppContext,
+  //   params: EthUnsubscribeParams,
+  // ): Promise<Object> => {
+  //   return ctx.client.blockchain.ethUnsubscribe(params)
+  // },
 
-  blockchain_subscribeNetworkChanged: async (
-    ctx: AppContext,
-  ): Promise<Object> => {
-    const subscription = await ctx.client.blockchain.subscribeNetworkChanged()
-    const sub = new EthNetworkSubscription()
-    sub.data = subscription.subscribe(msg => {
-      ctx.notifySandboxed(sub.id, msg)
-    })
-    ctx.setSubscription(sub)
-    return { id: sub.id }
-  },
-
-  wallet_subEthAccountsChanged: async (ctx: AppContext): Promise<Object> => {
-    const subscription = await ctx.client.wallet.subscribeEthAccountsChanged()
-    const sub = new EthWalletSubscription()
-    sub.data = subscription.subscribe(msg => {
-      ctx.notifySandboxed(sub.id, msg)
-    })
-    ctx.setSubscription(sub)
-    return { id: sub.id }
-  },
+  // blockchain_subscribeNetworkChanged: async (
+  //   ctx: AppContext,
+  // ): Promise<Object> => {
+  //   const subscription = await ctx.client.blockchain.subscribeNetworkChanged()
+  //   const sub = new EthNetworkSubscription()
+  //   sub.data = subscription.subscribe(msg => {
+  //     ctx.notifySandboxed(sub.id, msg)
+  //   })
+  //   ctx.setSubscription(sub)
+  //   return { id: sub.id }
+  // },
+  //
+  // wallet_subEthAccountsChanged: async (ctx: AppContext): Promise<Object> => {
+  //   const subscription = await ctx.client.wallet.subscribeEthAccountsChanged()
+  //   const sub = new EthWalletSubscription()
+  //   sub.data = subscription.subscribe(msg => {
+  //     ctx.notifySandboxed(sub.id, msg)
+  //   })
+  //   ctx.setSubscription(sub)
+  //   return { id: sub.id }
+  // },
 
   // Wallet
 
@@ -163,51 +178,51 @@ export const sandboxed = {
 
   // Comms
 
-  comms_publish: withPermission(
-    'COMMS_CONTACT',
-    async (
-      ctx: AppContext,
-      params: { contactID: string, key: string, value: Object },
-    ): Promise<void> => {
-      const appID = ctx.appSession.app.appID
-      const userID = ctx.appSession.user.id
-      return ctx.client.comms.publish({ ...params, appID, userID })
-    },
-  ),
+  // comms_publish: withPermission(
+  //   'COMMS_CONTACT',
+  //   async (
+  //     ctx: AppContext,
+  //     params: { contactID: string, key: string, value: Object },
+  //   ): Promise<void> => {
+  //     const appID = ctx.appSession.app.appID
+  //     const userID = ctx.appSession.user.id
+  //     return ctx.client.comms.publish({ ...params, appID, userID })
+  //   },
+  // ),
 
-  comms_subscribe: withPermission(
-    'COMMS_CONTACT',
-    async (
-      ctx: AppContext,
-      params: { contactID: string, key: string },
-    ): Promise<string> => {
-      const appID = ctx.appSession.app.appID
-      const userID = ctx.appSession.user.id
-      const subscription = await ctx.client.comms.subscribe({
-        ...params,
-        appID,
-        userID,
-      })
-      const sub = new CommsSubscription()
-      sub.data = subscription.subscribe(msg => {
-        ctx.notifySandboxed(sub.id, msg)
-      })
-      ctx.setSubscription(sub)
-      return sub.id
-    },
-  ),
-
-  comms_getSubscribable: withPermission(
-    'COMMS_CONTACT',
-    async (
-      ctx: AppContext,
-      params: { contactID: string },
-    ): Promise<Array<string>> => {
-      const appID = ctx.appSession.app.appID
-      const userID = ctx.appSession.user.id
-      return ctx.client.comms.getSubscribable({ ...params, appID, userID })
-    },
-  ),
+  // comms_subscribe: withPermission(
+  //   'COMMS_CONTACT',
+  //   async (
+  //     ctx: AppContext,
+  //     params: { contactID: string, key: string },
+  //   ): Promise<string> => {
+  //     const appID = ctx.appSession.app.appID
+  //     const userID = ctx.appSession.user.id
+  //     const subscription = await ctx.client.comms.subscribe({
+  //       ...params,
+  //       appID,
+  //       userID,
+  //     })
+  //     const sub = new CommsSubscription()
+  //     sub.data = subscription.subscribe(msg => {
+  //       ctx.notifySandboxed(sub.id, msg)
+  //     })
+  //     ctx.setSubscription(sub)
+  //     return sub.id
+  //   },
+  // ),
+  //
+  // comms_getSubscribable: withPermission(
+  //   'COMMS_CONTACT',
+  //   async (
+  //     ctx: AppContext,
+  //     params: { contactID: string },
+  //   ): Promise<Array<string>> => {
+  //     const appID = ctx.appSession.app.appID
+  //     const userID = ctx.appSession.user.id
+  //     return ctx.client.comms.getSubscribable({ ...params, appID, userID })
+  //   },
+  // ),
 
   // Contacts
 
@@ -376,6 +391,7 @@ export const trusted = {
   sub_createPermissionDenied: (ctx: AppContext): { id: string } => ({
     id: ctx.createPermissionDeniedSubscription(),
   }),
+
   sub_unsubscribe: {
     params: {
       id: LOCAL_ID_SCHEMA,

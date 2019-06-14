@@ -401,6 +401,14 @@ export const ownApp = new GraphQLObjectType({
       type: ownAppVersion,
       resolve: doc => doc.getLatestPublishedVersion(),
     },
+    viewerAppSettings: {
+      type: userAppSettings,
+      resolve: async (doc, args, ctx) => {
+        return await ctx.db.user_app_settings
+          .findOne({ ownApp: doc.localID, user: ctx.userID })
+          .exec()
+      },
+    },
   }),
 })
 

@@ -1,22 +1,22 @@
 // @flow
 
-export type PermissionsDefinitionsData = {
+export type PermissionsDefinitionsData = {|
   CONTACT_COMMUNICATION: ?boolean,
   CONTACT_LIST: ?boolean,
   ETHEREUM_TRANSACTION: ?boolean,
   WEB_REQUEST: ?Array<string>,
-}
+|}
 
-export type PermissionsRequirementsData = {
+export type PermissionsRequirementsData = {|
   required: ?PermissionsDefinitionsData,
   optional: ?PermissionsDefinitionsData,
-}
+|}
 
 export type PermissionsDefinitions = $Shape<PermissionsDefinitionsData>
-export type PermissionsRequirements = {
+export type PermissionsRequirements = {|
   required?: ?PermissionsDefinitions,
   optional?: ?PermissionsDefinitions,
-}
+|}
 
 const permissionsDefinitions = {
   title: 'web requests permissions grants',

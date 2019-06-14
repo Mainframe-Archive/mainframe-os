@@ -3,13 +3,13 @@
 import ethAddress from './ethAddress'
 import profile, { type GenericProfileData } from './genericProfile'
 
-export type PeerData = {
+export type PeerData = {|
   localID: string,
   publicFeed: string,
-  otherFeeds: Array<{ type: string, address: string }>,
+  otherFeeds: Array<{| type: string, address: string |}>,
   publicKey: ?string,
   profile: ?GenericProfileData,
-}
+|}
 
 export default {
   title: 'peer',

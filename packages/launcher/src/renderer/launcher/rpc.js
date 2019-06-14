@@ -1,5 +1,6 @@
 // @flow
 
+import { EthClient } from '@mainframe/eth'
 import electronRPC from '@mainframe/rpc-electron'
 import type { ExecutionResult } from 'graphql'
 import { Observable } from 'rxjs'
@@ -7,7 +8,13 @@ import { Observable } from 'rxjs'
 import { LAUNCHER_CHANNEL } from '../../constants'
 import type { DBOpenResult, UserCreateRequestParams } from '../../types'
 
-const rpc = electronRPC(LAUNCHER_CHANNEL)
+const client = electronRPC(LAUNCHER_CHANNEL)
+
+export const ethClient = new EthClient({
+  send: async (method: string, params: Array<*>): Promise<*> => {
+    return client.request('blockchain_ethSend', { method, params })
+  },
+})
 
 export default {
   log(levelOrInfo: string | Object, message?: string) {
@@ -15,29 +22,29 @@ export default {
       typeof levelOrInfo === 'string'
         ? { level: levelOrInfo, message }
         : levelOrInfo
-    rpc.notify('log', info)
+    client.notify('log', info)
   },
 
   async openLauncher(userID?: ?string): Promise<void> {
-    await rpc.request('launcher_open', { userID })
+    await client.request('launcher_open', { userID })
   },
 
   // DB
 
   async createDB(password: string, save?: boolean = false): Promise<void> {
-    await rpc.request('db_create', { password, save })
+    await client.request('db_create', { password, save })
   },
   async openDB(
     password: string,
     save?: boolean = false,
   ): Promise<DBOpenResult> {
-    return await rpc.request('db_open', { password, save })
+    return await client.request('db_open', { password, save })
   },
 
   // User
 
   async createUser(params: UserCreateRequestParams): Promise<string> {
-    return await rpc.request('user_create', params)
+    return await client.request('user_create', params)
   },
 
   // GraphQL
@@ -46,7 +53,7 @@ export default {
     query: string,
     variables?: ?Object,
   ): Promise<ExecutionResult> {
-    return await rpc.request('graphql_query', { query, variables })
+    return await client.request('graphql_query', { query, variables })
   },
 
   graphqlSubscribe: (
@@ -60,19 +67,19 @@ export default {
       if (subscription == null) {
         unsubscribed = true
       } else {
-        rpc.request('graphql_unsubscribe', { id: subscription })
+        client.request('graphql_unsubscribe', { id: subscription })
       }
     }
 
-    rpc.request('graphql_subscribe', { query, variables }).then(id => {
+    client.request('graphql_subscribe', { query, variables }).then(id => {
       if (unsubscribed) {
-        return rpc.request('graphql_unsubscribe', { id })
+        return client.request('graphql_unsubscribe', { id })
       }
       subscription = id
     })
 
     return Observable.create(observer => {
-      rpc.subscribe({
+      client.subscribe({
         next: msg => {
           if (
             msg.method === 'graphql_subscription_update' &&
@@ -84,7 +91,7 @@ export default {
               try {
                 observer.next(result)
               } catch (error) {
-                rpc.notify('log', {
+                client.notify('log', {
                   level: 'error',
                   message: 'Failed to apply subscription update',
                   error,
@@ -110,29 +117,29 @@ export default {
   // -- old stuff below --
 
   // // Apps
-  // createApp: (appInfo: AppCreateParams) => rpc.request('app_create', appInfo),
-  // getApps: () => rpc.request('app_getAll'),
+  // createApp: (appInfo: AppCreateParams) => client.request('app_create', appInfo),
+  // getApps: () => client.request('app_getAll'),
   // installApp: (
   //   manifest: Object,
   //   userID: ID,
   //   permissionsSettings: AppUserPermissionsSettings,
   // ) => {
-  //   return rpc.request('app_install', { manifest, userID, permissionsSettings })
+  //   return client.request('app_install', { manifest, userID, permissionsSettings })
   // },
   // launchApp: (appID: ID | string, userID: ID | string) => {
-  //   return rpc.request('app_launch', { appID, userID })
+  //   return client.request('app_launch', { appID, userID })
   // },
   // loadManifest: (hash: string) => {
-  //   return rpc.request('app_loadManifest', { hash })
+  //   return client.request('app_loadManifest', { hash })
   // },
-  // removeApp: (appID: ID) => rpc.request('app_remove', { appID }),
-  // removeOwnApp: (appID: ID) => rpc.request('app_removeOwn', { appID }),
+  // removeApp: (appID: ID) => client.request('app_remove', { appID }),
+  // removeOwnApp: (appID: ID) => client.request('app_removeOwn', { appID }),
   // setAppUserPermissionsSettings: (
   //   appID: string,
   //   userID: string,
   //   settings: AppUserPermissionsSettings,
   // ) => {
-  //   return rpc.request('app_setUserPermissionsSettings', {
+  //   return client.request('app_setUserPermissionsSettings', {
   //     appID,
   //     userID,
   //     settings,
@@ -141,20 +148,20 @@ export default {
   //
   // // Identity
   // createUserIdentity: (data: Object) => {
-  //   return rpc.request('identity_createUser', { profile: data })
+  //   return client.request('identity_createUser', { profile: data })
   // },
   // createDeveloperIdentity: (data: Object) => {
-  //   return rpc.request('identity_createDeveloper', { profile: data })
+  //   return client.request('identity_createDeveloper', { profile: data })
   // },
-  // getOwnUserIdentities: () => rpc.request('identity_getOwnUsers'),
-  // getOwnDevIdentities: () => rpc.request('identity_getOwnDevelopers'),
+  // getOwnUserIdentities: () => client.request('identity_getOwnUsers'),
+  // getOwnDevIdentities: () => client.request('identity_getOwnDevelopers'),
   //
   // // GraphQL
   // graphqlQuery: (
   //   query: string,
   //   variables?: ?Object,
   // ): Promise<GraphQLQueryResult> => {
-  //   return rpc.request('graphql_query', { query, variables })
+  //   return client.request('graphql_query', { query, variables })
   // },
   // graphqlSubscription: (
   //   query: string,
@@ -167,19 +174,19 @@ export default {
   //     if (subscription == null) {
   //       unsubscribed = true
   //     } else {
-  //       rpc.request('sub_unsubscribe', { id: subscription })
+  //       client.request('sub_unsubscribe', { id: subscription })
   //     }
   //   }
   //
-  //   rpc.request('graphql_subscription', { query, variables }).then(id => {
+  //   client.request('graphql_subscription', { query, variables }).then(id => {
   //     if (unsubscribed) {
-  //       return rpc.request('sub_unsubscribe', { id })
+  //       return client.request('sub_unsubscribe', { id })
   //     }
   //     subscription = id
   //   })
   //
   //   return Observable.create(observer => {
-  //     rpc.subscribe({
+  //     client.subscribe({
   //       next: msg => {
   //         if (
   //           msg.method === 'graphql_subscription_update' &&
@@ -212,40 +219,40 @@ export default {
   // },
   //
   // // Vault
-  // getVaultsData: () => rpc.request('vault_getVaultsData'),
+  // getVaultsData: () => client.request('vault_getVaultsData'),
   // createVault: (password: string, label: string) => {
-  //   return rpc.request('vault_create', { password, label })
+  //   return client.request('vault_create', { password, label })
   // },
   // openVault: (path: string, password: string) => {
-  //   return rpc.request('vault_open', { path, password })
+  //   return client.request('vault_open', { path, password })
   // },
   //
   // // Wallets & Blockchain
   ethSend: async (params: Object) => {
-    return rpc.request('blockchain_ethSend', params)
+    return client.request('blockchain_ethSend', params)
   },
   getLedgerAccounts: (pageNum: number, legacyPath: boolean) => {
-    return rpc.request('wallet_getLedgerAccounts', { pageNum, legacyPath })
+    return client.request('wallet_getLedgerAccounts', { pageNum, legacyPath })
   },
   // ethereumRequest: (params: Object) => {
-  //   return rpc.request('blockchain_ethSend', params)
+  //   return client.request('blockchain_ethSend', params)
   // },
   getInviteTXDetails: (params: Object) => {
-    return rpc.request('blockchain_getInviteTXDetails', params)
+    return client.request('blockchain_getInviteTXDetails', params)
   },
   sendInviteApprovalTX: (params: Object) => {
-    return rpc.request('blockchain_sendInviteApprovalTX', params)
+    return client.request('blockchain_sendInviteApprovalTX', params)
   },
 
   sendInviteTX: (params: Object) => {
-    return rpc.request('blockchain_sendInviteTX', params)
+    return client.request('blockchain_sendInviteTX', params)
   },
 
   sendDeclineInviteTX: (params: { requestID: string }) => {
-    return rpc.request('blockchain_sendDeclineInviteTX', params)
+    return client.request('blockchain_sendDeclineInviteTX', params)
   },
 
   sendWithdrawInviteTX: (params: { contactID: string }) => {
-    return rpc.request('blockchain_sendWithdrawInviteTX', params)
+    return client.request('blockchain_sendWithdrawInviteTX', params)
   },
 }

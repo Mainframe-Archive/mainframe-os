@@ -3,12 +3,12 @@
 import keyPair, { type KeyPairData } from './keyPair'
 import profile, { type GenericProfileData } from './genericProfile'
 
-export type OwnDeveloperData = {
+export type OwnDeveloperData = {|
   localID: string,
   keyPair: KeyPairData,
   profile: GenericProfileData,
   profileHash: ?string,
-}
+|}
 
 export default {
   title: 'own app developer',

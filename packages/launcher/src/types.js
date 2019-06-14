@@ -1,7 +1,7 @@
 // @flow
 
-import type Client, { ID, AppOpenResult } from '@mainframe/client'
-import type { BrowserWindow } from 'electron'
+import type { StrictPermissionsGrants } from './main/db/schemas/appPermissionsGrants'
+import type { GenericProfileData } from './main/db/schemas/genericProfile'
 
 // UI
 
@@ -12,41 +12,43 @@ export type Style =
   | StyleObject
   | Array<void | number | StyleObject>
 
-// Vault
+// App
 
-export type VaultPath = string
-export type VaultLabel = string
-
-export type VaultsData = {
-  vaults: { [VaultPath]: VaultLabel },
-  defaultVault: VaultPath,
-  vaultOpen: boolean,
+export type AppData = {
+  contentsPath: string,
+  profile: GenericProfileData,
+  publicID: string,
 }
 
-// Main
-
-export type AppSession = AppOpenResult
-
-export type AppSessions = {
-  [appID: ID]: {
-    [userID: string]: AppSession,
+export type AppWindowSession = {
+  app: {
+    contentsURL: string,
+    profile: GenericProfileData,
+    publicID: string,
+  },
+  isDevelopment: boolean,
+  partition: string,
+  permissions: StrictPermissionsGrants,
+  user: {
+    id: string,
+    profile: GenericProfileData,
   },
 }
 
 // Request
 
-export type ClientResponse = {
-  id: string,
-  error?: Object,
-  result?: Object,
-}
+// export type ClientResponse = {
+//   id: string,
+//   error?: Object,
+//   result?: Object,
+// }
 
-export type RequestContext = {
-  request: Object,
-  appSession: AppSession,
-  window: BrowserWindow,
-  client: Client,
-}
+// export type RequestContext = {
+//   request: Object,
+//   appSession: AppSession,
+//   window: BrowserWindow,
+//   client: Client,
+// }
 
 // RPC
 

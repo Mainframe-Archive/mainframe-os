@@ -11,7 +11,8 @@ export const COLLECTION_NAMES = {
   OWN_APPS: 'own_apps',
   OWN_DEVELOPERS: 'own_developers',
   PEERS: 'peers',
-  USERS: 'users',
   USER_APP_SETTINGS: 'user_app_settings',
   USER_APP_VERSIONS: 'user_app_versions',
+  USER_OWN_APPS: 'user_own_apps',
+  USERS: 'users',
 }

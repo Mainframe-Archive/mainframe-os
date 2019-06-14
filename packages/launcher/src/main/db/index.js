@@ -18,6 +18,7 @@ import createOwnDevelopersCollection from './collections/ownDevelopers'
 import createPeersCollection from './collections/peers'
 import createUserAppSettingsCollection from './collections/userAppSettings'
 import createUserAppVersionsCollection from './collections/userAppVersions'
+import createUserOwnAppsCollection from './collections/userOwnApps'
 import createUsersCollection from './collections/users'
 import type { DB, DBParams } from './types'
 
@@ -50,6 +51,7 @@ export const createDB = async (params: DBParams): Promise<DB> => {
     createPeersCollection(collectionParams),
     createUserAppSettingsCollection(collectionParams),
     createUserAppVersionsCollection(collectionParams),
+    createUserOwnAppsCollection(collectionParams),
     createUsersCollection(collectionParams),
   ])
 

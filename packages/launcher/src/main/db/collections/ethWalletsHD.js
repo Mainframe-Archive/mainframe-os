@@ -13,7 +13,7 @@ import { generateLocalID } from '../utils'
 import schema, { type EthWalletHDData } from '../schemas/ethWalletHD'
 import type { UserDoc } from './users'
 
-type EthWalletHDMethods = {
+type EthWalletHDMethods = {|
   getSeed(): Promise<Buffer>,
   getHDKey(): Promise<HDKey>,
   getRoot(): Promise<HDKey>,
@@ -22,14 +22,14 @@ type EthWalletHDMethods = {
   safeRemove(): Promise<void>,
   signTransaction(params: WalletEthSignTxParams): Promise<string>,
   sign(params: WalletSignDataParams): Promise<string>,
-}
+|}
 
 export type EthWalletHDDoc = EthWalletHDData & EthWalletHDMethods
 
-type EthWalletsHDStatics = {
+type EthWalletsHDStatics = {|
   create(data: { name: string, mnemonic?: ?string }): Promise<EthWalletHDDoc>,
   getByAddress(address: string): Promise<EthWalletHDDoc | null>,
-}
+|}
 
 export type EthWalletsHDCollection = Collection<
   EthWalletHDData,

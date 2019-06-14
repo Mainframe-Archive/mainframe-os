@@ -35,6 +35,3 @@ export class ElectronTransport extends AnonymousSubject<Object> {
     return subscription
   }
 }
-
-export default (window: BrowserWindow, channel?: ?string) =>
-  new ElectronTransport(window, channel)

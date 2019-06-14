@@ -13,7 +13,7 @@ export type ContactInviteStakeState =
   | 'reclaimed'
   | 'seized'
 
-export type ContactInviteData = {
+export type ContactInviteData = {|
   chain: ?number,
   inviteTX: string,
   fromAddress: string,
@@ -23,9 +23,9 @@ export type ContactInviteData = {
   stakeAmount: string,
   stakeState: ContactInviteStakeState,
   stakeReclaimedTX: ?string,
-}
+|}
 
-export type ContactData = {
+export type ContactData = {|
   localID: string,
   peer: string,
   keyPair: KeyPairData,
@@ -35,7 +35,7 @@ export type ContactData = {
   firstContactFeedCreated: boolean,
   invite: ?ContactInviteData,
   acceptanceSignature: ?string,
-}
+|}
 
 const invite = {
   title: 'contact invite',

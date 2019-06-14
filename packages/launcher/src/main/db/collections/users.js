@@ -30,7 +30,7 @@ import type { EthWalletHDDoc } from './ethWalletsHD'
 import type { EthWalletLedgerDoc } from './ethWalletsLedger'
 import type { UserAppVersionDoc } from './userAppVersions'
 
-type UserMethods = {
+type UserMethods = {|
   hasEthWallet(): boolean,
   getBzz(): Bzz,
   getEth(): EthClient,
@@ -43,12 +43,20 @@ type UserMethods = {
   checkEthConnection(): void,
   observeContactAdded(): Observable<ContactDoc>,
   addContact(publicID: string, data?: $Shape<ContactData>): Promise<ContactDoc>,
+  addContactFromRequest(request: ContactRequestDoc): Promise<void>,
+  addContactRequest(id: string): Promise<void>,
   addEthHDWallet(id: string): Promise<void>,
   addEthLedgerWallet(id: string): Promise<void>,
   setProfileEthAddress(address: string): Promise<void>,
-  findHDWallet(address: string): Promise<Object>,
-  findLedgerWallet(address: string): Promise<Object>,
-  findWalletOfAddress(address: string): Promise<Object>,
+  findContactByPeer(peerID: string): Promise<?ContactDoc>,
+  findContactRequestByPeer(peerID: string): Promise<?ContactRequestDoc>,
+  removeContact(id: string): Promise<void>,
+  removeContactRequest(request: Object): Promise<void>,
+  findHDWallet(address: string): Promise<?EthWalletHDDoc>,
+  findLedgerWallet(address: string): Promise<?EthWalletLedgerDoc>,
+  findWalletOfAddress(
+    address: string,
+  ): Promise<EthWalletHDDoc | EthWalletLedgerDoc | void>,
   signEthTransaction(params: Object): Promise<string>,
   signEthData(params: { address: string, data: string }): Promise<string>,
   startPublicProfilePublication(): rxjs$TeardownLogic,
@@ -57,9 +65,10 @@ type UserMethods = {
   stopPublicProfileToggle(): void,
   startContactsSync(): rxjs$TeardownLogic,
   stopContactsSync(): void,
+  startInvitesSync(env: Environment): void,
   startSync(env: Environment): rxjs$TeardownLogic,
   stopSync(): void,
-}
+|}
 
 type UserPopulate = Populate<{
   contacts: Array<ContactDoc>,
@@ -70,14 +79,14 @@ type UserPopulate = Populate<{
 
 export type UserDoc = UserData & UserMethods & UserPopulate
 
-type UsersStatics = {
+type UsersStatics = {|
   create(data: {
     profile: GenericProfile,
     privateProfile?: boolean,
   }): Promise<UserDoc>,
   startSync(env: Environment): Promise<void>,
   stopSync(): void,
-}
+|}
 
 export type UsersCollection = Collection<UserData, UserDoc> & UsersStatics
 
@@ -305,7 +314,7 @@ export default async (params: CollectionParams): Promise<UsersCollection> => {
         return contact
       },
 
-      async addContactFromRequest(request: Object): Promise<void> {
+      async addContactFromRequest(request: ContactRequestDoc): Promise<void> {
         logger.log({
           level: 'debug',
           message: 'Adding contact from request',
@@ -345,12 +354,14 @@ export default async (params: CollectionParams): Promise<UsersCollection> => {
         await request.remove()
       },
 
-      async findContactRequestByPeer(peerID: string): Promise<?Object> {
+      async findContactRequestByPeer(
+        peerID: string,
+      ): Promise<?ContactRequestDoc> {
         const requests = await this.populate('contactRequests')
         return requests.find(r => r.peer === peerID)
       },
 
-      async findContactByPeer(peerID: string): Promise<?Object> {
+      async findContactByPeer(peerID: string): Promise<?ContactDoc> {
         const contacts = await this.populate('contacts')
         return contacts.find(c => c.peer === peerID)
       },
@@ -534,7 +545,7 @@ export default async (params: CollectionParams): Promise<UsersCollection> => {
         }
       },
 
-      startInvitesSync(env: Environment) {
+      startInvitesSync(env: Environment): void {
         if (this.invitesSync != null) {
           logger.log({
             level: 'warn',

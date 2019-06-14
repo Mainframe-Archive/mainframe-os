@@ -7,7 +7,7 @@ import { COLLECTION_NAMES } from '../constants'
 import keyPair, { type KeyPairData } from './keyPair'
 import profile, { type GenericProfileData } from './genericProfile'
 
-export type UserData = {
+export type UserData = {|
   localID: string,
   keyPair: KeyPairData,
   profile: GenericProfileData,
@@ -15,13 +15,13 @@ export type UserData = {
   privateProfile: boolean,
   contacts: Array<string>,
   contactRequests: Array<string>,
-  ethWallets: {
+  ethWallets: {|
     hd: Array<string>,
     ledger: Array<string>,
-  },
+  |},
   ethURL: string,
   bzzURL: string,
-}
+|}
 
 export default {
   title: 'local user schema',

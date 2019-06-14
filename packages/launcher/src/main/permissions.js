@@ -1,9 +1,12 @@
 // @flow
+
 import url from 'url'
 import { type Session } from 'electron'
+// TODO: replace this usage
 import { checkPermission } from '@mainframe/app-permissions'
 import type { PermissionKey } from '@mainframe/app-permissions'
-import type { AppContext } from './contexts'
+
+import type { AppContext } from './context/app'
 
 export const userDeniedError = (key: PermissionKey) => {
   return new Error(`User denied permission: ${key}`)

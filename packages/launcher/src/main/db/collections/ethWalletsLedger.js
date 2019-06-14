@@ -8,13 +8,13 @@ import { generateLocalID } from '../utils'
 
 import schema, { type EthWalletLedgerData } from '../schemas/ethWalletLedger'
 
-type EthWalletLedgerMethods = {
+type EthWalletLedgerMethods = {|
   addAccounts(indexes: Array<number>): Promise<void>,
-}
+|}
 
 export type EthWalletLedgerDoc = EthWalletLedgerData & EthWalletLedgerMethods
 
-type EthWalletLedgersStatics = {
+type EthWalletLedgersStatics = {|
   create(data: {
     name: string,
     firstAddress: string,
@@ -25,7 +25,7 @@ type EthWalletLedgersStatics = {
     legacyPath?: boolean,
   }): Promise<EthWalletLedgerDoc>,
   getByAddress(address: string): Promise<EthWalletLedgerDoc | null>,
-}
+|}
 
 export type EthWalletsLedgerCollection = Collection<
   EthWalletLedgerData,

@@ -20,7 +20,7 @@ import type { GenericProfile } from '../schemas/genericProfile'
 
 import type { OwnAppDoc } from './ownApps'
 
-export type OwnDeveloperDoc = OwnDeveloperData & {
+type OwnDeveloperMethods = {|
   getPublicID(): string,
   getPublicFeed(): OwnFeed,
   getApps(): Promise<Array<OwnAppDoc>>,
@@ -28,13 +28,15 @@ export type OwnDeveloperDoc = OwnDeveloperData & {
   stopPublicProfilePublication(): void,
   startSync(bzz: Bzz): rxjs$TeardownLogic,
   stopSync(): void,
-}
+|}
 
-type OwnDevelopersStatics = {
+export type OwnDeveloperDoc = OwnDeveloperData & OwnDeveloperMethods
+
+type OwnDevelopersStatics = {|
   create(data: { profile: GenericProfile }): Promise<OwnDeveloperDoc>,
   startSync(bzz: Bzz): Promise<void>,
   stopSync(): void,
-}
+|}
 
 export type OwnDevelopersCollection = Collection<
   OwnDeveloperData,
@@ -50,7 +52,12 @@ export default async (
     collection: COLLECTION_NAMES.OWN_DEVELOPERS,
   })
 
-  return await db.collection({
+  return await db.collection<
+    OwnDeveloperData,
+    OwnDeveloperDoc,
+    OwnDeveloperMethods,
+    OwnDevelopersStatics,
+  >({
     name: COLLECTION_NAMES.OWN_DEVELOPERS,
     schema,
     statics: {

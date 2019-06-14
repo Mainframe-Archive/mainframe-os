@@ -1,23 +1,28 @@
 // @flow
 
+import { EthClient } from '@mainframe/eth'
 import electronRPC from '@mainframe/rpc-electron'
 import { Observable } from 'rxjs'
 
-import { APP_TRUSTED_CHANNEL } from '../../constants'
+import {
+  APP_TRUSTED_CHANNEL,
+  RPC_ETHEREUM_ACCOUNTS_CHANGED,
+  RPC_ETHEREUM_NETWORK_CHANGED,
+} from '../../constants'
 
-const rpc = electronRPC(APP_TRUSTED_CHANNEL)
+const client = electronRPC(APP_TRUSTED_CHANNEL)
 
 const createSubscription = async (
   rpcMethod,
   subMethod,
 ): Promise<Observable<*>> => {
-  const { id } = await rpc.request(rpcMethod)
+  const { id } = await client.request(rpcMethod)
   const unsubscribe = () => {
-    return rpc.request('sub_unsubscribe', { id })
+    return client.request('sub_unsubscribe', { id })
   }
 
   return Observable.create(observer => {
-    rpc.subscribe({
+    client.subscribe({
       next: msg => {
         if (
           msg.method === subMethod &&
@@ -49,46 +54,57 @@ const createSubscription = async (
   })
 }
 
+const provider = {
+  send: async (method: string, params: Array<*>): Promise<*> => {
+    return client.request('blockchain_ethSend', { method, params })
+  },
+}
+
+const subscriptions = {
+  accountsChanged: async () => {
+    return await createSubscription(
+      'ethereum_subscribeAccountsChanged',
+      'ethereum_accounts_changed',
+    )
+  },
+  networkChanged: async () => {
+    return await createSubscription(
+      'ethereum_subscribeNetworkChanged',
+      'ethereum_network_changed',
+    )
+  },
+}
+
+export const ethClient = new EthClient(provider, null, subscriptions)
+
 export default {
   // Subscriptions
 
-  createPermissionDeniedSubscription: async () =>
-    createSubscription('sub_createPermissionDenied', 'permission_denied'),
-
-  ethNetworkChangedSubscription: async () =>
-    createSubscription(
-      'blockchain_subscribeNetworkChanged',
-      'eth_network_subscription',
-    ),
-
-  ethAccountsChangedSubscription: async () =>
-    createSubscription(
-      'wallet_subEthAccountsChanged',
-      'eth_accounts_subscription',
-    ),
+  createPermissionDeniedSubscription: async () => {
+    return await createSubscription(
+      'sub_createPermissionDenied',
+      'permission_denied',
+    )
+  },
 
   // Wallets
 
   getUserEthWallets: async () => {
-    return rpc.request('wallet_getUserEthWallets')
+    return await client.request('wallet_getUserEthWallets')
   },
 
   getUserDefaultWallet: async () => {
-    const accounts = await rpc.request('wallet_getEthAccounts')
+    const accounts = await client.request('wallet_getEthAccounts')
     return accounts[0]
   },
 
   selectDefaultWallet: async () => {
-    return rpc.request('wallet_selectDefault')
-  },
-
-  ethSend: async (params: Object) => {
-    return rpc.request('blockchain_ethSend', params)
+    return await client.request('wallet_selectDefault')
   },
 
   // Contacts
 
   getUserContacts: async (userID: string) => {
-    return rpc.request('contacts_getUserContacts', { userID })
+    return await client.request('contacts_getUserContacts', { userID })
   },
 }

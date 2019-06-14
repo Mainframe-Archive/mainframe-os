@@ -14,11 +14,12 @@ import type { OwnDevelopersCollection } from './collections/ownDevelopers'
 import type { PeersCollection } from './collections/peers'
 import type { UserAppSettingsCollection } from './collections/userAppSettings'
 import type { UserAppVersionsCollection } from './collections/userAppVersions'
+import type { UserOwnAppsCollection } from './collections/userOwnApps'
 import type { UsersCollection } from './collections/users'
 
-export type Populate<T> = {
+export type Populate<T> = {|
   populate: <K: $Keys<T>>(field: K) => Promise<$ElementType<T, K>>,
-}
+|}
 
 export type Collection<DataType, DocType = DataType> = {
   _docType: DocType,
@@ -41,6 +42,7 @@ export type Collections = {|
   peers: PeersCollection,
   user_app_settings: UserAppSettingsCollection,
   user_app_versions: UserAppVersionsCollection,
+  user_own_apps: UserOwnAppsCollection,
   users: UsersCollection,
 |}
 

@@ -7,8 +7,7 @@ import styled from 'styled-components/native'
 
 import { MFT_TOKEN_ADDRESSES } from '../../../constants'
 
-import ethClient from '../ethClient'
-import rpc from '../rpc'
+import rpc, { ethClient } from '../rpc'
 import WalletIcon from '../wallets/WalletIcon'
 
 import Loader from '../../UIComponents/Loader'

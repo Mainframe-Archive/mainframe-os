@@ -8,7 +8,7 @@ import React, { Component } from 'react'
 import styled from 'styled-components/native'
 import { Text, Button, Checkbox } from '@morpheus-ui/core'
 import { hexToUtf8, isHex } from 'web3-utils'
-import { type EthClient, truncateAddress } from '@mainframe/eth'
+import { truncateAddress } from '@mainframe/eth'
 
 import type { Subscription } from 'rxjs'
 import type {
@@ -19,6 +19,7 @@ import type {
 import ContactsIcon from '@morpheus-ui/icons/ContactsFilledMd'
 
 import { APP_TRUSTED_REQUEST_CHANNEL } from '../../constants'
+import type { AppWindowSession } from '../../types'
 
 import BellIcon from '../UIComponents/Icons/BellIcon'
 import WalletIcon from '../UIComponents/Icons/Wallet'
@@ -29,7 +30,6 @@ import ContactPickerView, { type SelectedContactIDs } from './ContactPickerView'
 import WalletPickerView from './WalletPickerView'
 
 import rpc from './rpc'
-import type { AppSessionData } from './AppContainer'
 
 type ContactSelectParams = {
   multi: boolean,
@@ -63,9 +63,8 @@ type PermissionDeniedNotif = {
 }
 
 type Props = {
-  appSession: AppSessionData,
-  ethClient: EthClient,
   multipleWallets?: ?boolean,
+  session: AppWindowSession,
 }
 
 type PendingRequest = {
@@ -221,24 +220,20 @@ export default class UserAlertView extends Component<Props, State> {
     const notifications = await rpc.createPermissionDeniedSubscription()
     this._permissionDeniedSubscription = notifications.subscribe(
       (data: PermissionDeniedNotif) => {
-        this.setState(
-          ({ permissionDeniedNotifs }) => ({
-            permissionDeniedNotifs: [...permissionDeniedNotifs, data],
-          }),
-          () => {
-            setTimeout(() => {
-              this.setState(({ permissionDeniedNotifs: notifs }) => {
-                const index = notifs.indexOf(data)
-                if (index > -1) {
-                  notifs.splice(index, 1)
-                  return {
-                    permissionDeniedNotifs: notifs,
-                  }
-                }
-              })
-            }, 3000)
-          },
-        )
+        this.setState(({ permissionDeniedNotifs }) => ({
+          permissionDeniedNotifs: [...permissionDeniedNotifs, data],
+        }))
+        setTimeout(() => {
+          this.setState(({ permissionDeniedNotifs: notifs }) => {
+            const index = notifs.indexOf(data)
+            if (index > -1) {
+              notifs.splice(index, 1)
+              return {
+                permissionDeniedNotifs: notifs,
+              }
+            }
+          })
+        }, 3000)
       },
     )
   }
@@ -430,10 +425,7 @@ export default class UserAlertView extends Component<Props, State> {
       !params || !params.BLOCKCHAIN_SEND ? (
         <Text>Invalid transaction data</Text>
       ) : (
-        <WalletTxRequestView
-          transaction={params.BLOCKCHAIN_SEND}
-          ethClient={this.props.ethClient}
-        />
+        <WalletTxRequestView transaction={params.BLOCKCHAIN_SEND} />
       )
     return (
       <>
@@ -462,7 +454,6 @@ export default class UserAlertView extends Component<Props, State> {
 
   renderContactPicker(requestID: string, request: Request) {
     const { params } = request
-    const { id } = this.props.appSession.user
     const multi =
       params && params.CONTACTS_SELECT ? params.CONTACTS_SELECT.multi : false
     return (
@@ -472,7 +463,7 @@ export default class UserAlertView extends Component<Props, State> {
           <ContactsIcon width={26} height={24} />
         </TitleContainer>
         <ContactPickerView
-          userID={id}
+          userID={this.props.session.user.id}
           multiSelect={multi}
           onReject={() => this.declinePermission(requestID)}
           onSelectedContacts={contacts =>
@@ -512,9 +503,8 @@ export default class UserAlertView extends Component<Props, State> {
         </TitleContainer>
         <ContentContainer>
           <Text color="#FFF" size={13}>
-            {`${
-              this.props.appSession.app.manifest.name
-            } is requesting access to ${permissionLabel}.`}
+            {`${this.props.session.app.profile.name ||
+              'App'} is requesting access to ${permissionLabel}.`}
           </Text>
           <Checkbox
             variant="TrustedUI"
@@ -564,9 +554,8 @@ export default class UserAlertView extends Component<Props, State> {
           </TitleContainer>
           <ContentContainer>
             <Text color="#FFF" size={13}>
-              {`${
-                this.props.appSession.app.manifest.name
-              } is asking for permission to perform an unknown request`}
+              {`${this.props.session.app.profile.name ||
+                'App'} is asking for permission to perform an unknown request`}
             </Text>
             <ButtonsContainer>
               <Button

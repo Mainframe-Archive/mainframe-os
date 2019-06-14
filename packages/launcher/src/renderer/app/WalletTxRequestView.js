@@ -2,16 +2,12 @@
 
 import React, { Component } from 'react'
 import { hexToNumberString, fromWei } from 'web3-utils'
-import {
-  decodeTransactionData,
-  type DecodedTxResult,
-  type EthClient,
-} from '@mainframe/eth'
+import { decodeTransactionData, type DecodedTxResult } from '@mainframe/eth'
 
 import styled from 'styled-components/native'
 import { Text } from '@morpheus-ui/core'
 
-import rpc from './rpc'
+import rpc, { ethClient } from './rpc'
 
 type Props = {
   transaction: {
@@ -23,7 +19,6 @@ type Props = {
     gasPrice: string,
     gas: string,
   },
-  ethClient: EthClient,
 }
 
 type State = {
@@ -91,7 +86,7 @@ export default class WalletTxRequestView extends Component<Props, State> {
   }
 
   async attemptToReadData() {
-    const { transaction, ethClient } = this.props
+    const { transaction } = this.props
     const txData = transaction.data
     if (txData) {
       try {

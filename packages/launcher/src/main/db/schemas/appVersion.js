@@ -6,13 +6,13 @@ import manifest, { type AppManifestData } from './appManifest'
 
 export type AppInstallationState = 'pending' | 'downloading' | 'failed' | 'done'
 
-export type AppVersionData = {
+export type AppVersionData = {|
   localID: string,
   app: string,
   developer: string,
   manifest: AppManifestData,
   installationState: AppInstallationState,
-}
+|}
 
 export default {
   title: 'app version',

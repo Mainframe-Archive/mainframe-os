@@ -9,18 +9,18 @@ import type { GenericProfile } from '../schemas/genericProfile'
 
 import type { PeerDoc } from './peers'
 
-type ContactRequestMethods = {
+type ContactRequestMethods = {|
   getPublicID(): Promise<string>,
   getProfile(): Promise<GenericProfile>,
-}
+|}
 
 export type ContactRequestDoc = ContactRequestData &
   ContactRequestMethods &
   Populate<{ peer: PeerDoc }>
 
-type ContactRequestsStatics = {
+type ContactRequestsStatics = {|
   create(data: $Shape<ContactRequestData>): Promise<ContactRequestDoc>,
-}
+|}
 
 export type ContactRequestsCollection = Collection<
   ContactRequestData,

@@ -4,7 +4,7 @@ import { COLLECTION_NAMES } from '../constants'
 
 import ethAddress from './ethAddress'
 
-export type ContactRequestData = {
+export type ContactRequestData = {|
   localID: string,
   peer: string,
   ethNetwork: string,
@@ -13,7 +13,7 @@ export type ContactRequestData = {
   senderAddress: string,
   stakeAmount: ?string,
   rejectedTXHash: ?string,
-}
+|}
 
 export default {
   title: 'contact request',

@@ -18,13 +18,13 @@ import schema, { type PeerData } from '../schemas/peer'
 
 import type { UserDoc } from './users'
 
-export type FirstContactData = {
+export type FirstContactData = {|
   userAddress: string,
   peerAddress: string,
   sharedKey: Buffer,
-}
+|}
 
-export type PeerDoc = PeerData & {
+type PeerMethods = {|
   getPublicID(): string,
   getPublicKey(): ?string,
   getFirstContactData(user: UserDoc): Promise<FirstContactData>,
@@ -32,21 +32,28 @@ export type PeerDoc = PeerData & {
   stopPublicFeedSubscription(): void,
   startSync(bzz: Bzz): rxjs$TeardownLogic,
   stopSync(): void,
-}
+|}
 
-type PeersStatics = {
+export type PeerDoc = PeerData & PeerMethods
+
+type PeersStatics = {|
   createFromID(bzz: Bzz, publicID: string): Promise<PeerDoc>,
   findByPublicID(publicID: string): Promise<PeerDoc | null>,
   startSync(bzz: Bzz): Promise<void>,
   stopSync(): void,
-}
+|}
 
 export type PeersCollection = Collection<PeerData, PeerDoc> & PeersStatics
 
 export default async (params: CollectionParams): Promise<PeersCollection> => {
   const logger = params.logger.child({ collection: COLLECTION_NAMES.PEERS })
 
-  return await params.db.collection({
+  return await params.db.collection<
+    PeerData,
+    PeerDoc,
+    PeerMethods,
+    PeersStatics,
+  >({
     name: COLLECTION_NAMES.PEERS,
     schema,
     statics: {
@@ -106,7 +113,7 @@ export default async (params: CollectionParams): Promise<PeersCollection> => {
         )
       },
 
-      async stopSync() {
+      stopSync() {
         if (this._sync != null) {
           logger.debug('Stop collection sync')
           this._sync.unsubscribe()

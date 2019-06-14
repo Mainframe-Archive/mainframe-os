@@ -2,12 +2,12 @@
 
 import { COLLECTION_NAMES } from '../constants'
 
-export type UserAppVersionData = {
+export type UserAppVersionData = {|
   localID: string,
   user: string,
   appVersion: string,
   settings: string,
-}
+|}
 
 export default {
   title: 'user app version',

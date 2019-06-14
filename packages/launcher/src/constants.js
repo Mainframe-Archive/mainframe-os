@@ -19,3 +19,6 @@ export const MFT_TOKEN_ADDRESSES = {
   ropsten: '0xa46f1563984209fe47f8236f8b01a03f03f957e4',
   mainnet: '0xdf2c7238198ad8b389666574f2d8bc411a4b7428',
 }
+
+export const RPC_ETHEREUM_ACCOUNTS_CHANGED = 'ethereum_accounts_changed'
+export const RPC_ETHEREUM_NETWORK_CHANGED = 'ethereum_network_changed'

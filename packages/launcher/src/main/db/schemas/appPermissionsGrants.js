@@ -1,6 +1,6 @@
 // @flow
 
-export type PermissionsGrantsData = {
+export type PermissionsGrantsData = {|
   CONTACT_COMMUNICATION: ?boolean,
   CONTACT_LIST: ?boolean,
   ETHEREUM_TRANSACTION: ?boolean,
@@ -8,17 +8,19 @@ export type PermissionsGrantsData = {
     granted: ?Array<string>,
     denied: ?Array<string>,
   },
-}
+|}
 
-export type PermissionsGrants = {
-  CONTACT_COMMUNICATION?: ?boolean,
-  CONTACT_LIST?: ?boolean,
-  ETHEREUM_TRANSACTION?: ?boolean,
-  WEB_REQUEST: ?{
-    granted?: ?Array<string>,
-    denied?: ?Array<string>,
+export type PermissionsGrants = $Shape<PermissionsGrantsData>
+
+export type StrictPermissionsGrants = {|
+  CONTACT_COMMUNICATION: boolean,
+  CONTACT_LIST: boolean,
+  ETHEREUM_TRANSACTION: boolean,
+  WEB_REQUEST: {
+    granted: Array<string>,
+    denied: Array<string>,
   },
-}
+|}
 
 export default {
   title: 'app permissions grants',

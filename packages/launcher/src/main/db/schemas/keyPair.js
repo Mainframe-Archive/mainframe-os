@@ -1,9 +1,9 @@
 // @flow
 
-export type KeyPairData = {
+export type KeyPairData = {|
   privateKey: string,
   publicKey: string,
-}
+|}
 
 export default {
   title: 'hex-encoded secp256k1 key pair',

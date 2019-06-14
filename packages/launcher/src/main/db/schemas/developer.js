@@ -3,12 +3,12 @@
 import ethAddress from './ethAddress'
 import profile, { type GenericProfileData } from './genericProfile'
 
-export type DeveloperData = {
+export type DeveloperData = {|
   localID: string,
   publicFeed: string,
   publicKey: ?string,
   profile: ?GenericProfileData,
-}
+|}
 
 export default {
   title: 'developer',

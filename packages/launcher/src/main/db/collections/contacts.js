@@ -39,7 +39,7 @@ export type ContactConnectionState =
   | 'sending_blockchain'
   | 'sent_blockchain'
 
-type ContactMethods = {
+type ContactMethods = {|
   getConnectionState(): ContactConnectionState,
   getPrivateID(): string,
   getPublicKey(): ?string,
@@ -56,16 +56,16 @@ type ContactMethods = {
   stopStateToggle(): void,
   startSync(bzz: Bzz): rxjs$TeardownLogic,
   stopSync(): void,
-}
+|}
 
 export type ContactDoc = ContactData &
   ContactMethods &
   Populate<{ peer: PeerDoc }>
 
-type ContactsStatics = {
+type ContactsStatics = {|
   create(data: $Shape<ContactData>): Promise<ContactDoc>,
   findByPeerID(peer: string): Promise<Array<ContactDoc>>,
-}
+|}
 
 export type ContactsCollection = Collection<ContactData, ContactDoc> &
   ContactsStatics

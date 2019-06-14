@@ -9,21 +9,21 @@ import bzzHash from './bzzHash'
 import profile, { type GenericProfileData } from './genericProfile'
 import keyPair, { type KeyPairData } from './keyPair'
 
-export type OwnAppVersionData = {
+export type OwnAppVersionData = {|
   version: string,
   contentsHash: ?string,
   versionHash: ?string,
   permissions: PermissionsRequirementsData,
-}
+|}
 
-export type OwnAppData = {
+export type OwnAppData = {|
   localID: string,
   developer: string,
   keyPair: KeyPairData,
   profile: GenericProfileData,
   contentsPath: string,
   versions: Array<OwnAppVersionData>,
-}
+|}
 
 const appVersion = {
   title: 'own app version',

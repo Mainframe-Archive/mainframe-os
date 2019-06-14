@@ -10,10 +10,10 @@ import schema, { type AppData } from '../schemas/app'
 import type { AppVersionDoc } from './appVersions'
 import type { DeveloperDoc } from './developers'
 
-type AppMethods = {
+type AppMethods = {|
   getPublicID(): string,
   getVersions(): Promise<Array<AppVersionDoc>>,
-}
+|}
 
 export type AppDoc = AppData &
   AppMethods &

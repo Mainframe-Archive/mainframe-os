@@ -175,8 +175,11 @@ app.on('activate', () => {
 // Window lifecycle events
 
 ipcMain.on('window-exception', (event, error) => {
-  // TODO: use the right context logger for better trace
-  logger.error(`Window exception: ${error.message}`)
+  const ctx =
+    system.getLauncherContext(event.sender) ||
+    system.getAppContext(event.sender)
+  const windowLogger = ctx ? ctx.logger : logger
+  windowLogger.error(`Window exception: ${error.message}`)
 })
 
 ipcMain.on('window-opened', async event => {
@@ -188,25 +191,21 @@ ipcMain.on('window-opened', async event => {
         route: await launcherContext.getInitialRoute(),
       },
     })
+    return
   }
 
-  // TODO: handle apps
+  const appContext = system.getAppContext(event.sender)
+  if (appContext != null) {
+    event.sender.send('window-start', {
+      type: 'app',
+      initialProps: {
+        session: appContext.session.toAppWindowSession(),
+      },
+    })
+    return
+  }
 
-  // const window = BrowserWindow.fromWebContents(event.sender)
-  // if (window === launcherWindow) {
-  //   window.webContents.send('start', { type: 'launcher' })
-  // } else {
-  //   const appContext = contextsByWindow.get(window)
-  //   if (appContext != null) {
-  //     window.webContents.send('start', {
-  //       type: 'app',
-  //       appSession: appContext.appSession,
-  //       partition: `persist:${appContext.appSession.app.appID}/${
-  //         appContext.appSession.user.id
-  //       }`,
-  //     })
-  //   }
-  // }
+  logger.error('Context not found for Window opened')
 })
 
 ipcMain.on('window-ready', event => {

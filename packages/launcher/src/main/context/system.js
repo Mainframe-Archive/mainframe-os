@@ -9,9 +9,9 @@ import { createDB } from '../db'
 import type { DB } from '../db/types'
 import type { Environment } from '../environment'
 import type { Logger } from '../logger'
-import { createLauncherWindow } from '../windows'
+import { createAppWindow, createLauncherWindow } from '../windows'
 
-import { AppContext } from './app'
+import { AppContext, AppSession } from './app'
 import { LauncherContext } from './launcher'
 import { UserContext } from './user'
 
@@ -23,6 +23,9 @@ export type ContextParams = {
 }
 
 export class SystemContext {
+  _apps: { [id: string]: AppContext } = {}
+  _appsBySandboxContents: WeakMap<WebContents, string> = new WeakMap()
+  _appsByTrustedContents: WeakMap<WebContents, string> = new WeakMap()
   _launchers: { [id: string]: LauncherContext } = {}
   _launchersByContents: WeakMap<WebContents, string> = new WeakMap()
   _resolveDB: (db: DB) => void
@@ -214,7 +217,53 @@ export class SystemContext {
 
   // Contexts and windows
 
-  // TODO: similar logic for apps
+  getAppContext(idOrContents: string | WebContents): ?AppContext {
+    const id =
+      typeof idOrContents === 'string'
+        ? idOrContents
+        : this._appsByTrustedContents.get(idOrContents) ||
+          this._appsBySandboxContents.get(idOrContents)
+    if (id != null) {
+      return this._apps[id]
+    }
+  }
+
+  createAppContext(id: string, session: AppSession): AppContext {
+    const existing = this._apps[id]
+    if (existing != null) {
+      return existing
+    }
+
+    const ctx = new AppContext({
+      session,
+      system: this,
+      window: createAppWindow(),
+    })
+
+    this._apps[id] = ctx
+    this._appsByTrustedContents.set(window.webContents, id)
+
+    window.webContents.on('did-attach-webview', (event, webContents) => {
+      webContents.on('destroyed', () => {
+        this._appsBySandboxContents.delete(webContents)
+        ctx.sandbox = null
+      })
+      this._appsBySandboxContents.set(webContents, id)
+      ctx.attachSandbox(webContents)
+    })
+
+    return ctx
+  }
+
+  async openAppVersion(userAppVersionID: string): Promise<AppContext> {
+    const session = await AppSession.fromUserAppVersion(this, userAppVersionID)
+    return this.createAppContext(userAppVersionID, session)
+  }
+
+  async openOwnApp(userOwnAppID: string): Promise<AppContext> {
+    const session = await AppSession.fromUserOwnApp(this, userOwnAppID)
+    return this.createAppContext(userOwnAppID, session)
+  }
 
   getLauncherContext(idOrContents: string | WebContents): ?LauncherContext {
     const id =

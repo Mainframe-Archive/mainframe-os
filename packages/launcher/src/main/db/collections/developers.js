@@ -7,9 +7,9 @@ import schema, { type DeveloperData } from '../schemas/developer'
 
 import type { AppDoc } from './apps'
 
-type DeveloperMethods = {
+type DeveloperMethods = {|
   getApps(): Promise<Array<AppDoc>>,
-}
+|}
 
 export type DeveloperDoc = DeveloperData & DeveloperMethods
 

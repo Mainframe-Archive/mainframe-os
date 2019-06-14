@@ -8,10 +8,10 @@ import schema, { type AppVersionData } from '../schemas/appVersion'
 import type { AppDoc } from './apps'
 import type { DeveloperDoc } from './developers'
 
-type AppVersionMethods = {
+type AppVersionMethods = {|
   getPublicID(): Promise<string>,
   getUpdate(): Promise<AppVersionDoc | null>, // eslint-disable-line no-use-before-define
-}
+|}
 
 export type AppVersionDoc = AppVersionData &
   AppVersionMethods &

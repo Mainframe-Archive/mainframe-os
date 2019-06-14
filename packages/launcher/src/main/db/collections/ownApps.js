@@ -19,13 +19,13 @@ import type { GenericProfile } from '../schemas/genericProfile'
 
 import type { OwnDeveloperDoc } from './ownDevelopers'
 
-export type CreateOwnAppData = {
+export type CreateOwnAppData = {|
   contentsPath: string,
   developer: string,
   permissions: PermissionsRequirements,
   profile: GenericProfile,
   version: string,
-}
+|}
 
 export type AppDetails = {
   contentsPath?: ?string,
@@ -33,7 +33,7 @@ export type AppDetails = {
   version?: ?string,
 }
 
-type OwnAppMethods = {
+type OwnAppMethods = {|
   getPublicID(): string,
   getPublicFeed(): OwnFeed,
   getLatestPublishedVersion(): ?OwnAppVersionData,
@@ -43,15 +43,15 @@ type OwnAppMethods = {
   setPermissionsRequirements(
     permissions: PermissionsRequirements,
   ): Promise<void>,
-}
+|}
 
 export type OwnAppDoc = OwnAppData &
   OwnAppMethods &
   Populate<{ developer: OwnDeveloperDoc }>
 
-type OwnAppsStatics = {
+type OwnAppsStatics = {|
   create(data: CreateOwnAppData): Promise<OwnAppDoc>,
-}
+|}
 
 export type OwnAppsCollection = Collection<OwnAppData, OwnAppDoc> &
   OwnAppsStatics

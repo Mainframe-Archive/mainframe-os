@@ -21,6 +21,7 @@ import {
   ethLedgerWallet,
   ownApp,
   ownDeveloper,
+  userAppSettings,
   viewerField,
 } from './objects'
 
@@ -669,11 +670,16 @@ const createAppMutation = mutationWithClientMutationId({
         version: args.version,
         permissions: args.permissionsRequirements,
       })
+      const userAppSettings = await ctx.db.user_app_settings.createFor(
+        ctx.userID,
+        app,
+      )
       ctx.logger.log({
         level: 'debug',
         message: 'CreateApp mutation complete',
         args,
         appID: app.localID,
+        userAppSettingsID: userAppSettings.localID,
       })
       return { app }
     } catch (err) {
