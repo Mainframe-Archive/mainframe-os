@@ -4,15 +4,8 @@ import { createReadStream } from 'fs'
 import { Readable } from 'stream'
 import type { ListResult } from '@erebos/api-bzz-base'
 import getStream from 'get-stream'
-import {
-  LOCAL_ID_SCHEMA,
-  type BlockchainEthSendParams,
-  type ContactsGetUserContactsResult,
-  type EthUnsubscribeParams,
-  type WalletGetEthWalletsResult,
-} from '@mainframe/client'
 import { dialog } from 'electron'
-import { fromEvent, type Subscription as RxSubscription } from 'rxjs'
+import { fromEvent } from 'rxjs'
 import * as mime from 'mime'
 import nanoid from 'nanoid'
 
@@ -29,12 +22,20 @@ import {
   uploadStream,
 } from '../storage'
 
-const STORAGE_KEY_PARAM = { type: 'string', pattern: /^([A-Za-z0-9_. =+-]+?)$/ }
+const LOCAL_ID_PARAM = {
+  type: 'string',
+  length: 21, // nanoid generates 21-chars long strings
+}
+
+const STORAGE_KEY_PARAM = {
+  type: 'string',
+  pattern: /^([A-Za-z0-9_. =+-]+?)$/,
+}
 
 const sharedMethods = {
   ethereum_send: async (
     ctx: AppContext,
-    params: EthereumSendParams,
+    params: { method: string, params?: ?Array<any> },
   ): Promise<any> => {
     return await ctx.session.user.getEth().send(params.method, params.params)
   },
@@ -59,13 +60,13 @@ export const sandboxed = {
 
   ethereum_subscribe: async (
     ctx: AppContext,
-    params: EthereumSubscribeParams,
+    params: { method: string, params?: ?Array<any> },
   ): Promise<{ id: string }> => {
     const provider = ctx.session.user.getEth().web3Provider
     if (provider.subscribe != null && provider.on != null) {
       const subID = await provider.subscribe(
         'eth_subscribe',
-        params.params[0],
+        params.method,
         params.params,
       )
       const subscription = fromEvent(provider, subID).subscribe(msg => {
@@ -118,62 +119,20 @@ export const sandboxed = {
     ctx.removeSubscription(params.id)
   },
 
-  // Blockchain
-
-  // blockchain_ethSubscribe: async (
-  //   ctx: AppContext,
-  //   params: BlockchainEthSendParams,
-  // ): Promise<Object> => {
-  //   const { subscription, id } = await ctx.client.blockchain.ethSubscribe(
-  //     params,
-  //   )
-  //   const sub = new EthBlockchainSubscription(id)
-  //   sub.data = subscription.subscribe(msg => {
-  //     ctx.notifySandboxed(sub.id, msg.result)
-  //   })
-  //   ctx.setSubscription(sub)
-  //   return sub.id
-  // },
-
-  // blockchain_ethUnsubscribe: async (
-  //   ctx: AppContext,
-  //   params: EthUnsubscribeParams,
-  // ): Promise<Object> => {
-  //   return ctx.client.blockchain.ethUnsubscribe(params)
-  // },
-
-  // blockchain_subscribeNetworkChanged: async (
-  //   ctx: AppContext,
-  // ): Promise<Object> => {
-  //   const subscription = await ctx.client.blockchain.subscribeNetworkChanged()
-  //   const sub = new EthNetworkSubscription()
-  //   sub.data = subscription.subscribe(msg => {
-  //     ctx.notifySandboxed(sub.id, msg)
-  //   })
-  //   ctx.setSubscription(sub)
-  //   return { id: sub.id }
-  // },
-  //
-  // wallet_subEthAccountsChanged: async (ctx: AppContext): Promise<Object> => {
-  //   const subscription = await ctx.client.wallet.subscribeEthAccountsChanged()
-  //   const sub = new EthWalletSubscription()
-  //   sub.data = subscription.subscribe(msg => {
-  //     ctx.notifySandboxed(sub.id, msg)
-  //   })
-  //   ctx.setSubscription(sub)
-  //   return { id: sub.id }
-  // },
-
   // Wallet
 
   wallet_signEthTx: withPermission(
     'BLOCKCHAIN_SEND',
-    (ctx: AppContext, params: any) => ctx.client.wallet.signTransaction(params),
+    async (ctx: AppContext, params: any) => {
+      return await ctx.session.user.signEthTransaction(params)
+    },
   ),
 
   wallet_signEthData: withPermission(
     'BLOCKCHAIN_SIGN',
-    (ctx: AppContext, params: any) => ctx.client.wallet.sign(params),
+    async (ctx: AppContext, params: { address: string, data: string }) => {
+      return await ctx.session.user.signEthData(params)
+    },
   ),
 
   // Comms
@@ -394,7 +353,7 @@ export const trusted = {
 
   sub_unsubscribe: {
     params: {
-      id: LOCAL_ID_SCHEMA,
+      id: LOCAL_ID_PARAM,
     },
     handler: (ctx: AppContext, params: { id: string }): void => {
       ctx.removeSubscription(params.id)
