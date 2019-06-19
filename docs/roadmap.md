@@ -14,9 +14,11 @@ and to power the platform with **MFT**. This in turn will lead to greater **Free
 In pursuit of these goals, we have designed a rich and full-featured user experience,
 integrated with various Web3 infrastructure and services, developed and standardized low-level protocols,
 collaborated with the broader Web3 community, and at every layer carefully considered any tradeoffs and
-compromises necessary to balance user experiexnce, available technology, and adherence to guiding values.
+compromises necessary to balance user experience, available technology, and adherence to guiding values.
+We continue to researched and discuss at length how to leverage Blockchain technology to _power the platform with MFT_,
+with the first contracts already implemented and more in development.
 We are proud of the first form released to developers at the end of 2018, the rough alpha version released to users
-in early 2019, and heads down working hard towards milestones as outlined below.
+in early 2019, and are currently heads down working hard towards future milestones as outlined below.
 
 Mainframe OS is a new way to experience the potential of decentralization.
 We are excited about all we've accomplished so far,
