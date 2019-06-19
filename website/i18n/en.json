@@ -34,6 +34,10 @@
       "readme": {
         "title": "readme"
       },
+      "roadmap": {
+        "title": "Mainframe OS Development Roadmap",
+        "sidebar_label": "roadmap"
+      },
       "sdk": {
         "title": "Mainframe SDK",
         "sidebar_label": "Mainframe SDK"
