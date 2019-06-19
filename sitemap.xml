@@ -9,6 +9,7 @@
 <url> <loc>https://docs.mainframeos.com/docs/platform</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://docs.mainframeos.com/docs/platform" /> </url>
 <url> <loc>https://docs.mainframeos.com/docs/publish</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://docs.mainframeos.com/docs/publish" /> </url>
 <url> <loc>https://docs.mainframeos.com/docs/readme</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://docs.mainframeos.com/docs/readme" /> </url>
+<url> <loc>https://docs.mainframeos.com/docs/roadmap</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://docs.mainframeos.com/docs/roadmap" /> </url>
 <url> <loc>https://docs.mainframeos.com/docs/sdk</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://docs.mainframeos.com/docs/sdk" /> </url>
 <url> <loc>https://docs.mainframeos.com/docs/troubleshooting</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://docs.mainframeos.com/docs/troubleshooting" /> </url>
 <url> <loc>https://docs.mainframeos.com/docs/unix</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://docs.mainframeos.com/docs/unix" /> </url>
