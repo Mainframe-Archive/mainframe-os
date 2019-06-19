@@ -15,8 +15,8 @@ In pursuit of these goals, we have designed a rich and full-featured user experi
 integrated with various Web3 infrastructure and services, developed and standardized low-level protocols,
 collaborated with the broader Web3 community, and at every layer carefully considered any tradeoffs and
 compromises necessary to balance user experience, available technology, and adherence to guiding values.
-We continue to researched and discuss at length how to leverage Blockchain technology to _power the platform with MFT_,
-with the first contracts already implemented and more in development.
+We continue to research and discuss at length how to leverage Blockchain technology to _power the platform with MFT_,
+with the first contracts already implemented and more already in development.
 We are proud of the first form released to developers at the end of 2018, the rough alpha version released to users
 in early 2019, and are currently heads down working hard towards future milestones as outlined below.
 
