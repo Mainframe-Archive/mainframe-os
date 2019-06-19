@@ -26,7 +26,7 @@ driven by the possibilities of the future,
 sobered by the scope of work required to get us there,
 and sustained by the community's continued support and enthusiasm for the project.
 
-For more information and answers to common questions about Mainfrmae OS, see the [FAQs](https://docs.mainframeos.com/docs/faq).
+For more information and answers to common questions about Mainframe OS, see the [FAQs](https://docs.mainframeos.com/docs/faq).
 
 
 ## Research projects
@@ -40,18 +40,18 @@ abstracting Ethereum gas and Swarm storage fees.
 ### Community-moderated apps marketplace
 Mainframe OS is a platform for building and using decentralized applications. So far there
 is very basic discovery (suggested apps list) to help users find and install new apps.
-This will be expanded in Alpha 4 and Beat 1 (see below) but will still be fairly limited in scope.
+This will be expanded in [Alpha 4](#q3-milestone-alpha-4) and [Beta 1](#q4-milestone-beta-1) but will still be fairly limited in scope and centralized.
 Ultimately the intent is to create a robust community-driven marketplace to reinforce our
 core value of decentralization. Needs to include rankings, incentivization, promotion, accountability,
 and rich filtering tools.
 
 ### App developer business models
-In line with the research on subscriptions and marketplace listed above, we are exploring
-possibilities for app developers to include subscriptions in their apps through the Mainframe SDK.
-We are also exploring ways to support paid apps and in-app purchases through the Mainframe SDK.
+In line with the research on [subscriptions](#blockchain-based-subscriptions) and [marketplace](#community-moderated-apps-marketplace), we are exploring
+how to facilitate business models for app developers through the Mainframe SDK, including potentially subscriptions,
+paid apps and in-app purchases.
 
 ### Future-proof data structure for Mainframe protocols
-This is very important as Mainframe OS moves out of the Alpha phase to into a Beta state.
+This is very important as Mainframe OS moves out of the Alpha phase into a Beta state.
 We'll need to support compatibility for the various protocols (contacts, identity, communications,
 storage, payments, etc) between versions, as well as backwards and forward compatibility
 with the data vault.
@@ -67,21 +67,21 @@ and facilitate data migrations necessary for future-proofing.
 
 ### Mainframe OS User Features
 
-- **Mainframe OS updates:** Notifications for available update and option for auto-installing updates.
-- **`mainframeOS://` protocol:** Ability to create links to auto-install/open
+- **Mainframe OS updates:** Notifications for available updates and option for auto-installing updates.
+- **`mainframeOS://` protocol:** Ability to create deep-links to auto-install/open
 Mainframe OS apps, or search for Mainframe OS users. Facilitates out-of-band sharing of apps and contacts which
 in turn helps expand access and awareness.
 - **Apps management:** Ability to delete apps, recall permissions, and view app and developer details.
 - **Apps Marketplace:** List of "Verified" Apps, as submitted by developers via smart contract. Basic verification of
-developer and source code by Mainframe. (See future goals for decentralized marketplace above.)
+developer and source code by Mainframe. (See future goals for [decentralized marketplace](#community-moderated-apps-marketplace).)
 - **Wallets management:** Support for adding and removing wallet addresses, revealing local HD wallet seeds,
-and support for new Ledger wallet derivation path
+and support for new Ledger wallet derivation path.
 
 ### Mainframe OS Development Tools
 
 - **App submission to marketplace (with MFT payment):** App developers can submit information and pay fee (using MFT)
-to have their app considered for inclusion in the list of Verified apps in the Apps Marketplace.
-- **App managmeent:** Support for additional app metadata (description, website, etc). Ability to
+to have their app reviewed for inclusion in the list of verified apps in the Apps Marketplace.
+- **App management:** Support for additional app information (description, website, etc). Ability to
 view and edit app details and permissions.
 - **Developer profile:** Enhanced developer identity linked to published apps including description, links to website or github,
 and list of other publsihed apps.
@@ -90,21 +90,21 @@ and list of other publsihed apps.
 
 - **Lendo:** New social lending platform to facilitate blockchain-based loans to Mainframe OS contacts.
 - **Compounded and CDP Pro:** UX updates
-- **Noted and Payment:** bugfixes and basic improvements
+- **Noted and Payment:** bug fixes and basic improvements
 
 
 ## Q4 Milestone: Beta 1
 
 ### Mainframe OS protocols & SDK APIs
 
-- **Communications:** Ability to send and receive private, asynchronous messages between Mainframe OS contacts
+- **Communications:** Ability to send and receive private, asynchronous messages between Mainframe OS contacts.
 - **Files:** Ability to upload, access, and manage encrypted files to the decentralized Swarm storage layer,
 including sharing with Mainframe OS contacts.
 
 ### Mainframe OS User Features
 
 - **Vault management:** Ability to backup user data to a specified location and restore from
-that file on a fresh installation or new device. Additional option to wipe data and start from fresh vault.
+that backup in a fresh installation or new device. Additional option to wipe data and start from fresh vault.
 - **Multiple user accounts:** Ability to create multiple Mainframe OS identities, including
 separate profile, wallets, contacts, applications, and user data.
 - **Apps discovery:** Ability to share apps with contacts - e.g. explicitly share single app
@@ -121,4 +121,16 @@ or authorize Mainframe OS to transfer funds from a Coinbase wallet.
 ### Mainframe apps
 
 - **Messenger:** Reference app to showcase new communications protocol and SDK APIs.
-- **File sharing:** Refernce app to showcase new user storage and file sharing capabilitiies.
+- **File sharing:** Reference app to showcase new user storage and file sharing capabilities.
+
+
+## Future Exploration
+We've got our hands full with all of the current development and research projects, but we're not forgetting about these important projects and will
+turn attention to them as soon as we can (or as soon as we must):
+
+- **Mobile version of Mainframe OS**
+- **Shared encryption**
+- **Group communications**
+- **Light-node integration for Ethereum & Swarm**
+- **Integration of Swarm incentivization**
+- **Decentralized database integration**
