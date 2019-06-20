@@ -128,6 +128,7 @@ or authorize Mainframe OS to transfer funds from a Coinbase wallet.
 We've got our hands full with all of the current development and research projects, but we're not forgetting about these important projects and will
 turn attention to them as soon as we can (or as soon as we must):
 
+- **Usage tracking for platform and dapps**
 - **Mobile version of Mainframe OS**
 - **Shared encryption**
 - **Group communications**
