@@ -7,13 +7,13 @@ sidebar_label: roadmap
 updated June 2019
 
 ## Background
-Mainframe OS has been developed over the past year with the unwavering core values of **Privacy and Decentralization**.
+Mainframe OS has been developed over the past 18 months with the unwavering core values of **Privacy and Decentralization**.
 The goal is to provide easy access to developing, discovering, and using **Unstoppable Dapps** that likewise reinforce common values,
 and to power the platform with **MFT**. This in turn will lead to greater **Freedom, Independence, and Empowerment** for all users.
 
 In pursuit of these goals, we have designed a rich and full-featured user experience,
-integrated with various Web3 infrastructure and services, developed and standardized low-level protocols,
-collaborated with the broader Web3 community, and at every layer carefully considered any tradeoffs and
+integrated with various web3 infrastructure and services, developed and standardized low-level protocols,
+collaborated with the broader web3 community, and at every layer carefully considered any tradeoffs and
 compromises necessary to balance user experience, available technology, and adherence to guiding values.
 We continue to research and discuss at length how to leverage Blockchain technology to _power the platform with MFT_,
 with the first contracts already implemented and more already in development.
@@ -30,6 +30,8 @@ For more information and answers to common questions about Mainframe OS, see the
 
 
 ## Research projects
+These topics are currently being explored by our product and engineering teams, but all
+include some technical challenges that are not yet resolved. They will progress from "research" to "development" as possible.
 
 ### Blockchain-based subscriptions
 Investigating best way to implement subscriptions on the blockchain.
@@ -63,6 +65,7 @@ Improvements to Mainframe OS to simplify the underlying architecture and make it
 Vault structure, and wallets, apps, and contact protocols all updated. This is a huge and important effort,
 but will have little immediate external impact. But these changes will lay the groundwork for an
 improved installation experience, enable more rapid development of platform functionality,
+easier contributions from the open-source community,
 and facilitate data migrations necessary for future-proofing.
 
 ### Mainframe OS User Features
@@ -82,9 +85,9 @@ and support for new Ledger wallet derivation path.
 - **App submission to marketplace (with MFT payment):** App developers can submit information and pay fee (using MFT)
 to have their app reviewed for inclusion in the list of verified apps in the Apps Marketplace.
 - **App management:** Support for additional app information (description, website, etc). Ability to
-view and edit app details and permissions.
+view and edit app details and permissions, and to delete apps.
 - **Developer profile:** Enhanced developer identity linked to published apps including description, links to website or github,
-and list of other publsihed apps.
+and list of other published apps.
 
 ### Mainframe apps
 
@@ -114,24 +117,36 @@ available Mainframe OS or app updates, or app-driven messages.
 - **Additional Tokens:** Support for DAI, and ability to include other tokens dynamically in system wallet.
 - **Transfer funds using Wyre or Coinbase:** Users can use a credit card to purchase ETH with the integrated Wyre Service;
 or authorize Mainframe OS to transfer funds from a Coinbase wallet.
-- **Integrated ETH <> MFT exchange:** Built-in access to Uniswap contracts and community-funded liquidity pool for easy ETH<>MFT exchanges.
+- **Integrated ETH <> MFT exchange:** Built-in access to Uniswap contracts and community-supplied liquidity pool for easy ETH<>MFT exchanges.
 - **Decentralized file management:** Visual file explorer for storing, accessing, and managing files in the decentralized storage layer.
 - **File sharing:** Ability to share encrypted files with contacts
 
 ### Mainframe apps
 
-- **Messenger:** Reference app to showcase new communications protocol and SDK APIs.
-- **File sharing:** Reference app to showcase new user storage and file sharing capabilities.
+- **Messenger (v1):** Coming full circle back to our Mainframe messaging roots. First iteration of our marquee decentralized messaging app
+leveraging the all-new communications protocols through Mainframe SDK.
+- **File sharing (v1):** Create, manage, and share files privately and securely with Mainframe OS contacts. Initial version of
+an app based on decentralized storage protocols available through Mainframe SDK.
 
 
-## Future Exploration
-We've got our hands full with all of the current development and research projects, but we're not forgetting about these important projects and will
-turn attention to them as soon as we can (or as soon as we must):
+## Future Roadmap
 
-- **Usage tracking for platform and dapps**
-- **Mobile version of Mainframe OS**
-- **Shared encryption**
-- **Group communications**
-- **Light-node integration for Ethereum & Swarm**
-- **Integration of Swarm incentivization**
-- **Decentralized database integration**
+We'll continue to plan and update the roadmap to stay **two releases ahead**. Anything beyond that is unrealistic in this rapidly changing technological landscape.
+
+
+#### Projects Backlog
+(In no particular order. Subject to change.)
+
+- Usage tracking for platform and dapps
+- Mobile version of Mainframe OS
+- Shared encryption
+- Group communications
+- Light-node integration for Ethereum & Swarm
+- Integration of Swarm incentivization
+- Decentralized database integration
+- Multi-chain support
+- Decentralized identity integration
+- Distributed compute
+- Additional integrations for decentralized storage layer
+- Publish/index/access decentralized content
+- Developer Tools
