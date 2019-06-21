@@ -58,7 +58,7 @@ We'll need to support compatibility for the various protocols (contacts, identit
 storage, payments, etc) between versions, as well as backwards and forward compatibility
 with the data vault.
 
-## Q3 Milestone: Alpha 4
+## {{Mandela}} Release: Q3 Milestone (Alpha 4)
 
 ### Architecture Update
 Improvements to Mainframe OS to simplify the underlying architecture and make it more robust and reliable.
@@ -96,7 +96,7 @@ and list of other published apps.
 - **Noted and Payment:** bug fixes and basic improvements
 
 
-## Q4 Milestone: Beta 1
+## {{Voltaire}} Release: Q4 Milestone (Beta 1)
 
 ### Mainframe OS protocols & SDK APIs
 
