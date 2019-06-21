@@ -83,13 +83,19 @@ Existing solidity dapps only need to follow three steps to work in Mainframe OS.
 There is no need to redeploy any contracts since the front-end can continue to reference the same instance of contracts on the Ethereum blockchain.
 
 ## How does MFT integrate with Mainframe OS?
-MFT tokens are integrated in Mainframe OS to power underlying services. In this initial release, users can stake MFT to send invitations to other users to connect.
+MFT tokens are integrated in Mainframe OS to power underlying services. In the current version of Mainframe OS, users can stake MFT to **send invitations to other users to connect**.
 
-Coming soon, developers can stake MFT to submit their dapps to be included in the Mainframe App Store. We are also exploring subscription models for app users and developers, facilitating in-app purchases or upgrades, and tiered/paid dapps, all powered by MFT.
+In the next release (currently in development), developers can use MFT to **submit their dapps** to be included in the Mainframe App Store.
 
-Mainframe is particularly interested in and currently exploring an MFT powered decentralized gas relayer network (see EIP-1077). This dramatically simplifies the user on-boarding experience and opens more clearly defined monetization opportunities for dapp developers. Imagine using a dapp for the first time and not needing to acquire ETH.
+In support of seamless MFT integration throughout the platform, we are integrating **fiat onramp** and **ETH<>MFT exchange** functionality.
 
-As additional underlying services are enhanced to include incentivization functionality, MFT will be integrated more and more to power those services and create a seamless experience for users. Mainframe continues to be dedicated to a frictionless experience for users of our platform.
+We are also researching blockchain-based subscription models for app users and developers, facilitating in-app purchases or upgrades, tiered/paid dapps, and a community-moderated marketplace - all powered by MFT.
+
+We are also exploring an MFT powered decentralized gas relayer network (see EIP-1077), or the use of Meta-transactions to abstract blockchain transaction fees for users.
+This dramatically simplifies the user on-boarding experience and opens more clearly defined monetization opportunities for dapp developers. Imagine using a dapp for the first time and not needing to acquire ETH.
+
+As additional underlying services are enhanced to include incentivization functionality, MFT will be integrated more and more to power those services and create a seamless experience for users.
+Mainframe continues to be dedicated to a frictionless experience for users of our platform.
 
 
 ## Does Mainframe have it’s own Blockchain?
