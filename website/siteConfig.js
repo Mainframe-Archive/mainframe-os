@@ -30,6 +30,7 @@ const siteConfig = {
     {doc: 'introduction', label: 'Quick Start'},
     {doc: 'platform', label: 'Platform'},
     {doc: 'sdk', label: 'SDK'},
+    {doc: 'roadmap', label: 'Roadmap'},
     {doc: 'faq', label: 'FAQ'},
   ],
 
