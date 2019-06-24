@@ -58,7 +58,8 @@ We'll need to support compatibility for the various protocols (contacts, identit
 storage, payments, etc) between versions, as well as backwards and forward compatibility
 with the data vault.
 
-## {{Mandela}} Release: Q3 Milestone (Alpha 4)
+## Magna Carta Release: Q3 Milestone (Alpha 4)
+This 13th century “Great Charter of the Liberties” set an early stage for individual rights, serving as a template and inspiration for freedom movements around the world and across the centuries.
 
 ### Architecture Update
 Improvements to Mainframe OS to simplify the underlying architecture and make it more robust and reliable.
@@ -96,7 +97,8 @@ and list of other published apps.
 - **Noted and Payment:** bug fixes and basic improvements
 
 
-## {{Voltaire}} Release: Q4 Milestone (Beta 1)
+## Voltaire Release: Q4 Milestone (Beta 1)
+Voltaire's (mis-quoted but oft-attributed) sentiment “I disagree with what you say, but I will defend to the death your right to say it” reflects his free speech legacy.
 
 ### Mainframe OS protocols & SDK APIs
 
