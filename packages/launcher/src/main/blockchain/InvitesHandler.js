@@ -8,6 +8,7 @@ import { utils } from 'ethers'
 import { decode } from '../crypto'
 import { readFirstContact } from '../data/protocols'
 import { getFirstContactFeed } from '../db/collections/contacts'
+import type { ContactRequestDoc } from '../db/collections/contactRequests'
 import type { UserDoc } from '../db/collections/users'
 import type { DB } from '../db/types'
 import type { Environment } from '../environment'
@@ -309,22 +310,19 @@ export default class InvitesHandler {
     return allowanceBN.gte(stakeBN)
   }
 
-  async sendInviteApprovalTX(contactID: string, gasPrice?: string) {
-    if (!this.user.profile.ethAddress) {
-      throw new Error('No public ETH address found on profile')
-    }
-
-    const hasAllowance = await this.checkAllowance(this.user.profile.ethAddress)
+  async sendInviteApprovalTX(
+    contactID: string,
+    walletAddress: string,
+    gasPrice?: string,
+  ) {
+    const hasAllowance = await this.checkAllowance(walletAddress)
     if (hasAllowance) {
       return
     }
 
     const stake = await this.invitesContract.call('requiredStake')
     const stakeBN = utils.bigNumberify(stake)
-    const mftBalance = await this.tokenContract.getBalance(
-      // $FlowFixMe address checked above
-      this.user.profile.ethAddress,
-    )
+    const mftBalance = await this.tokenContract.getBalance(walletAddress)
 
     const balanceBN = utils.parseUnits(mftBalance, 'ether')
 
@@ -335,7 +333,7 @@ export default class InvitesHandler {
       )
     }
 
-    const txOptions: Object = { from: this.user.profile.ethAddress }
+    const txOptions: Object = { from: walletAddress }
     // TODO: check high gasPrice
 
     const approveValue = utils.formatUnits(stake, 'ether')
@@ -376,12 +374,12 @@ export default class InvitesHandler {
     return [toAddrHash, toFeedHash, this.user.getPublicID()]
   }
 
-  async processInviteTransaction(contactID: string) {
+  async processInviteTransaction(contactID: string, walletAddress: string) {
     return new Promise(async (resolve, reject) => {
       // TODO: Notify launcher and request permission from user?
       try {
         const params = await this.getInviteParams(contactID)
-        const txOptions = { from: this.user.profile.ethAddress }
+        const txOptions = { from: walletAddress }
         this.invitesContract
           .send('sendInvite', params, txOptions)
           .then(inviteRes => {
@@ -401,7 +399,7 @@ export default class InvitesHandler {
     })
   }
 
-  async sendInviteTX(contactID: string): Promise<void> {
+  async sendInviteTX(contactID: string, walletAddress: string): Promise<void> {
     this.logger.log({
       level: 'debug',
       message: 'Sending invite transaction',
@@ -411,18 +409,13 @@ export default class InvitesHandler {
     if (!contact) {
       throw new Error(`Contact ${contactID} not found`)
     }
-    if (!this.user.profile.ethAddress) {
-      throw new Error('No public ETH address found in profile')
-    }
     const contactProfile = await contact.getProfile()
     if (!contactProfile.ethAddress) {
       throw new Error('No public ETH address found for Contact')
     }
 
     const stake = await this.invitesContract.call('requiredStake')
-    const mftBalance = await this.tokenContract.getBalance(
-      this.user.profile.ethAddress,
-    )
+    const mftBalance = await this.tokenContract.getBalance(walletAddress)
     const stakeBN = utils.bigNumberify(stake)
     const balanceBN = utils.parseUnits(mftBalance, 'ether')
 
@@ -434,11 +427,14 @@ export default class InvitesHandler {
     }
 
     try {
-      const inviteTXHash = await this.processInviteTransaction(contactID)
+      const inviteTXHash = await this.processInviteTransaction(
+        contactID,
+        walletAddress,
+      )
       const invite = {
         inviteTX: inviteTXHash,
         ethNetwork: this.ethClient.networkName,
-        fromAddress: this.user.profile.ethAddress,
+        fromAddress: walletAddress,
         toAddress: contactProfile.ethAddress,
         stakeState: 'staked',
         stakeAmount: utils.formatUnits(stakeBN, 'ether'),
@@ -454,20 +450,20 @@ export default class InvitesHandler {
     }
   }
 
-  async signAccepted(inviteRequest: InviteRequest): Promise<string> {
+  async signAccepted(contactRequest: ContactRequestDoc): Promise<string> {
     const accounts = await this.user.getEthAccounts()
     const receivedAddress = accounts.find(
-      a => a === inviteRequest.receivedAddress,
+      a => a === contactRequest.receivedAddress,
     )
     if (!receivedAddress) {
       throw new Error(
         `Could not find a wallet containing address: ${
-          inviteRequest.receivedAddress
+          contactRequest.receivedAddress
         }`,
       )
     }
 
-    const addr = inviteRequest.senderAddress.substr(2)
+    const addr = contactRequest.senderAddress.substr(2)
     const addressHash = bufferFromHex(hash(Buffer.from(addr, 'hex')))
 
     const messageBytes = Buffer.concat([
@@ -539,9 +535,11 @@ export default class InvitesHandler {
 
     this.validateInviteOriginNetwork(contactRequest.ethNetwork)
     const txParams = await this.getDeclineTXParams(contactRequest)
-    const data = this.invitesContract.encodeCall('declineAndWithdraw', txParams)
 
-    const txOptions = { from: contactRequest.receivedAddress }
+    const txOptions = {
+      from: contactRequest.receivedAddress,
+      to: this.invitesContract.address,
+    }
     const res = await this.invitesContract.send(
       'declineAndWithdraw',
       txParams,
@@ -642,6 +640,11 @@ export default class InvitesHandler {
   }
 
   // ESTIMATE TX GAS
+
+  async getRequiredStake(): Promise<string> {
+    const stake = await this.invitesContract.call('requiredStake')
+    return utils.formatUnits(stake, 'ether').toString()
+  }
 
   async formatGasValues(txParams: {
     gas: string,

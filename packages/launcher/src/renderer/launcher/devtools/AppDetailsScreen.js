@@ -16,6 +16,7 @@ import type { Match, RouterHistory } from 'react-router-dom'
 import styled from 'styled-components/native'
 
 import ArrowLeft from '../../UIComponents/Icons/ArrowLeft'
+import CopyableBlock from '../../UIComponents/CopyableBlock'
 import PlusIcon from '../../UIComponents/Icons/PlusIcon'
 import colors from '../../colors'
 
@@ -449,15 +450,12 @@ class AppDetails extends Component<Props, State> {
             <Text theme={detailTextStyle}>
               {app.latestPublishedVersion.version}
             </Text>
-
             <Text variant="smallLabel">App Id</Text>
             <Text theme={detailTextStyle}>
               Share this app ID to allow users to install your app in Mainframe
               OS.
             </Text>
-            <Text variant={['addressLarge', 'marginTop10']}>
-              {app.publicID}
-            </Text>
+            <CopyableBlock value={app.publicID} />
             {hasDraftVersion ? null : (
               <ButtonsContainer>
                 {openButton}

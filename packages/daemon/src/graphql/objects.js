@@ -116,6 +116,7 @@ export const appPermissionGrants = new GraphQLObjectType({
   name: 'AppPermissions',
   fields: () => ({
     BLOCKCHAIN_SEND: { type: GraphQLBoolean },
+    BLOCKCHAIN_SIGN: { type: GraphQLBoolean },
     CONTACTS_READ: { type: GraphQLBoolean },
     WEB_REQUEST: { type: new GraphQLNonNull(webRequestGrants) },
   }),
@@ -168,6 +169,9 @@ export const appPermissionDefinitions = new GraphQLObjectType({
       type: new GraphQLList(GraphQLString),
     },
     BLOCKCHAIN_SEND: {
+      type: GraphQLBoolean,
+    },
+    BLOCKCHAIN_SIGN: {
       type: GraphQLBoolean,
     },
     COMMS_CONTACT: {
@@ -646,6 +650,19 @@ export const contact = new GraphQLObjectType({
 export const contacts = new GraphQLObjectType({
   name: 'Contacts',
   fields: () => ({
+    inviteStake: {
+      type: GraphQLInt,
+      resolve: async (self, args, ctx) => {
+        try {
+          const stake = await ctx.invitesHandler.getRequiredStake()
+          return Number(stake)
+        } catch (err) {
+          // Will error on unsupported networks
+          ctx.log(err)
+          return null
+        }
+      },
+    },
     invitesCount: {
       type: new GraphQLNonNull(GraphQLInt),
       args: {

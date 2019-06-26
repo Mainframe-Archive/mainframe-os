@@ -249,7 +249,7 @@ tx.on('hash', hash => ... )
 
 Will show a file upload window to the user, they can select one file they wish to upload.
 
-**returns:** Promise<boolean>
+**returns:** Promise<true> if the file was successfully uploaded, Promise<false> if the upload window was closed.
 
 **Example:**
 
@@ -257,6 +257,20 @@ Will show a file upload window to the user, they can select one file they wish t
 const key = 'example.jpg' // name that is going to be used in the app
 
 await sdk.storage.promptUpload(key)
+```
+
+### storage.promptDownload()
+
+Will show a save file window to the user, they can select where they wish to save the file.
+
+**returns:** Promise<true> if the file was successfully saved, Promise<false> if the save window was closed.
+
+**Example:**
+
+```
+const key = 'example.jpg' // key of the file user wants to download
+
+await sdk.storage.promptDownload(key)
 ```
 
 ### storage.list()
@@ -298,6 +312,20 @@ Fetches a string value for a given key.
 const key = 'my-key'
 
 const data = await sdk.storage.get(key)
+```
+
+### storage.delete()
+
+Deletes the key from the list of files available to the app.
+
+**returns:** Promise<void>
+
+**Example:**
+
+```
+const key = 'my-key'
+
+const data = await sdk.storage.delete(key)
 ```
 
 ## Types

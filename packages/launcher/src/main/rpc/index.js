@@ -56,11 +56,12 @@ const createChannel = (params: ChannelParams) => {
       if (outgoing != null) {
         event.sender.send(params.name, outgoing)
       }
-    } catch (error) {
+    } catch (err) {
       params.logger.log({
         level: 'error',
         message: 'RPC request failed',
-        error,
+        incoming,
+        error: err.toString(),
       })
     }
   })

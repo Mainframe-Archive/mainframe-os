@@ -485,10 +485,16 @@ export const contactInvite = new GraphQLObjectType({
       type: new GraphQLNonNull(contactStakeState),
     },
     inviteTX: {
-      type: GraphQLString,
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    fromAddress: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    toAddress: {
+      type: new GraphQLNonNull(GraphQLString),
     },
     ethNetwork: {
-      type: GraphQLString,
+      type: new GraphQLNonNull(GraphQLString),
     },
     reclaimedStakeTX: {
       type: GraphQLString,
@@ -558,13 +564,16 @@ export const contactRequest = new GraphQLObjectType({
       type: new GraphQLNonNull(genericProfile),
       resolve: doc => doc.getProfile(),
     },
+    receivedAddress: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    senderAddress: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
     stakeAmount: {
       type: new GraphQLNonNull(GraphQLString),
     },
     ethNetwork: {
-      type: new GraphQLNonNull(GraphQLString),
-    },
-    receivedAddress: {
       type: new GraphQLNonNull(GraphQLString),
     },
     connectionState: {
@@ -772,6 +781,10 @@ export const user = new GraphQLObjectType({
     contacts: {
       type: list(contact),
       resolve: doc => doc.populate('contacts'),
+    },
+    contactInviteStake: {
+      type: new GraphQLNonNull(GraphQLString),
+      resolve: doc => doc.getRequiredContactStake(),
     },
     contactRequests: {
       type: list(contactRequest),

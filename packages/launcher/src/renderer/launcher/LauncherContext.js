@@ -10,6 +10,7 @@ export type CurrentUser = $Call<<T>($ReadOnlyArray<T>) => T, OwnUsers>
 export type ContextProps = {
   user: CurrentUser,
   ethClient: EthClient,
+  showAlert: (message: string, timeout?: number) => void,
 }
 
 export const LauncherContext = createContext<ContextProps>({})

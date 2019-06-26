@@ -1,6 +1,7 @@
 // @flow
 
-import { Text, Tooltip } from '@morpheus-ui/core'
+import { Button, DropDown, Text, Tooltip } from '@morpheus-ui/core'
+import { utils } from 'ethers'
 import React, { Component } from 'react'
 import { graphql, createFragmentContainer } from 'react-relay'
 import styled from 'styled-components/native'
@@ -10,25 +11,49 @@ import { MFT_TOKEN_ADDRESSES } from '../../../constants'
 import rpc, { ethClient } from '../rpc'
 import WalletIcon from '../wallets/WalletIcon'
 
-import Loader from '../../UIComponents/Loader'
-import FormModalView from '../../UIComponents/FormModalView'
 import Avatar from '../../UIComponents/Avatar'
+import CircleCheck from '../../UIComponents/Icons/Circlecheck'
+import CircleLoader from '../../UIComponents/CircleLoader'
+import FormModalView from '../../UIComponents/FormModalView'
+import Loader from '../../UIComponents/Loader'
 
-import type { InviteContactModal_contact as Contact } from './__generated__/InviteContactModal_contact.graphql.js'
+import Transaction from './Transaction'
+
+import type { WalletAccount, WalletAccounts } from './ContactsScreen'
+
+import type { InviteContactModal_contactInvite as ContactInvite } from './__generated__/InviteContactModal_contactInvite.graphql'
+import type { InviteContactModal_user as User } from './__generated__/InviteContactModal_user.graphql'
+
+export type ContactInfo = {
+  localID: string,
+  publicID: string,
+  profile: $ReadOnly<{
+    name?: ?string,
+    ethAddress?: ?string,
+  }>,
+}
 
 export type TransactionType = 'invite' | 'retrieveStake' | 'declineInvite'
 
 type Props = {
   closeModal: () => void,
-  contact: Contact,
+  contactInfo: ContactInfo,
+  contactInvite: ?ContactInvite,
   type: TransactionType,
+  wallets: WalletAccounts,
+  selectedAddress: string,
+  updateSelectedAddress: string => void,
+  showNotification: string => void,
+  user: User,
 }
 
-type TXParams = {
+export type TXParam = {
   gasPriceGwei: string,
   maxCost: string,
   stakeAmount: string,
 }
+
+type TXParams = Array<TXParam>
 
 type State = {
   txProcessing: boolean,
@@ -50,6 +75,10 @@ type State = {
       | 'invite_sent'
       | 'error',
   },
+  txScreen: boolean,
+  dropdownError: boolean,
+  insufficientFunds: boolean,
+  contractRecipientAddress?: ?string,
 }
 
 const FormContainer = styled.View`
@@ -75,6 +104,11 @@ const AddContactDetail = styled.View`
   flex-direction: row;
   align-items: center;
   ${props => props.border && `border-width: 1px;`}
+  ${props => props.noMarginTop && `margin-top: 0px; padding: 5px;`}
+`
+
+const DropDownContainer = styled.View`
+  width: 440px;
 `
 
 const AddContactDetailText = styled.View`
@@ -91,15 +125,17 @@ class InviteContactModal extends Component<Props, State> {
   state = {}
 
   componentDidMount() {
-    if (this.props.type === 'invite') {
+    const { type } = this.props
+    if (type === 'invite') {
       this.getInviteApproveTXDetails()
-    } else {
-      this.getTXDetails(this.props.type)
+    } else if (type === 'declineInvite' || type === 'retrieveStake') {
+      this.getTXDetails(type)
     }
     this.getBalances()
   }
 
   async getBalances() {
+    // TODO: this could be queried with GraphQL
     const { ethAddress } = this.props.user.profile
     const address = MFT_TOKEN_ADDRESSES[ethClient.networkName]
     let balances = {
@@ -107,7 +143,7 @@ class InviteContactModal extends Component<Props, State> {
       eth: '0',
     }
     if (address && ethAddress) {
-      const token = this.props.ethClient.erc20Contract(address)
+      const token = ethClient.erc20Contract(address)
       const [mft, eth] = await Promise.all([
         token.getBalance(ethAddress),
         ethClient.getETHBalance(ethAddress),
@@ -121,10 +157,12 @@ class InviteContactModal extends Component<Props, State> {
     try {
       const res = await rpc.getInviteTXDetails({
         type,
-        contactID: this.props.contact.localID,
+        contactID: this.props.contactInfo.localID,
+        customAddress: this.props.selectedAddress,
       })
       this.setState({
-        txParams: res,
+        txParams: [res],
+        error: null,
       })
     } catch (err) {
       this.setState({
@@ -133,17 +171,19 @@ class InviteContactModal extends Component<Props, State> {
     }
   }
 
-  async getInviteApproveTXDetails() {
+  async getInviteApproveTXDetails(address?: string) {
     try {
       const res = await rpc.getInviteTXDetails({
         type: 'approve',
-        contactID: this.props.contact.localID,
+        contactID: this.props.contactInfo.localID,
+        customAddress: address ? address : this.props.selectedAddress,
       })
       this.setState({
-        txParams: res,
+        txParams: [res],
         invitePending: {
           state: 'awaiting_approval',
         },
+        error: null,
       })
     } catch (err) {
       this.setState({
@@ -156,13 +196,20 @@ class InviteContactModal extends Component<Props, State> {
     try {
       const res = await rpc.getInviteTXDetails({
         type: 'sendInvite',
-        contactID: this.props.contact.localID,
+        contactID: this.props.contactInfo.localID,
+        customAddress: this.props.selectedAddress,
       })
-      this.setState({
-        invitePending: {
-          state: 'approved',
-          txParams: res,
-        },
+      this.setState(prevState => {
+        if (prevState.txParams) {
+          const [previousTxParams] = prevState.txParams
+          return {
+            txParams: [previousTxParams, res],
+            invitePending: {
+              state: 'approved',
+            },
+            error: null,
+          }
+        }
       })
     } catch (err) {
       this.setState({
@@ -178,7 +225,8 @@ class InviteContactModal extends Component<Props, State> {
     try {
       this.setState({ txProcessing: true, error: null })
       await rpc.sendInviteApprovalTX({
-        contactID: this.props.contact.localID,
+        contactID: this.props.contactInfo.localID,
+        customAddress: this.props.selectedAddress,
       })
       this.setState({
         txProcessing: false,
@@ -192,7 +240,7 @@ class InviteContactModal extends Component<Props, State> {
         error: err.message,
         txProcessing: false,
         invitePending: {
-          state: 'approved',
+          state: 'error',
         },
       })
     }
@@ -202,7 +250,13 @@ class InviteContactModal extends Component<Props, State> {
     try {
       this.setState({ txProcessing: true, error: null })
       await rpc.sendInviteTX({
-        contactID: this.props.contact.localID,
+        contactID: this.props.contactInfo.localID,
+        customAddress: this.props.selectedAddress,
+      })
+      this.setState({
+        invitePending: {
+          state: 'invite_sent',
+        },
       })
       this.props.closeModal()
     } catch (err) {
@@ -220,13 +274,14 @@ class InviteContactModal extends Component<Props, State> {
     try {
       this.setState({ txProcessing: true, error: null })
       const res = await rpc.sendDeclineInviteTX({
-        requestID: this.props.contact.localID,
+        requestID: this.props.contactInfo.localID,
       })
       this.setState({
         txProcessing: false,
         declinedTXHash: res,
       })
       this.props.closeModal()
+      this.props.showNotification('decline')
     } catch (err) {
       this.setState({
         txProcessing: false,
@@ -239,13 +294,14 @@ class InviteContactModal extends Component<Props, State> {
     try {
       this.setState({ txProcessing: true, error: null })
       const res = await rpc.sendWithdrawInviteTX({
-        contactID: this.props.contact.localID,
+        contactID: this.props.contactInfo.localID,
       })
       this.setState({
         txProcessing: false,
         withdrawTXHash: res,
       })
       this.props.closeModal()
+      this.props.showNotification('withdraw')
     } catch (err) {
       this.setState({
         txProcessing: false,
@@ -254,19 +310,86 @@ class InviteContactModal extends Component<Props, State> {
     }
   }
 
-  // RENDER
+  validate = feedback => {
+    const { user, wallets } = this.props
+    const addr = feedback.value
+    const wallet = addr && addr.length > 0 ? wallets[addr] : null
 
+    if (wallet == null) {
+      this.setState({ dropdownError: true })
+      return 'Wallet not found'
+    }
+
+    const { eth, mft } = wallet.balances
+
+    if (this.props.type === 'invite') {
+      if (mft.lt(utils.parseEther(user.contactInviteStake))) {
+        this.setState({ dropdownError: true })
+        return 'Insufficient MFT funds in this wallet'
+      } else if (eth.isZero()) {
+        this.setState({ dropdownError: true })
+        return 'Insufficient ETH funds in this wallet'
+      } else {
+        this.setState({ dropdownError: false })
+      }
+    } else {
+      if (!(Number(eth) > 0)) {
+        this.setState({ dropdownError: true })
+        return 'Insufficient ETH funds in this wallet'
+      } else {
+        this.setState({ dropdownError: false })
+      }
+    }
+  }
+
+  showTransactions = () => {
+    this.setState({ txScreen: true })
+  }
+
+  updateSelectedAddress = (addr: string) => {
+    // refresh tx details
+    if (this.props.type === 'invite') {
+      this.getInviteApproveTXDetails(addr)
+    }
+    this.props.updateSelectedAddress(addr)
+  }
+
+  getApproveButton = () => {
+    const { invitePending, txProcessing } = this.state
+
+    if (invitePending && invitePending.state === 'awaiting_approval') {
+      if (txProcessing) {
+        return <CircleLoader width={24} height={24} key="c1" />
+      } else {
+        return (
+          <Button
+            title="APPROVE"
+            variant={['small', 'red']}
+            onPress={this.sendApproveTX}
+            key="b1"
+          />
+        )
+      }
+    } else if (invitePending && invitePending.state === 'approved') {
+      return <CircleCheck width={24} height={24} color="#00a7e7" key="c2" />
+    } else {
+      return null
+    }
+  }
+
+  // RENDER
   renderGasData() {
     const { txParams } = this.state
-    if (txParams) {
-      const { gasPriceGwei, maxCost, stakeAmount } = txParams
+    if (txParams && txParams[0]) {
+      const { gasPriceGwei, maxCost, stakeAmount } = txParams[0]
       const gasLabel = `Gas price: ${gasPriceGwei}`
       const costlabel = `Max Cost: ${maxCost} ETH`
       const mftLabel = `Stake: ${stakeAmount} MFT`
+
       return (
-        <Text color="#303030" variant="marginTop10" size={11}>
+        <Text color="#303030" variant={['marginTop10', 'ellipsis']} size={11}>
           {`${gasLabel}, ${costlabel}, ${mftLabel}`}
-          <Tooltip>
+          <Tooltip top>
             <Text variant="tooltipTitle">What is gas?</Text>
             <Text variant="tooltipText">
               When you send tokens, interact with a contract, or do anything
@@ -291,7 +414,7 @@ class InviteContactModal extends Component<Props, State> {
   }
 
   renderContactSection(title: string) {
-    const { contact } = this.props
+    const { contactInfo } = this.props
 
     return (
       <Section>
@@ -308,17 +431,17 @@ class InviteContactModal extends Component<Props, State> {
         </Text>
         <AddContactDetail border>
           <Blocky>
-            <Avatar id={contact.publicID} size="small" />
+            <Avatar id={contactInfo.publicID} size="small" />
           </Blocky>
           <AddContactDetailText>
             <Text bold variant="greyDark23" size={13}>
-              {contact.profile.name || 'This user has a private profile'}
+              {contactInfo.profile.name || 'This user has a private profile'}
             </Text>
             <Text variant={['greyDark23', 'ellipsis']} size={12}>
-              {contact.publicID}
+              {contactInfo.publicID}
             </Text>
             <Text variant={['greyDark23', 'ellipsis']} size={12}>
-              {contact.profile.ethAddress}
+              {contactInfo.profile.ethAddress}
             </Text>
           </AddContactDetailText>
         </AddContactDetail>
@@ -327,65 +450,181 @@ class InviteContactModal extends Component<Props, State> {
   }
 
   renderTransactionSection(title: string) {
-    const { balances } = this.state
-    const balanceLabel = balances ? (
-      <Text variant="greyDark23" size={11}>{`MFT: ${balances.mft}, ETH: ${
-        balances.eth
-      }`}</Text>
-    ) : null
-    return (
-      <Section>
-        <Text
-          bold
-          variant="smallTitle"
-          color="#585858"
-          theme={{
-            display: 'flex',
-            flexDirection: 'row',
-            alignItems: 'center',
-          }}>
-          {title}{' '}
+    const { type, wallets } = this.props
+
+    const titleSection = (
+      <Text
+        bold
+        variant="smallTitle"
+        color="#585858"
+        theme={{
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+        }}>
+        {title}{' '}
+        {type === 'declineInvite' && (
           <Tooltip>
             <Text variant="tooltipTitle">
               Where did this address come from?
             </Text>
             <Text variant="tooltipText">
-              This is your default ETH address. You can change it in the Wallets
-              tab by selecting another address and designating it as default
-              instead.
+              This is/was your default address at the time this contact sent the
+              blockchain invite.
             </Text>
           </Tooltip>
-        </Text>
-        <AddContactDetail border>
-          <Blocky>
-            <WalletIcon
-              address={this.props.user.profile.ethAddress || ''}
-              size="small"
-            />
-          </Blocky>
-          <AddContactDetailText>
-            <Text variant={['greyDark23', 'ellipsis', 'mono']} size={12}>
-              {this.props.user.profile.ethAddress}
+        )}
+        {type === 'retrieveStake' && (
+          <Tooltip>
+            <Text variant="tooltipTitle">
+              Where did this address come from?
             </Text>
-            {balanceLabel}
-          </AddContactDetailText>
-        </AddContactDetail>
-        {this.renderGasData()}
+            <Text variant="tooltipText">
+              This is the address you chose to stake MFT from at the time the
+              blockchain invite was sent.
+            </Text>
+          </Tooltip>
+        )}
+      </Text>
+    )
+
+    if (type === 'invite') {
+      const walletsArray = Object.values(wallets)
+      if (walletsArray.length !== 0) {
+        // $FlowFixMe: Object.values() losing type
+        const options = walletsArray.map((wallet: WalletAccount) => {
+          return {
+            key: wallet.address,
+            data: (
+              <AddContactDetail noMarginTop>
+                <Blocky>
+                  <WalletIcon address={wallet.address} size="small" />
+                </Blocky>
+                <AddContactDetailText>
+                  <Text variant={['greyDark23', 'ellipsis', 'mono']} size={12}>
+                    {wallet.address}
+                  </Text>
+                  <Text variant="greyDark23" size={11}>{`MFT: ${
+                    wallet.balances.mft
+                  }, ETH: ${wallet.balances.eth}`}</Text>
+                </AddContactDetailText>
+              </AddContactDetail>
+            ),
+          }
+        })
+
+        return (
+          <Section>
+            {titleSection}
+            <DropDownContainer>
+              <DropDown
+                options={options}
+                valueKey="key"
+                displayKey="data"
+                name="walletDropdown"
+                defaultValue={this.props.selectedAddress}
+                onChange={addr => {
+                  this.updateSelectedAddress(addr)
+                }}
+                variant={[
+                  this.state.dropdownError ? 'error' : '',
+                  'maxWidth440',
+                ]}
+                validation={feedback => this.validate(feedback)}
+                disabled={this.state.txProcessing}
+              />
+            </DropDownContainer>
+            {this.renderGasData()}
+          </Section>
+        )
+      }
+    } else {
+      const address = this.props.selectedAddress
+      const wallet = wallets[address]
+      return (
+        <Section>
+          {titleSection}
+          <AddContactDetail border>
+            <Blocky>
+              <WalletIcon address={address} size="small" />
+            </Blocky>
+            <AddContactDetailText>
+              <Text variant={['greyDark23', 'ellipsis', 'mono']} size={12}>
+                {address}
+              </Text>
+              <Text
+                variant="greyDark23"
+                size={11}>{`MFT: ${wallet.balances.mft.toString(
+                10,
+              )}, ETH: ${wallet.balances.eth.toString(10)}`}</Text>
+            </AddContactDetailText>
+          </AddContactDetail>
+          {this.renderGasData()}
+        </Section>
+      )
+    }
+  }
+
+  renderInviteTransactions() {
+    const { invitePending, txProcessing, txParams } = this.state
+    const approveInfo = {
+      title: 'TRANSACTION 1/2',
+      question: 'What does this mean?',
+      answer:
+        'To send an invite you must first grant approval to the contract to use your tokens.',
+    }
+    const sendInfo = {
+      title: 'TRANSACTION 2/2',
+      question: 'What does this mean?',
+      answer: 'This transaction will send the invite and withdraw your MFT.',
+    }
+
+    const approveButton = this.getApproveButton()
+    const sendButton = txProcessing ? (
+      <CircleLoader width={24} height={24} key="c3" />
+    ) : (
+      <Button
+        title="APPROVE"
+        variant={['small', 'red']}
+        onPress={this.sendInvite}
+        key="b2"
+      />
+    )
+
+    return (
+      <Section>
+        <Transaction
+          title="Contract"
+          tooltipInfo={approveInfo}
+          txParam={txParams && txParams[0]}
+          button={approveButton}
+        />
+        {invitePending && invitePending.state === 'approved' && (
+          <Transaction
+            title="Staking"
+            tooltipInfo={sendInfo}
+            txParam={txParams && txParams[0]}
+            button={sendButton}
+          />
+        )}
       </Section>
     )
   }
 
   renderRetrieveStake() {
-    const { invite } = this.props.contact
+    const { contactInvite, user } = this.props
     const activity = this.state.txProcessing && <Loader />
     const reclaimedTX =
-      invite && invite.stake && invite.stake.reclaimedTX ? (
-        <Text>TX hash: {invite.stake.reclaimedTX}</Text>
+      contactInvite && contactInvite.reclaimedStakeTX ? (
+        <Text>TX hash: {contactInvite.reclaimedStakeTX}</Text>
       ) : null
+
     return (
       <>
-        {this.renderContactSection('SEND BLOCKCHAIN INVITATION TO')}
-        {this.renderTransactionSection('APPROVE AND STAKE 100 MFT FROM')}
+        {this.renderContactSection('YOUR INVITATION HAS BEEN ACCEPTED FROM')}
+        {this.renderTransactionSection(
+          `WITHDRAW YOUR ${user.contactInviteStake} MFT ON`,
+        )}
         {reclaimedTX}
         {activity}
       </>
@@ -400,7 +639,9 @@ class InviteContactModal extends Component<Props, State> {
     return (
       <>
         {this.renderContactSection('DECLINE INVITATION FROM')}
-        {this.renderTransactionSection('CLAIM 100 MFT ON')}
+        {this.renderTransactionSection(
+          `CLAIM ${this.props.user.contactInviteStake} MFT ON`,
+        )}
         {declinedTXHash}
         {activity}
       </>
@@ -410,17 +651,22 @@ class InviteContactModal extends Component<Props, State> {
   renderInvite() {
     const activity = this.state.txProcessing && <Loader />
 
-    return (
-      <>
-        {this.renderContactSection('SEND BLOCKCHAIN INVITATION TO')}
-        {this.renderTransactionSection('APPROVE AND STAKE 100 MFT FROM')}
-        {activity}
-      </>
-    )
+    if (this.state.txScreen) {
+      return this.renderInviteTransactions()
+    } else {
+      return (
+        <>
+          {this.renderContactSection('SEND BLOCKCHAIN INVITATION TO')}
+          {this.renderTransactionSection(
+            `APPROVE AND STAKE ${this.props.user.contactInviteStake} MFT FROM`,
+          )}
+          {activity}
+        </>
+      )
+    }
   }
 
   render() {
-    const { invitePending } = this.state
     let content
     let btnTitle
     let action
@@ -428,15 +674,16 @@ class InviteContactModal extends Component<Props, State> {
     switch (this.props.type) {
       case 'invite':
         content = this.renderInvite()
-        screenTitle = 'SEND BLOCKCHAIN INVITATION'
-        if (!this.state.txProcessing) {
-          if (invitePending && invitePending.state === 'awaiting_approval') {
-            action = this.sendApproveTX
-            btnTitle = 'APPROVE TRANSACTION'
-          } else if (invitePending && invitePending.state === 'approved') {
-            action = this.sendInvite
-            btnTitle = 'SEND INVITATION'
-          }
+        screenTitle = 'ADD A NEW CONTACT'
+        if (!this.state.txScreen) {
+          action = this.showTransactions
+          btnTitle = 'INVITE'
+        } else if (
+          this.state.invitePending &&
+          this.state.invitePending.state === 'invite_sent'
+        ) {
+          action = this.props.closeModal
+          btnTitle = 'DONE'
         }
         break
       case 'retrieveStake':
@@ -445,10 +692,10 @@ class InviteContactModal extends Component<Props, State> {
         if (!this.state.txProcessing) {
           if (this.state.withdrawTXHash) {
             action = this.props.closeModal
-            btnTitle = 'Done'
+            btnTitle = 'DONE'
           } else {
             action = this.withdrawStake
-            btnTitle = 'Withdraw'
+            btnTitle = 'WITHDRAW'
           }
         }
         break
@@ -458,10 +705,10 @@ class InviteContactModal extends Component<Props, State> {
         if (!this.state.txProcessing) {
           if (this.state.declinedTXHash) {
             action = this.props.closeModal
-            btnTitle = 'Done'
+            btnTitle = 'DONE'
           } else {
             action = this.sendDeclineTX
-            btnTitle = 'Decline & Withdraw'
+            btnTitle = 'DECLINE / CLAIM'
           }
         }
         break
@@ -494,21 +741,20 @@ class InviteContactModal extends Component<Props, State> {
 }
 
 export default createFragmentContainer(InviteContactModal, {
-  contact: graphql`
-    fragment InviteContactModal_contact on Contact {
-      localID
-      peerID
-      publicID
-      connectionState
-      invite {
-        ethNetwork
-        inviteTX
-        stakeState
-        stakeAmount
-        reclaimedStakeTX
-      }
+  contactInvite: graphql`
+    fragment InviteContactModal_contactInvite on ContactInvite {
+      ethNetwork
+      fromAddress
+      inviteTX
+      stakeState
+      stakeAmount
+      reclaimedStakeTX
+    }
+  `,
+  user: graphql`
+    fragment InviteContactModal_user on User {
+      contactInviteStake
       profile {
-        name
         ethAddress
       }
     }

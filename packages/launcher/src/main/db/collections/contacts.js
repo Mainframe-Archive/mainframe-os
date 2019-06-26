@@ -350,7 +350,7 @@ export default async (
                 message: 'Set contact public key',
                 id: this.localID,
               })
-              if (data.contact.signature) {
+              if (data.contact.signature && this.invite != null) {
                 await this.atomicSet(
                   'invite.acceptedSignature',
                   data.contact.signature,

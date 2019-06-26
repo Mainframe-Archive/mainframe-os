@@ -1,6 +1,6 @@
 // @flow
 
-import { createReadStream } from 'fs'
+import { createReadStream, createWriteStream } from 'fs'
 import { Readable } from 'stream'
 import type { ListResult } from '@erebos/api-bzz-base'
 import getStream from 'get-stream'
@@ -247,6 +247,46 @@ export const sandboxed = {
     },
   ),
 
+  storage_promptDownload: {
+    params: {
+      key: STORAGE_KEY_PARAM,
+    },
+    handler: (ctx: AppContext, params: { key: string }): Promise<boolean> => {
+      return new Promise((resolve, reject) => {
+        dialog.showSaveDialog(
+          ctx.window,
+          { title: 'Save file to:', buttonLabel: 'Download' },
+          async filePath => {
+            if (filePath === undefined) {
+              // Dialog was canceled
+              resolve(false)
+            } else {
+              try {
+                const stream = await downloadStream(ctx, params.key)
+                if (stream === null) {
+                  reject(new Error('File not found'))
+                } else {
+                  await new Promise((resolve, reject) => {
+                    stream
+                      .pipe(createWriteStream(filePath))
+                      .on('error', error => {
+                        reject(error)
+                      })
+                      .on('finish', () => {
+                        resolve(true)
+                      })
+                  })
+                }
+              } catch (error) {
+                reject(new Error('Failed to access storage'))
+              }
+            }
+          },
+        )
+      })
+    },
+  },
+
   storage_promptUpload: {
     params: {
       key: STORAGE_KEY_PARAM,
@@ -257,7 +297,7 @@ export const sandboxed = {
           ctx.window,
           { title: 'Select file to upload', buttonLabel: 'Upload' },
           async filePaths => {
-            if (filePaths.length === 0) {
+            if (filePaths === undefined) {
               // No file selected
               resolve(false)
             } else {
@@ -337,6 +377,28 @@ export const sandboxed = {
         if (stream !== null) {
           return await getStream(stream)
         }
+      } catch (error) {
+        throw new Error('Failed to access storage')
+      }
+    },
+  },
+
+  storage_delete: {
+    params: {
+      key: STORAGE_KEY_PARAM,
+    },
+    handler: async (
+      ctx: AppContext,
+      params: { key: string },
+    ): Promise<void> => {
+      try {
+        const { feedHash, manifestHash } = await getStorageManifestHash(ctx)
+        const [newManifestHash, feedMetadata] = await Promise.all([
+          ctx.bzz.deleteResource(manifestHash, params.key),
+          ctx.bzz.getFeedMetadata(feedHash),
+        ])
+        await ctx.bzz.postFeedValue(feedMetadata, `0x${newManifestHash}`)
+        ctx.storage.manifestHash = newManifestHash
       } catch (error) {
         throw new Error('Failed to access storage')
       }

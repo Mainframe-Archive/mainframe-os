@@ -41,6 +41,7 @@ type UserMethods = {|
   getEthAccounts(): Promise<Array<string>>,
   initEthClient(): EthClient,
   checkEthConnection(): void,
+  getRequiredContactStake(): Promise<string>,
   observeContactAdded(): Observable<ContactDoc>,
   addContact(publicID: string, data?: $Shape<ContactData>): Promise<ContactDoc>,
   addContactFromRequest(request: ContactRequestDoc): Promise<void>,
@@ -228,6 +229,10 @@ export default async (params: CollectionParams): Promise<UsersCollection> => {
         }
       },
 
+      async getRequiredContactStake(): Promise<string> {
+        return await this.invitesSync.getRequiredStake()
+      },
+
       observeContactAdded(): Observable<ContactDoc> {
         if (this._contactAdded$ == null) {
           this._contactAdded$ = new Subject()
@@ -250,7 +255,6 @@ export default async (params: CollectionParams): Promise<UsersCollection> => {
         const bzz = this.getBzz()
 
         let peer = await db.peers.findByPublicID(publicID)
-
         if (peer == null) {
           logger.log({
             level: 'debug',
@@ -276,10 +280,29 @@ export default async (params: CollectionParams): Promise<UsersCollection> => {
           })
         }
 
-        // TODO: check existing after schema change
+        const existingContacts = await this.populate('contacts')
+        const existingContact = existingContacts.find(
+          contact => contact.peer === peer.localID,
+        )
+
+        if (existingContact != null) {
+          logger.log({
+            level: 'debug',
+            message: 'Contact already exists',
+            userID: this.localID,
+            contactID: existingContact.localID,
+            contactPublicID: publicID,
+            peerID: peer.localID,
+          })
+          return existingContact
+        }
 
         const contact = db.contacts.newDocument({
-          profile: {},
+          profile: {
+            name: undefined,
+            avatar: undefined,
+            ethAddress: undefined,
+          },
           ...data,
           localID: generateLocalID(),
           keyPair: generateKeyPair(),

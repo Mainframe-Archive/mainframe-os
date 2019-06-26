@@ -4,6 +4,7 @@ import { join } from 'path'
 import { format } from 'url'
 import StreamRPC from '@mainframe/rpc-stream'
 import type { BrowserWindow, WebContents } from 'electron'
+import fileURL from 'file-url'
 import type { Subscription } from 'rxjs'
 
 import {
@@ -99,7 +100,7 @@ export class AppSession {
 
   constructor(params: AppSessionParams) {
     this.app = params.app
-    this.contentsURL = encodeURI(params.app.contentsPath)
+    this.contentsURL = fileURL(params.app.contentsPath)
     this.permissions = params.settings.getPermissions()
     this.settings = params.settings
     this.user = params.user

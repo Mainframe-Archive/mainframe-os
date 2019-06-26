@@ -68,6 +68,26 @@ export const ethUnsubscribe = async (
   }
 }
 
+export const getContractRecipientAddress = (
+  ctx: ClientContext,
+  params: SendDeclineTXParams,
+): ?string => {
+  return ctx.invitesHandler.getContractRecipientAddress(
+    params.userID,
+    params.peerID,
+  )
+}
+
+export const getContractOriginAddress = (
+  ctx: ClientContext,
+  params: SendDeclineTXParams,
+): ?string => {
+  return ctx.invitesHandler.getContractOriginAddress(
+    params.userID,
+    params.peerID,
+  )
+}
+
 export const getInviteTXDetails = async (
   ctx: ClientContext,
   params: GetInviteTXDetailsParams,
@@ -76,6 +96,7 @@ export const getInviteTXDetails = async (
     params.type,
     params.userID,
     params.contactID,
+    params.customAddress,
   )
 }
 
@@ -87,6 +108,7 @@ export const sendInviteApprovalTX = async (
     params.userID,
     params.contactID,
     params.gasPrice,
+    params.customAddress,
   )
 }
 
@@ -94,7 +116,11 @@ export const sendInviteTX = async (
   ctx: ClientContext,
   params: SendInviteTXParams,
 ): Promise<void> => {
-  return ctx.invitesHandler.sendInviteTX(params.userID, params.contactID)
+  return ctx.invitesHandler.sendInviteTX(
+    params.userID,
+    params.contactID,
+    params.customAddress,
+  )
 }
 
 export const sendDeclineInviteTX = async (

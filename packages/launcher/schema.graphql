@@ -210,8 +210,10 @@ enum ContactConnectionState {
 type ContactInvite {
   stakeAmount: String!
   stakeState: ContactStakeState!
-  inviteTX: String
-  ethNetwork: String
+  inviteTX: String!
+  fromAddress: String!
+  toAddress: String!
+  ethNetwork: String!
   reclaimedStakeTX: String
 }
 
@@ -223,9 +225,10 @@ type ContactRequest implements Node {
   peer: Peer!
   publicID: ID!
   profile: GenericProfile!
+  receivedAddress: String!
+  senderAddress: String!
   stakeAmount: String!
   ethNetwork: String!
-  receivedAddress: String!
   connectionState: ContactConnectionState!
 }
 
@@ -557,6 +560,7 @@ type User implements Node {
   publicID: ID!
   apps: [UserAppVersion!]!
   contacts: [Contact!]!
+  contactInviteStake: String!
   contactRequests: [ContactRequest!]!
   ethWallets: EthWallets!
   ethURL: String!

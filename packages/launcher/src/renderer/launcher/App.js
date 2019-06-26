@@ -3,6 +3,9 @@
 import React, { Component } from 'react'
 import { ThemeProvider as MFThemeProvider } from '@morpheus-ui/core'
 import styled from 'styled-components/native'
+
+import AlertToast from '../UIComponents/AlertToast'
+
 import Loader from '../UIComponents/Loader'
 
 import THEME from '../theme'
@@ -34,13 +37,14 @@ const TitleBar = styled.View`
   height: 20px;
   background-color: transparent;
 `
-
 type State = {
   vaultsData?: VaultsData,
+  message?: ?string,
 }
 
 export default class App extends Component<{}, State> {
   static contextType = EnvironmentContext
+  _messageTimer: ?TimeoutID
 
   state = {}
 
@@ -94,16 +98,46 @@ export default class App extends Component<{}, State> {
       )
     }
 
-    return <Launcher />
+    return <Launcher showAlert={this.showAlert} />
+  }
+
+  showAlert = (message: string, timeout: number = 3000) => {
+    this.setState(
+      {
+        message,
+      },
+      () => this.dismissAlert(timeout),
+    )
+  }
+
+  dismissAlert = (timeout: number = 3000) => {
+    if (this._messageTimer) {
+      clearTimeout(this._messageTimer)
+      this._messageTimer = null
+    }
+
+    this._messageTimer = setTimeout(() => {
+      this.setState({
+        message: null,
+      })
+      clearTimeout(this._messageTimer)
+      this._messageTimer = null
+    }, timeout)
   }
 
   render() {
     return (
       <MFThemeProvider theme={THEME}>
-        <Container>
-          <TitleBar className="draggable" />
-          {this.renderContent()}
-        </Container>
+        <>
+          <Container>
+            <TitleBar className="draggable" />
+            {this.renderContent()}
+          </Container>
+          <AlertToast
+            message={this.state.message}
+            onRequestClose={this.dismissAlert}
+          />
+        </>
       </MFThemeProvider>
     )
   }

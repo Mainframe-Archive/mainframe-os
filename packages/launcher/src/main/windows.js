@@ -29,6 +29,9 @@ const createWindow = (params: Object = {}): BrowserWindow => {
     window.loadURL(formattedUrl)
   }
 
+  // hide the menu (Win and Linux)
+  window.setAutoHideMenuBar(true)
+
   return window
 }
 

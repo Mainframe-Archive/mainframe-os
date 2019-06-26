@@ -12,6 +12,24 @@ import { getAccountsByPage } from '../wallets/ledgerClient'
 
 import type { LauncherContext } from '../context/launcher'
 
+type BlockchainEthSendParams = {
+  method: string,
+  params: any,
+}
+
+type SendInviteTXParams = {
+  contactID: string,
+  customAddress: string,
+}
+
+type SendDeclineTXParams = {
+  requestID: string,
+}
+
+type SendWithdrawInviteTXParams = {
+  contactID: string,
+}
+
 const DB_PARAMS = {
   password: 'string',
   save: {
@@ -435,7 +453,10 @@ export default {
     if (user == null) {
       throw new Error('No user')
     }
-    return user.invitesSync.sendInviteApprovalTX(params.contactID)
+    return user.invitesSync.sendInviteApprovalTX(
+      params.contactID,
+      params.customAddress,
+    )
   },
 
   blockchain_sendInviteTX: async (
@@ -446,7 +467,7 @@ export default {
     if (user == null) {
       throw new Error('No user')
     }
-    return user.invitesSync.sendInviteTX(params.contactID)
+    return user.invitesSync.sendInviteTX(params.contactID, params.customAddress)
   },
 
   blockchain_sendDeclineInviteTX: async (

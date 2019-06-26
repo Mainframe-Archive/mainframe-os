@@ -298,6 +298,10 @@ export default {
       iconColor: COLORS.PRIMARY_RED,
       iconHoverColor: COLORS.PRIMARY_RED,
     },
+    hoverShadow: {
+      hoverShadow: true,
+      borderHoverColor: 'transparent',
+    },
     modalButton: {
       titlePadding: '10px 30px',
       fontSize: 12,
@@ -356,6 +360,10 @@ export default {
       fontSize: 9,
       fontWeight: 'bold',
       margin: '5px 0 0 0',
+    },
+    editRedButton: {
+      iconColor: COLORS.PRIMARY_RED,
+      borderColor: COLORS.PRIMARY_RED,
     },
     ...MARGINS,
   },
@@ -480,14 +488,12 @@ export default {
       overflow: 'hidden',
       textOverflow: 'ellipsis',
     },
-    addressLarge: {
+    copyableBlock: {
       fontFamily: 'IBM Plex Mono',
-      backgroundColor: '#F9F9F9',
       padding: '30px 20px',
       textAlign: 'center',
       color: '#303030',
       fontSize: 13,
-      borderRadius: '3px',
     },
     center: {
       textAlign: 'center',
@@ -581,6 +587,12 @@ export default {
     default: {
       padding: '5px 10px',
       menuItemPadding: '5px 10px',
+    },
+    maxWidth440: {
+      maxWidth: 440,
+    },
+    error: {
+      borderColor: COLORS.ERROR_RED,
     },
   },
   Tooltip: {

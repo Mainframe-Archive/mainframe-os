@@ -67,7 +67,7 @@ export const signTransaction = async (
 export const signPersonalMessage = async (
   accountIndex: number,
   hexData: string,
-  legacyPath?: boolea,
+  legacyPath?: boolean,
 ): Promise<{ r: string, s: string, v: number }> => {
   const app = await getLedgerApp()
   const path = getPath(accountIndex, legacyPath)

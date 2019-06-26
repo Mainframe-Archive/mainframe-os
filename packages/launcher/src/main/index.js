@@ -34,6 +34,21 @@ if (
   ENV_TYPE = NODE_ENV
 }
 
+if (ENV_TYPE === 'production') {
+  if (app.requestSingleInstanceLock()) {
+    app.on('second-instance', () => {
+      // Someone tried to run a second instance, we should focus our window.
+      // TODO: update logic for new windows management system
+      // if (launcherWindow) {
+      //   if (launcherWindow.isMinimized()) launcherWindow.restore()
+      //   launcherWindow.focus()
+      // }
+    })
+  } else {
+    app.exit()
+  }
+}
+
 const env = Environment.get(ENV_NAME, ENV_TYPE)
 const logger = createLogger(env)
 const system = new SystemContext({ env, logger })

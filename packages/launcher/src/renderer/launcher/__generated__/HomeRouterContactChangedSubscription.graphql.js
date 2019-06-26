@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 20299e4b357c3fd169546c08ae96be72
+ * @relayHash 9a4f9136bc10a709f4e050723206e41a
  */
 
 /* eslint-disable */
@@ -20,8 +20,8 @@ export type HomeRouterContactChangedSubscriptionResponse = {|
       +publicID: string,
       +connectionState: ContactConnectionState,
       +invite: ?{|
-        +ethNetwork: ?string,
-        +inviteTX: ?string,
+        +ethNetwork: string,
+        +inviteTX: string,
         +stakeAmount: string,
         +stakeState: ContactStakeState,
         +reclaimedStakeTX: ?string,

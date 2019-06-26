@@ -5,6 +5,9 @@ body,
   flex: 1;
   height: 100%;
   font-family: 'Poppins', sans-serif;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
 }
 
 
@@ -15,6 +18,37 @@ body,
 .app-shadow-hover {
   transition: all 0.3s;
   box-shadow: 0px 5px 25px 6px rgba(0,0,0,0.3);
+}
+
+.alert-modal {
+  position: fixed !important;
+  top: 0 !important;
+  right: 0 !important;
+  bottom: initial !important;
+  background-color: transparent !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  z-index: 99999 !important;
+  border: none !important;
+}
+
+.alert-toast-enter {
+  opacity: 0;
+}
+
+.alert-toast-enter-active {
+  opacity: 1;
+  transition: opacity 150ms;
+}
+
+.alert-toast-exit {
+  opacity: 1;
+}
+
+.alert-toast-exit-active {
+  opacity: 0;
+  transition: opacity 500mss;
 }
 
 .inner-modal {
@@ -63,6 +97,7 @@ body,
   outline: none !important;
   padding: 0px !important;
 }
+
 .no-skew {
   transition: all 0.3s;
   transform: perspective(400px) rotateY(0deg);
@@ -77,6 +112,17 @@ body,
   transform: perspective(400px) rotateY(15deg);
 }
 
+.app-editing {
+  transition: all 0.3s;
+  transform: perspective(400px) rotateY(-18deg);
+  animation: pulse 0.8s infinite both;
+}
+
+@keyframes pulse {
+	0% { transform: perspective(400px) rotateY(-18deg); }
+	50% { transform: perspective(400px) rotateY(18deg); }
+}
+
 .draggable {
   -webkit-app-region: drag
 }
@@ -86,3 +132,21 @@ body,
   -moz-box-shadow: -2px -30px 98px 34px rgba(255,255,255,1);
   box-shadow: -2px -30px 98px 34px rgba(255,255,255,1);
 }
+
+
+::-webkit-scrollbar {
+  background-color:#fff;
+  width:16px
+}
+
+::-webkit-scrollbar-track {
+  background-color:#fff
+}
+
+::-webkit-scrollbar-thumb {
+  background-color:#babac0;
+  border-radius:16px;
+  border:4px solid #fff
+}
+
+::-webkit-scrollbar-button {display:none}

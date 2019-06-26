@@ -234,24 +234,19 @@ export default {
   getLedgerAccounts: (pageNum: number, legacyPath: boolean) => {
     return client.request('wallet_getLedgerAccounts', { pageNum, legacyPath })
   },
-  // ethereumRequest: (params: Object) => {
-  //   return client.request('blockchain_ethSend', params)
-  // },
+
   getInviteTXDetails: (params: Object) => {
     return client.request('blockchain_getInviteTXDetails', params)
   },
   sendInviteApprovalTX: (params: Object) => {
     return client.request('blockchain_sendInviteApprovalTX', params)
   },
-
   sendInviteTX: (params: Object) => {
     return client.request('blockchain_sendInviteTX', params)
   },
-
   sendDeclineInviteTX: (params: { requestID: string }) => {
     return client.request('blockchain_sendDeclineInviteTX', params)
   },
-
   sendWithdrawInviteTX: (params: { contactID: string }) => {
     return client.request('blockchain_sendWithdrawInviteTX', params)
   },

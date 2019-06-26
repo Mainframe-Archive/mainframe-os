@@ -18,6 +18,9 @@ import SettingsItem from './SettingsItem'
 const NETWORK_NAMES = {
   mainnet: 'Mainnet',
   ropsten: 'Testnet (Ropsten)',
+  kovan: 'Testnet (Kovan)',
+  rinkeby: 'Testnet (Rinkeby)',
+  goerli: 'Testnet (Goerli)',
   ganache: 'Ganache (localhost:8545)',
   custom: 'Custom (MFT transfers disabled)',
 }

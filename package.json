@@ -26,11 +26,9 @@
     "test:types": "flow check --merge-timeout 0",
     "test:types-ci": "flow check --max-workers 1 --merge-timeout 0",
     "test": "yarn run lint && yarn run test:types && yarn run test:unit",
-    "build": "lerna run build && lerna run build:sdk",
+    "build": "cd packages/launcher && yarn deps:build && lerna run build && lerna run build:sdk",
     "start": "yarn run build && yarn run test",
-    "start:daemon": "./packages/cli/bin/run daemon:stop && ./packages/cli/bin/run daemon:start",
-    "start:launcher": "cd packages/launcher && yarn dev",
-    "dev": "nf start"
+    "dev": "cd packages/launcher && yarn run dev"
   },
   "devDependencies": {
     "@babel/cli": "^7.4.4",

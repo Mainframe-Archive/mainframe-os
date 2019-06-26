@@ -60,4 +60,3 @@ Then, in another tab, run the launcher:
 cd packages/launcher && npm run dev
 ```
 
->>Note: There is a known issue trying to download, install, and run published dapps, or to build and open your own dapps on Windows. App windows appear blank. For your own dapps, the workaround is to serve them locally from localhost:3000 and input that in the address bar on the dapp window (don't forget the http://). There is currently no workaround for downloading and running published dapps.

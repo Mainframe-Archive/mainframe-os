@@ -47,7 +47,7 @@ const contactChanged = {
       filter(event => user.contacts.includes(event.data.doc)),
       flatMap(event => ctx.getDoc('contacts', event.data.doc)),
       filter(contact => contact != null),
-      flatMap(async contact => ({
+      map(contact => ({
         contactChanged: {
           contact,
           viewer: {},

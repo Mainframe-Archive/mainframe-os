@@ -14,7 +14,9 @@ import { type FormSubmitPayload } from '@morpheus-ui/forms'
 import PlusIcon from '@morpheus-ui/icons/PlusSymbolSm'
 import SearchIcon from '@morpheus-ui/icons/SearchSm'
 import { shell } from 'electron'
+import { utils } from 'ethers'
 import { debounce } from 'lodash'
+import memoize from 'memoize-one'
 import React, { Component } from 'react'
 import styled from 'styled-components/native'
 import {
@@ -35,14 +37,19 @@ import SvgSelectedPointer from '../../UIComponents/SVGSelectedPointer'
 import FormModalView from '../../UIComponents/FormModalView'
 import Loader from '../../UIComponents/Loader'
 import { InformationBox } from '../identities/IdentitiesView'
-import { EnvironmentContext } from '../RelayEnvironment'
 import RelayRenderer from '../RelayRenderer'
-import InviteContactModal, { type TransactionType } from './InviteContactModal'
+import InviteContactModal, {
+  type ContactInfo,
+  type TransactionType,
+} from './InviteContactModal'
+import Notification from './Notification'
 
 import type { ContactsScreen_user as User } from './__generated__/ContactsScreen_user.graphql'
 
-type Contacts = $PropertyType<User, 'contacts'>
-type Contact = $Call<<T>($ReadOnlyArray<T>) => T, Contacts>
+type ItemType<U> = $Call<<T>($ReadOnlyArray<T>) => T, U>
+type Contact = ItemType<$PropertyType<User, 'contacts'>>
+type ContactRequest = ItemType<$PropertyType<User, 'contactRequests'>>
+type EthWallets = $PropertyType<User, 'ethWallets'>
 
 const SvgSmallClose = props => (
   <svg width="10" height="10" viewBox="0 0 10 10" {...props}>
@@ -74,7 +81,6 @@ const ContactsListContainer = styled.View`
   height: 100vh;
   position: absolute;
   z-index: 1;
-  overflow-y: auto;
 `
 
 const ContactCard = styled.TouchableOpacity`
@@ -165,6 +171,11 @@ const AvatarWrapper = styled.View`
   flex-direction: row;
   align-items: center;
   margin-bottom: 20px;
+  ${props =>
+    props.marginTop &&
+    `  margin-bottom: 0px;
+    margin-top: 10px;
+  `}
 `
 
 const ContactName = styled.View``
@@ -188,6 +199,42 @@ export type SubmitContactInput = {
   name: String,
 }
 
+export type WalletBalances = {
+  eth: utils.BigNumber,
+  mft: utils.BigNumber,
+}
+
+export type WalletAccount = {
+  address: string,
+  balances: WalletBalances,
+}
+
+export type WalletAccounts = { [address: string]: WalletAccount }
+
+const formatBalances = (balances: WalletBalances): string => {
+  const eth = utils.formatEther(balances.eth)
+  const mft = utils.formatEther(balances.mft)
+  return `${eth} ETH | ${mft} MFT`
+}
+
+type GraphQLWalletAccount = {|
+  +address: string,
+  +balances: {|
+    +eth: string,
+    +mft: string,
+  |},
+|}
+
+const toWalletAccount = (account: GraphQLWalletAccount): WalletAccount => {
+  return {
+    address: account.address,
+    balances: {
+      eth: utils.parseEther(account.balances.eth),
+      mft: utils.parseEther(account.balances.mft),
+    },
+  }
+}
+
 type Props = {
   relay: {
     environment: Environment,
@@ -199,6 +246,7 @@ type State = {
   searching?: boolean,
   searchTerm?: ?string,
   selectedContact: Object,
+  selectedAddress: string,
   addModalState?: number,
   editModalOpen?: boolean,
   radio?: ?string,
@@ -209,7 +257,8 @@ type State = {
   addingContact?: ?boolean,
   inviteModalOpen?: ?{
     type: TransactionType,
-    contact: Contact,
+    contactInfo: ContactInfo,
+    invite?: any,
   },
   foundPeer?: {
     mainframeID: string,
@@ -220,6 +269,7 @@ type State = {
     publicID: string,
     publicKey: string,
   },
+  notification: string,
 }
 
 const CONTACTS_CHANGED_SUBSCRIPTION = graphql`
@@ -236,7 +286,15 @@ export const addContactMutation = graphql`
   mutation ContactsScreenAddContactMutation($input: AddContactInput!) {
     addContact(input: $input) {
       contact {
-        ...InviteContactModal_contact
+        localID
+        publicID
+        profile {
+          name
+          ethAddress
+        }
+        invite {
+          ...InviteContactModal_contactInvite
+        }
       }
       viewer {
         ...ContactsScreen_user
@@ -279,6 +337,8 @@ class ContactsView extends Component<Props, State> {
     const { user } = this.props
     this.state = {
       selectedContact: user.localID,
+      selectedAddress: user.profile.ethAddress || '',
+      notification: '',
     }
   }
 
@@ -294,7 +354,7 @@ class ContactsView extends Component<Props, State> {
     }
   }
 
-  getSelectedContact(): Contact {
+  getSelectedContact(): Contact | ContactRequest {
     const { selectedContact } = this.state
     return (
       this.getContact(selectedContact) ||
@@ -329,6 +389,10 @@ class ContactsView extends Component<Props, State> {
 
   openEditModal = () => {
     this.setState({ editModalOpen: true })
+  }
+
+  updateSelectedAddress = (selectedAddress: string) => {
+    this.setState({ selectedAddress })
   }
 
   closeModal = () => {
@@ -373,8 +437,13 @@ class ContactsView extends Component<Props, State> {
   sendInvite = async (contact: Contact) => {
     this.setState({
       inviteModalOpen: {
-        contact,
+        contactInfo: {
+          localID: contact.localID,
+          publicID: contact.publicID,
+          profile: contact.profile,
+        },
         type: 'invite',
+        invite: contact.invite,
       },
     })
 
@@ -406,11 +475,17 @@ class ContactsView extends Component<Props, State> {
           if (errors && errors.length) {
             requestComplete(errors[0].message)
           } else if (this.state.radio === 'blockchain') {
+            const { contact } = response.addContact
             this.setState({
               addModalState: 2,
               inviteModalOpen: {
-                contact: response.addContact.contact,
+                contactInfo: {
+                  localID: contact.localID,
+                  publicID: contact.publicID,
+                  profile: contact.profile,
+                },
                 type: 'invite',
+                invite: contact.invite,
               },
             })
           } else {
@@ -448,7 +523,7 @@ class ContactsView extends Component<Props, State> {
     })
   }
 
-  acceptContact = (contact: Contact) => {
+  acceptContact = (contactRequest: ContactRequest) => {
     this.setState({ error: null, addingContact: true })
 
     const requestComplete = error => {
@@ -462,7 +537,7 @@ class ContactsView extends Component<Props, State> {
       mutation: acceptContactRequestMutation,
       variables: {
         input: {
-          peerID: contact.peerID,
+          peerID: contactRequest.peerID,
         },
       },
       onCompleted: (contact, errors) => {
@@ -481,19 +556,35 @@ class ContactsView extends Component<Props, State> {
   withdrawStake = (contact: Contact) => {
     this.setState({
       inviteModalOpen: {
-        contact,
+        contactInfo: {
+          localID: contact.localID,
+          publicID: contact.publicID,
+          profile: contact.profile,
+        },
         type: 'retrieveStake',
       },
     })
   }
 
-  rejectContact = (contact: Contact) => {
+  rejectContact = (contactRequest: ContactRequest) => {
     this.setState({
       inviteModalOpen: {
-        contact,
+        contactInfo: {
+          localID: contactRequest.localID,
+          publicID: contactRequest.publicID,
+          profile: contactRequest.profile,
+        },
         type: 'declineInvite',
       },
     })
+  }
+
+  showNotification = (notification: string) => {
+    this.setState({ notification })
+  }
+
+  closeNotification = () => {
+    this.setState({ notification: '' })
   }
 
   getIdentity = () => {
@@ -507,6 +598,23 @@ class ContactsView extends Component<Props, State> {
       profile: user.profile,
     }
   }
+
+  getWalletAccounts = memoize(
+    (ethWallets: EthWallets): WalletAccounts => {
+      const wallets = {}
+      ethWallets.hd.forEach(w => {
+        w.accounts.forEach(a => {
+          wallets[a.address] = toWalletAccount(a)
+        })
+      })
+      ethWallets.ledger.forEach(w => {
+        w.accounts.forEach(a => {
+          wallets[a.address] = toWalletAccount(a)
+        })
+      })
+      return wallets
+    },
+  )
 
   isIdentitySelected = () => {
     return this.state.selectedContact === this.props.user.localID
@@ -608,8 +716,8 @@ class ContactsView extends Component<Props, State> {
     )
   }
 
-  renderAcceptIgnore = (contact: Contact) => {
-    if (contact.connectionState === 'RECEIVED') {
+  renderAcceptIgnore = (contactRequest: ContactRequest) => {
+    if (contactRequest.connectionState === 'RECEIVED') {
       return (
         <Row size={2}>
           <Column>
@@ -617,15 +725,15 @@ class ContactsView extends Component<Props, State> {
               variant={['mediumUppercase', 'redOutline']}
               theme={{ minWidth: '100%' }}
               title="ACCEPT"
-              onPress={() => this.acceptContact(contact)}
+              onPress={() => this.acceptContact(contactRequest)}
             />
           </Column>
           <Column>
             <Button
-              variant={['mediumUppercase', 'marginLeftt10']}
+              variant={['mediumUppercase', 'hoverShadow']}
               theme={{ minWidth: '100%' }}
               title="DECLINE & CLAIM MFT"
-              onPress={() => this.rejectContact(contact)}
+              onPress={() => this.rejectContact(contactRequest)}
             />
           </Column>
         </Row>
@@ -729,7 +837,7 @@ class ContactsView extends Component<Props, State> {
           <Text size={12} color="#232323">
             Blockchain invitation .{' '}
             <Text size={12} color="#DA1157">
-              Stake 100 MFT
+              Stake {this.props.user.contactInviteStake} MFT
             </Text>
           </Text>
           <Text color="#585858" size={11}>
@@ -833,11 +941,7 @@ class ContactsView extends Component<Props, State> {
         return <Loader />
       }
       case 'CONNECTED': {
-        if (
-          contact &&
-          contact.connectionState === 'CONNECTED' &&
-          contact.invite
-        ) {
+        if (contact.invite != null) {
           if (contact.invite.stakeState === 'STAKED') {
             return (
               <Row size={1}>
@@ -947,7 +1051,7 @@ class ContactsView extends Component<Props, State> {
           contact.invite
         ) {
           if (
-            contact.invite.stakeAmont &&
+            contact.invite.stakeAmount &&
             !contact.invite.reclaimedStakeTX &&
             contact.invite.stakeState !== 'RECLAIMING'
           ) {
@@ -1087,28 +1191,76 @@ class ContactsView extends Component<Props, State> {
           </Row>
           {/* <Row size={1}>
               <Column styles="margin-top: 10px;">
-                <Button
-                  onPress={this.openEditModal}
-                  variant={['small', 'completeOnboarding']}
-                  title="EDIT"
-                />
+            <Button
+            onPress={this.openEditModal}
+            variant={['small', 'completeOnboarding']}
+            title="EDIT"
+            />
               </Column>
-            </Row> */}
+          </Row> */}
         </ScrollView>
       </RightContainer>
     )
   }
 
-  renderInviteModal() {
-    return (
-      this.state.inviteModalOpen && (
-        <InviteContactModal
-          closeModal={this.closeModal}
-          contact={this.state.inviteModalOpen.contact}
-          user={this.props.user}
-          type={this.state.inviteModalOpen.type}
+  renderNotificationModal() {
+    const { user } = this.props
+    const { selectedAddress, notification } = this.state
+    const deletedContact = this.state.inviteModalOpen
+      ? this.state.inviteModalOpen.contactInfo.profile
+      : null
+
+    if (notification === 'withdraw' || notification === 'decline') {
+      const wallets = this.getWalletAccounts(user.ethWallets)
+      const balances = formatBalances(wallets[selectedAddress].balances)
+
+      return (
+        <Notification
+          message={`${
+            user.contactInviteStake
+          } MFT have been added to your wallet.`}
+          address={selectedAddress}
+          firstLine={selectedAddress}
+          secondLine={balances}
+          onRequestClose={this.closeNotification}
         />
       )
+    } else if (this.state.notification === 'delete' && deletedContact) {
+      const name = deletedContact.name ? deletedContact.name : 'Contact'
+      const ethAddress = deletedContact.ethAddress
+        ? deletedContact.ethAddress
+        : ''
+      return (
+        <Notification
+          message={name + ' has been deleted.'}
+          address={ethAddress}
+          firstLine={name}
+          secondLine={ethAddress}
+          onRequestClose={this.closeNotification}
+        />
+      )
+    }
+  }
+
+  renderInviteModal() {
+    const { inviteModalOpen, selectedAddress } = this.state
+    const { user } = this.props
+    const wallets = this.getWalletAccounts(user.ethWallets)
+
+    return inviteModalOpen == null ? null : (
+      // $FlowFixMe: Relay fragment type
+      <InviteContactModal
+        closeModal={this.closeModal}
+        showNotification={this.showNotification}
+        contactInfo={inviteModalOpen.contactInfo}
+        contactInvite={inviteModalOpen.invite}
+        // $FlowFixMe: Relay fragment type
+        user={user}
+        type={inviteModalOpen.type}
+        updateSelectedAddress={this.updateSelectedAddress}
+        selectedAddress={selectedAddress}
+        wallets={wallets}
+      />
     )
   }
 
@@ -1170,6 +1322,7 @@ class ContactsView extends Component<Props, State> {
         {this.renderAddNewContactForm()}
         {this.renderEditModal()}
         {this.renderInviteModal()}
+        {this.renderNotificationModal()}
       </Container>
     )
   }
@@ -1178,12 +1331,14 @@ class ContactsView extends Component<Props, State> {
 const RelayContainer = createFragmentContainer(ContactsView, {
   user: graphql`
     fragment ContactsScreen_user on User {
+      ...InviteContactModal_user
       localID
       publicID
       profile {
         name
         ethAddress
       }
+      contactInviteStake
       contactRequests {
         localID
         publicID
@@ -1196,15 +1351,17 @@ const RelayContainer = createFragmentContainer(ContactsView, {
         ethNetwork
         stakeAmount
         receivedAddress
+        senderAddress
       }
       contacts {
-        # ...InviteContactModal_contact
         localID
         peerID
         publicID
         connectionState
         invite {
+          ...InviteContactModal_contactInvite
           ethNetwork
+          fromAddress
           inviteTX
           stakeState
           stakeAmount
@@ -1213,6 +1370,30 @@ const RelayContainer = createFragmentContainer(ContactsView, {
         profile {
           name
           ethAddress
+        }
+      }
+      ethWallets {
+        hd {
+          name
+          localID
+          accounts {
+            address
+            balances {
+              eth
+              mft
+            }
+          }
+        }
+        ledger {
+          name
+          localID
+          accounts {
+            address
+            balances {
+              eth
+              mft
+            }
+          }
         }
       }
     }

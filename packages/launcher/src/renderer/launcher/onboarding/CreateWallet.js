@@ -104,7 +104,6 @@ export default class OnboardingCreateWallet extends Component<{}, State> {
       <WalletCreateModal
         onClose={this.closeModal}
         onSetupWallet={this.onSetupWallet}
-        setAsDefault
         full
       />
     )

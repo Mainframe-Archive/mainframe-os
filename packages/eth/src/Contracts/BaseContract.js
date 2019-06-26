@@ -128,14 +128,6 @@ export default class Contract {
     }
 
     const encodedSig = Web3EthAbi.encodeEventSignature(abi)
-    const inputs = [
-      {
-        indexed: true,
-        name: 'signature',
-        type: 'string',
-      },
-      ...abi.inputs,
-    ]
     const topics = [encodedSig].concat(params.topics || [])
     params.address = this.address
 

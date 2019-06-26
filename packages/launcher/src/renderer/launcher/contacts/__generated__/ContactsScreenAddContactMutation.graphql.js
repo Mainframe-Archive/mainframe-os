@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 0024ffad7fb2008b7dd5a380f59c3df1
+ * @relayHash 4c000180328d78dbe08fca2f6f286ef7
  */
 
 /* eslint-disable */
@@ -10,7 +10,7 @@
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
 type ContactsScreen_user$ref = any;
-type InviteContactModal_contact$ref = any;
+type InviteContactModal_contactInvite$ref = any;
 export type AddContactInput = {
   publicID: string,
   aliasName?: ?string,
@@ -22,7 +22,15 @@ export type ContactsScreenAddContactMutationVariables = {|
 export type ContactsScreenAddContactMutationResponse = {|
   +addContact: ?{|
     +contact: ?{|
-      +$fragmentRefs: InviteContactModal_contact$ref
+      +localID: string,
+      +publicID: string,
+      +profile: {|
+        +name: ?string,
+        +ethAddress: ?string,
+      |},
+      +invite: ?{|
+        +$fragmentRefs: InviteContactModal_contactInvite$ref
+      |},
     |},
     +viewer: {|
       +$fragmentRefs: ContactsScreen_user$ref
@@ -42,7 +50,15 @@ mutation ContactsScreenAddContactMutation(
 ) {
   addContact(input: $input) {
     contact {
-      ...InviteContactModal_contact
+      localID
+      publicID
+      profile {
+        name
+        ethAddress
+      }
+      invite {
+        ...InviteContactModal_contactInvite
+      }
       id
     }
     viewer {
@@ -52,31 +68,24 @@ mutation ContactsScreenAddContactMutation(
   }
 }
 
-fragment InviteContactModal_contact on Contact {
-  localID
-  peerID
-  publicID
-  connectionState
-  invite {
-    ethNetwork
-    inviteTX
-    stakeState
-    stakeAmount
-    reclaimedStakeTX
-  }
-  profile {
-    name
-    ethAddress
-  }
+fragment InviteContactModal_contactInvite on ContactInvite {
+  ethNetwork
+  fromAddress
+  inviteTX
+  stakeState
+  stakeAmount
+  reclaimedStakeTX
 }
 
 fragment ContactsScreen_user on User {
+  ...InviteContactModal_user
   localID
   publicID
   profile {
     name
     ethAddress
   }
+  contactInviteStake
   contactRequests {
     localID
     publicID
@@ -89,6 +98,7 @@ fragment ContactsScreen_user on User {
     ethNetwork
     stakeAmount
     receivedAddress
+    senderAddress
     id
   }
   contacts {
@@ -97,7 +107,9 @@ fragment ContactsScreen_user on User {
     publicID
     connectionState
     invite {
+      ...InviteContactModal_contactInvite
       ethNetwork
+      fromAddress
       inviteTX
       stakeState
       stakeAmount
@@ -108,6 +120,39 @@ fragment ContactsScreen_user on User {
       ethAddress
     }
     id
+  }
+  ethWallets {
+    hd {
+      name
+      localID
+      accounts {
+        address
+        balances {
+          eth
+          mft
+        }
+      }
+      id
+    }
+    ledger {
+      name
+      localID
+      accounts {
+        address
+        balances {
+          eth
+          mft
+        }
+      }
+      id
+    }
+  }
+}
+
+fragment InviteContactModal_user on User {
+  contactInviteStake
+  profile {
+    ethAddress
   }
 }
 */
@@ -139,55 +184,25 @@ v2 = {
 v3 = {
   "kind": "ScalarField",
   "alias": null,
-  "name": "peerID",
+  "name": "publicID",
   "args": null,
   "storageKey": null
 },
 v4 = {
   "kind": "ScalarField",
   "alias": null,
-  "name": "publicID",
+  "name": "name",
   "args": null,
   "storageKey": null
 },
 v5 = {
   "kind": "ScalarField",
   "alias": null,
-  "name": "connectionState",
+  "name": "ethAddress",
   "args": null,
   "storageKey": null
 },
 v6 = {
-  "kind": "ScalarField",
-  "alias": null,
-  "name": "ethNetwork",
-  "args": null,
-  "storageKey": null
-},
-v7 = {
-  "kind": "ScalarField",
-  "alias": null,
-  "name": "stakeAmount",
-  "args": null,
-  "storageKey": null
-},
-v8 = [
-  {
-    "kind": "ScalarField",
-    "alias": null,
-    "name": "name",
-    "args": null,
-    "storageKey": null
-  },
-  {
-    "kind": "ScalarField",
-    "alias": null,
-    "name": "ethAddress",
-    "args": null,
-    "storageKey": null
-  }
-],
-v9 = {
   "kind": "LinkedField",
   "alias": null,
   "name": "profile",
@@ -195,7 +210,65 @@ v9 = {
   "args": null,
   "concreteType": "GenericProfile",
   "plural": false,
-  "selections": v8
+  "selections": [
+    v4,
+    v5
+  ]
+},
+v7 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "ethNetwork",
+  "args": null,
+  "storageKey": null
+},
+v8 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "stakeAmount",
+  "args": null,
+  "storageKey": null
+},
+v9 = {
+  "kind": "LinkedField",
+  "alias": null,
+  "name": "invite",
+  "storageKey": null,
+  "args": null,
+  "concreteType": "ContactInvite",
+  "plural": false,
+  "selections": [
+    v7,
+    {
+      "kind": "ScalarField",
+      "alias": null,
+      "name": "fromAddress",
+      "args": null,
+      "storageKey": null
+    },
+    {
+      "kind": "ScalarField",
+      "alias": null,
+      "name": "inviteTX",
+      "args": null,
+      "storageKey": null
+    },
+    {
+      "kind": "ScalarField",
+      "alias": null,
+      "name": "stakeState",
+      "args": null,
+      "storageKey": null
+    },
+    v8,
+    {
+      "kind": "ScalarField",
+      "alias": null,
+      "name": "reclaimedStakeTX",
+      "args": null,
+      "storageKey": null
+    }
+  ]
 },
 v10 = {
   "kind": "ScalarField",
@@ -204,46 +277,66 @@ v10 = {
   "args": null,
   "storageKey": null
 },
-v11 = [
-  v2,
-  v3,
+v11 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "peerID",
+  "args": null,
+  "storageKey": null
+},
+v12 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "connectionState",
+  "args": null,
+  "storageKey": null
+},
+v13 = [
   v4,
-  v5,
+  v2,
   {
     "kind": "LinkedField",
     "alias": null,
-    "name": "invite",
+    "name": "accounts",
     "storageKey": null,
     "args": null,
-    "concreteType": "ContactInvite",
-    "plural": false,
+    "concreteType": "WalletAccount",
+    "plural": true,
     "selections": [
-      v6,
       {
         "kind": "ScalarField",
         "alias": null,
-        "name": "inviteTX",
+        "name": "address",
         "args": null,
         "storageKey": null
       },
       {
-        "kind": "ScalarField",
+        "kind": "LinkedField",
         "alias": null,
-        "name": "stakeState",
+        "name": "balances",
+        "storageKey": null,
         "args": null,
-        "storageKey": null
-      },
-      v7,
-      {
-        "kind": "ScalarField",
-        "alias": null,
-        "name": "reclaimedStakeTX",
-        "args": null,
-        "storageKey": null
+        "concreteType": "WalletBalances",
+        "plural": false,
+        "selections": [
+          {
+            "kind": "ScalarField",
+            "alias": null,
+            "name": "eth",
+            "args": null,
+            "storageKey": null
+          },
+          {
+            "kind": "ScalarField",
+            "alias": null,
+            "name": "mft",
+            "args": null,
+            "storageKey": null
+          }
+        ]
       }
     ]
   },
-  v9,
   v10
 ];
 return {
@@ -251,7 +344,7 @@ return {
   "operationKind": "mutation",
   "name": "ContactsScreenAddContactMutation",
   "id": null,
-  "text": "mutation ContactsScreenAddContactMutation(\n  $input: AddContactInput!\n) {\n  addContact(input: $input) {\n    contact {\n      ...InviteContactModal_contact\n      id\n    }\n    viewer {\n      ...ContactsScreen_user\n      id\n    }\n  }\n}\n\nfragment InviteContactModal_contact on Contact {\n  localID\n  peerID\n  publicID\n  connectionState\n  invite {\n    ethNetwork\n    inviteTX\n    stakeState\n    stakeAmount\n    reclaimedStakeTX\n  }\n  profile {\n    name\n    ethAddress\n  }\n}\n\nfragment ContactsScreen_user on User {\n  localID\n  publicID\n  profile {\n    name\n    ethAddress\n  }\n  contactRequests {\n    localID\n    publicID\n    peerID\n    profile {\n      name\n      ethAddress\n    }\n    connectionState\n    ethNetwork\n    stakeAmount\n    receivedAddress\n    id\n  }\n  contacts {\n    localID\n    peerID\n    publicID\n    connectionState\n    invite {\n      ethNetwork\n      inviteTX\n      stakeState\n      stakeAmount\n      reclaimedStakeTX\n    }\n    profile {\n      name\n      ethAddress\n    }\n    id\n  }\n}\n",
+  "text": "mutation ContactsScreenAddContactMutation(\n  $input: AddContactInput!\n) {\n  addContact(input: $input) {\n    contact {\n      localID\n      publicID\n      profile {\n        name\n        ethAddress\n      }\n      invite {\n        ...InviteContactModal_contactInvite\n      }\n      id\n    }\n    viewer {\n      ...ContactsScreen_user\n      id\n    }\n  }\n}\n\nfragment InviteContactModal_contactInvite on ContactInvite {\n  ethNetwork\n  fromAddress\n  inviteTX\n  stakeState\n  stakeAmount\n  reclaimedStakeTX\n}\n\nfragment ContactsScreen_user on User {\n  ...InviteContactModal_user\n  localID\n  publicID\n  profile {\n    name\n    ethAddress\n  }\n  contactInviteStake\n  contactRequests {\n    localID\n    publicID\n    peerID\n    profile {\n      name\n      ethAddress\n    }\n    connectionState\n    ethNetwork\n    stakeAmount\n    receivedAddress\n    senderAddress\n    id\n  }\n  contacts {\n    localID\n    peerID\n    publicID\n    connectionState\n    invite {\n      ...InviteContactModal_contactInvite\n      ethNetwork\n      fromAddress\n      inviteTX\n      stakeState\n      stakeAmount\n      reclaimedStakeTX\n    }\n    profile {\n      name\n      ethAddress\n    }\n    id\n  }\n  ethWallets {\n    hd {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n    ledger {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n  }\n}\n\nfragment InviteContactModal_user on User {\n  contactInviteStake\n  profile {\n    ethAddress\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -278,10 +371,24 @@ return {
             "concreteType": "Contact",
             "plural": false,
             "selections": [
+              v2,
+              v3,
+              v6,
               {
-                "kind": "FragmentSpread",
-                "name": "InviteContactModal_contact",
-                "args": null
+                "kind": "LinkedField",
+                "alias": null,
+                "name": "invite",
+                "storageKey": null,
+                "args": null,
+                "concreteType": "ContactInvite",
+                "plural": false,
+                "selections": [
+                  {
+                    "kind": "FragmentSpread",
+                    "name": "InviteContactModal_contactInvite",
+                    "args": null
+                  }
+                ]
               }
             ]
           },
@@ -327,7 +434,13 @@ return {
             "args": null,
             "concreteType": "Contact",
             "plural": false,
-            "selections": v11
+            "selections": [
+              v2,
+              v3,
+              v6,
+              v9,
+              v10
+            ]
           },
           {
             "kind": "LinkedField",
@@ -338,8 +451,13 @@ return {
             "concreteType": "User",
             "plural": false,
             "selections": [
-              v2,
-              v4,
+              {
+                "kind": "ScalarField",
+                "alias": null,
+                "name": "contactInviteStake",
+                "args": null,
+                "storageKey": null
+              },
               {
                 "kind": "LinkedField",
                 "alias": null,
@@ -348,8 +466,13 @@ return {
                 "args": null,
                 "concreteType": "NamedProfile",
                 "plural": false,
-                "selections": v8
+                "selections": [
+                  v5,
+                  v4
+                ]
               },
+              v2,
+              v3,
               {
                 "kind": "LinkedField",
                 "alias": null,
@@ -360,16 +483,23 @@ return {
                 "plural": true,
                 "selections": [
                   v2,
-                  v4,
                   v3,
-                  v9,
-                  v5,
+                  v11,
                   v6,
+                  v12,
                   v7,
+                  v8,
                   {
                     "kind": "ScalarField",
                     "alias": null,
                     "name": "receivedAddress",
+                    "args": null,
+                    "storageKey": null
+                  },
+                  {
+                    "kind": "ScalarField",
+                    "alias": null,
+                    "name": "senderAddress",
                     "args": null,
                     "storageKey": null
                   },
@@ -384,7 +514,46 @@ return {
                 "args": null,
                 "concreteType": "Contact",
                 "plural": true,
-                "selections": v11
+                "selections": [
+                  v2,
+                  v11,
+                  v3,
+                  v12,
+                  v9,
+                  v6,
+                  v10
+                ]
+              },
+              {
+                "kind": "LinkedField",
+                "alias": null,
+                "name": "ethWallets",
+                "storageKey": null,
+                "args": null,
+                "concreteType": "EthWallets",
+                "plural": false,
+                "selections": [
+                  {
+                    "kind": "LinkedField",
+                    "alias": null,
+                    "name": "hd",
+                    "storageKey": null,
+                    "args": null,
+                    "concreteType": "EthHDWallet",
+                    "plural": true,
+                    "selections": v13
+                  },
+                  {
+                    "kind": "LinkedField",
+                    "alias": null,
+                    "name": "ledger",
+                    "storageKey": null,
+                    "args": null,
+                    "concreteType": "EthLedgerWallet",
+                    "plural": true,
+                    "selections": v13
+                  }
+                ]
               },
               v10
             ]
@@ -396,5 +565,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '783f30393c80fef02966e627d3060f77';
+(node/*: any*/).hash = 'f2bdc09a3bcce6505d7f5e99e1b9b9b0';
 module.exports = node;

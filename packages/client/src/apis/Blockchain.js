@@ -15,6 +15,14 @@ export default class BlockchainAPIs extends ClientAPIs {
     return this._rpc.request('blockchain_ethSend', params)
   }
 
+  getContractRecipientAddress(params: { userID: string, peerID: string }) {
+    return this._rpc.request('blockchain_getContractRecipientAddress', params)
+  }
+
+  getContractOriginAddress(params: { userID: string, peerID: string }) {
+    return this._rpc.request('blockchain_getContractOriginAddress', params)
+  }
+
   getInviteTXDetails(params: {
     type: 'approve' | 'sendInvite',
     userID: string,
