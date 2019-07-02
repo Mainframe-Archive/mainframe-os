@@ -15,7 +15,7 @@ type Props = {
   id?: boolean,
   wallet?: boolean,
   tooltipContent?: ?any,
-  step?: 1 | 2 | 3,
+  step?: 1 | 2 | 3 | 4,
 }
 
 const Container = styled.View`
@@ -34,7 +34,7 @@ const BgGraphicContainer = styled.View`
   height: 575;
 `
 const Content = styled.View`
-  max-width: 400;
+  max-width: 500;
   margin-left: 100;
 `
 
@@ -88,6 +88,7 @@ export default function OnboardingFlowContainer(props: Props) {
       <StepIndicator selected={props.step === 1}>1</StepIndicator>
       <StepIndicator selected={props.step === 2}>2</StepIndicator>
       <StepIndicator selected={props.step === 3}>3</StepIndicator>
+      <StepIndicator selected={props.step === 4}>4</StepIndicator>
       {/*eslint-enable react-native/no-raw-text */}
     </Steps>
   ) : null

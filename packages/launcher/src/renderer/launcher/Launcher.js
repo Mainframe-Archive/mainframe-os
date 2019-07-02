@@ -89,9 +89,10 @@ type Props = {
     environment: Environment,
   },
   showAlert: (message: string, timeout?: number) => void,
+  defaultEthAddress?: string,
 }
 
-type OnboardSteps = 'identity' | 'wallet'
+type OnboardSteps = 'identity' | 'wallet' | 'fiat'
 
 type State = {
   openScreen: ScreenNames,
@@ -115,7 +116,8 @@ class Launcher extends Component<Props, State> {
       onboardRequired = 'wallet'
     }
     this.state = {
-      onboardRequired,
+      // onboardRequired,
+      onboardRequired: 'fiat',
       openScreen: 'apps',
     }
     this._ethClient = new EthClient(ethClientProvider)
@@ -173,11 +175,15 @@ class Launcher extends Component<Props, State> {
     const { onboardRequired } = this.state
 
     if (onboardRequired) {
+      console.log('hereeeeee')
       return (
         <OnboardView
           startState={onboardRequired}
           onboardComplete={this.onboardComplete}
           userID={ownUsers && ownUsers.length ? ownUsers[0].localID : null}
+          defaultEthAddress={
+            ownUsers && ownUsers.length ? ownUsers[0].defaultEthAddress : null
+          }
         />
       )
     }
@@ -202,27 +208,27 @@ class Launcher extends Component<Props, State> {
 }
 
 const LauncherRelayContainer = createFragmentContainer(Launcher, {
-  // identities: graphql`
-  //   fragment Launcher_identities on Identities {
-  //     ownUsers {
-  //       defaultEthAddress
-  //       localID
-  //       feedHash
-  //       profile {
-  //         name
-  //         ethAddress
-  //       }
-  //       wallets {
-  //         hd {
-  //           localID
-  //         }
-  //         ledger {
-  //           localID
-  //         }
-  //       }
-  //     }
-  //   }
-  // `,
+  identities: graphql`
+    fragment Launcher_identities on Identities {
+      ownUsers {
+        defaultEthAddress
+        localID
+        feedHash
+        profile {
+          name
+          ethAddress
+        }
+        wallets {
+          hd {
+            localID
+          }
+          ledger {
+            localID
+          }
+        }
+      }
+    }
+  `,
 })
 
 export default class LauncherQueryRenderer extends Component<{}> {
