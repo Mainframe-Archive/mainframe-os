@@ -56,6 +56,6 @@ export default {
       default: false,
     },
     permissionsGrants,
-    // TODO: storage keyPair
+    // TODO: storage keyPair - also communications one?
   },
 }

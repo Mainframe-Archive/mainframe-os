@@ -43,6 +43,7 @@ export type AppDetailsScreen_app = {|
   +latestPublishedVersion: ?{|
     +version: string
   |},
+  +viewerOwnAppID: string,
   +$refType: AppDetailsScreen_app$ref,
 |};
 */
@@ -201,10 +202,17 @@ return {
       "selections": [
         v2
       ]
+    },
+    {
+      "kind": "ScalarField",
+      "alias": null,
+      "name": "viewerOwnAppID",
+      "args": null,
+      "storageKey": null
     }
   ]
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '30e8a428dc8a96767edffc72734fe3a6';
+(node/*: any*/).hash = '7d3885712fa2ec0adf3f11a56a46a505';
 module.exports = node;

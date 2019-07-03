@@ -59,7 +59,7 @@ export default async (
     },
     methods: {
       getPermissions(): StrictPermissionsGrants {
-        const webRequest = this.permissions.WEB_REQUEST || {}
+        const webRequest = this.permissionsGrants.WEB_REQUEST || {}
         if (webRequest.denied == null) {
           webRequest.denied = []
         }
@@ -68,9 +68,10 @@ export default async (
         }
         return {
           CONTACT_COMMUNICATION:
-            this.permissions.CONTACT_COMMUNICATION || false,
-          CONTACT_LIST: this.permissions.CONTACT_LIST || false,
-          ETHEREUM_TRANSACTION: this.permissions.ETHEREUM_TRANSACTION || false,
+            this.permissionsGrants.CONTACT_COMMUNICATION || false,
+          CONTACT_LIST: this.permissionsGrants.CONTACT_LIST || false,
+          ETHEREUM_TRANSACTION:
+            this.permissionsGrants.ETHEREUM_TRANSACTION || false,
           WEB_REQUEST: webRequest,
         }
       },

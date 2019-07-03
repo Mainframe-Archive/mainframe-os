@@ -284,9 +284,8 @@ class AppDetails extends Component<Props, State> {
   }
 
   onPressOpenApp = async () => {
-    const { user, ownApp } = this.props
     try {
-      await rpc.launchApp(ownApp.localID, user.localID)
+      await rpc.openOwnApp(this.props.app.viewerOwnAppID)
     } catch (err) {
       this.setState({
         errorMsg: err.message,
@@ -558,6 +557,7 @@ const RelayContainer = createFragmentContainer(AppDetails, {
       latestPublishedVersion {
         version
       }
+      viewerOwnAppID
     }
   `,
 })

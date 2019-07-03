@@ -25,10 +25,6 @@ export default {
     client.notify('log', info)
   },
 
-  async openLauncher(userID?: ?string): Promise<void> {
-    await client.request('launcher_open', { userID })
-  },
-
   // DB
 
   async createDB(password: string, save?: boolean = false): Promise<void> {
@@ -112,6 +108,16 @@ export default {
 
       return unsubscribe
     })
+  },
+
+  // Windows
+
+  async openOwnApp(userOwnAppID: string): Promise<void> {
+    await client.request('window_openOwnApp', { userOwnAppID })
+  },
+
+  async openLauncher(userID?: ?string): Promise<void> {
+    await client.request('window_openLauncher', { userID })
   },
 
   // -- old stuff below --

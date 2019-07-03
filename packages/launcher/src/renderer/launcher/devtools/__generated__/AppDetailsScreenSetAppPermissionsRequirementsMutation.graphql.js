@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash d6df70f3d4cd0ccb6bbf30c54adce679
+ * @relayHash 6f2223bb864cc90807616826e7e3de31
  */
 
 /* eslint-disable */
@@ -88,6 +88,7 @@ fragment AppDetailsScreen_app on OwnApp {
   latestPublishedVersion {
     version
   }
+  viewerOwnAppID
 }
 */
 
@@ -182,7 +183,7 @@ return {
   "operationKind": "mutation",
   "name": "AppDetailsScreenSetAppPermissionsRequirementsMutation",
   "id": null,
-  "text": "mutation AppDetailsScreenSetAppPermissionsRequirementsMutation(\n  $input: SetAppPermissionsRequirementsInput!\n) {\n  setAppPermissionsRequirements(input: $input) {\n    app {\n      ...AppDetailsScreen_app\n      id\n    }\n  }\n}\n\nfragment AppDetailsScreen_app on OwnApp {\n  localID\n  publicID\n  profile {\n    name\n  }\n  contentsPath\n  developer {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n  inProgressVersion {\n    version\n    permissions {\n      optional {\n        CONTACT_COMMUNICATION\n        CONTACT_LIST\n        ETHEREUM_TRANSACTION\n        WEB_REQUEST\n      }\n      required {\n        CONTACT_COMMUNICATION\n        CONTACT_LIST\n        ETHEREUM_TRANSACTION\n        WEB_REQUEST\n      }\n    }\n  }\n  latestPublishedVersion {\n    version\n  }\n}\n",
+  "text": "mutation AppDetailsScreenSetAppPermissionsRequirementsMutation(\n  $input: SetAppPermissionsRequirementsInput!\n) {\n  setAppPermissionsRequirements(input: $input) {\n    app {\n      ...AppDetailsScreen_app\n      id\n    }\n  }\n}\n\nfragment AppDetailsScreen_app on OwnApp {\n  localID\n  publicID\n  profile {\n    name\n  }\n  contentsPath\n  developer {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n  inProgressVersion {\n    version\n    permissions {\n      optional {\n        CONTACT_COMMUNICATION\n        CONTACT_LIST\n        ETHEREUM_TRANSACTION\n        WEB_REQUEST\n      }\n      required {\n        CONTACT_COMMUNICATION\n        CONTACT_LIST\n        ETHEREUM_TRANSACTION\n        WEB_REQUEST\n      }\n    }\n  }\n  latestPublishedVersion {\n    version\n  }\n  viewerOwnAppID\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -327,6 +328,13 @@ return {
                 "selections": [
                   v5
                 ]
+              },
+              {
+                "kind": "ScalarField",
+                "alias": null,
+                "name": "viewerOwnAppID",
+                "args": null,
+                "storageKey": null
               },
               v4
             ]

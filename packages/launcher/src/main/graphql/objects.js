@@ -401,13 +401,16 @@ export const ownApp = new GraphQLObjectType({
       type: ownAppVersion,
       resolve: doc => doc.getLatestPublishedVersion(),
     },
-    viewerAppSettings: {
-      type: userAppSettings,
+    viewerOwnAppID: {
+      type: new GraphQLNonNull(GraphQLID),
       resolve: async (doc, args, ctx) => {
-        return await ctx.db.user_app_settings
-          .findOne({ ownApp: doc.localID, user: ctx.userID })
-          .exec()
+        const userOwnApp = await doc.getUserOwnApp(ctx.userID)
+        return userOwnApp.localID
       },
+    },
+    viewerAppSettings: {
+      type: new GraphQLNonNull(userAppSettings),
+      resolve: (doc, args, ctx) => doc.getUserAppSettings(ctx.userID),
     },
   }),
 })

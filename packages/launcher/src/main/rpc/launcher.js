@@ -91,7 +91,39 @@ export default {
 
   // Windows management
 
-  launcher_open: {
+  window_openApp: {
+    params: {
+      userAppVersionID: {
+        type: 'string',
+      },
+    },
+    async handler(
+      ctx: LauncherContext,
+      params: { userAppVersionID: string },
+    ): Promise<void> {
+      const { userAppVersionID } = params
+      ctx.logger.log({ level: 'debug', message: 'Open app', userAppVersionID })
+      await ctx.system.openAppVersion(userAppVersionID)
+    },
+  },
+
+  window_openOwnApp: {
+    params: {
+      userOwnAppID: {
+        type: 'string',
+      },
+    },
+    async handler(
+      ctx: LauncherContext,
+      params: { userOwnAppID: string },
+    ): Promise<void> {
+      const { userOwnAppID } = params
+      ctx.logger.log({ level: 'debug', message: 'Open own app', userOwnAppID })
+      await ctx.system.openOwnApp(userOwnAppID)
+    },
+  },
+
+  window_openLauncher: {
     params: {
       userID: {
         type: 'string',

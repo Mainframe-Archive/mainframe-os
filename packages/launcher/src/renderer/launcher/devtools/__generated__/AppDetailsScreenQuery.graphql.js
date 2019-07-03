@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash f7d5e49b9e8603db8750245272c0324b
+ * @relayHash dcdd1a62724e13a474344237e4e15a30
  */
 
 /* eslint-disable */
@@ -72,6 +72,7 @@ fragment AppDetailsScreen_app on OwnApp {
   latestPublishedVersion {
     version
   }
+  viewerOwnAppID
 }
 */
 
@@ -166,7 +167,7 @@ return {
   "operationKind": "query",
   "name": "AppDetailsScreenQuery",
   "id": null,
-  "text": "query AppDetailsScreenQuery(\n  $appID: ID!\n) {\n  app: node(id: $appID) {\n    __typename\n    ... on OwnApp {\n      ...AppDetailsScreen_app\n    }\n    id\n  }\n}\n\nfragment AppDetailsScreen_app on OwnApp {\n  localID\n  publicID\n  profile {\n    name\n  }\n  contentsPath\n  developer {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n  inProgressVersion {\n    version\n    permissions {\n      optional {\n        CONTACT_COMMUNICATION\n        CONTACT_LIST\n        ETHEREUM_TRANSACTION\n        WEB_REQUEST\n      }\n      required {\n        CONTACT_COMMUNICATION\n        CONTACT_LIST\n        ETHEREUM_TRANSACTION\n        WEB_REQUEST\n      }\n    }\n  }\n  latestPublishedVersion {\n    version\n  }\n}\n",
+  "text": "query AppDetailsScreenQuery(\n  $appID: ID!\n) {\n  app: node(id: $appID) {\n    __typename\n    ... on OwnApp {\n      ...AppDetailsScreen_app\n    }\n    id\n  }\n}\n\nfragment AppDetailsScreen_app on OwnApp {\n  localID\n  publicID\n  profile {\n    name\n  }\n  contentsPath\n  developer {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n  inProgressVersion {\n    version\n    permissions {\n      optional {\n        CONTACT_COMMUNICATION\n        CONTACT_LIST\n        ETHEREUM_TRANSACTION\n        WEB_REQUEST\n      }\n      required {\n        CONTACT_COMMUNICATION\n        CONTACT_LIST\n        ETHEREUM_TRANSACTION\n        WEB_REQUEST\n      }\n    }\n  }\n  latestPublishedVersion {\n    version\n  }\n  viewerOwnAppID\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -309,6 +310,13 @@ return {
                 "selections": [
                   v5
                 ]
+              },
+              {
+                "kind": "ScalarField",
+                "alias": null,
+                "name": "viewerOwnAppID",
+                "args": null,
+                "storageKey": null
               }
             ]
           }

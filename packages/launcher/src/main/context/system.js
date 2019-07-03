@@ -9,6 +9,7 @@ import { createDB } from '../db'
 import type { DB } from '../db/types'
 import type { Environment } from '../environment'
 import type { Logger } from '../logger'
+import { createChannels } from '../rpc'
 import { createAppWindow, createLauncherWindow } from '../windows'
 
 import { AppContext, AppSession } from './app'
@@ -47,6 +48,9 @@ export class SystemContext {
     })
     this.env = params.env
     this.logger = params.logger.child({ context: 'system' })
+
+    createChannels(this)
+
     this.logger.log({
       level: 'debug',
       message: 'System context created',
@@ -241,9 +245,9 @@ export class SystemContext {
     })
 
     this._apps[id] = ctx
-    this._appsByTrustedContents.set(window.webContents, id)
+    this._appsByTrustedContents.set(ctx.window.webContents, id)
 
-    window.webContents.on('did-attach-webview', (event, webContents) => {
+    ctx.window.webContents.on('did-attach-webview', (event, webContents) => {
       webContents.on('destroyed', () => {
         this._appsBySandboxContents.delete(webContents)
         ctx.sandbox = null

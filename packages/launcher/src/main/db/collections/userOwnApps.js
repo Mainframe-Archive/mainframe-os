@@ -28,6 +28,7 @@ export type UserOwnAppDoc = UserOwnAppData &
 
 type UserOwnAppStatics = {|
   createFor(userID: string, ownApp: OwnAppDoc): Promise<UserOwnAppDoc>,
+  getOrCreateFor(userID: string, ownApp: OwnAppDoc): Promise<UserOwnAppDoc>,
 |}
 
 export type UserOwnAppsCollection = Collection<UserOwnAppData> &
@@ -58,9 +59,20 @@ export default async (
         return await this.insert({
           localID: generateLocalID(),
           ownApp: app.localID,
-          settings,
+          settings: settings.localID,
           user: userID,
         })
+      },
+
+      async getOrCreateFor(
+        userID: string,
+        app: OwnAppDoc,
+      ): Promise<UserOwnAppDoc> {
+        const existing = await this.findOne({
+          user: userID,
+          ownApp: app.localID,
+        }).exec()
+        return existing ? existing : await this.createFor(userID, app)
       },
     },
     methods: {

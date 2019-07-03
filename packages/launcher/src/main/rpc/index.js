@@ -10,10 +10,8 @@ import {
   LAUNCHER_CHANNEL,
 } from '../../constants'
 
-import { LauncherContext } from '../context/launcher'
+import type { SystemContext } from '../context/system'
 import type { Logger } from '../logger'
-
-import type { AppContext } from '../contexts'
 
 import { sandboxed as sandboxedMethods, trusted as trustedMethods } from './app'
 import launcherMethods from './launcher'
@@ -52,6 +50,10 @@ const createChannel = (params: ChannelParams) => {
   ipcMain.on(params.name, async (event, incoming) => {
     try {
       const ctx = params.getContext(event.sender)
+      if (ctx == null) {
+        throw new Error('Could not get context')
+      }
+
       const outgoing = await handleMessage(ctx, incoming)
       if (outgoing != null) {
         event.sender.send(params.name, outgoing)
@@ -67,32 +69,25 @@ const createChannel = (params: ChannelParams) => {
   })
 }
 
-export type ChannelsParams = {
-  logger: Logger,
-  getAppSanboxedContext: (contents: WebContents) => AppContext,
-  getAppTrustedContext: (contents: WebContents) => AppContext,
-  getLauncherContext: (contents: WebContents) => LauncherContext,
-}
-
-export const createChannels = (params: ChannelsParams) => {
+export const createChannels = (system: SystemContext) => {
   createChannel({
-    logger: params.logger,
+    logger: system.logger,
     name: APP_SANDBOXED_CHANNEL,
     methods: sandboxedMethods,
-    getContext: params.getAppSanboxedContext,
+    getContext: system.getAppContext,
   })
 
   createChannel({
-    logger: params.logger,
+    logger: system.logger,
     name: APP_TRUSTED_CHANNEL,
     methods: trustedMethods,
-    getContext: params.getAppTrustedContext,
+    getContext: system.getAppContext,
   })
 
   createChannel({
-    logger: params.logger,
+    logger: system.logger,
     name: LAUNCHER_CHANNEL,
     methods: launcherMethods,
-    getContext: params.getLauncherContext,
+    getContext: system.getLauncherContext,
   })
 }

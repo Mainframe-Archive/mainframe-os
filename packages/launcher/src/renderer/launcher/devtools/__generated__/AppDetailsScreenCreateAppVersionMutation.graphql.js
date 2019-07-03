@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 84bd7c3eadbafac8db11d2d91d64240c
+ * @relayHash 43a52a5fd418e09cab81e1e8a4ca9f83
  */
 
 /* eslint-disable */
@@ -78,6 +78,7 @@ fragment AppDetailsScreen_app on OwnApp {
   latestPublishedVersion {
     version
   }
+  viewerOwnAppID
 }
 */
 
@@ -172,7 +173,7 @@ return {
   "operationKind": "mutation",
   "name": "AppDetailsScreenCreateAppVersionMutation",
   "id": null,
-  "text": "mutation AppDetailsScreenCreateAppVersionMutation(\n  $input: CreateAppVersionInput!\n) {\n  createAppVersion(input: $input) {\n    app {\n      ...AppDetailsScreen_app\n      id\n    }\n  }\n}\n\nfragment AppDetailsScreen_app on OwnApp {\n  localID\n  publicID\n  profile {\n    name\n  }\n  contentsPath\n  developer {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n  inProgressVersion {\n    version\n    permissions {\n      optional {\n        CONTACT_COMMUNICATION\n        CONTACT_LIST\n        ETHEREUM_TRANSACTION\n        WEB_REQUEST\n      }\n      required {\n        CONTACT_COMMUNICATION\n        CONTACT_LIST\n        ETHEREUM_TRANSACTION\n        WEB_REQUEST\n      }\n    }\n  }\n  latestPublishedVersion {\n    version\n  }\n}\n",
+  "text": "mutation AppDetailsScreenCreateAppVersionMutation(\n  $input: CreateAppVersionInput!\n) {\n  createAppVersion(input: $input) {\n    app {\n      ...AppDetailsScreen_app\n      id\n    }\n  }\n}\n\nfragment AppDetailsScreen_app on OwnApp {\n  localID\n  publicID\n  profile {\n    name\n  }\n  contentsPath\n  developer {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n  inProgressVersion {\n    version\n    permissions {\n      optional {\n        CONTACT_COMMUNICATION\n        CONTACT_LIST\n        ETHEREUM_TRANSACTION\n        WEB_REQUEST\n      }\n      required {\n        CONTACT_COMMUNICATION\n        CONTACT_LIST\n        ETHEREUM_TRANSACTION\n        WEB_REQUEST\n      }\n    }\n  }\n  latestPublishedVersion {\n    version\n  }\n  viewerOwnAppID\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -317,6 +318,13 @@ return {
                 "selections": [
                   v5
                 ]
+              },
+              {
+                "kind": "ScalarField",
+                "alias": null,
+                "name": "viewerOwnAppID",
+                "args": null,
+                "storageKey": null
               },
               v4
             ]

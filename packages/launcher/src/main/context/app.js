@@ -171,8 +171,7 @@ export class AppContext {
       // Allowing files loaded from apps contents
       if (url.protocol === 'file:') {
         const isValidPath =
-          url.pathname != null &&
-          url.pathname.startsWith(this.session.contentsURL)
+          url.href != null && url.href.startsWith(this.session.contentsURL)
         callback({ cancel: !isValidPath })
         return
       }
@@ -235,7 +234,7 @@ export class AppContext {
 
   attachSandbox(sandbox: WebContents) {
     this.sandbox = sandbox
-    sandbox.webRequest.onBeforeRequest([], this.handleSandboxWebRequest)
+    sandbox.session.webRequest.onBeforeRequest([], this.handleSandboxWebRequest)
   }
 
   notifyTrusted(method: string, id: string, result?: Object = {}) {

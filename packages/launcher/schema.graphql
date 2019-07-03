@@ -420,7 +420,8 @@ type OwnApp implements Node {
   versions: [OwnAppVersion!]!
   inProgressVersion: OwnAppVersion
   latestPublishedVersion: OwnAppVersion
-  viewerAppSettings: UserAppSettings
+  viewerOwnAppID: ID!
+  viewerAppSettings: UserAppSettings!
 }
 
 type OwnAppVersion {

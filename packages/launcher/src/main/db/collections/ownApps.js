@@ -18,6 +18,8 @@ import type { PermissionsRequirements } from '../schemas/appPermissionsRequireme
 import type { GenericProfile } from '../schemas/genericProfile'
 
 import type { OwnDeveloperDoc } from './ownDevelopers'
+import type { UserAppSettingsDoc } from './userAppSettings'
+import type { UserOwnAppDoc } from './userOwnApps'
 
 export type CreateOwnAppData = {|
   contentsPath: string,
@@ -38,6 +40,8 @@ type OwnAppMethods = {|
   getPublicFeed(): OwnFeed,
   getLatestPublishedVersion(): ?OwnAppVersionData,
   getInProgressVersion(): ?OwnAppVersionData,
+  getUserOwnApp(userID: string): Promise<UserOwnAppDoc>,
+  getUserAppSettings(userID: string): Promise<UserAppSettingsDoc>,
   addVersion(data: { version: string }): Promise<void>,
   setDetails(data: AppDetails): Promise<void>,
   setPermissionsRequirements(
@@ -102,6 +106,16 @@ export default async (params: CollectionParams): Promise<OwnAppsCollection> => {
 
       getInProgressVersion(): ?OwnAppVersionData {
         return this.versions.find(v => v.versionHash == null)
+      },
+
+      async getUserOwnApp(userID: string): Promise<UserOwnAppDoc> {
+        console.log('getUserOwnApp called', userID)
+        return await db.user_own_apps.getOrCreateFor(userID, this)
+      },
+
+      async getUserAppSettings(userID: string): Promise<UserAppSettingsDoc> {
+        const userOwnApp = await this.getUserOwnApp(userID)
+        return await userOwnApp.populate('settings')
       },
 
       async addVersion(data: { version: string }): Promise<void> {

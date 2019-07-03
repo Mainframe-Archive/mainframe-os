@@ -4,7 +4,7 @@
 import '@babel/polyfill'
 
 // import StreamRPC from '@mainframe/rpc-stream'
-import { app, BrowserWindow, WebContents, ipcMain } from 'electron'
+import { app, BrowserWindow, ipcMain } from 'electron'
 import { is } from 'electron-util'
 
 // import { APP_TRUSTED_REQUEST_CHANNEL } from '../constants'
@@ -15,7 +15,7 @@ import './menu'
 // import { interceptWebRequests } from './permissions'
 // import { registerStreamProtocol } from './storage'
 // import createElectronTransport from './createElectronTransport'
-import { createChannels } from './rpc'
+// import { createChannels } from './rpc'
 // import { createLauncherWindow } from './windows'
 
 import { SystemContext } from './context/system'
@@ -52,23 +52,6 @@ if (ENV_TYPE === 'production') {
 const env = Environment.get(ENV_NAME, ENV_TYPE)
 const logger = createLogger(env)
 const system = new SystemContext({ env, logger })
-
-createChannels({
-  logger,
-  getAppSanboxedContext: (_contents: WebContents) => {
-    throw new Error('Must be implemented')
-  },
-  getAppTrustedContext: (_contents: WebContents) => {
-    throw new Error('Must be implemented')
-  },
-  getLauncherContext: (contents: WebContents) => {
-    const context = system.getLauncherContext(contents)
-    if (context == null) {
-      throw new Error('Failed to retrieve launcher context')
-    }
-    return context
-  },
-})
 
 // type AppContexts = { [appID: string]: { [userID: string]: AppContext } }
 //
