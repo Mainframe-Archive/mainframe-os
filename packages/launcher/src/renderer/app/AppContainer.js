@@ -23,7 +23,7 @@ import type { AppWindowSession } from '../../types'
 import WalletIcon from '../UIComponents/Icons/Wallet'
 import THEME from '../theme'
 
-import rpc, { ethClient } from './rpc'
+import rpc, { getEthClient } from './rpc'
 import UserAlertView from './UserAlertView'
 
 declare var __static: string
@@ -126,6 +126,7 @@ export default class AppContainer extends Component<Props, State> {
     super(props)
     const cachedData = store.get(props.session.app.publicID)
     const customUrl = cachedData ? cachedData.customUrl : null
+    const ethClient = getEthClient()
     this.state = {
       urlInputValue: customUrl || props.session.app.contentsURL,
       contentsPath: customUrl || props.session.app.contentsURL,

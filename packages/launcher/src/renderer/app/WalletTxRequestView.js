@@ -7,7 +7,7 @@ import { decodeTransactionData, type DecodedTxResult } from '@mainframe/eth'
 import styled from 'styled-components/native'
 import { Text } from '@morpheus-ui/core'
 
-import rpc, { ethClient } from './rpc'
+import rpc, { getEthClient } from './rpc'
 
 type Props = {
   transaction: {
@@ -94,7 +94,7 @@ export default class WalletTxRequestView extends Component<Props, State> {
         let tokenInfo
 
         if (txInfo.contractType === 'ERC20') {
-          const contract = ethClient.erc20Contract(transaction.to)
+          const contract = getEthClient().erc20Contract(transaction.to)
           const [symbol, decimalsUnit] = await Promise.all([
             contract.getTicker(),
             contract.getTokenDecimalsUnit(),

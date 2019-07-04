@@ -21,6 +21,7 @@ import type { GenericProfile } from '../schemas/genericProfile'
 import type { OwnAppDoc } from './ownApps'
 
 type OwnDeveloperMethods = {|
+  getAddress(): string,
   getPublicID(): string,
   getPublicFeed(): OwnFeed,
   getApps(): Promise<Array<OwnAppDoc>>,
@@ -114,8 +115,12 @@ export default async (
       },
     },
     methods: {
+      getAddress(): string {
+        return this.getPublicFeed().address
+      },
+
       getPublicID(): string {
-        return this.getPublicFeed().address.replace('0x', MF_PREFIX.DEVELOPER)
+        return this.getAddress().replace('0x', MF_PREFIX.DEVELOPER)
       },
 
       getPublicFeed(): OwnFeed {

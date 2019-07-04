@@ -8,7 +8,7 @@ import styled from 'styled-components/native'
 
 import { MFT_TOKEN_ADDRESSES } from '../../../constants'
 
-import rpc, { ethClient } from '../rpc'
+import rpc, { getEthClient } from '../rpc'
 import WalletIcon from '../wallets/WalletIcon'
 
 import Avatar from '../../UIComponents/Avatar'
@@ -135,6 +135,7 @@ class InviteContactModal extends Component<Props, State> {
   }
 
   async getBalances() {
+    const ethClient = getEthClient()
     // TODO: this could be queried with GraphQL
     const { ethAddress } = this.props.user.profile
     const address = MFT_TOKEN_ADDRESSES[ethClient.networkName]

@@ -1,15 +1,14 @@
 // @flow
 
-import React, { Component } from 'react'
 import { Text, Button, Checkbox, Row, Column } from '@morpheus-ui/core'
-import styled from 'styled-components/native'
-import QRCode from 'qrcode.react'
-import { shell } from 'electron'
-
 import EtherscanIcon from '@morpheus-ui/icons/Etherscan'
+import { shell } from 'electron'
+import QRCode from 'qrcode.react'
+import React, { Component } from 'react'
+import styled from 'styled-components/native'
 
+import CopyableBlock from '../CopyableBlock'
 import FormModalView from '../../UIComponents/FormModalView'
-import CopyableBlock from '../../UIComponents/CopyableBlock'
 
 type Props = {
   address: string,

@@ -75,7 +75,14 @@ const subscriptions = {
   },
 }
 
-export const ethClient = new EthClient(provider, null, subscriptions)
+let ethClient
+
+export const getEthClient = () => {
+  if (ethClient == null) {
+    ethClient = new EthClient(provider, null, subscriptions)
+  }
+  return ethClient
+}
 
 export default {
   // Subscriptions

@@ -16,7 +16,7 @@ import type { Match, RouterHistory } from 'react-router-dom'
 import styled from 'styled-components/native'
 
 import ArrowLeft from '../../UIComponents/Icons/ArrowLeft'
-import CopyableBlock from '../../UIComponents/CopyableBlock'
+import CopyableBlock from '../CopyableBlock'
 import PlusIcon from '../../UIComponents/Icons/PlusIcon'
 import colors from '../../colors'
 
@@ -98,13 +98,10 @@ const publishVersionMutation = graphql`
     $input: PublishAppVersionInput!
   ) {
     publishAppVersion(input: $input) {
-      versionHash
-      viewer {
-        id
-        # apps {
-        #   ...OwnAppsView_apps
-        # }
+      app {
+        ...AppDetailsScreen_app
       }
+      versionHash
     }
   }
 `
@@ -245,10 +242,7 @@ class AppDetails extends Component<Props, State> {
     commitMutation(relay.environment, {
       mutation: publishVersionMutation,
       variables: {
-        input: {
-          appID: app.localID,
-          version: app.currentVersionData.version,
-        },
+        input: { appID: app.localID },
       },
       onCompleted: (res, errors) => {
         let errorMsg
@@ -353,7 +347,7 @@ class AppDetails extends Component<Props, State> {
         return (
           <SetPermissionsRequirements
             // $FlowFixMe: different definition between library-imported and Relay-generated one
-            permissionRequirements={app.currentVersionData.permissions}
+            permissionRequirements={app.inProgressVersion.permissions}
             onSetPermissions={this.onSetPermissions}
             onRequestClose={this.onCloseModal}
           />
@@ -363,7 +357,7 @@ class AppDetails extends Component<Props, State> {
           <AppSummary
             appData={appData}
             // $FlowFixMe: different definition between library-imported and Relay-generated one
-            permissionsRequirements={app.currentVersionData.permissions}
+            permissionsRequirements={app.inProgressVersion.permissions}
             onPressBack={this.onPressPublishVersion}
             onRequestClose={this.onCloseModal}
             onPressSave={this.publishApp}

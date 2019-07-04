@@ -1,15 +1,18 @@
 // @flow
 
+import type Bzz from '@erebos/api-bzz-node'
+import { createKeyPair, type KeyPair } from '@erebos/secp256k1'
+import { pubKeyToAddress } from '@erebos/keccak256'
+import { Timeline } from '@erebos/timeline'
 import semver from 'semver'
 
 import { MF_PREFIX } from '../../../constants'
-
-import OwnFeed from '../../swarm/OwnFeed'
 
 import { COLLECTION_NAMES } from '../constants'
 import type { Collection, CollectionParams, Populate } from '../types'
 import { generateKeyPair, generateLocalID } from '../utils'
 
+import type { AppManifestData } from '../schemas/appManifest'
 import schema, {
   type OwnAppData,
   type OwnAppVersionData,
@@ -36,8 +39,9 @@ export type AppDetails = {
 }
 
 type OwnAppMethods = {|
+  getKeyPair(): KeyPair,
   getPublicID(): string,
-  getPublicFeed(): OwnFeed,
+  getTimeline(bzz: Bzz): Timeline<AppManifestData>,
   getLatestPublishedVersion(): ?OwnAppVersionData,
   getInProgressVersion(): ?OwnAppVersionData,
   getUserOwnApp(userID: string): Promise<UserOwnAppDoc>,
@@ -47,6 +51,7 @@ type OwnAppMethods = {|
   setPermissionsRequirements(
     permissions: PermissionsRequirements,
   ): Promise<void>,
+  publishVersion(bzz: Bzz): Promise<string>,
 |}
 
 export type OwnAppDoc = OwnAppData &
@@ -89,15 +94,24 @@ export default async (params: CollectionParams): Promise<OwnAppsCollection> => {
       },
     },
     methods: {
-      getPublicID(): string {
-        return this.getPublicFeed().address.replace('0x', MF_PREFIX.APP)
+      getKeyPair(): KeyPair {
+        return createKeyPair(this.keyPair.privateKey)
       },
 
-      getPublicFeed(): OwnFeed {
-        if (this._publicFeed == null) {
-          this._publicFeed = new OwnFeed(this.keyPair.privateKey)
-        }
-        return this._publicFeed
+      getPublicID(): string {
+        const pubKey = this.getKeyPair()
+          .getPublic()
+          .encode()
+        return pubKeyToAddress(pubKey).replace('0x', MF_PREFIX.APP)
+      },
+
+      getTimeline(bzz: Bzz): Timeline<AppManifestData> {
+        const keyPair = this.getKeyPair()
+        return new Timeline<AppManifestData>({
+          bzz,
+          feed: { user: pubKeyToAddress(keyPair.getPublic().encode()) },
+          signParams: keyPair.getPrivate(),
+        })
       },
 
       getLatestPublishedVersion(): ?OwnAppVersionData {
@@ -109,7 +123,6 @@ export default async (params: CollectionParams): Promise<OwnAppsCollection> => {
       },
 
       async getUserOwnApp(userID: string): Promise<UserOwnAppDoc> {
-        console.log('getUserOwnApp called', userID)
         return await db.user_own_apps.getOrCreateFor(userID, this)
       },
 
@@ -121,7 +134,7 @@ export default async (params: CollectionParams): Promise<OwnAppsCollection> => {
       async addVersion(data: { version: string }): Promise<void> {
         await this.atomicUpdate(doc => {
           const current = doc.versions[0]
-          if (semver.lte(current.version, data.version)) {
+          if (semver.gte(current.version, data.version)) {
             throw new Error('New version must be greater than current one')
           }
           doc.versions = [
@@ -166,6 +179,57 @@ export default async (params: CollectionParams): Promise<OwnAppsCollection> => {
           }
           return doc
         })
+      },
+
+      async publishVersion(bzz: Bzz): Promise<string> {
+        const toPublish = this.getInProgressVersion()
+        if (toPublish == null) {
+          throw new Error('Version not found')
+        }
+
+        const developer = await this.populate('developer')
+        if (developer == null) {
+          throw new Error('Developer not found')
+        }
+
+        let { contentsHash } = toPublish
+        if (contentsHash == null) {
+          contentsHash = await bzz.uploadDirectoryFrom(this.contentsPath)
+          await this.atomicUpdate(doc => {
+            const version = doc.versions.find(
+              v => v.version === toPublish.version,
+            )
+            if (version != null) {
+              version.contentsHash = contentsHash
+            }
+            return doc
+          })
+        }
+
+        const authorAddress = developer.getAddress()
+        const manifest: AppManifestData = {
+          authorAddress,
+          contentsHash,
+          profile: this.profile,
+          version: toPublish.version,
+          permissions: toPublish.permissions,
+        }
+
+        const chapter = await this.getTimeline(bzz).addChapter({
+          author: authorAddress,
+          content: manifest,
+        })
+        await this.atomicUpdate(doc => {
+          const version = doc.versions.find(
+            v => v.version === toPublish.version,
+          )
+          if (version != null) {
+            version.versionHash = chapter.id
+          }
+          return doc
+        })
+
+        return chapter.id
       },
     },
   })

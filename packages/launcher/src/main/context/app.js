@@ -237,6 +237,13 @@ export class AppContext {
     sandbox.session.webRequest.onBeforeRequest([], this.handleSandboxWebRequest)
   }
 
+  showWindow() {
+    if (this.window.isMinimized()) {
+      this.window.restore()
+    }
+    this.window.show()
+  }
+
   notifyTrusted(method: string, id: string, result?: Object = {}) {
     this.logger.log({
       level: 'debug',

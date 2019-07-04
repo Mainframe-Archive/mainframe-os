@@ -670,10 +670,8 @@ const createAppMutation = mutationWithClientMutationId({
         version: args.version,
         permissions: args.permissionsRequirements,
       })
-      const userAppSettings = await ctx.db.user_app_settings.createFor(
-        ctx.userID,
-        app,
-      )
+      const userOwnApp = await ctx.db.user_own_apps.createFor(ctx.userID, app)
+      const userAppSettings = await userOwnApp.populate('settings')
       ctx.logger.log({
         level: 'debug',
         message: 'CreateApp mutation complete',
@@ -715,7 +713,7 @@ const createAppVersionMutation = mutationWithClientMutationId({
       level: 'debug',
       message: 'CreateAppVersion mutation called',
       appID: args.appID,
-      versions: args.version,
+      version: args.version,
     })
     try {
       const app = await ctx.getDoc('own_apps', args.appID)
@@ -969,19 +967,48 @@ const publishAppVersionMutation = mutationWithClientMutationId({
     appID: {
       type: new GraphQLNonNull(GraphQLString),
     },
-    version: {
-      type: new GraphQLNonNull(GraphQLString),
-    },
   },
   outputFields: {
+    app: {
+      type: GraphQLNonNull(ownApp),
+      resolve: payload => payload.app,
+    },
     versionHash: {
       type: GraphQLNonNull(GraphQLString),
+      resolve: payload => payload.versionHash,
     },
     viewer: viewerField,
   },
-  mutateAndGetPayload: async (params, ctx) => {
-    const versionHash = await ctx.mutations.publishApp(params)
-    return { versionHash }
+  mutateAndGetPayload: async (args, ctx) => {
+    ctx.logger.log({
+      level: 'debug',
+      message: 'PublishAppVersion mutation called',
+      appID: args.appID,
+    })
+    try {
+      const app = await ctx.getDoc('own_apps', args.appID)
+      if (app == null) {
+        throw new Error('Application not found')
+      }
+
+      const bzz = await ctx.user.getBzz()
+      const versionHash = await app.publishVersion(bzz)
+      ctx.logger.log({
+        level: 'debug',
+        message: 'PublishAppVersion mutation succeeded',
+        appID: args.appID,
+        versionHash,
+      })
+
+      return { app, versionHash }
+    } catch (err) {
+      ctx.logger.log({
+        level: 'error',
+        message: 'PublishAppVersion mutation failed',
+        error: err.toString(),
+      })
+      throw err
+    }
   },
 })
 

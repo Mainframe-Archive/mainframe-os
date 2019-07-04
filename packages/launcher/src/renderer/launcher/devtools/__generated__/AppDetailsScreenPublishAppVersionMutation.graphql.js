@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash ba25b515b2be935ae7e37ed1783ed7c2
+ * @relayHash 383412a6085415ca5a4c730f4351c258
  */
 
 /* eslint-disable */
@@ -9,9 +9,9 @@
 
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
+type AppDetailsScreen_app$ref = any;
 export type PublishAppVersionInput = {
   appID: string,
-  version: string,
   clientMutationId?: ?string,
 };
 export type AppDetailsScreenPublishAppVersionMutationVariables = {|
@@ -19,10 +19,10 @@ export type AppDetailsScreenPublishAppVersionMutationVariables = {|
 |};
 export type AppDetailsScreenPublishAppVersionMutationResponse = {|
   +publishAppVersion: ?{|
-    +versionHash: string,
-    +viewer: {|
-      +id: string
+    +app: {|
+      +$fragmentRefs: AppDetailsScreen_app$ref
     |},
+    +versionHash: string,
   |}
 |};
 export type AppDetailsScreenPublishAppVersionMutation = {|
@@ -37,11 +37,49 @@ mutation AppDetailsScreenPublishAppVersionMutation(
   $input: PublishAppVersionInput!
 ) {
   publishAppVersion(input: $input) {
-    versionHash
-    viewer {
+    app {
+      ...AppDetailsScreen_app
       id
     }
+    versionHash
   }
+}
+
+fragment AppDetailsScreen_app on OwnApp {
+  localID
+  publicID
+  profile {
+    name
+  }
+  contentsPath
+  developer {
+    localID
+    profile {
+      name
+    }
+    id
+  }
+  inProgressVersion {
+    version
+    permissions {
+      optional {
+        CONTACT_COMMUNICATION
+        CONTACT_LIST
+        ETHEREUM_TRANSACTION
+        WEB_REQUEST
+      }
+      required {
+        CONTACT_COMMUNICATION
+        CONTACT_LIST
+        ETHEREUM_TRANSACTION
+        WEB_REQUEST
+      }
+    }
+  }
+  latestPublishedVersion {
+    version
+  }
+  viewerOwnAppID
 }
 */
 
@@ -56,47 +94,86 @@ var v0 = [
 ],
 v1 = [
   {
-    "kind": "LinkedField",
+    "kind": "Variable",
+    "name": "input",
+    "variableName": "input",
+    "type": "PublishAppVersionInput!"
+  }
+],
+v2 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "versionHash",
+  "args": null,
+  "storageKey": null
+},
+v3 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "localID",
+  "args": null,
+  "storageKey": null
+},
+v4 = {
+  "kind": "LinkedField",
+  "alias": null,
+  "name": "profile",
+  "storageKey": null,
+  "args": null,
+  "concreteType": "NamedProfile",
+  "plural": false,
+  "selections": [
+    {
+      "kind": "ScalarField",
+      "alias": null,
+      "name": "name",
+      "args": null,
+      "storageKey": null
+    }
+  ]
+},
+v5 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "id",
+  "args": null,
+  "storageKey": null
+},
+v6 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "version",
+  "args": null,
+  "storageKey": null
+},
+v7 = [
+  {
+    "kind": "ScalarField",
     "alias": null,
-    "name": "publishAppVersion",
-    "storageKey": null,
-    "args": [
-      {
-        "kind": "Variable",
-        "name": "input",
-        "variableName": "input",
-        "type": "PublishAppVersionInput!"
-      }
-    ],
-    "concreteType": "PublishAppVersionPayload",
-    "plural": false,
-    "selections": [
-      {
-        "kind": "ScalarField",
-        "alias": null,
-        "name": "versionHash",
-        "args": null,
-        "storageKey": null
-      },
-      {
-        "kind": "LinkedField",
-        "alias": null,
-        "name": "viewer",
-        "storageKey": null,
-        "args": null,
-        "concreteType": "User",
-        "plural": false,
-        "selections": [
-          {
-            "kind": "ScalarField",
-            "alias": null,
-            "name": "id",
-            "args": null,
-            "storageKey": null
-          }
-        ]
-      }
-    ]
+    "name": "CONTACT_COMMUNICATION",
+    "args": null,
+    "storageKey": null
+  },
+  {
+    "kind": "ScalarField",
+    "alias": null,
+    "name": "CONTACT_LIST",
+    "args": null,
+    "storageKey": null
+  },
+  {
+    "kind": "ScalarField",
+    "alias": null,
+    "name": "ETHEREUM_TRANSACTION",
+    "args": null,
+    "storageKey": null
+  },
+  {
+    "kind": "ScalarField",
+    "alias": null,
+    "name": "WEB_REQUEST",
+    "args": null,
+    "storageKey": null
   }
 ];
 return {
@@ -104,7 +181,7 @@ return {
   "operationKind": "mutation",
   "name": "AppDetailsScreenPublishAppVersionMutation",
   "id": null,
-  "text": "mutation AppDetailsScreenPublishAppVersionMutation(\n  $input: PublishAppVersionInput!\n) {\n  publishAppVersion(input: $input) {\n    versionHash\n    viewer {\n      id\n    }\n  }\n}\n",
+  "text": "mutation AppDetailsScreenPublishAppVersionMutation(\n  $input: PublishAppVersionInput!\n) {\n  publishAppVersion(input: $input) {\n    app {\n      ...AppDetailsScreen_app\n      id\n    }\n    versionHash\n  }\n}\n\nfragment AppDetailsScreen_app on OwnApp {\n  localID\n  publicID\n  profile {\n    name\n  }\n  contentsPath\n  developer {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n  inProgressVersion {\n    version\n    permissions {\n      optional {\n        CONTACT_COMMUNICATION\n        CONTACT_LIST\n        ETHEREUM_TRANSACTION\n        WEB_REQUEST\n      }\n      required {\n        CONTACT_COMMUNICATION\n        CONTACT_LIST\n        ETHEREUM_TRANSACTION\n        WEB_REQUEST\n      }\n    }\n  }\n  latestPublishedVersion {\n    version\n  }\n  viewerOwnAppID\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -112,16 +189,162 @@ return {
     "type": "Mutation",
     "metadata": null,
     "argumentDefinitions": v0,
-    "selections": v1
+    "selections": [
+      {
+        "kind": "LinkedField",
+        "alias": null,
+        "name": "publishAppVersion",
+        "storageKey": null,
+        "args": v1,
+        "concreteType": "PublishAppVersionPayload",
+        "plural": false,
+        "selections": [
+          {
+            "kind": "LinkedField",
+            "alias": null,
+            "name": "app",
+            "storageKey": null,
+            "args": null,
+            "concreteType": "OwnApp",
+            "plural": false,
+            "selections": [
+              {
+                "kind": "FragmentSpread",
+                "name": "AppDetailsScreen_app",
+                "args": null
+              }
+            ]
+          },
+          v2
+        ]
+      }
+    ]
   },
   "operation": {
     "kind": "Operation",
     "name": "AppDetailsScreenPublishAppVersionMutation",
     "argumentDefinitions": v0,
-    "selections": v1
+    "selections": [
+      {
+        "kind": "LinkedField",
+        "alias": null,
+        "name": "publishAppVersion",
+        "storageKey": null,
+        "args": v1,
+        "concreteType": "PublishAppVersionPayload",
+        "plural": false,
+        "selections": [
+          {
+            "kind": "LinkedField",
+            "alias": null,
+            "name": "app",
+            "storageKey": null,
+            "args": null,
+            "concreteType": "OwnApp",
+            "plural": false,
+            "selections": [
+              v3,
+              {
+                "kind": "ScalarField",
+                "alias": null,
+                "name": "publicID",
+                "args": null,
+                "storageKey": null
+              },
+              v4,
+              {
+                "kind": "ScalarField",
+                "alias": null,
+                "name": "contentsPath",
+                "args": null,
+                "storageKey": null
+              },
+              {
+                "kind": "LinkedField",
+                "alias": null,
+                "name": "developer",
+                "storageKey": null,
+                "args": null,
+                "concreteType": "OwnDeveloper",
+                "plural": false,
+                "selections": [
+                  v3,
+                  v4,
+                  v5
+                ]
+              },
+              {
+                "kind": "LinkedField",
+                "alias": null,
+                "name": "inProgressVersion",
+                "storageKey": null,
+                "args": null,
+                "concreteType": "OwnAppVersion",
+                "plural": false,
+                "selections": [
+                  v6,
+                  {
+                    "kind": "LinkedField",
+                    "alias": null,
+                    "name": "permissions",
+                    "storageKey": null,
+                    "args": null,
+                    "concreteType": "AppPermissionsRequirements",
+                    "plural": false,
+                    "selections": [
+                      {
+                        "kind": "LinkedField",
+                        "alias": null,
+                        "name": "optional",
+                        "storageKey": null,
+                        "args": null,
+                        "concreteType": "AppPermissionDefinitions",
+                        "plural": false,
+                        "selections": v7
+                      },
+                      {
+                        "kind": "LinkedField",
+                        "alias": null,
+                        "name": "required",
+                        "storageKey": null,
+                        "args": null,
+                        "concreteType": "AppPermissionDefinitions",
+                        "plural": false,
+                        "selections": v7
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": "LinkedField",
+                "alias": null,
+                "name": "latestPublishedVersion",
+                "storageKey": null,
+                "args": null,
+                "concreteType": "OwnAppVersion",
+                "plural": false,
+                "selections": [
+                  v6
+                ]
+              },
+              {
+                "kind": "ScalarField",
+                "alias": null,
+                "name": "viewerOwnAppID",
+                "args": null,
+                "storageKey": null
+              },
+              v5
+            ]
+          },
+          v2
+        ]
+      }
+    ]
   }
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '187889fb459d0c379ce7beb6149782c4';
+(node/*: any*/).hash = 'd1e149e091267bb6490ff302ae4e3d87';
 module.exports = node;

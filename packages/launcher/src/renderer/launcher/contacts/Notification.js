@@ -1,10 +1,11 @@
-//@flow
+// @flow
 
-import React, { Component } from 'react'
 import { Text } from '@morpheus-ui/core'
+import React, { Component } from 'react'
 import styled from 'styled-components/native'
-import AlertToast from '../../UIComponents/AlertToast'
+
 import Avatar from '../../UIComponents/Avatar'
+import ToastMessage from '../../UIComponents/ToastMessage'
 
 type Props = {
   message: string,
@@ -40,7 +41,7 @@ export default class Notification extends Component<Props> {
       onRequestClose,
     } = this.props
     return (
-      <AlertToast onRequestClose={onRequestClose}>
+      <ToastMessage onRequestClose={onRequestClose}>
         <Text color="#fff" size={13} variant={['bold', 'marginTop5']}>
           {message}
         </Text>
@@ -65,7 +66,7 @@ export default class Notification extends Component<Props> {
             </Text>
           </WalletContainer>
         </AvatarWrapper>
-      </AlertToast>
+      </ToastMessage>
     )
   }
 }

@@ -10,11 +10,19 @@ import type { DBOpenResult, UserCreateRequestParams } from '../../types'
 
 const client = electronRPC(LAUNCHER_CHANNEL)
 
-export const ethClient = new EthClient({
-  send: async (method: string, params: Array<*>): Promise<*> => {
-    return client.request('blockchain_ethSend', { method, params })
-  },
-})
+let ethClient
+
+export const getEthClient = () => {
+  if (ethClient == null) {
+    ethClient = new EthClient({
+      send: async (method: string, params: Array<*>): Promise<*> => {
+        console.log('launcher eth send')
+        return client.request('blockchain_ethSend', { method, params })
+      },
+    })
+  }
+  return ethClient
+}
 
 export default {
   log(levelOrInfo: string | Object, message?: string) {

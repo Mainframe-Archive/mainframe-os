@@ -17,7 +17,6 @@ import rpc from '../rpc'
 import PermissionsView from '../PermissionsView'
 import OSLogo from '../../UIComponents/MainframeOSLogo'
 import EditIcon from '../../UIComponents/Icons/EditIcon'
-import applyContext, { type CurrentUser } from '../LauncherContext'
 import CompleteOnboardSession from './CompleteOnboardSession'
 
 import AppInstallModal from './AppInstallModal'
@@ -516,7 +515,7 @@ class AppsView extends Component<Props, State> {
   }
 }
 
-const AppsViewFragmentContainer = createFragmentContainer(AppsView, {
+export default createFragmentContainer(AppsView, {
   // ...AppItem_installedApp
   // ...AppUpdateModal_app
   user: graphql`
@@ -562,5 +561,3 @@ const AppsViewFragmentContainer = createFragmentContainer(AppsView, {
     }
   `,
 })
-
-export default applyContext(AppsViewFragmentContainer)

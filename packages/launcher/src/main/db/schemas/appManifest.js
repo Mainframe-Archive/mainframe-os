@@ -8,8 +8,7 @@ import ethAddress from './ethAddress'
 import profile, { type GenericProfileData } from './genericProfile'
 
 export type AppManifestData = {|
-  publicFeed: string,
-  authorFeed: string,
+  authorAddress: string,
   profile: GenericProfileData,
   version: string,
   contentsHash: string,
@@ -21,13 +20,7 @@ export default {
   version: 0,
   type: 'object',
   properties: {
-    // TODO: does the publicFeed need to be provided in the manifest?
-    // It should be known in order to read the manifest in the first place...
-    publicFeed: {
-      ...ethAddress,
-      final: true,
-    },
-    authorFeed: {
+    authorAddress: {
       ...ethAddress,
       final: true,
     },
@@ -40,5 +33,4 @@ export default {
     permissions: permissionsRequirements,
   },
   required: ['profile', 'version', 'contentsHash', 'permissions'],
-  compoundIndexes: [['publicFeed', 'version']],
 }

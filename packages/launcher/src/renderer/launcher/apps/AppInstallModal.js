@@ -15,7 +15,6 @@ import styled from 'styled-components/native'
 
 import { EnvironmentContext } from '../RelayEnvironment'
 
-import applyContext, { type CurrentUser } from '../LauncherContext'
 import FormModalView from '../../UIComponents/FormModalView'
 import Loader from '../../UIComponents/Loader'
 import rpc from '../rpc'
@@ -56,7 +55,7 @@ const TextContainer = styled.View`
 
 const View = styled.View``
 
-class AppInstallModal extends Component<ViewProps, State> {
+export default class AppInstallModal extends Component<ViewProps, State> {
   static contextType = EnvironmentContext
 
   state = {
@@ -250,5 +249,3 @@ class AppInstallModal extends Component<ViewProps, State> {
     }
   }
 }
-
-export default applyContext(AppInstallModal)

@@ -457,11 +457,11 @@ type PeerLookupResult {
 
 input PublishAppVersionInput {
   appID: String!
-  version: String!
   clientMutationId: String
 }
 
 type PublishAppVersionPayload {
+  app: OwnApp!
   versionHash: String!
   viewer: User!
   clientMutationId: String

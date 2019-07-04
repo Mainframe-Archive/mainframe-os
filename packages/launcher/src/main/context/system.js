@@ -235,6 +235,7 @@ export class SystemContext {
   createAppContext(id: string, session: AppSession): AppContext {
     const existing = this._apps[id]
     if (existing != null) {
+      existing.showWindow()
       return existing
     }
 
@@ -244,12 +245,14 @@ export class SystemContext {
       window: createAppWindow(),
     })
 
+    ctx.window.on('closed', () => {
+      delete this._apps[id]
+    })
     this._apps[id] = ctx
     this._appsByTrustedContents.set(ctx.window.webContents, id)
 
     ctx.window.webContents.on('did-attach-webview', (event, webContents) => {
       webContents.on('destroyed', () => {
-        this._appsBySandboxContents.delete(webContents)
         ctx.sandbox = null
       })
       this._appsBySandboxContents.set(webContents, id)
@@ -298,13 +301,13 @@ export class SystemContext {
       userID,
       window: createLauncherWindow(),
     })
-    this._launchers[ctx.launcherID] = ctx
-    this._launchersByContents.set(ctx.window.webContents, ctx.launcherID)
 
     ctx.window.on('closed', async () => {
       // await ctx.clear()
       delete this._launchers[ctx.launcherID]
     })
+    this._launchers[ctx.launcherID] = ctx
+    this._launchersByContents.set(ctx.window.webContents, ctx.launcherID)
 
     return ctx
   }

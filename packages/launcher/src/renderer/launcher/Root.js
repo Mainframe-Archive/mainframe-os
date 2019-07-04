@@ -10,6 +10,7 @@ import { ROUTES } from './constants'
 
 import HomeRouter from './HomeRouter'
 import OnboardingRouter from './onboarding/Router'
+import { ToastProvider } from './ToastContext'
 
 const Container = styled.View`
   flex: 1;
@@ -32,13 +33,15 @@ export default function Root({ route }: Props) {
   return (
     <ThemeProvider theme={THEME}>
       <MemoryRouter initialEntries={[route || ROUTES.ONBOARDING_CREATE]}>
-        <Container>
-          <TitleBar className="draggable" />
-          <Switch>
-            <Route path="/onboarding" component={OnboardingRouter} />
-            <Route path="/" component={HomeRouter} />
-          </Switch>
-        </Container>
+        <ToastProvider>
+          <Container>
+            <TitleBar className="draggable" />
+            <Switch>
+              <Route path="/onboarding" component={OnboardingRouter} />
+              <Route path="/" component={HomeRouter} />
+            </Switch>
+          </Container>
+        </ToastProvider>
       </MemoryRouter>
     </ThemeProvider>
   )

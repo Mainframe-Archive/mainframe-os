@@ -45,7 +45,7 @@ export default function NewAppVersionModal(props: Props) {
 
   const onSetVersion = useCallback((payload: FormSubmitPayload) => {
     if (payload.valid) {
-      this.props.onSetVersion(payload.fields.version)
+      props.onSetVersion(payload.fields.version)
     }
   }, [])
 

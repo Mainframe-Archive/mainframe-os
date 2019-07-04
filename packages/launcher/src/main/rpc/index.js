@@ -70,24 +70,27 @@ const createChannel = (params: ChannelParams) => {
 }
 
 export const createChannels = (system: SystemContext) => {
+  const appLogger = system.logger.child({ context: 'rpc/app' })
+  const getAppContext = system.getAppContext.bind(system)
+
   createChannel({
-    logger: system.logger,
+    logger: appLogger,
     name: APP_SANDBOXED_CHANNEL,
     methods: sandboxedMethods,
-    getContext: system.getAppContext,
+    getContext: getAppContext,
   })
 
   createChannel({
-    logger: system.logger,
+    logger: appLogger,
     name: APP_TRUSTED_CHANNEL,
     methods: trustedMethods,
-    getContext: system.getAppContext,
+    getContext: getAppContext,
   })
 
   createChannel({
-    logger: system.logger,
+    logger: system.logger.child({ context: 'rpc/launcher' }),
     name: LAUNCHER_CHANNEL,
     methods: launcherMethods,
-    getContext: system.getLauncherContext,
+    getContext: system.getLauncherContext.bind(system),
   })
 }

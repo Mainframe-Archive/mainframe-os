@@ -11,7 +11,6 @@ import {
 } from 'react-relay'
 import styled from 'styled-components/native'
 
-import { LauncherContext } from '../LauncherContext'
 import FormModalView from '../../UIComponents/FormModalView'
 import Loader from '../../UIComponents/Loader'
 import PermissionsView from '../PermissionsView'
@@ -60,8 +59,6 @@ const TextContainer = styled.View`
 `
 
 class AppUpdateModal extends Component<Props, State> {
-  static contextType = LauncherContext
-
   state = {
     updateStep: 'confirm',
     userPermissions: undefined,

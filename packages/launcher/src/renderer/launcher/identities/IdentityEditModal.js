@@ -6,9 +6,9 @@ import styled from 'styled-components/native'
 import { type FormSubmitPayload } from '@morpheus-ui/forms'
 import { createFragmentContainer, graphql, commitMutation } from 'react-relay'
 
+import CopyableBlock from '../CopyableBlock'
 import { EnvironmentContext } from '../RelayEnvironment'
 import FormModalView from '../../UIComponents/FormModalView'
-import CopyableBlock from '../../UIComponents/CopyableBlock'
 import { type OwnUserIdentity } from './__generated__/IdentityEditModal_ownUserIdentity.graphql.js'
 
 type Props = {

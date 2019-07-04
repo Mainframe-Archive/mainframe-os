@@ -7,7 +7,6 @@ import type { AppInstalledData } from '@mainframe/client'
 
 import { Text, Button } from '@morpheus-ui/core'
 
-import applyContext, { type CurrentUser } from '../LauncherContext'
 import Avatar from '../../UIComponents/Avatar'
 import InfoIcon from '../../UIComponents/Icons/InfoIcon'
 import IdentityEditModal from './IdentityEditModal'
@@ -171,44 +170,39 @@ class IdentitiesView extends Component<Props, State> {
   }
 }
 
-export const IdentitiesViewRelayContainer = createFragmentContainer(
-  IdentitiesView,
-  {
-    //   identities: graphql`
-    //     fragment IdentitiesView_identities on Identities {
-    //       ownUsers {
-    //         ...IdentityEditModal_ownUserIdentity
-    //         localID
-    //         feedHash
-    //         profile {
-    //           name
-    //         }
-    //         apps {
-    //           localID
-    //           manifest {
-    //             name
-    //           }
-    //           users {
-    //             settings {
-    //               permissionsSettings {
-    //                 permissionsChecked
-    //                 grants {
-    //                   BLOCKCHAIN_SEND
-    //                 }
-    //               }
-    //             }
-    //           }
-    //         }
-    //       }
-    //       ownDevelopers {
-    //         localID
-    //         profile {
-    //           name
-    //         }
-    //       }
-    //     }
-    //   `,
-  },
-)
-
-export default applyContext(IdentitiesViewRelayContainer)
+export default createFragmentContainer(IdentitiesView, {
+  //   identities: graphql`
+  //     fragment IdentitiesView_identities on Identities {
+  //       ownUsers {
+  //         ...IdentityEditModal_ownUserIdentity
+  //         localID
+  //         feedHash
+  //         profile {
+  //           name
+  //         }
+  //         apps {
+  //           localID
+  //           manifest {
+  //             name
+  //           }
+  //           users {
+  //             settings {
+  //               permissionsSettings {
+  //                 permissionsChecked
+  //                 grants {
+  //                   BLOCKCHAIN_SEND
+  //                 }
+  //               }
+  //             }
+  //           }
+  //         }
+  //       }
+  //       ownDevelopers {
+  //         localID
+  //         profile {
+  //           name
+  //         }
+  //       }
+  //     }
+  //   `,
+})
