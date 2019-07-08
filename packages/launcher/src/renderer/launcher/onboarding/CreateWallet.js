@@ -135,7 +135,7 @@ export default class OnboardingCreateWallet extends Component<{}, State> {
   renderContent() {
     switch (this.state.view) {
       case 'redirect':
-        return <Redirect to={ROUTES.HOME} />
+        return <Redirect to={ROUTES.ONBOARDING_FIAT} />
       case 'import':
         return this.renderImport()
       case 'ledger':

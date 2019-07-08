@@ -5,6 +5,7 @@ import { Form, type FormSubmitPayload } from '@morpheus-ui/forms'
 import LedgerIcon from '@morpheus-ui/icons/Ledger'
 import PlusSymbolMdIcon from '@morpheus-ui/icons/PlusSymbolMd'
 import PlusSymbolSmIcon from '@morpheus-ui/icons/PlusSymbolSm'
+import ArrowRight from '@morpheus-ui/icons/ArrowRight'
 import DownloadMdIcon from '@morpheus-ui/icons/DownloadMd'
 import EthCircledIcon from '@morpheus-ui/icons/EthCircled'
 import MftCircledIcon from '@morpheus-ui/icons/MftCircled'
@@ -20,6 +21,7 @@ import styled from 'styled-components/native'
 
 import RelayRenderer from '../RelayRenderer'
 
+import WyreModal from './WyreModal'
 import WalletImportView from './WalletImportView'
 import WalletCreateModal from './WalletCreateModal'
 import WalletAddLedgerModal from './WalletAddLedgerModal'
@@ -244,6 +246,12 @@ class WalletsView extends Component<Props, State> {
     })
   }
 
+  onPressWyre = () => {
+    this.setState({
+      showModal: 'show_wyre',
+    })
+  }
+
   onCloseModal = () => {
     this.setState({
       showModal: undefined,
@@ -263,6 +271,17 @@ class WalletsView extends Component<Props, State> {
       <WalletAddLedgerModal
         wallets={this.props.user.ethWallets.ledger}
         onClose={this.onCloseModal}
+      />
+    ) : null
+  }
+
+  renderWyreView() {
+    console.log(this.props)
+    return this.state.showModal === 'show_wyre' ? (
+      <WyreModal
+        address={this.props.user && this.props.user.profile.ethAddress}
+        onClose={this.onCloseModal}
+        onComplete={this.onComplete}
       />
     ) : null
   }
@@ -456,6 +475,7 @@ class WalletsView extends Component<Props, State> {
             {this.renderCreateModal()}
             {this.renderImportView()}
             {this.renderConnectLedgerView()}
+            {this.renderWyreView()}
           </ScrollView>
         </WalletsContainer>
         <Buttons className="white-shadow">
@@ -479,6 +499,13 @@ class WalletsView extends Component<Props, State> {
             variant={['completeOnboarding', 'walletOnboarding', 'marginLeft20']}
             title="Ledger"
             Icon={LedgerIcon}
+          />
+
+          <Button
+            onPress={this.onPressWyre}
+            variant={['completeOnboarding', 'walletOnboarding', 'marginLeft20']}
+            title="Transfer fiat"
+            Icon={ArrowRight}
           />
         </Buttons>
       </Container>

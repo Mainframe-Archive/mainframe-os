@@ -13,6 +13,7 @@ export const ROUTES = {
   ONBOARDING_OPEN: '/onboarding/open',
   ONBOARDING_USER: '/onboarding/user',
   ONBOARDING_WALLET: '/onboarding/wallet',
+  ONBOARDING_FIAT: '/onboarding/fiat',
   SETTINGS: '/settings',
   WALLETS: '/wallets',
 }
