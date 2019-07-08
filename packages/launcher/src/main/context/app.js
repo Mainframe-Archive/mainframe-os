@@ -90,6 +90,28 @@ export class AppSession {
     })
   }
 
+  static async fromWyre(system: SystemContext): Promise<AppSession> {
+    if (system.db == null) {
+      throw new Error('Database must be opened')
+    }
+
+    const userOwnApp = await system.db.user_own_apps
+      .findOne(userOwnAppID)
+      .exec()
+    if (userOwnApp == null) {
+      throw new Error('UserOwnApp not found')
+    }
+
+    const [user] = await Promise.all([userOwnApp.populate('user')])
+
+    return new AppSession({
+      // app,
+      isDevelopment: true,
+      // settings,
+      user,
+    })
+  }
+
   app: AppData
   contentsURL: string
   isDevelopment: boolean

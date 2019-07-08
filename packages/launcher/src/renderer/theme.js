@@ -566,6 +566,9 @@ export default {
       labelActiveColor: 'transparent',
       labelWithContentColor: 'transparent',
     },
+    numberAmt: {
+      labelDisabledColor: '#D3D3D3',
+    },
   },
   Checkbox: {
     mono: {

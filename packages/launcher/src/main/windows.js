@@ -44,6 +44,15 @@ export const createAppWindow = (): BrowserWindow => {
   })
 }
 
+export const createWyreWindow = (): BrowserWindow => {
+  return createWindow({
+    width: 350,
+    height: 600,
+    minWidth: 350,
+    minHeight: 600,
+  })
+}
+
 export const createLauncherWindow = (): BrowserWindow => {
   return createWindow({
     width: 900,
