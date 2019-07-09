@@ -74,17 +74,6 @@ Or on Windows
 ```
 
 This first environment should be created with the `development` type and set as default environment.
-The newly created environment then needs to be configured using the CLI:
-
-```
-packages/cli/bin/run daemon:setup --bin-path=./packages/daemon/bin/run
-```
-
-Or on Windows
-
-```
-"packages/cli/bin/run.cmd" daemon:setup --bin-path="packages/daemon/bin/run.cmd"
-```
 
 ## Development
 
@@ -96,22 +85,16 @@ Whenever code changes in any other package than the launcher, you should build e
 yarn run build
 ```
 
-Now, in one terminal tab, run the daemon:
+Then, build dependencies:
 
 ```
-./packages/cli/bin/run daemon:start -e <your_env_name>
+cd packages/launcher && yarn deps:build
 ```
 
-Or on Windows
+Then, start the OS:
 
 ```
-"packages/cli/bin/run.cmd" daemon:start -e <your_env_name>
-```
-
-Then, in another tab, run the launcher:
-
-```
-MAINFRAME_ENV=<your_env_name> cd packages/launcher && yarn deps:build && yarn run dev
+MAINFRAME_ENV=<your_env_name> yarn run dev
 ```
 
 ### Building Mainframe Apps
