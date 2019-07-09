@@ -1,6 +1,6 @@
 // @flow
 
-import type { StrictPermissionsGrants } from './main/db/schemas/appPermissionsGrants'
+import type { WebDomainsDefinitions } from './main/db/schemas/appManifest'
 import type { GenericProfileData } from './main/db/schemas/genericProfile'
 
 // UI
@@ -28,11 +28,11 @@ export type AppWindowSession = {
   },
   isDevelopment: boolean,
   partition: string,
-  permissions: StrictPermissionsGrants,
   user: {
     id: string,
     profile: GenericProfileData,
   },
+  webDomains: WebDomainsDefinitions,
 }
 
 // Request

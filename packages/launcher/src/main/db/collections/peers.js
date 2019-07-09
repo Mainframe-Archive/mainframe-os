@@ -64,7 +64,7 @@ export default async (params: CollectionParams): Promise<PeersCollection> => {
           throw new Error('Peer data not found')
         }
 
-        const data = readPeer(payload)
+        const data = await readPeer(payload)
         return await this.insert({
           localID: generateLocalID(),
           publicFeed,

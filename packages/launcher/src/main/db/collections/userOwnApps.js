@@ -53,9 +53,9 @@ export default async (
         if (version == null) {
           throw new Error('Missing own app version')
         }
-        const settings = await db.user_app_settings.createFromPermissionRequirement(
-          version.permissions,
-        )
+        const settings = await db.user_app_settings.create({
+          webDomains: version.webDomains,
+        })
         return await this.insert({
           localID: generateLocalID(),
           ownApp: app.localID,

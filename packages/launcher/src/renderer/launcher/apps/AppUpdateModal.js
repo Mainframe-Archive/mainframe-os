@@ -1,6 +1,5 @@
 //@flow
 
-import { type StrictPermissionsGrants } from '@mainframe/app-permissions'
 import { Text } from '@morpheus-ui/core'
 import React, { Component } from 'react'
 import {

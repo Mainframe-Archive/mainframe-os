@@ -2,10 +2,6 @@
 
 import React, { Component } from 'react'
 import { createFragmentContainer, graphql } from 'react-relay'
-import {
-  havePermissionsToGrant,
-  type StrictPermissionsGrants,
-} from '@mainframe/app-permissions'
 import styled from 'styled-components/native'
 import { Text, Button } from '@morpheus-ui/core'
 

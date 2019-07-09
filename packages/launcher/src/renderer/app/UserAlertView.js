@@ -82,6 +82,7 @@ type State = {
   persistGrant: boolean,
 }
 
+// TODO: change this to use different methods for each permission
 const methods = {
   user_request: (ctx, request: Request): Promise<PermissionGrantResult> => {
     return new Promise(resolve => {

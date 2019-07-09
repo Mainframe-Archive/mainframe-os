@@ -1,9 +1,6 @@
 // @flow
 
 import { Text } from '@morpheus-ui/core'
-
-// TODO: use local type rather than library import
-import type { StrictPermissionsRequirements } from '@mainframe/app-permissions'
 import React, { Component } from 'react'
 import {
   graphql,

@@ -1,5 +1,6 @@
 // @flow
 
+import { Timeline } from '@erebos/timeline'
 import {
   GraphQLBoolean,
   GraphQLEnumType,
@@ -11,12 +12,13 @@ import {
   GraphQLString,
 } from 'graphql'
 import { fromGlobalId, globalIdField, nodeDefinitions } from 'graphql-relay'
+import semver from 'semver'
 
 import { MF_PREFIX, MFT_TOKEN_ADDRESSES } from '../../constants'
-import { isValidPeerID } from '../../validation'
+import { isValidAppID, isValidPeerID } from '../../validation'
 
 import type { GraphQLContext } from '../context/graphql'
-import { readPeer } from '../data/protocols'
+import { readAppManifest, readPeer } from '../data/protocols'
 import { readJSON } from '../swarm/feeds'
 
 const TYPE_COLLECTION = {
@@ -123,14 +125,17 @@ export const developer = new GraphQLObjectType({
   }),
 })
 
-export const webRequestGrants = new GraphQLObjectType({
-  name: 'WebRequestGrants',
+export const webDomainDefinition = new GraphQLObjectType({
+  name: 'WebDomainDefinition',
   fields: () => ({
-    granted: {
-      type: list(GraphQLString),
+    domain: {
+      type: new GraphQLNonNull(GraphQLString),
     },
-    denied: {
-      type: list(GraphQLString),
+    internal: {
+      type: GraphQLBoolean,
+    },
+    external: {
+      type: GraphQLBoolean,
     },
   }),
 })
@@ -146,24 +151,6 @@ export const appApprovedContact = new GraphQLObjectType({
       resolve: doc => doc.contact,
     },
     // TODO: add contact object if possible to populate
-  }),
-})
-
-export const appPermissionGrants = new GraphQLObjectType({
-  name: 'AppPermissions',
-  fields: () => ({
-    CONTACT_COMMUNICATION: {
-      type: GraphQLBoolean,
-    },
-    CONTACT_LIST: {
-      type: GraphQLBoolean,
-    },
-    ETHEREUM_TRANSACTION: {
-      type: GraphQLBoolean,
-    },
-    WEB_REQUEST: {
-      type: new GraphQLNonNull(webRequestGrants),
-    },
   }),
 })
 
@@ -184,38 +171,8 @@ export const userAppSettings = new GraphQLObjectType({
     permissionsChecked: {
       type: new GraphQLNonNull(GraphQLBoolean),
     },
-    permissionsGrants: {
-      type: new GraphQLNonNull(appPermissionGrants),
-    },
-  }),
-})
-
-export const appPermissionDefinitions = new GraphQLObjectType({
-  name: 'AppPermissionDefinitions',
-  fields: () => ({
-    CONTACT_COMMUNICATION: {
-      type: GraphQLBoolean,
-    },
-    CONTACT_LIST: {
-      type: GraphQLBoolean,
-    },
-    ETHEREUM_TRANSACTION: {
-      type: GraphQLBoolean,
-    },
-    WEB_REQUEST: {
-      type: new GraphQLList(GraphQLString),
-    },
-  }),
-})
-
-export const appPermissionsRequirements = new GraphQLObjectType({
-  name: 'AppPermissionsRequirements',
-  fields: () => ({
-    optional: {
-      type: new GraphQLNonNull(appPermissionDefinitions),
-    },
-    required: {
-      type: new GraphQLNonNull(appPermissionDefinitions),
+    webDomains: {
+      type: list(webDomainDefinition),
     },
   }),
 })
@@ -248,8 +205,8 @@ export const appManifest = new GraphQLObjectType({
     contentsHash: {
       type: new GraphQLNonNull(GraphQLString),
     },
-    permissions: {
-      type: new GraphQLNonNull(appPermissionsRequirements),
+    webDomains: {
+      type: list(webDomainDefinition),
     },
   }),
 })
@@ -303,9 +260,23 @@ export const app = new GraphQLObjectType({
       type: new GraphQLNonNull(GraphQLID),
       resolve: doc => doc.getPublicID(),
     },
+    developer: {
+      type: new GraphQLNonNull(developer),
+      resolve: doc => doc.populate('developer'),
+    },
+    latestAvailableVersion: {
+      type: appVersion,
+      resolve: doc => doc.populate('latestAvailableVersion'),
+    },
+    latestDownloadedVersion: {
+      type: appVersion,
+      resolve: doc => doc.populate('latestDownloadedVersion'),
+    },
     versions: {
       type: list(appVersion),
-      resolve: doc => doc.getVersions(),
+      resolve: async (doc, args, ctx) => {
+        return await ctx.db.app_versions.findByAppID(doc.localID)
+      },
     },
   }),
 })
@@ -361,8 +332,8 @@ export const ownAppVersion = new GraphQLObjectType({
     versionHash: {
       type: GraphQLString,
     },
-    permissions: {
-      type: new GraphQLNonNull(appPermissionsRequirements),
+    webDomains: {
+      type: list(webDomainDefinition),
     },
   }),
 })
@@ -742,18 +713,15 @@ export const userAppVersion = new GraphQLObjectType({
         const appVersion = await doc.populate('appVersion')
         const newVersion = await appVersion.getUpdate()
 
-        if (newVersion == null) {
-          return null
-        }
-
-        // TODO: compare current and new version manifest permissions
-        const permissionsChanged = false
-
-        return {
-          fromVersion: appVersion,
-          toVersion: newVersion,
-          permissionsChanged,
-        }
+        return newVersion == null
+          ? null
+          : {
+              fromVersion: appVersion,
+              toVersion: newVersion,
+              permissionsChanged: newVersion.hasWebDomainsChangesFrom(
+                appVersion,
+              ),
+            }
       },
     },
   }),
@@ -817,6 +785,18 @@ export const viewerField = {
 
 // Lookup (search)
 
+export const appLookupResult = new GraphQLObjectType({
+  name: 'AppLookupResult',
+  fields: () => ({
+    app: {
+      type: new GraphQLNonNull(app),
+    },
+    userAppVersion: {
+      type: userAppVersion,
+    },
+  }),
+})
+
 export const peerLookupResult = new GraphQLObjectType({
   name: 'PeerLookupResult',
   fields: () => ({
@@ -835,6 +815,70 @@ export const peerLookupResult = new GraphQLObjectType({
 export const lookup = new GraphQLObjectType({
   name: 'Lookup',
   fields: () => ({
+    appByID: {
+      type: appLookupResult,
+      args: {
+        publicID: {
+          type: new GraphQLNonNull(GraphQLID),
+        },
+      },
+      resolve: async (self, args, ctx: GraphQLContext) => {
+        ctx.logger.log({
+          level: 'debug',
+          message: 'Lookup app by ID',
+          args,
+        })
+        try {
+          if (!isValidAppID(args.publicID)) {
+            throw new Error('Invalid app ID')
+          }
+
+          const timeline = new Timeline({
+            bzz: await ctx.user.getBzz(),
+            feed: { user: args.publicID.replace(MF_PREFIX.APP, '0x') },
+          })
+          const chapter = await timeline.getLatestChapter()
+          if (chapter == null) {
+            return null
+          }
+
+          const manifest = await readAppManifest(chapter.content)
+          ctx.logger.log({
+            level: 'debug',
+            message: 'Lookup app by ID result',
+            args,
+            manifest,
+          })
+
+          let app = await ctx.db.apps.findByPublicID(args.publicID)
+          if (app == null) {
+            app = await ctx.db.apps.createFromManifest(manifest)
+          } else {
+            const appVersion = await app.populate('latestAvailableVersion')
+            if (
+              appVersion == null ||
+              semver.gt(manifest.version, appVersion.manifest.version)
+            ) {
+              await app.setLatestAvailableVersionFromManifest(manifest)
+            }
+          }
+
+          const userAppVersion = await ctx.db.user_app_versions.findByAppAndUserID(
+            app.localID,
+            ctx.user.userID,
+          )
+          return { app, userAppVersion }
+        } catch (error) {
+          ctx.logger.log({
+            level: 'warn',
+            message: 'Lookup app by ID failed',
+            args,
+            error: error.toString(),
+          })
+          return null
+        }
+      },
+    },
     peerByID: {
       type: peerLookupResult,
       args: {
@@ -859,7 +903,7 @@ export const lookup = new GraphQLObjectType({
           if (payload == null) {
             return null
           }
-          const data = readPeer(payload)
+          const data = await readPeer(payload)
           ctx.logger.log({
             level: 'debug',
             message: 'Lookup peer by ID result',

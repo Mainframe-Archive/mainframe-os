@@ -16,7 +16,7 @@ import type { AppData, AppWindowSession } from '../../types'
 
 import type { UserAppSettingsDoc } from '../db/collections/userAppSettings'
 import type { UserDoc } from '../db/collections/users'
-import type { StrictPermissionsGrants } from '../db/schemas/appPermissionsGrants'
+import type { WebDomainsDefinitions } from '../db/schemas/appManifest'
 import type { Logger } from '../logger'
 import { ElectronTransport } from '../rpc/ElectronTransport'
 
@@ -93,7 +93,6 @@ export class AppSession {
   app: AppData
   contentsURL: string
   isDevelopment: boolean
-  permissions: StrictPermissionsGrants
   publicID: string
   settings: UserAppSettingsDoc
   user: UserDoc
@@ -101,7 +100,6 @@ export class AppSession {
   constructor(params: AppSessionParams) {
     this.app = params.app
     this.contentsURL = fileURL(params.app.contentsPath)
-    this.permissions = params.settings.getPermissions()
     this.settings = params.settings
     this.user = params.user
   }
@@ -119,11 +117,11 @@ export class AppSession {
       },
       isDevelopment: this.isDevelopment,
       partition: `persist:${this.app.publicID}/${this.user.localID}`,
-      permissions: this.permissions,
       user: {
         id: this.user.localID,
         profile: this.user.profile,
       },
+      webDomains: this.settings.webDomains,
     }
   }
 }
@@ -184,16 +182,20 @@ export class AppContext {
         return
       }
 
-      // Check if already granted
-      if (this.session.permissions.WEB_REQUEST.granted.includes(domain)) {
-        callback({ cancel: false })
+      // Check if already granted or denied
+      const grant = this.session.settings.webDomains.find(
+        w => w.domain === domain,
+      )
+      if (grant == null || grant.internal === false) {
+        // Unknown domain or grant defied
+        this.notifyPermissionDenied({ key: 'WEB_REQUEST', domain })
+        callback({ cancel: true })
         return
       }
 
-      // Check if already denied
-      if (this.session.permissions.WEB_REQUEST.denied.includes(domain)) {
-        this.notifyPermissionDenied({ key: 'WEB_REQUEST', domain })
-        callback({ cancel: true })
+      if (grant.internal === true) {
+        // Granted
+        callback({ cancel: false })
         return
       }
 
@@ -202,20 +204,19 @@ export class AppContext {
         key: 'WEB_REQUEST',
         domain,
       })
-      const granted = res.granted ? 'granted' : 'denied'
-      if (
-        res.persist &&
-        !this.session.permissions.WEB_REQUEST[granted].includes(domain)
-      ) {
+      if (res.persist && grant == null) {
         // Grant for session
-        this.session.permissions.WEB_REQUEST[granted].push(domain)
+        this.session.settings.webDomains.push({ domain, internal: res.granted })
         if (res.persist === 'always') {
           // Grant for future sessions
-          await this.session.settings.setWebRequestPermission(granted, domain)
+          await this.session.settings.setWebDomainGrant({
+            domain,
+            internal: res.granted,
+          })
         }
       }
 
-      if (granted) {
+      if (res.granted) {
         callback({ cancel: false })
       } else {
         this.notifyPermissionDenied({ key: 'WEB_REQUEST', domain })

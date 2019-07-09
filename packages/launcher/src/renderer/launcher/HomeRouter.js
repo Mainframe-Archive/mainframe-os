@@ -9,6 +9,7 @@ import { ROUTES } from './constants'
 import { useSubscription } from './RelayEnvironment'
 
 import SideMenu from './SideMenu'
+import AppsScreen from './apps/AppsScreen'
 import ContactsScreen from './contacts/ContactsScreen'
 import DevtoolsRouter from './devtools/DevtoolsRouter'
 import SettingsRouter from './settings/SettingsRouter'
@@ -58,7 +59,7 @@ export default function HomeRouter() {
       <SideMenu />
       <ContentContainer>
         <Switch>
-          <Route path={ROUTES.APPS} component={() => <h1>Apps</h1>} />
+          <Route path={ROUTES.APPS} component={AppsScreen} />
           <Route path={ROUTES.CONTACTS} component={ContactsScreen} />
           <Route path={ROUTES.DEVTOOLS} component={DevtoolsRouter} />
           <Route path={ROUTES.WALLETS} component={WalletsScreen} />

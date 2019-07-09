@@ -1,7 +1,5 @@
 // @flow
 
-// TODO: remove use of this library
-import type { StrictPermissionsRequirements } from '@mainframe/app-permissions'
 import { Text, Button } from '@morpheus-ui/core'
 import { shell } from 'electron'
 import React, { Component } from 'react'

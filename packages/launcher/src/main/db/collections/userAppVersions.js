@@ -15,12 +15,12 @@ import type { UserAppSettingsDoc } from './userAppSettings'
 import type { UserDoc } from './users'
 
 type UserAppVersionMethods = {|
-  getApp(): Promise<AppDoc>,
   getPublicID(): Promise<string>,
   getAppData(env: Environment): Promise<AppData>,
 |}
 
 type UserAppVersionPopulate = Populate<{
+  app: AppDoc,
   appVersion: AppVersionDoc,
   settings: UserAppSettingsDoc,
   user: UserDoc,
@@ -30,34 +30,46 @@ export type UserAppVersionDoc = UserAppVersionData &
   UserAppVersionMethods &
   UserAppVersionPopulate
 
-export type UserAppVersionsCollection = Collection<UserAppVersionData>
+type UserAppVersionStatics = {|
+  findByAppAndUserID(
+    appID: string,
+    userID: string,
+  ): Promise<UserAppVersionDoc | null>,
+|}
+
+export type UserAppVersionsCollection = Collection<UserAppVersionData> &
+  UserAppVersionStatics
 
 export default async (
   params: CollectionParams,
 ): Promise<UserAppVersionsCollection> => {
-  return await params.db.collection<
+  const { db } = params
+
+  return await db.collection<
     UserAppVersionData,
     UserAppVersionDoc,
     UserAppVersionMethods,
-    {},
+    UserAppVersionStatics,
   >({
     name: COLLECTION_NAMES.USER_APP_VERSIONS,
     schema,
-    statics: {},
-    methods: {
-      async getApp(): Promise<AppDoc> {
-        const appVersion = await this.populate('appVersion')
-        return await appVersion.populate('app')
+    statics: {
+      async findByAppAndUserID(
+        appID: string,
+        userID: string,
+      ): Promise<UserAppVersionDoc | null> {
+        return await this.findOne({ app: appID, user: userID }).exec()
       },
-
+    },
+    methods: {
       async getPublicID(): Promise<string> {
-        const app = await this.getApp()
+        const app = await this.populate('app')
         return app.getPublicID()
       },
 
       async getAppData(env: Environment): Promise<AppData> {
         const appVersion = await this.populate('appVersion')
-        const app = await this.populate('ownApp')
+        const app = await this.populate('app')
         return {
           contentsPath: env.getAppContentsPath(
             app.getPublicID(),

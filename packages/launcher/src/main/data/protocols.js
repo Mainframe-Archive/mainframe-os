@@ -1,6 +1,18 @@
 // @flow
 
+import Ajv from 'ajv'
 import semver from 'semver'
+
+import { APP_MANIFEST_V0 } from './constants'
+import { appManifestSchema } from './schemas/app'
+
+const ajv = new Ajv()
+ajv.addSchema([appManifestSchema])
+
+const validateSchema = async (type: string, data: Object) => {
+  await ajv.validate(type, data)
+  return data
+}
 
 const validateHasPublicKey = (data: Object = {}) => {
   if (data.publicKey == null) {
@@ -9,7 +21,11 @@ const validateHasPublicKey = (data: Object = {}) => {
   return data
 }
 
-const validateDeveloper = (data: Object = {}) => {
+const validateAppManifest = async (data: Object = {}) => {
+  return await validateSchema(APP_MANIFEST_V0, data)
+}
+
+const validateDeveloper = async (data: Object = {}) => {
   if (data.apps == null) {
     data.apps = []
   }
@@ -19,7 +35,7 @@ const validateDeveloper = (data: Object = {}) => {
   return data
 }
 
-const validatePeer = (data: Object = {}) => {
+const validatePeer = async (data: Object = {}) => {
   validateHasPublicKey(data)
   if (data.profile == null) {
     data.profile = {}
@@ -27,7 +43,7 @@ const validatePeer = (data: Object = {}) => {
   return data
 }
 
-const validateFirstContact = (data: Object = {}) => {
+const validateFirstContact = async (data: Object = {}) => {
   validateHasPublicKey(data.contact)
 
   if (data.peer == null || data.peer.publicFeed == null) {
@@ -38,6 +54,17 @@ const validateFirstContact = (data: Object = {}) => {
 }
 
 export const PROTOCOLS = {
+  appManifest_v1: {
+    name: 'appManifest',
+    read: {
+      process: validateAppManifest,
+      version: '^1.0.0',
+    },
+    write: {
+      process: validateAppManifest,
+      version: '1.0.0',
+    },
+  },
   developer_v1: {
     name: 'developer',
     read: {
@@ -74,7 +101,11 @@ export const PROTOCOLS = {
 }
 
 export type Protocol = $Keys<typeof PROTOCOLS>
-export type Payload = { mainframe: string, version: string, data: any }
+export type Payload = {
+  mainframe: string,
+  version: string,
+  data: any,
+}
 
 export const createWriter = (key: Protocol) => {
   const protocol = PROTOCOLS[key]
@@ -82,11 +113,14 @@ export const createWriter = (key: Protocol) => {
     throw new Error(`Unsupported protocol: ${key}`)
   }
 
-  return (data: any): Payload => ({
-    mainframe: protocol.name,
-    version: protocol.write.version,
-    data: protocol.write.process(data),
-  })
+  return async (data: any): Payload => {
+    const processed = await protocol.write.process(data)
+    return {
+      mainframe: protocol.name,
+      version: protocol.write.version,
+      data: processed,
+    }
+  }
 }
 
 export const createReader = (key: Protocol) => {
@@ -95,7 +129,7 @@ export const createReader = (key: Protocol) => {
     throw new Error(`Unsupported protocol: ${key}`)
   }
 
-  return (payload: Payload) => {
+  return async (payload: Payload) => {
     if (payload.mainframe !== protocol.name) {
       throw new Error('Unsupported payload')
     }
@@ -105,9 +139,12 @@ export const createReader = (key: Protocol) => {
     if (!semver.satisfies(payload.version, protocol.read.version)) {
       throw new Error(`Unsupported version: ${payload.version}`)
     }
-    return protocol.read.process(payload.data)
+    return await protocol.read.process(payload.data)
   }
 }
+
+export const readAppManifest = createReader('appManifest_v1')
+export const writeAppManifest = createWriter('appManifest_v1')
 
 export const readDeveloper = createReader('developer_v1')
 export const writeDeveloper = createWriter('developer_v1')

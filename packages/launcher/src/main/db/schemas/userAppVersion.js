@@ -5,6 +5,7 @@ import { COLLECTION_NAMES } from '../constants'
 export type UserAppVersionData = {|
   localID: string,
   user: string,
+  app: string,
   appVersion: string,
   settings: string,
 |}
@@ -23,6 +24,11 @@ export default {
       ref: COLLECTION_NAMES.USERS,
       final: true,
     },
+    app: {
+      type: 'string',
+      ref: COLLECTION_NAMES.APPS,
+      final: true,
+    },
     appVersion: {
       type: 'string',
       ref: COLLECTION_NAMES.APP_VERSIONS,
@@ -32,5 +38,5 @@ export default {
       ref: COLLECTION_NAMES.USER_APP_SETTINGS,
     },
   },
-  compoundIndexes: [['user', 'appVersion']],
+  compoundIndexes: [['user', 'app']],
 }

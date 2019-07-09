@@ -1,12 +1,5 @@
-//@flow
+// @flow
 
-import {
-  createWebRequestGrant,
-  definitionsExist,
-  type PermissionKey, // eslint-disable-line import/named
-  type StrictPermissionsRequirements,
-  type StrictPermissionsGrants, // eslint-disable-line import/named
-} from '@mainframe/app-permissions'
 import React, { Component } from 'react'
 import { Text, DropDown } from '@morpheus-ui/core'
 import styled from 'styled-components/native'

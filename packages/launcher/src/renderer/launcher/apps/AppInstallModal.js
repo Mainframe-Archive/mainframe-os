@@ -1,16 +1,12 @@
-//@flow
+// @flow
 
-import {
-  havePermissionsToGrant,
-  type StrictPermissionsGrants,
-  createStrictPermissionGrants,
-} from '@mainframe/app-permissions'
 import type { IdentityOwnData } from '@mainframe/client'
 import type { ManifestData } from '@mainframe/app-manifest'
 import React, { Component } from 'react'
 import { Text, TextField } from '@morpheus-ui/core'
 import { type FormSubmitPayload } from '@morpheus-ui/forms'
-import { commitMutation } from 'react-relay'
+import { commitMutation, graphql } from 'react-relay'
+import { fetchQuery } from 'relay-runtime'
 import styled from 'styled-components/native'
 
 import { EnvironmentContext } from '../RelayEnvironment'
@@ -20,25 +16,6 @@ import Loader from '../../UIComponents/Loader'
 import rpc from '../rpc'
 import PermissionsView from '../PermissionsView'
 import { appInstallMutation } from './appMutations'
-
-type Props = {
-  appID?: ?string,
-  onRequestClose: () => void,
-  onInstallComplete: () => void,
-  getIcon?: (id?: ?string) => ?string,
-}
-
-type ViewProps = Props & {
-  user: CurrentUser,
-}
-
-type State = {
-  installStep: 'manifest' | 'permissions' | 'download',
-  manifest: ?ManifestData,
-  userPermissions?: StrictPermissionsGrants,
-  ownUsers: Array<IdentityOwnData>,
-  errorMsg?: string,
-}
 
 const Container = styled.View`
   flex: 1;
@@ -55,9 +32,58 @@ const TextContainer = styled.View`
 
 const View = styled.View``
 
-export default class AppInstallModal extends Component<ViewProps, State> {
-  static contextType = EnvironmentContext
+const appLookupQuery = graphql`
+  query AppInstallModalLookupAppQuery($publicID: ID!) {
+    lookup {
+      appByID(publicID: $publicID) {
+        app {
+          latestAvailableVersion {
+            manifest {
+              profile {
+                name
+              }
+              version
+              permissions {
+                optional {
+                  CONTACT_COMMUNICATION
+                  CONTACT_LIST
+                  ETHEREUM_TRANSACTION
+                  WEB_REQUEST
+                }
+                required {
+                  CONTACT_COMMUNICATION
+                  CONTACT_LIST
+                  ETHEREUM_TRANSACTION
+                  WEB_REQUEST
+                }
+              }
+            }
+          }
+        }
+        userAppVersion {
+          localID
+        }
+      }
+    }
+  }
+`
 
+type Props = {
+  appID?: ?string,
+  onRequestClose: () => void,
+  onInstallComplete: () => void,
+  getIcon?: (id?: ?string) => ?string,
+}
+
+type State = {
+  installStep: 'manifest' | 'permissions' | 'download',
+  manifest: ?ManifestData,
+  userPermissions?: StrictPermissionsGrants,
+  ownUsers: Array<IdentityOwnData>,
+  errorMsg?: string,
+}
+
+export default class AppInstallModal extends Component<Props, State> {
   state = {
     installStep: 'manifest',
     manifest: null,
@@ -72,22 +98,15 @@ export default class AppInstallModal extends Component<ViewProps, State> {
 
   // HANDLERS
 
-  async loadManifest(hash: string) {
+  async loadManifest(publicID: string) {
     try {
       this.setState({ installStep: 'download' })
 
-      const { manifest, appID, isOwn } = await rpc.loadManifest(hash)
+      const { manifest, appID } = await rpc.loadManifest(publicID)
       // If appID is returned it means the app is already installed.
       // If we only support a single user in the launcher, the app must have been already installed by this user.
       if (appID != null) {
-        if (isOwn) {
-          return this.setState({
-            installStep: 'manifest',
-            errorMsg: `We currently don't support installing your own apps, they should be accessed from the developer section.`,
-          })
-        } else {
-          return this.props.onInstallComplete()
-        }
+        return this.props.onInstallComplete()
       }
 
       if (havePermissionsToGrant(manifest.permissions)) {

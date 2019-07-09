@@ -53,6 +53,9 @@ type App implements Node {
   id: ID!
   localID: ID!
   publicID: ID!
+  developer: Developer!
+  latestAvailableVersion: AppVersion
+  latestDownloadedVersion: AppVersion
   versions: [AppVersion!]!
 }
 
@@ -79,6 +82,11 @@ type AppInstallMutationPayload {
   appVersion: AppVersion
   viewer: User!
   clientMutationId: String
+}
+
+type AppLookupResult {
+  app: App!
+  userAppVersion: UserAppVersion
 }
 
 type AppManifest {
@@ -367,6 +375,7 @@ type ImportHDWalletPayload {
 }
 
 type Lookup {
+  appByID(publicID: ID!): AppLookupResult
   peerByID(publicID: ID!): PeerLookupResult
 }
 

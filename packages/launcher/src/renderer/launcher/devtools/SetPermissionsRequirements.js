@@ -6,13 +6,6 @@ import {
   type FieldValidateFunctionParams,
 } from '@morpheus-ui/forms'
 import CloseIcon from '@morpheus-ui/icons/Close'
-// TODO: remove dependency on this package, these types should be added in the OS package
-import type {
-  StrictPermissionsRequirements,
-  PermissionRequirement,
-  PermissionKey,
-  PermissionKeyBasic,
-} from '@mainframe/app-permissions'
 import React, { Component } from 'react'
 import styled from 'styled-components/native'
 
@@ -20,30 +13,20 @@ import { isValidWebHost } from '../../../validation'
 
 import FormModalView from '../../UIComponents/FormModalView'
 
+type WebDomains = Array<{ domain: string, internal?: ?boolean }>
+
 type Props = {
   onPressBack?: () => any,
   onRequestClose?: () => any,
-  onSetPermissions: (permissions: StrictPermissionsRequirements) => void,
-  permissionRequirements?: StrictPermissionsRequirements,
-}
-
-type PermissionSettings = {
-  WEB_REQUEST: { [host: string]: PermissionRequirement },
-  [PermissionKeyBasic]: PermissionRequirement,
+  onSetWebDomains: (webDomains: WebDomains) => void,
+  webDomains?: WebDomains,
 }
 
 type State = {
   isHovering?: boolean,
   hostInput: string,
   errorMsg?: ?string,
-  permissionSettings: PermissionSettings,
-}
-
-export const PERMISSIONS_DESCRIPTIONS = {
-  CONTACT_COMMUNICATION: 'Communicate data with contacts',
-  CONTACT_LIST: 'Access user contacts',
-  ETHEREUM_TRANSACTION: 'Make transactions to Ethereum blockchain',
-  WEB_REQUEST: 'Set required web request hosts',
+  domains: { [domain: string]: boolean },
 }
 
 const Container = styled.View`
@@ -102,50 +85,25 @@ export default class SetPermissionsRequirements extends Component<
 > {
   constructor(props: Props) {
     super(props)
-    const permissionSettings: PermissionSettings = {
-      WEB_REQUEST: {},
-    }
-    const requirements = props.permissionRequirements
-    if (requirements) {
-      Object.keys(requirements).forEach(
-        (requirement: PermissionRequirement) => {
-          Object.keys(requirements[requirement]).forEach(
-            (key: PermissionKey) => {
-              if (
-                key === 'WEB_REQUEST' &&
-                Array.isArray(requirements[requirement].WEB_REQUEST)
-              ) {
-                requirements[requirement].WEB_REQUEST.forEach(host => {
-                  permissionSettings.WEB_REQUEST[host] = requirement
-                })
-              } else if (key !== 'WEB_REQUEST') {
-                if (requirements[requirement][key]) {
-                  permissionSettings[key] = requirement
-                }
-              }
-            },
-          )
-        },
-      )
-    }
     this.state = {
       hostInput: '',
-      permissionSettings,
+      domains: (props.webDomains || []).reduce((acc, w) => {
+        acc[w.domain] = !!w.internal
+        return acc
+      }, {}),
     }
   }
 
   onPressAddHost = (payload: FormSubmitPayload) => {
-    const { hostInput } = this.state
-    if (payload.valid && hostInput) {
-      this.setState(({ permissionSettings }) => {
-        permissionSettings.WEB_REQUEST[hostInput] = 'required'
-        return {
-          permissionSettings,
-          errorMsg: undefined,
-          hostInput: '',
-        }
-      })
-    }
+    this.setState(({ hostInput, domains }) => {
+      return payload.valid && hostInput.length
+        ? {
+            domains: { ...domains, [hostInput]: true },
+            errorMsg: undefined,
+            hostInput: '',
+          }
+        : null
+    })
   }
 
   onChangeHostInput = (value: string) => {
@@ -156,64 +114,33 @@ export default class SetPermissionsRequirements extends Component<
   }
 
   onPressSave = () => {
-    const { permissionSettings } = this.state
-    const formattedPermissions: StrictPermissionsRequirements = {
-      optional: {
-        WEB_REQUEST: [],
-      },
-      required: {
-        WEB_REQUEST: [],
-      },
-    }
-    const keys: Array<PermissionKey> = Object.keys(permissionSettings)
-    keys.forEach((key: PermissionKey) => {
-      if (key === 'WEB_REQUEST') {
-        Object.keys(permissionSettings.WEB_REQUEST).forEach(host => {
-          const requirement = permissionSettings.WEB_REQUEST[host]
-          formattedPermissions[requirement].WEB_REQUEST.push(host)
-        })
-      } else {
-        const requirement = permissionSettings[key]
-        formattedPermissions[requirement][key] = true
-      }
+    const { domains } = this.state
+    const webDomains = Object.keys(domains).map(domain => {
+      return { domain, internal: domains[domain] }
     })
-    this.props.onSetPermissions(formattedPermissions)
+    this.props.onSetWebDomains(webDomains)
   }
 
-  onToggle = (
-    key: PermissionKey,
-    newState: PermissionRequirement,
-    host?: string,
-  ) => {
-    this.setState(({ permissionSettings }) => {
-      if (key === 'WEB_REQUEST' && host) {
-        permissionSettings.WEB_REQUEST[host] = newState
-      } else if (key !== 'WEB_REQUEST') {
-        permissionSettings[key] = newState
-      }
-      return { permissionSettings }
+  onToggle = (domain: string, required: boolean) => {
+    this.setState(({ domains }) => {
+      return { domains: { ...domains, [domain]: required } }
     })
   }
 
-  removeHost = (host: string) => {
-    this.setState(({ permissionSettings }) => {
-      delete permissionSettings.WEB_REQUEST[host]
-      return { permissionSettings }
+  removeHost = (domain: string) => {
+    this.setState(({ domains }) => {
+      const { [domain]: _remove, ...nextDomains } = domains
+      return { domains: nextDomains }
     })
   }
   // RENDER
 
   renderToggle = (
-    key: PermissionKey,
-    state: PermissionRequirement,
-    onToggle: (
-      key: PermissionKey,
-      type: PermissionRequirement,
-      host?: string,
-    ) => void,
-    host?: string,
+    domain: string,
+    required: boolean,
+    onToggle: (domain: string, required: boolean) => void,
   ) => {
-    const onPress = sel => onToggle(key, sel.toLowerCase(), host)
+    const onPress = sel => onToggle(domain, sel === 'Required')
 
     return (
       <DropDown
@@ -221,16 +148,14 @@ export default class SetPermissionsRequirements extends Component<
         label="Optional"
         options={['Optional', 'Required']}
         onChange={onPress}
-        defaultValue={
-          state
-            ? `${state.charAt(0).toUpperCase()}${state.slice(1)}`
-            : 'Optional'
-        }
+        defaultValue={required ? 'Required' : 'Optional'}
       />
     )
   }
 
   render() {
+    // TODO: remove all logic not needed for web domains
+
     const { permissionSettings } = this.state
     const permissionOptions = Object.keys(PERMISSIONS_DESCRIPTIONS).map(
       (key, index) => {

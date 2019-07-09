@@ -2,11 +2,10 @@
 
 import { COLLECTION_NAMES } from '../constants'
 
-import permissionsGrants, {
-  type PermissionsGrantsData,
-} from './appPermissionsGrants'
-
-// These settings should be shared by both own apps and installed ones
+import {
+  webDomainsDefinitions,
+  type WebDomainsDefinitions,
+} from './appManifest'
 
 export type ApprovedContact = {|
   aliasID: string,
@@ -18,7 +17,7 @@ export type UserAppSettingsData = {|
   approvedContacts: Array<ApprovedContact>,
   defaultEthAccount: ?string,
   permissionsChecked: boolean,
-  permissionsGrants: PermissionsGrantsData,
+  webDomains: WebDomainsDefinitions,
 |}
 
 export default {
@@ -55,7 +54,10 @@ export default {
       type: 'boolean',
       default: false,
     },
-    permissionsGrants,
+    webDomains: {
+      ...webDomainsDefinitions,
+      default: [],
+    },
     // TODO: storage keyPair - also communications one?
   },
 }

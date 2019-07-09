@@ -2,12 +2,12 @@
 
 import url from 'url'
 import { type Session } from 'electron'
-// TODO: replace this usage
-import { checkPermission } from '@mainframe/app-permissions'
-import type { PermissionKey } from '@mainframe/app-permissions'
 import fileUrl from 'file-url'
 
 import type { AppContext } from './context/app'
+
+// TODO: defined these keys
+type PermissionKey = string
 
 export const userDeniedError = (key: PermissionKey) => {
   return new Error(`User denied permission: ${key}`)
@@ -103,8 +103,9 @@ export const isGranted = async (
   ctx: AppContext,
   params?: string | Object,
 ) => {
-  const permissions = ctx.appSession.session.permissions.session
-  let granted = checkPermission(permissions, key)
+  // TODO: handle these on AppContext
+  const permissions = {}
+  let granted = 'not_set'
   // Always request permission for transaction signing
   if (
     granted === 'not_set' ||

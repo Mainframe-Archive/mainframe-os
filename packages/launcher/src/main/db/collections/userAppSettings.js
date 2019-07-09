@@ -3,25 +3,18 @@
 import { COLLECTION_NAMES } from '../constants'
 import type { Collection, CollectionParams } from '../types'
 
-import type { StrictPermissionsGrants } from '../schemas/appPermissionsGrants'
-import type { PermissionsRequirementsData } from '../schemas/appPermissionsRequirements'
+import type { WebDomainDefinition } from '../schemas/appManifest'
 import schema, { type UserAppSettingsData } from '../schemas/userAppSettings'
 import { generateLocalID } from '../utils'
 
 type UserAppSettingsMethods = {|
-  getPermissions(): StrictPermissionsGrants,
-  setWebRequestPermission(
-    permission: 'denied' | 'granted',
-    domain: string,
-  ): Promise<void>,
+  setWebDomainGrant(grant: WebDomainDefinition): Promise<void>,
 |}
 
 export type UserAppSettingsDoc = UserAppSettingsData & UserAppSettingsMethods
 
 type UserAppSettingsStatics = {|
-  createFromPermissionRequirement(
-    requirements: PermissionsRequirementsData,
-  ): Promise<UserAppSettingsDoc>,
+  create(data: $Shape<UserAppSettingsData>): Promise<UserAppSettingsDoc>,
 |}
 
 export type UserAppSettingsCollection = Collection<UserAppSettingsData> &
@@ -39,69 +32,24 @@ export default async (
     name: COLLECTION_NAMES.USER_APP_SETTINGS,
     schema,
     statics: {
-      async createFromPermissionRequirement(
-        requirements: PermissionsRequirementsData,
+      async create(
+        data: $Shape<UserAppSettingsData>,
       ): Promise<UserAppSettingsDoc> {
-        const required = requirements.required || {}
         return await this.insert({
+          ...data,
           localID: generateLocalID(),
-          permissionsGrants: {
-            CONTACT_COMMUNICATION: required.CONTACT_COMMUNICATION,
-            CONTACT_LIST: required.CONTACT_LIST,
-            ETHEREUM_TRANSACTION: required.ETHEREUM_TRANSACTION,
-            WEB_REQUEST: {
-              granted: required.WEB_REQUEST || [],
-              denied: [],
-            },
-          },
         })
       },
     },
     methods: {
-      getPermissions(): StrictPermissionsGrants {
-        const webRequest = this.permissionsGrants.WEB_REQUEST || {}
-        if (webRequest.denied == null) {
-          webRequest.denied = []
-        }
-        if (webRequest.granted == null) {
-          webRequest.granted = []
-        }
-        return {
-          CONTACT_COMMUNICATION:
-            this.permissionsGrants.CONTACT_COMMUNICATION || false,
-          CONTACT_LIST: this.permissionsGrants.CONTACT_LIST || false,
-          ETHEREUM_TRANSACTION:
-            this.permissionsGrants.ETHEREUM_TRANSACTION || false,
-          WEB_REQUEST: webRequest,
-        }
-      },
-
-      async setWebRequestPermission(
-        permission: 'denied' | 'granted',
-        domain: string,
-      ): Promise<void> {
+      async setWebDomainGrant(grant: WebDomainDefinition): Promise<void> {
         await this.atomicUpdate(doc => {
-          // Ensure permissions grants exist
-          const permissionsGrants = doc.permissionsGrants || {}
-          if (permissionsGrants.denied == null) {
-            permissionsGrants.denied = []
+          const index = doc.webDomains.findIndex(w => w.domain === grant.domain)
+          if (index === -1) {
+            doc.webDomains.push(grant)
+          } else {
+            Object.assign(doc.webDomains[index], grant)
           }
-          if (permissionsGrants.granted == null) {
-            permissionsGrants.granted = []
-          }
-
-          // Remove from other list if needed
-          const other = permission === 'granted' ? 'denied' : 'granted'
-          const otherIndex = permissionsGrants[other].indexOf(domain)
-          if (otherIndex !== -1) {
-            permissionsGrants[other].splice(otherIndex, 1)
-          }
-
-          // Add to permission list
-          if (!permissionsGrants[permission].includes(domain)) {
-            permissionsGrants[permission].push(domain)
-          }
-
           return doc
         })
       },
