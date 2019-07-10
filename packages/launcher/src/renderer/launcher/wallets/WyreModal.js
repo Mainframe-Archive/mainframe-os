@@ -10,6 +10,7 @@ import FormModalView from '../../UIComponents/FormModalView'
 import { EnvironmentContext } from '../RelayEnvironment'
 import Avatar from '../../UIComponents/Avatar'
 
+import rpc from '../rpc'
 import { type Wallets } from './WalletsView'
 
 type Props = {
@@ -96,56 +97,53 @@ export default class WyreModal extends Component<Props, State> {
   }
 
   openWyreWidget = () => {
-    const deviceToken = localStorage.getItem('DEVICE_TOKEN')
-    const widget = new Wyre.Widget({
-      env: 'test',
-      accountId: 'AK-QXYZDJTM-LN9LLA8H-T6Q78E6A-6NTLAENV',
-      auth: {
-        type: 'secretKey',
-        secretKey: deviceToken,
-      },
-      operation: {
-        type: 'debitcard',
-        dest: 'ethereum:' + this.props.address,
-        sourceCurrency: 'USD',
-        destCurrency: 'ETH',
-        sourceAmount: this.state.amount,
-      },
-    })
-
-    widget.on('close', e => {
-      // localStorage.setItem('WYRE_STATUS', 'incomplete')
-      if (e.error) {
-        this.setState({ errorMsg: e.error, completed: false })
-      } else {
-        this.setState({ completed: false })
-      }
-    })
-
-    widget.on('complete', e => {
-      // localStorage.setItem('WYRE_STATUS', 'complete')
-      console.log('event', e)
-      this.setState({ completed: true })
-    })
-
-    widget.open()
-
-    console.log(widget)
-
-    // let authWindow = new remote.BrowserWindow({
+    // const deviceToken = localStorage.getItem('DEVICE_TOKEN')
+    // const widget = new Wyre.Widget({
+    //   env: 'test',
+    //   accountId: 'AK-QXYZDJTM-LN9LLA8H-T6Q78E6A-6NTLAENV',
+    //   auth: {
+    //     type: 'secretKey',
+    //     secretKey: deviceToken,
+    //   },
+    //   operation: {
+    //     type: 'debitcard',
+    //     dest: 'ethereum:' + this.props.address,
+    //     sourceCurrency: 'USD',
+    //     destCurrency: 'ETH',
+    //     sourceAmount: this.state.amount,
+    //   },
+    // })
+    //
+    // widget.on('close', e => {
+    //   // localStorage.setItem('WYRE_STATUS', 'incomplete')
+    //   if (e.error) {
+    //     this.setState({ errorMsg: e.error, completed: false })
+    //   } else {
+    //     this.setState({ completed: false })
+    //   }
+    // })
+    //
+    // widget.on('complete', e => {
+    //   // localStorage.setItem('WYRE_STATUS', 'complete')
+    //   console.log('event', e)
+    //   this.setState({ completed: true })
+    // })
+    //
+    // widget.open()
+    //
+    // console.log(widget)
+    // const authWindow = new remote.BrowserWindow({
     //   width: 350,
     //   height: 600,
     //   show: false,
     //   webPreferences: { nodeIntegration: false },
     // })
-    //
     // authWindow.loadURL(
     //   `https://verify.testwyre.com/widget/v1?env=test&operation=debitcard&accountId=AC_1234&authType=secretKey&destCurrency=ETH&sourceCurrency=USD&sourceAmount=${
     //     this.state.amount
     //   }&dest=ethereum:${this.props.address}&redirectUrl=https://sendwyre.com`,
     // )
     // authWindow.show()
-    //
     // // Handle the response from GitHub - See Update from 4/12/2015
     //
     // authWindow.webContents.on('did-navigate', (event, url) => {
@@ -210,7 +208,9 @@ export default class WyreModal extends Component<Props, State> {
           dismissButton={completed ? null : 'CANCEL'}
           onRequestClose={onClose}
           confirmButton={completed ? 'FINISH' : 'PROCEED'}
-          onSubmitForm={completed ? onComplete : this.openWyreWidget}>
+          onSubmitForm={
+            completed ? onComplete : () => rpc.openWyre(this.state.amount)
+          }>
           <Container>
             {errorMsg}
             <>

@@ -9,11 +9,16 @@ import { createDB } from '../db'
 import type { DB } from '../db/types'
 import type { Environment } from '../environment'
 import type { Logger } from '../logger'
-import { createAppWindow, createLauncherWindow } from '../windows'
+import {
+  createAppWindow,
+  createWyreWindow,
+  createLauncherWindow,
+} from '../windows'
 
 import { AppContext, AppSession } from './app'
 import { LauncherContext } from './launcher'
 import { UserContext } from './user'
+import { WyreContext } from './wyre'
 
 const PASSWORD_SERVICE = 'MainframeOS'
 
@@ -255,6 +260,27 @@ export class SystemContext {
     return ctx
   }
 
+  createWyreContext(session: AppSession, amount: number): AppContext {
+    console.log('system js app cintext')
+    const ctx = new AppContext({
+      session,
+      system: this,
+      window: createWyreWindow(),
+    })
+    console.log('system js webcontents')
+
+    // window.webContents.on('did-attach-webview', (event, webContents) => {
+    //   webContents.on('destroyed', () => {
+    //     this._appsBySandboxContents.delete(webContents)
+    //     ctx.sandbox = null
+    //   })
+    //   this._appsBySandboxContents.set(webContents, id)
+    //   ctx.attachSandbox(webContents)
+    // })
+
+    return ctx
+  }
+
   async openAppVersion(userAppVersionID: string): Promise<AppContext> {
     const session = await AppSession.fromUserAppVersion(this, userAppVersionID)
     return this.createAppContext(userAppVersionID, session)
@@ -263,6 +289,12 @@ export class SystemContext {
   async openOwnApp(userOwnAppID: string): Promise<AppContext> {
     const session = await AppSession.fromUserOwnApp(this, userOwnAppID)
     return this.createAppContext(userOwnAppID, session)
+  }
+
+  async openWyreWindow(userID: ?string, amount: number): Promise<AppContext> {
+    console.log('system js open wyre window')
+    const session = await AppSession.fromWyre(this)
+    return this.createWyreContext(session, amount)
   }
 
   getLauncherContext(idOrContents: string | WebContents): ?LauncherContext {
@@ -299,6 +331,28 @@ export class SystemContext {
 
     ctx.window.on('closed', async () => {
       // await ctx.clear()
+      delete this._launchers[ctx.launcherID]
+    })
+
+    return ctx
+  }
+
+  launchWyre(userID: ?string, amount: number): LauncherContext {
+    console.log('system js launch wyre')
+    if (!amount || typeof amount !== 'number') {
+      throw new Error('Invalid amount')
+    }
+
+    const ctx = new WyreContext({
+      db: this.db,
+      logger: this.logger,
+      window: createWyreWindow(amount),
+    })
+
+    this._launchers[ctx.launcherID] = ctx
+    this._launchersByContents.set(ctx.window.webContents, ctx.launcherID)
+
+    ctx.window.on('closed', async () => {
       delete this._launchers[ctx.launcherID]
     })
 

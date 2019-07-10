@@ -11,6 +11,7 @@ import type {
 import { getAccountsByPage } from '../wallets/ledgerClient'
 
 import type { LauncherContext } from '../context/launcher'
+import { createWyreWindow } from '../windows'
 
 type BlockchainEthSendParams = {
   method: string,
@@ -103,6 +104,23 @@ export default {
       params: { userID?: ?string },
     ): Promise<void> {
       ctx.system.openLauncher(params.userID)
+    },
+  },
+
+  wyre_open: {
+    params: {
+      amount: {
+        type: 'number',
+        optional: false,
+      },
+    },
+    async handler(
+      ctx: LauncherContext,
+      params: { amount: number },
+    ): Promise<void> {
+      ctx.system.launchWyre(ctx.userID, params.amount)
+      console.log('create wyre window')
+      createWyreWindow(params.amount)
     },
   },
 

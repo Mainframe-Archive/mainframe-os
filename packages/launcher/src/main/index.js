@@ -198,6 +198,7 @@ ipcMain.on('window-exception', (event, error) => {
 })
 
 ipcMain.on('window-opened', async event => {
+  console.log('WINDOW OPENED')
   const launcherContext = system.getLauncherContext(event.sender)
   if (launcherContext != null) {
     event.sender.send('window-start', {
@@ -210,7 +211,15 @@ ipcMain.on('window-opened', async event => {
   }
 
   const appContext = system.getAppContext(event.sender)
-  if (appContext != null) {
+  console.log('appContext')
+  console.log(appContext)
+  if (appContext == null) {
+    console.log('hellow2')
+    event.sender.send('window-start', {
+      type: 'wyre',
+    })
+    return
+  } else if (appContext != null) {
     event.sender.send('window-start', {
       type: 'app',
       initialProps: {

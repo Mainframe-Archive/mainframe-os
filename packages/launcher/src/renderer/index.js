@@ -11,10 +11,12 @@ import './styles.css'
 
 import Launcher from './launcher/Root.js'
 import AppContainer from './app/AppContainer.js'
+import WyreWidget from './launcher/WyreWidget.js'
 
 const AppTypes = {
   app: AppContainer,
   launcher: Launcher,
+  wyre: WyreWidget,
 }
 
 const rootTag = document.getElementById('app')
@@ -22,7 +24,20 @@ Modal.setAppElement(rootTag)
 
 ipcRenderer.on('window-start', (event, params) => {
   const App = AppTypes[params.type]
-  if (App == null) {
+  console.log('params.type')
+
+  console.log(params.type)
+  console.log(App)
+  if (App == null && params.type === 'wyre') {
+    const Root = () => <App />
+    AppRegistry.registerComponent('Root', () => Root)
+    AppRegistry.runApplication('Root', {
+      rootTag,
+      callback: () => {
+        ipcRenderer.send('window-ready')
+      },
+    })
+  } else if (App == null) {
     ipcRenderer.send('window-exception', {
       message: `Unknown app type: ${params.type}`,
     })

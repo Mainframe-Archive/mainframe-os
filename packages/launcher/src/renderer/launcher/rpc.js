@@ -29,6 +29,12 @@ export default {
     await client.request('launcher_open', { userID })
   },
 
+  async openWyre(amount: number): Promise<void> {
+    console.log('rpc js')
+    console.log(amount)
+    await client.request('wyre_open', { amount })
+  },
+
   // DB
 
   async createDB(password: string, save?: boolean = false): Promise<void> {
