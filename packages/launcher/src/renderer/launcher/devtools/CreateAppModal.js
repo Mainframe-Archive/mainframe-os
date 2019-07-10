@@ -9,6 +9,8 @@ import {
   type Environment,
 } from 'react-relay'
 
+import type { WebDomainsDefinitions } from '../../../types'
+
 import AppSummary, { type AppData } from './AppSummary'
 import EditAppDetailsModal, {
   type CompleteAppData,
@@ -46,7 +48,7 @@ type Props = {
 
 type State = {
   screen: 'info' | 'permissions' | 'summary',
-  permissionsRequirements: StrictPermissionsRequirements,
+  webDomains: WebDomainsDefinitions,
   userId?: string,
   appData: AppData,
   errorMsg?: string,
@@ -59,20 +61,13 @@ class CreateAppModal extends Component<Props, State> {
     appData: {
       version: '1.0.0',
     },
-    permissionsRequirements: {
-      optional: {
-        WEB_REQUEST: [],
-      },
-      required: {
-        WEB_REQUEST: [],
-      },
-    },
+    webDomains: [],
   }
 
   // HANDLERS
 
   onPressCreateApp = async () => {
-    const { appData, permissionsRequirements } = this.state
+    const { appData, webDomains } = this.state
     if (
       appData.name == null ||
       appData.version == null ||
@@ -91,7 +86,7 @@ class CreateAppModal extends Component<Props, State> {
           ...appData,
           developerID: this.props.developer.localID,
           // $FlowFixMe: Relay type
-          permissionsRequirements,
+          webDomains,
         },
       },
       onCompleted: () => {
@@ -108,19 +103,11 @@ class CreateAppModal extends Component<Props, State> {
   }
 
   onSetAppData = (appData: CompleteAppData) => {
-    this.setState({
-      appData,
-      screen: 'permissions',
-    })
+    this.setState({ appData, screen: 'permissions' })
   }
 
-  onSetPermissions = (
-    permissionsRequirements: StrictPermissionsRequirements,
-  ) => {
-    this.setState({
-      permissionsRequirements,
-      screen: 'summary',
-    })
+  onSetWebDomains = (webDomains: WebDomainsDefinitions) => {
+    this.setState({ webDomains, screen: 'summary' })
   }
 
   onBackSummary = () => {
@@ -145,19 +132,20 @@ class CreateAppModal extends Component<Props, State> {
   renderPermissions() {
     return (
       <SetPermissionsRequirements
-        onSetPermissions={this.onSetPermissions}
+        onSetWebDomains={this.onSetWebDomains}
         onPressBack={this.onBackPermissions}
         onRequestClose={this.props.onRequestClose}
+        webDomains={this.state.webDomains}
       />
     )
   }
 
   renderSummary() {
-    const { appData, permissionsRequirements } = this.state
+    const { appData, webDomains } = this.state
     return (
       <AppSummary
         appData={appData}
-        permissionsRequirements={permissionsRequirements}
+        webDomains={webDomains}
         onPressBack={this.onBackSummary}
         onRequestClose={this.props.onRequestClose}
         onPressSave={this.onPressCreateApp}

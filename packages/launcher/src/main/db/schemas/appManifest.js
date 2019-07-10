@@ -1,7 +1,6 @@
 // @flow
 
 import bzzHash from './bzzHash'
-import ethAddress from './ethAddress'
 import profile, { type GenericProfileData } from './genericProfile'
 
 export type WebDomainDefinition = {|
@@ -30,7 +29,6 @@ export const webDomainsDefinitions = {
 }
 
 export type AppManifestData = {|
-  authorAddress: string,
   profile: GenericProfileData,
   version: string,
   contentsHash: string,
@@ -43,10 +41,6 @@ export default {
   type: 'object',
   required: ['profile', 'contentsHash', 'webDomains'],
   properties: {
-    authorAddress: {
-      ...ethAddress,
-      final: true,
-    },
     profile,
     version: {
       type: 'string', // semver

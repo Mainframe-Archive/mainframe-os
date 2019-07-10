@@ -430,19 +430,10 @@ export const RelayContainer = createFragmentContainer(AppsView, {
             profile {
               name
             }
-            permissions {
-              optional {
-                CONTACT_COMMUNICATION
-                CONTACT_LIST
-                ETHEREUM_TRANSACTION
-                WEB_REQUEST
-              }
-              required {
-                CONTACT_COMMUNICATION
-                CONTACT_LIST
-                ETHEREUM_TRANSACTION
-                WEB_REQUEST
-              }
+            webDomains {
+              domain
+              internal
+              external
             }
           }
         }
@@ -457,14 +448,10 @@ export const RelayContainer = createFragmentContainer(AppsView, {
         }
         settings {
           permissionsChecked
-          permissionsGrants {
-            CONTACT_COMMUNICATION
-            CONTACT_LIST
-            ETHEREUM_TRANSACTION
-            WEB_REQUEST {
-              granted
-              denied
-            }
+          webDomains {
+            domain
+            internal
+            external
           }
         }
       }

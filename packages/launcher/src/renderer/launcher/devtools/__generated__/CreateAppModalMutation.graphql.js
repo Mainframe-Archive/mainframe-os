@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 5f456d2c24ac30f247e46385cb715905
+ * @relayHash c81d3550d3188ddd858d576853eaf0bf
  */
 
 /* eslint-disable */
@@ -15,18 +15,13 @@ export type CreateAppInput = {
   contentsPath: string,
   version: string,
   developerID: string,
-  permissionsRequirements: AppPermissionsRequirementsInput,
+  webDomains: $ReadOnlyArray<WebDomainDefinitionInput>,
   clientMutationId?: ?string,
 };
-export type AppPermissionsRequirementsInput = {
-  optional: AppPermissionDefinitionsInput,
-  required: AppPermissionDefinitionsInput,
-};
-export type AppPermissionDefinitionsInput = {
-  CONTACT_COMMUNICATION?: ?boolean,
-  CONTACT_LIST?: ?boolean,
-  ETHEREUM_TRANSACTION?: ?boolean,
-  WEB_REQUEST?: ?$ReadOnlyArray<?string>,
+export type WebDomainDefinitionInput = {
+  domain: string,
+  internal?: ?boolean,
+  external?: ?boolean,
 };
 export type CreateAppModalMutationVariables = {|
   input: CreateAppInput

@@ -13,7 +13,6 @@ import { EnvironmentContext } from '../RelayEnvironment'
 
 import FormModalView from '../../UIComponents/FormModalView'
 import Loader from '../../UIComponents/Loader'
-import rpc from '../rpc'
 import PermissionsView from '../PermissionsView'
 import { appInstallMutation } from './appMutations'
 
@@ -43,19 +42,10 @@ const appLookupQuery = graphql`
                 name
               }
               version
-              permissions {
-                optional {
-                  CONTACT_COMMUNICATION
-                  CONTACT_LIST
-                  ETHEREUM_TRANSACTION
-                  WEB_REQUEST
-                }
-                required {
-                  CONTACT_COMMUNICATION
-                  CONTACT_LIST
-                  ETHEREUM_TRANSACTION
-                  WEB_REQUEST
-                }
+              webDomains {
+                domain
+                internal
+                external
               }
             }
           }
@@ -78,62 +68,65 @@ type Props = {
 type State = {
   installStep: 'manifest' | 'permissions' | 'download',
   manifest: ?ManifestData,
-  userPermissions?: StrictPermissionsGrants,
-  ownUsers: Array<IdentityOwnData>,
   errorMsg?: string,
 }
 
 export default class AppInstallModal extends Component<Props, State> {
+  static contextType = EnvironmentContext
+
   state = {
     installStep: 'manifest',
     manifest: null,
-    ownUsers: [],
   }
 
   componentDidMount() {
     if (this.props.appID != null) {
-      this.loadManifest(this.props.appID)
+      this.loadApp(this.props.appID)
     }
   }
 
   // HANDLERS
 
-  async loadManifest(publicID: string) {
+  async loadApp(publicID: string) {
     try {
       this.setState({ installStep: 'download' })
 
-      const { manifest, appID } = await rpc.loadManifest(publicID)
-      // If appID is returned it means the app is already installed.
-      // If we only support a single user in the launcher, the app must have been already installed by this user.
-      if (appID != null) {
-        return this.props.onInstallComplete()
+      const res = await fetchQuery(this.context, appLookupQuery, { publicID })
+      if (res.lookup.appByID == null) {
+        this.setState({
+          errorMsg: 'Application not found',
+          installStep: 'manifest',
+        })
+        return
       }
 
-      if (havePermissionsToGrant(manifest.permissions)) {
-        this.setState({ installStep: 'permissions', manifest })
-      } else {
-        this.setState(
-          {
-            installStep: 'download',
-            manifest,
-            userPermissions: createStrictPermissionGrants({}),
-          },
-          this.saveApp,
-        )
+      if (res.lookup.appByID.userAppVersion != null) {
+        // User already has this app installed
+        // TODO: open app details screen
+        this.props.onInstallComplete()
+        return
       }
+
+      // TODO: this screen should not only display permissions but also developer and app description
+      // before the user confirms installation (= create userAppVersion and background download the app contents)
+      // this.setState({
+      //   installStep: 'permissions',
+      //   manifest: res.lookup.appByID.app.latestAvailableVersion.manifest,
+      // })
+
+      console.log('lookup app res', res)
+      this.props.onRequestClose()
     } catch (err) {
       this.setState({
         errorMsg: err.message,
         installStep: 'manifest',
       })
-      // eslint-disable-next-line no-console
-      console.log('error loading manifest:', err)
     }
   }
 
-  onSubmitManifest = async (payload: FormSubmitPayload) => {
+  onSubmitAppID = async (payload: FormSubmitPayload) => {
     if (payload.valid) {
-      await this.loadManifest(payload.fields.appid)
+      await this.loadApp(payload.fields.appid)
     }
   }
 
@@ -205,7 +198,7 @@ export default class AppInstallModal extends Component<Props, State> {
         confirmButton="OK"
         title="Install an app"
         onRequestClose={this.props.onRequestClose}
-        onSubmitForm={this.onSubmitManifest}>
+        onSubmitForm={this.onSubmitAppID}>
         <Container>
           <TextContainer>
             <Text variant={['modalText', 'center']}>

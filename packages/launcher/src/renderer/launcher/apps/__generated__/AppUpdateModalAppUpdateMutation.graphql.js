@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash bccbc3b0cfa43f0d88dc3c26ebe5bd49
+ * @relayHash 3453777916cd187b6e326f4174a77318
  */
 
 /* eslint-disable */
@@ -12,22 +12,13 @@ import type { ConcreteRequest } from 'relay-runtime';
 export type AppUpdateMutationInput = {
   appID: string,
   userID: string,
-  permissionsSettings?: ?AppPermissionsSettingsInput,
+  webDomains: $ReadOnlyArray<WebDomainDefinitionInput>,
   clientMutationId?: ?string,
 };
-export type AppPermissionsSettingsInput = {
-  permissionsChecked: boolean,
-  grants: AppPermissionGrantsInput,
-};
-export type AppPermissionGrantsInput = {
-  CONTACT_COMMUNICATION?: ?boolean,
-  CONTACT_LIST?: ?boolean,
-  ETHEREUM_TRANSACTION?: ?boolean,
-  WEB_REQUEST: WebRequestGrantInput,
-};
-export type WebRequestGrantInput = {
-  granted?: ?$ReadOnlyArray<?string>,
-  denied?: ?$ReadOnlyArray<?string>,
+export type WebDomainDefinitionInput = {
+  domain: string,
+  internal?: ?boolean,
+  external?: ?boolean,
 };
 export type AppUpdateModalAppUpdateMutationVariables = {|
   input: AppUpdateMutationInput

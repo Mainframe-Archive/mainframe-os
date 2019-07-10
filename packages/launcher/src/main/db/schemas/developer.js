@@ -5,8 +5,7 @@ import profile, { type GenericProfileData } from './genericProfile'
 
 export type DeveloperData = {|
   localID: string,
-  publicFeed: string,
-  publicKey: ?string,
+  publicKey: string,
   profile: ?GenericProfileData,
 |}
 
@@ -25,6 +24,7 @@ export default {
     },
     publicKey: {
       type: 'string',
+      final: true,
     },
     profile,
   },

@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 9604d45f7f318ca3b8c44435135cbb94
+ * @relayHash 5104ddf5088e7640ec4a2c26ee504914
  */
 
 /* eslint-disable */
@@ -62,19 +62,10 @@ fragment AppDetailsScreen_app on OwnApp {
   }
   inProgressVersion {
     version
-    permissions {
-      optional {
-        CONTACT_COMMUNICATION
-        CONTACT_LIST
-        ETHEREUM_TRANSACTION
-        WEB_REQUEST
-      }
-      required {
-        CONTACT_COMMUNICATION
-        CONTACT_LIST
-        ETHEREUM_TRANSACTION
-        WEB_REQUEST
-      }
+    webDomains {
+      domain
+      internal
+      external
     }
   }
   latestPublishedVersion {
@@ -139,43 +130,13 @@ v5 = {
   "name": "version",
   "args": null,
   "storageKey": null
-},
-v6 = [
-  {
-    "kind": "ScalarField",
-    "alias": null,
-    "name": "CONTACT_COMMUNICATION",
-    "args": null,
-    "storageKey": null
-  },
-  {
-    "kind": "ScalarField",
-    "alias": null,
-    "name": "CONTACT_LIST",
-    "args": null,
-    "storageKey": null
-  },
-  {
-    "kind": "ScalarField",
-    "alias": null,
-    "name": "ETHEREUM_TRANSACTION",
-    "args": null,
-    "storageKey": null
-  },
-  {
-    "kind": "ScalarField",
-    "alias": null,
-    "name": "WEB_REQUEST",
-    "args": null,
-    "storageKey": null
-  }
-];
+};
 return {
   "kind": "Request",
   "operationKind": "mutation",
   "name": "AppDetailsScreenUpdateAppDetailsMutation",
   "id": null,
-  "text": "mutation AppDetailsScreenUpdateAppDetailsMutation(\n  $input: UpdateAppDetailsInput!\n) {\n  updateAppDetails(input: $input) {\n    app {\n      ...AppDetailsScreen_app\n      id\n    }\n  }\n}\n\nfragment AppDetailsScreen_app on OwnApp {\n  localID\n  publicID\n  profile {\n    name\n  }\n  contentsPath\n  developer {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n  inProgressVersion {\n    version\n    permissions {\n      optional {\n        CONTACT_COMMUNICATION\n        CONTACT_LIST\n        ETHEREUM_TRANSACTION\n        WEB_REQUEST\n      }\n      required {\n        CONTACT_COMMUNICATION\n        CONTACT_LIST\n        ETHEREUM_TRANSACTION\n        WEB_REQUEST\n      }\n    }\n  }\n  latestPublishedVersion {\n    version\n  }\n  viewerOwnAppID\n}\n",
+  "text": "mutation AppDetailsScreenUpdateAppDetailsMutation(\n  $input: UpdateAppDetailsInput!\n) {\n  updateAppDetails(input: $input) {\n    app {\n      ...AppDetailsScreen_app\n      id\n    }\n  }\n}\n\nfragment AppDetailsScreen_app on OwnApp {\n  localID\n  publicID\n  profile {\n    name\n  }\n  contentsPath\n  developer {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n  inProgressVersion {\n    version\n    webDomains {\n      domain\n      internal\n      external\n    }\n  }\n  latestPublishedVersion {\n    version\n  }\n  viewerOwnAppID\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -279,31 +240,32 @@ return {
                   {
                     "kind": "LinkedField",
                     "alias": null,
-                    "name": "permissions",
+                    "name": "webDomains",
                     "storageKey": null,
                     "args": null,
-                    "concreteType": "AppPermissionsRequirements",
-                    "plural": false,
+                    "concreteType": "WebDomainDefinition",
+                    "plural": true,
                     "selections": [
                       {
-                        "kind": "LinkedField",
+                        "kind": "ScalarField",
                         "alias": null,
-                        "name": "optional",
-                        "storageKey": null,
+                        "name": "domain",
                         "args": null,
-                        "concreteType": "AppPermissionDefinitions",
-                        "plural": false,
-                        "selections": v6
+                        "storageKey": null
                       },
                       {
-                        "kind": "LinkedField",
+                        "kind": "ScalarField",
                         "alias": null,
-                        "name": "required",
-                        "storageKey": null,
+                        "name": "internal",
                         "args": null,
-                        "concreteType": "AppPermissionDefinitions",
-                        "plural": false,
-                        "selections": v6
+                        "storageKey": null
+                      },
+                      {
+                        "kind": "ScalarField",
+                        "alias": null,
+                        "name": "external",
+                        "args": null,
+                        "storageKey": null
                       }
                     ]
                   }

@@ -12,13 +12,12 @@ import {
   GraphQLString,
 } from 'graphql'
 import { fromGlobalId, globalIdField, nodeDefinitions } from 'graphql-relay'
-import semver from 'semver'
 
 import { MF_PREFIX, MFT_TOKEN_ADDRESSES } from '../../constants'
 import { isValidAppID, isValidPeerID } from '../../validation'
 
 import type { GraphQLContext } from '../context/graphql'
-import { readAppManifest, readPeer } from '../data/protocols'
+import { readPeer, validateAppFeed } from '../data/protocols'
 import { readJSON } from '../swarm/feeds'
 
 const TYPE_COLLECTION = {
@@ -191,9 +190,6 @@ export const appManifest = new GraphQLObjectType({
   name: 'AppManifest',
   fields: () => ({
     publicFeed: {
-      type: new GraphQLNonNull(GraphQLString),
-    },
-    authorFeed: {
       type: new GraphQLNonNull(GraphQLString),
     },
     profile: {
@@ -839,41 +835,37 @@ export const lookup = new GraphQLObjectType({
           })
           const chapter = await timeline.getLatestChapter()
           if (chapter == null) {
+            ctx.logger.log({
+              level: 'warn',
+              message: 'Lookup app by ID not found',
+              args,
+            })
             return null
           }
 
-          const manifest = await readAppManifest(chapter.content)
+          const appChapter = await validateAppFeed(chapter)
           ctx.logger.log({
             level: 'debug',
             message: 'Lookup app by ID result',
             args,
-            manifest,
+            app: appChapter,
           })
 
-          let app = await ctx.db.apps.findByPublicID(args.publicID)
-          if (app == null) {
-            app = await ctx.db.apps.createFromManifest(manifest)
-          } else {
-            const appVersion = await app.populate('latestAvailableVersion')
-            if (
-              appVersion == null ||
-              semver.gt(manifest.version, appVersion.manifest.version)
-            ) {
-              await app.setLatestAvailableVersionFromManifest(manifest)
-            }
-          }
-
+          const app = await ctx.db.apps.importFromFeed(
+            args.publicID,
+            appChapter.content,
+          )
           const userAppVersion = await ctx.db.user_app_versions.findByAppAndUserID(
             app.localID,
             ctx.user.userID,
           )
           return { app, userAppVersion }
-        } catch (error) {
+        } catch (err) {
           ctx.logger.log({
             level: 'warn',
             message: 'Lookup app by ID failed',
             args,
-            error: error.toString(),
+            error: err.toString(),
           })
           return null
         }

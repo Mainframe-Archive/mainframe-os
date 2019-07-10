@@ -1,3 +1,3 @@
 // @flow
 
-export const APP_MANIFEST_V0 = 'mainframe.appManifest.v0'
+export const APP_FEED_V0 = 'mainframe.appFeed.v0'

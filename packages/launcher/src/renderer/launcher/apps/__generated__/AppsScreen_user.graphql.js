@@ -23,20 +23,11 @@ export type AppsScreen_user = {|
         +profile: {|
           +name: ?string
         |},
-        +permissions: {|
-          +optional: {|
-            +CONTACT_COMMUNICATION: ?boolean,
-            +CONTACT_LIST: ?boolean,
-            +ETHEREUM_TRANSACTION: ?boolean,
-            +WEB_REQUEST: ?$ReadOnlyArray<?string>,
-          |},
-          +required: {|
-            +CONTACT_COMMUNICATION: ?boolean,
-            +CONTACT_LIST: ?boolean,
-            +ETHEREUM_TRANSACTION: ?boolean,
-            +WEB_REQUEST: ?$ReadOnlyArray<?string>,
-          |},
-        |},
+        +webDomains: $ReadOnlyArray<{|
+          +domain: string,
+          +internal: ?boolean,
+          +external: ?boolean,
+        |}>,
       |},
     |},
     +update: ?{|
@@ -50,15 +41,11 @@ export type AppsScreen_user = {|
     |},
     +settings: {|
       +permissionsChecked: boolean,
-      +permissionsGrants: {|
-        +CONTACT_COMMUNICATION: ?boolean,
-        +CONTACT_LIST: ?boolean,
-        +ETHEREUM_TRANSACTION: ?boolean,
-        +WEB_REQUEST: {|
-          +granted: $ReadOnlyArray<string>,
-          +denied: $ReadOnlyArray<string>,
-        |},
-      |},
+      +webDomains: $ReadOnlyArray<{|
+        +domain: string,
+        +internal: ?boolean,
+        +external: ?boolean,
+      |}>,
     |},
   |}>,
   +$refType: AppsScreen_user$ref,
@@ -68,38 +55,37 @@ export type AppsScreen_user = {|
 
 const node/*: ConcreteFragment*/ = (function(){
 var v0 = {
-  "kind": "ScalarField",
+  "kind": "LinkedField",
   "alias": null,
-  "name": "CONTACT_COMMUNICATION",
+  "name": "webDomains",
+  "storageKey": null,
   "args": null,
-  "storageKey": null
-},
-v1 = {
-  "kind": "ScalarField",
-  "alias": null,
-  "name": "CONTACT_LIST",
-  "args": null,
-  "storageKey": null
-},
-v2 = {
-  "kind": "ScalarField",
-  "alias": null,
-  "name": "ETHEREUM_TRANSACTION",
-  "args": null,
-  "storageKey": null
-},
-v3 = [
-  v0,
-  v1,
-  v2,
-  {
-    "kind": "ScalarField",
-    "alias": null,
-    "name": "WEB_REQUEST",
-    "args": null,
-    "storageKey": null
-  }
-];
+  "concreteType": "WebDomainDefinition",
+  "plural": true,
+  "selections": [
+    {
+      "kind": "ScalarField",
+      "alias": null,
+      "name": "domain",
+      "args": null,
+      "storageKey": null
+    },
+    {
+      "kind": "ScalarField",
+      "alias": null,
+      "name": "internal",
+      "args": null,
+      "storageKey": null
+    },
+    {
+      "kind": "ScalarField",
+      "alias": null,
+      "name": "external",
+      "args": null,
+      "storageKey": null
+    }
+  ]
+};
 return {
   "kind": "Fragment",
   "name": "AppsScreen_user",
@@ -184,37 +170,7 @@ return {
                     }
                   ]
                 },
-                {
-                  "kind": "LinkedField",
-                  "alias": null,
-                  "name": "permissions",
-                  "storageKey": null,
-                  "args": null,
-                  "concreteType": "AppPermissionsRequirements",
-                  "plural": false,
-                  "selections": [
-                    {
-                      "kind": "LinkedField",
-                      "alias": null,
-                      "name": "optional",
-                      "storageKey": null,
-                      "args": null,
-                      "concreteType": "AppPermissionDefinitions",
-                      "plural": false,
-                      "selections": v3
-                    },
-                    {
-                      "kind": "LinkedField",
-                      "alias": null,
-                      "name": "required",
-                      "storageKey": null,
-                      "args": null,
-                      "concreteType": "AppPermissionDefinitions",
-                      "plural": false,
-                      "selections": v3
-                    }
-                  ]
-                }
+                v0
               ]
             }
           ]
@@ -289,45 +245,7 @@ return {
               "args": null,
               "storageKey": null
             },
-            {
-              "kind": "LinkedField",
-              "alias": null,
-              "name": "permissionsGrants",
-              "storageKey": null,
-              "args": null,
-              "concreteType": "AppPermissions",
-              "plural": false,
-              "selections": [
-                v0,
-                v1,
-                v2,
-                {
-                  "kind": "LinkedField",
-                  "alias": null,
-                  "name": "WEB_REQUEST",
-                  "storageKey": null,
-                  "args": null,
-                  "concreteType": "WebRequestGrants",
-                  "plural": false,
-                  "selections": [
-                    {
-                      "kind": "ScalarField",
-                      "alias": null,
-                      "name": "granted",
-                      "args": null,
-                      "storageKey": null
-                    },
-                    {
-                      "kind": "ScalarField",
-                      "alias": null,
-                      "name": "denied",
-                      "args": null,
-                      "storageKey": null
-                    }
-                  ]
-                }
-              ]
-            }
+            v0
           ]
         }
       ]
@@ -336,5 +254,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '7dffcb6046a3ee3d78f9e411d7f2a8c9';
+(node/*: any*/).hash = 'ef74208deda04d9ebdba194df7a2d779';
 module.exports = node;

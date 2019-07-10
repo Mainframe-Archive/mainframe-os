@@ -73,8 +73,8 @@ enum AppInstallationState {
 
 input AppInstallMutationInput {
   userID: String!
-  manifest: AppManifestInput!
-  permissionsSettings: AppPermissionsSettingsInput!
+  appVersionID: String!
+  webDomains: [WebDomainDefinitionInput!]!
   clientMutationId: String
 }
 
@@ -91,64 +91,10 @@ type AppLookupResult {
 
 type AppManifest {
   publicFeed: String!
-  authorFeed: String!
   profile: GenericProfile!
   version: String!
   contentsHash: String!
-  permissions: AppPermissionsRequirements!
-}
-
-input AppManifestInput {
-  id: String!
-  name: String!
-  version: String!
-  contentsHash: String!
-  updateHash: String!
-  permissions: AppPermissionsRequirementsInput!
-  author: ManifestAuthorInput!
-}
-
-type AppPermissionDefinitions {
-  CONTACT_COMMUNICATION: Boolean
-  CONTACT_LIST: Boolean
-  ETHEREUM_TRANSACTION: Boolean
-  WEB_REQUEST: [String]
-}
-
-input AppPermissionDefinitionsInput {
-  CONTACT_COMMUNICATION: Boolean
-  CONTACT_LIST: Boolean
-  ETHEREUM_TRANSACTION: Boolean
-  WEB_REQUEST: [String]
-}
-
-input AppPermissionGrantsInput {
-  CONTACT_COMMUNICATION: Boolean
-  CONTACT_LIST: Boolean
-  ETHEREUM_TRANSACTION: Boolean
-  WEB_REQUEST: WebRequestGrantInput!
-}
-
-type AppPermissions {
-  CONTACT_COMMUNICATION: Boolean
-  CONTACT_LIST: Boolean
-  ETHEREUM_TRANSACTION: Boolean
-  WEB_REQUEST: WebRequestGrants!
-}
-
-type AppPermissionsRequirements {
-  optional: AppPermissionDefinitions!
-  required: AppPermissionDefinitions!
-}
-
-input AppPermissionsRequirementsInput {
-  optional: AppPermissionDefinitionsInput!
-  required: AppPermissionDefinitionsInput!
-}
-
-input AppPermissionsSettingsInput {
-  permissionsChecked: Boolean!
-  grants: AppPermissionGrantsInput!
+  webDomains: [WebDomainDefinition!]!
 }
 
 type AppUpdate {
@@ -160,7 +106,7 @@ type AppUpdate {
 input AppUpdateMutationInput {
   appID: String!
   userID: String!
-  permissionsSettings: AppPermissionsSettingsInput
+  webDomains: [WebDomainDefinitionInput!]!
   clientMutationId: String
 }
 
@@ -252,7 +198,7 @@ input CreateAppInput {
   contentsPath: String!
   version: String!
   developerID: String!
-  permissionsRequirements: AppPermissionsRequirementsInput!
+  webDomains: [WebDomainDefinitionInput!]!
   clientMutationId: String
 }
 
@@ -379,17 +325,12 @@ type Lookup {
   peerByID(publicID: ID!): PeerLookupResult
 }
 
-input ManifestAuthorInput {
-  id: String!
-  name: String!
-}
-
 type Mutation {
   createApp(input: CreateAppInput!): CreateAppPayload
   createAppVersion(input: CreateAppVersionInput!): CreateAppVersionPayload
   installApp(input: AppInstallMutationInput!): AppInstallMutationPayload
   updateApp(input: AppUpdateMutationInput!): AppUpdateMutationPayload
-  setAppPermissionsRequirements(input: SetAppPermissionsRequirementsInput!): SetAppPermissionsRequirementsPayload
+  setAppWebDomainsDefinitions(input: SetAppWebDomainsDefinitionsInput!): SetAppWebDomainsDefinitionsPayload
   publishAppVersion(input: PublishAppVersionInput!): PublishAppVersionPayload
   updateAppDetails(input: UpdateAppDetailsInput!): UpdateAppDetailsPayload
   acceptContactRequest(input: AcceptContactRequestInput!): AcceptContactRequestPayload
@@ -437,7 +378,7 @@ type OwnAppVersion {
   version: String!
   contentsHash: String
   versionHash: String
-  permissions: AppPermissionsRequirements!
+  webDomains: [WebDomainDefinition!]!
 }
 
 type OwnDeveloper implements Node {
@@ -488,13 +429,13 @@ type Query {
   viewer: User!
 }
 
-input SetAppPermissionsRequirementsInput {
+input SetAppWebDomainsDefinitionsInput {
   appID: String!
-  permissionsRequirements: AppPermissionsRequirementsInput!
+  webDomains: [WebDomainDefinitionInput!]!
   clientMutationId: String
 }
 
-type SetAppPermissionsRequirementsPayload {
+type SetAppWebDomainsDefinitionsPayload {
   app: OwnApp!
   viewer: User!
   clientMutationId: String
@@ -584,7 +525,7 @@ type UserAppSettings implements Node {
   approvedContacts: [AppApprovedContact!]!
   defaultEthAccount: String
   permissionsChecked: Boolean!
-  permissionsGrants: AppPermissions!
+  webDomains: [WebDomainDefinition!]!
 }
 
 type UserAppVersion implements Node {
@@ -613,12 +554,14 @@ type WalletBalances {
   mft: String!
 }
 
-input WebRequestGrantInput {
-  granted: [String]
-  denied: [String]
+type WebDomainDefinition {
+  domain: String!
+  internal: Boolean
+  external: Boolean
 }
 
-type WebRequestGrants {
-  granted: [String!]!
-  denied: [String!]!
+input WebDomainDefinitionInput {
+  domain: String!
+  internal: Boolean
+  external: Boolean
 }

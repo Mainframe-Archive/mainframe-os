@@ -9,17 +9,19 @@ import CloseIcon from '@morpheus-ui/icons/Close'
 import React, { Component } from 'react'
 import styled from 'styled-components/native'
 
+import type {
+  WebDomainsDefinitions,
+  ReadOnlyWebDomainsDefinitions,
+} from '../../../types'
 import { isValidWebHost } from '../../../validation'
 
 import FormModalView from '../../UIComponents/FormModalView'
 
-type WebDomains = Array<{ domain: string, internal?: ?boolean }>
-
 type Props = {
   onPressBack?: () => any,
   onRequestClose?: () => any,
-  onSetWebDomains: (webDomains: WebDomains) => void,
-  webDomains?: WebDomains,
+  onSetWebDomains: (webDomains: WebDomainsDefinitions) => void,
+  webDomains?: WebDomainsDefinitions | ReadOnlyWebDomainsDefinitions,
 }
 
 type State = {
@@ -35,17 +37,6 @@ const Container = styled.View`
   padding: 20px;
   justify-content: center;
 `
-const ScrollView = styled.ScrollView``
-
-const PermissionRow = styled.View`
-  flex-direction: row;
-  padding: 5px 3px;
-  align-items: center;
-  justify-content: space-between;
-  border-top-width: 1px;
-  border-color: #f9f9f9;
-  ${props => props.first && `border-top-width: 0;`}
-`
 
 const WebHostRow = styled.View`
   flex-direction: row;
@@ -57,11 +48,9 @@ const RemoveButton = styled.TouchableOpacity`
   padding: 5px 5px 10px 10px;
 `
 
-const WebRequestsContainer = styled.View`
+const WebRequestsContainer = styled.ScrollView`
   padding: 20px 3px;
   margin-top: 20px;
-  border-top-width: 3px;
-  border-color: #f9f9f9;
 `
 
 const FieldContainer = styled.View`
@@ -115,9 +104,11 @@ export default class SetPermissionsRequirements extends Component<
 
   onPressSave = () => {
     const { domains } = this.state
-    const webDomains = Object.keys(domains).map(domain => {
-      return { domain, internal: domains[domain] }
-    })
+    const webDomains: WebDomainsDefinitions = Object.keys(domains).map(
+      domain => {
+        return { domain, internal: domains[domain] }
+      },
+    )
     this.props.onSetWebDomains(webDomains)
   }
 
@@ -133,90 +124,50 @@ export default class SetPermissionsRequirements extends Component<
       return { domains: nextDomains }
     })
   }
-  // RENDER
-
-  renderToggle = (
-    domain: string,
-    required: boolean,
-    onToggle: (domain: string, required: boolean) => void,
-  ) => {
-    const onPress = sel => onToggle(domain, sel === 'Required')
-
-    return (
-      <DropDown
-        variant="small"
-        label="Optional"
-        options={['Optional', 'Required']}
-        onChange={onPress}
-        defaultValue={required ? 'Required' : 'Optional'}
-      />
-    )
-  }
 
   render() {
-    // TODO: remove all logic not needed for web domains
+    const { domains } = this.state
 
-    const { permissionSettings } = this.state
-    const permissionOptions = Object.keys(PERMISSIONS_DESCRIPTIONS).map(
-      (key, index) => {
-        if (key === 'WEB_REQUEST') {
-          const hostRequirements = Object.keys(
-            permissionSettings.WEB_REQUEST,
-          ).map(host => {
-            return (
-              <WebHostRow key={host}>
-                <Text variant={['greyDark23', 'flex1']} size={12}>
-                  {host}
-                </Text>
-                {this.renderToggle(
-                  key,
-                  permissionSettings.WEB_REQUEST[host],
-                  this.onToggle,
-                  host,
-                )}
-                <RemoveButton onPress={() => this.removeHost(host)}>
-                  <CloseIcon width={10} height={10} color="#808080" />
-                </RemoveButton>
-              </WebHostRow>
-            )
-          })
-          return (
-            <WebRequestsContainer key={key}>
-              <Text variant={['greyDark23', 'marginBottom10']} bold size={12}>
-                HTTPS Requests
-              </Text>
-              <FieldContainer>
-                <Text
-                  variant={['greyDark23', 'marginBottom10', 'flex1']}
-                  size={11}>
-                  {PERMISSIONS_DESCRIPTIONS[key]}
-                </Text>
+    const domainsList = Object.keys(domains).map(domain => (
+      <WebHostRow key={domain}>
+        <Text variant={['greyDark23', 'flex1']} size={12}>
+          {domain}
+        </Text>
+        <DropDown
+          variant="small"
+          label="Optional"
+          options={['Optional', 'Required']}
+          onChange={sel => this.onToggle(domain, sel === 'Required')}
+          defaultValue={domains[domain] ? 'Required' : 'Optional'}
+        />
+        <RemoveButton onPress={() => this.removeHost(domain)}>
+          <CloseIcon width={10} height={10} color="#808080" />
+        </RemoveButton>
+      </WebHostRow>
+    ))
 
-                <TextField
-                  name="domain"
-                  value={this.state.hostInput}
-                  onChange={this.onChangeHostInput}
-                  label="Add domain"
-                  placeholder="(e.g. mainframe.com)"
-                  validation={domainValidation}
-                  submitOnPressIcon
-                  IconRight={() => <Text variant={['smallButton']}>ADD</Text>}
-                />
-              </FieldContainer>
-              {hostRequirements}
-            </WebRequestsContainer>
-          )
-        }
-
-        return (
-          <PermissionRow first={index === 0} key={key}>
-            <Text variant={['greyDark23']} size={12}>
-              {PERMISSIONS_DESCRIPTIONS[key]}
-            </Text>
-            {this.renderToggle(key, permissionSettings[key], this.onToggle)}
-          </PermissionRow>
-        )
-      },
+    const permissionRequirements = (
+      <WebRequestsContainer>
+        <Text variant={['greyDark23', 'marginBottom10']} bold size={12}>
+          Web Requests
+        </Text>
+        <FieldContainer>
+          <Text variant={['greyDark23', 'marginBottom10', 'flex1']} size={11}>
+            Add Web domains your app need to or may make request to.
+          </Text>
+          <TextField
+            name="domain"
+            value={this.state.hostInput}
+            onChange={this.onChangeHostInput}
+            label="Add domain"
+            placeholder="(e.g. mainframe.com)"
+            validation={domainValidation}
+            submitOnPressIcon
+            IconRight={() => <Text variant={['smallButton']}>ADD</Text>}
+          />
+        </FieldContainer>
+        {domainsList}
+      </WebRequestsContainer>
     )
 
     const errorLabel = this.state.errorMsg ? (
@@ -234,12 +185,7 @@ export default class SetPermissionsRequirements extends Component<
         onPressConfirm={this.onPressSave}
         onRequestClose={this.props.onRequestClose}>
         <Container>
-          <ScrollView>
-            <Text variant={['greyDark23']} bold size={12}>
-              Blockchain
-            </Text>
-            {permissionOptions}
-          </ScrollView>
+          {permissionRequirements}
           {errorLabel}
         </Container>
       </FormModalView>

@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash e69239254252fe8ebb66ec97225a2e96
+ * @relayHash b41ed5ea5fa055a76a142c417b262e1d
  */
 
 /* eslint-disable */
@@ -11,46 +11,14 @@
 import type { ConcreteRequest } from 'relay-runtime';
 export type AppInstallMutationInput = {
   userID: string,
-  manifest: AppManifestInput,
-  permissionsSettings: AppPermissionsSettingsInput,
+  appVersionID: string,
+  webDomains: $ReadOnlyArray<WebDomainDefinitionInput>,
   clientMutationId?: ?string,
 };
-export type AppManifestInput = {
-  id: string,
-  name: string,
-  version: string,
-  contentsHash: string,
-  updateHash: string,
-  permissions: AppPermissionsRequirementsInput,
-  author: ManifestAuthorInput,
-};
-export type AppPermissionsRequirementsInput = {
-  optional: AppPermissionDefinitionsInput,
-  required: AppPermissionDefinitionsInput,
-};
-export type AppPermissionDefinitionsInput = {
-  CONTACT_COMMUNICATION?: ?boolean,
-  CONTACT_LIST?: ?boolean,
-  ETHEREUM_TRANSACTION?: ?boolean,
-  WEB_REQUEST?: ?$ReadOnlyArray<?string>,
-};
-export type ManifestAuthorInput = {
-  id: string,
-  name: string,
-};
-export type AppPermissionsSettingsInput = {
-  permissionsChecked: boolean,
-  grants: AppPermissionGrantsInput,
-};
-export type AppPermissionGrantsInput = {
-  CONTACT_COMMUNICATION?: ?boolean,
-  CONTACT_LIST?: ?boolean,
-  ETHEREUM_TRANSACTION?: ?boolean,
-  WEB_REQUEST: WebRequestGrantInput,
-};
-export type WebRequestGrantInput = {
-  granted?: ?$ReadOnlyArray<?string>,
-  denied?: ?$ReadOnlyArray<?string>,
+export type WebDomainDefinitionInput = {
+  domain: string,
+  internal?: ?boolean,
+  external?: ?boolean,
 };
 export type appMutationsAppInstallMutationVariables = {|
   input: AppInstallMutationInput

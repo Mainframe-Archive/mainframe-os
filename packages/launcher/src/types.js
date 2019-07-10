@@ -1,7 +1,18 @@
 // @flow
 
-import type { WebDomainsDefinitions } from './main/db/schemas/appManifest'
+import type {
+  WebDomainDefinition,
+  WebDomainsDefinitions,
+} from './main/db/schemas/appManifest'
 import type { GenericProfileData } from './main/db/schemas/genericProfile'
+
+export type {
+  WebDomainDefinition,
+  WebDomainsDefinitions,
+} from './main/db/schemas/appManifest'
+
+export type ReadOnlyWebDomainDefinition = $ReadOnly<WebDomainDefinition>
+export type ReadOnlyWebDomainsDefinitions = $ReadOnlyArray<ReadOnlyWebDomainDefinition>
 
 // UI
 

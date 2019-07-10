@@ -1,5 +1,9 @@
 // @flow
 
+import { pubKeyToAddress } from '@erebos/keccak256'
+
+import { MF_PREFIX } from '../../../constants'
+
 import { COLLECTION_NAMES } from '../constants'
 import type { Collection, CollectionParams } from '../types'
 
@@ -9,13 +13,14 @@ import { generateLocalID } from '../utils'
 import type { AppDoc } from './apps'
 
 type DeveloperMethods = {|
+  getPublicID(): string,
   getApps(): Promise<Array<AppDoc>>,
 |}
 
 export type DeveloperDoc = DeveloperData & DeveloperMethods
 
 type DeveloperStatics = {|
-  getOrCreateByAddress(address: string): Promise<DeveloperDoc>,
+  getOrCreateByPublicKey(publicKey: string): Promise<DeveloperDoc>,
 |}
 
 export type DevelopersCollection = Collection<DeveloperData, DeveloperDoc> &
@@ -37,19 +42,24 @@ export default async (
     name: COLLECTION_NAMES.DEVELOPERS,
     schema,
     statics: {
-      async getOrCreateByAddress(address: string): Promise<DeveloperDoc> {
-        const existing = await this.findOne({ publicFeed: address }).exec()
+      async getOrCreateByPublicKey(publicKey: string): Promise<DeveloperDoc> {
+        const existing = await this.findOne({ publicKey }).exec()
         if (existing != null) {
           return existing
         }
 
         return await this.insert({
           localID: generateLocalID(),
-          publicFeed: address,
+          publicFeed: pubKeyToAddress(Buffer.from(publicKey, 'hex')),
+          publicKey,
         })
       },
     },
     methods: {
+      getPublicID(): string {
+        return this.publicFeed.replace('0x', MF_PREFIX.DEVELOPER)
+      },
+
       async getApps(): Promise<Array<AppDoc>> {
         return await db.apps.find({ developer: this.localID }).exec()
       },

@@ -1,25 +1,31 @@
 // @flow
 
 import type Bzz from '@erebos/api-bzz-node'
-import { createKeyPair, type KeyPair } from '@erebos/secp256k1'
+import createHex from '@erebos/hex'
+import { createKeyPair, sign, type KeyPair } from '@erebos/secp256k1'
 import { pubKeyToAddress } from '@erebos/keccak256'
-import { Timeline } from '@erebos/timeline'
+import { Timeline, createChapter, type PartialChapter } from '@erebos/timeline'
 import semver from 'semver'
 
 import { MF_PREFIX } from '../../../constants'
+
+import { validateAppFeed } from '../../data/protocols'
 
 import { COLLECTION_NAMES } from '../constants'
 import type { Collection, CollectionParams, Populate } from '../types'
 import { generateKeyPair, generateLocalID } from '../utils'
 
-import type { AppManifestData } from '../schemas/appManifest'
+import type {
+  AppManifestData,
+  WebDomainsDefinitions,
+} from '../schemas/appManifest'
 import schema, {
   type OwnAppData,
   type OwnAppVersionData,
 } from '../schemas/ownApp'
-import type { PermissionsRequirements } from '../schemas/appPermissionsRequirements'
 import type { GenericProfile } from '../schemas/genericProfile'
 
+import type { AppMetadata } from './apps'
 import type { OwnDeveloperDoc } from './ownDevelopers'
 import type { UserAppSettingsDoc } from './userAppSettings'
 import type { UserOwnAppDoc } from './userOwnApps'
@@ -27,9 +33,9 @@ import type { UserOwnAppDoc } from './userOwnApps'
 export type CreateOwnAppData = {|
   contentsPath: string,
   developer: string,
-  permissions: PermissionsRequirements,
   profile: GenericProfile,
   version: string,
+  webDomains: WebDomainsDefinitions,
 |}
 
 export type AppDetails = {
@@ -46,11 +52,12 @@ type OwnAppMethods = {|
   getInProgressVersion(): ?OwnAppVersionData,
   getUserOwnApp(userID: string): Promise<UserOwnAppDoc>,
   getUserAppSettings(userID: string): Promise<UserAppSettingsDoc>,
+  encodeAppVersion(
+    chapter: $Shape<PartialChapter<AppMetadata>>,
+  ): Promise<string>,
   addVersion(data: { version: string }): Promise<void>,
   setDetails(data: AppDetails): Promise<void>,
-  setPermissionsRequirements(
-    permissions: PermissionsRequirements,
-  ): Promise<void>,
+  setWebDomains(webDomains: WebDomainsDefinitions): Promise<void>,
   publishVersion(bzz: Bzz): Promise<string>,
 |}
 
@@ -87,7 +94,7 @@ export default async (params: CollectionParams): Promise<OwnAppsCollection> => {
           versions: [
             {
               version: data.version,
-              permissions: data.permissions,
+              webDomains: data.webDomains,
             },
           ],
         })
@@ -110,6 +117,7 @@ export default async (params: CollectionParams): Promise<OwnAppsCollection> => {
         return new Timeline<AppManifestData>({
           bzz,
           feed: { user: pubKeyToAddress(keyPair.getPublic().encode()) },
+          encode: this.encodeAppVersion,
           signParams: keyPair.getPrivate(),
         })
       },
@@ -131,6 +139,29 @@ export default async (params: CollectionParams): Promise<OwnAppsCollection> => {
         return await userOwnApp.populate('settings')
       },
 
+      async encodeAppVersion(
+        chapter: $Shape<PartialChapter<AppMetadata>>,
+      ): Promise<string> {
+        // Sanity check for developer
+        const developer = await this.populate('developer')
+        if (developer == null) {
+          throw new Error('Developer not found')
+        }
+
+        // Inject author and signature into chapter
+        chapter.author = developer.getAddress()
+        chapter.content.authorKey = developer.keyPair.publicKey
+        const signature = sign(
+          createHex(chapter).toBytesArray(),
+          createKeyPair(developer.keyPair.privateKey),
+        )
+        chapter.signature = createHex(signature).value
+
+        // Validate it conforms protocol and return serialised chapter
+        await validateAppFeed(chapter)
+        return JSON.stringify(chapter)
+      },
+
       async addVersion(data: { version: string }): Promise<void> {
         await this.atomicUpdate(doc => {
           const current = doc.versions[0]
@@ -138,7 +169,7 @@ export default async (params: CollectionParams): Promise<OwnAppsCollection> => {
             throw new Error('New version must be greater than current one')
           }
           doc.versions = [
-            { version: data.version, permissions: current.permissions },
+            { version: data.version, webDomains: current.webDomains },
           ].concat(doc.versions)
           return doc
         })
@@ -169,13 +200,11 @@ export default async (params: CollectionParams): Promise<OwnAppsCollection> => {
         })
       },
 
-      async setPermissionsRequirements(
-        permissions: PermissionsRequirements,
-      ): Promise<void> {
+      async setWebDomains(webDomains: WebDomainsDefinitions): Promise<void> {
         await this.atomicUpdate(doc => {
           const version = doc.versions.find(v => v.versionHash == null)
           if (version != null) {
-            version.permissions = permissions
+            version.webDomains = webDomains
           }
           return doc
         })
@@ -185,11 +214,6 @@ export default async (params: CollectionParams): Promise<OwnAppsCollection> => {
         const toPublish = this.getInProgressVersion()
         if (toPublish == null) {
           throw new Error('Version not found')
-        }
-
-        const developer = await this.populate('developer')
-        if (developer == null) {
-          throw new Error('Developer not found')
         }
 
         let { contentsHash } = toPublish
@@ -206,19 +230,16 @@ export default async (params: CollectionParams): Promise<OwnAppsCollection> => {
           })
         }
 
-        const authorAddress = developer.getAddress()
         const manifest: AppManifestData = {
-          authorAddress,
           contentsHash,
           profile: this.profile,
           version: toPublish.version,
-          permissions: toPublish.permissions,
+          webDomains: toPublish.webDomains,
         }
-
-        const chapter = await this.getTimeline(bzz).addChapter({
-          author: authorAddress,
-          content: manifest,
-        })
+        // NOTE: Using createChapter() will no longer be needed when calling addChapter() in erebos v0.9
+        const chapter = await this.getTimeline(bzz).addChapter(
+          createChapter({ content: { manifest } }),
+        )
         await this.atomicUpdate(doc => {
           const version = doc.versions.find(
             v => v.version === toPublish.version,

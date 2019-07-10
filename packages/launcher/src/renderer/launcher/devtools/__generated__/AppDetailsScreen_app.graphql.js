@@ -25,20 +25,11 @@ export type AppDetailsScreen_app = {|
   |},
   +inProgressVersion: ?{|
     +version: string,
-    +permissions: {|
-      +optional: {|
-        +CONTACT_COMMUNICATION: ?boolean,
-        +CONTACT_LIST: ?boolean,
-        +ETHEREUM_TRANSACTION: ?boolean,
-        +WEB_REQUEST: ?$ReadOnlyArray<?string>,
-      |},
-      +required: {|
-        +CONTACT_COMMUNICATION: ?boolean,
-        +CONTACT_LIST: ?boolean,
-        +ETHEREUM_TRANSACTION: ?boolean,
-        +WEB_REQUEST: ?$ReadOnlyArray<?string>,
-      |},
-    |},
+    +webDomains: $ReadOnlyArray<{|
+      +domain: string,
+      +internal: ?boolean,
+      +external: ?boolean,
+    |}>,
   |},
   +latestPublishedVersion: ?{|
     +version: string
@@ -81,37 +72,7 @@ v2 = {
   "name": "version",
   "args": null,
   "storageKey": null
-},
-v3 = [
-  {
-    "kind": "ScalarField",
-    "alias": null,
-    "name": "CONTACT_COMMUNICATION",
-    "args": null,
-    "storageKey": null
-  },
-  {
-    "kind": "ScalarField",
-    "alias": null,
-    "name": "CONTACT_LIST",
-    "args": null,
-    "storageKey": null
-  },
-  {
-    "kind": "ScalarField",
-    "alias": null,
-    "name": "ETHEREUM_TRANSACTION",
-    "args": null,
-    "storageKey": null
-  },
-  {
-    "kind": "ScalarField",
-    "alias": null,
-    "name": "WEB_REQUEST",
-    "args": null,
-    "storageKey": null
-  }
-];
+};
 return {
   "kind": "Fragment",
   "name": "AppDetailsScreen_app",
@@ -161,31 +122,32 @@ return {
         {
           "kind": "LinkedField",
           "alias": null,
-          "name": "permissions",
+          "name": "webDomains",
           "storageKey": null,
           "args": null,
-          "concreteType": "AppPermissionsRequirements",
-          "plural": false,
+          "concreteType": "WebDomainDefinition",
+          "plural": true,
           "selections": [
             {
-              "kind": "LinkedField",
+              "kind": "ScalarField",
               "alias": null,
-              "name": "optional",
-              "storageKey": null,
+              "name": "domain",
               "args": null,
-              "concreteType": "AppPermissionDefinitions",
-              "plural": false,
-              "selections": v3
+              "storageKey": null
             },
             {
-              "kind": "LinkedField",
+              "kind": "ScalarField",
               "alias": null,
-              "name": "required",
-              "storageKey": null,
+              "name": "internal",
               "args": null,
-              "concreteType": "AppPermissionDefinitions",
-              "plural": false,
-              "selections": v3
+              "storageKey": null
+            },
+            {
+              "kind": "ScalarField",
+              "alias": null,
+              "name": "external",
+              "args": null,
+              "storageKey": null
             }
           ]
         }
@@ -214,5 +176,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '7d3885712fa2ec0adf3f11a56a46a505';
+(node/*: any*/).hash = 'e83439a21c57d5d7c7a0eb5b7005c38c';
 module.exports = node;

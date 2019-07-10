@@ -192,59 +192,37 @@ export default createFragmentContainer(AppUpdateModal, {
     fragment AppUpdateModal_userAppVersion on UserAppVersion {
       localID
       settings {
-        permissionsGrants {
-          CONTACT_COMMUNICATION
-          CONTACT_LIST
-          ETHEREUM_TRANSACTION
-          WEB_REQUEST {
-            granted
-            denied
-          }
+        webDomains {
+          domain
+          internal
+          external
         }
       }
       update {
         fromVersion {
           manifest {
-            permissions {
-              optional {
-                CONTACT_COMMUNICATION
-                CONTACT_LIST
-                ETHEREUM_TRANSACTION
-                WEB_REQUEST
-              }
-              required {
-                CONTACT_COMMUNICATION
-                CONTACT_LIST
-                ETHEREUM_TRANSACTION
-                WEB_REQUEST
-              }
-            }
             profile {
               name
             }
             version
+            webDomains {
+              domain
+              internal
+              external
+            }
           }
         }
         toVersion {
           manifest {
-            permissions {
-              optional {
-                CONTACT_COMMUNICATION
-                CONTACT_LIST
-                ETHEREUM_TRANSACTION
-                WEB_REQUEST
-              }
-              required {
-                CONTACT_COMMUNICATION
-                CONTACT_LIST
-                ETHEREUM_TRANSACTION
-                WEB_REQUEST
-              }
-            }
             profile {
               name
             }
             version
+            webDomains {
+              domain
+              internal
+              external
+            }
           }
         }
         permissionsChanged

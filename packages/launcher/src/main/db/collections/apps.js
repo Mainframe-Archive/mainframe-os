@@ -1,5 +1,7 @@
 // @flow
 
+import semver from 'semver'
+
 import { COLLECTION_NAMES } from '../constants'
 import type { Collection, CollectionParams, Populate } from '../types'
 
@@ -11,6 +13,11 @@ import { generateLocalID } from '../utils'
 
 import type { AppVersionDoc } from './appVersions'
 import type { DeveloperDoc } from './developers'
+
+export type AppMetadata = {
+  authorKey: string,
+  manifest: AppManifestData,
+}
 
 type AppMethods = {|
   getPublicID(): string,
@@ -29,8 +36,9 @@ export type AppDoc = AppData &
   }>
 
 type AppStatics = {|
-  createFromManifest(manifest: AppManifestData): Promise<AppDoc>,
+  createFromFeed(publicID: string, meta: AppMetadata): Promise<AppDoc>,
   findByPublicID(publicID: string): Promise<AppDoc | null>,
+  importFromFeed(publicID: string, meta: AppMetadata): Promise<AppDoc>,
 |}
 
 export type AppsCollection = Collection<AppData, AppDoc> & AppStatics
@@ -38,31 +46,57 @@ export type AppsCollection = Collection<AppData, AppDoc> & AppStatics
 export default async (params: CollectionParams): Promise<AppsCollection> => {
   const db = params.db
 
-  return await db.collection<AppData, AppDoc, AppMethods, {}>({
+  return await db.collection<AppData, AppDoc, AppMethods, AppStatics>({
     name: COLLECTION_NAMES.APPS,
     schema,
     statics: {
-      async createFromManifest(manifest: AppManifestData): Promise<AppDoc> {
-        const developer = await db.developers.getOrCreateByAddress(
-          manifest.authorAddress,
+      async createFromFeed(
+        publicID: string,
+        meta: AppMetadata,
+      ): Promise<AppDoc> {
+        const developer = await db.developers.getOrCreateByPublicKey(
+          meta.authorKey,
         )
         const app = this.newDocument({
           localID: generateLocalID(),
           developer: developer.localID,
+          publicFeed: publicID.replace(MF_PREFIX.APP, '0x'),
         })
         const appVersion = await db.app_versions.create({
           app: app.localID,
           developer: developer.localID,
-          manifest,
+          manifest: meta.manifest,
         })
         app.latestAvailableVersion = appVersion.localID
-        return await app.save()
+        await app.save()
+        return app
       },
 
       async findByPublicID(publicID: string): Promise<AppDoc | null> {
         return await this.findOne({
           publicFeed: publicID.replace(MF_PREFIX.APP, '0x'),
         }).exec()
+      },
+
+      async importFromFeed(
+        publicID: string,
+        meta: AppMetadata,
+      ): Promise<AppDoc> {
+        const app = await this.findByPublicID(publicID)
+        if (app == null) {
+          return await this.createFromFeed(publicID, meta)
+        }
+
+        // Check and update latest available version with the imported chapter if newer
+        const appVersion = await app.populate('latestAvailableVersion')
+        if (
+          appVersion == null ||
+          semver.gt(meta.manifest.version, appVersion.manifest.version)
+        ) {
+          await app.setLatestAvailableVersionFromManifest(meta.manifest)
+        }
+
+        return app
       },
     },
     methods: {

@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 5d40451d453234cba90f7464d62593da
+ * @relayHash 2b6adb8d827451ca35e0533b111832ed
  */
 
 /* eslint-disable */
@@ -22,20 +22,11 @@ export type AppInstallModalLookupAppQueryResponse = {|
               +name: ?string
             |},
             +version: string,
-            +permissions: {|
-              +optional: {|
-                +CONTACT_COMMUNICATION: ?boolean,
-                +CONTACT_LIST: ?boolean,
-                +ETHEREUM_TRANSACTION: ?boolean,
-                +WEB_REQUEST: ?$ReadOnlyArray<?string>,
-              |},
-              +required: {|
-                +CONTACT_COMMUNICATION: ?boolean,
-                +CONTACT_LIST: ?boolean,
-                +ETHEREUM_TRANSACTION: ?boolean,
-                +WEB_REQUEST: ?$ReadOnlyArray<?string>,
-              |},
-            |},
+            +webDomains: $ReadOnlyArray<{|
+              +domain: string,
+              +internal: ?boolean,
+              +external: ?boolean,
+            |}>,
           |}
         |}
       |},
@@ -65,19 +56,10 @@ query AppInstallModalLookupAppQuery(
               name
             }
             version
-            permissions {
-              optional {
-                CONTACT_COMMUNICATION
-                CONTACT_LIST
-                ETHEREUM_TRANSACTION
-                WEB_REQUEST
-              }
-              required {
-                CONTACT_COMMUNICATION
-                CONTACT_LIST
-                ETHEREUM_TRANSACTION
-                WEB_REQUEST
-              }
+            webDomains {
+              domain
+              internal
+              external
             }
           }
           id
@@ -110,37 +92,7 @@ v1 = [
     "type": "ID!"
   }
 ],
-v2 = [
-  {
-    "kind": "ScalarField",
-    "alias": null,
-    "name": "CONTACT_COMMUNICATION",
-    "args": null,
-    "storageKey": null
-  },
-  {
-    "kind": "ScalarField",
-    "alias": null,
-    "name": "CONTACT_LIST",
-    "args": null,
-    "storageKey": null
-  },
-  {
-    "kind": "ScalarField",
-    "alias": null,
-    "name": "ETHEREUM_TRANSACTION",
-    "args": null,
-    "storageKey": null
-  },
-  {
-    "kind": "ScalarField",
-    "alias": null,
-    "name": "WEB_REQUEST",
-    "args": null,
-    "storageKey": null
-  }
-],
-v3 = {
+v2 = {
   "kind": "LinkedField",
   "alias": null,
   "name": "manifest",
@@ -177,44 +129,45 @@ v3 = {
     {
       "kind": "LinkedField",
       "alias": null,
-      "name": "permissions",
+      "name": "webDomains",
       "storageKey": null,
       "args": null,
-      "concreteType": "AppPermissionsRequirements",
-      "plural": false,
+      "concreteType": "WebDomainDefinition",
+      "plural": true,
       "selections": [
         {
-          "kind": "LinkedField",
+          "kind": "ScalarField",
           "alias": null,
-          "name": "optional",
-          "storageKey": null,
+          "name": "domain",
           "args": null,
-          "concreteType": "AppPermissionDefinitions",
-          "plural": false,
-          "selections": v2
+          "storageKey": null
         },
         {
-          "kind": "LinkedField",
+          "kind": "ScalarField",
           "alias": null,
-          "name": "required",
-          "storageKey": null,
+          "name": "internal",
           "args": null,
-          "concreteType": "AppPermissionDefinitions",
-          "plural": false,
-          "selections": v2
+          "storageKey": null
+        },
+        {
+          "kind": "ScalarField",
+          "alias": null,
+          "name": "external",
+          "args": null,
+          "storageKey": null
         }
       ]
     }
   ]
 },
-v4 = {
+v3 = {
   "kind": "ScalarField",
   "alias": null,
   "name": "localID",
   "args": null,
   "storageKey": null
 },
-v5 = {
+v4 = {
   "kind": "ScalarField",
   "alias": null,
   "name": "id",
@@ -226,7 +179,7 @@ return {
   "operationKind": "query",
   "name": "AppInstallModalLookupAppQuery",
   "id": null,
-  "text": "query AppInstallModalLookupAppQuery(\n  $publicID: ID!\n) {\n  lookup {\n    appByID(publicID: $publicID) {\n      app {\n        latestAvailableVersion {\n          manifest {\n            profile {\n              name\n            }\n            version\n            permissions {\n              optional {\n                CONTACT_COMMUNICATION\n                CONTACT_LIST\n                ETHEREUM_TRANSACTION\n                WEB_REQUEST\n              }\n              required {\n                CONTACT_COMMUNICATION\n                CONTACT_LIST\n                ETHEREUM_TRANSACTION\n                WEB_REQUEST\n              }\n            }\n          }\n          id\n        }\n        id\n      }\n      userAppVersion {\n        localID\n        id\n      }\n    }\n  }\n}\n",
+  "text": "query AppInstallModalLookupAppQuery(\n  $publicID: ID!\n) {\n  lookup {\n    appByID(publicID: $publicID) {\n      app {\n        latestAvailableVersion {\n          manifest {\n            profile {\n              name\n            }\n            version\n            webDomains {\n              domain\n              internal\n              external\n            }\n          }\n          id\n        }\n        id\n      }\n      userAppVersion {\n        localID\n        id\n      }\n    }\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -271,7 +224,7 @@ return {
                     "concreteType": "AppVersion",
                     "plural": false,
                     "selections": [
-                      v3
+                      v2
                     ]
                   }
                 ]
@@ -285,7 +238,7 @@ return {
                 "concreteType": "UserAppVersion",
                 "plural": false,
                 "selections": [
-                  v4
+                  v3
                 ]
               }
             ]
@@ -335,11 +288,11 @@ return {
                     "concreteType": "AppVersion",
                     "plural": false,
                     "selections": [
-                      v3,
-                      v5
+                      v2,
+                      v4
                     ]
                   },
-                  v5
+                  v4
                 ]
               },
               {
@@ -351,8 +304,8 @@ return {
                 "concreteType": "UserAppVersion",
                 "plural": false,
                 "selections": [
-                  v4,
-                  v5
+                  v3,
+                  v4
                 ]
               }
             ]
@@ -364,5 +317,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '0aa157d69404a5abb91d7368241cd580';
+(node/*: any*/).hash = '0b469af9ea1a32cc95823f1bb06cd016';
 module.exports = node;

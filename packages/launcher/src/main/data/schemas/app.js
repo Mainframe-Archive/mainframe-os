@@ -1,58 +1,64 @@
 // @flow
 
-import { APP_MANIFEST_V0 } from '../constants'
+import { APP_FEED_V0 } from '../constants'
 
 import { profileProperty } from './profile'
-import { ethereumAddressProperty, swarmHashProperty } from './scalars'
+import {
+  ethereumAddressProperty,
+  publicKeyProperty,
+  signatureProperty,
+  swarmHashProperty,
+} from './scalars'
 
-const appPermissionsDefinitionsProperty = {
+export const appManifestProperty = {
   type: 'object',
+  required: ['profile', 'version', 'contentsHash', 'webDomains'],
   properties: {
-    CONTACT_COMMUNICATION: {
-      type: 'boolean',
-    },
-    CONTACT_LIST: {
-      type: 'boolean',
-    },
-    ETHEREUM_TRANSACTION: {
-      type: 'boolean',
-    },
-    WEB_REQUEST: {
-      type: 'array',
-      items: {
-        type: 'string', // URL
-      },
-    },
-  },
-}
-
-export const appPermissionsRequirementsProperty = {
-  type: 'object',
-  properties: {
-    required: appPermissionsDefinitionsProperty,
-    optional: appPermissionsDefinitionsProperty,
-  },
-}
-
-export const appManifestSchema = {
-  $async: true,
-  $id: APP_MANIFEST_V0,
-  type: 'object',
-  required: [
-    'authorAddress',
-    'profile',
-    'version',
-    'contentsHash',
-    'permissions',
-  ],
-  properties: {
-    authorAddress: ethereumAddressProperty,
     profile: profileProperty,
     version: {
       type: 'string',
       maxLength: 20,
     },
     contentsHash: swarmHashProperty,
-    permissions: appPermissionsRequirementsProperty,
+    webDomains: {
+      type: 'array',
+      items: {
+        type: 'object',
+        required: ['domain'],
+        properties: {
+          domain: {
+            type: 'string',
+            maxLength: 200,
+          },
+          internal: {
+            type: 'boolean',
+          },
+          external: {
+            type: 'boolean',
+          },
+        },
+      },
+    },
+  },
+}
+
+export const appMetadataProperty = {
+  type: 'object',
+  required: ['authorKey', 'manifest'],
+  properties: {
+    authorKey: publicKeyProperty,
+    manifest: appManifestProperty,
+  },
+}
+
+export const appFeedSchema = {
+  $async: true,
+  $id: APP_FEED_V0,
+  type: 'object',
+  required: ['author', 'content', 'signature'],
+  properties: {
+    author: ethereumAddressProperty,
+    content: appMetadataProperty,
+    signature: signatureProperty,
   },
 }

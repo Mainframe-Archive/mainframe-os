@@ -1,13 +1,15 @@
 // @flow
 
+import createHex from '@erebos/hex'
+import { verify } from '@erebos/secp256k1'
 import Ajv from 'ajv'
 import semver from 'semver'
 
-import { APP_MANIFEST_V0 } from './constants'
-import { appManifestSchema } from './schemas/app'
+import { APP_FEED_V0 } from './constants'
+import { appFeedSchema } from './schemas/app'
 
 const ajv = new Ajv()
-ajv.addSchema([appManifestSchema])
+ajv.addSchema([appFeedSchema])
 
 const validateSchema = async (type: string, data: Object) => {
   await ajv.validate(type, data)
@@ -21,8 +23,22 @@ const validateHasPublicKey = (data: Object = {}) => {
   return data
 }
 
-const validateAppManifest = async (data: Object = {}) => {
-  return await validateSchema(APP_MANIFEST_V0, data)
+export const validateAppFeed = async (data: Object = {}, author?: ?string) => {
+  try {
+    await validateSchema(APP_FEED_V0, data)
+  } catch (err) {
+    throw new Error('Invalid data')
+  }
+  const { signature, ...rest } = data
+  const verified = verify(
+    createHex(rest).toBytesArray(),
+    createHex(signature).toBytesArray(),
+    author || rest.content.authorKey,
+  )
+  if (!verified) {
+    throw new Error('Invalid signature')
+  }
+  return data
 }
 
 const validateDeveloper = async (data: Object = {}) => {
@@ -54,17 +70,6 @@ const validateFirstContact = async (data: Object = {}) => {
 }
 
 export const PROTOCOLS = {
-  appManifest_v1: {
-    name: 'appManifest',
-    read: {
-      process: validateAppManifest,
-      version: '^1.0.0',
-    },
-    write: {
-      process: validateAppManifest,
-      version: '1.0.0',
-    },
-  },
   developer_v1: {
     name: 'developer',
     read: {
@@ -113,7 +118,7 @@ export const createWriter = (key: Protocol) => {
     throw new Error(`Unsupported protocol: ${key}`)
   }
 
-  return async (data: any): Payload => {
+  return async (data: any): Promise<Payload> => {
     const processed = await protocol.write.process(data)
     return {
       mainframe: protocol.name,
@@ -142,9 +147,6 @@ export const createReader = (key: Protocol) => {
     return await protocol.read.process(payload.data)
   }
 }
-
-export const readAppManifest = createReader('appManifest_v1')
-export const writeAppManifest = createWriter('appManifest_v1')
 
 export const readDeveloper = createReader('developer_v1')
 export const writeDeveloper = createWriter('developer_v1')

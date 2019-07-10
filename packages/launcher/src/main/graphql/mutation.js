@@ -21,7 +21,6 @@ import {
   ethLedgerWallet,
   ownApp,
   ownDeveloper,
-  userAppSettings,
   viewerField,
 } from './objects'
 
@@ -598,35 +597,24 @@ const acceptContactRequestMutation = mutationWithClientMutationId({
   },
 })
 
-const appPermissionDefinitionsInput = new GraphQLInputObjectType({
-  name: 'AppPermissionDefinitionsInput',
+const webDomainDefinitionInput = new GraphQLInputObjectType({
+  name: 'WebDomainDefinitionInput',
   fields: () => ({
-    CONTACT_COMMUNICATION: {
+    domain: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    internal: {
       type: GraphQLBoolean,
     },
-    CONTACT_LIST: {
+    external: {
       type: GraphQLBoolean,
-    },
-    ETHEREUM_TRANSACTION: {
-      type: GraphQLBoolean,
-    },
-    WEB_REQUEST: {
-      type: new GraphQLList(GraphQLString),
     },
   }),
 })
 
-const appPermissionsRequirementsInput = new GraphQLInputObjectType({
-  name: 'AppPermissionsRequirementsInput',
-  fields: () => ({
-    optional: {
-      type: new GraphQLNonNull(appPermissionDefinitionsInput),
-    },
-    required: {
-      type: new GraphQLNonNull(appPermissionDefinitionsInput),
-    },
-  }),
-})
+const webDomainsDefinitionsInput = new GraphQLNonNull(
+  new GraphQLList(new GraphQLNonNull(webDomainDefinitionInput)),
+)
 
 const createAppMutation = mutationWithClientMutationId({
   name: 'CreateApp',
@@ -643,8 +631,8 @@ const createAppMutation = mutationWithClientMutationId({
     developerID: {
       type: new GraphQLNonNull(GraphQLString),
     },
-    permissionsRequirements: {
-      type: new GraphQLNonNull(appPermissionsRequirementsInput),
+    webDomains: {
+      type: webDomainsDefinitionsInput,
     },
   },
   outputFields: {
@@ -668,7 +656,7 @@ const createAppMutation = mutationWithClientMutationId({
           name: args.name,
         },
         version: args.version,
-        permissions: args.permissionsRequirements,
+        webDomains: args.webDomains,
       })
       const userOwnApp = await ctx.db.user_own_apps.createFor(ctx.userID, app)
       const userAppSettings = await userOwnApp.populate('settings')
@@ -733,14 +721,14 @@ const createAppVersionMutation = mutationWithClientMutationId({
   },
 })
 
-const setAppPermissionsRequirementsMutation = mutationWithClientMutationId({
-  name: 'SetAppPermissionsRequirements',
+const setAppWebDomainsDefinitionsMutation = mutationWithClientMutationId({
+  name: 'SetAppWebDomainsDefinitions',
   inputFields: {
     appID: {
       type: new GraphQLNonNull(GraphQLString),
     },
-    permissionsRequirements: {
-      type: new GraphQLNonNull(appPermissionsRequirementsInput),
+    webDomains: {
+      type: webDomainsDefinitionsInput,
     },
   },
   outputFields: {
@@ -753,7 +741,7 @@ const setAppPermissionsRequirementsMutation = mutationWithClientMutationId({
   mutateAndGetPayload: async (args, ctx) => {
     ctx.logger.log({
       level: 'debug',
-      message: 'SetAppPermissionsRequirements mutation called',
+      message: 'SetAppWebDomainsDefinitions mutation called',
       appID: args.appID,
     })
     try {
@@ -761,94 +749,17 @@ const setAppPermissionsRequirementsMutation = mutationWithClientMutationId({
       if (app == null) {
         throw new Error('Application not found')
       }
-      await app.setPermissionsRequirements(args.permissionsRequirements)
+      await app.setWebDomains(args.webDomains)
       return { app }
     } catch (err) {
       ctx.logger.log({
         level: 'error',
-        message: 'SetAppPermissionsRequirements mutation failed',
+        message: 'SetAppWebDomainsDefinitions mutation failed',
         error: err.toString(),
       })
       throw err
     }
   },
-})
-
-const manifestAuthorInput = new GraphQLInputObjectType({
-  name: 'ManifestAuthorInput',
-  fields: () => ({
-    id: {
-      type: new GraphQLNonNull(GraphQLString),
-    },
-    name: {
-      type: new GraphQLNonNull(GraphQLString),
-    },
-  }),
-})
-
-const appManifestInput = new GraphQLInputObjectType({
-  name: 'AppManifestInput',
-  fields: () => ({
-    id: {
-      type: new GraphQLNonNull(GraphQLString),
-    },
-    name: {
-      type: new GraphQLNonNull(GraphQLString),
-    },
-    version: {
-      type: new GraphQLNonNull(GraphQLString),
-    },
-    contentsHash: {
-      type: new GraphQLNonNull(GraphQLString),
-    },
-    updateHash: {
-      type: new GraphQLNonNull(GraphQLString),
-    },
-    permissions: {
-      type: new GraphQLNonNull(appPermissionsRequirementsInput),
-    },
-    author: {
-      type: new GraphQLNonNull(manifestAuthorInput),
-    },
-  }),
-})
-
-const webRequestGrantInput = new GraphQLInputObjectType({
-  name: 'WebRequestGrantInput',
-  fields: () => ({
-    granted: { type: new GraphQLList(GraphQLString) },
-    denied: { type: new GraphQLList(GraphQLString) },
-  }),
-})
-
-const appPermissionGrantsInput = new GraphQLInputObjectType({
-  name: 'AppPermissionGrantsInput',
-  fields: () => ({
-    CONTACT_COMMUNICATION: {
-      type: GraphQLBoolean,
-    },
-    CONTACT_LIST: {
-      type: GraphQLBoolean,
-    },
-    ETHEREUM_TRANSACTION: {
-      type: GraphQLBoolean,
-    },
-    WEB_REQUEST: {
-      type: new GraphQLNonNull(webRequestGrantInput),
-    },
-  }),
-})
-
-const appPermissionSettingsInput = new GraphQLInputObjectType({
-  name: 'AppPermissionsSettingsInput',
-  fields: () => ({
-    permissionsChecked: {
-      type: new GraphQLNonNull(GraphQLBoolean),
-    },
-    grants: {
-      type: new GraphQLNonNull(appPermissionGrantsInput),
-    },
-  }),
 })
 
 const appInstallMutation = mutationWithClientMutationId({
@@ -857,11 +768,11 @@ const appInstallMutation = mutationWithClientMutationId({
     userID: {
       type: new GraphQLNonNull(GraphQLString),
     },
-    manifest: {
-      type: new GraphQLNonNull(appManifestInput),
+    appVersionID: {
+      type: new GraphQLNonNull(GraphQLString),
     },
-    permissionsSettings: {
-      type: new GraphQLNonNull(appPermissionSettingsInput),
+    webDomains: {
+      type: webDomainsDefinitionsInput,
     },
   },
   outputFields: {
@@ -893,8 +804,8 @@ const appUpdateMutation = mutationWithClientMutationId({
     userID: {
       type: new GraphQLNonNull(GraphQLString),
     },
-    permissionsSettings: {
-      type: appPermissionSettingsInput,
+    webDomains: {
+      type: webDomainsDefinitionsInput,
     },
   },
   outputFields: {
@@ -1020,7 +931,7 @@ export default new GraphQLObjectType({
     createAppVersion: createAppVersionMutation,
     installApp: appInstallMutation,
     updateApp: appUpdateMutation,
-    setAppPermissionsRequirements: setAppPermissionsRequirementsMutation,
+    setAppWebDomainsDefinitions: setAppWebDomainsDefinitionsMutation,
     publishAppVersion: publishAppVersionMutation,
     updateAppDetails: updateAppDetailsMutation,
     // Users

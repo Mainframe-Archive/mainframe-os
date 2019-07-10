@@ -116,11 +116,11 @@ const updateAppDetailsMutation = graphql`
   }
 `
 
-const setAppPermissionsRequirementsMutation = graphql`
-  mutation AppDetailsScreenSetAppPermissionsRequirementsMutation(
-    $input: SetAppPermissionsRequirementsInput!
+const setAppWebDomainsDefinitionsMutation = graphql`
+  mutation AppDetailsScreenSetAppWebDomainsDefinitionsMutation(
+    $input: SetAppWebDomainsDefinitionsInput!
   ) {
-    setAppPermissionsRequirements(input: $input) {
+    setAppWebDomainsDefinitions(input: $input) {
       app {
         ...AppDetailsScreen_app
       }
@@ -291,14 +291,13 @@ class AppDetails extends Component<Props, State> {
     })
   }
 
-  onSetPermissions = (requirements: StrictPermissionsRequirements) => {
+  onSetWebDomains = (webDomains: Array<Object>) => {
     commitMutation(this.props.relay.environment, {
-      mutation: setAppPermissionsRequirementsMutation,
+      mutation: setAppWebDomainsDefinitionsMutation,
       variables: {
         input: {
           appID: this.props.app.localID,
-          // $FlowFixMe permission key
-          permissionsRequirements: requirements,
+          webDomains: webDomains,
         },
       },
       onCompleted: (res, errors) => {
@@ -344,9 +343,12 @@ class AppDetails extends Component<Props, State> {
       case 'confirm_permissions':
         return (
           <SetPermissionsRequirements
-            // $FlowFixMe: different definition between library-imported and Relay-generated one
-            permissionRequirements={app.inProgressVersion.permissions}
-            onSetPermissions={this.onSetPermissions}
+            webDomains={
+              app.inProgressVersion
+                ? app.inProgressVersion.webDomains
+                : undefined
+            }
+            onSetWebDomains={this.onSetWebDomains}
             onRequestClose={this.onCloseModal}
           />
         )
@@ -354,8 +356,9 @@ class AppDetails extends Component<Props, State> {
         return (
           <AppSummary
             appData={appData}
-            // $FlowFixMe: different definition between library-imported and Relay-generated one
-            permissionsRequirements={app.inProgressVersion.permissions}
+            webDomains={
+              app.inProgressVersion ? app.inProgressVersion.webDomains : []
+            }
             onPressBack={this.onPressPublishVersion}
             onRequestClose={this.onCloseModal}
             onPressSave={this.publishApp}
@@ -531,19 +534,10 @@ const RelayContainer = createFragmentContainer(AppDetails, {
       }
       inProgressVersion {
         version
-        permissions {
-          optional {
-            CONTACT_COMMUNICATION
-            CONTACT_LIST
-            ETHEREUM_TRANSACTION
-            WEB_REQUEST
-          }
-          required {
-            CONTACT_COMMUNICATION
-            CONTACT_LIST
-            ETHEREUM_TRANSACTION
-            WEB_REQUEST
-          }
+        webDomains {
+          domain
+          internal
+          external
         }
       }
       latestPublishedVersion {

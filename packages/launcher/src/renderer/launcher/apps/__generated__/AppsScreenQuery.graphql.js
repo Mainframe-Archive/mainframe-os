@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash b41ab240c064a38683c1e22fdaa5e8fd
+ * @relayHash f88a1138ff1850d48de79413cd8d3581
  */
 
 /* eslint-disable */
@@ -44,19 +44,10 @@ fragment AppsScreen_user on User {
         profile {
           name
         }
-        permissions {
-          optional {
-            CONTACT_COMMUNICATION
-            CONTACT_LIST
-            ETHEREUM_TRANSACTION
-            WEB_REQUEST
-          }
-          required {
-            CONTACT_COMMUNICATION
-            CONTACT_LIST
-            ETHEREUM_TRANSACTION
-            WEB_REQUEST
-          }
+        webDomains {
+          domain
+          internal
+          external
         }
       }
       id
@@ -73,14 +64,10 @@ fragment AppsScreen_user on User {
     }
     settings {
       permissionsChecked
-      permissionsGrants {
-        CONTACT_COMMUNICATION
-        CONTACT_LIST
-        ETHEREUM_TRANSACTION
-        WEB_REQUEST {
-          granted
-          denied
-        }
+      webDomains {
+        domain
+        internal
+        external
       }
       id
     }
@@ -98,44 +85,43 @@ var v0 = {
   "storageKey": null
 },
 v1 = {
-  "kind": "ScalarField",
+  "kind": "LinkedField",
   "alias": null,
-  "name": "CONTACT_COMMUNICATION",
+  "name": "webDomains",
+  "storageKey": null,
   "args": null,
-  "storageKey": null
-},
-v2 = {
-  "kind": "ScalarField",
-  "alias": null,
-  "name": "CONTACT_LIST",
-  "args": null,
-  "storageKey": null
-},
-v3 = {
-  "kind": "ScalarField",
-  "alias": null,
-  "name": "ETHEREUM_TRANSACTION",
-  "args": null,
-  "storageKey": null
-},
-v4 = [
-  v1,
-  v2,
-  v3,
-  {
-    "kind": "ScalarField",
-    "alias": null,
-    "name": "WEB_REQUEST",
-    "args": null,
-    "storageKey": null
-  }
-];
+  "concreteType": "WebDomainDefinition",
+  "plural": true,
+  "selections": [
+    {
+      "kind": "ScalarField",
+      "alias": null,
+      "name": "domain",
+      "args": null,
+      "storageKey": null
+    },
+    {
+      "kind": "ScalarField",
+      "alias": null,
+      "name": "internal",
+      "args": null,
+      "storageKey": null
+    },
+    {
+      "kind": "ScalarField",
+      "alias": null,
+      "name": "external",
+      "args": null,
+      "storageKey": null
+    }
+  ]
+};
 return {
   "kind": "Request",
   "operationKind": "query",
   "name": "AppsScreenQuery",
   "id": null,
-  "text": "query AppsScreenQuery {\n  user: viewer {\n    ...AppsScreen_user\n    id\n  }\n}\n\nfragment AppsScreen_user on User {\n  id\n  apps {\n    localID\n    appVersion {\n      app {\n        publicID\n        id\n      }\n      manifest {\n        profile {\n          name\n        }\n        permissions {\n          optional {\n            CONTACT_COMMUNICATION\n            CONTACT_LIST\n            ETHEREUM_TRANSACTION\n            WEB_REQUEST\n          }\n          required {\n            CONTACT_COMMUNICATION\n            CONTACT_LIST\n            ETHEREUM_TRANSACTION\n            WEB_REQUEST\n          }\n        }\n      }\n      id\n    }\n    update {\n      toVersion {\n        installationState\n        manifest {\n          version\n        }\n        id\n      }\n      permissionsChanged\n    }\n    settings {\n      permissionsChecked\n      permissionsGrants {\n        CONTACT_COMMUNICATION\n        CONTACT_LIST\n        ETHEREUM_TRANSACTION\n        WEB_REQUEST {\n          granted\n          denied\n        }\n      }\n      id\n    }\n    id\n  }\n}\n",
+  "text": "query AppsScreenQuery {\n  user: viewer {\n    ...AppsScreen_user\n    id\n  }\n}\n\nfragment AppsScreen_user on User {\n  id\n  apps {\n    localID\n    appVersion {\n      app {\n        publicID\n        id\n      }\n      manifest {\n        profile {\n          name\n        }\n        webDomains {\n          domain\n          internal\n          external\n        }\n      }\n      id\n    }\n    update {\n      toVersion {\n        installationState\n        manifest {\n          version\n        }\n        id\n      }\n      permissionsChanged\n    }\n    settings {\n      permissionsChecked\n      webDomains {\n        domain\n        internal\n        external\n      }\n      id\n    }\n    id\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -248,37 +234,7 @@ return {
                           }
                         ]
                       },
-                      {
-                        "kind": "LinkedField",
-                        "alias": null,
-                        "name": "permissions",
-                        "storageKey": null,
-                        "args": null,
-                        "concreteType": "AppPermissionsRequirements",
-                        "plural": false,
-                        "selections": [
-                          {
-                            "kind": "LinkedField",
-                            "alias": null,
-                            "name": "optional",
-                            "storageKey": null,
-                            "args": null,
-                            "concreteType": "AppPermissionDefinitions",
-                            "plural": false,
-                            "selections": v4
-                          },
-                          {
-                            "kind": "LinkedField",
-                            "alias": null,
-                            "name": "required",
-                            "storageKey": null,
-                            "args": null,
-                            "concreteType": "AppPermissionDefinitions",
-                            "plural": false,
-                            "selections": v4
-                          }
-                        ]
-                      }
+                      v1
                     ]
                   },
                   v0
@@ -355,45 +311,7 @@ return {
                     "args": null,
                     "storageKey": null
                   },
-                  {
-                    "kind": "LinkedField",
-                    "alias": null,
-                    "name": "permissionsGrants",
-                    "storageKey": null,
-                    "args": null,
-                    "concreteType": "AppPermissions",
-                    "plural": false,
-                    "selections": [
-                      v1,
-                      v2,
-                      v3,
-                      {
-                        "kind": "LinkedField",
-                        "alias": null,
-                        "name": "WEB_REQUEST",
-                        "storageKey": null,
-                        "args": null,
-                        "concreteType": "WebRequestGrants",
-                        "plural": false,
-                        "selections": [
-                          {
-                            "kind": "ScalarField",
-                            "alias": null,
-                            "name": "granted",
-                            "args": null,
-                            "storageKey": null
-                          },
-                          {
-                            "kind": "ScalarField",
-                            "alias": null,
-                            "name": "denied",
-                            "args": null,
-                            "storageKey": null
-                          }
-                        ]
-                      }
-                    ]
-                  },
+                  v1,
                   v0
                 ]
               },

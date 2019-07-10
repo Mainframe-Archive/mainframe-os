@@ -1,26 +1,21 @@
 // @flow
 
 import { Text } from '@morpheus-ui/core'
-import React, { Component } from 'react'
+import React, { useMemo } from 'react'
 import styled from 'styled-components/native'
 
+import type {
+  WebDomainsDefinitions,
+  ReadOnlyWebDomainsDefinitions,
+} from '../../../types'
+
 import FormModalView from '../../UIComponents/FormModalView'
-import { PERMISSIONS_DESCRIPTIONS } from './SetPermissionsRequirements'
 
 export type AppData = {
   name?: ?string,
   version?: ?string,
   contentsPath?: ?string,
   developerID?: ?string,
-}
-
-type Props = {
-  onRequestClose?: () => any,
-  onPressBack?: () => any,
-  onPressSave: () => any,
-  submitButtonTitle?: ?string,
-  permissionsRequirements?: StrictPermissionsRequirements,
-  appData: AppData,
 }
 
 const Container = styled.View`
@@ -49,117 +44,104 @@ const Section = styled.View`
   ${props => props.first && `border-top-width: 0; margin-top: 0;`}
 `
 
-export default class AppSummary extends Component<Props> {
-  renderPermissionsSummaryRows(
-    requirements: StrictPermissionsRequirements,
-    type: PermissionRequirement,
-  ): Array<Object> {
-    return Object.keys(requirements[type]).reduce((acc, key: PermissionKey) => {
-      // @$FlowFixMe Missing keys
-      const permission = requirements[type][key]
-      if (key === 'WEB_REQUEST') {
-        if (permission.length) {
-          // @$FlowFixMe WEB_REQUEST specific
-          permission.forEach(host => {
-            acc.push(
-              <PermissionRow first={acc.length === 0} key={host}>
-                <Text variant={['greyDark23']} size={12}>
-                  Make web requests to <Text bold>{host}</Text>
-                </Text>
-              </PermissionRow>,
-            )
-          })
-        }
+type Props = {
+  onRequestClose?: () => any,
+  onPressBack?: () => any,
+  onPressSave: () => any,
+  submitButtonTitle?: ?string,
+  appData: AppData,
+  webDomains: WebDomainsDefinitions | ReadOnlyWebDomainsDefinitions,
+}
+
+export default function AppSummary(props: Props) {
+  const { appData, webDomains } = props
+
+  const domains = useMemo(() => {
+    const required = []
+    const optional = []
+    webDomains.forEach(w => {
+      if (w.internal) {
+        required.push(w.domain)
       } else {
-        if (permission === true) {
-          acc.push(
-            <PermissionRow first={acc.length === 0} key={key}>
-              <Text variant={['greyDark23']} size={12}>
-                {PERMISSIONS_DESCRIPTIONS[key]}
-              </Text>
-            </PermissionRow>,
-          )
-        }
+        optional.push(w.domain)
       }
-      return acc
-    }, [])
-  }
+    })
+    return { required, optional }
+  }, [webDomains])
 
-  render() {
-    const { appData, permissionsRequirements: requirements } = this.props
-
-    let permissionsContainer = null
-    if (requirements) {
-      const optionalPermissionRequirements = this.renderPermissionsSummaryRows(
-        requirements,
-        'optional',
-      )
-      const requiredPermissionRequirements = this.renderPermissionsSummaryRows(
-        requirements,
-        'required',
-      )
-
-      const optionalPermissions = optionalPermissionRequirements.length ? (
-        <Section>
-          <Text variant={['greyDark23', 'marginBottom10']} bold size={12}>
-            Optional Permissions
-          </Text>
-          {optionalPermissionRequirements}
-        </Section>
-      ) : null
-
-      const requiredPermissions = requiredPermissionRequirements.length ? (
-        <Section>
-          <Text variant={['greyDark23', 'marginBottom10']} bold size={12}>
-            Required Permissions
-          </Text>
-          {requiredPermissionRequirements}
-        </Section>
-      ) : null
-
-      permissionsContainer = (
-        <>
-          {optionalPermissions}
-          {requiredPermissions}
-        </>
-      )
-    }
-
-    return (
-      <FormModalView
-        title="App SUMMARY"
-        dismissButton={this.props.onPressBack ? 'BACK' : 'CLOSE'}
-        onPressDismiss={this.props.onPressBack}
-        confirmTestID="create-app-complete-button"
-        confirmButton={this.props.submitButtonTitle || 'SAVE'}
-        onPressConfirm={this.props.onPressSave}
-        onRequestClose={this.props.onRequestClose}>
-        <Container>
-          <ScrollView>
-            <Section first>
-              <Text variant={['greyDark23', 'marginBottom10']} bold size={12}>
-                App Info
-              </Text>
-              <PermissionRow first>
-                <Text variant={['greyDark23']} size={12}>
-                  Name: {appData.name}
-                </Text>
-              </PermissionRow>
-              <PermissionRow>
-                <Text variant={['greyDark23']} size={12}>
-                  Version: {appData.version}
-                </Text>
-              </PermissionRow>
-              <PermissionRow>
-                <Text variant={['greyDark23']} size={12}>
-                  Contents path: {appData.contentsPath}
-                </Text>
-              </PermissionRow>
-            </Section>
-            {permissionsContainer}
-          </ScrollView>
-        </Container>
-      </FormModalView>
+  let requiredPermissions = null
+  if (domains.required.length > 0) {
+    const requiredDomains = domains.required.map(domain => (
+      <PermissionRow key={domain}>
+        <Text variant={['greyDark23']} size={12}>
+          {domain}
+        </Text>
+      </PermissionRow>
+    ))
+    requiredPermissions = (
+      <Section>
+        <Text variant={['greyDark23', 'marginBottom10']} bold size={12}>
+          Required Web domains access
+        </Text>
+        {requiredDomains}
+      </Section>
     )
   }
+
+  let optionalPermissions = null
+  if (domains.optional.length > 0) {
+    const optionalDomains = domains.optional.map(domain => (
+      <PermissionRow key={domain}>
+        <Text variant={['greyDark23']} size={12}>
+          {domain}
+        </Text>
+      </PermissionRow>
+    ))
+    optionalPermissions = (
+      <Section>
+        <Text variant={['greyDark23', 'marginBottom10']} bold size={12}>
+          Optional Web domains access
+        </Text>
+        {optionalDomains}
+      </Section>
+    )
+  }
+
+  return (
+    <FormModalView
+      title="App SUMMARY"
+      dismissButton={props.onPressBack ? 'BACK' : 'CLOSE'}
+      onPressDismiss={props.onPressBack}
+      confirmTestID="create-app-complete-button"
+      confirmButton={props.submitButtonTitle || 'SAVE'}
+      onPressConfirm={props.onPressSave}
+      onRequestClose={props.onRequestClose}>
+      <Container>
+        <ScrollView>
+          <Section first>
+            <Text variant={['greyDark23', 'marginBottom10']} bold size={12}>
+              App Info
+            </Text>
+            <PermissionRow first>
+              <Text variant={['greyDark23']} size={12}>
+                Name: {appData.name}
+              </Text>
+            </PermissionRow>
+            <PermissionRow>
+              <Text variant={['greyDark23']} size={12}>
+                Version: {appData.version}
+              </Text>
+            </PermissionRow>
+            <PermissionRow>
+              <Text variant={['greyDark23']} size={12}>
+                Contents path: {appData.contentsPath}
+              </Text>
+            </PermissionRow>
+          </Section>
+          {requiredPermissions}
+          {optionalPermissions}
+        </ScrollView>
+      </Container>
+    </FormModalView>
+  )
 }
