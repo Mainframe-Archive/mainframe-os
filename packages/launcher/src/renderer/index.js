@@ -24,20 +24,7 @@ Modal.setAppElement(rootTag)
 
 ipcRenderer.on('window-start', (event, params) => {
   const App = AppTypes[params.type]
-  console.log('params.type')
-
-  console.log(params.type)
-  console.log(App)
-  if (App == null && params.type === 'wyre') {
-    const Root = () => <App />
-    AppRegistry.registerComponent('Root', () => Root)
-    AppRegistry.runApplication('Root', {
-      rootTag,
-      callback: () => {
-        ipcRenderer.send('window-ready')
-      },
-    })
-  } else if (App == null) {
+  if (App == null) {
     ipcRenderer.send('window-exception', {
       message: `Unknown app type: ${params.type}`,
     })

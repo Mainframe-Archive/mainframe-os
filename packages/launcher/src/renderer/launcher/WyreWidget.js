@@ -5,12 +5,20 @@ import styled from 'styled-components/native'
 import { Row, Column, Text, TextField } from '@morpheus-ui/core'
 import Script from 'react-load-script'
 
-import { remote } from 'electron'
 import Avatar from '../UIComponents/Avatar'
 import { EnvironmentContext } from './RelayEnvironment'
 
 import rpc from './rpc'
 import { type Wallets } from './WalletsView'
+
+const TitleBar = styled.View`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 20px;
+  background-color: transparent;
+`
 
 export default class WyreWidget extends Component<Props, State> {
   componentDidMount() {
@@ -27,6 +35,7 @@ export default class WyreWidget extends Component<Props, State> {
 
   load = () => {
     const deviceToken = localStorage.getItem('DEVICE_TOKEN')
+    rpc.getWyreDeviceToken()
 
     const widget = new Wyre.Widget({
       env: 'test',
@@ -40,12 +49,10 @@ export default class WyreWidget extends Component<Props, State> {
         dest: 'ethereum:0x75bdf6a2ced3a0d0eff704555e3350b5010f5e00',
         sourceCurrency: 'USD',
         destCurrency: 'ETH',
-        sourceAmount: '10',
       },
     })
 
     widget.on('close', e => {
-      // localStorage.setItem('WYRE_STATUS', 'incomplete')
       if (e.error) {
         this.setState({ errorMsg: e.error, completed: false })
       } else {
@@ -54,19 +61,17 @@ export default class WyreWidget extends Component<Props, State> {
     })
 
     widget.on('complete', e => {
-      // localStorage.setItem('WYRE_STATUS', 'complete')
       console.log('event', e)
       this.setState({ completed: true })
     })
 
     widget.open()
-
-    console.log(widget)
   }
 
   render() {
     return (
       <>
+        <TitleBar className="draggable" />
         <Script
           url="https://verify.sendwyre.com/js/widget-loader.js"
           onLoad={this.load}

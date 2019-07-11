@@ -30,8 +30,7 @@ export default async (params: CollectionParams): Promise<AppsCollection> => {
   return await db.collection<AppData, AppDoc, AppMethods, {}>({
     name: COLLECTION_NAMES.WYRE_DEVICE_TOKEN,
     schema,
-    statics: {},
-    methods: {
+    statics: {
       getToken(): string {
         console.log('DB WYRE DEV TOKEN')
         if (this._deviceToken == null) {
@@ -42,5 +41,6 @@ export default async (params: CollectionParams): Promise<AppsCollection> => {
         return this._deviceToken
       },
     },
+    methods: {},
   })
 }

@@ -108,19 +108,17 @@ export default {
   },
 
   wyre_open: {
-    params: {
-      amount: {
-        type: 'number',
-        optional: false,
-      },
+    async handler(ctx, params): Promise<void> {
+      ctx.system.launchWyre()
+      createWyreWindow()
     },
-    async handler(
-      ctx: LauncherContext,
-      params: { amount: number },
-    ): Promise<void> {
-      ctx.system.launchWyre(ctx.userID, params.amount)
-      console.log('create wyre window')
-      createWyreWindow(params.amount)
+  },
+
+  get_wyre_token: {
+    async handler(ctx: LauncherContext, params): Promise<void> {
+      console.log('ctx get wyre')
+      console.log(ctx)
+      ctx.system.getWyreDeviceToken()
     },
   },
 

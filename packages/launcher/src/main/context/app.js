@@ -90,18 +90,6 @@ export class AppSession {
     })
   }
 
-  static async fromWyre(system: SystemContext): Promise<AppSession> {
-    if (system.db == null) {
-      throw new Error('Database must be opened')
-    }
-
-    // const wyreDeviceToken = await system.db.wyre_device_token.findOne().exec()
-    // if (wyreDeviceToken == null) {
-    //   throw new Error('WyreDeviceToken not found')
-    // }
-    return new AppSession()
-  }
-
   app: AppData
   contentsURL: string
   isDevelopment: boolean

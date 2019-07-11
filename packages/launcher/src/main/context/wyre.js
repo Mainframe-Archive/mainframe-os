@@ -30,11 +30,10 @@ export class WyreContext {
     this.window.show()
   }
 
-  launchWidget(): null {
-    console.log('launching widget...')
-  }
-
   getToken(): string {
+    // console.log(this.db.wyre_device_token)
+    // console.log(this.db.wyre_device_token.getToken())
+
     return this.db.wyre_device_token.getToken()
   }
 }

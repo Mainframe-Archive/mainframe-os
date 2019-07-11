@@ -29,17 +29,12 @@ export default {
     await client.request('launcher_open', { userID })
   },
 
-  async openWyre(amount: number): Promise<void> {
-    console.log('rpc js')
-    console.log(amount)
-    await client.request('wyre_open', { amount })
-  },
-
   // DB
 
   async createDB(password: string, save?: boolean = false): Promise<void> {
     await client.request('db_create', { password, save })
   },
+
   async openDB(
     password: string,
     save?: boolean = false,
@@ -51,6 +46,17 @@ export default {
 
   async createUser(params: UserCreateRequestParams): Promise<string> {
     return await client.request('user_create', params)
+  },
+
+  // Wyre
+
+  async openWyre(): Promise<void> {
+    await client.request('wyre_open')
+  },
+
+  async getWyreDeviceToken(): Promise<void> {
+    console.log('haylo')
+    return await client.request('get_wyre_token')
   },
 
   // GraphQL

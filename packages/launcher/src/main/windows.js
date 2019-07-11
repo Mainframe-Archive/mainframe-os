@@ -7,7 +7,7 @@ import { is } from 'electron-util'
 
 const PORT = process.env.ELECTRON_WEBPACK_WDS_PORT || ''
 
-const createWindow = (params: Object = {}, amount?: number): BrowserWindow => {
+const createWindow = (params: Object = {}): BrowserWindow => {
   const window = new BrowserWindow({
     minWidth: 1020,
     minHeight: 702,
@@ -18,12 +18,7 @@ const createWindow = (params: Object = {}, amount?: number): BrowserWindow => {
     ...params,
   })
 
-  if (amount) {
-    const wyreURL = `https://verify.testwyre.com/widget/v1?env=test&operation=debitcard&accountId=AC_1234&authType=secretKey&destCurrency=ETH&sourceCurrency=USD&sourceAmount=${amount}&dest=ethereum:0x75bdf6a2ced3a0d0eff704555e3350b5010f5e00&redirectUrl=https://sendwyre.com`
-
-    window.loadURL(`http://localhost:${PORT}`)
-    // window.loadURL(wyreURL)
-  } else if (is.development) {
+  if (is.development) {
     window.loadURL(`http://localhost:${PORT}`)
   } else {
     const formattedUrl = url.format({
@@ -41,7 +36,6 @@ const createWindow = (params: Object = {}, amount?: number): BrowserWindow => {
 }
 
 export const createAppWindow = (): BrowserWindow => {
-  console.log('createappwindow')
   return createWindow({
     width: 900,
     height: 600,
@@ -50,18 +44,13 @@ export const createAppWindow = (): BrowserWindow => {
   })
 }
 
-export const createWyreWindow = (amount: number): BrowserWindow => {
-  console.log('createwyrewindow')
-
-  return createWindow(
-    {
-      width: 350,
-      height: 600,
-      minWidth: 350,
-      minHeight: 600,
-    },
-    amount,
-  )
+export const createWyreWindow = (): BrowserWindow => {
+  return createWindow({
+    width: 350,
+    height: 600,
+    minWidth: 350,
+    minHeight: 600,
+  })
 }
 
 export const createLauncherWindow = (): BrowserWindow => {

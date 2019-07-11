@@ -32,6 +32,7 @@ export class SystemContext {
   _appsBySandboxContents: WeakMap<WebContents, string> = new WeakMap()
   _appsByTrustedContents: WeakMap<WebContents, string> = new WeakMap()
   _launchers: { [id: string]: LauncherContext } = {}
+  _wyre: WyreContext = null
   _launchersByContents: WeakMap<WebContents, string> = new WeakMap()
   _resolveDB: (db: DB) => void
   _users: { [id: string]: UserContext } = {}
@@ -222,6 +223,16 @@ export class SystemContext {
 
   // Contexts and windows
 
+  getWyreDeviceToken() {
+    console.log('SUCCESS IN GETTING TO SYSTEM.JS')
+    // const token = this.db.wyre_device_token.getToken()
+    // console.log(token)
+  }
+
+  getWyreContext(): ?WyreContext {
+    return this._wyre
+  }
+
   getAppContext(idOrContents: string | WebContents): ?AppContext {
     const id =
       typeof idOrContents === 'string'
@@ -260,27 +271,6 @@ export class SystemContext {
     return ctx
   }
 
-  createWyreContext(session: AppSession, amount: number): AppContext {
-    console.log('system js app cintext')
-    const ctx = new AppContext({
-      session,
-      system: this,
-      window: createWyreWindow(),
-    })
-    console.log('system js webcontents')
-
-    // window.webContents.on('did-attach-webview', (event, webContents) => {
-    //   webContents.on('destroyed', () => {
-    //     this._appsBySandboxContents.delete(webContents)
-    //     ctx.sandbox = null
-    //   })
-    //   this._appsBySandboxContents.set(webContents, id)
-    //   ctx.attachSandbox(webContents)
-    // })
-
-    return ctx
-  }
-
   async openAppVersion(userAppVersionID: string): Promise<AppContext> {
     const session = await AppSession.fromUserAppVersion(this, userAppVersionID)
     return this.createAppContext(userAppVersionID, session)
@@ -289,12 +279,6 @@ export class SystemContext {
   async openOwnApp(userOwnAppID: string): Promise<AppContext> {
     const session = await AppSession.fromUserOwnApp(this, userOwnAppID)
     return this.createAppContext(userOwnAppID, session)
-  }
-
-  async openWyreWindow(userID: ?string, amount: number): Promise<AppContext> {
-    console.log('system js open wyre window')
-    const session = await AppSession.fromWyre(this)
-    return this.createWyreContext(session, amount)
   }
 
   getLauncherContext(idOrContents: string | WebContents): ?LauncherContext {
@@ -337,26 +321,28 @@ export class SystemContext {
     return ctx
   }
 
-  launchWyre(userID: ?string, amount: number): LauncherContext {
-    console.log('system js launch wyre')
-    if (!amount || typeof amount !== 'number') {
-      throw new Error('Invalid amount')
+  launchWyre(): WyreContext {
+    if (this._wyre === null) {
+      const ctx = new WyreContext({
+        db: this.db,
+        logger: this.logger,
+        id: nanoid(),
+        window: createWyreWindow(),
+      })
+      this._wyre = ctx
     }
 
-    const ctx = new WyreContext({
-      db: this.db,
-      logger: this.logger,
-      window: createWyreWindow(amount),
-    })
-
-    this._launchers[ctx.launcherID] = ctx
-    this._launchersByContents.set(ctx.window.webContents, ctx.launcherID)
+    console.log('zedatabase')
+    // console.log(this.db)
+    console.log(this.db.collections)
+    // const token = this.db.wyre_device_token.getToken()
+    // console.log(token)
 
     ctx.window.on('closed', async () => {
-      delete this._launchers[ctx.launcherID]
+      this._wyre = null
     })
 
-    return ctx
+    return this._wyre
   }
 
   getUserContext(userID: string): UserContext {
