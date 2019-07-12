@@ -17,7 +17,7 @@ import EditAppDetailsModal, {
   type CompleteAppData,
 } from './EditAppDetailsModal'
 import SetPermissionsRequirements from './SetPermissionsRequirements'
-
+import TermsAndConditions from './TermsAndConditions'
 import type { CreateAppModal_developer as Developer } from './__generated__/CreateAppModal_developer.graphql'
 
 const createAppMutation = graphql`
@@ -122,16 +122,26 @@ class CreateAppModal extends Component<Props, State> {
   ) => {
     this.setState({
       permissionsRequirements,
+      screen: 'terms',
+    })
+  }
+
+  onTermsAgreement = () => {
+    this.setState({
       screen: 'summary',
     })
   }
 
-  onBackSummary = () => {
+  onBackPermissions = () => {
+    this.setState({ screen: 'info' })
+  }
+
+  onBackTerms = () => {
     this.setState({ screen: 'permissions' })
   }
 
-  onBackPermissions = () => {
-    this.setState({ screen: 'info' })
+  onBackSummary = () => {
+    this.setState({ screen: 'terms' })
   }
 
   // RENDER
@@ -150,6 +160,16 @@ class CreateAppModal extends Component<Props, State> {
       <SetPermissionsRequirements
         onSetPermissions={this.onSetPermissions}
         onPressBack={this.onBackPermissions}
+        onRequestClose={this.props.onRequestClose}
+      />
+    )
+  }
+
+  renderTerms() {
+    return (
+      <TermsAndConditions
+        onPressBack={this.onBackTerms}
+        onProceed={this.onTermsAgreement}
         onRequestClose={this.props.onRequestClose}
       />
     )
@@ -180,6 +200,8 @@ class CreateAppModal extends Component<Props, State> {
         return this.renderPermissions()
       case 'summary':
         return this.renderSummary()
+      case 'terms':
+        return this.renderTerms()
       case 'info':
       default:
         return this.renderInfoForm()

@@ -16,8 +16,7 @@ import CircleCheck from '../../UIComponents/Icons/Circlecheck'
 import CircleLoader from '../../UIComponents/CircleLoader'
 import FormModalView from '../../UIComponents/FormModalView'
 import Loader from '../../UIComponents/Loader'
-
-import Transaction from './Transaction'
+import Transaction from '../../UIComponents/Transaction'
 
 import type { WalletAccount, WalletAccounts } from './ContactsScreen'
 

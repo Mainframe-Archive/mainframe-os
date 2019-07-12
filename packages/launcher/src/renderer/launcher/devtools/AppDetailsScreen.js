@@ -371,6 +371,18 @@ class AppDetails extends Component<Props, State> {
             submitButtonTitle="PUBLISH"
           />
         )
+      case 'contract':
+        return (
+          <AppSummary
+            appData={appData}
+            // $FlowFixMe: different definition between library-imported and Relay-generated one
+            permissionsRequirements={app.currentVersionData.permissions}
+            onPressBack={this.onPressPublishVersion}
+            onRequestClose={this.onCloseModal}
+            onPressSave={this.publishApp}
+            submitButtonTitle="PUBLISH"
+          />
+        )
       case 'edit_details':
         return (
           <EditAppDetailsModal
