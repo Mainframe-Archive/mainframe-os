@@ -20,11 +20,14 @@ import Transaction from './Transaction'
 import type { WalletAccount, WalletAccounts } from './ContactsScreen'
 
 export default class SetPermissionsRequirements extends Component<> {
-  this.state = {txStatus: 'start'}
+  constructor(props) {
+    super(props)
+    this.state = { txStatus: 'start' }
+  }
 
-componentDidMount(){
-  this.getTxDetails()
-}
+  componentDidMount() {
+    this.getTxDetails()
+  }
 
   sendInvite = async () => {
     try {
@@ -121,22 +124,22 @@ componentDidMount(){
         confirmButton="NEXT"
         onPressConfirm={this.onPressSave}
         onRequestClose={this.props.onRequestClose}>
-      <Section>
-        <Transaction
-          title="Contract"
-          tooltipInfo={approveInfo}
-          txParam={txParams && txParams[0]}
-          button={approveButton}
-        />
-        {invitePending && invitePending.state === 'approved' && (
+        <Section>
           <Transaction
-            title="Staking"
-            tooltipInfo={sendInfo}
+            title="Contract"
+            tooltipInfo={approveInfo}
             txParam={txParams && txParams[0]}
-            button={sendButton}
+            button={approveButton}
           />
-        )}
-      </Section>
+          {invitePending && invitePending.state === 'approved' && (
+            <Transaction
+              title="Staking"
+              tooltipInfo={sendInfo}
+              txParam={txParams && txParams[0]}
+              button={sendButton}
+            />
+          )}
+        </Section>
       </FormModalView>
     )
   }
