@@ -1,7 +1,7 @@
 // @flow
 
 import { COLLECTION_NAMES } from '../constants'
-import type { Collection, CollectionParams } from '../types'
+import type { Collection, CollectionParams, Doc } from '../types'
 import { getAddressAtIndex } from '../../wallets/ledgerClient'
 
 import { generateLocalID } from '../utils'
@@ -12,7 +12,10 @@ type EthWalletLedgerMethods = {|
   addAccounts(indexes: Array<number>): Promise<void>,
 |}
 
-export type EthWalletLedgerDoc = EthWalletLedgerData & EthWalletLedgerMethods
+export type EthWalletLedgerDoc = Doc<
+  EthWalletLedgerData,
+  EthWalletLedgerMethods,
+>
 
 type EthWalletLedgersStatics = {|
   create(data: {

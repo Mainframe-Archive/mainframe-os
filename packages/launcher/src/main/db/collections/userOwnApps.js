@@ -3,7 +3,7 @@
 import type { AppData } from '../../../types'
 
 import { COLLECTION_NAMES } from '../constants'
-import type { Collection, CollectionParams, Populate } from '../types'
+import type { Collection, CollectionParams, Doc } from '../types'
 
 import schema, { type UserOwnAppData } from '../schemas/userOwnApp'
 import { generateLocalID } from '../utils'
@@ -16,15 +16,15 @@ type UserOwnAppMethods = {|
   getAppData(): Promise<AppData>,
 |}
 
-type UserOwnAppPopulate = Populate<{
-  ownApp: OwnAppDoc,
-  settings: UserAppSettingsDoc,
-  user: UserDoc,
-}>
-
-export type UserOwnAppDoc = UserOwnAppData &
-  UserOwnAppMethods &
-  UserOwnAppPopulate
+export type UserOwnAppDoc = Doc<
+  UserOwnAppData,
+  UserOwnAppMethods,
+  {
+    ownApp: OwnAppDoc,
+    settings: UserAppSettingsDoc,
+    user: UserDoc,
+  },
+>
 
 type UserOwnAppStatics = {|
   createFor(userID: string, ownApp: OwnAppDoc): Promise<UserOwnAppDoc>,

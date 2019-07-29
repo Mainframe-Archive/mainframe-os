@@ -3,7 +3,7 @@
 import semver from 'semver'
 
 import { COLLECTION_NAMES } from '../constants'
-import type { Collection, CollectionParams, Populate } from '../types'
+import type { Collection, CollectionParams, Doc } from '../types'
 
 import { MF_PREFIX } from '../../../constants'
 
@@ -25,15 +25,18 @@ type AppMethods = {|
   setLatestAvailableVersionFromManifest(
     manifest: AppManifestData,
   ): Promise<AppVersionDoc>,
+  handleDownloadedVersion(appVersion: AppVersionDoc): Promise<void>,
 |}
 
-export type AppDoc = AppData &
-  AppMethods &
-  Populate<{
+export type AppDoc = Doc<
+  AppData,
+  AppMethods,
+  {
     developer: DeveloperDoc,
     latestAvailableVersion: ?AppVersionDoc,
     latestDownloadedVersion: ?AppVersionDoc,
-  }>
+  },
+>
 
 type AppStatics = {|
   createFromFeed(publicID: string, meta: AppMetadata): Promise<AppDoc>,
@@ -118,6 +121,34 @@ export default async (params: CollectionParams): Promise<AppsCollection> => {
         })
         await this.atomicSet('latestAvailableVersion', appVersion.localID)
         return appVersion
+      },
+
+      async handleDownloadedVersion(appVersion: AppVersionDoc): Promise<void> {
+        const [downloadedVersion, availableVersion] = await Promise.all([
+          this.populate('latestDownloadedVersion'),
+          this.populate('latestAvailableVersion'),
+        ])
+        await this.atomicUpdate(doc => {
+          if (
+            downloadedVersion === null ||
+            semver.gt(
+              appVersion.manifest.version,
+              downloadedVersion.manifest.version,
+            )
+          ) {
+            doc.latestDownloadedVersion = appVersion.localID
+          }
+          if (
+            availableVersion !== null &&
+            semver.gte(
+              appVersion.manifest.version,
+              availableVersion.manifest.version,
+            )
+          ) {
+            doc.latestAvailableVersion = undefined
+          }
+          return doc
+        })
       },
     },
   })

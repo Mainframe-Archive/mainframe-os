@@ -5,7 +5,7 @@ import { pubKeyToAddress } from '@erebos/keccak256'
 import { MF_PREFIX } from '../../../constants'
 
 import { COLLECTION_NAMES } from '../constants'
-import type { Collection, CollectionParams } from '../types'
+import type { Collection, CollectionParams, Doc } from '../types'
 
 import schema, { type DeveloperData } from '../schemas/developer'
 import { generateLocalID } from '../utils'
@@ -17,7 +17,7 @@ type DeveloperMethods = {|
   getApps(): Promise<Array<AppDoc>>,
 |}
 
-export type DeveloperDoc = DeveloperData & DeveloperMethods
+export type DeveloperDoc = Doc<DeveloperData, DeveloperMethods>
 
 type DeveloperStatics = {|
   getOrCreateByPublicKey(publicKey: string): Promise<DeveloperDoc>,

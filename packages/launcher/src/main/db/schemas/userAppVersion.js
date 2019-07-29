@@ -32,6 +32,7 @@ export default {
     appVersion: {
       type: 'string',
       ref: COLLECTION_NAMES.APP_VERSIONS,
+      index: true,
     },
     settings: {
       type: 'string',

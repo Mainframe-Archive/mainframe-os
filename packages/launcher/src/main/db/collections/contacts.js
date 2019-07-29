@@ -15,7 +15,7 @@ import { createSubscriber } from '../../swarm/feeds'
 import OwnFeed from '../../swarm/OwnFeed'
 
 import { COLLECTION_NAMES } from '../constants'
-import type { Collection, CollectionParams, Populate } from '../types'
+import type { Collection, CollectionParams, Doc } from '../types'
 
 import schema, { type ContactData } from '../schemas/contact'
 import type { GenericProfile } from '../schemas/genericProfile'
@@ -58,9 +58,7 @@ type ContactMethods = {|
   stopSync(): void,
 |}
 
-export type ContactDoc = ContactData &
-  ContactMethods &
-  Populate<{ peer: PeerDoc }>
+export type ContactDoc = Doc<ContactData, ContactMethods, { peer: PeerDoc }>
 
 type ContactsStatics = {|
   create(data: $Shape<ContactData>): Promise<ContactDoc>,

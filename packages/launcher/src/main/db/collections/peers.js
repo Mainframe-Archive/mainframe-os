@@ -11,7 +11,7 @@ import { readPeer } from '../../data/protocols'
 import { createSubscriber, readJSON } from '../../swarm/feeds'
 
 import { COLLECTION_NAMES } from '../constants'
-import type { Collection, CollectionParams } from '../types'
+import type { Collection, CollectionParams, Doc } from '../types'
 import { generateLocalID } from '../utils'
 
 import schema, { type PeerData } from '../schemas/peer'
@@ -34,7 +34,7 @@ type PeerMethods = {|
   stopSync(): void,
 |}
 
-export type PeerDoc = PeerData & PeerMethods
+export type PeerDoc = Doc<PeerData, PeerMethods>
 
 type PeersStatics = {|
   createFromID(bzz: Bzz, publicID: string): Promise<PeerDoc>,

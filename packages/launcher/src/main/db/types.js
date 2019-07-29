@@ -1,5 +1,7 @@
 // @flow
 
+import type { Observable } from 'rxjs'
+
 import type { Logger } from '../logger'
 
 import type { AppsCollection } from './collections/apps'
@@ -17,19 +19,41 @@ import type { UserAppVersionsCollection } from './collections/userAppVersions'
 import type { UserOwnAppsCollection } from './collections/userOwnApps'
 import type { UsersCollection } from './collections/users'
 
-export type Populate<T> = {|
-  populate: <K: $Keys<T>>(field: K) => Promise<$ElementType<T, K>>,
+type ChangeEvent = {|
+  +data: {|
+    +doc: string,
+  |},
 |}
 
-export type Collection<DataType, DocType = DataType> = {
-  _docType: DocType,
-  insert: (data: DataType) => Promise<DocType>,
-  find: Function,
-  findOne: Function,
-  newDocument: (data: DataType) => DocType,
-}
+export type Doc<DataType, Methods = {}, Relations = {}> = $ReadOnly<DataType> &
+  $ReadOnly<Methods> & {|
+    +get$: <K: $Keys<DataType>>(
+      field: K,
+    ) => Observable<$ElementType<DataType, K>>,
+    +populate: <K: $Keys<Relations>>(
+      field: K,
+    ) => Promise<$ElementType<Relations, K>>,
+  |}
 
-export type Collections = {|
+export type Collection<
+  DataType,
+  DocType = Doc<DataType>,
+  Statics = {},
+> = $ReadOnly<Statics> &
+  $ReadOnly<{|
+    _docType: DocType,
+    insert: (data: DataType) => Promise<DocType>,
+    find: (query: Object) => { exec(): Promise<Array<DocType>> },
+    findOne: (
+      idOrQuery: string | Object,
+    ) => { exec(): Promise<DocType | null> },
+    newDocument: (data: DataType) => DocType,
+    insert$: Observable<ChangeEvent>,
+    update$: Observable<ChangeEvent>,
+    remove$: Observable<ChangeEvent>,
+  |}>
+
+export type Collections = $ReadOnly<{|
   apps: AppsCollection,
   app_versions: AppVersionsCollection,
   contact_requests: ContactRequestsCollection,
@@ -44,7 +68,7 @@ export type Collections = {|
   user_app_versions: UserAppVersionsCollection,
   user_own_apps: UserOwnAppsCollection,
   users: UsersCollection,
-|}
+|}>
 
 export type CollectionKey = $Keys<Collections>
 

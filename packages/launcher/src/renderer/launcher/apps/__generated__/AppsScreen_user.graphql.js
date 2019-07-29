@@ -8,6 +8,7 @@
 
 /*::
 import type { ConcreteFragment } from 'relay-runtime';
+type AppItem_appVersion$ref = any;
 export type AppInstallationState = "DONE" | "DOWNLOADING" | "FAILED" | "PENDING" | "%future added value";
 import type { FragmentReference } from "relay-runtime";
 declare export opaque type AppsScreen_user$ref: FragmentReference;
@@ -19,6 +20,7 @@ export type AppsScreen_user = {|
       +app: {|
         +publicID: string
       |},
+      +installationState: AppInstallationState,
       +manifest: {|
         +profile: {|
           +name: ?string
@@ -29,6 +31,7 @@ export type AppsScreen_user = {|
           +external: ?boolean,
         |}>,
       |},
+      +$fragmentRefs: AppItem_appVersion$ref,
     |},
     +update: ?{|
       +toVersion: {|
@@ -55,6 +58,13 @@ export type AppsScreen_user = {|
 
 const node/*: ConcreteFragment*/ = (function(){
 var v0 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "installationState",
+  "args": null,
+  "storageKey": null
+},
+v1 = {
   "kind": "LinkedField",
   "alias": null,
   "name": "webDomains",
@@ -126,6 +136,11 @@ return {
           "plural": false,
           "selections": [
             {
+              "kind": "FragmentSpread",
+              "name": "AppItem_appVersion",
+              "args": null
+            },
+            {
               "kind": "LinkedField",
               "alias": null,
               "name": "app",
@@ -143,6 +158,7 @@ return {
                 }
               ]
             },
+            v0,
             {
               "kind": "LinkedField",
               "alias": null,
@@ -170,7 +186,7 @@ return {
                     }
                   ]
                 },
-                v0
+                v1
               ]
             }
           ]
@@ -193,13 +209,7 @@ return {
               "concreteType": "AppVersion",
               "plural": false,
               "selections": [
-                {
-                  "kind": "ScalarField",
-                  "alias": null,
-                  "name": "installationState",
-                  "args": null,
-                  "storageKey": null
-                },
+                v0,
                 {
                   "kind": "LinkedField",
                   "alias": null,
@@ -245,7 +255,7 @@ return {
               "args": null,
               "storageKey": null
             },
-            v0
+            v1
           ]
         }
       ]
@@ -254,5 +264,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = 'ef74208deda04d9ebdba194df7a2d779';
+(node/*: any*/).hash = '235f2f7b2f027a465753568a012fa68b';
 module.exports = node;

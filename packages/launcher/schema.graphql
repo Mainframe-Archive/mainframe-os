@@ -71,19 +71,6 @@ enum AppInstallationState {
   DONE
 }
 
-input AppInstallMutationInput {
-  userID: String!
-  appVersionID: String!
-  webDomains: [WebDomainDefinitionInput!]!
-  clientMutationId: String
-}
-
-type AppInstallMutationPayload {
-  appVersion: AppVersion
-  viewer: User!
-  clientMutationId: String
-}
-
 type AppLookupResult {
   app: App!
   userAppVersion: UserAppVersion
@@ -103,28 +90,11 @@ type AppUpdate {
   permissionsChanged: Boolean!
 }
 
-input AppUpdateMutationInput {
-  appID: String!
-  userID: String!
-  webDomains: [WebDomainDefinitionInput!]!
-  clientMutationId: String
-}
-
-type AppUpdateMutationPayload {
-  app: App!
-  viewer: User!
-  clientMutationId: String
-}
-
-type AppUpdatePayload {
-  app: App!
-  viewer: User!
-}
-
 type AppVersion implements Node {
   """The ID of an object"""
   id: ID!
   localID: ID!
+  publicID: ID!
   appID: ID!
   app: App!
   developerID: ID!
@@ -132,6 +102,11 @@ type AppVersion implements Node {
   manifest: AppManifest!
   installationState: AppInstallationState!
   update: AppVersion
+}
+
+type AppVersionPayload {
+  appVersion: AppVersion!
+  viewer: User!
 }
 
 type Contact implements Node {
@@ -320,6 +295,18 @@ type ImportHDWalletPayload {
   clientMutationId: String
 }
 
+input InstallUserAppVersionMutationInput {
+  appVersionID: String!
+  webDomains: [WebDomainDefinitionInput!]!
+  clientMutationId: String
+}
+
+type InstallUserAppVersionMutationPayload {
+  userAppVersion: UserAppVersion!
+  viewer: User!
+  clientMutationId: String
+}
+
 type Lookup {
   appByID(publicID: ID!): AppLookupResult
   peerByID(publicID: ID!): PeerLookupResult
@@ -328,8 +315,8 @@ type Lookup {
 type Mutation {
   createApp(input: CreateAppInput!): CreateAppPayload
   createAppVersion(input: CreateAppVersionInput!): CreateAppVersionPayload
-  installApp(input: AppInstallMutationInput!): AppInstallMutationPayload
-  updateApp(input: AppUpdateMutationInput!): AppUpdateMutationPayload
+  installUserAppVersion(input: InstallUserAppVersionMutationInput!): InstallUserAppVersionMutationPayload
+  updateUserAppVersion(input: UpdateUserAppVersionMutationInput!): UpdateUserAppVersionMutationPayload
   setAppWebDomainsDefinitions(input: SetAppWebDomainsDefinitionsInput!): SetAppWebDomainsDefinitionsPayload
   publishAppVersion(input: PublishAppVersionInput!): PublishAppVersionPayload
   updateAppDetails(input: UpdateAppDetailsInput!): UpdateAppDetailsPayload
@@ -462,7 +449,7 @@ type SetProfileWalletPayload {
 }
 
 type Subscription {
-  appUpdateChanged: AppUpdatePayload!
+  appVersionChanged: AppVersionPayload!
   contactChanged: ContactChangedPayload!
   contactsChanged: ContactChangedPayload!
 }
@@ -492,6 +479,18 @@ input UpdateProfileInput {
 }
 
 type UpdateProfilePayload {
+  viewer: User!
+  clientMutationId: String
+}
+
+input UpdateUserAppVersionMutationInput {
+  userAppVersionID: String!
+  webDomains: [WebDomainDefinitionInput!]!
+  clientMutationId: String
+}
+
+type UpdateUserAppVersionMutationPayload {
+  userAppVersion: UserAppVersion!
   viewer: User!
   clientMutationId: String
 }

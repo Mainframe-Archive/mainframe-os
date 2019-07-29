@@ -5,7 +5,10 @@ import { Text, DropDown } from '@morpheus-ui/core'
 import memoize from 'memoize-one'
 import styled from 'styled-components/native'
 
-import type { WebDomainsDefinitions } from '../../types'
+import type {
+  WebDomainsDefinitions,
+  ReadOnlyWebDomainsDefinitions,
+} from '../../types'
 
 import FormModalView from '../UIComponents/FormModalView'
 import AppIcon from './apps/AppIcon'
@@ -72,9 +75,9 @@ type Props = {
   publicID: string,
   icon?: ?string,
   name: string,
-  webDomainsRequirements: WebDomainsDefinitions,
+  webDomainsRequirements: WebDomainsDefinitions | ReadOnlyWebDomainsDefinitions,
   onCancel: () => any,
-  onSubmit: (webDomains: WebDomainsDefinitions) => any,
+  onSubmit: (webDomains: ReadOnlyWebDomainsDefinitions) => any,
 }
 
 type WebDomainGrants = { internal: boolean, external?: ?boolean }
@@ -101,7 +104,9 @@ export default class PermissionsView extends Component<Props, State> {
       }
     })
 
-    const webDomains = Object.keys(webDomainsGrants).map(domain => {
+    const webDomains: ReadOnlyWebDomainsDefinitions = Object.keys(
+      webDomainsGrants,
+    ).map(domain => {
       return { ...webDomainsGrants[domain], domain }
     })
     this.props.onSubmit(webDomains)
@@ -121,15 +126,15 @@ export default class PermissionsView extends Component<Props, State> {
 
   splitWebDomains = memoize(
     (
-      webDomains: WebDomainsDefinitions,
+      webDomains: WebDomainsDefinitions | ReadOnlyWebDomainsDefinitions,
     ): { required: WebDomainsDefinitions, optional: WebDomainsDefinitions } => {
       const required = []
       const optional = []
       webDomains.forEach(w => {
         if (w.internal) {
-          required.push(w)
+          required.push({ ...w })
         } else {
-          optional.push(w)
+          optional.push({ ...w })
         }
       })
       return { required, optional }
@@ -223,6 +228,8 @@ export default class PermissionsView extends Component<Props, State> {
                 Allow this app to make Web requests to specified domains
               </Text>
             </PermissionInfo>
+          </PermissionRow>
+          <PermissionRow>
             <Domains>
               {required}
               {optional}

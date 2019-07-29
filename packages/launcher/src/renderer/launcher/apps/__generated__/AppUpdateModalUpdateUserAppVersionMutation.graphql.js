@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 3453777916cd187b6e326f4174a77318
+ * @relayHash 89b81bf398a7728ba0866578eed46c7e
  */
 
 /* eslint-disable */
@@ -9,9 +9,8 @@
 
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
-export type AppUpdateMutationInput = {
-  appID: string,
-  userID: string,
+export type UpdateUserAppVersionMutationInput = {
+  userAppVersionID: string,
   webDomains: $ReadOnlyArray<WebDomainDefinitionInput>,
   clientMutationId?: ?string,
 };
@@ -20,28 +19,28 @@ export type WebDomainDefinitionInput = {
   internal?: ?boolean,
   external?: ?boolean,
 };
-export type AppUpdateModalAppUpdateMutationVariables = {|
-  input: AppUpdateMutationInput
+export type AppUpdateModalUpdateUserAppVersionMutationVariables = {|
+  input: UpdateUserAppVersionMutationInput
 |};
-export type AppUpdateModalAppUpdateMutationResponse = {|
-  +updateApp: ?{|
+export type AppUpdateModalUpdateUserAppVersionMutationResponse = {|
+  +updateUserAppVersion: ?{|
     +viewer: {|
       +id: string
     |}
   |}
 |};
-export type AppUpdateModalAppUpdateMutation = {|
-  variables: AppUpdateModalAppUpdateMutationVariables,
-  response: AppUpdateModalAppUpdateMutationResponse,
+export type AppUpdateModalUpdateUserAppVersionMutation = {|
+  variables: AppUpdateModalUpdateUserAppVersionMutationVariables,
+  response: AppUpdateModalUpdateUserAppVersionMutationResponse,
 |};
 */
 
 
 /*
-mutation AppUpdateModalAppUpdateMutation(
-  $input: AppUpdateMutationInput!
+mutation AppUpdateModalUpdateUserAppVersionMutation(
+  $input: UpdateUserAppVersionMutationInput!
 ) {
-  updateApp(input: $input) {
+  updateUserAppVersion(input: $input) {
     viewer {
       id
     }
@@ -54,7 +53,7 @@ var v0 = [
   {
     "kind": "LocalArgument",
     "name": "input",
-    "type": "AppUpdateMutationInput!",
+    "type": "UpdateUserAppVersionMutationInput!",
     "defaultValue": null
   }
 ],
@@ -62,17 +61,17 @@ v1 = [
   {
     "kind": "LinkedField",
     "alias": null,
-    "name": "updateApp",
+    "name": "updateUserAppVersion",
     "storageKey": null,
     "args": [
       {
         "kind": "Variable",
         "name": "input",
         "variableName": "input",
-        "type": "AppUpdateMutationInput!"
+        "type": "UpdateUserAppVersionMutationInput!"
       }
     ],
-    "concreteType": "AppUpdateMutationPayload",
+    "concreteType": "UpdateUserAppVersionMutationPayload",
     "plural": false,
     "selections": [
       {
@@ -99,13 +98,13 @@ v1 = [
 return {
   "kind": "Request",
   "operationKind": "mutation",
-  "name": "AppUpdateModalAppUpdateMutation",
+  "name": "AppUpdateModalUpdateUserAppVersionMutation",
   "id": null,
-  "text": "mutation AppUpdateModalAppUpdateMutation(\n  $input: AppUpdateMutationInput!\n) {\n  updateApp(input: $input) {\n    viewer {\n      id\n    }\n  }\n}\n",
+  "text": "mutation AppUpdateModalUpdateUserAppVersionMutation(\n  $input: UpdateUserAppVersionMutationInput!\n) {\n  updateUserAppVersion(input: $input) {\n    viewer {\n      id\n    }\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
-    "name": "AppUpdateModalAppUpdateMutation",
+    "name": "AppUpdateModalUpdateUserAppVersionMutation",
     "type": "Mutation",
     "metadata": null,
     "argumentDefinitions": v0,
@@ -113,12 +112,12 @@ return {
   },
   "operation": {
     "kind": "Operation",
-    "name": "AppUpdateModalAppUpdateMutation",
+    "name": "AppUpdateModalUpdateUserAppVersionMutation",
     "argumentDefinitions": v0,
     "selections": v1
   }
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = 'dcb3510c252fe1ac0d7e4977fbee0826';
+(node/*: any*/).hash = '49e6bbdcf7e3b2fd881f3cf4df9dff4b';
 module.exports = node;

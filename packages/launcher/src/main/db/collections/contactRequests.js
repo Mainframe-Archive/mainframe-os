@@ -1,7 +1,7 @@
 // @flow
 
 import { COLLECTION_NAMES } from '../constants'
-import type { Collection, CollectionParams, Populate } from '../types'
+import type { Collection, CollectionParams, Doc } from '../types'
 import { generateLocalID } from '../utils'
 
 import schema, { type ContactRequestData } from '../schemas/contactRequest'
@@ -14,9 +14,11 @@ type ContactRequestMethods = {|
   getProfile(): Promise<GenericProfile>,
 |}
 
-export type ContactRequestDoc = ContactRequestData &
-  ContactRequestMethods &
-  Populate<{ peer: PeerDoc }>
+export type ContactRequestDoc = Doc<
+  ContactRequestData,
+  ContactRequestMethods,
+  { peer: PeerDoc },
+>
 
 type ContactRequestsStatics = {|
   create(data: $Shape<ContactRequestData>): Promise<ContactRequestDoc>,

@@ -17,7 +17,7 @@ import WalletProvider from '../../blockchain/WalletProvider'
 import InvitesHandler from '../../blockchain/InvitesHandler'
 
 import { COLLECTION_NAMES } from '../constants'
-import type { Collection, CollectionParams, Populate } from '../types'
+import type { Collection, CollectionParams, Doc } from '../types'
 import { generateKeyPair, generateLocalID } from '../utils'
 
 import schema, { type UserData } from '../schemas/user'
@@ -71,14 +71,14 @@ type UserMethods = {|
   stopSync(): void,
 |}
 
-type UserPopulate = Populate<{
+type UserPopulate = {
   contacts: Array<ContactDoc>,
   contactRequests: Array<ContactRequestDoc>,
   'ethWallets.hd': Array<EthWalletHDDoc>,
   'ethWallets.ledger': Array<EthWalletLedgerDoc>,
-}>
+}
 
-export type UserDoc = UserData & UserMethods & UserPopulate
+export type UserDoc = Doc<UserData, UserMethods, UserPopulate>
 
 type UsersStatics = {|
   create(data: {

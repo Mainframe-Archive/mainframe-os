@@ -7,7 +7,7 @@ import HDKey from 'ethereumjs-wallet/hdkey'
 import EthereumTx from 'ethereumjs-tx'
 
 import { COLLECTION_NAMES } from '../constants'
-import type { Collection, CollectionParams } from '../types'
+import type { Collection, CollectionParams, Doc } from '../types'
 import { generateLocalID } from '../utils'
 
 import schema, { type EthWalletHDData } from '../schemas/ethWalletHD'
@@ -24,7 +24,7 @@ type EthWalletHDMethods = {|
   sign(params: WalletSignDataParams): Promise<string>,
 |}
 
-export type EthWalletHDDoc = EthWalletHDData & EthWalletHDMethods
+export type EthWalletHDDoc = Doc<EthWalletHDData, EthWalletHDMethods>
 
 type EthWalletsHDStatics = {|
   create(data: { name: string, mnemonic?: ?string }): Promise<EthWalletHDDoc>,

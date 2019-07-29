@@ -112,6 +112,7 @@ export const developer = new GraphQLObjectType({
     },
     profile: {
       type: new GraphQLNonNull(genericProfile),
+      resolve: doc => doc.profile || {},
     },
     publicID: {
       type: new GraphQLNonNull(GraphQLID),
@@ -214,6 +215,10 @@ export const appVersion = new GraphQLObjectType({
     id: idResolver,
     localID: {
       type: new GraphQLNonNull(GraphQLID),
+    },
+    publicID: {
+      type: new GraphQLNonNull(GraphQLID),
+      resolve: doc => doc.getPublicID(),
     },
     appID: {
       type: new GraphQLNonNull(GraphQLID),

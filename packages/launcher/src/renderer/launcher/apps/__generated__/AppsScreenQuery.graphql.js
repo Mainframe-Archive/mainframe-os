@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash f88a1138ff1850d48de79413cd8d3581
+ * @relayHash 7f17bfcfb2dad8e79179070e0dd1294c
  */
 
 /* eslint-disable */
@@ -36,10 +36,12 @@ fragment AppsScreen_user on User {
   apps {
     localID
     appVersion {
+      ...AppItem_appVersion
       app {
         publicID
         id
       }
+      installationState
       manifest {
         profile {
           name
@@ -74,6 +76,30 @@ fragment AppsScreen_user on User {
     id
   }
 }
+
+fragment AppItem_appVersion on AppVersion {
+  localID
+  installationState
+  app {
+    publicID
+    id
+  }
+  developer {
+    localID
+    profile {
+      name
+    }
+    id
+  }
+  manifest {
+    profile {
+      name
+    }
+  }
+  update {
+    id
+  }
+}
 */
 
 const node/*: ConcreteRequest*/ = (function(){
@@ -85,6 +111,38 @@ var v0 = {
   "storageKey": null
 },
 v1 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "localID",
+  "args": null,
+  "storageKey": null
+},
+v2 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "installationState",
+  "args": null,
+  "storageKey": null
+},
+v3 = {
+  "kind": "LinkedField",
+  "alias": null,
+  "name": "profile",
+  "storageKey": null,
+  "args": null,
+  "concreteType": "GenericProfile",
+  "plural": false,
+  "selections": [
+    {
+      "kind": "ScalarField",
+      "alias": null,
+      "name": "name",
+      "args": null,
+      "storageKey": null
+    }
+  ]
+},
+v4 = {
   "kind": "LinkedField",
   "alias": null,
   "name": "webDomains",
@@ -121,7 +179,7 @@ return {
   "operationKind": "query",
   "name": "AppsScreenQuery",
   "id": null,
-  "text": "query AppsScreenQuery {\n  user: viewer {\n    ...AppsScreen_user\n    id\n  }\n}\n\nfragment AppsScreen_user on User {\n  id\n  apps {\n    localID\n    appVersion {\n      app {\n        publicID\n        id\n      }\n      manifest {\n        profile {\n          name\n        }\n        webDomains {\n          domain\n          internal\n          external\n        }\n      }\n      id\n    }\n    update {\n      toVersion {\n        installationState\n        manifest {\n          version\n        }\n        id\n      }\n      permissionsChanged\n    }\n    settings {\n      permissionsChecked\n      webDomains {\n        domain\n        internal\n        external\n      }\n      id\n    }\n    id\n  }\n}\n",
+  "text": "query AppsScreenQuery {\n  user: viewer {\n    ...AppsScreen_user\n    id\n  }\n}\n\nfragment AppsScreen_user on User {\n  id\n  apps {\n    localID\n    appVersion {\n      ...AppItem_appVersion\n      app {\n        publicID\n        id\n      }\n      installationState\n      manifest {\n        profile {\n          name\n        }\n        webDomains {\n          domain\n          internal\n          external\n        }\n      }\n      id\n    }\n    update {\n      toVersion {\n        installationState\n        manifest {\n          version\n        }\n        id\n      }\n      permissionsChanged\n    }\n    settings {\n      permissionsChecked\n      webDomains {\n        domain\n        internal\n        external\n      }\n      id\n    }\n    id\n  }\n}\n\nfragment AppItem_appVersion on AppVersion {\n  localID\n  installationState\n  app {\n    publicID\n    id\n  }\n  developer {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n  manifest {\n    profile {\n      name\n    }\n  }\n  update {\n    id\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -172,13 +230,7 @@ return {
             "concreteType": "UserAppVersion",
             "plural": true,
             "selections": [
-              {
-                "kind": "ScalarField",
-                "alias": null,
-                "name": "localID",
-                "args": null,
-                "storageKey": null
-              },
+              v1,
               {
                 "kind": "LinkedField",
                 "alias": null,
@@ -188,6 +240,8 @@ return {
                 "concreteType": "AppVersion",
                 "plural": false,
                 "selections": [
+                  v1,
+                  v2,
                   {
                     "kind": "LinkedField",
                     "alias": null,
@@ -210,31 +264,40 @@ return {
                   {
                     "kind": "LinkedField",
                     "alias": null,
+                    "name": "developer",
+                    "storageKey": null,
+                    "args": null,
+                    "concreteType": "Developer",
+                    "plural": false,
+                    "selections": [
+                      v1,
+                      v3,
+                      v0
+                    ]
+                  },
+                  {
+                    "kind": "LinkedField",
+                    "alias": null,
                     "name": "manifest",
                     "storageKey": null,
                     "args": null,
                     "concreteType": "AppManifest",
                     "plural": false,
                     "selections": [
-                      {
-                        "kind": "LinkedField",
-                        "alias": null,
-                        "name": "profile",
-                        "storageKey": null,
-                        "args": null,
-                        "concreteType": "GenericProfile",
-                        "plural": false,
-                        "selections": [
-                          {
-                            "kind": "ScalarField",
-                            "alias": null,
-                            "name": "name",
-                            "args": null,
-                            "storageKey": null
-                          }
-                        ]
-                      },
-                      v1
+                      v3,
+                      v4
+                    ]
+                  },
+                  {
+                    "kind": "LinkedField",
+                    "alias": null,
+                    "name": "update",
+                    "storageKey": null,
+                    "args": null,
+                    "concreteType": "AppVersion",
+                    "plural": false,
+                    "selections": [
+                      v0
                     ]
                   },
                   v0
@@ -258,13 +321,7 @@ return {
                     "concreteType": "AppVersion",
                     "plural": false,
                     "selections": [
-                      {
-                        "kind": "ScalarField",
-                        "alias": null,
-                        "name": "installationState",
-                        "args": null,
-                        "storageKey": null
-                      },
+                      v2,
                       {
                         "kind": "LinkedField",
                         "alias": null,
@@ -311,7 +368,7 @@ return {
                     "args": null,
                     "storageKey": null
                   },
-                  v1,
+                  v4,
                   v0
                 ]
               },

@@ -17,8 +17,10 @@ import PermissionsView from '../PermissionsView'
 import type { AppUpdateModal_app as App } from './__generated__/AppUpdateModal_app.graphql'
 
 const appUpdateMutation = graphql`
-  mutation AppUpdateModalAppUpdateMutation($input: AppUpdateMutationInput!) {
-    updateApp(input: $input) {
+  mutation AppUpdateModalUpdateUserAppVersionMutation(
+    $input: UpdateUserAppVersionMutationInput!
+  ) {
+    updateUserAppVersion(input: $input) {
       viewer {
         id
         # apps {

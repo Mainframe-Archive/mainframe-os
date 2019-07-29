@@ -15,6 +15,16 @@ import DevtoolsRouter from './devtools/DevtoolsRouter'
 import SettingsRouter from './settings/SettingsRouter'
 import WalletsScreen from './wallets/WalletsScreen'
 
+const APP_VERSION_CHANGED_SUBSCRIPTION = graphql`
+  subscription HomeRouterAppVersionChangedSubscription {
+    appVersionChanged {
+      appVersion {
+        ...AppItem_appVersion
+      }
+    }
+  }
+`
+
 const CONTACT_CHANGED_SUBSCRIPTION = graphql`
   subscription HomeRouterContactChangedSubscription {
     contactChanged {
@@ -52,6 +62,7 @@ const ContentContainer = styled.View`
 `
 
 export default function HomeRouter() {
+  useSubscription(APP_VERSION_CHANGED_SUBSCRIPTION)
   useSubscription(CONTACT_CHANGED_SUBSCRIPTION)
 
   return (

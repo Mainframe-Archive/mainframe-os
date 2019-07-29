@@ -14,13 +14,13 @@ import { mutationWithClientMutationId } from 'graphql-relay'
 
 import {
   app,
-  appVersion,
   contact,
   devtoolsField,
   ethHdWallet,
   ethLedgerWallet,
   ownApp,
   ownDeveloper,
+  userAppVersion,
   viewerField,
 } from './objects'
 
@@ -659,13 +659,12 @@ const createAppMutation = mutationWithClientMutationId({
         webDomains: args.webDomains,
       })
       const userOwnApp = await ctx.db.user_own_apps.createFor(ctx.userID, app)
-      const userAppSettings = await userOwnApp.populate('settings')
       ctx.logger.log({
         level: 'debug',
         message: 'CreateApp mutation complete',
         args,
         appID: app.localID,
-        userAppSettingsID: userAppSettings.localID,
+        userAppSettingsID: userOwnApp.settings,
       })
       return { app }
     } catch (err) {
@@ -762,12 +761,9 @@ const setAppWebDomainsDefinitionsMutation = mutationWithClientMutationId({
   },
 })
 
-const appInstallMutation = mutationWithClientMutationId({
-  name: 'AppInstallMutation',
+const installUserAppVersionMutation = mutationWithClientMutationId({
+  name: 'InstallUserAppVersionMutation',
   inputFields: {
-    userID: {
-      type: new GraphQLNonNull(GraphQLString),
-    },
     appVersionID: {
       type: new GraphQLNonNull(GraphQLString),
     },
@@ -776,32 +772,64 @@ const appInstallMutation = mutationWithClientMutationId({
     },
   },
   outputFields: {
-    appVersion: {
-      type: appVersion,
-      resolve: payload => payload.appVersion,
+    userAppVersion: {
+      type: new GraphQLNonNull(userAppVersion),
+      resolve: payload => payload.userAppVersion,
     },
     viewer: viewerField,
   },
-  mutateAndGetPayload: async (
-    { userID, manifest, permissionsSettings },
-    ctx,
-  ) => {
-    const app = await ctx.mutations.installApp({
-      userID,
-      manifest,
-      permissionsSettings,
+  mutateAndGetPayload: async (args, ctx) => {
+    ctx.logger.log({
+      level: 'debug',
+      message: 'InstallUserAppVersion mutation called',
+      appVersionID: args.appVersionID,
     })
-    return { app }
+    try {
+      const userAppVersion = await ctx.db.user_app_versions.getOrCreateFor(
+        ctx.userID,
+        args.appVersionID,
+        args.webDomains,
+      )
+      ctx.logger.log({
+        level: 'debug',
+        message: 'InstallUserAppVersion appVersion contents download starts',
+        appVersionID: args.appVersionID,
+      })
+      userAppVersion.downloadContents(ctx.user).then(
+        () => {
+          ctx.logger.log({
+            level: 'debug',
+            message: 'InstallUserAppVersion appVersion contents downloaded',
+            appVersionID: args.appVersionID,
+          })
+        },
+        err => {
+          ctx.logger.log({
+            level: 'warn',
+            message:
+              'InstallUserAppVersion appVersion contents download failed',
+            appVersionID: args.appVersionID,
+            error: err.toString(),
+          })
+        },
+      )
+      return { userAppVersion }
+    } catch (err) {
+      ctx.logger.log({
+        level: 'error',
+        message: 'InstallUserAppVersion mutation failed',
+        appVersionID: args.appVersionID,
+        error: err.toString(),
+      })
+      throw err
+    }
   },
 })
 
-const appUpdateMutation = mutationWithClientMutationId({
-  name: 'AppUpdateMutation',
+const updateUserAppVersionMutation = mutationWithClientMutationId({
+  name: 'UpdateUserAppVersionMutation',
   inputFields: {
-    appID: {
-      type: new GraphQLNonNull(GraphQLString),
-    },
-    userID: {
+    userAppVersionID: {
       type: new GraphQLNonNull(GraphQLString),
     },
     webDomains: {
@@ -809,15 +837,63 @@ const appUpdateMutation = mutationWithClientMutationId({
     },
   },
   outputFields: {
-    app: {
-      type: new GraphQLNonNull(app),
-      resolve: payload => payload.app,
+    userAppVersion: {
+      type: new GraphQLNonNull(userAppVersion),
+      resolve: payload => payload.userAppVersion,
     },
     viewer: viewerField,
   },
-  mutateAndGetPayload: async (params, ctx) => {
-    const app = await ctx.mutations.updateApp(params)
-    return { app }
+  mutateAndGetPayload: async (args, ctx) => {
+    ctx.logger.log({
+      level: 'debug',
+      message: 'UpdateAppVersion mutation called',
+      userAppVersionID: args.userAppVersionID,
+    })
+    try {
+      const userAppVersion = await ctx.getDoc(
+        'user_app_versions',
+        args.userAppVersionID,
+      )
+      if (userAppVersion === null) {
+        throw new Error('UserAppVersion not found')
+      }
+
+      const appVersion = await userAppVersion.populate('appVersion')
+      const update = await appVersion.getUpdate()
+
+      if (update === null) {
+        ctx.logger.log({
+          level: 'warn',
+          message: 'UpdateAppVersion update not found',
+          userAppVersionID: args.userAppVersionID,
+        })
+      } else {
+        ctx.logger.log({
+          level: 'debug',
+          message: 'UpdateAppVersion download update',
+          userAppVersionID: args.userAppVersionID,
+          appVersionID: update.localID,
+        })
+        await update.downloadContents(ctx)
+        await userAppVersion.applyUpdate(update.localID, args.webDomains)
+        ctx.logger.log({
+          level: 'debug',
+          message: 'UpdateAppVersion mutation applied update',
+          userAppVersionID: args.userAppVersionID,
+          appVersionID: update.localID,
+        })
+      }
+
+      return { userAppVersion }
+    } catch (err) {
+      ctx.logger.log({
+        level: 'error',
+        message: 'UpdateAppVersion mutation mailed',
+        userAppVersionID: args.userAppVersionID,
+        error: err.toString(),
+      })
+      throw err
+    }
   },
 })
 
@@ -929,8 +1005,8 @@ export default new GraphQLObjectType({
     // Apps
     createApp: createAppMutation,
     createAppVersion: createAppVersionMutation,
-    installApp: appInstallMutation,
-    updateApp: appUpdateMutation,
+    installUserAppVersion: installUserAppVersionMutation,
+    updateUserAppVersion: updateUserAppVersionMutation,
     setAppWebDomainsDefinitions: setAppWebDomainsDefinitionsMutation,
     publishAppVersion: publishAppVersionMutation,
     updateAppDetails: updateAppDetailsMutation,

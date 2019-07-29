@@ -23,8 +23,8 @@ import NewAppButton from './NewAppButton'
 import SuggestedAppItem, { type SuggestedAppData } from './SuggestedItem'
 import type { AppsScreen_user as User } from './__generated__/AppsScreen_user.graphql'
 
-type InstalledApps = $PropertyType<Apps, 'installed'>
-type AppData = $Call<<T>($ReadOnlyArray<T>) => T, InstalledApps>
+type Apps = $PropertyType<User, 'apps'>
+type AppData = $Call<<T>($ReadOnlyArray<T>) => T, Apps>
 
 const SUGGESTED_APPS_URL = `https://mainframehq.github.io/suggested-apps/apps.json?timestamp=${new Date().toString()}`
 
@@ -263,22 +263,26 @@ class AppsView extends Component<Props, State> {
   // RENDER
 
   renderApps() {
-    const apps = this.props.user.apps
-    const installed = apps.map(appVersion => (
-      // $FlowFixMe: injected fragment type
-      <InstalledAppItem
-        icon={this.getIcon(appVersion.app.publicID, this.state.suggestedApps)}
-        editing={this.state.editing}
-        deleting={this.state.deleting === appVersion.app.publicID}
-        key={appVersion.localID}
-        installedApp={appVersion}
-        onOpenApp={this.onOpenApp}
-        onPressUpdate={this.onPressUpdate}
-        onStartDeleting={this.onStartDeleting}
-        onCancelDelete={this.onCancelDelete}
-        onPressDelete={this.onPressDelete}
-      />
-    ))
+    const { apps } = this.props.user
+    const installed = apps.map(userAppVersion => {
+      const { appVersion } = userAppVersion
+      return (
+        // $FlowFixMe: injected fragment type
+        <InstalledAppItem
+          appVersion={appVersion}
+          icon={this.getIcon(appVersion.app.publicID, this.state.suggestedApps)}
+          editing={this.state.editing}
+          deleting={this.state.deleting === appVersion.app.publicID}
+          key={userAppVersion.localID}
+          installedApp={appVersion}
+          onOpenApp={this.onOpenApp}
+          onPressUpdate={this.onPressUpdate}
+          onStartDeleting={this.onStartDeleting}
+          onCancelDelete={this.onCancelDelete}
+          onPressDelete={this.onPressDelete}
+        />
+      )
+    })
     const suggested = this.getSuggestedList(apps, this.state.suggestedApps)
 
     return (
@@ -415,7 +419,6 @@ class AppsView extends Component<Props, State> {
 }
 
 export const RelayContainer = createFragmentContainer(AppsView, {
-  // ...AppItem_installedApp
   // ...AppUpdateModal_app
   user: graphql`
     fragment AppsScreen_user on User {
@@ -423,9 +426,11 @@ export const RelayContainer = createFragmentContainer(AppsView, {
       apps {
         localID
         appVersion {
+          ...AppItem_appVersion
           app {
             publicID
           }
+          installationState
           manifest {
             profile {
               name

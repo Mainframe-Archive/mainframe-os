@@ -12,7 +12,7 @@ import { MF_PREFIX } from '../../../constants'
 import { validateAppFeed } from '../../data/protocols'
 
 import { COLLECTION_NAMES } from '../constants'
-import type { Collection, CollectionParams, Populate } from '../types'
+import type { Collection, CollectionParams, Doc } from '../types'
 import { generateKeyPair, generateLocalID } from '../utils'
 
 import type {
@@ -61,9 +61,11 @@ type OwnAppMethods = {|
   publishVersion(bzz: Bzz): Promise<string>,
 |}
 
-export type OwnAppDoc = OwnAppData &
-  OwnAppMethods &
-  Populate<{ developer: OwnDeveloperDoc }>
+export type OwnAppDoc = Doc<
+  OwnAppData,
+  OwnAppMethods,
+  { developer: OwnDeveloperDoc },
+>
 
 type OwnAppsStatics = {|
   create(data: CreateOwnAppData): Promise<OwnAppDoc>,

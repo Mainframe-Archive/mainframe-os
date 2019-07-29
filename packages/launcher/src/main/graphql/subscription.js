@@ -5,27 +5,28 @@ import { filter, flatMap, map } from 'rxjs/operators'
 
 import type { GraphQLContext } from '../context/graphql'
 
-import { app, contact, viewerField } from './objects'
+import { appVersion, contact, viewerField } from './objects'
 import observableToAsyncIterator from './observableToAsyncIterator'
 
-const appUpdatePayload = new GraphQLObjectType({
-  name: 'AppUpdatePayload',
+const appVersionPayload = new GraphQLObjectType({
+  name: 'AppVersionPayload',
   fields: () => ({
-    app: {
-      type: new GraphQLNonNull(app),
+    appVersion: {
+      type: new GraphQLNonNull(appVersion),
     },
     viewer: viewerField,
   }),
 })
 
-const appUpdateChanged = {
-  type: new GraphQLNonNull(appUpdatePayload),
-  subscribe: (self, args, ctx: ClientContext) => {
-    const { source, dispose } = ctx.appsUpdates.observe()
-    const observable = source.pipe(
-      map(e => ({ appUpdateChanged: { app: e.app, viewer: {} } })),
+const appVersionChanged = {
+  type: new GraphQLNonNull(appVersionPayload),
+  subscribe: (self, args, ctx: GraphQLContext) => {
+    const observable = ctx.db.app_versions.update$.pipe(
+      flatMap(event => ctx.getDoc('app_versions', event.data.doc)),
+      filter(appVersion => appVersion != null),
+      map(appVersion => ({ appVersionChanged: { appVersion, viewer: {} } })),
     )
-    return observableToAsyncIterator(observable, dispose)
+    return observableToAsyncIterator(observable)
   },
 }
 
@@ -47,12 +48,7 @@ const contactChanged = {
       filter(event => user.contacts.includes(event.data.doc)),
       flatMap(event => ctx.getDoc('contacts', event.data.doc)),
       filter(contact => contact != null),
-      map(contact => ({
-        contactChanged: {
-          contact,
-          viewer: {},
-        },
-      })),
+      map(contact => ({ contactChanged: { contact, viewer: {} } })),
     )
     return observableToAsyncIterator(observable)
   },
@@ -62,7 +58,7 @@ const contactsChanged = {
   type: new GraphQLNonNull(contactChangedPayload),
   subscribe: async (self, args, ctx: GraphQLContext) => {
     const user = await ctx.getUser()
-    const observable = user.contacts$.pipe(
+    const observable = user.get$('contacts').pipe(
       map(() => ({
         contactsChanged: {
           viewer: {},
@@ -76,7 +72,7 @@ const contactsChanged = {
 export default new GraphQLObjectType({
   name: 'Subscription',
   fields: () => ({
-    appUpdateChanged,
+    appVersionChanged,
     contactChanged,
     contactsChanged,
   }),

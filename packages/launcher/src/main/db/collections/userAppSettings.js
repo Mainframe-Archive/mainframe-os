@@ -1,7 +1,7 @@
 // @flow
 
 import { COLLECTION_NAMES } from '../constants'
-import type { Collection, CollectionParams } from '../types'
+import type { Collection, CollectionParams, Doc } from '../types'
 
 import type { WebDomainDefinition } from '../schemas/appManifest'
 import schema, { type UserAppSettingsData } from '../schemas/userAppSettings'
@@ -11,7 +11,10 @@ type UserAppSettingsMethods = {|
   setWebDomainGrant(grant: WebDomainDefinition): Promise<void>,
 |}
 
-export type UserAppSettingsDoc = UserAppSettingsData & UserAppSettingsMethods
+export type UserAppSettingsDoc = Doc<
+  UserAppSettingsData,
+  UserAppSettingsMethods,
+>
 
 type UserAppSettingsStatics = {|
   create(data: $Shape<UserAppSettingsData>): Promise<UserAppSettingsDoc>,

@@ -12,7 +12,7 @@ import OwnFeed from '../../swarm/OwnFeed'
 import { createPublisher } from '../../swarm/feeds'
 
 import { COLLECTION_NAMES } from '../constants'
-import type { Collection, CollectionParams } from '../types'
+import type { Collection, CollectionParams, Doc } from '../types'
 import { generateKeyPair, generateLocalID } from '../utils'
 
 import schema, { type OwnDeveloperData } from '../schemas/ownDeveloper'
@@ -31,7 +31,7 @@ type OwnDeveloperMethods = {|
   stopSync(): void,
 |}
 
-export type OwnDeveloperDoc = OwnDeveloperData & OwnDeveloperMethods
+export type OwnDeveloperDoc = Doc<OwnDeveloperData, OwnDeveloperMethods>
 
 type OwnDevelopersStatics = {|
   create(data: { profile: GenericProfile }): Promise<OwnDeveloperDoc>,

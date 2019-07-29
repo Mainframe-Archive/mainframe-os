@@ -326,7 +326,7 @@ export class SystemContext {
       }
       this._users[userID] = new UserContext({
         db: this.db,
-        logger: this.logger,
+        system: this,
         userID,
       })
     }

@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 2b6adb8d827451ca35e0533b111832ed
+ * @relayHash bb86ab2bd32b4819a1e1f8614d2d0a1f
  */
 
 /* eslint-disable */
@@ -17,6 +17,8 @@ export type AppInstallModalLookupAppQueryResponse = {|
     +appByID: ?{|
       +app: {|
         +latestAvailableVersion: ?{|
+          +localID: string,
+          +publicID: string,
           +manifest: {|
             +profile: {|
               +name: ?string
@@ -27,7 +29,7 @@ export type AppInstallModalLookupAppQueryResponse = {|
               +internal: ?boolean,
               +external: ?boolean,
             |}>,
-          |}
+          |},
         |}
       |},
       +userAppVersion: ?{|
@@ -51,6 +53,8 @@ query AppInstallModalLookupAppQuery(
     appByID(publicID: $publicID) {
       app {
         latestAvailableVersion {
+          localID
+          publicID
           manifest {
             profile {
               name
@@ -93,6 +97,20 @@ v1 = [
   }
 ],
 v2 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "localID",
+  "args": null,
+  "storageKey": null
+},
+v3 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "publicID",
+  "args": null,
+  "storageKey": null
+},
+v4 = {
   "kind": "LinkedField",
   "alias": null,
   "name": "manifest",
@@ -160,14 +178,7 @@ v2 = {
     }
   ]
 },
-v3 = {
-  "kind": "ScalarField",
-  "alias": null,
-  "name": "localID",
-  "args": null,
-  "storageKey": null
-},
-v4 = {
+v5 = {
   "kind": "ScalarField",
   "alias": null,
   "name": "id",
@@ -179,7 +190,7 @@ return {
   "operationKind": "query",
   "name": "AppInstallModalLookupAppQuery",
   "id": null,
-  "text": "query AppInstallModalLookupAppQuery(\n  $publicID: ID!\n) {\n  lookup {\n    appByID(publicID: $publicID) {\n      app {\n        latestAvailableVersion {\n          manifest {\n            profile {\n              name\n            }\n            version\n            webDomains {\n              domain\n              internal\n              external\n            }\n          }\n          id\n        }\n        id\n      }\n      userAppVersion {\n        localID\n        id\n      }\n    }\n  }\n}\n",
+  "text": "query AppInstallModalLookupAppQuery(\n  $publicID: ID!\n) {\n  lookup {\n    appByID(publicID: $publicID) {\n      app {\n        latestAvailableVersion {\n          localID\n          publicID\n          manifest {\n            profile {\n              name\n            }\n            version\n            webDomains {\n              domain\n              internal\n              external\n            }\n          }\n          id\n        }\n        id\n      }\n      userAppVersion {\n        localID\n        id\n      }\n    }\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -224,7 +235,9 @@ return {
                     "concreteType": "AppVersion",
                     "plural": false,
                     "selections": [
-                      v2
+                      v2,
+                      v3,
+                      v4
                     ]
                   }
                 ]
@@ -238,7 +251,7 @@ return {
                 "concreteType": "UserAppVersion",
                 "plural": false,
                 "selections": [
-                  v3
+                  v2
                 ]
               }
             ]
@@ -289,10 +302,12 @@ return {
                     "plural": false,
                     "selections": [
                       v2,
-                      v4
+                      v3,
+                      v4,
+                      v5
                     ]
                   },
-                  v4
+                  v5
                 ]
               },
               {
@@ -304,8 +319,8 @@ return {
                 "concreteType": "UserAppVersion",
                 "plural": false,
                 "selections": [
-                  v3,
-                  v4
+                  v2,
+                  v5
                 ]
               }
             ]
@@ -317,5 +332,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '0b469af9ea1a32cc95823f1bb06cd016';
+(node/*: any*/).hash = '81fb0ab562382f5ad6c518bf84fda2f3';
 module.exports = node;

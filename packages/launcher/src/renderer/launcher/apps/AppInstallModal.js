@@ -1,7 +1,5 @@
 // @flow
 
-import type { IdentityOwnData } from '@mainframe/client'
-import type { ManifestData } from '@mainframe/app-manifest'
 import React, { Component } from 'react'
 import { Text, TextField } from '@morpheus-ui/core'
 import { type FormSubmitPayload } from '@morpheus-ui/forms'
@@ -9,12 +7,22 @@ import { commitMutation, graphql } from 'react-relay'
 import { fetchQuery } from 'relay-runtime'
 import styled from 'styled-components/native'
 
+import type { ReadOnlyWebDomainsDefinitions } from '../../../types'
+
 import { EnvironmentContext } from '../RelayEnvironment'
 
 import FormModalView from '../../UIComponents/FormModalView'
 import Loader from '../../UIComponents/Loader'
 import PermissionsView from '../PermissionsView'
-import { appInstallMutation } from './appMutations'
+
+import type { AppInstallModalLookupAppQueryResponse } from './__generated__/AppInstallModalLookupAppQuery.graphql'
+type LookupQuery = $PropertyType<
+  AppInstallModalLookupAppQueryResponse,
+  'lookup',
+>
+type AppByID = $PropertyType<LookupQuery, 'appByID'>
+type AppResult = $PropertyType<AppByID, 'app'>
+type AppVersion = $PropertyType<AppResult, 'latestAvailableVersion'>
 
 const Container = styled.View`
   flex: 1;
@@ -31,12 +39,26 @@ const TextContainer = styled.View`
 
 const View = styled.View``
 
+const appInstallMutation = graphql`
+  mutation AppInstallModalInstallUserAppVersionMutation(
+    $input: InstallUserAppVersionMutationInput!
+  ) {
+    installUserAppVersion(input: $input) {
+      viewer {
+        ...AppsScreen_user
+      }
+    }
+  }
+`
+
 const appLookupQuery = graphql`
   query AppInstallModalLookupAppQuery($publicID: ID!) {
     lookup {
       appByID(publicID: $publicID) {
         app {
           latestAvailableVersion {
+            localID
+            publicID
             manifest {
               profile {
                 name
@@ -66,8 +88,8 @@ type Props = {
 }
 
 type State = {
-  installStep: 'manifest' | 'permissions' | 'download',
-  manifest: ?ManifestData,
+  installStep: 'manifest' | 'permissions' | 'download' | 'error',
+  appVersion: ?AppVersion,
   errorMsg?: string,
 }
 
@@ -76,7 +98,7 @@ export default class AppInstallModal extends Component<Props, State> {
 
   state = {
     installStep: 'manifest',
-    manifest: null,
+    appVersion: null,
   }
 
   componentDidMount() {
@@ -84,8 +106,6 @@ export default class AppInstallModal extends Component<Props, State> {
       this.loadApp(this.props.appID)
     }
   }
-
-  // HANDLERS
 
   async loadApp(publicID: string) {
     try {
@@ -102,20 +122,14 @@ export default class AppInstallModal extends Component<Props, State> {
 
       if (res.lookup.appByID.userAppVersion != null) {
         // User already has this app installed
-        // TODO: open app details screen
         this.props.onInstallComplete()
         return
       }
 
-      // TODO: this screen should not only display permissions but also developer and app description
-      // before the user confirms installation (= create userAppVersion and background download the app contents)
-      // this.setState({
-      //   installStep: 'permissions',
-      //   manifest: res.lookup.appByID.app.latestAvailableVersion.manifest,
-      // })
-
-      console.log('lookup app res', res)
-      this.props.onRequestClose()
+      this.setState({
+        installStep: 'permissions',
+        appVersion: res.lookup.appByID.app.latestAvailableVersion,
+      })
     } catch (err) {
       this.setState({
         errorMsg: err.message,
@@ -130,41 +144,27 @@ export default class AppInstallModal extends Component<Props, State> {
     }
   }
 
-  onSubmitPermissions = (userPermissions: StrictPermissionsGrants) => {
-    this.setState(
-      {
-        installStep: 'download',
-        userPermissions,
-      },
-      this.saveApp,
-    )
-  }
-
-  saveApp = async () => {
-    // $FlowFixMe: userPermissions key in state
-    const { manifest, userPermissions } = this.state
-    if (manifest == null || userPermissions == null) {
-      // eslint-disable-next-line no-console
-      console.log('invalid manifest or permissions to save app')
-      // TODO: Display error
+  onSubmitWebDomains = (webDomains: ReadOnlyWebDomainsDefinitions) => {
+    const { appVersion } = this.state
+    if (appVersion == null) {
+      this.setState({
+        installStep: 'error',
+        errorMsg: 'Missing appVersion data to install app',
+      })
       return
     }
 
-    const permissionsSettings = {
-      grants: userPermissions,
-      permissionsChecked: true,
-    }
+    this.setState({ installStep: 'download' })
 
-    const params = {
-      userID: this.props.user.localID,
-      manifest,
-      permissionsSettings,
-    }
-
-    // $FlowFixMe: Permission types
     commitMutation(this.context, {
       mutation: appInstallMutation,
-      variables: { input: params },
+      variables: {
+        input: {
+          appVersionID: appVersion.localID,
+          // $FlowFixMe: types mismatch
+          webDomains,
+        },
+      },
       onCompleted: (res, errors) => {
         if (errors && errors.length) {
           this.setState({
@@ -185,8 +185,6 @@ export default class AppInstallModal extends Component<Props, State> {
       },
     })
   }
-
-  // RENDER
 
   renderManifestImport() {
     const errorMsg = this.state.errorMsg ? (
@@ -215,28 +213,32 @@ export default class AppInstallModal extends Component<Props, State> {
   }
 
   renderPermissions() {
-    const { manifest } = this.state
-    if (!manifest) return null
+    const { appVersion } = this.state
+    if (!appVersion) return null
 
-    const icon = this.props.getIcon ? this.props.getIcon(manifest.id) : null
+    const icon = this.props.getIcon
+      ? this.props.getIcon(appVersion.publicID)
+      : null
     return (
       <PermissionsView
-        mfid={manifest.id}
+        publicID={appVersion.publicID}
         icon={icon}
-        name={manifest.name}
-        permissions={manifest.permissions}
-        onSubmit={this.onSubmitPermissions}
+        name={appVersion.manifest.profile.name || appVersion.publicID}
+        webDomainsRequirements={appVersion.manifest.webDomains}
+        onSubmit={this.onSubmitWebDomains}
         onCancel={this.props.onRequestClose}
       />
     )
   }
 
   renderDownload() {
-    const { manifest } = this.state
+    const { appVersion } = this.state
+    const appName = appVersion
+      ? appVersion.manifest.profile.name || appVersion.publicID
+      : 'app manifest'
 
     return (
-      <FormModalView
-        title={`Downloading ${manifest ? manifest.name : 'App Manifest'}`}>
+      <FormModalView title={`Downloading ${appName}`}>
         <Container>
           <TextContainer>
             <Text variant={['modalText', 'center']}>
@@ -248,6 +250,19 @@ export default class AppInstallModal extends Component<Props, State> {
     )
   }
 
+  renderError() {
+    // TODO: retry button and/or return to default state
+    return (
+      <Container>
+        <TextContainer>
+          <Text variant={['modalText', 'center']}>
+            {this.state.errorMsg || 'Failed to install app'}
+          </Text>
+        </TextContainer>
+      </Container>
+    )
+  }
+
   render() {
     switch (this.state.installStep) {
       case 'manifest':
@@ -256,6 +271,8 @@ export default class AppInstallModal extends Component<Props, State> {
         return this.renderPermissions()
       case 'download':
         return this.renderDownload()
+      case 'error':
+        return this.renderError()
       default:
         return null
     }
