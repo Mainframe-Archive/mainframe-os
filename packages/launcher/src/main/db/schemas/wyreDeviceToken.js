@@ -1,8 +1,11 @@
 // @flow
 
 export default {
-  title: 'Wyre device token',
+  title: 'Wyre data',
   version: 0,
-  type: 'string',
+  type: 'object',
+  properties: {
+    "deviceToken": { "type": 'string' },
+  },
   // pattern: '^0x[0-9a-fA-F]{40}$',
 }

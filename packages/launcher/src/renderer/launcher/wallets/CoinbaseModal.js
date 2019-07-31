@@ -61,7 +61,7 @@ const Blocky = styled.View`
   margin-right: 15px;
 `
 
-export default class WyreModal extends Component<Props, State> {
+export default class CoinbaseModal extends Component<Props, State> {
   static contextType = EnvironmentContext
 
   constructor(props) {
@@ -70,7 +70,6 @@ export default class WyreModal extends Component<Props, State> {
   }
 
   componentDidMount() {
-    console.log('hiya, component: mounted')
     if (!this.props.address) {
       this.setState({ errorMsg: 'No wallet found' })
     }
@@ -81,13 +80,6 @@ export default class WyreModal extends Component<Props, State> {
       saving: false,
       errorMsg: error.message,
     })
-  }
-
-  openWyre = () => {
-    console.log('OPEN WYREE')
-    const tok = rpc.openWyre()
-    console.log('wyre modal')
-    console.log(tok)
   }
 
   render() {
@@ -110,7 +102,7 @@ export default class WyreModal extends Component<Props, State> {
         dismissButton={completed ? null : 'CANCEL'}
         onRequestClose={onClose}
         confirmButton={completed ? 'FINISH' : 'PROCEED'}
-        onSubmitForm={completed ? onComplete : this.openWyre}>
+        onSubmitForm={completed ? onComplete : () => rpc.openCoinbase()}>
         <Container>
           {errorMsg}
           <>

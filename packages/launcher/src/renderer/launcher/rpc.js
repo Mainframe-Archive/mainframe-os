@@ -48,15 +48,18 @@ export default {
     return await client.request('user_create', params)
   },
 
-  // Wyre
+  // Coinbase
 
-  async openWyre(): Promise<void> {
-    await client.request('wyre_open')
+  async openCoinbase(): Promise<void> {
+    await client.request('coinbase_open')
   },
 
-  async getWyreDeviceToken(): Promise<void> {
-    console.log('haylo')
-    return await client.request('get_wyre_token')
+  // Wyre
+
+  async openWyre(): Promise<string> {
+    const token = await client.request('wyre_open')
+
+    return token
   },
 
   // GraphQL

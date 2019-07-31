@@ -35,7 +35,9 @@ export default class WyreWidget extends Component<Props, State> {
 
   load = () => {
     const deviceToken = localStorage.getItem('DEVICE_TOKEN')
-    rpc.getWyreDeviceToken()
+    // const tok = rpc.getWyreDeviceToken()
+    // console.log('tok')
+    // console.log(tok)
 
     const widget = new Wyre.Widget({
       env: 'test',
@@ -61,7 +63,7 @@ export default class WyreWidget extends Component<Props, State> {
     })
 
     widget.on('complete', e => {
-      console.log('event', e)
+      // console.log('event', e)
       this.setState({ completed: true })
     })
 

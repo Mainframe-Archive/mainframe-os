@@ -229,6 +229,14 @@ ipcMain.on('window-opened', async event => {
     return
   }
 
+  const coinbaseContext = system.getCoinbaseContext()
+  if (coinbaseContext != null) {
+    event.sender.send('window-start', {
+      type: 'coinbase',
+    })
+    return
+  }
+
   logger.error('Context not found for Window opened')
 })
 

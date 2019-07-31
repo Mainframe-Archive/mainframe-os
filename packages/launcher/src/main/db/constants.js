@@ -15,5 +15,5 @@ export const COLLECTION_NAMES = {
   USER_APP_VERSIONS: 'user_app_versions',
   USER_OWN_APPS: 'user_own_apps',
   USERS: 'users',
-  WYRE_DEVICE_TOKEN: 'wyre_device_token',
+  WYRE: 'wyre',
 }

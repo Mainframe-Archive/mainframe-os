@@ -22,6 +22,7 @@ import styled from 'styled-components/native'
 import RelayRenderer from '../RelayRenderer'
 
 import WyreModal from './WyreModal'
+import CoinbaseModal from './CoinbaseModal'
 import WalletImportView from './WalletImportView'
 import WalletCreateModal from './WalletCreateModal'
 import WalletAddLedgerModal from './WalletAddLedgerModal'
@@ -252,6 +253,12 @@ class WalletsView extends Component<Props, State> {
     })
   }
 
+  onPressCoinbase = () => {
+    this.setState({
+      showModal: 'show_coinbase',
+    })
+  }
+
   onCloseModal = () => {
     this.setState({
       showModal: undefined,
@@ -276,9 +283,18 @@ class WalletsView extends Component<Props, State> {
   }
 
   renderWyreView() {
-    console.log(this.props)
     return this.state.showModal === 'show_wyre' ? (
       <WyreModal
+        address={this.props.user && this.props.user.profile.ethAddress}
+        onClose={this.onCloseModal}
+        onComplete={this.onComplete}
+      />
+    ) : null
+  }
+
+  renderCoinbaseView() {
+    return this.state.showModal === 'show_coinbase' ? (
+      <CoinbaseModal
         address={this.props.user && this.props.user.profile.ethAddress}
         onClose={this.onCloseModal}
         onComplete={this.onComplete}
@@ -476,6 +492,7 @@ class WalletsView extends Component<Props, State> {
             {this.renderImportView()}
             {this.renderConnectLedgerView()}
             {this.renderWyreView()}
+            {this.renderCoinbaseView()}
           </ScrollView>
         </WalletsContainer>
         <Buttons className="white-shadow">
@@ -505,6 +522,13 @@ class WalletsView extends Component<Props, State> {
             onPress={this.onPressWyre}
             variant={['completeOnboarding', 'walletOnboarding', 'marginLeft20']}
             title="Transfer fiat"
+            Icon={ArrowRight}
+          />
+
+          <Button
+            onPress={this.onPressCoinbase}
+            variant={['completeOnboarding', 'walletOnboarding', 'marginLeft20']}
+            title="Coinbase"
             Icon={ArrowRight}
           />
         </Buttons>

@@ -12,6 +12,7 @@ import type { Logger } from '../logger'
 import {
   createAppWindow,
   createWyreWindow,
+  createCoinbaseWindow,
   createLauncherWindow,
 } from '../windows'
 
@@ -19,6 +20,7 @@ import { AppContext, AppSession } from './app'
 import { LauncherContext } from './launcher'
 import { UserContext } from './user'
 import { WyreContext } from './wyre'
+import { CoinbaseContext } from './coinbase'
 
 const PASSWORD_SERVICE = 'MainframeOS'
 
@@ -33,6 +35,7 @@ export class SystemContext {
   _appsByTrustedContents: WeakMap<WebContents, string> = new WeakMap()
   _launchers: { [id: string]: LauncherContext } = {}
   _wyre: WyreContext = null
+  _coinbase: CoinbaseContext = null
   _launchersByContents: WeakMap<WebContents, string> = new WeakMap()
   _resolveDB: (db: DB) => void
   _users: { [id: string]: UserContext } = {}
@@ -223,10 +226,13 @@ export class SystemContext {
 
   // Contexts and windows
 
-  getWyreDeviceToken() {
-    console.log('SUCCESS IN GETTING TO SYSTEM.JS')
-    // const token = this.db.wyre_device_token.getToken()
-    // console.log(token)
+  getCoinbaseContext(): ?CoinbaseContext {
+    return this._coinbase
+  }
+
+  async getWyreDeviceToken() {
+    const deviceToken = await this.db.wyre._methods.getToken()
+    return deviceToken
   }
 
   getWyreContext(): ?WyreContext {
@@ -321,27 +327,35 @@ export class SystemContext {
     return ctx
   }
 
-  launchWyre(): WyreContext {
-    if (this._wyre === null) {
-      const ctx = new WyreContext({
-        db: this.db,
-        logger: this.logger,
-        id: nanoid(),
-        window: createWyreWindow(),
-      })
-      this._wyre = ctx
-    }
-
-    console.log('zedatabase')
-    // console.log(this.db)
-    console.log(this.db.collections)
-    // const token = this.db.wyre_device_token.getToken()
-    // console.log(token)
-
-    ctx.window.on('closed', async () => {
-      this._wyre = null
+  launchCoinbase(): CoinbaseContext {
+    const ctx = new CoinbaseContext({
+      logger: this.logger,
+      id: nanoid(),
+      window: createCoinbaseWindow(),
     })
 
+    this._coinbase = ctx
+
+    this._coinbase.window.on('closed', async () => {
+      this._coinbase = null
+    })
+
+    console.log(this._coinbase.window)
+
+    return this._coinbase
+  }
+
+  launchWyre(): WyreContext {
+    const ctx = new WyreContext({
+      logger: this.logger,
+      id: nanoid(),
+      window: createWyreWindow(),
+    })
+    this._wyre = ctx
+    console.log('wyre ctx created')
+    this._wyre.window.on('closed', async () => {
+      this._wyre = null
+    })
     return this._wyre
   }
 

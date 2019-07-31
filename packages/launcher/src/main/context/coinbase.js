@@ -12,7 +12,7 @@ export type ContextParams = {
   window: BrowserWindow,
 }
 
-export class WyreContext {
+export class CoinbaseContext {
   db: DB
   logger: Logger
   window: BrowserWindow
@@ -29,11 +29,4 @@ export class WyreContext {
     }
     this.window.show()
   }
-
-  // getToken(): string {
-  //   // console.log(this.db.wyre_device_token)
-  //   // console.log(this.db.wyre_device_token.getToken())
-  //
-  //   return this.db.wyre.getToken()
-  // }
 }

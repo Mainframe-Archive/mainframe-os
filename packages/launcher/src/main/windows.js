@@ -17,7 +17,6 @@ const createWindow = (params: Object = {}): BrowserWindow => {
     titleBarStyle: 'hidden',
     ...params,
   })
-
   if (is.development) {
     window.loadURL(`http://localhost:${PORT}`)
   } else {
@@ -40,6 +39,15 @@ export const createAppWindow = (): BrowserWindow => {
     width: 900,
     height: 600,
     minWidth: 900,
+    minHeight: 600,
+  })
+}
+
+export const createCoinbaseWindow = (): BrowserWindow => {
+  return createWindow({
+    width: 700,
+    height: 600,
+    minWidth: 700,
     minHeight: 600,
   })
 }

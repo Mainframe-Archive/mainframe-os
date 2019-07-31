@@ -107,18 +107,20 @@ export default {
     },
   },
 
-  wyre_open: {
+  coinbase_open: {
     async handler(ctx, params): Promise<void> {
-      ctx.system.launchWyre()
-      createWyreWindow()
+      ctx.system.launchCoinbase()
+      // createCoinbaseWindow()
     },
   },
 
-  get_wyre_token: {
-    async handler(ctx: LauncherContext, params): Promise<void> {
-      console.log('ctx get wyre')
-      console.log(ctx)
-      ctx.system.getWyreDeviceToken()
+  wyre_open: {
+    async handler(ctx, params): Promise<string> {
+      ctx.system.launchWyre()
+      const token = await ctx.system.getWyreDeviceToken()
+      console.log(token)
+      return token
+      // createWyreWindow()
     },
   },
 

@@ -20,6 +20,8 @@ import createUserAppSettingsCollection from './collections/userAppSettings'
 import createUserAppVersionsCollection from './collections/userAppVersions'
 import createUserOwnAppsCollection from './collections/userOwnApps'
 import createUsersCollection from './collections/users'
+import createWyreCollection from './collections/wyre'
+
 import type { DB, DBParams } from './types'
 
 RxDB.plugin(levelAdapter)
@@ -53,6 +55,7 @@ export const createDB = async (params: DBParams): Promise<DB> => {
     createUserAppVersionsCollection(collectionParams),
     createUserOwnAppsCollection(collectionParams),
     createUsersCollection(collectionParams),
+    createWyreCollection(collectionParams),
   ])
 
   return db
