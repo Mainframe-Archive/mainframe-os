@@ -341,7 +341,7 @@ const InstalledView = (props: InstalledProps) => {
   return (
     <AppItem
       {...props}
-      installing={version.installationState === 'DOWNLOADING'}
+      installing={version.installationState !== 'DONE'}
       appID={version.app.publicID}
       appName={version.manifest.profile.name || '(no name)'}
       devName={version.developer.profile.name}

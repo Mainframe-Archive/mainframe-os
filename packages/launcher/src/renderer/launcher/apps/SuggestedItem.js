@@ -41,8 +41,7 @@ const IconContainer = styled.View`
 `
 
 export type SuggestedAppData = {
-  hash: string,
-  mfid: string,
+  publicID: string,
   icon?: ?string,
   name: string,
   description?: ?string,
@@ -52,7 +51,7 @@ export type SuggestedAppData = {
 type Props = {
   appData: SuggestedAppData,
   onOpen: (app: Object) => void,
-  onPressInstall: (hash: string, icon?: ?string) => void,
+  onPressInstall: (publicID: string, icon?: ?string) => void,
 }
 
 type State = {
@@ -71,10 +70,10 @@ export default class SuggestedItem extends Component<Props, State> {
   }
 
   onPressInstall = () => {
-    this.props.onPressInstall(this.props.appData.hash)
+    this.props.onPressInstall(this.props.appData.publicID)
   }
   render() {
-    const { hash, name, description, icon, mfid } = this.props.appData
+    const { publicID, name, description, icon } = this.props.appData
     return (
       <AppButtonContainer
         className="transition"
@@ -82,9 +81,9 @@ export default class SuggestedItem extends Component<Props, State> {
         onMouseOver={this.toggleHover}
         onMouseOut={this.toggleHover}
         onPress={this.onOpen}
-        key={hash}>
+        key={publicID}>
         <IconContainer className="transition" hover={this.state.hover}>
-          <AppIcon url={icon} id={mfid} />
+          <AppIcon url={icon} id={publicID} />
           <AppShadow
             className={
               this.state.hover ? 'app-shadow app-shadow-hover' : 'app-shadow'

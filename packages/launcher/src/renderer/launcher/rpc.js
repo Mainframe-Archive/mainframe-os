@@ -16,7 +16,6 @@ export const getEthClient = () => {
   if (ethClient == null) {
     ethClient = new EthClient({
       send: async (method: string, params: Array<*>): Promise<*> => {
-        console.log('launcher eth send')
         return client.request('blockchain_ethSend', { method, params })
       },
     })
@@ -119,6 +118,10 @@ export default {
   },
 
   // Windows
+
+  async openApp(userAppVersionID: string): Promise<void> {
+    await client.request('window_openApp', { userAppVersionID })
+  },
 
   async openOwnApp(userOwnAppID: string): Promise<void> {
     await client.request('window_openOwnApp', { userOwnAppID })

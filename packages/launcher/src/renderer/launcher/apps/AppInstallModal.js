@@ -81,7 +81,7 @@ const appLookupQuery = graphql`
 `
 
 type Props = {
-  appID?: ?string,
+  publicID?: ?string,
   onRequestClose: () => void,
   onInstallComplete: () => void,
   getIcon?: (id?: ?string) => ?string,
@@ -102,8 +102,8 @@ export default class AppInstallModal extends Component<Props, State> {
   }
 
   componentDidMount() {
-    if (this.props.appID != null) {
-      this.loadApp(this.props.appID)
+    if (this.props.publicID != null) {
+      this.loadApp(this.props.publicID)
     }
   }
 

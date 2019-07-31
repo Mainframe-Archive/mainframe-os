@@ -10,29 +10,28 @@ import {
 } from 'react-relay'
 import styled from 'styled-components/native'
 
+import type { ReadOnlyWebDomainsDefinitions } from '../../../types'
+
 import FormModalView from '../../UIComponents/FormModalView'
 import Loader from '../../UIComponents/Loader'
 import PermissionsView from '../PermissionsView'
 
-import type { AppUpdateModal_app as App } from './__generated__/AppUpdateModal_app.graphql'
+import type { AppUpdateModal_userAppVersion as UserAppVersion } from './__generated__/AppUpdateModal_userAppVersion.graphql'
 
-const appUpdateMutation = graphql`
+const updateMutation = graphql`
   mutation AppUpdateModalUpdateUserAppVersionMutation(
     $input: UpdateUserAppVersionMutationInput!
   ) {
     updateUserAppVersion(input: $input) {
-      viewer {
-        id
-        # apps {
-        #   ...AppsView_apps
-        # }
+      userAppVersion {
+        ...AppUpdateModal_userAppVersion
       }
     }
   }
 `
 
 type Props = {
-  app: App,
+  userAppVersion: UserAppVersion,
   onRequestClose: () => void,
   onUpdateComplete: () => void,
   relay: {
@@ -42,7 +41,7 @@ type Props = {
 
 type State = {
   updateStep: 'confirm' | 'permissions' | 'download',
-  userPermissions: ?StrictPermissionsGrants,
+  webDomains?: ReadOnlyWebDomainsDefinitions,
   errorMsg?: string,
 }
 
@@ -62,38 +61,36 @@ const TextContainer = styled.View`
 class AppUpdateModal extends Component<Props, State> {
   state = {
     updateStep: 'confirm',
-    userPermissions: undefined,
+    webDomains: undefined,
   }
 
   // HANDLERS
 
   onSubmitConfirm = () => {
-    const { update } = this.props.app
-    if (update && update.permissionsChanged) {
+    const { update } = this.props.userAppVersion
+    if (update != null && update.permissionsChanged) {
       this.setState({ updateStep: 'permissions' })
     } else {
-      this.setState({ updateStep: 'download' }, this.updateApp)
+      this.setState({ updateStep: 'download' })
+      this.updateApp()
     }
   }
 
-  onSubmitPermissions = (userPermissions: StrictPermissionsGrants) => {
-    this.setState({ updateStep: 'download', userPermissions }, this.updateApp)
+  onSubmitPermissions = (webDomains: ReadOnlyWebDomainsDefinitions) => {
+    this.setState({ updateStep: 'download', webDomains }, this.updateApp)
   }
 
   updateApp = async () => {
-    const { userPermissions } = this.state
-    const permissionsSettings = userPermissions
-      ? { grants: userPermissions, permissionsChecked: true }
-      : undefined
+    const { relay, userAppVersion } = this.props
+    const { webDomains } = this.state
 
-    commitMutation(this.props.relay.environment, {
-      mutation: appUpdateMutation,
+    commitMutation(relay.environment, {
+      mutation: updateMutation,
       variables: {
         input: {
-          appID: this.props.app.localID,
-          userID: this.context.user.localID,
+          userAppVersionID: userAppVersion.localID,
           // $FlowFixMe: type definition difference between Relay-generated and library-defined
-          permissionsSettings,
+          webDomains: webDomains || userAppVersion.settings.webDomains,
         },
       },
       onCompleted: (res, errors) => {
@@ -120,23 +117,30 @@ class AppUpdateModal extends Component<Props, State> {
   // RENDER
 
   renderConfirm() {
-    const { app } = this.props
+    const { userAppVersion } = this.props
+    if (userAppVersion.update == null) {
+      return null
+    }
+
+    const { fromVersion, toVersion } = userAppVersion.update
+    const appName = toVersion.manifest.profile.name || toVersion.publicID
     const errorMsg = this.state.errorMsg ? (
       <Text variant="error">{this.state.errorMsg}</Text>
     ) : null
 
-    return app.update == null ? null : (
+    return (
       <FormModalView
         dismissButton="CANCEL"
         confirmButton="UPDATE"
-        title={`Update ${app.name}`}
+        title={`Update ${appName}`}
         onRequestClose={this.props.onRequestClose}
         onSubmitForm={this.onSubmitConfirm}>
         <Container>
           <TextContainer>
             <Text variant={['modalText', 'center']}>
-              Are you sure you want to update {app.name} from version{' '}
-              {app.manifest.version} to version {app.update.manifest.version}?
+              Are you sure you want to update {appName} from version{' '}
+              {fromVersion.manifest.version} to version{' '}
+              {toVersion.manifest.version}?
             </Text>
           </TextContainer>
           {errorMsg}
@@ -146,19 +150,23 @@ class AppUpdateModal extends Component<Props, State> {
   }
 
   renderPermissions() {
-    // TODO: provide already defined permissions from current version
-    const { app } = this.props
+    const { userAppVersion } = this.props
+    if (userAppVersion.update == null) {
+      return null
+    }
 
-    return app.update ? (
+    const version = userAppVersion.update.toVersion
+    return (
       <PermissionsView
-        mfid={app.mfid}
-        name={app.name}
+        publicID={version.publicID}
+        name={version.manifest.profile.name || version.publicID}
+        webDomainsGrants={userAppVersion.settings.webDomains}
         // $FlowFixMe: type definition difference between Relay-generated and library-defined
-        permissions={app.update.manifest.permissions}
+        webDomainsRequirements={version.manifest.webDomains}
         onSubmit={this.onSubmitPermissions}
         onCancel={this.props.onRequestClose}
       />
-    ) : null
+    )
   }
 
   renderDownload() {
@@ -215,6 +223,7 @@ export default createFragmentContainer(AppUpdateModal, {
           }
         }
         toVersion {
+          publicID
           manifest {
             profile {
               name

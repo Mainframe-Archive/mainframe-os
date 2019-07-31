@@ -48,7 +48,7 @@ export class AppSession {
     }
 
     const [app, settings, user] = await Promise.all([
-      userAppVersion.getAppData(),
+      userAppVersion.getAppData(system.env),
       userAppVersion.populate('settings'),
       userAppVersion.populate('user'),
     ])

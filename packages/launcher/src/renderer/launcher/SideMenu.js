@@ -199,15 +199,7 @@ export default class SideMenu extends Component<Props> {
   render() {
     return (
       <Container>
-        <ScrollView>
-          {MENU_ITEMS.map(i => this.renderMenuItem(i))}
-          <Button
-            title="New window"
-            onPress={() => {
-              rpc.openLauncher()
-            }}
-          />
-        </ScrollView>
+        <ScrollView>{MENU_ITEMS.map(i => this.renderMenuItem(i))}</ScrollView>
       </Container>
     )
   }

@@ -75,6 +75,7 @@ type Props = {
   publicID: string,
   icon?: ?string,
   name: string,
+  webDomainsGrants?: WebDomainsDefinitions | ReadOnlyWebDomainsDefinitions,
   webDomainsRequirements: WebDomainsDefinitions | ReadOnlyWebDomainsDefinitions,
   onCancel: () => any,
   onSubmit: (webDomains: ReadOnlyWebDomainsDefinitions) => any,
@@ -88,9 +89,18 @@ type State = {
 }
 
 export default class PermissionsView extends Component<Props, State> {
-  state = {
-    failedValidation: false,
-    webDomainsGrants: {},
+  constructor(props: Props) {
+    super(props)
+    this.state = {
+      failedValidation: false,
+      webDomainsGrants: props.webDomainsGrants
+        ? props.webDomainsGrants.reduce((acc, webDomainGrant) => {
+            const { domain, ...grants } = webDomainGrant
+            acc[domain] = grants
+            return acc
+          }, {})
+        : {},
+    }
   }
 
   onPressDone = () => {

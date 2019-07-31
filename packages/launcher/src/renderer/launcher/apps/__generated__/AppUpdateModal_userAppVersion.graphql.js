@@ -34,6 +34,7 @@ export type AppUpdateModal_userAppVersion = {|
       |}
     |},
     +toVersion: {|
+      +publicID: string,
       +manifest: {|
         +profile: {|
           +name: ?string
@@ -44,7 +45,7 @@ export type AppUpdateModal_userAppVersion = {|
           +internal: ?boolean,
           +external: ?boolean,
         |}>,
-      |}
+      |},
     |},
     +permissionsChanged: boolean,
   |},
@@ -86,45 +87,43 @@ var v0 = {
     }
   ]
 },
-v1 = [
-  {
-    "kind": "LinkedField",
-    "alias": null,
-    "name": "manifest",
-    "storageKey": null,
-    "args": null,
-    "concreteType": "AppManifest",
-    "plural": false,
-    "selections": [
-      {
-        "kind": "LinkedField",
-        "alias": null,
-        "name": "profile",
-        "storageKey": null,
-        "args": null,
-        "concreteType": "GenericProfile",
-        "plural": false,
-        "selections": [
-          {
-            "kind": "ScalarField",
-            "alias": null,
-            "name": "name",
-            "args": null,
-            "storageKey": null
-          }
-        ]
-      },
-      {
-        "kind": "ScalarField",
-        "alias": null,
-        "name": "version",
-        "args": null,
-        "storageKey": null
-      },
-      v0
-    ]
-  }
-];
+v1 = {
+  "kind": "LinkedField",
+  "alias": null,
+  "name": "manifest",
+  "storageKey": null,
+  "args": null,
+  "concreteType": "AppManifest",
+  "plural": false,
+  "selections": [
+    {
+      "kind": "LinkedField",
+      "alias": null,
+      "name": "profile",
+      "storageKey": null,
+      "args": null,
+      "concreteType": "GenericProfile",
+      "plural": false,
+      "selections": [
+        {
+          "kind": "ScalarField",
+          "alias": null,
+          "name": "name",
+          "args": null,
+          "storageKey": null
+        }
+      ]
+    },
+    {
+      "kind": "ScalarField",
+      "alias": null,
+      "name": "version",
+      "args": null,
+      "storageKey": null
+    },
+    v0
+  ]
+};
 return {
   "kind": "Fragment",
   "name": "AppUpdateModal_userAppVersion",
@@ -168,7 +167,9 @@ return {
           "args": null,
           "concreteType": "AppVersion",
           "plural": false,
-          "selections": v1
+          "selections": [
+            v1
+          ]
         },
         {
           "kind": "LinkedField",
@@ -178,7 +179,16 @@ return {
           "args": null,
           "concreteType": "AppVersion",
           "plural": false,
-          "selections": v1
+          "selections": [
+            {
+              "kind": "ScalarField",
+              "alias": null,
+              "name": "publicID",
+              "args": null,
+              "storageKey": null
+            },
+            v1
+          ]
         },
         {
           "kind": "ScalarField",
@@ -193,5 +203,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = 'acafa4f297ba0ec6414ecbe3c2001c06';
+(node/*: any*/).hash = '103bf3093c4207868da19b45edc495f9';
 module.exports = node;

@@ -1,7 +1,6 @@
 // @flow
 
 import { Text, Button } from '@morpheus-ui/core'
-import { findIndex } from 'lodash'
 import memoize from 'memoize-one'
 import React, { Component } from 'react'
 import { graphql, createFragmentContainer } from 'react-relay'
@@ -12,7 +11,6 @@ import OSLogo from '../../UIComponents/MainframeOSLogo'
 import EditIcon from '../../UIComponents/Icons/EditIcon'
 import rpc from '../rpc'
 import RelayRenderer from '../RelayRenderer'
-import PermissionsView from '../PermissionsView'
 
 import AppInstallModal from './AppInstallModal'
 import AppPreviewModal from './AppPreviewModal'
@@ -23,10 +21,10 @@ import NewAppButton from './NewAppButton'
 import SuggestedAppItem, { type SuggestedAppData } from './SuggestedItem'
 import type { AppsScreen_user as User } from './__generated__/AppsScreen_user.graphql'
 
-type Apps = $PropertyType<User, 'apps'>
-type AppData = $Call<<T>($ReadOnlyArray<T>) => T, Apps>
+type UserApps = $PropertyType<User, 'apps'>
+type UserAppData = $Call<<T>($ReadOnlyArray<T>) => T, UserApps>
 
-const SUGGESTED_APPS_URL = `https://mainframehq.github.io/suggested-apps/apps.json?timestamp=${new Date().toString()}`
+// const SUGGESTED_APPS_URL = `https://mainframehq.github.io/suggested-apps/apps.json?timestamp=${new Date().toString()}`
 
 const Container = styled.View`
   padding: 0 0 20px 50px;
@@ -72,11 +70,12 @@ type Props = {
 
 type State = {
   showModal: ?{
-    type: 'accept_permissions' | 'app_install' | 'app_preview' | 'app_update',
-    appID?: ?string,
+    type: 'app_install' | 'app_preview' | 'app_update',
+    publicID?: ?string,
+    userAppVersionID?: ?string,
     suggestedApp?: ?Object,
     data?: ?{
-      app: AppData,
+      app: UserAppData,
     },
   },
   showOnboarding: boolean,
@@ -94,20 +93,21 @@ class AppsView extends Component<Props, State> {
     deleting: undefined,
   }
 
-  componentDidMount() {
-    this.fetchSuggested()
-  }
+  // TODO: move this logic to a dedicated DB collection and Swarm feed
+  // componentDidMount() {
+  //   this.fetchSuggested()
+  // }
 
-  fetchSuggested = async () => {
-    try {
-      const suggestedPromise = await fetch(SUGGESTED_APPS_URL)
-      const suggestedApps = await suggestedPromise.json()
-      this.setState({ suggestedApps })
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error(err)
-    }
-  }
+  // fetchSuggested = async () => {
+  //   try {
+  //     const suggestedPromise = await fetch(SUGGESTED_APPS_URL)
+  //     const suggestedApps = await suggestedPromise.json()
+  //     this.setState({ suggestedApps })
+  //   } catch (err) {
+  //     // eslint-disable-next-line no-console
+  //     console.error(err)
+  //   }
+  // }
 
   toggleEditing = () => {
     this.setState({
@@ -132,40 +132,32 @@ class AppsView extends Component<Props, State> {
     })
   }
 
-  installSuggested = (appID: string) => {
+  installSuggested = (userAppVersionID: string) => {
     this.setState({
       showModal: {
         type: 'app_install',
-        appID,
+        userAppVersionID,
       },
     })
   }
 
-  onPressUpdate = (appID: string) => {
-    const app = this.props.user.apps.find(app => app.localID === appID)
-    if (app != null) {
+  onPressUpdate = (userAppVersionID: string) => {
+    const exists = this.props.user.apps.find(
+      uav => uav.localID === userAppVersionID,
+    )
+    if (exists != null) {
       this.setState({
-        showModal: { type: 'app_update', appID },
+        showModal: { type: 'app_update', userAppVersionID },
       })
     }
   }
 
-  onStartDeleting = (appID: string) => {
-    this.setState({
-      deleting: appID,
-    })
-  }
-
-  onStartDeleting = (appID: string) => {
-    this.setState({
-      deleting: appID,
-    })
+  onStartDeleting = (userAppVersionID: string) => {
+    this.setState({ deleting: userAppVersionID })
   }
 
   onCancelDelete = () => {
-    this.setState({
-      deleting: null,
-    })
+    this.setState({ deleting: null })
   }
 
   onPressDelete = () => {
@@ -173,9 +165,13 @@ class AppsView extends Component<Props, State> {
     this.onCancelDelete()
   }
 
-  previewSuggested = (app: Object) => {
+  previewSuggested = (app: SuggestedAppData) => {
     this.setState({
-      showModal: { type: 'app_preview', suggestedApp: app, appID: app.hash },
+      showModal: {
+        type: 'app_preview',
+        suggestedApp: app,
+        publicID: app.publicID,
+      },
     })
   }
 
@@ -183,55 +179,11 @@ class AppsView extends Component<Props, State> {
     this.onCloseModal()
   }
 
-  onSubmitPermissions = async (permissionSettings: StrictPermissionsGrants) => {
-    if (
-      this.state.showModal &&
-      this.state.showModal.type === 'accept_permissions' &&
-      this.state.showModal.data
-    ) {
-      const { app } = this.state.showModal.data
-      const { user } = this.props
-      try {
-        await rpc.setAppUserPermissionsSettings(app.localID, user.localID, {
-          grants: permissionSettings,
-          permissionsChecked: true,
-        })
-        await rpc.launchApp(app.localID, user.localID)
-      } catch (err) {
-        // TODO: - Error feedback
-        // eslint-disable-next-line no-console
-        console.warn(err)
-      }
-      this.setState({
-        showModal: undefined,
-      })
-    }
-  }
-
-  onOpenApp = async (appID: string) => {
-    const { user } = this.props
-    const app = user.apps.find(app => app.localID === appID)
-    if (app == null) {
-      return
-    }
-
-    const appUser = app.users.find(u => u.localID === user.localID)
-    if (
-      // $FlowFixMe: difference between Relay-generated and library-defined types
-      havePermissionsToGrant(app.manifest.permissions) &&
-      (!appUser || !appUser.settings.permissionsSettings.permissionsChecked)
-    ) {
-      // If this user hasn't used the app before
-      // we need to ask to accept permissions
-      this.setState({
-        showModal: { type: 'accept_permissions', appID },
-      })
-    } else {
-      try {
-        await rpc.launchApp(appID, user.localID)
-      } catch (err) {
-        // TODO: - Error feedback
-      }
+  onOpenApp = async (userAppVersionID: string) => {
+    try {
+      await rpc.openApp(userAppVersionID)
+    } catch (err) {
+      // TODO: - Error feedback
     }
   }
 
@@ -242,20 +194,26 @@ class AppsView extends Component<Props, State> {
   }
 
   getSuggestedList = memoize(
-    (apps: InstalledApps, suggestedApps: Array<SuggestedAppData>) => {
-      return suggestedApps.filter(
-        item => findIndex(apps, { mfid: item.mfid }) < 0,
-      )
+    (
+      apps: UserApps,
+      suggestedApps: Array<SuggestedAppData>,
+    ): Array<SuggestedAppData> => {
+      return suggestedApps.filter((item: SuggestedAppData) => {
+        return (
+          apps.find(app => app.appVersion.app.publicID === item.publicID) ==
+          null
+        )
+      })
     },
   )
 
   getIcon = memoize(
     (
-      mfId?: ?string,
+      publicID?: ?string,
       suggestedApps: Array<SuggestedAppData> = this.state.suggestedApps,
     ) => {
-      if (!mfId) return null
-      const icon = suggestedApps.filter(app => app.mfid === mfId)
+      if (!publicID) return null
+      const icon = suggestedApps.filter(app => app.publicID === publicID)
       return icon.length ? icon[0].icon : null
     },
   )
@@ -265,7 +223,7 @@ class AppsView extends Component<Props, State> {
   renderApps() {
     const { apps } = this.props.user
     const installed = apps.map(userAppVersion => {
-      const { appVersion } = userAppVersion
+      const { appVersion, localID } = userAppVersion
       return (
         // $FlowFixMe: injected fragment type
         <InstalledAppItem
@@ -273,9 +231,11 @@ class AppsView extends Component<Props, State> {
           icon={this.getIcon(appVersion.app.publicID, this.state.suggestedApps)}
           editing={this.state.editing}
           deleting={this.state.deleting === appVersion.app.publicID}
-          key={userAppVersion.localID}
+          key={localID}
           installedApp={appVersion}
-          onOpenApp={this.onOpenApp}
+          onOpenApp={() => {
+            this.onOpenApp(localID)
+          }}
           onPressUpdate={this.onPressUpdate}
           onStartDeleting={this.onStartDeleting}
           onCancelDelete={this.onCancelDelete}
@@ -298,13 +258,13 @@ class AppsView extends Component<Props, State> {
             />
           )}
         </AppsGrid>
-        {suggested.length ? (
+        {suggested.length > 0 ? (
           <>
             <Text variant={['appsTitle', 'blue', 'bold']}>Suggestions</Text>
             <AppsGrid>
               {suggested.map(app => (
                 <SuggestedAppItem
-                  key={app.hash}
+                  key={app.publicID}
                   appData={app}
                   onPressInstall={this.installSuggested}
                   onOpen={this.previewSuggested}
@@ -324,7 +284,7 @@ class AppsView extends Component<Props, State> {
         case 'app_install':
           modal = (
             <AppInstallModal
-              appID={this.state.showModal.appID}
+              publicID={this.state.showModal.publicID}
               onRequestClose={this.onCloseModal}
               onInstallComplete={this.onInstallComplete}
               getIcon={this.getIcon}
@@ -340,32 +300,15 @@ class AppsView extends Component<Props, State> {
             />
           ) : null
           break
-        case 'accept_permissions': {
-          // $FlowFixMe ignore undefined warning
-          const { app } = this.state.showModal.data
-          const icon = this.getIcon(app.mfid, this.state.suggestedApps)
-          modal = (
-            <PermissionsView
-              mfid={app.mfid}
-              icon={icon}
-              name={app.name}
-              // $FlowFixMe: difference between Relay-generated and library-defined types
-              permissions={app.manifest.permissions}
-              onCancel={this.onCloseModal}
-              onSubmit={this.onSubmitPermissions}
-            />
-          )
-          break
-        }
         case 'app_update': {
-          const app = this.props.user.apps.find(
+          const userAppVersion = this.props.user.apps.find(
             // $FlowFixMe ignore undefined warning
-            app => app.localID === this.state.showModal.appID,
+            uav => uav.localID === this.state.showModal.userAppVersionID,
           )
-          modal = app ? (
+          modal = userAppVersion ? (
             // $FlowFixMe: injected fragment type
             <AppUpdateModal
-              app={app}
+              userAppVersion={userAppVersion}
               onRequestClose={this.onCloseModal}
               onUpdateComplete={this.onInstallComplete}
             />
@@ -419,11 +362,11 @@ class AppsView extends Component<Props, State> {
 }
 
 export const RelayContainer = createFragmentContainer(AppsView, {
-  // ...AppUpdateModal_app
   user: graphql`
     fragment AppsScreen_user on User {
       id
       apps {
+        ...AppUpdateModal_userAppVersion
         localID
         appVersion {
           ...AppItem_appVersion
