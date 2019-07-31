@@ -1,13 +1,19 @@
 // @flow
 
+import { createSecretStreamKey } from '@mainframe/utils-crypto'
+
+import OwnFeed from '../../swarm/OwnFeed'
+
 import { COLLECTION_NAMES } from '../constants'
 import type { Collection, CollectionParams, Doc } from '../types'
 
 import type { WebDomainDefinition } from '../schemas/appManifest'
 import schema, { type UserAppSettingsData } from '../schemas/userAppSettings'
-import { generateLocalID } from '../utils'
+import { generateKeyPair, generateLocalID } from '../utils'
 
 type UserAppSettingsMethods = {|
+  getStorageFeed(): OwnFeed,
+  getStorageKey(): Buffer,
   setWebDomainGrant(grant: WebDomainDefinition): Promise<void>,
 |}
 
@@ -41,10 +47,23 @@ export default async (
         return await this.insert({
           ...data,
           localID: generateLocalID(),
+          storageKeyPair: generateKeyPair(),
+          storageEncryptionKey: createSecretStreamKey().toString('base64'),
         })
       },
     },
     methods: {
+      getStorageFeed(): OwnFeed {
+        if (this._storageFeed == null) {
+          this._storageFeed = new OwnFeed(this.storageKeyPair.privateKey)
+        }
+        return this._storageFeed
+      },
+
+      getStorageKey(): Buffer {
+        return Buffer.from(this.storageEncryptionKey, 'base64')
+      },
+
       async setWebDomainGrant(grant: WebDomainDefinition): Promise<void> {
         await this.atomicUpdate(doc => {
           const index = doc.webDomains.findIndex(w => w.domain === grant.domain)

@@ -6,6 +6,7 @@ import {
   webDomainsDefinitions,
   type WebDomainsDefinitions,
 } from './appManifest'
+import keyPair, { type KeyPairData } from './keyPair'
 
 export type ApprovedContact = {|
   aliasID: string,
@@ -14,6 +15,8 @@ export type ApprovedContact = {|
 
 export type UserAppSettingsData = {|
   localID: string,
+  storageKeyPair: KeyPairData,
+  storageEncryptionKey: string,
   approvedContacts: Array<ApprovedContact>,
   defaultEthAccount: ?string,
   permissionsChecked: boolean,
@@ -28,6 +31,10 @@ export default {
     localID: {
       type: 'string',
       primary: true,
+    },
+    storageKeyPair: keyPair,
+    storageEncryptionKey: {
+      type: 'string',
     },
     approvedContacts: {
       type: 'array',
@@ -58,6 +65,6 @@ export default {
       ...webDomainsDefinitions,
       default: [],
     },
-    // TODO: storage keyPair - also communications one?
   },
+  required: ['storageEncryptionKey', 'storageKeyPair'],
 }

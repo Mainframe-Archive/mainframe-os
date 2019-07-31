@@ -197,7 +197,7 @@ ipcMain.on('window-opened', async event => {
     event.sender.send('window-start', {
       type: 'app',
       initialProps: {
-        session: appContext.session.toAppWindowSession(),
+        session: await appContext.session.toAppWindowSession(),
       },
     })
     return

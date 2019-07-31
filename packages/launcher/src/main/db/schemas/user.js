@@ -89,5 +89,5 @@ export default {
       default: 'http://mainframe-gateways.net:8500',
     },
   },
-  required: ['localID', 'keyPair', 'profile'],
+  required: ['keyPair', 'profile'],
 }

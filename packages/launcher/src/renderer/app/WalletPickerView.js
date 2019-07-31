@@ -3,6 +3,8 @@
 import React, { Component, type Node } from 'react'
 import styled from 'styled-components/native'
 
+import type { AppWallet, AppWallets } from '../../types'
+
 import WalletIcon from '../launcher/wallets/WalletIcon'
 import rpc from './rpc'
 
@@ -14,24 +16,12 @@ export const condenseAddress = (a?: ?string, len: number = 8): string => {
   return a.slice(0, len + 2) + '...' + a.slice(-len, a.length)
 }
 
-type Wallet = {
-  name: string,
-  localID: string,
-  accounts: Array<string>,
-}
-
-type Wallets = {
-  hd: Array<Wallet>,
-  ledger: Array<Wallet>,
-}
-
 type Props = {
   onSelectedWalletAccount: (address: string) => void,
 }
 
 type State = {
-  wallets?: Wallets,
-  defaultWalletAcc?: string,
+  wallets?: AppWallets,
   hover?: ?string,
 }
 
@@ -75,9 +65,7 @@ export default class WalletPickerView extends Component<Props, State> {
   }
 
   async fetchWallets() {
-    const wallets = await rpc.getUserEthWallets()
-    const defaultWalletAcc = await rpc.getUserDefaultWallet()
-    this.setState({ wallets, defaultWalletAcc })
+    this.setState({ wallets: await rpc.getUserWallets() })
   }
 
   onSelectWalletAccount = (address: string) => {
@@ -92,12 +80,15 @@ export default class WalletPickerView extends Component<Props, State> {
     this.setState({ hover: id })
   }
 
-  renderWallets(wallets: Array<Wallet>): Array<Node> {
+  renderWallets(
+    wallets: Array<AppWallet>,
+    defaultAccount: ?string,
+  ): Array<Node> {
     return wallets.map(w => {
       const accounts = w.accounts.map((a, index) => {
-        const onPress = () => this.onSelectWalletAccount(a)
+        const onPress = () => this.props.onSelectedWalletAccount(a)
         const setHover = () => this.setHover(a)
-        const selected = this.state.defaultWalletAcc === a
+        const selected = defaultAccount === a
 
         return (
           <AccountRow
@@ -131,8 +122,10 @@ export default class WalletPickerView extends Component<Props, State> {
     const { wallets } = this.state
     const walletRows = []
     if (wallets) {
-      walletRows.push(this.renderWallets(wallets.hd))
-      walletRows.push(this.renderWallets(wallets.ledger))
+      walletRows.push(this.renderWallets(wallets.hd, wallets.defaultAccount))
+      walletRows.push(
+        this.renderWallets(wallets.ledger, wallets.defaultAccount),
+      )
     }
     return <ScrollViewStyled>{walletRows}</ScrollViewStyled>
   }

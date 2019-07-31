@@ -56,7 +56,7 @@ const createSubscription = async (
 
 const provider = {
   send: async (method: string, params: Array<*>): Promise<*> => {
-    return client.request('blockchain_ethSend', { method, params })
+    return client.request('ethereum_send', { method, params })
   },
 }
 
@@ -64,13 +64,13 @@ const subscriptions = {
   accountsChanged: async () => {
     return await createSubscription(
       'ethereum_subscribeAccountsChanged',
-      'ethereum_accounts_changed',
+      RPC_ETHEREUM_ACCOUNTS_CHANGED,
     )
   },
   networkChanged: async () => {
     return await createSubscription(
       'ethereum_subscribeNetworkChanged',
-      'ethereum_network_changed',
+      RPC_ETHEREUM_NETWORK_CHANGED,
     )
   },
 }
@@ -94,16 +94,15 @@ export default {
     )
   },
 
+  // Ethereum
+
+  getEthAccounts: async () => {
+    return await client.request('ethereum_getAccounts')
+  },
+
   // Wallets
 
-  getUserEthWallets: async () => {
-    return await client.request('wallet_getUserEthWallets')
-  },
-
-  getUserDefaultWallet: async () => {
-    const accounts = await client.request('wallet_getEthAccounts')
-    return accounts[0]
-  },
+  getUserWallets: async () => {},
 
   selectDefaultWallet: async () => {
     return await client.request('wallet_selectDefault')

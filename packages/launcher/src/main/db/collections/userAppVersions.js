@@ -131,7 +131,7 @@ export default async (
             app.getPublicID(),
             appVersion.manifest.version,
           ),
-          profile: app.profile,
+          profile: appVersion.manifest.profile || {},
           publicID: app.getPublicID(),
         }
       },

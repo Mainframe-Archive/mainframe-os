@@ -34,29 +34,6 @@ const PRELOAD_URL = url.format({
   slashes: true,
 })
 
-type User = {
-  id: ID,
-  profile: Object,
-}
-
-type App = {
-  appID: ID,
-  manifest: Object,
-  contentsPath: string,
-}
-
-type Session = {
-  id: ID,
-  permission: Object,
-}
-
-export type AppSessionData = {
-  app: App,
-  user: User,
-  session: Session,
-  isDev?: boolean,
-}
-
 type Props = {
   session: AppWindowSession,
 }
@@ -66,7 +43,6 @@ type State = {
   contentsPath: string,
   showUrlButtons?: ?boolean,
   ethNetwork: string,
-  multipleWallets?: ?boolean,
 }
 
 const store = new Store()
@@ -137,38 +113,16 @@ export default class AppContainer extends Component<Props, State> {
     })
   }
 
-  componentDidMount() {
-    this.fetchWallets()
-  }
-
-  async fetchWallets() {
-    const wallets = await rpc.getUserEthWallets()
-    const addresses = flattenDeep([
-      ...wallets.hd.map(item => item.accounts),
-      ...wallets.ledger.map(item => item.accounts),
-    ])
-
-    if (addresses.length > 1) {
-      this.setState({ multipleWallets: true })
-    }
-  }
-
   onChangeUrl = (value: string) => {
-    this.setState({
-      urlInputValue: value,
-    })
+    this.setState({ urlInputValue: value })
   }
 
   onFocusUrlInput = () => {
-    this.setState({
-      showUrlButtons: true,
-    })
+    this.setState({ showUrlButtons: true })
   }
 
   onBlurUrlInput = () => {
-    this.setState({
-      showUrlButtons: false,
-    })
+    this.setState({ showUrlButtons: false })
   }
 
   resetUrl = () => {
@@ -200,6 +154,7 @@ export default class AppContainer extends Component<Props, State> {
 
   render() {
     const { session } = this.props
+    const multipleWallets = session.user.walletAddresses.length > 1
 
     const urlBar = session.isDevelopment ? (
       <URLContainer>
@@ -244,7 +199,7 @@ export default class AppContainer extends Component<Props, State> {
                 </Text>
               </EthNetwork>
               {urlBar}
-              {this.state.multipleWallets && (
+              {multipleWallets ? (
                 <HeaderButtons>
                   <Button
                     variant="TuiWalletsButton"
@@ -253,13 +208,10 @@ export default class AppContainer extends Component<Props, State> {
                     onPress={this.onPressSelectWallet}
                   />
                 </HeaderButtons>
-              )}
+              ) : null}
             </ActionBar>
           </Header>
-          <UserAlertView
-            multipleWallets={this.state.multipleWallets}
-            session={session}
-          />
+          <UserAlertView multipleWallets={multipleWallets} session={session} />
           <webview
             id="sandbox-webview"
             src={this.state.contentsPath || session.app.contentsURL}

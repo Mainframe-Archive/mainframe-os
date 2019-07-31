@@ -54,14 +54,29 @@ const createChannel = (params: ChannelParams) => {
         throw new Error('Could not get context')
       }
 
+      params.logger.log({
+        level: 'silly',
+        message: 'RPC request incoming',
+        channel: params.name,
+        incoming,
+      })
+
       const outgoing = await handleMessage(ctx, incoming)
       if (outgoing != null) {
+        params.logger.log({
+          level: 'silly',
+          message: 'RPC response outgoing',
+          channel: params.name,
+          incoming,
+          outgoing,
+        })
         event.sender.send(params.name, outgoing)
       }
     } catch (err) {
       params.logger.log({
         level: 'error',
         message: 'RPC request failed',
+        channel: params.name,
         incoming,
         error: err.toString(),
       })

@@ -16,9 +16,9 @@ import type { AppData, AppWindowSession } from '../../types'
 
 import type { UserAppSettingsDoc } from '../db/collections/userAppSettings'
 import type { UserDoc } from '../db/collections/users'
-import type { WebDomainsDefinitions } from '../db/schemas/appManifest'
 import type { Logger } from '../logger'
 import { ElectronTransport } from '../rpc/ElectronTransport'
+import type OwnFeed from '../swarm/OwnFeed'
 
 import type { SystemContext } from './system'
 
@@ -104,7 +104,7 @@ export class AppSession {
     this.user = params.user
   }
 
-  toAppWindowSession(): AppWindowSession {
+  async toAppWindowSession(): Promise<AppWindowSession> {
     return {
       app: {
         contentsURL: format({
@@ -117,24 +117,34 @@ export class AppSession {
       },
       isDevelopment: this.isDevelopment,
       partition: `persist:${this.app.publicID}/${this.user.localID}`,
+      settings: {
+        webDomains: this.settings.webDomains,
+      },
       user: {
         id: this.user.localID,
         profile: this.user.profile,
+        walletAddresses: await this.user.getEthAccounts(),
       },
-      webDomains: this.settings.webDomains,
     }
   }
 }
 
-export type ContextParams = {
+export type AppContextStorage = {
+  encryptionKey: Buffer,
+  feed: OwnFeed,
+  manifestHash: string | null,
+}
+
+export type AppContextParams = {
   session: AppSession,
   system: SystemContext,
   window: BrowserWindow,
 }
 
 export class AppContext {
-  _permissionDeniedID: ?string
-  _subscriptions: { [id: string]: Subscription }
+  _hasPermissionDeniedSubscription: boolean = false
+  _storage: ?AppContextStorage
+  _subscriptions: { [id: string]: Subscription } = {}
   logger: Logger
   sandbox: ?WebContents
   session: AppSession
@@ -142,7 +152,7 @@ export class AppContext {
   trustedRPC: StreamRPC
   window: BrowserWindow
 
-  constructor(params: ContextParams) {
+  constructor(params: AppContextParams) {
     this.logger = params.system.logger.child({
       context: 'app',
       userID: params.session.user.localID,
@@ -154,6 +164,17 @@ export class AppContext {
     )
     this.window = params.window
     this.logger.debug('App context created')
+  }
+
+  get storage(): AppContextStorage {
+    if (this._storage == null) {
+      this._storage = {
+        encryptionKey: this.session.settings.getStorageKey(),
+        feed: this.session.settings.getStorageFeed(),
+        manifestHash: null,
+      }
+    }
+    return this._storage
   }
 
   handleSandboxWebRequest = async (request, callback) => {
@@ -245,6 +266,11 @@ export class AppContext {
     this.window.show()
   }
 
+  setPermissionDeniedSubscription(): string {
+    this._hasPermissionDeniedSubscription = true
+    return PERMISSION_DENIED_METHOD
+  }
+
   notifyTrusted(method: string, id: string, result?: Object = {}) {
     this.logger.log({
       level: 'debug',
@@ -261,15 +287,18 @@ export class AppContext {
   }
 
   notifyPermissionDenied(permission: { key: string, domain?: string }) {
-    const id = this._permissionDeniedID
-    if (id == null) {
+    if (this._hasPermissionDeniedSubscription) {
+      this.notifyTrusted(
+        PERMISSION_DENIED_METHOD,
+        PERMISSION_DENIED_METHOD,
+        permission,
+      )
+    } else {
       this.logger.log({
         level: 'warn',
         message: 'Could not notify of permission denied: no subscription set',
         permission,
       })
-    } else {
-      this.notifyTrusted(PERMISSION_DENIED_METHOD, id, permission)
     }
   }
 
@@ -301,14 +330,6 @@ export class AppContext {
 
   addSubscription(id: string, subscription: Subscription): void {
     this._subscriptions[id] = subscription
-  }
-
-  setPermissionDeniedSubscription(
-    id: string,
-    subscription: Subscription,
-  ): void {
-    this.addSubscription(id, subscription)
-    this._permissionDeniedID = id
   }
 
   removeSubscription(id: string): void {

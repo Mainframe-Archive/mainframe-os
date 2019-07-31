@@ -227,7 +227,7 @@ export default class UserAlertView extends Component<Props, State> {
         setTimeout(() => {
           this.setState(({ permissionDeniedNotifs: notifs }) => {
             const index = notifs.indexOf(data)
-            if (index > -1) {
+            if (index !== -1) {
               notifs.splice(index, 1)
               return {
                 permissionDeniedNotifs: notifs,

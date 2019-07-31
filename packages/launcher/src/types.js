@@ -31,6 +31,18 @@ export type AppData = {
   publicID: string,
 }
 
+export type AppWallet = {
+  name: string,
+  localID: string,
+  accounts: Array<string>,
+}
+
+export type AppWallets = {
+  hd: Array<AppWallet>,
+  ledger: Array<AppWallet>,
+  defaultAccount: ?string,
+}
+
 export type AppWindowSession = {
   app: {
     contentsURL: string,
@@ -39,11 +51,14 @@ export type AppWindowSession = {
   },
   isDevelopment: boolean,
   partition: string,
+  settings: {
+    webDomains: WebDomainsDefinitions,
+  },
   user: {
     id: string,
     profile: GenericProfileData,
+    walletAddresses: Array<string>,
   },
-  webDomains: WebDomainsDefinitions,
 }
 
 // Request

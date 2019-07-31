@@ -7,46 +7,34 @@ import {
   createEncryptStream,
 } from '@mainframe/utils-crypto'
 
-import type { AppContext } from './contexts'
+import type { AppContext } from './context/app'
 
 const STORAGE_EMPTY_MANIFEST = JSON.stringify({ entries: [] })
 
 export const getStorageManifestHash = async (
   ctx: AppContext,
-): Promise<{ feedHash: string, manifestHash: string }> => {
-  let feedHash = ctx.storage.feedHash
-  let manifestHash
-
-  if (feedHash) {
-    manifestHash = await ctx.bzz.getFeedValue(feedHash, {
-      mode: 'content-hash',
-    })
-  } else {
-    feedHash = await ctx.bzz.createFeedManifest({ user: ctx.storage.address })
-    manifestHash = await ctx.bzz.uploadFeedValue(
-      feedHash,
-      STORAGE_EMPTY_MANIFEST,
-    )
-    await ctx.client.app.setFeedHash({
-      sessID: ctx.appSession.session.sessID,
-      feedHash: feedHash,
-    })
-    ctx.storage.feedHash = feedHash
+): Promise<string> => {
+  if (ctx.storage.manifestHash != null) {
+    return ctx.storage.manifestHash
   }
 
-  return { feedHash, manifestHash }
+  const bzz = ctx.session.user.getBzz()
+  let hash = await ctx.storage.feed.getContentHash(bzz)
+  if (hash === null) {
+    hash = await ctx.storage.feed.publishContent(bzz, STORAGE_EMPTY_MANIFEST)
+  }
+
+  ctx.storage.manifestHash = hash
+  return hash
 }
 
 export const downloadStream = async (
   ctx: AppContext,
   key: string,
 ): Promise<Readable | null> => {
-  const { encryptionKey, feedHash } = ctx.storage
-  if (feedHash == null) {
-    return null
-  }
-  const res = await ctx.bzz.download(`${feedHash}/${key}`)
-  return res.body.pipe(createDecryptStream(encryptionKey))
+  const hash = await getStorageManifestHash(ctx)
+  const res = await ctx.session.user.getBzz().download(`${hash}/${key}`)
+  return res.body.pipe(createDecryptStream(ctx.storage.encryptionKey))
 }
 
 export type UploadStreamParams = {
@@ -59,19 +47,17 @@ export const uploadStream = async (
   ctx: AppContext,
   params: UploadStreamParams,
 ): Promise<void> => {
-  const { feedHash, manifestHash } = await getStorageManifestHash(ctx)
+  const bzz = ctx.session.user.getBzz()
   const stream = params.stream.pipe(
     createEncryptStream(ctx.storage.encryptionKey),
   )
-  const [dataHash, feedMetadata] = await Promise.all([
-    ctx.bzz.uploadFileStream(stream, {
-      contentType: params.contentType || 'application/octet-stream',
-      path: params.key,
-      manifestHash,
-    }),
-    ctx.bzz.getFeedMetadata(feedHash),
-  ])
-  await ctx.bzz.postFeedValue(feedMetadata, `0x${dataHash}`)
+  const manifestHash = await bzz.uploadFileStream(stream, {
+    contentType: params.contentType || 'application/octet-stream',
+    path: params.key,
+    manifestHash: await getStorageManifestHash(ctx),
+  })
+  await ctx.storage.feed.setContentHash(bzz, manifestHash)
+  ctx.storage.manifestHash = manifestHash
 }
 
 export const registerStreamProtocol = (context: AppContext) => {

@@ -13,6 +13,7 @@ import {
   RPC_ETHEREUM_ACCOUNTS_CHANGED,
   RPC_ETHEREUM_NETWORK_CHANGED,
 } from '../../constants'
+import type { AppWallets } from '../../types'
 
 import type { AppContext } from '../context/app'
 import { withPermission } from '../permissions'
@@ -33,14 +34,7 @@ const STORAGE_KEY_PARAM = {
 }
 
 const sharedMethods = {
-  ethereum_send: async (
-    ctx: AppContext,
-    params: { method: string, params?: ?Array<any> },
-  ): Promise<any> => {
-    return await ctx.session.user.getEth().send(params.method, params.params)
-  },
-
-  wallet_getEthAccounts: async (ctx: AppContext): Promise<Array<string>> => {
+  ethereum_getAccounts: async (ctx: AppContext): Promise<Array<string>> => {
     const accounts = await ctx.session.user.getEthAccounts()
     const { defaultEthAccount } = ctx.session.settings
     if (defaultEthAccount != null) {
@@ -52,6 +46,13 @@ const sharedMethods = {
       }
     }
     return accounts
+  },
+
+  ethereum_send: async (
+    ctx: AppContext,
+    params: { method: string, params?: ?Array<any> },
+  ): Promise<any> => {
+    return await ctx.session.user.getEth().send(params.method, params.params)
   },
 }
 
@@ -324,8 +325,10 @@ export const sandboxed = {
       ctx: AppContext,
     ): Promise<Array<{ contentType: string, key: string }>> => {
       try {
-        const { manifestHash } = await getStorageManifestHash(ctx)
-        const list: ListResult = await ctx.bzz.list(manifestHash)
+        const manifestHash = await getStorageManifestHash(ctx)
+        const list: ListResult = await ctx.session.user
+          .getBzz()
+          .list(manifestHash)
         return list.entries == null
           ? []
           : list.entries.map(meta => {
@@ -392,12 +395,13 @@ export const sandboxed = {
       params: { key: string },
     ): Promise<void> => {
       try {
-        const { feedHash, manifestHash } = await getStorageManifestHash(ctx)
-        const [newManifestHash, feedMetadata] = await Promise.all([
-          ctx.bzz.deleteResource(manifestHash, params.key),
-          ctx.bzz.getFeedMetadata(feedHash),
-        ])
-        await ctx.bzz.postFeedValue(feedMetadata, `0x${newManifestHash}`)
+        const bzz = ctx.session.user.getBzz()
+        const manifestHash = await getStorageManifestHash(ctx)
+        const newManifestHash = await bzz.deleteResource(
+          manifestHash,
+          params.key,
+        )
+        await ctx.storage.feed.setContentHash(bzz, newManifestHash)
         ctx.storage.manifestHash = newManifestHash
       } catch (error) {
         throw new Error('Failed to access storage')
@@ -410,7 +414,7 @@ export const trusted = {
   ...sharedMethods,
 
   sub_createPermissionDenied: (ctx: AppContext): { id: string } => ({
-    id: ctx.createPermissionDeniedSubscription(),
+    id: ctx.setPermissionDeniedSubscription(),
   }),
 
   sub_unsubscribe: {
@@ -422,24 +426,85 @@ export const trusted = {
     },
   },
 
-  blockchain_subscribeNetworkChanged: async (
+  ethereum_subscribe: async (
     ctx: AppContext,
-  ): Promise<Object> => {
-    const subscription = await ctx.client.blockchain.subscribeNetworkChanged()
-    const sub = new EthNetworkSubscription()
-    sub.data = subscription.subscribe(msg => {
-      ctx.notifyTrusted(sub.id, msg)
-    })
-    ctx.setSubscription(sub)
-    return { id: sub.id }
+    params: { method: string, params?: ?Array<any> },
+  ): Promise<{ id: string }> => {
+    const provider = ctx.session.user.getEth().web3Provider
+    if (provider.subscribe != null && provider.on != null) {
+      const subID = await provider.subscribe(
+        'eth_subscribe',
+        params.method,
+        params.params,
+      )
+      const subscription = fromEvent(provider, subID).subscribe(msg => {
+        if (msg.subscription === subID) {
+          ctx.notifySandboxed('eth_subscription', subID, msg)
+        }
+      })
+      ctx.addSubscription(subID, subscription)
+      return { id: subID }
+    }
+    throw new Error('Subscriptions not supported')
   },
 
-  wallet_getUserEthWallets: async (
+  ethereum_subscribeAccountsChanged: async (
     ctx: AppContext,
-  ): Promise<WalletGetEthWalletsResult> => {
-    return ctx.client.wallet.getUserEthWallets({
-      userID: ctx.appSession.user.localID,
+  ): Promise<{ id: string }> => {
+    const id = nanoid()
+    const subscription = fromEvent(
+      ctx.session.user.getEth(),
+      'accountsChanged',
+    ).subscribe(event => {
+      ctx.notifyTrusted(RPC_ETHEREUM_ACCOUNTS_CHANGED, id, event)
     })
+    ctx.addSubscription(id, subscription)
+    return { id }
+  },
+
+  ethereum_subscribeNetworkChanged: async (
+    ctx: AppContext,
+  ): Promise<{ id: string }> => {
+    const id = nanoid()
+    const subscription = fromEvent(
+      ctx.session.user.getEth(),
+      'networkChanged',
+    ).subscribe(event => {
+      ctx.notifyTrusted(RPC_ETHEREUM_NETWORK_CHANGED, id, event)
+    })
+    ctx.addSubscription(id, subscription)
+    return { id }
+  },
+
+  ethereum_unsubscribe: async (
+    ctx: AppContext,
+    params: { id: string },
+  ): Promise<void> => {
+    const provider = ctx.session.user.getEth().web3Provider
+    if (provider.unsubscribe != null) {
+      await provider.unsubscribe(params.id)
+    }
+    ctx.removeSubscription(params.id)
+  },
+
+  wallet_getUserWallets: async (ctx: AppContext): Promise<AppWallets> => {
+    const [hd, ledger] = await Promise.all([
+      ctx.session.user.populate('ethWallets.hd'),
+      ctx.session.user.populate('ethWallets.ledger'),
+    ])
+    return {
+      hd: hd.map(w => ({
+        localID: w.localID,
+        name: w.name,
+        accounts: w.activeAccounts.map(a => a.address),
+      })),
+      ledger: ledger.map(w => ({
+        localID: w.localID,
+        name: w.name,
+        accounts: w.activeAccounts.map(a => a.address),
+      })),
+      defaultAccount: ctx.session.settings.defaultEthAccount,
+    }
   },
 
   wallet_selectDefault: async (
@@ -462,16 +527,6 @@ export const trusted = {
       })
     }
     return { address }
-  },
-
-  wallet_subEthAccountsChanged: async (ctx: AppContext): Promise<Object> => {
-    const subscription = await ctx.client.wallet.subscribeEthAccountsChanged()
-    const sub = new EthWalletSubscription()
-    sub.data = subscription.subscribe(msg => {
-      ctx.notifyTrusted(sub.id, msg)
-    })
-    ctx.setSubscription(sub)
-    return { id: sub.id }
   },
 
   contacts_getUserContacts: (

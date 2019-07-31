@@ -36,13 +36,36 @@ export default class OwnFeed {
     return this._feed || { user: this.address }
   }
 
-  async publishJSON(bzz: Bzz, payload: Object): Promise<string> {
-    return await bzz.setFeedContent(
+  async getContentHash(bzz: Bzz): Promise<string | null> {
+    return await bzz.getFeedContentHash(this.feed)
+  }
+
+  async setContentHash(bzz: Bzz, hash: string): Promise<void> {
+    return await bzz.setFeedContentHash(
       this.feed,
-      JSON.stringify(payload),
-      { mode: 'raw' },
+      hash,
+      {},
       this.keyPair.getPrivate(),
     )
+  }
+
+  async publishContent(
+    bzz: Bzz,
+    content: any,
+    options?: Object = {},
+  ): Promise<string> {
+    return await bzz.setFeedContent(
+      this.feed,
+      content,
+      options,
+      this.keyPair.getPrivate(),
+    )
+  }
+
+  async publishJSON(bzz: Bzz, payload: Object): Promise<string> {
+    return await this.publishContent(bzz, JSON.stringify(payload), {
+      mode: 'raw',
+    })
   }
 
   toJSON() {
