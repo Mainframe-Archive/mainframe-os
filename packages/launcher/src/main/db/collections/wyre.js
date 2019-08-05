@@ -24,13 +24,19 @@ export default async (params: CollectionParams) => {
     schema,
     methods: {
       async getToken(): string {
-        // if (db.wyre.deviceToken == null) {
-        const newID = uuidv4()
-        const update = await db.wyre.insert({ deviceToken: newID })
-        return newID
-        // } else {
-        //   return db.wyre
-        // }
+        const dump = db.wyre.find()
+        const exec = await dump.exec()
+        if (exec[0]) {
+          const tok = exec[0].get('deviceToken')
+          return tok
+        } else {
+          const newID = uuidv4()
+          const update = await db.wyre.insert({
+            name: 'singleToken',
+            deviceToken: newID,
+          })
+          return newID
+        }
       },
     },
     statics: {},

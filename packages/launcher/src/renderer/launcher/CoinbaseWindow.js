@@ -29,7 +29,6 @@ export default class CoinbaseWindow extends Component<Props, State> {
     return (
       <>
         <TitleBar className="draggable" />
-        <iframe src="https://sleepy-oasis-35263.herokuapp.com/authorize" />
       </>
     )
   }

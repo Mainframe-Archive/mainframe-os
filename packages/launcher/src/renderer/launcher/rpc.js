@@ -57,9 +57,7 @@ export default {
   // Wyre
 
   async openWyre(): Promise<string> {
-    const token = await client.request('wyre_open')
-
-    return token
+    return await client.request('wyre_open')
   },
 
   // GraphQL

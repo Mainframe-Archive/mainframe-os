@@ -222,9 +222,12 @@ ipcMain.on('window-opened', async event => {
   }
 
   const wyreContext = system.getWyreContext()
+  const deviceToken = await system.getWyreDeviceToken()
+
   if (wyreContext != null) {
     event.sender.send('window-start', {
       type: 'wyre',
+      initialProps: { deviceToken },
     })
     return
   }

@@ -70,7 +70,6 @@ export default class WyreModal extends Component<Props, State> {
   }
 
   componentDidMount() {
-    console.log('hiya, component: mounted')
     if (!this.props.address) {
       this.setState({ errorMsg: 'No wallet found' })
     }
@@ -84,10 +83,7 @@ export default class WyreModal extends Component<Props, State> {
   }
 
   openWyre = () => {
-    console.log('OPEN WYREE')
     const tok = rpc.openWyre()
-    console.log('wyre modal')
-    console.log(tok)
   }
 
   render() {

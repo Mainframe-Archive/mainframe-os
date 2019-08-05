@@ -117,9 +117,9 @@ export default {
   wyre_open: {
     async handler(ctx, params): Promise<string> {
       ctx.system.launchWyre()
-      const token = await ctx.system.getWyreDeviceToken()
-      console.log(token)
-      return token
+      // const token = await ctx.system.getWyreDeviceToken()
+      // console.log(token)
+      // return token
       // createWyreWindow()
     },
   },

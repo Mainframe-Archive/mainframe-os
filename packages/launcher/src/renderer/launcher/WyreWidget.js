@@ -21,23 +21,22 @@ const TitleBar = styled.View`
 `
 
 export default class WyreWidget extends Component<Props, State> {
-  componentDidMount() {
-    let deviceToken = localStorage.getItem('DEVICE_TOKEN')
-    if (!deviceToken) {
-      const array = new Uint8Array(25)
-      crypto.getRandomValues(array)
-      deviceToken = Array.prototype.map
-        .call(array, x => ('00' + x.toString(16)).slice(-2))
-        .join('')
-      localStorage.setItem('DEVICE_TOKEN', deviceToken)
-    }
-  }
+  // componentDidMount() {
+  //   let deviceToken = localStorage.getItem('DEVICE_TOKEN')
+  //   if (!deviceToken) {
+  //     const array = new Uint8Array(25)
+  //     crypto.getRandomValues(array)
+  //     deviceToken = Array.prototype.map
+  //       .call(array, x => ('00' + x.toString(16)).slice(-2))
+  //       .join('')
+  //     localStorage.setItem('DEVICE_TOKEN', deviceToken)
+  //   }
+  // }
 
   load = () => {
-    const deviceToken = localStorage.getItem('DEVICE_TOKEN')
-    // const tok = rpc.getWyreDeviceToken()
-    // console.log('tok')
-    // console.log(tok)
+    const { deviceToken } = this.props
+    // const deviceToken = localStorage.getItem('DEVICE_TOKEN')
+    // console.log(this.props.deviceToken)
 
     const widget = new Wyre.Widget({
       env: 'test',
@@ -48,6 +47,7 @@ export default class WyreWidget extends Component<Props, State> {
       },
       operation: {
         type: 'debitcard',
+        // dest: `ethereum:${this.props.ethAddress}`,
         dest: 'ethereum:0x75bdf6a2ced3a0d0eff704555e3350b5010f5e00',
         sourceCurrency: 'USD',
         destCurrency: 'ETH',

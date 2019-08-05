@@ -232,6 +232,9 @@ export class SystemContext {
 
   async getWyreDeviceToken() {
     const deviceToken = await this.db.wyre._methods.getToken()
+    // const user = await this.db.users.findOne(this.defaultUser).exec()
+    // const usefulinfo = user.get('ethWallets').hd
+
     return deviceToken
   }
 
@@ -339,9 +342,19 @@ export class SystemContext {
     this._coinbase.window.on('closed', async () => {
       this._coinbase = null
     })
-
-    console.log(this._coinbase.window)
-
+    this._coinbase.window.webContents.on('will-navigate', (e, url) => {
+      console.log('navigating')
+      console.log(e)
+      console.log(url)
+    })
+    this._coinbase.window.webContents.on('will-redirect', (e, url) => {
+      console.log('redirecting')
+      console.log(e)
+      console.log(url)
+      if (url === 'http://localhost:3000/2fa') {
+        // this._coinbase.window.hide()
+      }
+    })
     return this._coinbase
   }
 
@@ -356,6 +369,7 @@ export class SystemContext {
     this._wyre.window.on('closed', async () => {
       this._wyre = null
     })
+
     return this._wyre
   }
 

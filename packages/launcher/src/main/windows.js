@@ -7,7 +7,7 @@ import { is } from 'electron-util'
 
 const PORT = process.env.ELECTRON_WEBPACK_WDS_PORT || ''
 
-const createWindow = (params: Object = {}): BrowserWindow => {
+const createWindow = (params: Object = {}, coinbase): BrowserWindow => {
   const window = new BrowserWindow({
     minWidth: 1020,
     minHeight: 702,
@@ -17,8 +17,18 @@ const createWindow = (params: Object = {}): BrowserWindow => {
     titleBarStyle: 'hidden',
     ...params,
   })
-  if (is.development) {
+
+  if (is.development && !coinbase) {
     window.loadURL(`http://localhost:${PORT}`)
+  } else if (coinbase) {
+    const formattedUrl = url.format({
+      pathname: path.join(__dirname, `index.html`),
+      protocol: 'file:',
+      slashes: true,
+    })
+
+    console.log(formattedUrl)
+    window.loadURL(`http://localhost:3000/authorize`)
   } else {
     const formattedUrl = url.format({
       pathname: path.join(__dirname, `index.html`),
@@ -44,17 +54,21 @@ export const createAppWindow = (): BrowserWindow => {
 }
 
 export const createCoinbaseWindow = (): BrowserWindow => {
-  return createWindow({
-    width: 700,
-    height: 600,
-    minWidth: 700,
-    minHeight: 600,
-  })
+  return createWindow(
+    {
+      width: 900,
+      height: 600,
+      minWidth: 900,
+      minHeight: 600,
+      show: true,
+    },
+    true,
+  )
 }
 
 export const createWyreWindow = (): BrowserWindow => {
   return createWindow({
-    width: 350,
+    width: 400,
     height: 600,
     minWidth: 350,
     minHeight: 600,

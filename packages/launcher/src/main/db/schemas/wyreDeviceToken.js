@@ -5,7 +5,8 @@ export default {
   version: 0,
   type: 'object',
   properties: {
-    "deviceToken": { "type": 'string' },
+    deviceToken: { type: 'string' },
+    name: { type: 'string', primary: true },
   },
   // pattern: '^0x[0-9a-fA-F]{40}$',
 }
