@@ -66,7 +66,7 @@ export default class WyreModal extends Component<Props, State> {
 
   constructor(props) {
     super(props)
-    this.state = { amount: 10, completed: false }
+    this.state = { amount: 10, completed: false, screen: 'selectAddress' }
   }
 
   componentDidMount() {
@@ -89,6 +89,7 @@ export default class WyreModal extends Component<Props, State> {
   render() {
     const { address, onClose, onComplete } = this.props
     const { completed } = this.state
+
     const errorMsg = this.state.errorMsg ? (
       <Row size={1}>
         <Column>

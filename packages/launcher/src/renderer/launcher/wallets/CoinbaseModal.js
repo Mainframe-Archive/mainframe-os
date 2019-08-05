@@ -66,7 +66,7 @@ export default class CoinbaseModal extends Component<Props, State> {
 
   constructor(props) {
     super(props)
-    this.state = { amount: 10, completed: false }
+    this.state = { amount: 10, completed: false, screen: 'selectAddress' }
   }
 
   componentDidMount() {
@@ -82,9 +82,23 @@ export default class CoinbaseModal extends Component<Props, State> {
     })
   }
 
+  openCoinbase = () => {
+    this.setState({ screen: '2fa' })
+    const tok = rpc.openCoinbase()
+  }
+
+  sendCode = payload => {
+    console.log(payload)
+    if (payload && payload.valid) {
+      rpc.sendCoinbaseCode(payload.fields.code)
+    }
+  }
+
   render() {
     const { address, onClose, onComplete } = this.props
-    const { completed } = this.state
+    const { completed, screen } = this.state
+
+    console.log(screen)
     const errorMsg = this.state.errorMsg ? (
       <Row size={1}>
         <Column>
@@ -95,39 +109,61 @@ export default class CoinbaseModal extends Component<Props, State> {
       </Row>
     ) : null
 
-    return (
-      <FormModalView
-        title="Purchase ETH"
-        full
-        dismissButton={completed ? null : 'CANCEL'}
-        onRequestClose={onClose}
-        confirmButton={completed ? 'FINISH' : 'PROCEED'}
-        onSubmitForm={completed ? onComplete : () => rpc.openCoinbase()}>
-        <Container>
-          {errorMsg}
-          <>
-            <Text variant={['modalText', 'center']}>
-              {completed
-                ? "Congrats! You're all done"
-                : 'Funds will be deposited to this Eth address:'}
-            </Text>
-            {!completed && (
-              <>
-                <AddContactDetail>
-                  <Blocky>
-                    <Avatar id={address} size="small" />
-                  </Blocky>
-                  <AddContactDetailText>
-                    <Text bold variant={['ellipsis', 'greyDark23']} size={13}>
-                      {address}
-                    </Text>
-                  </AddContactDetailText>
-                </AddContactDetail>
-              </>
-            )}
-          </>
-        </Container>
-      </FormModalView>
-    )
+    if (screen === 'selectAddress') {
+      return (
+        <FormModalView
+          title="Purchase ETH"
+          full
+          dismissButton={completed ? null : 'CANCEL'}
+          onRequestClose={onClose}
+          confirmButton={completed ? 'FINISH' : 'PROCEED'}
+          onSubmitForm={completed ? onComplete : this.openCoinbase}>
+          <Container>
+            {errorMsg}
+            <>
+              <Text variant={['modalText', 'center']}>
+                {completed
+                  ? "Congrats! You're all done"
+                  : 'Funds will be deposited to this Eth address:'}
+              </Text>
+              {!completed && (
+                <>
+                  <AddContactDetail>
+                    <Blocky>
+                      <Avatar id={address} size="small" />
+                    </Blocky>
+                    <AddContactDetailText>
+                      <Text bold variant={['ellipsis', 'greyDark23']} size={13}>
+                        {address}
+                      </Text>
+                    </AddContactDetailText>
+                  </AddContactDetail>
+                </>
+              )}
+            </>
+          </Container>
+        </FormModalView>
+      )
+    } else if (screen === '2fa') {
+      return (
+        <FormModalView
+          title="Mobile Authentication"
+          full
+          dismissButton={completed ? null : 'CANCEL'}
+          onRequestClose={onClose}
+          confirmButton={completed ? 'EXIT' : 'SEND'}
+          onSubmitForm={this.sendCode}>
+          <Container>
+            {errorMsg}
+            <>
+              <Text>
+                {'enter your 2FA code below to authorize the transaction'}
+              </Text>
+              <TextField name="code" label="code" />
+            </>
+          </Container>
+        </FormModalView>
+      )
+    }
   }
 }

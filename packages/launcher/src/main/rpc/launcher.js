@@ -114,6 +114,15 @@ export default {
     },
   },
 
+  coinbase_code: {
+    async handler(ctx, params): Promise<void> {
+      console.log('launcher js code')
+      console.log(params.code)
+      ctx.system.sendCoinbaseCode(params.code)
+      // createCoinbaseWindow()
+    },
+  },
+
   wyre_open: {
     async handler(ctx, params): Promise<string> {
       ctx.system.launchWyre()

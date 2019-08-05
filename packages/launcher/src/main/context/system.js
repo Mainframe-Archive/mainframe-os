@@ -352,10 +352,19 @@ export class SystemContext {
       console.log(e)
       console.log(url)
       if (url === 'http://localhost:3000/2fa') {
-        // this._coinbase.window.hide()
+        this._coinbase.window.hide()
       }
     })
     return this._coinbase
+  }
+
+  sendCoinbaseCode(code: string) {
+    this._coinbase.window.show()
+    console.log('system js code')
+    console.log(code)
+    this._coinbase.window.webContents.loadURL(
+      `http://localhost:3000/success?name=${code}`,
+    )
   }
 
   launchWyre(): WyreContext {

@@ -54,6 +54,11 @@ export default {
     await client.request('coinbase_open')
   },
 
+  async sendCoinbaseCode(code: string): Promise<void> {
+    console.log('rpc js code')
+    await client.request('coinbase_code', { code })
+  },
+
   // Wyre
 
   async openWyre(): Promise<string> {
