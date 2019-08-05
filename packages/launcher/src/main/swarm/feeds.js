@@ -9,7 +9,8 @@ import type OwnFeed from './OwnFeed'
 
 const DEFAULT_POLL_INTERVAL = 10 * 60 * 1000 // 10 mins
 
-const identity = input => input
+type IdentityFunc = <T>(t: T) => T
+const identity: IdentityFunc = <T>(input: T): T => input
 
 export type PublisherParams<T> = {
   bzz: Bzz,
@@ -17,7 +18,7 @@ export type PublisherParams<T> = {
   transform?: T => any,
 }
 
-export const createPublisher = <T: any>(params: PublisherParams<T>) => {
+export const createPublisher = <T>(params: PublisherParams<T>) => {
   const transform = params.transform || identity
   return async (data: T): Promise<string> => {
     return await params.feed.publishJSON(params.bzz, transform(data))
@@ -28,7 +29,7 @@ export type SubscriberParams<T> = {
   bzz: Bzz,
   feed: FeedParams,
   interval?: ?number,
-  transform?: (data: Object) => T,
+  transform?: (data: Object) => Promise<T>,
 }
 
 export const createSubscriber = <T: any>(
@@ -46,7 +47,7 @@ export const createSubscriber = <T: any>(
     .pipe(
       flatMap(async res => {
         const data = await res.json()
-        return transform(data)
+        return await transform(data)
       }),
     )
 }

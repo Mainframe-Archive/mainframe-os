@@ -9,8 +9,9 @@ import styled from 'styled-components/native'
 import { ROUTES } from '../constants'
 
 import RelayRenderer from '../RelayRenderer'
-import { AppsGrid, NewAppButton } from '../apps/AppsView'
 import { OwnAppItem } from '../apps/AppItem'
+import AppsGrid from '../apps/AppsGrid'
+import NewAppButton from '../apps/NewAppButton'
 import CreateAppModal from './CreateAppModal'
 
 import type { DeveloperAppsScreen_developer as Developer } from './__generated__/DeveloperAppsScreen_developer.graphql'

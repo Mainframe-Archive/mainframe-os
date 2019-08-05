@@ -1,12 +1,12 @@
 // @flow
 
+import { truncateAddress } from '@mainframe/eth'
+import { Button, Text, Checkbox } from '@morpheus-ui/core'
 import React, { Component } from 'react'
 import styled from 'styled-components/native'
-import { Button, Text, Checkbox } from '@morpheus-ui/core'
+
 import Avatar from '../UIComponents/Avatar'
 import rpc from './rpc'
-
-import { condenseAddress } from './WalletPickerView'
 
 export type SelectedContactIDs = Array<string>
 
@@ -77,12 +77,8 @@ export default class ContactPickerView extends Component<Props, State> {
   }
 
   async fetchContacts() {
-    const { contacts } = await rpc.getUserContacts(this.props.userID)
-    this.setState({
-      contacts: contacts.filter(
-        item => item.connectionState.toLowerCase() === 'connected',
-      ),
-    })
+    const { contacts } = await rpc.getApprovedContacts(true)
+    this.setState({ contacts })
   }
 
   checkContact(contact: Contact) {
@@ -119,7 +115,7 @@ export default class ContactPickerView extends Component<Props, State> {
               {c.profile.name}
             </Text>
             <Text size={10} color="#F9F9F9" variant="mono">
-              {condenseAddress(c.profile.ethAddress)}
+              {truncateAddress(c.profile.ethAddress || '')}
             </Text>
           </ContactData>
           {this.props.multiSelect && (

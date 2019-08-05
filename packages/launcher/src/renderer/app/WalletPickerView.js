@@ -1,5 +1,6 @@
 // @flow
 
+import { truncateAddress } from '@mainframe/eth'
 import React, { Component, type Node } from 'react'
 import styled from 'styled-components/native'
 
@@ -7,14 +8,6 @@ import type { AppWallet, AppWallets } from '../../types'
 
 import WalletIcon from '../launcher/wallets/WalletIcon'
 import rpc from './rpc'
-
-export const condenseAddress = (a?: ?string, len: number = 8): string => {
-  if (!a) return ''
-  if (a.length < len + 2) {
-    return a
-  }
-  return a.slice(0, len + 2) + '...' + a.slice(-len, a.length)
-}
 
 type Props = {
   onSelectedWalletAccount: (address: string) => void,
@@ -104,7 +97,7 @@ export default class WalletPickerView extends Component<Props, State> {
             hover={this.state.hover === a}>
             <WalletIcon size="small" address={a} />
             <AccountLabel selected={selected} numberOfLines={1}>
-              {condenseAddress(a)}
+              {truncateAddress(a)}
             </AccountLabel>
           </AccountRow>
         )

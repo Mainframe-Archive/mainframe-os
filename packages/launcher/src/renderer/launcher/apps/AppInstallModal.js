@@ -20,7 +20,7 @@ type LookupQuery = $PropertyType<
   AppInstallModalLookupAppQueryResponse,
   'lookup',
 >
-type AppByID = $PropertyType<LookupQuery, 'appByID'>
+type AppByID = $NonMaybeType<$PropertyType<LookupQuery, 'appByID'>>
 type AppResult = $PropertyType<AppByID, 'app'>
 type AppVersion = $PropertyType<AppResult, 'latestAvailableVersion'>
 

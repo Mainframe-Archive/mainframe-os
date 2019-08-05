@@ -19,13 +19,16 @@ import rpc from '../rpc'
 import FormModalView from '../../UIComponents/FormModalView'
 import { EnvironmentContext } from '../RelayEnvironment'
 
-import { type Wallet } from './WalletsView'
+import type { WalletsScreen_user as User } from './__generated__/WalletsScreen_user.graphql'
+type UserWallets = $PropertyType<User, 'ethWallets'>
+type LedgerWallets = $PropertyType<UserWallets, 'ledger'>
 
 type Props = {
-  wallets: Array<Wallet>,
+  wallets: LedgerWallets,
+  setAsDefault?: boolean,
   full?: boolean,
   onClose: () => void,
-  onSuccess?: (address: string) => Promise<void>,
+  onSuccess?: (address: string) => any,
 }
 
 type State = {
@@ -196,7 +199,7 @@ export default class WalletAddLedgerModal extends Component<Props, State> {
     })
   }
 
-  getAddresses = memoize((wallets: Array<Wallet>) => {
+  getAddresses = memoize((wallets: LedgerWallets) => {
     const addresses = flatten(wallets.map(w => w.accounts))
     return addresses
   })

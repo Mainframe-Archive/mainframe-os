@@ -248,8 +248,14 @@ export default {
   ethSend: async (params: Object) => {
     return client.request('blockchain_ethSend', params)
   },
-  getLedgerAccounts: (pageNum: number, legacyPath: boolean) => {
-    return client.request('wallet_getLedgerAccounts', { pageNum, legacyPath })
+  getLedgerAccounts: async (
+    pageNum: number,
+    legacyPath: boolean,
+  ): Promise<Array<string>> => {
+    return await client.request('wallet_getLedgerAccounts', {
+      pageNum,
+      legacyPath,
+    })
   },
 
   getInviteTXDetails: (params: Object) => {

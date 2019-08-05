@@ -1,14 +1,15 @@
-//@flow
+// @flow
 
 import React, { Component, type Node } from 'react'
 import { Text, Tooltip } from '@morpheus-ui/core'
 import styled from 'styled-components/native'
-import { type txParam } from './InviteContactModal'
+
+import type { TXParam } from './InviteContactModal'
 
 type Props = {
   title: string,
   tooltipInfo: { title: string, question: string, answer: string },
-  txParam: ?txParam,
+  txParam: ?TXParam,
   button: ?Node,
 }
 
@@ -63,7 +64,7 @@ export default class Transaction extends Component<Props> {
             <Text variant={['greyDark23', 'bold']} size={12}>
               {title}
             </Text>
-            {txParam && (
+            {txParam ? (
               <GasContainer>
                 <Text color="#303030" size={11} variant="marginRight15">
                   {'Gas price: ' + txParam.gasPriceGwei}
@@ -72,9 +73,9 @@ export default class Transaction extends Component<Props> {
                   {'Max Cost: ' + txParam.maxCost + ' ETH'}
                 </Text>
               </GasContainer>
-            )}
+            ) : null}
           </AddContactDetailText>
-          {button && button}
+          {button || null}
         </AddContactDetail>
       </Container>
     )

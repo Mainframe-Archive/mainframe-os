@@ -52,6 +52,7 @@ export type AppWindowSession = {
   isDevelopment: boolean,
   partition: string,
   settings: {
+    defaultWalletAddress: ?string,
     webDomains: WebDomainsDefinitions,
   },
   user: {
@@ -78,13 +79,24 @@ export type AppWindowSession = {
 
 // RPC
 
-export type DBRequestParams = { password: string, save?: ?boolean }
+export type ContactGetInviteTXDetailsParams = {|
+  type: string,
+  contactID: string,
+  customAddress: string,
+|}
 
-export type DBOpenResult = { user: boolean, wallet: boolean }
+export type DBRequestParams = {| password: string, save?: ?boolean |}
 
-export type GraphQLRequestParams = { query: string, variables?: ?Object }
+export type DBOpenResult = {| user: boolean, wallet: boolean |}
 
-export type UserCreateRequestParams = {
+export type GraphQLRequestParams = {| query: string, variables?: ?Object |}
+
+export type UserCreateRequestParams = {|
   profile: { name: string },
   isPrivate: boolean,
-}
+|}
+
+export type WalletGetLedgerEthAccountsParams = {|
+  pageNum: number,
+  legacyPath: boolean,
+|}

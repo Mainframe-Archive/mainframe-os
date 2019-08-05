@@ -1,5 +1,6 @@
 // @flow
 
+import type { TXParams } from '@mainframe/eth'
 import { generateMnemonic, mnemonicToSeed } from 'bip39'
 import sigUtil from 'eth-sig-util'
 import type EthWallet from 'ethereumjs-wallet'
@@ -20,8 +21,8 @@ type EthWalletHDMethods = {|
   addAccounts(indexes: Array<number>): Promise<void>,
   getUsers(): Promise<Array<UserDoc>>,
   safeRemove(): Promise<void>,
-  signTransaction(params: WalletEthSignTxParams): Promise<string>,
-  sign(params: WalletSignDataParams): Promise<string>,
+  signTransaction(params: TXParams): Promise<string>,
+  sign(params: { address: string, data: string }): Promise<string>,
 |}
 
 export type EthWalletHDDoc = Doc<EthWalletHDData, EthWalletHDMethods>
@@ -207,7 +208,7 @@ export default async (
         })
       },
 
-      async signTransaction(params: WalletEthSignTxParams): Promise<string> {
+      async signTransaction(params: TXParams): Promise<string> {
         const account = this.activeAccounts.find(a => a.address === params.from)
         if (!account) {
           throw new Error(`wallet not found for ${params.from}`)
@@ -220,7 +221,7 @@ export default async (
         return '0x' + tx.serialize().toString('hex')
       },
 
-      async sign(params: WalletSignDataParams): Promise<string> {
+      async sign(params: { address: string, data: string }): Promise<string> {
         const account = this.activeAccounts.find(
           a => a.address === params.address,
         )

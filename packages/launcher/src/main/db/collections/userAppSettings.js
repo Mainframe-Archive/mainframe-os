@@ -8,12 +8,28 @@ import { COLLECTION_NAMES } from '../constants'
 import type { Collection, CollectionParams, Doc } from '../types'
 
 import type { WebDomainDefinition } from '../schemas/appManifest'
-import schema, { type UserAppSettingsData } from '../schemas/userAppSettings'
+import schema, {
+  type ApprovedContact,
+  type UserAppSettingsData,
+} from '../schemas/userAppSettings'
 import { generateKeyPair, generateLocalID } from '../utils'
+
+import type { ContactAppData } from './contacts'
+
+export type UserAppApprovedContact = {|
+  aliasID: string,
+  contact: ContactAppData,
+|}
 
 type UserAppSettingsMethods = {|
   getStorageFeed(): OwnFeed,
   getStorageKey(): Buffer,
+  getApprovedContacts(
+    approvedContacts: Array<ApprovedContact>,
+  ): Promise<Array<UserAppApprovedContact>>,
+  getContacts(aliasIDs: Array<string>): Promise<Array<UserAppApprovedContact>>,
+  getAllContacts(): Promise<Array<UserAppApprovedContact>>,
+  addContacts(contactsIDs: Array<string>): Promise<Array<string>>,
   setWebDomainGrant(grant: WebDomainDefinition): Promise<void>,
 |}
 
@@ -32,7 +48,9 @@ export type UserAppSettingsCollection = Collection<UserAppSettingsData> &
 export default async (
   params: CollectionParams,
 ): Promise<UserAppSettingsCollection> => {
-  return await params.db.collection<
+  const { db } = params
+
+  return await db.collection<
     UserAppSettingsData,
     UserAppSettingsDoc,
     UserAppSettingsMethods,
@@ -62,6 +80,53 @@ export default async (
 
       getStorageKey(): Buffer {
         return Buffer.from(this.storageEncryptionKey, 'base64')
+      },
+
+      async getApprovedContacts(
+        approvedContacts: Array<ApprovedContact>,
+      ): Promise<Array<UserAppApprovedContact>> {
+        const contacts = approvedContacts.map(async a => ({
+          aliasID: a.aliasID,
+          contact: await db.contacts.getAppData(a.contact),
+        }))
+        const loaded = await Promise.all(contacts)
+        return loaded.filter(a => a.contact !== null)
+      },
+
+      async getContacts(
+        aliasIDs: Array<string>,
+      ): Promise<Array<UserAppApprovedContact>> {
+        const contacts = this.approvedContacts.filter(a => {
+          return aliasIDs.includes(a.aliasID)
+        })
+        return await this.getApprovedContacts(contacts)
+      },
+
+      async getAllContacts(): Promise<Array<UserAppApprovedContact>> {
+        return await this.getApprovedContacts(this.approvedContacts)
+      },
+
+      async addContacts(contactsIDs: Array<string>): Promise<Array<string>> {
+        const aliasIDs = []
+        await this.atomicUpdate(doc => {
+          const existingIDs = []
+          doc.approvedContacts.forEach(a => {
+            if (contactsIDs.includes(a.contact)) {
+              aliasIDs.push(a.aliasID)
+              existingIDs.push(a.contact)
+            }
+          })
+          const toAdd = []
+          contactsIDs.forEach(id => {
+            if (!existingIDs.includes(id)) {
+              const aliasID = generateLocalID()
+              aliasIDs.push(aliasID)
+              toAdd.push({ aliasID, contact: id })
+            }
+          })
+          doc.approveContacts = doc.approveContacts.concat(toAdd)
+        })
+        return aliasIDs
       },
 
       async setWebDomainGrant(grant: WebDomainDefinition): Promise<void> {

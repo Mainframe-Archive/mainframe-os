@@ -110,7 +110,14 @@ export default {
 
   // Contacts
 
-  getUserContacts: async (userID: string) => {
-    return await client.request('contacts_getUserContacts', { userID })
+  getApprovedContacts: async (connectedOnly?: boolean = false) => {
+    const res = await client.request('contacts_getApproved')
+    return connectedOnly
+      ? {
+          contacts: res.contacts.map(
+            c => c.contact.connectionState === 'connected',
+          ),
+        }
+      : res
   },
 }

@@ -23,7 +23,6 @@ type Props = {
 
 type State = {
   error?: ?string,
-  wallets?: ?Object, // TODO define
   tokenInfo?: {
     symbol: string,
     decimalsUnit: string,
@@ -71,18 +70,12 @@ export default class WalletTxRequestView extends Component<Props, State> {
   state = {}
 
   componentDidMount() {
-    this.getEthWallets()
     this.attemptToReadData()
   }
   componentDidUpdate(nextProps: Props) {
     if (nextProps !== this.props) {
       this.attemptToReadData()
     }
-  }
-
-  async getEthWallets() {
-    const wallets = await rpc.getUserEthWallets()
-    this.setState({ wallets })
   }
 
   async attemptToReadData() {

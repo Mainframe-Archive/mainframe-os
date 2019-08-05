@@ -1,6 +1,5 @@
 // @flow
 
-import { MANIFEST_SCHEMA_MESSAGES } from '@mainframe/app-manifest'
 import createHandler, { type Methods } from '@mainframe/rpc-handler'
 import { ipcMain, type WebContents } from 'electron'
 
@@ -15,8 +14,6 @@ import type { Logger } from '../logger'
 
 import { sandboxed as sandboxedMethods, trusted as trustedMethods } from './app'
 import launcherMethods from './launcher'
-
-const validatorOptions = { messages: MANIFEST_SCHEMA_MESSAGES }
 
 type Notification = {
   method: string,
@@ -44,7 +41,6 @@ const createChannel = (params: ChannelParams) => {
   const handleMessage = createHandler({
     methods: params.methods,
     onNotification,
-    validatorOptions,
   })
 
   ipcMain.on(params.name, async (event, incoming) => {

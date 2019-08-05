@@ -16,6 +16,7 @@ import AppInstallModal from './AppInstallModal'
 import AppPreviewModal from './AppPreviewModal'
 import AppUpdateModal from './AppUpdateModal'
 import { InstalledAppItem } from './AppItem'
+import AppsGrid from './AppsGrid'
 import CompleteOnboardSession from './CompleteOnboardSession'
 import NewAppButton from './NewAppButton'
 import SuggestedAppItem, { type SuggestedAppData } from './SuggestedItem'
@@ -44,14 +45,6 @@ const LogoContainer = styled.View`
 
 const ButtonsContainer = styled.View`
   flex-direction: row;
-`
-
-export const AppsGrid = styled.View`
-  flex-direction: row;
-  flex-wrap: wrap;
-  margin-left: -8px;
-  margin-top: 5px;
-  margin-bottom: 15px;
 `
 
 const Bottom = styled.View`

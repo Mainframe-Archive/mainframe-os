@@ -1,5 +1,7 @@
 // @flow
 
+import type { TXParams } from '@mainframe/eth'
+
 import type { UserDoc } from '../db/collections/users'
 
 export default class WalletProvider {
@@ -13,12 +15,11 @@ export default class WalletProvider {
     return Promise.resolve(this._user.getEthAccounts())
   }
 
-  signTransaction(params: Object) {
-    const eth = this._user.getEth()
-    return this._user.signEthTransaction(params, eth.networkID)
+  async signTransaction(params: TXParams): Promise<string> {
+    return await this._user.signEthTransaction(params)
   }
 
-  sign(params: Object) {
-    return this._user.signEthData(params)
+  async sign(params: { address: string, data: string }): Promise<string> {
+    return await this._user.signEthData(params)
   }
 }

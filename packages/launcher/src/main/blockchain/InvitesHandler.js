@@ -204,7 +204,9 @@ export default class InvitesHandler {
           throw new Error('First contact feed hash undefined')
         }
         const payload = await res.json()
-        const firstContactFeed = readFirstContact(decode(sharedKey, payload))
+        const firstContactFeed = await readFirstContact(
+          decode(sharedKey, payload),
+        )
         this.logger.log({
           level: 'debug',
           message: 'Found contact feed from blockchain invite',
@@ -287,12 +289,13 @@ export default class InvitesHandler {
       return
     }
     const contact = await this.user.findContactByPeer(peer.localID)
-    if (contact && contact.invite) {
+    if (contact != null && contact.invite != null) {
       this.logger.log({
         level: 'debug',
         message: 'Setting contact state declined',
         id: event.recipientFeedHash,
       })
+      // $FlowFixMe: nested key is not recognised
       await contact.atomicSet('invite.stakeState', 'seized')
     }
   }

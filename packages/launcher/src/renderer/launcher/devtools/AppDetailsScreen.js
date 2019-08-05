@@ -13,6 +13,8 @@ import {
 import type { Match, RouterHistory } from 'react-router-dom'
 import styled from 'styled-components/native'
 
+import type { WebDomainsDefinitions } from '../../../types'
+
 import ArrowLeft from '../../UIComponents/Icons/ArrowLeft'
 import CopyableBlock from '../CopyableBlock'
 import PlusIcon from '../../UIComponents/Icons/PlusIcon'
@@ -357,7 +359,9 @@ class AppDetails extends Component<Props, State> {
           <AppSummary
             appData={appData}
             webDomains={
-              app.inProgressVersion ? app.inProgressVersion.webDomains : []
+              app.inProgressVersion
+                ? app.inProgressVersion.webDomains
+                : ([]: WebDomainsDefinitions)
             }
             onPressBack={this.onPressPublishVersion}
             onRequestClose={this.onCloseModal}

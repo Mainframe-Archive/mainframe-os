@@ -24,6 +24,12 @@ import type { SystemContext } from './system'
 
 const PERMISSION_DENIED_METHOD = 'permission_denied'
 
+// TODO: defined these keys
+export type PermissionKey = string
+// TODO: rename BLOCKCHAIN_ to ETHEREUM_
+// 'BLOCKCHAIN_SEND' | 'BLOCKCHAIN_SIGN' | 'CONTACTS_READ'
+export type PermissionGrant = 'granted' | 'denied' | 'not_set'
+
 export type AppSessionParams = {
   app: AppData,
   isDevelopment: boolean,
@@ -118,6 +124,7 @@ export class AppSession {
       isDevelopment: this.isDevelopment,
       partition: `persist:${this.app.publicID}/${this.user.localID}`,
       settings: {
+        defaultWalletAddress: this.settings.defaultEthAccount,
         webDomains: this.settings.webDomains,
       },
       user: {
@@ -143,6 +150,7 @@ export type AppContextParams = {
 
 export class AppContext {
   _hasPermissionDeniedSubscription: boolean = false
+  _permissions: { [key: PermissionKey]: PermissionGrant } = {}
   _storage: ?AppContextStorage
   _subscriptions: { [id: string]: Subscription } = {}
   logger: Logger
@@ -175,6 +183,31 @@ export class AppContext {
       }
     }
     return this._storage
+  }
+
+  async isGranted(
+    key: PermissionKey,
+    params?: string | Object,
+  ): Promise<PermissionGrant> {
+    let granted = 'not_set'
+    // Always request permission for transaction signing
+    if (
+      granted === 'not_set' ||
+      key === 'BLOCKCHAIN_SEND' ||
+      key === 'BLOCKCHAIN_SIGN'
+    ) {
+      const res = await this.trustedRPC.request('user_request', {
+        key,
+        params: { [key]: params },
+      })
+
+      if (res.persist) {
+        // Grant for session
+        this._permissions[key] = res.granted
+      }
+      granted = res.granted ? 'granted' : 'denied'
+    }
+    return granted
   }
 
   handleSandboxWebRequest = async (request, callback) => {
@@ -346,5 +379,25 @@ export class AppContext {
       sub.unsubscribe()
     })
     this._subscriptions = {}
+  }
+}
+
+export const withAppPermission = (
+  key: PermissionKey,
+  handler: (ctx: AppContext, params: Object) => Promise<any>,
+) => {
+  return async (ctx: AppContext, params: Object) => {
+    const granted = await ctx.isGranted(key, params)
+    switch (granted) {
+      case 'granted':
+        return await handler(ctx, params)
+      case 'denied': {
+        ctx.notifyPermissionDenied({ key })
+        throw new Error(`User denied permission: ${key}`)
+      }
+      case 'unknown':
+      default:
+        throw new Error(`Unknown permission: ${key}`)
+    }
   }
 }

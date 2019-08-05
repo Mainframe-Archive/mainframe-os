@@ -61,7 +61,7 @@ class CreateAppModal extends Component<Props, State> {
     appData: {
       version: '1.0.0',
     },
-    webDomains: [],
+    webDomains: ([]: WebDomainsDefinitions),
   }
 
   // HANDLERS

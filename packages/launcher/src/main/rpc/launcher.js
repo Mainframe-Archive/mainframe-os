@@ -3,10 +3,12 @@
 import type { ExecutionResult } from 'graphql'
 
 import type {
+  ContactGetInviteTXDetailsParams,
   DBRequestParams,
   DBOpenResult,
   GraphQLRequestParams,
   UserCreateRequestParams,
+  WalletGetLedgerEthAccountsParams,
 } from '../../types'
 import { getAccountsByPage } from '../wallets/ledgerClient'
 
@@ -439,12 +441,12 @@ export default {
   //
   // // Wallets & Blockchain
   //
-  wallet_getLedgerAccounts: (
+  wallet_getLedgerAccounts: async (
     ctx: LauncherContext,
     params: WalletGetLedgerEthAccountsParams,
-  ): Promise<WalletGetLedgerEthAccountsResult> => {
+  ): Promise<Array<string>> => {
     try {
-      return getAccountsByPage(params.pageNum, params.legacyPath)
+      return await getAccountsByPage(params.pageNum, params.legacyPath)
     } catch (err) {
       ctx.logger.log({
         level: 'error',
@@ -468,24 +470,18 @@ export default {
 
   blockchain_getInviteTXDetails: async (
     ctx: LauncherContext,
-    params: GetInviteTXDetailsParams,
+    params: ContactGetInviteTXDetailsParams,
   ): Promise<any> => {
-    const user = await ctx.getUserChecked()
-    if (user == null) {
-      throw new Error('No user')
-    }
-    return user.invitesSync.getInviteTXDetails(params.type, params.contactID)
+    const invitesSync = await ctx.getInvitesSync()
+    return invitesSync.getInviteTXDetails(params.type, params.contactID)
   },
 
   blockchain_sendInviteApprovalTX: async (
     ctx: LauncherContext,
     params: SendInviteTXParams,
   ): Promise<any> => {
-    const user = await ctx.getUserChecked()
-    if (user == null) {
-      throw new Error('No user')
-    }
-    return user.invitesSync.sendInviteApprovalTX(
+    const invitesSync = await ctx.getInvitesSync()
+    return invitesSync.sendInviteApprovalTX(
       params.contactID,
       params.customAddress,
     )
@@ -495,32 +491,23 @@ export default {
     ctx: LauncherContext,
     params: SendInviteTXParams,
   ): Promise<any> => {
-    const user = await ctx.getUserChecked()
-    if (user == null) {
-      throw new Error('No user')
-    }
-    return user.invitesSync.sendInviteTX(params.contactID, params.customAddress)
+    const invitesSync = await ctx.getInvitesSync()
+    return invitesSync.sendInviteTX(params.contactID, params.customAddress)
   },
 
   blockchain_sendDeclineInviteTX: async (
     ctx: LauncherContext,
     params: SendDeclineTXParams,
   ): Promise<any> => {
-    const user = await ctx.getUserChecked()
-    if (user == null) {
-      throw new Error('No user')
-    }
-    return user.invitesSync.declineContactInvite(params.requestID)
+    const invitesSync = await ctx.getInvitesSync()
+    return invitesSync.declineContactInvite(params.requestID)
   },
 
   blockchain_sendWithdrawInviteTX: async (
     ctx: LauncherContext,
     params: SendWithdrawInviteTXParams,
   ): Promise<any> => {
-    const user = await ctx.getUserChecked()
-    if (user == null) {
-      throw new Error('No user')
-    }
-    return user.invitesSync.retrieveStake(params.contactID)
+    const invitesSync = await ctx.getInvitesSync()
+    return invitesSync.retrieveStake(params.contactID)
   },
 }

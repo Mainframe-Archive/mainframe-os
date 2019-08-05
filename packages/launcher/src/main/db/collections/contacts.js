@@ -39,6 +39,11 @@ export type ContactConnectionState =
   | 'sending_blockchain'
   | 'sent_blockchain'
 
+export type ContactAppData = {|
+  connectionState: ContactConnectionState,
+  profile: GenericProfile,
+|}
+
 type ContactMethods = {|
   getConnectionState(): ContactConnectionState,
   getPrivateID(): string,
@@ -63,6 +68,7 @@ export type ContactDoc = Doc<ContactData, ContactMethods, { peer: PeerDoc }>
 type ContactsStatics = {|
   create(data: $Shape<ContactData>): Promise<ContactDoc>,
   findByPeerID(peer: string): Promise<Array<ContactDoc>>,
+  getAppData(localID: string): Promise<ContactAppData | null>,
 |}
 
 export type ContactsCollection = Collection<ContactData, ContactDoc> &
@@ -94,6 +100,16 @@ export default async (
       // Return all contacts a peer has
       async findByPeerID(peer: string): Promise<Array<ContactDoc>> {
         return await this.find({ peer }).exec()
+      },
+
+      async getAppData(localID: string): Promise<ContactAppData | null> {
+        const contact = this.findOne(localID).exec()
+        return contact === null
+          ? null
+          : {
+              connectionState: contact.connectionState,
+              profile: await contact.getProfile(),
+            }
       },
     },
     methods: {
@@ -240,7 +256,7 @@ export default async (
         this._connectedSubscription = createSubscriber({
           bzz: user.getBzz(),
           feed: { user: pubKeyToAddress(pubKey.encode()) },
-          transform: payload => {
+          transform: async payload => {
             try {
               // TODO: readContact() protocol
               return decode(payload)
@@ -321,14 +337,14 @@ export default async (
           bzz: user.getBzz(),
           feed,
           interval: 60 * 1000, // 1 min
-          transform: payload => {
+          transform: async payload => {
             logger.log({
               level: 'debug',
               message: 'Received first contact payload',
               id: this.localID,
             })
             try {
-              return readFirstContact(decode(payload))
+              return await readFirstContact(decode(payload))
             } catch (err) {
               logger.log({
                 level: 'warn',

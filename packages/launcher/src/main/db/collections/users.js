@@ -2,7 +2,7 @@
 
 import Bzz from '@erebos/api-bzz-node'
 import { createKeyPair, sign } from '@erebos/secp256k1'
-import { EthClient, ETH_RPC_URLS } from '@mainframe/eth'
+import { EthClient, ETH_RPC_URLS, type TXParams } from '@mainframe/eth'
 import objectHash from 'object-hash'
 import { type Observable, Subject, Subscription } from 'rxjs'
 import { debounceTime, filter, flatMap, map } from 'rxjs/operators'
@@ -34,6 +34,7 @@ type UserMethods = {|
   hasEthWallet(): boolean,
   getBzz(): Bzz,
   getEth(): EthClient,
+  getInvitesSync(): ?InvitesHandler,
   getPublicID(): string,
   getPublicFeed(): OwnFeed,
   getSharedKey(peerKey: any): Buffer,
@@ -58,7 +59,7 @@ type UserMethods = {|
   findWalletOfAddress(
     address: string,
   ): Promise<EthWalletHDDoc | EthWalletLedgerDoc | void>,
-  signEthTransaction(params: Object): Promise<string>,
+  signEthTransaction(params: TXParams): Promise<string>,
   signEthData(params: { address: string, data: string }): Promise<string>,
   startPublicProfilePublication(): rxjs$TeardownLogic,
   stopPublicProfilePublication(): void,
@@ -71,12 +72,12 @@ type UserMethods = {|
   stopSync(): void,
 |}
 
-type UserPopulate = {
+type UserPopulate = {|
   contacts: Array<ContactDoc>,
   contactRequests: Array<ContactRequestDoc>,
   'ethWallets.hd': Array<EthWalletHDDoc>,
   'ethWallets.ledger': Array<EthWalletLedgerDoc>,
-}
+|}
 
 export type UserDoc = Doc<UserData, UserMethods, UserPopulate>
 
@@ -177,6 +178,10 @@ export default async (params: CollectionParams): Promise<UsersCollection> => {
         }
         // $FlowFixMe null checked above
         return this._ethClient
+      },
+
+      getInvitesSync(): ?InvitesHandler {
+        return this.invitesSync
       },
 
       getPublicID(): string {
@@ -422,7 +427,7 @@ export default async (params: CollectionParams): Promise<UsersCollection> => {
         )
       },
 
-      async signEthTransaction(params: Object): Promise<string> {
+      async signEthTransaction(params: TXParams): Promise<string> {
         const wallet = await this.findWalletOfAddress(params.from)
         if (!wallet) {
           throw new Error(`No wallet found for user ${this.localID}`)

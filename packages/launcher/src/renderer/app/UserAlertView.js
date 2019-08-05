@@ -1,22 +1,15 @@
 // @flow
 
-import { MANIFEST_SCHEMA_MESSAGES } from '@mainframe/app-manifest'
+import { truncateAddress, type TXParams } from '@mainframe/eth'
 import createHandler from '@mainframe/rpc-handler'
-import { uniqueID } from '@mainframe/utils-id'
-import { ipcRenderer } from 'electron'
-import React, { Component } from 'react'
-import styled from 'styled-components/native'
 import { Text, Button, Checkbox } from '@morpheus-ui/core'
-import { hexToUtf8, isHex } from 'web3-utils'
-import { truncateAddress } from '@mainframe/eth'
-
-import type { Subscription } from 'rxjs'
-import type {
-  WalletEthSignTxParams,
-  WalletEthSignParams,
-} from '@mainframe/client'
-
 import ContactsIcon from '@morpheus-ui/icons/ContactsFilledMd'
+import { ipcRenderer } from 'electron'
+import nanoid from 'nanoid'
+import React, { Component } from 'react'
+import type { Subscription } from 'rxjs'
+import styled from 'styled-components/native'
+import { hexToUtf8, isHex } from 'web3-utils'
 
 import { APP_TRUSTED_REQUEST_CHANNEL } from '../../constants'
 import type { AppWindowSession } from '../../types'
@@ -42,10 +35,10 @@ type GrantedData = {
 type Request = {
   key: string,
   domain?: string,
-  params?: WalletEthSignTxParams | ContactSelectParams,
+  params?: TXParams | ContactSelectParams,
   params: {
-    BLOCKCHAIN_SEND?: WalletEthSignTxParams,
-    BLOCKCHAIN_SIGN?: WalletEthSignParams,
+    BLOCKCHAIN_SEND?: TXParams,
+    BLOCKCHAIN_SIGN?: TXParams,
     CONTACTS_SELECT?: ContactSelectParams,
   },
 }
@@ -86,7 +79,7 @@ type State = {
 const methods = {
   user_request: (ctx, request: Request): Promise<PermissionGrantResult> => {
     return new Promise(resolve => {
-      const id = uniqueID()
+      const id = nanoid()
       ctx.setState(({ requests }) => ({
         requests: {
           ...requests,
@@ -100,9 +93,6 @@ const methods = {
     })
   },
 }
-
-const validatorOptions = { messages: MANIFEST_SCHEMA_MESSAGES }
-const handleMessage = createHandler({ methods, validatorOptions })
 
 const permissionDescriptions = {
   BLOCKCHAIN_SEND: 'make an Ethereum blockchain transaction',
@@ -241,6 +231,8 @@ export default class UserAlertView extends Component<Props, State> {
 
   handleRequest() {
     const context = { setState: this.setState.bind(this) }
+    const handleMessage = createHandler({ methods })
+
     this._onRPCMessage = async (event: Object, incoming: Object) => {
       const outgoing = await handleMessage(context, incoming)
       if (outgoing != null) {

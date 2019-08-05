@@ -7,6 +7,7 @@ import nanoid from 'nanoid'
 import { LAUNCHER_CHANNEL } from '../../constants'
 import { ROUTES } from '../../renderer/launcher/constants'
 
+import type InvitesHandler from '../blockchain/InvitesHandler'
 import type { Config } from '../config'
 import type { UserDoc } from '../db/collections/users'
 import type { DB } from '../db/types'
@@ -139,6 +140,18 @@ export class LauncherContext {
     }
 
     return user
+  }
+
+  async getInvitesSync(): Promise<InvitesHandler> {
+    const user = await this.getUserChecked()
+    if (user == null) {
+      throw new Error('No user')
+    }
+    const invitesSync = user.getInvitesSync()
+    if (invitesSync == null) {
+      throw new Error('Invites sync is not setup')
+    }
+    return invitesSync
   }
 
   async getInitialRoute(): Promise<string> {

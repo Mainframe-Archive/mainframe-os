@@ -25,20 +25,25 @@ type ChangeEvent = {|
   |},
 |}
 
-export type Doc<DataType, Methods = {}, Relations = {}> = $ReadOnly<DataType> &
-  $ReadOnly<Methods> & {|
-    +get$: <K: $Keys<DataType>>(
-      field: K,
-    ) => Observable<$ElementType<DataType, K>>,
-    +populate: <K: $Keys<Relations>>(
-      field: K,
+export type Doc<DataType, Methods = {}, Relations = {}> = $Exact<
+  $ReadOnly<{
+    ...DataType,
+    ...Methods,
+    atomicSet: <K: $Keys<DataType>>(
+      key: K,
+      value: $ElementType<DataType, K>,
+    ) => Promise<void>,
+    get$: <K: $Keys<DataType>>(key: K) => Observable<$ElementType<DataType, K>>,
+    populate: <K: $Keys<Relations>>(
+      key: K,
     ) => Promise<$ElementType<Relations, K>>,
-  |}
+  }>,
+>
 
 export type Collection<
   DataType,
   DocType = Doc<DataType>,
-  Statics = {},
+  Statics = any,
 > = $ReadOnly<Statics> &
   $ReadOnly<{|
     _docType: DocType,

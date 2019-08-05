@@ -20,6 +20,11 @@ import type { GenericProfile } from '../schemas/genericProfile'
 
 import type { OwnAppDoc } from './ownApps'
 
+type DeveloperPayload = {|
+  publicKey: string,
+  profile: GenericProfile,
+|}
+
 type OwnDeveloperMethods = {|
   getAddress(): string,
   getPublicID(): string,
@@ -150,7 +155,7 @@ export default async (
           id: this.localID,
         })
 
-        const publish = createPublisher({
+        const publish = createPublisher<DeveloperPayload>({
           bzz,
           feed: this.getPublicFeed(),
           transform: writeDeveloper, // TODO: new transform for developer
@@ -164,7 +169,8 @@ export default async (
             debounceTime(10000),
             map(profile => ({ hash: objectHash(profile), profile })),
             filter(data => data.hash !== this.profileHash),
-            flatMap(async data => {
+            flatMap(async (data: { hash: string, profile: GenericProfile }) => {
+              // $FlowFixMe: data type is not properly detected
               const hash = await publish({
                 publicKey: this.keyPair.publicKey,
                 profile: data.profile,

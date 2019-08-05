@@ -15,8 +15,7 @@ import {
 } from '../../constants'
 import type { AppWallets } from '../../types'
 
-import type { AppContext } from '../context/app'
-import { withPermission } from '../permissions'
+import { type AppContext, withAppPermission } from '../context/app'
 import {
   getStorageManifestHash,
   downloadStream,
@@ -52,7 +51,9 @@ const sharedMethods = {
     ctx: AppContext,
     params: { method: string, params?: ?Array<any> },
   ): Promise<any> => {
-    return await ctx.session.user.getEth().send(params.method, params.params)
+    return await ctx.session.user
+      .getEth()
+      .send(params.method, params.params || [])
   },
 }
 
@@ -122,14 +123,14 @@ export const sandboxed = {
 
   // Wallet
 
-  wallet_signEthTx: withPermission(
+  wallet_signEthTx: withAppPermission(
     'BLOCKCHAIN_SEND',
     async (ctx: AppContext, params: any) => {
       return await ctx.session.user.signEthTransaction(params)
     },
   ),
 
-  wallet_signEthData: withPermission(
+  wallet_signEthData: withAppPermission(
     'BLOCKCHAIN_SIGN',
     async (ctx: AppContext, params: { address: string, data: string }) => {
       return await ctx.session.user.signEthData(params)
@@ -186,7 +187,7 @@ export const sandboxed = {
 
   // Contacts
 
-  contacts_select: withPermission(
+  contacts_select: withAppPermission(
     'CONTACTS_READ',
     async (ctx: AppContext, params: { multi?: boolean }) => {
       const res = await ctx.trustedRPC.request('user_request', {
@@ -196,55 +197,27 @@ export const sandboxed = {
       if (!res || !res.granted || !res.data || !res.data.selectedContactIDs) {
         return { contacts: [] }
       }
-      const userID = ctx.appSession.user.id
-      const appID = ctx.appSession.app.appID
-      const contactIDs = res.data.selectedContactIDs
-      const contactsToApprove = contactIDs.map(id => ({
-        localID: id,
-        publicDataOnly: true, // TODO allow user to set only public data
-      }))
-      const {
-        approvedContacts,
-      } = await ctx.client.contacts.approveContactsForApp({
-        appID,
-        userID,
-        contactsToApprove,
-      })
-      const ids = approvedContacts.map(c => c.id)
 
-      const contactsRes = await ctx.client.contacts.getAppUserContacts({
-        appID,
-        userID,
-        contactIDs: ids,
-      })
-      return contactsRes.contacts
+      const ids = await ctx.session.settings.addContacts(
+        res.data.selectedContactIDs,
+      )
+      return { contacts: await ctx.session.settings.getContacts(ids) }
     },
   ),
 
-  contacts_getData: withPermission(
+  contacts_getData: withAppPermission(
     'CONTACTS_READ',
     async (ctx: AppContext, params: { contactIDs: Array<string> }) => {
-      const userID = ctx.appSession.user.id
-      const appID = ctx.appSession.app.appID
-      const contactsRes = await ctx.client.contacts.getAppUserContacts({
-        appID,
-        userID,
-        contactIDs: params.contactIDs,
-      })
-      return contactsRes.contacts
+      return {
+        contacts: await ctx.session.settings.getContacts(params.contactIDs),
+      }
     },
   ),
 
-  contacts_getApproved: withPermission(
+  contacts_getApproved: withAppPermission(
     'CONTACTS_READ',
     async (ctx: AppContext) => {
-      const userID = ctx.appSession.user.id
-      const appID = ctx.appSession.app.appID
-      const contactsRes = await ctx.client.contacts.getAppApprovedContacts({
-        appID,
-        userID,
-      })
-      return contactsRes.contacts
+      return { contacts: await ctx.session.settings.getAllContacts() }
     },
   ),
 
@@ -489,7 +462,9 @@ export const trusted = {
 
   wallet_getUserWallets: async (ctx: AppContext): Promise<AppWallets> => {
     const [hd, ledger] = await Promise.all([
+      // $FlowFixMe: returned type mismatch
       ctx.session.user.populate('ethWallets.hd'),
+      // $FlowFixMe: returned type mismatch
       ctx.session.user.populate('ethWallets.ledger'),
     ])
     return {
@@ -516,23 +491,12 @@ export const trusted = {
     })
     let address
     if (res.data && res.data.address) {
-      address = res.data.address
-      ctx.appSession.defaultEthAccount = res.data.address
-      const userID = ctx.appSession.user.id
-      const appID = ctx.appSession.app.appID
-      await ctx.client.app.setUserDefaultWallet({
-        userID,
-        appID,
-        address,
-      })
+      await ctx.session.settings.atomicSet('defaultEthAccount', address)
     }
     return { address }
   },
 
-  contacts_getUserContacts: (
-    ctx: AppContext,
-    params: { userID: string },
-  ): Promise<ContactsGetUserContactsResult> => {
-    return ctx.client.contacts.getUserContacts(params)
+  contacts_getApproved: async (ctx: AppContext) => {
+    return { contacts: await ctx.session.settings.getAllContacts() }
   },
 }

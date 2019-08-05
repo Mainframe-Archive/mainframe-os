@@ -14,26 +14,26 @@ import SettingsFilledIcon from '@morpheus-ui/icons/SettingsFilledMd'
 import NotificationsIcon from '@morpheus-ui/icons/NotificationsMd'
 import NotificationsFilledIcon from '@morpheus-ui/icons/NotificationsFilledMd'
 import React, { Component } from 'react'
-import {
-  graphql,
-  QueryRenderer,
-  createFragmentContainer,
-  // $FlowFixMe: requestSubscription not present in Flow definition but exported by library
-  requestSubscription,
-  type Disposable,
-  type Environment,
-} from 'react-relay'
+// import {
+//   graphql,
+//   QueryRenderer,
+//   createFragmentContainer,
+//   // $FlowFixMe: requestSubscription not present in Flow definition but exported by library
+//   requestSubscription,
+//   type Disposable,
+//   type Environment,
+// } from 'react-relay'
 import { Route } from 'react-router-dom'
 import styled from 'styled-components/native'
 
 import SvgSelectedPointer from '../UIComponents/SVGSelectedPointer'
 import { ROUTES } from './constants'
-import RelayLoaderView from './RelayLoaderView'
-import { EnvironmentContext } from './RelayEnvironment'
-import rpc from './rpc'
+// import RelayLoaderView from './RelayLoaderView'
+// import { EnvironmentContext } from './RelayEnvironment'
+// import rpc from './rpc'
 
-import type { SideMenu_contacts as Contacts } from './__generated__/SideMenu_contacts.graphql'
-import type { SideMenu_apps as Apps } from './__generated__/SideMenu_apps.graphql'
+// import type { SideMenu_contacts as Contacts } from './__generated__/SideMenu_contacts.graphql'
+// import type { SideMenu_apps as Apps } from './__generated__/SideMenu_apps.graphql'
 
 export type ScreenNames =
   | 'apps'
@@ -123,21 +123,21 @@ const SelectedPointer = styled.View`
   margin-top: -8px;
 `
 
-const CONTACTS_CHANGED_SUBSCRIPTION = graphql`
-  subscription SideMenuContactsChangedSubscription {
-    contactsChanged {
-      viewer {
-        id
-        # contacts {
-        #   invitesCount(userID: $userID)
-        # }
-      }
-    }
-  }
-`
+// const CONTACTS_CHANGED_SUBSCRIPTION = graphql`
+//   subscription SideMenuContactsChangedSubscription {
+//     contactsChanged {
+//       viewer {
+//         id
+//         # contacts {
+//         #   invitesCount(userID: $userID)
+//         # }
+//       }
+//     }
+//   }
+// `
 
 export default class SideMenu extends Component<Props> {
-  _contactsChangedSub: Disposable
+  // _contactsChangedSub: Disposable
 
   static defaultProps = {
     notifications: [],
@@ -155,22 +155,21 @@ export default class SideMenu extends Component<Props> {
     // this._contactsChangedSub.dispose()
   }
 
-  hasNotifications(type: ScreenNames) {
-    return false
-    // const { apps, contacts } = this.props
-    // switch (type) {
-    //   case 'contacts':
-    //     return contacts.invitesCount > 0
-    //   case 'apps':
-    //     return apps.updatesCount > 0
-    //   default:
-    //     return false
-    // }
-  }
+  // hasNotifications(type: ScreenNames) {
+  //   const { apps, contacts } = this.props
+  //   switch (type) {
+  //     case 'contacts':
+  //       return contacts.invitesCount > 0
+  //     case 'apps':
+  //       return apps.updatesCount > 0
+  //     default:
+  //       return false
+  //   }
+  // }
 
   renderMenuItem(item: ScreenNames) {
     const data = BUTTONS[item]
-    const notifications = this.hasNotifications(item)
+    const notifications = false // this.hasNotifications(item)
 
     return (
       <Route key={item} path={data.path}>

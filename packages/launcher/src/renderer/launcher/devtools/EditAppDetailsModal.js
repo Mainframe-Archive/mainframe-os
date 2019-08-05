@@ -84,11 +84,9 @@ export default class EditAppDetailsModal extends Component<Props, State> {
   }
 
   onSetAppData = (payload: FormSubmitPayload) => {
-    if (payload.valid) {
-      this.props.onSetAppData({
-        ...payload.fields,
-        contentsPath: this.state.contentsPath,
-      })
+    const { contentsPath } = this.state
+    if (payload.valid && contentsPath != null) {
+      this.props.onSetAppData({ ...payload.fields, contentsPath })
     }
   }
 
