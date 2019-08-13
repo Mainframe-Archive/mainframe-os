@@ -1,6 +1,5 @@
 //@flow
 
-import type { ID } from '@mainframe/client'
 import React, { Component } from 'react'
 import { View, StyleSheet, TextInput } from 'react-native-web'
 import { QueryRenderer, graphql, commitMutation } from 'react-relay'
@@ -14,8 +13,8 @@ import { EnvironmentContext } from './RelayEnvironment'
 type ContainerProps = {
   type: 'user' | 'developer',
   enableCreate?: boolean,
-  onSelectId: (id: ID) => any,
-  onCreatedId?: (id: ID) => any,
+  onSelectId: (id: string) => any,
+  onCreatedId?: (id: string) => any,
 }
 
 type Identity = {

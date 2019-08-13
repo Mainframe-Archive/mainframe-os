@@ -3,7 +3,6 @@
 import React, { Component } from 'react'
 import { createFragmentContainer, graphql } from 'react-relay'
 import styled from 'styled-components/native'
-import type { AppInstalledData } from '@mainframe/client'
 
 import { Text, Button } from '@morpheus-ui/core'
 
@@ -18,7 +17,7 @@ export type User = {
   profile: {
     name: string,
   },
-  apps: Array<AppInstalledData>,
+  apps: Array<Object>,
 }
 
 export type Identities = {

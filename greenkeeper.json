@@ -3,14 +3,10 @@
     "default": {
       "packages": [
         "package.json",
-        "packages/app-manifest/package.json",
-        "packages/app-permissions/package.json",
-        "packages/cli/package.json",
-        "packages/client/package.json",
-        "packages/config/package.json",
-        "packages/daemon/package.json",
+        "packages/eth/package.json",
         "packages/launcher/package.json",
-        "packages/toolbox/package.json"
+        "packages/sdk/package.json",
+        "packages/smart-contracts/package.json"
       ]
     }
   }

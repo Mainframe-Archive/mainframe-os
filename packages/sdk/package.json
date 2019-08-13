@@ -17,16 +17,16 @@
     "test:types": "flow check"
   },
   "dependencies": {
-    "@babel/runtime": "^7.4.5",
+    "@babel/runtime": "^7.5.5",
     "@mainframe/eth": "^0.3.3",
     "ethereumjs-abi": "^0.6.6",
-    "eventemitter3": "^3.1.2"
+    "eventemitter3": "^4.0.0"
   },
   "devDependencies": {
     "@mainframe/rpc-stream": "^0.3.0",
     "babel-loader": "^8.0.6",
-    "flow-bin": "^0.98.1",
-    "webpack": "^4.32.2",
-    "webpack-cli": "^3.3.2"
+    "flow-bin": "^0.105.2",
+    "webpack": "^4.39.1",
+    "webpack-cli": "^3.3.6"
   }
 }

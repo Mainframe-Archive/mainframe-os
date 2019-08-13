@@ -15,6 +15,9 @@ const createWindow = (params: Object = {}): BrowserWindow => {
     height: 702,
     show: false,
     titleBarStyle: 'hidden',
+    webPreferences: {
+      nodeIntegration: true,
+    },
     ...params,
   })
 

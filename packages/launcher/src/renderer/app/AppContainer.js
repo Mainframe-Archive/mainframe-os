@@ -4,9 +4,7 @@ import path from 'path'
 import url from 'url'
 import { remote } from 'electron'
 import Store from 'electron-store'
-import type { ID } from '@mainframe/utils-id'
 import React, { Component } from 'react'
-import { flattenDeep } from 'lodash'
 import {
   ThemeProvider as MFThemeProvider,
   Button,

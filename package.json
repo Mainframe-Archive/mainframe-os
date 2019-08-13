@@ -11,7 +11,8 @@
     "nohoist": []
   },
   "resolutions": {
-    "graphql": "^0.13.2"
+    "graphql": "^0.13.2",
+    "web3": "1.0.0-beta.37"
   },
   "scripts": {
     "flow:install": "lerna exec --concurrency 1 -- flow-typed install --ignoreDeps=dev",
@@ -44,17 +45,17 @@
     "babel-eslint": "^10.0.1",
     "babel-jest": "^24.8.0",
     "cross-env": "^5.2.0",
-    "del-cli": "^1.1.0",
+    "del-cli": "^2.0.0",
     "electron-webpack": "^2.6.2",
     "eslint": "^5.15.3",
     "eslint-config-mainframe": "^3.2.0",
-    "flow-bin": "^0.98.1",
+    "flow-bin": "^0.105.2",
     "flow-copy-source": "^2.0.6",
-    "flow-remove-types": "^1.2.3",
+    "flow-remove-types": "^2.105.2",
     "flow-typed": "^2.5.2",
     "foreman": "^3.0.1",
     "jest": "^24.8.0",
-    "jest-junit": "^6.4.0",
+    "jest-junit": "^7.0.0",
     "lerna": "^3.14.1",
     "prettier": "^1.17.1"
   }

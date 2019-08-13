@@ -16,11 +16,11 @@
     "binascii": "^0.0.2",
     "ethereumjs-util": "^6.1.0",
     "ethers": "^4.0.28",
-    "flow-bin": "^0.98.1",
+    "flow-bin": "^0.105.2",
     "ganache-cli": "^6.4.3",
     "solidity-util": "willitscale/solidity-util",
     "truffle": "^5.0.19",
-    "truffle-assertions": "^0.8.0",
+    "truffle-assertions": "^0.9.1",
     "truffle-hdwallet-provider": "^1.0.9"
   }
 }

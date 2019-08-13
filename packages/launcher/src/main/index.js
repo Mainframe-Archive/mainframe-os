@@ -3,21 +3,10 @@
 // Needed to fix issue with Ledger: https://github.com/LedgerHQ/ledgerjs/issues/211
 import '@babel/polyfill'
 
-// import StreamRPC from '@mainframe/rpc-stream'
 import { app, BrowserWindow, ipcMain } from 'electron'
 import { is } from 'electron-util'
 
-// import { APP_TRUSTED_REQUEST_CHANNEL } from '../constants'
-// import type { AppSession } from '../types'
-
 import './menu'
-// import { AppContext } from './contexts'
-// import { interceptWebRequests } from './permissions'
-// import { registerStreamProtocol } from './storage'
-// import createElectronTransport from './createElectronTransport'
-// import { createChannels } from './rpc'
-// import { createLauncherWindow } from './windows'
-
 import { SystemContext } from './context/system'
 import { Environment } from './environment'
 import { createLogger } from './logger'
@@ -53,100 +42,7 @@ const env = Environment.get(ENV_NAME, ENV_TYPE)
 const logger = createLogger(env)
 const system = new SystemContext({ env, logger })
 
-// type AppContexts = { [appID: string]: { [userID: string]: AppContext } }
-//
-// const appContexts: AppContexts = {}
-// const contextsBySandbox: WeakMap<WebContents, AppContext> = new WeakMap()
-// const contextsByWindow: WeakMap<BrowserWindow, AppContext> = new WeakMap()
-
 // App Lifecycle
-
-// const launchApp = async (
-//   appSession: AppSession,
-//   // vaultSettings: VaultSettings,
-// ) => {
-//   const appID = appSession.app.appID
-//   const userID = appSession.user.id
-//   const appOpen = appContexts[appID] && appContexts[appID][userID]
-//   if (appOpen) {
-//     const appWindow = appContexts[appID][userID].window
-//     if (appWindow.isMinimized()) {
-//       appWindow.restore()
-//     }
-//     appWindow.show()
-//     appWindow.focus()
-//     return
-//   }
-//
-//   const appWindow = newWindow()
-//   if (appSession.isDev) {
-//     appWindow.webContents.on('did-attach-webview', () => {
-//       // Open a separate developer tools window for the app
-//       appWindow.webContents.executeJavaScript(
-//         `document.getElementById('sandbox-webview').openDevTools()`,
-//       )
-//     })
-//   }
-//   appWindow.on('closed', async () => {
-//     // await client.app.close({ sessID: appSession.session.sessID })
-//     const ctx = contextsByWindow.get(appWindow)
-//     if (ctx != null) {
-//       await ctx.clear()
-//       contextsByWindow.delete(appWindow)
-//     }
-//     delete appContexts[appID][userID]
-//   })
-//
-//   const appContext = new AppContext({
-//     appSession,
-//     trustedRPC: new StreamRPC(
-//       createElectronTransport(appWindow, APP_TRUSTED_REQUEST_CHANNEL),
-//     ),
-//     window: appWindow,
-//     // settings: vaultSettings,
-//   })
-//   contextsByWindow.set(appWindow, appContext)
-//
-//   appWindow.webContents.on('did-attach-webview', (event, webContents) => {
-//     webContents.on('destroyed', () => {
-//       contextsBySandbox.delete(webContents)
-//       appContext.sandbox = null
-//     })
-//
-//     contextsBySandbox.set(webContents, appContext)
-//     appContext.sandbox = webContents
-//
-//     interceptWebRequests(appContext, webContents.session)
-//   })
-//
-//   if (appContexts[appID]) {
-//     appContexts[appID][userID] = appContext
-//   } else {
-//     // $FlowFixMe: can't assign ID type
-//     appContexts[appID] = { [userID]: appContext }
-//   }
-//
-//   appWindow.webContents.on('did-attach-webview', (event, webContents) => {
-//     // Open a separate developer tools window for the app
-//     appContext.sandbox = webContents
-//     registerStreamProtocol(appContext)
-//     if (is.development) {
-//       appWindow.webContents.executeJavaScript(
-//         `document.getElementById('sandbox-webview').openDevTools()`,
-//       )
-//     }
-//   })
-//
-//   appWindow.on('closed', async () => {
-//     // await client.app.close({ sessID: appSession.session.sessID })
-//     const ctx = contextsByWindow.get(appWindow)
-//     if (ctx != null) {
-//       await ctx.clear()
-//       contextsByWindow.delete(appWindow)
-//     }
-//     delete appContexts[appID][userID]
-//   })
-// }
 
 app.on('ready', async () => {
   try {

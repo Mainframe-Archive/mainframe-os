@@ -1,5 +1,6 @@
 {
   "appId": "com.mainframe.launcher",
+  "electronVersion": "5.0.9",
   "productName": "MainframeOS",
   "artifactName": "${productName}.${ext}",
   "appImage": {
@@ -8,9 +9,7 @@
   "directories": {
     "buildResources": "build"
   },
-  "files": [
-    "build/icon/*"
-  ],
+  "files": ["build/icon/*"],
   "linux": {
     "category": "Network",
     "icon": "build/icon/",
