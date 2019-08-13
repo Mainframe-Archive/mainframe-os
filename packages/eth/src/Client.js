@@ -1,5 +1,9 @@
 // @flow
+
 import EventEmitter from 'events'
+import type { Observable } from 'rxjs'
+import Web3EthAbi from 'web3-eth-abi'
+import { WebsocketProvider } from 'web3-providers'
 import {
   fromWei,
   hexToNumber,
@@ -9,8 +13,6 @@ import {
   toHex,
   toBN,
 } from 'web3-utils'
-import type { Observable } from 'rxjs'
-import { WebsocketProvider } from 'web3-providers'
 
 import ERC20 from './Contracts/ERC20'
 import BaseContract from './Contracts/BaseContract'
@@ -21,7 +23,6 @@ import type {
   TXEventEmitter,
   TXParams,
 } from './types'
-import Web3EthAbi from './web3EthAbi'
 
 export const NETWORKS = {
   '1': 'mainnet',
@@ -123,7 +124,7 @@ export default class EthClient extends EventEmitter {
   }
 
   async setup() {
-    this.fetchNetwork()
+    await this.fetchNetwork()
     if (!this._subscriptions) {
       return
     }
@@ -398,6 +399,6 @@ export default class EthClient extends EventEmitter {
   }
 
   async send(method: string, params: Array<*>): Promise<*> {
-    return this.web3Provider.send(method, params)
+    return await this.web3Provider.send(method, params)
   }
 }

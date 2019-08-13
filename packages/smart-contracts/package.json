@@ -5,7 +5,7 @@
   "author": "Mainframe",
   "license": "MIT",
   "scripts": {
-    "build": "yarn run truffle build",
+    "build": "truffle build",
     "ganache": "ganache-cli -m=\"canyon shaft mirror vital twin father surprise live nasty grain awesome boring\"",
     "test": "truffle test"
   },
@@ -15,12 +15,12 @@
   "devDependencies": {
     "binascii": "^0.0.2",
     "ethereumjs-util": "^6.1.0",
-    "ethers": "^4.0.28",
+    "ethers": "^4.0.33",
     "flow-bin": "^0.105.2",
-    "ganache-cli": "^6.4.3",
+    "ganache-cli": "^6.5.1",
     "solidity-util": "willitscale/solidity-util",
-    "truffle": "^5.0.19",
+    "truffle": "^5.0.31",
     "truffle-assertions": "^0.9.1",
-    "truffle-hdwallet-provider": "^1.0.9"
+    "truffle-hdwallet-provider": "^1.0.16"
   }
 }

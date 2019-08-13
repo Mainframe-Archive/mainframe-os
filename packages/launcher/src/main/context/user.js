@@ -1,6 +1,6 @@
 // @flow
 
-import type Bzz from '@erebos/api-bzz-node'
+import type { Bzz } from '@erebos/api-bzz-node'
 
 import type { UserDoc } from '../db/collections/users'
 import type { DB } from '../db/types'

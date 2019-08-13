@@ -1,6 +1,6 @@
 // @flow
 
-import type Bzz from '@erebos/api-bzz-node'
+import type { Bzz } from '@erebos/api-bzz-node'
 import { createPublic } from '@erebos/secp256k1'
 import { Subscription } from 'rxjs'
 import { flatMap } from 'rxjs/operators'

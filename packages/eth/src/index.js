@@ -4,7 +4,6 @@ export { default as ABI } from './abi'
 export { default as BaseContract } from './Contracts/BaseContract'
 export { default as ERC20 } from './Contracts/ERC20'
 export { default as EthClient } from './Client'
-export { default as Web3EthAbi } from './web3EthAbi'
 export * from './types'
 export * from './utils'
 

@@ -1,4 +1,5 @@
 // @flow
+
 import type EventEmitter from 'events'
 
 export type DecodedTxResult = {

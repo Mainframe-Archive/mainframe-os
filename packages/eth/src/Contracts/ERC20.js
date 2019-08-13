@@ -1,11 +1,13 @@
 // @flow
-import { hexToString } from 'web3-utils'
 
 import { utils } from 'ethers'
-import { unitMap } from '../utils'
-import type { SendParams } from '../types'
-import type EthClient from '../Client'
+import { hexToString } from 'web3-utils'
+
 import ABI from '../abi'
+import type EthClient from '../Client'
+import type { SendParams } from '../types'
+import { unitMap } from '../utils'
+
 import BaseContract from './BaseContract'
 
 export default class ERC20Contract extends BaseContract {

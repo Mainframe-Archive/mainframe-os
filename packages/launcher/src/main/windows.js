@@ -15,9 +15,6 @@ const createWindow = (params: Object = {}): BrowserWindow => {
     height: 702,
     show: false,
     titleBarStyle: 'hidden',
-    webPreferences: {
-      nodeIntegration: true,
-    },
     ...params,
   })
 
@@ -44,6 +41,10 @@ export const createAppWindow = (): BrowserWindow => {
     height: 600,
     minWidth: 900,
     minHeight: 600,
+    webPreferences: {
+      nodeIntegration: true,
+      webviewTag: true,
+    },
   })
 }
 
@@ -53,5 +54,8 @@ export const createLauncherWindow = (): BrowserWindow => {
     height: 600,
     minWidth: 900,
     minHeight: 600,
+    webPreferences: {
+      nodeIntegration: true,
+    },
   })
 }

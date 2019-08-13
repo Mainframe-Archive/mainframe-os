@@ -1,7 +1,6 @@
 // @flow
 
-import { type FeedParams, getFeedTopic } from '@erebos/api-bzz-base'
-import type Bzz from '@erebos/api-bzz-node'
+import { type Bzz, type FeedParams, getFeedTopic } from '@erebos/api-bzz-node'
 import { pubKeyToAddress } from '@erebos/keccak256'
 import { createKeyPair, createPublic } from '@erebos/secp256k1'
 import { Subscription } from 'rxjs'

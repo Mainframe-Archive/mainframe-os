@@ -1,7 +1,7 @@
 // @flow
 
-import type Bzz from '@erebos/api-bzz-node'
-import createHex from '@erebos/hex'
+import type { Bzz } from '@erebos/api-bzz-node'
+import { createHex } from '@erebos/hex'
 import { createKeyPair, sign, type KeyPair } from '@erebos/secp256k1'
 import { pubKeyToAddress } from '@erebos/keccak256'
 import { Timeline, createChapter, type PartialChapter } from '@erebos/timeline'

@@ -1,6 +1,6 @@
 {
   "appId": "com.mainframe.launcher",
-  "electronVersion": "5.0.9",
+  "electronVersion": "6.0.2",
   "productName": "MainframeOS",
   "artifactName": "${productName}.${ext}",
   "appImage": {

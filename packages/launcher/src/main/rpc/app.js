@@ -2,7 +2,7 @@
 
 import { createReadStream, createWriteStream } from 'fs'
 import { Readable } from 'stream'
-import type { ListResult } from '@erebos/api-bzz-base'
+import type { ListResult } from '@erebos/api-bzz-node'
 import getStream from 'get-stream'
 import { dialog } from 'electron'
 import { fromEvent } from 'rxjs'

@@ -1,7 +1,6 @@
 // @flow
 
-import type { FeedParams } from '@erebos/api-bzz-base'
-import type Bzz from '@erebos/api-bzz-node'
+import type { Bzz, FeedParams } from '@erebos/api-bzz-node'
 import { pubKeyToAddress } from '@erebos/keccak256'
 import { createKeyPair, type KeyPair } from '@erebos/secp256k1'
 

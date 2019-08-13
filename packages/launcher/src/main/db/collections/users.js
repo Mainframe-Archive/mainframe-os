@@ -1,6 +1,6 @@
 // @flow
 
-import Bzz from '@erebos/api-bzz-node'
+import { Bzz } from '@erebos/api-bzz-node'
 import { createKeyPair, sign } from '@erebos/secp256k1'
 import { EthClient, ETH_RPC_URLS, type TXParams } from '@mainframe/eth'
 import objectHash from 'object-hash'

@@ -1,7 +1,6 @@
 // @flow
 
-import type { FeedParams } from '@erebos/api-bzz-base'
-import type Bzz from '@erebos/api-bzz-node'
+import type { Bzz, FeedParams } from '@erebos/api-bzz-node'
 import type { Observable } from 'rxjs'
 import { flatMap } from 'rxjs/operators'
 

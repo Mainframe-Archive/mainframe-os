@@ -38,7 +38,6 @@ contract('ContactInvite', accounts => {
       senderFeedHash,
       accountHashes[1],
       recipientFeedHash,
-      {},
     )
 
     assert.equal(web3.utils.toUtf8(inviteState), 'NONE', 'Invalid invite state')
@@ -60,7 +59,6 @@ contract('ContactInvite', accounts => {
       senderFeedHash,
       accountHashes[1],
       recipientFeedHash,
-      {},
     )
 
     assert.equal(
@@ -132,7 +130,6 @@ contract('ContactInvite', accounts => {
       senderFeedHash,
       accountHashes[1],
       recipientFeedHash,
-      {},
     )
 
     assert.equal(
@@ -169,7 +166,6 @@ contract('ContactInvite', accounts => {
       senderFeedHash,
       accountHashes[1],
       recipientFeedHash,
-      {},
     )
 
     const pendingStake = await invites.pendingInviteStake(
@@ -177,7 +173,6 @@ contract('ContactInvite', accounts => {
       senderFeedHash,
       accountHashes[1],
       recipientFeedHash,
-      {},
     )
 
     assert.equal(
@@ -230,7 +225,6 @@ contract('ContactInvite', accounts => {
       senderFeedHash,
       accountHashes[1],
       recipientFeedHash,
-      {},
     )
 
     assert.equal(
@@ -253,7 +247,6 @@ contract('ContactInvite', accounts => {
       senderFeedHash,
       accountHashes[1],
       recipientFeedHash,
-      {},
     )
 
     assert.equal(
@@ -267,7 +260,6 @@ contract('ContactInvite', accounts => {
       senderFeedHash,
       accountHashes[1],
       recipientFeedHash,
-      {},
     )
 
     const stateString = web3.utils.toUtf8(inviteState)
@@ -303,7 +295,6 @@ contract('ContactInvite', accounts => {
       senderFeedHash,
       accountHashes[1],
       recipientFeedHash,
-      {},
     )
 
     assert.equal(
@@ -317,7 +308,6 @@ contract('ContactInvite', accounts => {
       senderFeedHash,
       accountHashes[1],
       recipientFeedHash,
-      {},
     )
 
     const stateString = web3.utils.toUtf8(inviteState)
@@ -424,7 +414,6 @@ contract('ContactInvite', accounts => {
       senderFeedHash,
       accountHashes[1],
       recipientFeedHash,
-      {},
     )
 
     const stateString = web3.utils.toUtf8(inviteState)
@@ -473,7 +462,6 @@ contract('ContactInvite', accounts => {
       senderFeedHash,
       accountHashes[1],
       recipientFeedHash,
-      {},
     )
 
     assert.equal(
@@ -487,7 +475,6 @@ contract('ContactInvite', accounts => {
       senderFeedHash,
       accountHashes[2],
       recipient2FeedHash,
-      {},
     )
 
     assert.equal(

@@ -289,7 +289,7 @@ export class AppContext {
 
   attachSandbox(sandbox: WebContents) {
     this.sandbox = sandbox
-    sandbox.session.webRequest.onBeforeRequest([], this.handleSandboxWebRequest)
+    sandbox.session.webRequest.onBeforeRequest(this.handleSandboxWebRequest)
   }
 
   showWindow() {

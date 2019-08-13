@@ -1,6 +1,6 @@
 // @flow
 
-import createHex from '@erebos/hex'
+import { createHex } from '@erebos/hex'
 import { verify } from '@erebos/secp256k1'
 import Ajv from 'ajv'
 import semver from 'semver'

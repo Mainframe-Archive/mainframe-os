@@ -1,6 +1,6 @@
 // @flow
 
-import Bzz from '@erebos/api-bzz-node'
+import { Bzz } from '@erebos/api-bzz-node'
 import objectHash from 'object-hash'
 import { Subscription } from 'rxjs'
 import { debounceTime, filter, flatMap, map } from 'rxjs/operators'

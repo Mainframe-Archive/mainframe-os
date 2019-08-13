@@ -1,6 +1,6 @@
 // @flow
 
-import type Bzz from '@erebos/api-bzz-node'
+import type { Bzz } from '@erebos/api-bzz-node'
 import { type BaseContract, type EthClient } from '@mainframe/eth'
 import createKeccakHash from 'keccak'
 import { utils } from 'ethers'
