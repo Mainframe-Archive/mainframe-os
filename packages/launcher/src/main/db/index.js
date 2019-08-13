@@ -21,6 +21,7 @@ import createUserAppVersionsCollection from './collections/userAppVersions'
 import createUserOwnAppsCollection from './collections/userOwnApps'
 import createUsersCollection from './collections/users'
 import createWyreCollection from './collections/wyre'
+import createCoinbaseCollection from './collections/coinbase'
 
 import type { DB, DBParams } from './types'
 
@@ -56,6 +57,7 @@ export const createDB = async (params: DBParams): Promise<DB> => {
     createUserOwnAppsCollection(collectionParams),
     createUsersCollection(collectionParams),
     createWyreCollection(collectionParams),
+    createCoinbaseCollection(collectionParams),
   ])
 
   return db

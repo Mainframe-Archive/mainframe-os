@@ -34,8 +34,8 @@ export class SystemContext {
   _appsBySandboxContents: WeakMap<WebContents, string> = new WeakMap()
   _appsByTrustedContents: WeakMap<WebContents, string> = new WeakMap()
   _launchers: { [id: string]: LauncherContext } = {}
-  _wyre: WyreContext = null
-  _coinbase: CoinbaseContext = null
+  _wyre: WyreContext = {}
+  _coinbase: CoinbaseContext = {}
   _launchersByContents: WeakMap<WebContents, string> = new WeakMap()
   _resolveDB: (db: DB) => void
   _users: { [id: string]: UserContext } = {}
@@ -226,10 +226,6 @@ export class SystemContext {
 
   // Contexts and windows
 
-  getCoinbaseContext(): ?CoinbaseContext {
-    return this._coinbase
-  }
-
   async getWyreDeviceToken() {
     const deviceToken = await this.db.wyre._methods.getToken()
     // const user = await this.db.users.findOne(this.defaultUser).exec()
@@ -240,6 +236,31 @@ export class SystemContext {
 
   getWyreContext(): ?WyreContext {
     return this._wyre
+  }
+
+  getCoinbaseContext(): ?CoinbaseContext {
+    return this._coinbase
+  }
+
+  subscribeToCoinbaseState(): null {
+    console.log('actual db call')
+    this.db.coinbase._methods.subscribeToCoinbaseState()
+  }
+
+  setCoinbaseState(): null {
+    console.log('set state')
+    if (this.db && this.db.coinbase) {
+      this.db.coinbase._methods.setState('new state')
+    }
+  }
+
+  getCoinbaseState(): ?string {
+    console.log('get state')
+    if (this.db && this.db.coinbase) {
+      return this.db.coinbase._methods.getState('newer state')
+    } else {
+      return null
+    }
   }
 
   getAppContext(idOrContents: string | WebContents): ?AppContext {
@@ -333,19 +354,21 @@ export class SystemContext {
   launchCoinbase(): CoinbaseContext {
     const ctx = new CoinbaseContext({
       logger: this.logger,
-      id: nanoid(),
       window: createCoinbaseWindow(),
     })
 
     this._coinbase = ctx
 
     this._coinbase.window.on('closed', async () => {
-      this._coinbase = null
+      this._coinbase = {}
     })
     this._coinbase.window.webContents.on('will-navigate', (e, url) => {
       console.log('navigating')
       console.log(e)
       console.log(url)
+      if (url === 'http://localhost:3000/callback') {
+        // emit event
+      }
     })
     this._coinbase.window.webContents.on('will-redirect', (e, url) => {
       console.log('redirecting')
@@ -360,23 +383,21 @@ export class SystemContext {
 
   sendCoinbaseCode(code: string) {
     this._coinbase.window.show()
-    console.log('system js code')
-    console.log(code)
     this._coinbase.window.webContents.loadURL(
       `http://localhost:3000/success?name=${code}`,
     )
+    this._coinbase.window.hide()
   }
 
   launchWyre(): WyreContext {
     const ctx = new WyreContext({
       logger: this.logger,
-      id: nanoid(),
       window: createWyreWindow(),
     })
     this._wyre = ctx
     console.log('wyre ctx created')
     this._wyre.window.on('closed', async () => {
-      this._wyre = null
+      this._wyre = {}
     })
 
     return this._wyre

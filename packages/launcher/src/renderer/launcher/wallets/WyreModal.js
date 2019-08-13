@@ -10,11 +10,9 @@ import { EnvironmentContext } from '../RelayEnvironment'
 import Avatar from '../../UIComponents/Avatar'
 
 import rpc from '../rpc'
-import { type Wallets } from './WalletsView'
 
 type Props = {
   address?: string,
-  wallets?: Wallets,
   onClose: () => void,
   onComplete?: () => void,
 }

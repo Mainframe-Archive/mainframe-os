@@ -2,28 +2,26 @@
 
 import uuidv4 from 'uuid/v4'
 import { COLLECTION_NAMES } from '../constants'
-import type { Collection, CollectionParams, Populate } from '../types'
+import type { Collection, CollectionParams } from '../types'
 
-import schema from '../schemas/wyreDeviceToken'
+import schema, { type WyreData } from '../schemas/wyreDeviceToken'
 
-// type WyreMethods = {|
-//   getToken(): string,
-// |}
-//
-// export type WyreData = { deviceToken: ?string }
-//
-// export type WyreDoc = WyreData & WyreMethods
-//
-// export type WyreCollection = Collection<WyreData, WyreDoc>
+type WyreMethods = {|
+  getToken(): Promise<string>,
+|}
 
-export default async (params: CollectionParams) => {
+export type WyreDoc = WyreData & WyreMethods
+
+export type WyreCollection = Collection<WyreData, WyreDoc>
+
+export default async (params: CollectionParams): Promise<WyreCollection> => {
   const db = params.db
 
-  return await db.collection({
+  return await db.collection<WyreData, WyreDoc, WyreMethods, {}>({
     name: COLLECTION_NAMES.WYRE,
     schema,
     methods: {
-      async getToken(): string {
+      async getToken(): Promise<string> {
         const dump = db.wyre.find()
         const exec = await dump.exec()
         if (exec[0]) {

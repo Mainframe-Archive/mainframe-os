@@ -22,7 +22,7 @@ const TitleBar = styled.View`
 
 export default class CoinbaseWindow extends Component<Props, State> {
   componentDidMount() {
-    console.log('https://sleepy-oasis-35263.herokuapp.com/authorize')
+    console.log('r we ever hitting this?')
   }
 
   render() {

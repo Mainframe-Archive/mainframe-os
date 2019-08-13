@@ -54,8 +54,19 @@ export default {
     await client.request('coinbase_open')
   },
 
+  async subscribeToCoinbaseState(): Promise<string> {
+    await client.request('coinbase_subscribe')
+  },
+
+  async setCoinbaseState(params: { state: string }): Promise<void> {
+    await client.request('coinbase_setstate', params)
+  },
+
+  async getCoinbaseState(): Promise<string> {
+    await client.request('coinbase_getstate')
+  },
+
   async sendCoinbaseCode(code: string): Promise<void> {
-    console.log('rpc js code')
     await client.request('coinbase_code', { code })
   },
 

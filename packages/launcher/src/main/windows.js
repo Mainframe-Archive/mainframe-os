@@ -21,13 +21,6 @@ const createWindow = (params: Object = {}, coinbase): BrowserWindow => {
   if (is.development && !coinbase) {
     window.loadURL(`http://localhost:${PORT}`)
   } else if (coinbase) {
-    const formattedUrl = url.format({
-      pathname: path.join(__dirname, `index.html`),
-      protocol: 'file:',
-      slashes: true,
-    })
-
-    console.log(formattedUrl)
     window.loadURL(`http://localhost:3000/authorize`)
   } else {
     const formattedUrl = url.format({

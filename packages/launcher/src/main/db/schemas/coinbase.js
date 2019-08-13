@@ -1,13 +1,16 @@
 // @flow
 
-export type WyreData = { deviceToken: ?string, name: string }
+export type CoinbaseData = {
+  state: string,
+  name: string,
+}
 
 export default {
-  title: 'Wyre data',
+  title: 'Coinbase data',
   version: 0,
   type: 'object',
   properties: {
-    deviceToken: { type: 'string' },
+    state: { type: 'string' },
     name: { type: 'string', primary: true },
   },
   // pattern: '^0x[0-9a-fA-F]{40}$',

@@ -82,8 +82,12 @@ export default class CoinbaseModal extends Component<Props, State> {
     })
   }
 
-  openCoinbase = () => {
+  openCoinbase = async () => {
     this.setState({ screen: '2fa' })
+    rpc.subscribeToCoinbaseState()
+    // await rpc.setCoinbaseState('newstate')
+    // const state = await rpc.getCoinbaseState()
+    // console.log(state)
     const tok = rpc.openCoinbase()
   }
 
@@ -91,6 +95,7 @@ export default class CoinbaseModal extends Component<Props, State> {
     console.log(payload)
     if (payload && payload.valid) {
       rpc.sendCoinbaseCode(payload.fields.code)
+      this.setState({ screen: 'success' })
     }
   }
 
@@ -160,6 +165,23 @@ export default class CoinbaseModal extends Component<Props, State> {
                 {'enter your 2FA code below to authorize the transaction'}
               </Text>
               <TextField name="code" label="code" />
+            </>
+          </Container>
+        </FormModalView>
+      )
+    } else if (screen === 'success') {
+      return (
+        <FormModalView
+          title="Mobile Authentication"
+          full
+          dismissButton={completed ? null : 'CANCEL'}
+          onRequestClose={onClose}
+          confirmButton={'FINISH'}
+          onSubmitForm={onClose}>
+          <Container>
+            {errorMsg}
+            <>
+              <Text>{'Success!'}</Text>
             </>
           </Container>
         </FormModalView>

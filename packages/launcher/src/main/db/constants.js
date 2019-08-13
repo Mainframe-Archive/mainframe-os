@@ -3,6 +3,7 @@
 export const COLLECTION_NAMES = {
   APPS: 'apps',
   APP_VERSIONS: 'app_versions',
+  COINBASE: 'coinbase',
   CONTACTS: 'contacts',
   CONTACT_REQUESTS: 'contact_requests',
   DEVELOPERS: 'developers',

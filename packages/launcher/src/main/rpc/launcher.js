@@ -110,19 +110,29 @@ export default {
   coinbase_open: {
     async handler(ctx, params): Promise<void> {
       ctx.system.launchCoinbase()
-      // createCoinbaseWindow()
     },
   },
-
-  coinbase_code: {
+  coinbase_subscribe: {
     async handler(ctx, params): Promise<void> {
-      console.log('launcher js code')
-      console.log(params.code)
-      ctx.system.sendCoinbaseCode(params.code)
-      // createCoinbaseWindow()
+      console.log('got to launcher js')
+      ctx.system.subscribeToCoinbaseState()
     },
   },
-
+  coinbase_setstate: {
+    async handler(ctx, params: { state: string }): Promise<void> {
+      ctx.system.setCoinbaseState(params.state)
+    },
+  },
+  coinbase_getstate: {
+    async handler(ctx, params): Promise<string> {
+      ctx.system.getCoinbaseState()
+    },
+  },
+  coinbase_code: {
+    async handler(ctx, params: { code: string }): Promise<void> {
+      ctx.system.sendCoinbaseCode(params.code)
+    },
+  },
   wyre_open: {
     async handler(ctx, params): Promise<string> {
       ctx.system.launchWyre()

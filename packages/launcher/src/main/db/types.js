@@ -4,6 +4,7 @@ import type { Logger } from '../logger'
 
 import type { AppsCollection } from './collections/apps'
 import type { AppVersionsCollection } from './collections/appVersions'
+import type { CoinbaseCollection } from './collections/coinbase'
 import type { ContactRequestsCollection } from './collections/contactRequests'
 import type { ContactsCollection } from './collections/contacts'
 import type { DevelopersCollection } from './collections/developers'
@@ -16,6 +17,7 @@ import type { UserAppSettingsCollection } from './collections/userAppSettings'
 import type { UserAppVersionsCollection } from './collections/userAppVersions'
 import type { UserOwnAppsCollection } from './collections/userOwnApps'
 import type { UsersCollection } from './collections/users'
+import type { WyreCollection } from './collections/wyre'
 
 export type Populate<T> = {|
   populate: <K: $Keys<T>>(field: K) => Promise<$ElementType<T, K>>,
@@ -32,6 +34,7 @@ export type Collection<DataType, DocType = DataType> = {
 export type Collections = {|
   apps: AppsCollection,
   app_versions: AppVersionsCollection,
+  coinbase: CoinbaseCollection,
   contact_requests: ContactRequestsCollection,
   contacts: ContactsCollection,
   developers: DevelopersCollection,
@@ -44,6 +47,7 @@ export type Collections = {|
   user_app_versions: UserAppVersionsCollection,
   user_own_apps: UserOwnAppsCollection,
   users: UsersCollection,
+  wyre: WyreCollection,
 |}
 
 export type CollectionKey = $Keys<Collections>
