@@ -4,20 +4,12 @@ A platform for easily building and running distributed, unstoppable apps.
 
 ## Overview
 
-The main components (packages) of the Mainframe Platform are as follows:
+Mainframe OS is made of the following packages:
 
-- `daemon`: a background daemon process that communicates with decentralized services
-- `launcher`: the Mainframe application installing, launching and running sandboxed apps
-
-In addition, there are several auxiliary packages:
-
-- `app-manifest`: an utility library for app manifests creation an validation
-- `app-permissions`: an utility library for distributed app permissions
-- `cli`: a command-line interface to communicate with the daemon
-- `client`: a library used by the CLI & launcher to communicate with the daemon
-- `config`: shared configuration utilities used by several packages
-- `data-types`: shared data primitives
-- `toolbox`: a set of functions that both the launcher and the cli use
+- `os`: the Electron application containing the OS data, UI and logic.
+- `sdk`: the Mainframe SDK, used by the apps to use the OS features.
+- `eth`: the internal Ethereum client used by Mainframe OS.
+- `smart-contracts`: the Ethereum smart contracts used by the OS.
 
 In order to make it easier to share code among packages, this project uses [lerna](https://lernajs.io/). Whenever code changes, it's expected that you run `yarn run build` from the root of the project directory, and it will kick off the necessary `lerna` build processes in the package folders.
 
@@ -61,31 +53,6 @@ yarn install
 yarn build
 ```
 
-Next, a local environment must be created. An environment contains references to all the vaults created and stores the downloaded application contents. To create a new environment, run the following command:
-
-```
-packages/cli/bin/run env:create
-```
-
-Or on Windows
-
-```
-"packages/cli/bin/run.cmd" env:create
-```
-
-This first environment should be created with the `development` type and set as default environment.
-The newly created environment then needs to be configured using the CLI:
-
-```
-packages/cli/bin/run daemon:setup --bin-path=./packages/daemon/bin/run
-```
-
-Or on Windows
-
-```
-"packages/cli/bin/run.cmd" daemon:setup --bin-path="packages/daemon/bin/run.cmd"
-```
-
 ## Development
 
 ### Building the code
@@ -94,24 +61,6 @@ Whenever code changes in any other package than the launcher, you should build e
 
 ```
 yarn run build
-```
-
-Now, in one terminal tab, run the daemon:
-
-```
-./packages/cli/bin/run daemon:start -e <your_env_name>
-```
-
-Or on Windows
-
-```
-"packages/cli/bin/run.cmd" daemon:start -e <your_env_name>
-```
-
-Then, in another tab, run the launcher:
-
-```
-MAINFRAME_ENV=<your_env_name> cd packages/launcher && yarn deps:build && yarn run dev
 ```
 
 ### Building Mainframe Apps

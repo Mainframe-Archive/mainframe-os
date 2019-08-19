@@ -315,6 +315,7 @@ export default class EthClient extends EventEmitter {
     if (!txParams.from) {
       throw new Error('Transaction "from" address required')
     }
+    /* eslint-disable require-atomic-updates */
     if (!txParams.nonce) {
       txParams.nonce = await this.send('eth_getTransactionCount', [
         txParams.from,
@@ -338,6 +339,8 @@ export default class EthClient extends EventEmitter {
     if (!txParams.gasPrice) {
       txParams.gasPrice = await this.send('eth_gasPrice', [])
     }
+    /* eslint-enable require-atomic-updates */
+
     return txParams
   }
 

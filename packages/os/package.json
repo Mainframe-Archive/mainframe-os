@@ -1,5 +1,5 @@
 {
-  "name": "launcher",
+  "name": "mfos",
   "version": "0.3.1",
   "main": "main/index.js",
   "license": "MIT",
@@ -119,6 +119,6 @@
     "relay-compiler": "^1.7.0",
     "spectron": "^8.0.0",
     "url-loader": "^2.1.0",
-    "webpack": "^4.39.1"
+    "webpack": "^4.39.2"
   }
 }

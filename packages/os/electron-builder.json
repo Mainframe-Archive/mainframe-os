@@ -1,11 +1,8 @@
 {
-  "appId": "com.mainframe.launcher",
+  "appId": "com.mainframeos.desktop",
   "electronVersion": "6.0.2",
   "productName": "MainframeOS",
   "artifactName": "${productName}.${ext}",
-  "appImage": {
-    "systemIntegration": "doNotAsk"
-  },
   "directories": {
     "buildResources": "build"
   },

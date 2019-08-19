@@ -26,7 +26,7 @@
     "@mainframe/rpc-stream": "^0.3.0",
     "babel-loader": "^8.0.6",
     "flow-bin": "^0.105.2",
-    "webpack": "^4.39.1",
-    "webpack-cli": "^3.3.6"
+    "webpack": "^4.39.2",
+    "webpack-cli": "^3.3.7"
   }
 }

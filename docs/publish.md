@@ -36,7 +36,6 @@ To allow users to install your app, you will need to upload the contents to Swar
 
 It is also possible to setup and use a local Swarm node, rather than the gateway.
 
-
 ### Setup local Swarm node
 
 You might prefer to use a local swarm node rather than the Mainframe gateway (configured by default) or Swarm gateways (available through `swarm-gateways.net`).
@@ -51,6 +50,4 @@ Your vault settings will need to be updated to use the local node rather than th
 ./packages/cli/bin/run vault:settings --bzz-url http://localhost:8500
 ```
 
-
->**Note:** If you don't know your app's ID, you can view details of all your apps by running: `./packages/cli/bin/run app:list`
-
+> **Note:** If you don't know your app's ID, you can view details of all your apps by running: `./packages/cli/bin/run app:list`
