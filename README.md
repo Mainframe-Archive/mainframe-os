@@ -28,7 +28,7 @@ This project is in alpha, lots of breaking changes are to be expected between re
 #### Linux
 
 ```
-sudo apt install -y libudev-dev libtool libusb-1.0-0-dev build-essential
+sudo apt install -y build-essential libsecret-1-dev libudev-dev libusb-1.0-0-dev
 ```
 
 #### Windows
