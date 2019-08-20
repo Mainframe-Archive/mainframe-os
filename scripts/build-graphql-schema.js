@@ -11,4 +11,4 @@ import schema from '../src/main/graphql/schema'
 
 const output = graphqlSync(schema, getIntrospectionQuery())
 const contents = printSchema(buildClientSchema(output.data))
-writeFileSync(resolve(__dirname, '..', 'schema.graphql'), contents)
+writeFileSync(resolve(__dirname, '../src', 'schema.graphql'), contents)

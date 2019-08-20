@@ -24,6 +24,7 @@ export const getStorageManifestHash = async (
     hash = await ctx.storage.feed.publishContent(bzz, STORAGE_EMPTY_MANIFEST)
   }
 
+  // eslint-disable-next-line require-atomic-updates
   ctx.storage.manifestHash = hash
   return hash
 }
@@ -57,6 +58,7 @@ export const uploadStream = async (
     manifestHash: await getStorageManifestHash(ctx),
   })
   await ctx.storage.feed.setContentHash(bzz, manifestHash)
+  // eslint-disable-next-line require-atomic-updates
   ctx.storage.manifestHash = manifestHash
 }
 

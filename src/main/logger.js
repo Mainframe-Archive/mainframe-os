@@ -28,7 +28,7 @@ export const createLogger = (env: Environment): Logger => {
     ],
   })
 
-  if (true || env.isDev) {
+  if (env.isDev) {
     logger.add(
       new winston.transports.Console({
         format: winston.format.simple(),

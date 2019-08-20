@@ -4,14 +4,13 @@ A platform for easily building and running distributed, unstoppable apps.
 
 ## Overview
 
-Mainframe OS is made of the following packages:
+This repository is a desktop application based on Electron, producing the Mainframe OS binaries for Linux, macOS and Windows.
 
-- `os`: the Electron application containing the OS data, UI and logic.
-- `sdk`: the Mainframe SDK, used by the apps to use the OS features.
-- `eth`: the internal Ethereum client used by Mainframe OS.
-- `smart-contracts`: the Ethereum smart contracts used by the OS.
+Other repositories contain specific parts of logic:
 
-In order to make it easier to share code among packages, this project uses [lerna](https://lernajs.io/). Whenever code changes, it's expected that you run `yarn run build` from the root of the project directory, and it will kick off the necessary `lerna` build processes in the package folders.
+- [`mainframe-contracts`](https://github.com/MainframeHQ/mainframe-contracts): Ethereum smart contracts for contacts discovery
+- [`mainframe-eth`](https://github.com/MainframeHQ/mainframe-eth): custom Ethereum client used by Mainframe OS
+- [`mainframe-sdk`](https://github.com/MainframeHQ/mainframe-sdk): Mainframe SDK used by apps to interact with Mainframe OS
 
 ## Project Status
 
@@ -19,24 +18,20 @@ This project is in alpha, lots of breaking changes are to be expected between re
 
 ## Getting Started
 
-### Contributing
-
-> see [contributing.md](contributing.md)
-
 ### Prerequisites
 
-- [Node](https://nodejs.org/en/) v10.x and [Yarn](https://yarnpkg.com/en/) => v1.13
+- [Node](https://nodejs.org/en/) v10.x and [Yarn](https://yarnpkg.com/en/) v1.13
 - Installed git and added to PATH environment variable
 
-#### Platform-specific dependencies
+### Platform-specific dependencies
 
-##### Linux
+#### Linux
 
 ```
 sudo apt install -y libudev-dev libtool libusb-1.0-0-dev build-essential
 ```
 
-##### Windows
+#### Windows
 
 ```
 npm install --global --production windows-build-tools
@@ -44,25 +39,23 @@ npm install --global --production windows-build-tools
 
 ### Setup
 
-Each package contains (or will contain) a readme with further information pertaining to setup. A shortcut guide is as follows:
-
-In the root of the project, install node dependencies:
-
 ```
 yarn install
-yarn build
 ```
 
 ## Development
 
-### Building the code
-
-Whenever code changes in any other package than the launcher, you should build everything (via `lerna`) with:
+### Running the code
 
 ```
-yarn run build
+yarn run dev
 ```
 
-### Building Mainframe Apps
+### Building Mainframe apps
 
-Information and guides for building MainframeOS apps can be found in our [developer docs](https://docs.mainframe.com/docs/build-dapps).
+Information and guides for building Mainframe apps can be found in our [developer docs](https://docs.mainframeos.com/docs/build-dapps).
+
+## License
+
+MIT.\
+See [LICENSE](LICENSE) file.
