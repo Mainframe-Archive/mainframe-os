@@ -80,9 +80,15 @@ export default {
         }
 
         const user = await ctx.getUserChecked()
-        return user == null
-          ? { user: false, wallet: false }
-          : { user: true, wallet: user.hasEthWallet() }
+        if (user == null) {
+          return { user: false, wallet: false }
+        }
+
+        if (!ctx.system.syncing) {
+          await ctx.system.startSync()
+        }
+
+        return { user: true, wallet: user.hasEthWallet() }
       } catch (error) {
         const message = 'Failed to open DB'
         ctx.logger.log({ level: 'error', message, error: error.toString() })

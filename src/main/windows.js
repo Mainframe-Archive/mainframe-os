@@ -22,7 +22,7 @@ const createWindow = (params: Object = {}): BrowserWindow => {
     window.loadURL(`http://localhost:${PORT}`)
   } else {
     const formattedUrl = url.format({
-      pathname: path.join(__dirname, `index.html`),
+      pathname: path.join(__dirname, 'index.html'),
       protocol: 'file:',
       slashes: true,
     })

@@ -9,6 +9,7 @@
 /*::
 import type { ConcreteFragment } from 'relay-runtime';
 type AppItem_appVersion$ref = any;
+type AppUpdateModal_userAppVersion$ref = any;
 export type AppInstallationState = "DONE" | "DOWNLOADING" | "FAILED" | "PENDING" | "%future added value";
 import type { FragmentReference } from "relay-runtime";
 declare export opaque type AppsScreen_user$ref: FragmentReference;
@@ -50,6 +51,7 @@ export type AppsScreen_user = {|
         +external: ?boolean,
       |}>,
     |},
+    +$fragmentRefs: AppUpdateModal_userAppVersion$ref,
   |}>,
   +$refType: AppsScreen_user$ref,
 |};
@@ -119,6 +121,11 @@ return {
       "concreteType": "UserAppVersion",
       "plural": true,
       "selections": [
+        {
+          "kind": "FragmentSpread",
+          "name": "AppUpdateModal_userAppVersion",
+          "args": null
+        },
         {
           "kind": "ScalarField",
           "alias": null,
@@ -264,5 +271,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '235f2f7b2f027a465753568a012fa68b';
+(node/*: any*/).hash = '5f72ac3aebd8aacc1f05c16a905a2170';
 module.exports = node;

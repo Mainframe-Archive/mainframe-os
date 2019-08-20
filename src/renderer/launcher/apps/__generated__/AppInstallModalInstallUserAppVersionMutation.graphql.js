@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 551a3e47eaf77147a4aec2840a16c632
+ * @relayHash 42ff5163bd3a10724da632afb628bd66
  */
 
 /* eslint-disable */
@@ -52,6 +52,7 @@ mutation AppInstallModalInstallUserAppVersionMutation(
 fragment AppsScreen_user on User {
   id
   apps {
+    ...AppUpdateModal_userAppVersion
     localID
     appVersion {
       ...AppItem_appVersion
@@ -92,6 +93,50 @@ fragment AppsScreen_user on User {
       id
     }
     id
+  }
+}
+
+fragment AppUpdateModal_userAppVersion on UserAppVersion {
+  localID
+  settings {
+    webDomains {
+      domain
+      internal
+      external
+    }
+    id
+  }
+  update {
+    fromVersion {
+      manifest {
+        profile {
+          name
+        }
+        version
+        webDomains {
+          domain
+          internal
+          external
+        }
+      }
+      id
+    }
+    toVersion {
+      publicID
+      manifest {
+        profile {
+          name
+        }
+        version
+        webDomains {
+          domain
+          internal
+          external
+        }
+      }
+      id
+    }
+    permissionsChanged
   }
 }
 
@@ -152,31 +197,6 @@ v3 = {
   "storageKey": null
 },
 v4 = {
-  "kind": "ScalarField",
-  "alias": null,
-  "name": "installationState",
-  "args": null,
-  "storageKey": null
-},
-v5 = {
-  "kind": "LinkedField",
-  "alias": null,
-  "name": "profile",
-  "storageKey": null,
-  "args": null,
-  "concreteType": "GenericProfile",
-  "plural": false,
-  "selections": [
-    {
-      "kind": "ScalarField",
-      "alias": null,
-      "name": "name",
-      "args": null,
-      "storageKey": null
-    }
-  ]
-},
-v6 = {
   "kind": "LinkedField",
   "alias": null,
   "name": "webDomains",
@@ -207,13 +227,65 @@ v6 = {
       "storageKey": null
     }
   ]
+},
+v5 = {
+  "kind": "LinkedField",
+  "alias": null,
+  "name": "profile",
+  "storageKey": null,
+  "args": null,
+  "concreteType": "GenericProfile",
+  "plural": false,
+  "selections": [
+    {
+      "kind": "ScalarField",
+      "alias": null,
+      "name": "name",
+      "args": null,
+      "storageKey": null
+    }
+  ]
+},
+v6 = {
+  "kind": "LinkedField",
+  "alias": null,
+  "name": "manifest",
+  "storageKey": null,
+  "args": null,
+  "concreteType": "AppManifest",
+  "plural": false,
+  "selections": [
+    v5,
+    {
+      "kind": "ScalarField",
+      "alias": null,
+      "name": "version",
+      "args": null,
+      "storageKey": null
+    },
+    v4
+  ]
+},
+v7 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "publicID",
+  "args": null,
+  "storageKey": null
+},
+v8 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "installationState",
+  "args": null,
+  "storageKey": null
 };
 return {
   "kind": "Request",
   "operationKind": "mutation",
   "name": "AppInstallModalInstallUserAppVersionMutation",
   "id": null,
-  "text": "mutation AppInstallModalInstallUserAppVersionMutation(\n  $input: InstallUserAppVersionMutationInput!\n) {\n  installUserAppVersion(input: $input) {\n    viewer {\n      ...AppsScreen_user\n      id\n    }\n  }\n}\n\nfragment AppsScreen_user on User {\n  id\n  apps {\n    localID\n    appVersion {\n      ...AppItem_appVersion\n      app {\n        publicID\n        id\n      }\n      installationState\n      manifest {\n        profile {\n          name\n        }\n        webDomains {\n          domain\n          internal\n          external\n        }\n      }\n      id\n    }\n    update {\n      toVersion {\n        installationState\n        manifest {\n          version\n        }\n        id\n      }\n      permissionsChanged\n    }\n    settings {\n      permissionsChecked\n      webDomains {\n        domain\n        internal\n        external\n      }\n      id\n    }\n    id\n  }\n}\n\nfragment AppItem_appVersion on AppVersion {\n  localID\n  installationState\n  app {\n    publicID\n    id\n  }\n  developer {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n  manifest {\n    profile {\n      name\n    }\n  }\n  update {\n    id\n  }\n}\n",
+  "text": "mutation AppInstallModalInstallUserAppVersionMutation(\n  $input: InstallUserAppVersionMutationInput!\n) {\n  installUserAppVersion(input: $input) {\n    viewer {\n      ...AppsScreen_user\n      id\n    }\n  }\n}\n\nfragment AppsScreen_user on User {\n  id\n  apps {\n    ...AppUpdateModal_userAppVersion\n    localID\n    appVersion {\n      ...AppItem_appVersion\n      app {\n        publicID\n        id\n      }\n      installationState\n      manifest {\n        profile {\n          name\n        }\n        webDomains {\n          domain\n          internal\n          external\n        }\n      }\n      id\n    }\n    update {\n      toVersion {\n        installationState\n        manifest {\n          version\n        }\n        id\n      }\n      permissionsChanged\n    }\n    settings {\n      permissionsChecked\n      webDomains {\n        domain\n        internal\n        external\n      }\n      id\n    }\n    id\n  }\n}\n\nfragment AppUpdateModal_userAppVersion on UserAppVersion {\n  localID\n  settings {\n    webDomains {\n      domain\n      internal\n      external\n    }\n    id\n  }\n  update {\n    fromVersion {\n      manifest {\n        profile {\n          name\n        }\n        version\n        webDomains {\n          domain\n          internal\n          external\n        }\n      }\n      id\n    }\n    toVersion {\n      publicID\n      manifest {\n        profile {\n          name\n        }\n        version\n        webDomains {\n          domain\n          internal\n          external\n        }\n      }\n      id\n    }\n    permissionsChanged\n  }\n}\n\nfragment AppItem_appVersion on AppVersion {\n  localID\n  installationState\n  app {\n    publicID\n    id\n  }\n  developer {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n  manifest {\n    profile {\n      name\n    }\n  }\n  update {\n    id\n  }\n}\n",
   "metadata": {},
   "fragment": {
     "kind": "Fragment",
@@ -288,6 +360,72 @@ return {
                   {
                     "kind": "LinkedField",
                     "alias": null,
+                    "name": "settings",
+                    "storageKey": null,
+                    "args": null,
+                    "concreteType": "UserAppSettings",
+                    "plural": false,
+                    "selections": [
+                      v4,
+                      v2,
+                      {
+                        "kind": "ScalarField",
+                        "alias": null,
+                        "name": "permissionsChecked",
+                        "args": null,
+                        "storageKey": null
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "LinkedField",
+                    "alias": null,
+                    "name": "update",
+                    "storageKey": null,
+                    "args": null,
+                    "concreteType": "AppUpdate",
+                    "plural": false,
+                    "selections": [
+                      {
+                        "kind": "LinkedField",
+                        "alias": null,
+                        "name": "fromVersion",
+                        "storageKey": null,
+                        "args": null,
+                        "concreteType": "AppVersion",
+                        "plural": false,
+                        "selections": [
+                          v6,
+                          v2
+                        ]
+                      },
+                      {
+                        "kind": "LinkedField",
+                        "alias": null,
+                        "name": "toVersion",
+                        "storageKey": null,
+                        "args": null,
+                        "concreteType": "AppVersion",
+                        "plural": false,
+                        "selections": [
+                          v7,
+                          v6,
+                          v2,
+                          v8
+                        ]
+                      },
+                      {
+                        "kind": "ScalarField",
+                        "alias": null,
+                        "name": "permissionsChanged",
+                        "args": null,
+                        "storageKey": null
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "LinkedField",
+                    "alias": null,
                     "name": "appVersion",
                     "storageKey": null,
                     "args": null,
@@ -295,7 +433,7 @@ return {
                     "plural": false,
                     "selections": [
                       v3,
-                      v4,
+                      v8,
                       {
                         "kind": "LinkedField",
                         "alias": null,
@@ -305,13 +443,7 @@ return {
                         "concreteType": "App",
                         "plural": false,
                         "selections": [
-                          {
-                            "kind": "ScalarField",
-                            "alias": null,
-                            "name": "publicID",
-                            "args": null,
-                            "storageKey": null
-                          },
+                          v7,
                           v2
                         ]
                       },
@@ -339,7 +471,7 @@ return {
                         "plural": false,
                         "selections": [
                           v5,
-                          v6
+                          v4
                         ]
                       },
                       {
@@ -354,75 +486,6 @@ return {
                           v2
                         ]
                       },
-                      v2
-                    ]
-                  },
-                  {
-                    "kind": "LinkedField",
-                    "alias": null,
-                    "name": "update",
-                    "storageKey": null,
-                    "args": null,
-                    "concreteType": "AppUpdate",
-                    "plural": false,
-                    "selections": [
-                      {
-                        "kind": "LinkedField",
-                        "alias": null,
-                        "name": "toVersion",
-                        "storageKey": null,
-                        "args": null,
-                        "concreteType": "AppVersion",
-                        "plural": false,
-                        "selections": [
-                          v4,
-                          {
-                            "kind": "LinkedField",
-                            "alias": null,
-                            "name": "manifest",
-                            "storageKey": null,
-                            "args": null,
-                            "concreteType": "AppManifest",
-                            "plural": false,
-                            "selections": [
-                              {
-                                "kind": "ScalarField",
-                                "alias": null,
-                                "name": "version",
-                                "args": null,
-                                "storageKey": null
-                              }
-                            ]
-                          },
-                          v2
-                        ]
-                      },
-                      {
-                        "kind": "ScalarField",
-                        "alias": null,
-                        "name": "permissionsChanged",
-                        "args": null,
-                        "storageKey": null
-                      }
-                    ]
-                  },
-                  {
-                    "kind": "LinkedField",
-                    "alias": null,
-                    "name": "settings",
-                    "storageKey": null,
-                    "args": null,
-                    "concreteType": "UserAppSettings",
-                    "plural": false,
-                    "selections": [
-                      {
-                        "kind": "ScalarField",
-                        "alias": null,
-                        "name": "permissionsChecked",
-                        "args": null,
-                        "storageKey": null
-                      },
-                      v6,
                       v2
                     ]
                   },
