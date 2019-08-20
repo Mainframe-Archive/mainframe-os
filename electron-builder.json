@@ -1,0 +1,33 @@
+{
+  "appId": "com.mainframeos.desktop",
+  "electronVersion": "6.0.3",
+  "productName": "MainframeOS",
+  "artifactName": "${productName}.${ext}",
+  "directories": {
+    "buildResources": "build"
+  },
+  "files": ["build/icon/*"],
+  "linux": {
+    "category": "Network",
+    "icon": "build/icon/",
+    "target": ["AppImage", "dir"]
+  },
+  "dmg": {
+    "icon": "build/dmg/icon.png",
+    "background": "build/dmg/background.png"
+  },
+  "mac": {
+    "icon": "build/icon.icns",
+    "target": ["dmg", "dir"]
+  },
+  "win": {
+    "certificateSubjectName": "Mainframe Group, Inc",
+    "icon": "build/icon.ico",
+    "target": [
+      {
+        "target": "nsis",
+        "arch": ["x64", "ia32"]
+      }
+    ]
+  }
+}
