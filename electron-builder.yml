@@ -2,12 +2,12 @@ appId: com.mainframeos.desktop
 productName: MainframeOS
 artifactName: '${productName}.${ext}'
 
+asar: false
+
 electronVersion: '6.0.3'
 
 directories:
   buildResources: build
-files:
-  - 'build/icon/*'
 
 linux:
   category: Network
@@ -32,5 +32,29 @@ win:
   target:
     - target: nsis
       arch:
-        - x64
-        - ia32
+        - 'x64'
+        - 'ia32'
+
+files:
+  # Files to exclude
+  - 'build/icon/*'
+
+  # Individual files to exclude - mostly from https://github.com/LedgerHQ/ledger-live-desktop/blob/develop/electron-builder.yml
+  - '!report-*.html'
+  - '!node_modules/**/{CONTRIBUTORS,LICENSE,License,license,CNAME,AUTHOR,TODO,CONTRIBUTING,COPYING,INSTALL,NEWS,PORTING,Makefile,htdocs,CHANGELOG,ChangeLog,changelog,README,Readme,readme,test,example,demo,composer.json,tsconfig.json,jsdoc.json,tslint.json,typings.json,gulpfile,bower.json,package-lock,Gruntfile,CMakeLists,karma.conf,yarn.lock}*'
+  - '!node_modules/**/{coverage,man,flow-typed,benchmark,spec,cmake,browser,vagrant,doxy*,bin,obj,obj.target,example,examples,test,tests,__tests__,mocks,__mocks__,doc,docs,msvc,Xcode,CVS,RCS,SCCS,.storybook}{,/**/*}'
+  - '!node_modules/**/*.{conf,png,pc,coffee,txt,spec.js,ts,js.flow,html,def,jst,xml,ico,in,ac,sln,dsp,dsw,cmd,vcproj,vcxproj,vcxproj.filters,pdb,exp,obj,lib,map,md,sh,gypi,gyp,h,cpp,yml,log,tlog,Makefile,mk,c,cc,rc,xcodeproj,xcconfig,d.ts,yaml,hpp,py}'
+
+  # Unnecessary modules to exclude
+  - '!node_modules/@erebos/{dist,esm}{,/**/*}'
+  - '!node_modules/@mainframe/{dist,esm}{,/**/*}'
+  - '!node_modules/ajv/dist{,/**/*}'
+  - '!node_modules/electron{,/**/*}'
+  - '!node_modules/lodash-{es,fp}{,/**/*}'
+  - '!node_modules/lodash/fp{,/**/*}'
+  - '!node_modules/react-dom/umd{,/**/*}'
+  - '!node_modules/react/umd{,/**/*}'
+  - '!node_modules/source-map/dist{,/**/*}'
+  - '!node_modules/winston/dist{,/**/*}'
+  - '!node_modules/winston-transport/dist{,/**/*}'
+  - '!node_modules/ws{,/**/*}'

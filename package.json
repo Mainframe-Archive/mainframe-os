@@ -4,11 +4,12 @@
   "main": "src/main/index.js",
   "license": "MIT",
   "scripts": {
-    "dev": "electron-webpack dev",
     "compile": "NODE_ENV=development electron-webpack",
     "compile:preload": "webpack --config ./build/webpack.preload.js",
     "deps:build": "electron-builder install-app-deps",
+    "deps:clean": "del-cli ./node_modules",
     "deps:flow": "flow-typed install --ignoreDeps dev",
+    "dev": "electron-webpack dev",
     "dist:ci": "yarn run compile && electron-builder --dir",
     "dist": "yarn run compile && electron-builder",
     "dist:dir": "yarn run dist --dir -c.compression=store -c.mac.identity=null",
@@ -33,6 +34,9 @@
     "renderer": {
       "webpackConfig": "./build/webpack.renderer.additions.js"
     }
+  },
+  "resolutions": {
+    "leveldown": "^5.1.1"
   },
   "dependencies": {
     "@babel/polyfill": "^7.4.4",
