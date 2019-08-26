@@ -4,12 +4,14 @@ import ClientAPIs from '../ClientAPIs'
 import type { ContactID, Contact } from '../types'
 
 export default class ContactsAPIs extends ClientAPIs {
-  async selectContacts(): Promise<Array<Contact>> {
-    return this._rpc.request('contacts_select', { multi: true })
+  async selectContacts(options?: {
+    withWallet?: boolean,
+  }): Promise<Array<Contact>> {
+    return this._rpc.request('contacts_select', { multi: true, options })
   }
 
-  async selectContact(): Promise<?Contact> {
-    const contacts = await this._rpc.request('contacts_select', {})
+  async selectContact(options?: { withWallet?: boolean }): Promise<?Contact> {
+    const contacts = await this._rpc.request('contacts_select', { options })
     if (contacts && contacts.length) {
       return contacts[0]
     }
