@@ -246,9 +246,7 @@ export const sandboxed = {
         contactIDs: ids,
       })
       if (params.options && params.options.withWallet) {
-        const filteredContacts = contactsRes.contacts.filter(contact => 
-          contact.data.profile.ethAddress
-        )
+        const filteredContacts = contactsRes.contacts.filter(contact => contact.data.profile.ethAddress)
         return filteredContacts
       }
       return contactsRes.contacts
