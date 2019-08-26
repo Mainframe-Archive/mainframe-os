@@ -213,7 +213,10 @@ export const sandboxed = {
 
   contacts_select: withPermission(
     'CONTACTS_READ',
-    async (ctx: AppContext, params: { multi?: boolean }) => {
+    async (
+      ctx: AppContext,
+      params: { multi?: boolean, options?: { withWallet?: boolean } },
+    ) => {
       const res = await ctx.trustedRPC.request('user_request', {
         key: 'CONTACTS_SELECT',
         params: { CONTACTS_SELECT: params },
@@ -242,6 +245,12 @@ export const sandboxed = {
         userID,
         contactIDs: ids,
       })
+      if (params.options && params.options.withWallet) {
+        const filteredContacts = contactsRes.contacts.filter(contact => 
+          contact.data.profile.ethAddress
+        )
+        return filteredContacts
+      }
       return contactsRes.contacts
     },
   ),
