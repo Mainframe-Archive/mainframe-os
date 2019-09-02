@@ -9,7 +9,7 @@ import DownloadMdIcon from '@morpheus-ui/icons/DownloadMd'
 import EthCircledIcon from '@morpheus-ui/icons/EthCircled'
 import MftCircledIcon from '@morpheus-ui/icons/MftCircled'
 import { sortBy } from 'lodash'
-import React, { Component } from 'react'
+import React, { Component, useEffect, useState } from 'react'
 import {
   commitMutation,
   createFragmentContainer,
@@ -18,7 +18,10 @@ import {
 } from 'react-relay'
 import styled from 'styled-components/native'
 
+import { MFT_TOKEN_ADDRESSES } from '../../../constants'
+
 import RelayRenderer from '../RelayRenderer'
+import { getEthClient } from '../rpc'
 
 import WalletImportView from './WalletImportView'
 import WalletCreateModal from './WalletCreateModal'
@@ -26,9 +29,6 @@ import WalletAddLedgerModal from './WalletAddLedgerModal'
 import WallePreviewModal from './WalletPreviewModal'
 import WalletIcon from './WalletIcon'
 import type { WalletsScreen_user as User } from './__generated__/WalletsScreen_user.graphql'
-
-// TODO: getting the wallet balances involves external calls that can fail or take some time
-// these calls should be deferred or use their own query to avoid delaying the screen loading
 
 type Props = {
   relay: {
@@ -51,10 +51,6 @@ type Wallet = {|
   +localID: string,
   +accounts: $ReadOnlyArray<{|
     +address: string,
-    +balances: {|
-      +eth: string,
-      +mft: string,
-    |},
   |}>,
 |}
 
@@ -165,9 +161,43 @@ const setProfileWalletMutation = graphql`
   }
 `
 
-const roundNum = (number, precision) => {
-  precision = Math.pow(10, precision)
-  return Math.ceil(Number(number) * precision) / precision
+const roundNum = (value: string, precision = 5): number => {
+  const p = Math.pow(10, precision)
+  return Math.ceil(Number(value) * p) / p
+}
+
+type AccountBalanceProps = { address: string, currency: 'ETH' | 'MFT' }
+
+function AccountBalance({ address, currency }: AccountBalanceProps) {
+  const [balance, setBalance] = useState<null | number>(null)
+
+  useEffect(() => {
+    const eth = getEthClient()
+    if (currency === 'ETH') {
+      eth.getETHBalance(address).then(b => setBalance(roundNum(b, 5)))
+    } else if (currency === 'MFT') {
+      eth
+        .fetchNetwork()
+        .then(() => {
+          return eth
+            .erc20Contract(MFT_TOKEN_ADDRESSES[eth.networkName])
+            .getBalance(address)
+        })
+        .then(b => {
+          setBalance(roundNum(b, 5))
+        })
+    } else {
+      setBalance(null)
+    }
+  }, [address, currency])
+
+  return balance ? (
+    <>
+      {balance} {currency}
+    </>
+  ) : (
+    <>...</>
+  )
 }
 
 class WalletsView extends Component<Props, State> {
@@ -319,7 +349,7 @@ class WalletsView extends Component<Props, State> {
                 minWidth: 80,
               }}
               color="#232323">
-              {roundNum(a.balances.eth, 5)} ETH
+              <AccountBalance address={a.address} currency="ETH" />
             </Text>
           </Ballance>
           <Ballance>
@@ -332,7 +362,7 @@ class WalletsView extends Component<Props, State> {
                 minWidth: 80,
               }}
               color="#232323">
-              {roundNum(a.balances.mft, 5)} MFT
+              <AccountBalance address={a.address} currency="MFT" />
             </Text>
           </Ballance>
         </AccountView>
@@ -498,10 +528,6 @@ const RelayContainer = createFragmentContainer(WalletsView, {
           localID
           accounts {
             address
-            balances {
-              eth
-              mft
-            }
           }
         }
         ledger {
@@ -509,10 +535,6 @@ const RelayContainer = createFragmentContainer(WalletsView, {
           localID
           accounts {
             address
-            balances {
-              eth
-              mft
-            }
           }
         }
       }
