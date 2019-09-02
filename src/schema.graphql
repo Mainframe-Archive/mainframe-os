@@ -1,0 +1,566 @@
+input AcceptContactRequestInput {
+  peerID: String!
+  clientMutationId: String
+}
+
+type AcceptContactRequestPayload {
+  viewer: User!
+  contact: Contact!
+  clientMutationId: String
+}
+
+input AddContactInput {
+  publicID: String!
+  aliasName: String
+  clientMutationId: String
+}
+
+type AddContactPayload {
+  contact: Contact
+  viewer: User!
+  clientMutationId: String
+}
+
+input AddHDWalletAccountInput {
+  walletID: String!
+  index: Int!
+  clientMutationId: String
+}
+
+type AddHDWalletAccountPayload {
+  address: String!
+  viewer: User!
+  clientMutationId: String
+}
+
+input AddLedgerWalletAccountsInput {
+  indexes: [Int]
+  name: String!
+  userID: String
+  setAsDefault: Boolean
+  legacyPath: Boolean
+  clientMutationId: String
+}
+
+type AddLedgerWalletAccountsPayload {
+  ledgerWallet: EthLedgerWallet
+  viewer: User!
+  clientMutationId: String
+}
+
+type App implements Node {
+  """The ID of an object"""
+  id: ID!
+  localID: ID!
+  publicID: ID!
+  developer: Developer!
+  latestAvailableVersion: AppVersion
+  latestDownloadedVersion: AppVersion
+  versions: [AppVersion!]!
+}
+
+type AppApprovedContact {
+  aliasID: ID!
+  contactID: ID!
+}
+
+enum AppInstallationState {
+  PENDING
+  DOWNLOADING
+  FAILED
+  DONE
+}
+
+type AppLookupResult {
+  app: App!
+  userAppVersion: UserAppVersion
+}
+
+type AppManifest {
+  publicFeed: String!
+  profile: GenericProfile!
+  version: String!
+  contentsHash: String!
+  webDomains: [WebDomainDefinition!]!
+}
+
+type AppUpdate {
+  fromVersion: AppVersion!
+  toVersion: AppVersion!
+  permissionsChanged: Boolean!
+}
+
+type AppVersion implements Node {
+  """The ID of an object"""
+  id: ID!
+  localID: ID!
+  publicID: ID!
+  appID: ID!
+  app: App!
+  developerID: ID!
+  developer: Developer!
+  manifest: AppManifest!
+  installationState: AppInstallationState!
+  update: AppVersion
+}
+
+type AppVersionPayload {
+  appVersion: AppVersion!
+  viewer: User!
+}
+
+type Contact implements Node {
+  """The ID of an object"""
+  id: ID!
+  localID: ID!
+  peerID: ID!
+  peer: Peer!
+  publicID: ID!
+  profile: GenericProfile!
+  connectionState: ContactConnectionState!
+  invite: ContactInvite
+}
+
+type ContactChangedPayload {
+  contact: Contact!
+  viewer: User!
+}
+
+enum ContactConnectionState {
+  CONNECTED
+  DECLINED
+  RECEIVED
+  SENDING_FEED
+  SENT_FEED
+  SENDING_BLOCKCHAIN
+  SENT_BLOCKCHAIN
+}
+
+type ContactInvite {
+  stakeAmount: String!
+  stakeState: ContactStakeState!
+  inviteTX: String!
+  fromAddress: String!
+  toAddress: String!
+  ethNetwork: String!
+  reclaimedStakeTX: String
+}
+
+type ContactRequest implements Node {
+  """The ID of an object"""
+  id: ID!
+  localID: ID!
+  peerID: ID!
+  peer: Peer!
+  publicID: ID!
+  profile: GenericProfile!
+  receivedAddress: String!
+  senderAddress: String!
+  stakeAmount: String!
+  ethNetwork: String!
+  connectionState: ContactConnectionState!
+}
+
+enum ContactStakeState {
+  STAKED
+  RECLAIMING
+  RECLAIMED
+  SEIZED
+}
+
+input CreateAppInput {
+  name: String!
+  contentsPath: String!
+  version: String!
+  developerID: String!
+  webDomains: [WebDomainDefinitionInput!]!
+  clientMutationId: String
+}
+
+type CreateAppPayload {
+  app: OwnApp!
+  devtools: Devtools!
+  clientMutationId: String
+}
+
+input CreateAppVersionInput {
+  appID: String!
+  version: String!
+  clientMutationId: String
+}
+
+type CreateAppVersionPayload {
+  app: OwnApp!
+  viewer: User!
+  clientMutationId: String
+}
+
+input CreateDeveloperInput {
+  profile: UserProfileInput!
+  clientMutationId: String
+}
+
+type CreateDeveloperPayload {
+  developer: OwnDeveloper
+  devtools: Devtools!
+  clientMutationId: String
+}
+
+input CreateHDWalletInput {
+  blockchain: SupportedWallets!
+  name: String!
+  setAsDefault: Boolean
+  clientMutationId: String
+}
+
+type CreateHDWalletPayload {
+  hdWallet: EthHDWallet
+  viewer: User!
+  clientMutationId: String
+}
+
+input DeleteContactInput {
+  contactID: String!
+  clientMutationId: String
+}
+
+type DeleteContactPayload {
+  viewer: User!
+  clientMutationId: String
+}
+
+input DeleteWalletInput {
+  walletID: String!
+  type: String!
+  clientMutationId: String
+}
+
+type DeleteWalletPayload {
+  viewer: User!
+  clientMutationId: String
+}
+
+type Developer implements Node {
+  """The ID of an object"""
+  id: ID!
+  localID: ID!
+  profile: GenericProfile!
+  publicID: ID!
+  apps: [App!]!
+}
+
+type Devtools {
+  developers: [OwnDeveloper!]!
+}
+
+type EthHDWallet implements Node {
+  """The ID of an object"""
+  id: ID!
+  localID: ID!
+  mnemonic: String!
+  name: String
+  accounts: [WalletAccount!]!
+}
+
+type EthLedgerWallet implements Node {
+  """The ID of an object"""
+  id: ID!
+  localID: ID!
+  name: String
+  accounts: [WalletAccount!]!
+}
+
+type EthWallets {
+  hd: [EthHDWallet!]!
+  ledger: [EthLedgerWallet!]!
+}
+
+type GenericProfile {
+  name: String
+  avatar: String
+  ethAddress: String
+}
+
+input ImportHDWalletInput {
+  blockchain: SupportedWallets!
+  mnemonic: String!
+  name: String!
+  setAsDefault: Boolean
+  clientMutationId: String
+}
+
+type ImportHDWalletPayload {
+  hdWallet: EthHDWallet
+  viewer: User!
+  clientMutationId: String
+}
+
+input InstallUserAppVersionMutationInput {
+  appVersionID: String!
+  webDomains: [WebDomainDefinitionInput!]!
+  clientMutationId: String
+}
+
+type InstallUserAppVersionMutationPayload {
+  userAppVersion: UserAppVersion!
+  viewer: User!
+  clientMutationId: String
+}
+
+type Lookup {
+  appByID(publicID: ID!): AppLookupResult
+  peerByID(publicID: ID!): PeerLookupResult
+}
+
+type Mutation {
+  createApp(input: CreateAppInput!): CreateAppPayload
+  createAppVersion(input: CreateAppVersionInput!): CreateAppVersionPayload
+  installUserAppVersion(input: InstallUserAppVersionMutationInput!): InstallUserAppVersionMutationPayload
+  updateUserAppVersion(input: UpdateUserAppVersionMutationInput!): UpdateUserAppVersionMutationPayload
+  setAppWebDomainsDefinitions(input: SetAppWebDomainsDefinitionsInput!): SetAppWebDomainsDefinitionsPayload
+  publishAppVersion(input: PublishAppVersionInput!): PublishAppVersionPayload
+  updateAppDetails(input: UpdateAppDetailsInput!): UpdateAppDetailsPayload
+  acceptContactRequest(input: AcceptContactRequestInput!): AcceptContactRequestPayload
+  addContact(input: AddContactInput!): AddContactPayload
+  createDeveloper(input: CreateDeveloperInput!): CreateDeveloperPayload
+  deleteContact(input: DeleteContactInput!): DeleteContactPayload
+  setProfileWallet(input: SetProfileWalletInput!): SetProfileWalletPayload
+  updateProfile(input: UpdateProfileInput!): UpdateProfilePayload
+  addHDWalletAccount(input: AddHDWalletAccountInput!): AddHDWalletAccountPayload
+  addLedgerWalletAccounts(input: AddLedgerWalletAccountsInput!): AddLedgerWalletAccountsPayload
+  createHDWallet(input: CreateHDWalletInput!): CreateHDWalletPayload
+  deleteWallet(input: DeleteWalletInput!): DeleteWalletPayload
+  importHDWallet(input: ImportHDWalletInput!): ImportHDWalletPayload
+  setEthNetwork(input: SetEthNetworkInput!): SetEthNetworkPayload
+}
+
+type NamedProfile {
+  name: String!
+  avatar: String
+  ethAddress: String
+}
+
+"""An object with an ID"""
+interface Node {
+  """The id of the object."""
+  id: ID!
+}
+
+type OwnApp implements Node {
+  """The ID of an object"""
+  id: ID!
+  localID: ID!
+  publicID: ID!
+  developer: OwnDeveloper!
+  profile: NamedProfile!
+  contentsPath: String!
+  versions: [OwnAppVersion!]!
+  inProgressVersion: OwnAppVersion
+  latestPublishedVersion: OwnAppVersion
+  viewerOwnAppID: ID!
+  viewerAppSettings: UserAppSettings!
+}
+
+type OwnAppVersion {
+  version: String!
+  contentsHash: String
+  versionHash: String
+  webDomains: [WebDomainDefinition!]!
+}
+
+type OwnDeveloper implements Node {
+  """The ID of an object"""
+  id: ID!
+  localID: ID!
+  profile: NamedProfile!
+  publicID: ID!
+  apps: [OwnApp!]!
+}
+
+type Peer implements Node {
+  """The ID of an object"""
+  id: ID!
+  localID: ID!
+  publicID: ID!
+  publicFeed: String!
+  profile: GenericProfile!
+}
+
+type PeerLookupResult {
+  publicKey: String
+  publicID: ID!
+  profile: GenericProfile!
+}
+
+input PublishAppVersionInput {
+  appID: String!
+  clientMutationId: String
+}
+
+type PublishAppVersionPayload {
+  app: OwnApp!
+  versionHash: String!
+  viewer: User!
+  clientMutationId: String
+}
+
+type Query {
+  devtools: Devtools!
+  lookup: Lookup!
+
+  """Fetches an object given its ID"""
+  node(
+    """The ID of an object"""
+    id: ID!
+  ): Node
+  viewer: User!
+}
+
+input SetAppWebDomainsDefinitionsInput {
+  appID: String!
+  webDomains: [WebDomainDefinitionInput!]!
+  clientMutationId: String
+}
+
+type SetAppWebDomainsDefinitionsPayload {
+  app: OwnApp!
+  viewer: User!
+  clientMutationId: String
+}
+
+input SetEthNetworkInput {
+  url: String!
+  clientMutationId: String
+}
+
+type SetEthNetworkPayload {
+  viewer: User!
+  clientMutationId: String
+}
+
+input SetProfileWalletInput {
+  address: String!
+  clientMutationId: String
+}
+
+type SetProfileWalletPayload {
+  viewer: User!
+  clientMutationId: String
+}
+
+type Subscription {
+  appVersionChanged: AppVersionPayload!
+  contactChanged: ContactChangedPayload!
+  contactsChanged: ContactChangedPayload!
+}
+
+enum SupportedWallets {
+  ETHEREUM
+}
+
+input UpdateAppDetailsInput {
+  appID: String!
+  name: String!
+  contentsPath: String!
+  version: String!
+  clientMutationId: String
+}
+
+type UpdateAppDetailsPayload {
+  app: OwnApp!
+  viewer: User!
+  clientMutationId: String
+}
+
+input UpdateProfileInput {
+  profile: UpdateUserProfileInput!
+  privateProfile: Boolean
+  clientMutationId: String
+}
+
+type UpdateProfilePayload {
+  viewer: User!
+  clientMutationId: String
+}
+
+input UpdateUserAppVersionMutationInput {
+  userAppVersionID: String!
+  webDomains: [WebDomainDefinitionInput!]!
+  clientMutationId: String
+}
+
+type UpdateUserAppVersionMutationPayload {
+  userAppVersion: UserAppVersion!
+  viewer: User!
+  clientMutationId: String
+}
+
+input UpdateUserProfileInput {
+  name: String
+  avatar: String
+  ethAddress: String
+}
+
+type User implements Node {
+  """The ID of an object"""
+  id: ID!
+  localID: ID!
+  profile: NamedProfile!
+  privateProfile: Boolean!
+  publicID: ID!
+  apps: [UserAppVersion!]!
+  contacts: [Contact!]!
+  contactInviteStake: String!
+  contactRequests: [ContactRequest!]!
+  ethWallets: EthWallets!
+  ethURL: String!
+  bzzURL: String!
+}
+
+type UserAppSettings implements Node {
+  """The ID of an object"""
+  id: ID!
+  localID: ID!
+  approvedContacts: [AppApprovedContact!]!
+  defaultEthAccount: String
+  permissionsChecked: Boolean!
+  webDomains: [WebDomainDefinition!]!
+}
+
+type UserAppVersion implements Node {
+  """The ID of an object"""
+  id: ID!
+  localID: ID!
+  userID: ID!
+  user: User!
+  appVersion: AppVersion!
+  settings: UserAppSettings!
+  update: AppUpdate
+}
+
+input UserProfileInput {
+  name: String!
+  avatar: String
+}
+
+type WalletAccount {
+  address: String!
+  balances: WalletBalances!
+}
+
+type WalletBalances {
+  eth: String!
+  mft: String!
+}
+
+type WebDomainDefinition {
+  domain: String!
+  internal: Boolean
+  external: Boolean
+}
+
+input WebDomainDefinitionInput {
+  domain: String!
+  internal: Boolean
+  external: Boolean
+}

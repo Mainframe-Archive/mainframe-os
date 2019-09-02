@@ -15,29 +15,32 @@ jobs:
           name: Install system dependencies
           command: |
             sudo apt-get update
-            sudo apt-get install build-essential libudev-dev libusb-1.0-0-dev -y
+            sudo apt-get install build-essential libsecret-1-dev libudev-dev libusb-1.0-0-dev -y
       - run:
           name: Setup
-          command: yarn install && yarn run bootstrap:ci
+          command: yarn install
       - save_cache:
           paths:
             - node_modules
           key: v1-dependencies-{{ .Branch }}
       - run:
-          name: Build and check
-          command: yarn run build && yarn run lint && yarn run test:types-ci
+          name: Lint
+          command: yarn run lint
       - run:
-          name: Project tests
-          command: yarn run test:ci
-          environment:
-            JEST_JUNIT_OUTPUT: '/tmp/test-reports/jest/results.xml'
-      - run:
-          name: Setup test env
-          command: './packages/cli/bin/run env:create -n v030-production -t testing -d && ./packages/cli/bin/run daemon:setup --bin-path=./packages/daemon/bin/run'
-      - run:
-          name: Integration tests
-          environment:
-            USE_HARD_LINKS: 'false'
-          command: cd ./packages/launcher && yarn run dist:ci && yarn run test
-      - store_test_results:
-          path: /tmp/test-reports
+          name: Build binary
+          command: yarn run dist:ci
+      # - run:
+      #     name: Project tests
+      #     command: yarn run test:ci
+      #     environment:
+      #       JEST_JUNIT_OUTPUT: '/tmp/test-reports/jest/results.xml'
+      # - run:
+      #     name: Setup test env
+      #     command: './packages/cli/bin/run env:create -n v030-production -t testing -d && ./packages/cli/bin/run daemon:setup --bin-path=./packages/daemon/bin/run'
+      # - run:
+      #     name: Integration tests
+      #     environment:
+      #       USE_HARD_LINKS: 'false'
+      #     command: cd ./packages/launcher && yarn run dist:ci && yarn run test
+      # - store_test_results:
+      #     path: /tmp/test-reports

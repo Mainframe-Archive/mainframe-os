@@ -4,22 +4,13 @@ A platform for easily building and running distributed, unstoppable apps.
 
 ## Overview
 
-The main components (packages) of the Mainframe Platform are as follows:
+This repository is a desktop application based on Electron, producing the Mainframe OS binaries for Linux, macOS and Windows.
 
-- `daemon`: a background daemon process that communicates with decentralized services
-- `launcher`: the Mainframe application installing, launching and running sandboxed apps
+Other repositories contain specific parts of logic:
 
-In addition, there are several auxiliary packages:
-
-- `app-manifest`: an utility library for app manifests creation an validation
-- `app-permissions`: an utility library for distributed app permissions
-- `cli`: a command-line interface to communicate with the daemon
-- `client`: a library used by the CLI & launcher to communicate with the daemon
-- `config`: shared configuration utilities used by several packages
-- `data-types`: shared data primitives
-- `toolbox`: a set of functions that both the launcher and the cli use
-
-In order to make it easier to share code among packages, this project uses [lerna](https://lernajs.io/). Whenever code changes, it's expected that you run `yarn run build` from the root of the project directory, and it will kick off the necessary `lerna` build processes in the package folders.
+- [`mainframe-contracts`](https://github.com/MainframeHQ/mainframe-contracts): Ethereum smart contracts for contacts discovery
+- [`mainframe-eth`](https://github.com/MainframeHQ/mainframe-eth): custom Ethereum client used by Mainframe OS
+- [`mainframe-sdk`](https://github.com/MainframeHQ/mainframe-sdk): Mainframe SDK used by apps to interact with Mainframe OS
 
 ## Project Status
 
@@ -27,24 +18,20 @@ This project is in alpha, lots of breaking changes are to be expected between re
 
 ## Getting Started
 
-### Contributing
-
-> see [contributing.md](contributing.md)
-
 ### Prerequisites
 
-- [Node](https://nodejs.org/en/) v10.x and [Yarn](https://yarnpkg.com/en/) => v1.13
+- [Node](https://nodejs.org/en/) v10.x and [Yarn](https://yarnpkg.com/en/) v1.13
 - Installed git and added to PATH environment variable
 
-#### Platform-specific dependencies
+### Platform-specific dependencies
 
-##### Linux
+#### Linux
 
 ```
-sudo apt install -y libudev-dev libtool libusb-1.0-0-dev build-essential
+sudo apt install -y build-essential libsecret-1-dev libudev-dev libusb-1.0-0-dev
 ```
 
-##### Windows
+#### Windows
 
 ```
 npm install --global --production windows-build-tools
@@ -52,51 +39,23 @@ npm install --global --production windows-build-tools
 
 ### Setup
 
-Each package contains (or will contain) a readme with further information pertaining to setup. A shortcut guide is as follows:
-
-In the root of the project, install node dependencies:
-
 ```
 yarn install
-yarn build
 ```
-
-Next, a local environment must be created. An environment contains references to all the vaults created and stores the downloaded application contents. To create a new environment, run the following command:
-
-```
-packages/cli/bin/run env:create
-```
-
-Or on Windows
-
-```
-"packages/cli/bin/run.cmd" env:create
-```
-
-This first environment should be created with the `development` type and set as default environment.
 
 ## Development
 
-### Building the code
-
-Whenever code changes in any other package than the launcher, you should build everything (via `lerna`) with:
+### Running the code
 
 ```
-yarn run build
+yarn run dev
 ```
 
-Then, build dependencies:
+### Building Mainframe apps
 
-```
-cd packages/launcher && yarn deps:build
-```
+Information and guides for building Mainframe apps can be found in our [developer docs](https://docs.mainframeos.com/docs/build-dapps).
 
-Then, start the OS:
+## License
 
-```
-MAINFRAME_ENV=<your_env_name> yarn run dev
-```
-
-### Building Mainframe Apps
-
-Information and guides for building MainframeOS apps can be found in our [developer docs](https://docs.mainframe.com/docs/build-dapps).
+MIT.\
+See [LICENSE](LICENSE) file.

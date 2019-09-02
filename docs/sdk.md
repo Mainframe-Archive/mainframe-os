@@ -312,7 +312,6 @@ const key = 'my-key'
 const data = await sdk.storage.delete(key)
 ```
 
-
 # Types
 
 ### Contact:
