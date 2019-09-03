@@ -5,7 +5,7 @@ import { filter, flatMap, map } from 'rxjs/operators'
 
 import type { GraphQLContext } from '../context/graphql'
 
-import { appVersion, contact, viewerField } from './objects'
+import { appVersion, contact, systemUpdate, viewerField } from './objects'
 import observableToAsyncIterator from './observableToAsyncIterator'
 
 const appVersionPayload = new GraphQLObjectType({
@@ -69,11 +69,31 @@ const contactsChanged = {
   },
 }
 
+const systemUpdateChangedPayload = new GraphQLObjectType({
+  name: 'SystemUpdateChangedPayload',
+  fields: () => ({
+    systemUpdate: {
+      type: new GraphQLNonNull(systemUpdate),
+    },
+  }),
+})
+
+const systemUpdateChanged = {
+  type: new GraphQLNonNull(systemUpdateChangedPayload),
+  subscribe: (self, args, ctx: GraphQLContext) => {
+    const observable = ctx.system.updater.pipe(
+      map(systemUpdate => ({ systemUpdateChanged: { systemUpdate } })),
+    )
+    return observableToAsyncIterator(observable)
+  },
+}
+
 export default new GraphQLObjectType({
   name: 'Subscription',
   fields: () => ({
     appVersionChanged,
     contactChanged,
     contactsChanged,
+    systemUpdateChanged,
   }),
 })

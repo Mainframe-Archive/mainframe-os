@@ -105,6 +105,7 @@ export class LauncherContext {
       this._graphqlContext = new GraphQLContext({
         db: this.db,
         logger: this.logger,
+        system: this.system,
         user: this.system.getUserContext(this.userID),
       })
     }

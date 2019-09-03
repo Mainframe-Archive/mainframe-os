@@ -6,7 +6,6 @@ import SettingsToolIcon from '@morpheus-ui/icons/SettingsToolSm'
 import DocumentIcon from '@morpheus-ui/icons/DocumentSm'
 import CommunityIcon from '@morpheus-ui/icons/CommunitySm'
 import FeedbackIcon from '@morpheus-ui/icons/Feedback'
-import MainframeLogoIcon from '@morpheus-ui/icons/MainframeLogoSm'
 import GreaterIcon from '@morpheus-ui/icons/GreaterSm'
 import ExportIcon from '@morpheus-ui/icons/ExportSm'
 import React from 'react'
@@ -17,12 +16,12 @@ import { ROUTES } from '../constants'
 
 import EthereumNetworkSelector from './EthereumNetworkSelector'
 import SettingsItem from './SettingsItem'
+import SystemUpdateItem from './SystemUpdateItem'
 
 const EXTERNAL_URLS = {
   docs: 'https://mainframe.com/developers/',
   help: 'https://community.mainframe.com/',
   feedback: 'https://mainframe.com/contact/',
-  update: 'https://github.com/MainframeHQ/mainframe-os/releases',
 }
 
 const openExternal = (key: $Keys<typeof EXTERNAL_URLS>) => {
@@ -82,17 +81,7 @@ export default function SettingsMenu(props: Props) {
             Icon={FeedbackIcon}
             RightElement={ExportIcon}
           />
-          <SettingsItem
-            title="Alpha version 0.3"
-            Icon={MainframeLogoIcon}
-            RightElement={() => (
-              <Button
-                onPress={() => openExternal('update')}
-                title="CHECK FOR UPDATES"
-                variant={['completeOnboarding', 'small']}
-              />
-            )}
-          />
+          <SystemUpdateItem />
         </List>
       </Container>
     </ScrollView>

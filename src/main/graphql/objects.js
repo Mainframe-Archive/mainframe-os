@@ -1,9 +1,11 @@
 // @flow
 
 import { Timeline } from '@erebos/timeline'
+import { app as electronApp } from 'electron'
 import {
   GraphQLBoolean,
   GraphQLEnumType,
+  GraphQLFloat,
   GraphQLID,
   GraphQLList,
   GraphQLObjectType,
@@ -925,3 +927,53 @@ export const lookup = new GraphQLObjectType({
     },
   }),
 })
+
+export const lookupField = {
+  type: new GraphQLNonNull(lookup),
+}
+
+export const systemUpdateStatus = new GraphQLEnumType({
+  name: 'SystemUpdateStatus',
+  values: {
+    IDLE: { value: 'idle' },
+    CHECKING: { value: 'checking' },
+    ERROR: { value: 'error' },
+    NO_UPDATE: { value: 'no-update' },
+    UPDATE_AVAILABLE: { value: 'update-available' },
+    UPDATE_DOWNLOADING: { value: 'update-downloading' },
+    UPDATE_DOWNLOADED: { value: 'update-downloaded' },
+  },
+})
+
+export const systemUpdate = new GraphQLObjectType({
+  name: 'SystemUpdate',
+  interfaces: () => [nodeInterface],
+  fields: () => ({
+    id: {
+      type: new GraphQLNonNull(GraphQLID),
+      resolve: () => 'SystemUpdate',
+    },
+    status: {
+      type: new GraphQLNonNull(systemUpdateStatus),
+    },
+    currentVersion: {
+      type: new GraphQLNonNull(GraphQLString),
+      resolve: () => electronApp.getVersion(),
+    },
+    newVersion: {
+      type: GraphQLString,
+      resolve: self => (self.info ? self.info.version : null),
+    },
+    downloadProgress: {
+      type: GraphQLFloat,
+      resolve: self => (self.progress ? self.progress.percent : null),
+    },
+  }),
+})
+
+export const systemUpdateField = {
+  type: new GraphQLNonNull(systemUpdate),
+  resolve: (self: Object, args: Object, ctx: GraphQLContext) => {
+    return ctx.system.updater.value
+  },
+}

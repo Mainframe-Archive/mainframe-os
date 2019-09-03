@@ -2,6 +2,8 @@
 
 import type { ExecutionResult } from 'graphql'
 
+import { checkForUpdates } from '../updater'
+
 import type {
   ContactGetInviteTXDetailsParams,
   DBRequestParams,
@@ -49,6 +51,36 @@ const GRAPHQL_PARAMS = {
 }
 
 export default {
+  // System lifecycle
+
+  system_checkUpdate: {
+    async handler(ctx: LauncherContext) {
+      ctx.logger.log({ level: 'info', message: 'Check for system updates' })
+      checkForUpdates()
+    },
+  },
+
+  system_installUpdate: {
+    async handler(ctx: LauncherContext) {
+      const update = ctx.system.updater.value
+      if (update.status === 'update-downloaded') {
+        ctx.logger.log({
+          level: 'info',
+          message: 'Install downloaded system update',
+          version: update.info.version,
+        })
+        update.install()
+      } else {
+        ctx.logger.log({
+          level: 'warn',
+          message: 'Invalid updater status to install update',
+          status: update.status,
+        })
+        throw new Error('Unable to install update')
+      }
+    },
+  },
+
   // DB
 
   db_create: {

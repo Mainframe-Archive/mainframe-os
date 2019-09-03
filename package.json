@@ -2,6 +2,7 @@
   "name": "mainframe-os",
   "version": "0.3.1",
   "main": "src/main/index.js",
+  "respository": "github:MainframeHQ/mainframe-os",
   "license": "MIT",
   "scripts": {
     "compile": "NODE_ENV=development electron-webpack",
@@ -57,6 +58,7 @@
     "bip39": "^3.0.2",
     "conf": "^5.0.0",
     "electron-store": "^4.0.0",
+    "electron-updater": "^4.1.2",
     "electron-util": "^0.12.1",
     "env-paths": "^2.2.0",
     "eth-sig-util": "^2.3.0",

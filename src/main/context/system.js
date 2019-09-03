@@ -10,6 +10,7 @@ import type { DB } from '../db/types'
 import type { Environment } from '../environment'
 import type { Logger } from '../logger'
 import { createChannels } from '../rpc'
+import { setupUpdater, UpdaterSubject } from '../updater'
 import { createAppWindow, createLauncherWindow } from '../windows'
 
 import { AppContext, AppSession } from './app'
@@ -36,8 +37,9 @@ export class SystemContext {
   dbReady: Promise<DB>
   env: Environment
   initialized: boolean = false
-  syncing: boolean = false
   logger: Logger
+  syncing: boolean = false
+  updater: UpdaterSubject
 
   constructor(params: ContextParams) {
     this.dbReady = new Promise(resolve => {
@@ -48,6 +50,7 @@ export class SystemContext {
     })
     this.env = params.env
     this.logger = params.logger.child({ context: 'system' })
+    this.updater = setupUpdater(params.logger)
 
     createChannels(this)
 
