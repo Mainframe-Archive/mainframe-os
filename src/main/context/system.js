@@ -144,6 +144,7 @@ export class SystemContext {
 
     const bzz = user.getBzz()
     db.apps.startSync(bzz)
+    db.developers.startSync(bzz)
     db.own_developers.startSync(bzz)
     db.peers.startSync(bzz)
     db.users.startSync(this.env)
@@ -162,6 +163,7 @@ export class SystemContext {
     } else {
       this.logger.debug('Stop sync')
       db.apps.stopSync()
+      db.developers.stopSync()
       db.own_developers.stopSync()
       db.peers.stopSync()
       db.users.stopSync()

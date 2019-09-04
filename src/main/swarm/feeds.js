@@ -20,7 +20,8 @@ export type PublisherParams<T> = {
 export const createPublisher = <T>(params: PublisherParams<T>) => {
   const transform = params.transform || identity
   return async (data: T): Promise<string> => {
-    return await params.feed.publishJSON(params.bzz, transform(data))
+    const transformed = await transform(data)
+    return await params.feed.publishJSON(params.bzz, transformed)
   }
 }
 
