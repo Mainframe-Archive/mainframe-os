@@ -90,6 +90,11 @@ type AppUpdate {
   permissionsChanged: Boolean!
 }
 
+type AppUpdatesPayload {
+  appUpdatesCount: Int!
+  viewer: User!
+}
+
 type AppVersion implements Node {
   """The ID of an object"""
   id: ID!
@@ -449,6 +454,7 @@ type SetProfileWalletPayload {
 }
 
 type Subscription {
+  appUpdatesChanged: AppUpdatesPayload!
   appVersionChanged: AppVersionPayload!
   contactChanged: ContactChangedPayload!
   contactsChanged: ContactChangedPayload!

@@ -874,7 +874,7 @@ const updateUserAppVersionMutation = mutationWithClientMutationId({
           userAppVersionID: args.userAppVersionID,
           appVersionID: update.localID,
         })
-        await update.downloadContents(ctx)
+        await update.downloadContents(ctx.user)
         await userAppVersion.applyUpdate(update.localID, args.webDomains)
         ctx.logger.log({
           level: 'debug',

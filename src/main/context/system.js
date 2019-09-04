@@ -142,7 +142,10 @@ export class SystemContext {
 
     this.logger.debug('Start sync')
 
-    db.peers.startSync(user.getBzz())
+    const bzz = user.getBzz()
+    db.apps.startSync(bzz)
+    db.own_developers.startSync(bzz)
+    db.peers.startSync(bzz)
     db.users.startSync(this.env)
 
     this.syncing = true
@@ -158,6 +161,8 @@ export class SystemContext {
       this.logger.debug('No opened database to stop sync')
     } else {
       this.logger.debug('Stop sync')
+      db.apps.stopSync()
+      db.own_developers.stopSync()
       db.peers.stopSync()
       db.users.stopSync()
     }

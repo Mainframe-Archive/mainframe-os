@@ -6,7 +6,7 @@ import { flatMap } from 'rxjs/operators'
 
 import type OwnFeed from './OwnFeed'
 
-const DEFAULT_POLL_INTERVAL = 10 * 60 * 1000 // 10 mins
+export const DEFAULT_POLL_INTERVAL = 10 * 60 * 1000 // 10 mins
 
 type IdentityFunc = <T>(t: T) => T
 const identity: IdentityFunc = <T>(input: T): T => input

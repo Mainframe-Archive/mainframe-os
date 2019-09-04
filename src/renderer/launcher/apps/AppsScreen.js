@@ -134,13 +134,15 @@ class AppsView extends Component<Props, State> {
     })
   }
 
-  onPressUpdate = (userAppVersionID: string) => {
-    const exists = this.props.user.apps.find(
-      uav => uav.localID === userAppVersionID,
-    )
-    if (exists != null) {
+  onPressUpdate = (fromVersionID: string) => {
+    const found = this.props.user.apps.find(uav => {
+      return (
+        uav.update != null && uav.update.fromVersion.localID === fromVersionID
+      )
+    })
+    if (found != null) {
       this.setState({
-        showModal: { type: 'app_update', userAppVersionID },
+        showModal: { type: 'app_update', userAppVersionID: found.localID },
       })
     }
   }
@@ -379,6 +381,9 @@ export const RelayContainer = createFragmentContainer(AppsView, {
           }
         }
         update {
+          fromVersion {
+            localID
+          }
           toVersion {
             installationState
             manifest {

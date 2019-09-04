@@ -35,6 +35,9 @@ export type AppsScreen_user = {|
       +$fragmentRefs: AppItem_appVersion$ref,
     |},
     +update: ?{|
+      +fromVersion: {|
+        +localID: string
+      |},
       +toVersion: {|
         +installationState: AppInstallationState,
         +manifest: {|
@@ -62,11 +65,18 @@ const node/*: ConcreteFragment*/ = (function(){
 var v0 = {
   "kind": "ScalarField",
   "alias": null,
-  "name": "installationState",
+  "name": "localID",
   "args": null,
   "storageKey": null
 },
 v1 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "installationState",
+  "args": null,
+  "storageKey": null
+},
+v2 = {
   "kind": "LinkedField",
   "alias": null,
   "name": "webDomains",
@@ -126,13 +136,7 @@ return {
           "name": "AppUpdateModal_userAppVersion",
           "args": null
         },
-        {
-          "kind": "ScalarField",
-          "alias": null,
-          "name": "localID",
-          "args": null,
-          "storageKey": null
-        },
+        v0,
         {
           "kind": "LinkedField",
           "alias": null,
@@ -165,7 +169,7 @@ return {
                 }
               ]
             },
-            v0,
+            v1,
             {
               "kind": "LinkedField",
               "alias": null,
@@ -193,7 +197,7 @@ return {
                     }
                   ]
                 },
-                v1
+                v2
               ]
             }
           ]
@@ -210,13 +214,25 @@ return {
             {
               "kind": "LinkedField",
               "alias": null,
+              "name": "fromVersion",
+              "storageKey": null,
+              "args": null,
+              "concreteType": "AppVersion",
+              "plural": false,
+              "selections": [
+                v0
+              ]
+            },
+            {
+              "kind": "LinkedField",
+              "alias": null,
               "name": "toVersion",
               "storageKey": null,
               "args": null,
               "concreteType": "AppVersion",
               "plural": false,
               "selections": [
-                v0,
+                v1,
                 {
                   "kind": "LinkedField",
                   "alias": null,
@@ -262,7 +278,7 @@ return {
               "args": null,
               "storageKey": null
             },
-            v1
+            v2
           ]
         }
       ]
@@ -271,5 +287,5 @@ return {
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '5f72ac3aebd8aacc1f05c16a905a2170';
+(node/*: any*/).hash = '19e88f2649b8bd3f40c5560f22ac5d6c';
 module.exports = node;

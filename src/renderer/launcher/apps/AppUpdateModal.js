@@ -26,6 +26,9 @@ const updateMutation = graphql`
       userAppVersion {
         ...AppUpdateModal_userAppVersion
       }
+      viewer {
+        ...AppsScreen_user
+      }
     }
   }
 `
