@@ -515,6 +515,7 @@ type User implements Node {
   privateProfile: Boolean!
   publicID: ID!
   apps: [UserAppVersion!]!
+  appUpdatesCount: Int!
   contacts: [Contact!]!
   contactInviteStake: String!
   contactRequests: [ContactRequest!]!

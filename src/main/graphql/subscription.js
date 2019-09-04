@@ -1,7 +1,7 @@
 // @flow
 
 import { GraphQLInt, GraphQLObjectType, GraphQLNonNull } from 'graphql'
-import { merge, of } from 'rxjs'
+import { merge } from 'rxjs'
 import {
   distinctUntilChanged,
   filter,
@@ -25,19 +25,26 @@ const appUpdatesPayload = new GraphQLObjectType({
   }),
 })
 
+// To know if there are available app updates for the given context user, we need
+// to keep track of the `user_app_versions` collection for the given user, and
+// inserts to the `app_versions` collection (managed by the apps collection sync)
+// to keep track of newly available updates, and updates applied by the user
 const appUpdatesChanged = {
   type: new GraphQLNonNull(appUpdatesPayload),
-  subscribe: async (self, args, ctx: GraphQLContext) => {
+  subscribe: (self, args, ctx: GraphQLContext) => {
     // Get all the app versions for the context user
-    const userAppVersions = await ctx.db.user_app_versions
+    const installedVersions = ctx.db.user_app_versions
       .find({ user: ctx.userID })
-      .exec()
-    const versionsData = await Promise.all(
-      userAppVersions.map(async uav => {
-        return { [uav.localID]: await uav.getNewAvailableVersion() }
-      }),
-    )
-    const currentVersions = of(Object.assign({}, ...versionsData))
+      .$.pipe(
+        flatMap(async userAppVersions => {
+          const versionsData = await Promise.all(
+            userAppVersions.map(async uav => {
+              return { [uav.localID]: await uav.getNewAvailableVersion() }
+            }),
+          )
+          return Object.assign({}, ...versionsData)
+        }),
+      )
 
     const newVersions = ctx.db.app_versions.insert$.pipe(
       // Load the created doc
@@ -55,7 +62,7 @@ const appUpdatesChanged = {
       }),
     )
 
-    const observable = merge(currentVersions, newVersions).pipe(
+    const observable = merge(installedVersions, newVersions).pipe(
       // Merge results for all app versions
       scan((acc, value) => ({ ...acc, ...value }), {}),
       // Reduce to count for available updates

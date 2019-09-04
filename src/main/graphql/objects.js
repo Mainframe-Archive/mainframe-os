@@ -5,6 +5,7 @@ import {
   GraphQLBoolean,
   GraphQLEnumType,
   GraphQLID,
+  GraphQLInt,
   GraphQLList,
   GraphQLObjectType,
   GraphQLNonNull,
@@ -749,6 +750,21 @@ export const user = new GraphQLObjectType({
     apps: {
       type: list(userAppVersion),
       resolve: doc => doc.getAppsVersions(),
+    },
+    appUpdatesCount: {
+      type: new GraphQLNonNull(GraphQLInt),
+      resolve: async (self, args, ctx: GraphQLContext) => {
+        const userAppVersions = await ctx.db.user_app_versions
+          .find({ user: ctx.userID })
+          .exec()
+        const newVersions = await Promise.all(
+          userAppVersions.map(async uav => {
+            const newVersion = await uav.getNewAvailableVersion()
+            return newVersion != null
+          }),
+        )
+        return Object.values(newVersions).filter(Boolean).length
+      },
     },
     contacts: {
       type: list(contact),
