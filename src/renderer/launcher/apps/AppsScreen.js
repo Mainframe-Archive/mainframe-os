@@ -8,7 +8,7 @@ import styled from 'styled-components/native'
 
 import PlusIcon from '../../UIComponents/Icons/PlusIcon'
 import OSLogo from '../../UIComponents/MainframeOSLogo'
-import EditIcon from '../../UIComponents/Icons/EditIcon'
+// import EditIcon from '../../UIComponents/Icons/EditIcon'
 import rpc from '../rpc'
 import RelayRenderer from '../RelayRenderer'
 
@@ -26,6 +26,15 @@ type UserApps = $PropertyType<User, 'apps'>
 type UserAppData = $Call<<T>($ReadOnlyArray<T>) => T, UserApps>
 
 // const SUGGESTED_APPS_URL = `https://mainframehq.github.io/suggested-apps/apps.json?timestamp=${new Date().toString()}`
+
+// const SUGGESTED_APPS = [
+//   {
+//     publicID: string,
+//     name: string,
+//     description?: ?string,
+//     longDescription?: ?string,
+//   }
+// ]
 
 const Container = styled.View`
   padding: 0 0 20px 50px;
@@ -328,11 +337,11 @@ class AppsView extends Component<Props, State> {
           </LogoContainer>
           {this.props.user.apps.length ? (
             <ButtonsContainer>
-              <Button
+              {/* <Button
                 onPress={this.toggleEditing}
                 variant={editButtonVariants}
                 Icon={EditIcon}
-              />
+              /> */}
               <Button
                 variant={['xSmallIconOnly', 'noTitle']}
                 Icon={PlusIcon}

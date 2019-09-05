@@ -215,7 +215,7 @@ export class AppContext {
       const url = new URL(request.url)
 
       // Allowing devtools requests
-      if (url.protocol === 'chrome-devtools:') {
+      if (url.protocol === 'devtools:') {
         callback({ cancel: false })
         return
       }

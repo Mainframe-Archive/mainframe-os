@@ -13,7 +13,6 @@ import {
 import { mutationWithClientMutationId } from 'graphql-relay'
 
 import {
-  app,
   contact,
   devtoolsField,
   ethHdWallet,
@@ -749,6 +748,15 @@ const setAppWebDomainsDefinitionsMutation = mutationWithClientMutationId({
         throw new Error('Application not found')
       }
       await app.setWebDomains(args.webDomains)
+
+      // Update user own apps settings with new domains
+      const userOwnApps = await ctx.db.user_own_apps
+        .find({ ownApp: args.appID, user: ctx.userID })
+        .exec()
+      await Promise.all(
+        userOwnApps.map(uoa => uoa.setWebDomains(args.webDomains)),
+      )
+
       return { app }
     } catch (err) {
       ctx.logger.log({

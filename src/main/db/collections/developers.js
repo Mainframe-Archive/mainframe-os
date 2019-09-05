@@ -158,10 +158,7 @@ export default async (
         this._publicFeedSubscription = createSubscriber({
           bzz,
           feed: { user: this.publicFeed },
-          transform: data => {
-            console.log('public feed read data', data)
-            return readDeveloper(data)
-          },
+          transform: readDeveloper,
         })
           .pipe(
             flatMap(async data => {
