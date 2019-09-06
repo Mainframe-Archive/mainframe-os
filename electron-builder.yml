@@ -2,9 +2,7 @@ appId: com.mainframeos.desktop
 productName: MainframeOS
 artifactName: '${productName}.${ext}'
 
-asar: false
-
-electronVersion: '6.0.3'
+electronVersion: '6.0.7'
 
 directories:
   buildResources: build
