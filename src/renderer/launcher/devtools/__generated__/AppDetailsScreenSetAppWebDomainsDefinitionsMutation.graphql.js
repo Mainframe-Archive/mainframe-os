@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash e93dc0cb5a35b71ca20c3bfa0546a32f
+ * @relayHash e34fc30ddffd95313775bf307adcddbb
  */
 
 /* eslint-disable */
@@ -10,16 +10,16 @@
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
 type AppDetailsScreen_app$ref = any;
-export type SetAppWebDomainsDefinitionsInput = {
+export type SetAppWebDomainsDefinitionsInput = {|
   appID: string,
   webDomains: $ReadOnlyArray<WebDomainDefinitionInput>,
   clientMutationId?: ?string,
-};
-export type WebDomainDefinitionInput = {
+|};
+export type WebDomainDefinitionInput = {|
   domain: string,
   internal?: ?boolean,
   external?: ?boolean,
-};
+|};
 export type AppDetailsScreenSetAppWebDomainsDefinitionsMutationVariables = {|
   input: SetAppWebDomainsDefinitionsInput
 |};
@@ -91,8 +91,7 @@ v1 = [
   {
     "kind": "Variable",
     "name": "input",
-    "variableName": "input",
-    "type": "SetAppWebDomainsDefinitionsInput!"
+    "variableName": "input"
   }
 ],
 v2 = {
@@ -136,24 +135,19 @@ v5 = {
 };
 return {
   "kind": "Request",
-  "operationKind": "mutation",
-  "name": "AppDetailsScreenSetAppWebDomainsDefinitionsMutation",
-  "id": null,
-  "text": "mutation AppDetailsScreenSetAppWebDomainsDefinitionsMutation(\n  $input: SetAppWebDomainsDefinitionsInput!\n) {\n  setAppWebDomainsDefinitions(input: $input) {\n    app {\n      ...AppDetailsScreen_app\n      id\n    }\n  }\n}\n\nfragment AppDetailsScreen_app on OwnApp {\n  localID\n  publicID\n  profile {\n    name\n  }\n  contentsPath\n  developer {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n  inProgressVersion {\n    version\n    webDomains {\n      domain\n      internal\n      external\n    }\n  }\n  latestPublishedVersion {\n    version\n  }\n  viewerOwnAppID\n}\n",
-  "metadata": {},
   "fragment": {
     "kind": "Fragment",
     "name": "AppDetailsScreenSetAppWebDomainsDefinitionsMutation",
     "type": "Mutation",
     "metadata": null,
-    "argumentDefinitions": v0,
+    "argumentDefinitions": (v0/*: any*/),
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
         "name": "setAppWebDomainsDefinitions",
         "storageKey": null,
-        "args": v1,
+        "args": (v1/*: any*/),
         "concreteType": "SetAppWebDomainsDefinitionsPayload",
         "plural": false,
         "selections": [
@@ -180,14 +174,14 @@ return {
   "operation": {
     "kind": "Operation",
     "name": "AppDetailsScreenSetAppWebDomainsDefinitionsMutation",
-    "argumentDefinitions": v0,
+    "argumentDefinitions": (v0/*: any*/),
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
         "name": "setAppWebDomainsDefinitions",
         "storageKey": null,
-        "args": v1,
+        "args": (v1/*: any*/),
         "concreteType": "SetAppWebDomainsDefinitionsPayload",
         "plural": false,
         "selections": [
@@ -200,7 +194,7 @@ return {
             "concreteType": "OwnApp",
             "plural": false,
             "selections": [
-              v2,
+              (v2/*: any*/),
               {
                 "kind": "ScalarField",
                 "alias": null,
@@ -208,7 +202,7 @@ return {
                 "args": null,
                 "storageKey": null
               },
-              v3,
+              (v3/*: any*/),
               {
                 "kind": "ScalarField",
                 "alias": null,
@@ -225,9 +219,9 @@ return {
                 "concreteType": "OwnDeveloper",
                 "plural": false,
                 "selections": [
-                  v2,
-                  v3,
-                  v4
+                  (v2/*: any*/),
+                  (v3/*: any*/),
+                  (v4/*: any*/)
                 ]
               },
               {
@@ -239,7 +233,7 @@ return {
                 "concreteType": "OwnAppVersion",
                 "plural": false,
                 "selections": [
-                  v5,
+                  (v5/*: any*/),
                   {
                     "kind": "LinkedField",
                     "alias": null,
@@ -283,7 +277,7 @@ return {
                 "concreteType": "OwnAppVersion",
                 "plural": false,
                 "selections": [
-                  v5
+                  (v5/*: any*/)
                 ]
               },
               {
@@ -293,12 +287,19 @@ return {
                 "args": null,
                 "storageKey": null
               },
-              v4
+              (v4/*: any*/)
             ]
           }
         ]
       }
     ]
+  },
+  "params": {
+    "operationKind": "mutation",
+    "name": "AppDetailsScreenSetAppWebDomainsDefinitionsMutation",
+    "id": null,
+    "text": "mutation AppDetailsScreenSetAppWebDomainsDefinitionsMutation(\n  $input: SetAppWebDomainsDefinitionsInput!\n) {\n  setAppWebDomainsDefinitions(input: $input) {\n    app {\n      ...AppDetailsScreen_app\n      id\n    }\n  }\n}\n\nfragment AppDetailsScreen_app on OwnApp {\n  localID\n  publicID\n  profile {\n    name\n  }\n  contentsPath\n  developer {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n  inProgressVersion {\n    version\n    webDomains {\n      domain\n      internal\n      external\n    }\n  }\n  latestPublishedVersion {\n    version\n  }\n  viewerOwnAppID\n}\n",
+    "metadata": {}
   }
 };
 })();

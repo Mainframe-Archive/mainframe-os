@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 550d77608397e09252376bb2ad3f00e5
+ * @relayHash a019c379888e257a55a774d5c811c6ce
  */
 
 /* eslint-disable */
@@ -11,16 +11,16 @@
 import type { ConcreteRequest } from 'relay-runtime';
 type AppUpdateModal_userAppVersion$ref = any;
 type AppsScreen_user$ref = any;
-export type UpdateUserAppVersionMutationInput = {
+export type UpdateUserAppVersionMutationInput = {|
   userAppVersionID: string,
   webDomains: $ReadOnlyArray<WebDomainDefinitionInput>,
   clientMutationId?: ?string,
-};
-export type WebDomainDefinitionInput = {
+|};
+export type WebDomainDefinitionInput = {|
   domain: string,
   internal?: ?boolean,
   external?: ?boolean,
-};
+|};
 export type AppUpdateModalUpdateUserAppVersionMutationVariables = {|
   input: UpdateUserAppVersionMutationInput
 |};
@@ -190,8 +190,7 @@ v1 = [
   {
     "kind": "Variable",
     "name": "input",
-    "variableName": "input",
-    "type": "UpdateUserAppVersionMutationInput!"
+    "variableName": "input"
   }
 ],
 v2 = {
@@ -267,7 +266,7 @@ v6 = {
   "concreteType": "AppManifest",
   "plural": false,
   "selections": [
-    v5,
+    (v5/*: any*/),
     {
       "kind": "ScalarField",
       "alias": null,
@@ -275,7 +274,7 @@ v6 = {
       "args": null,
       "storageKey": null
     },
-    v3
+    (v3/*: any*/)
   ]
 },
 v7 = {
@@ -301,24 +300,19 @@ v9 = {
 };
 return {
   "kind": "Request",
-  "operationKind": "mutation",
-  "name": "AppUpdateModalUpdateUserAppVersionMutation",
-  "id": null,
-  "text": "mutation AppUpdateModalUpdateUserAppVersionMutation(\n  $input: UpdateUserAppVersionMutationInput!\n) {\n  updateUserAppVersion(input: $input) {\n    userAppVersion {\n      ...AppUpdateModal_userAppVersion\n      id\n    }\n    viewer {\n      ...AppsScreen_user\n      id\n    }\n  }\n}\n\nfragment AppUpdateModal_userAppVersion on UserAppVersion {\n  localID\n  settings {\n    webDomains {\n      domain\n      internal\n      external\n    }\n    id\n  }\n  update {\n    fromVersion {\n      manifest {\n        profile {\n          name\n        }\n        version\n        webDomains {\n          domain\n          internal\n          external\n        }\n      }\n      id\n    }\n    toVersion {\n      publicID\n      manifest {\n        profile {\n          name\n        }\n        version\n        webDomains {\n          domain\n          internal\n          external\n        }\n      }\n      id\n    }\n    permissionsChanged\n  }\n}\n\nfragment AppsScreen_user on User {\n  id\n  apps {\n    ...AppUpdateModal_userAppVersion\n    localID\n    appVersion {\n      ...AppItem_appVersion\n      app {\n        publicID\n        id\n      }\n      installationState\n      manifest {\n        profile {\n          name\n        }\n        webDomains {\n          domain\n          internal\n          external\n        }\n      }\n      id\n    }\n    update {\n      fromVersion {\n        localID\n        id\n      }\n      toVersion {\n        installationState\n        manifest {\n          version\n        }\n        id\n      }\n      permissionsChanged\n    }\n    settings {\n      permissionsChecked\n      webDomains {\n        domain\n        internal\n        external\n      }\n      id\n    }\n    id\n  }\n}\n\nfragment AppItem_appVersion on AppVersion {\n  localID\n  installationState\n  app {\n    publicID\n    id\n  }\n  developer {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n  manifest {\n    profile {\n      name\n    }\n  }\n  update {\n    id\n  }\n}\n",
-  "metadata": {},
   "fragment": {
     "kind": "Fragment",
     "name": "AppUpdateModalUpdateUserAppVersionMutation",
     "type": "Mutation",
     "metadata": null,
-    "argumentDefinitions": v0,
+    "argumentDefinitions": (v0/*: any*/),
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
         "name": "updateUserAppVersion",
         "storageKey": null,
-        "args": v1,
+        "args": (v1/*: any*/),
         "concreteType": "UpdateUserAppVersionMutationPayload",
         "plural": false,
         "selections": [
@@ -361,14 +355,14 @@ return {
   "operation": {
     "kind": "Operation",
     "name": "AppUpdateModalUpdateUserAppVersionMutation",
-    "argumentDefinitions": v0,
+    "argumentDefinitions": (v0/*: any*/),
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
         "name": "updateUserAppVersion",
         "storageKey": null,
-        "args": v1,
+        "args": (v1/*: any*/),
         "concreteType": "UpdateUserAppVersionMutationPayload",
         "plural": false,
         "selections": [
@@ -381,7 +375,7 @@ return {
             "concreteType": "UserAppVersion",
             "plural": false,
             "selections": [
-              v2,
+              (v2/*: any*/),
               {
                 "kind": "LinkedField",
                 "alias": null,
@@ -391,8 +385,8 @@ return {
                 "concreteType": "UserAppSettings",
                 "plural": false,
                 "selections": [
-                  v3,
-                  v4
+                  (v3/*: any*/),
+                  (v4/*: any*/)
                 ]
               },
               {
@@ -413,8 +407,8 @@ return {
                     "concreteType": "AppVersion",
                     "plural": false,
                     "selections": [
-                      v6,
-                      v4
+                      (v6/*: any*/),
+                      (v4/*: any*/)
                     ]
                   },
                   {
@@ -426,15 +420,15 @@ return {
                     "concreteType": "AppVersion",
                     "plural": false,
                     "selections": [
-                      v7,
-                      v6,
-                      v4
+                      (v7/*: any*/),
+                      (v6/*: any*/),
+                      (v4/*: any*/)
                     ]
                   },
-                  v8
+                  (v8/*: any*/)
                 ]
               },
-              v4
+              (v4/*: any*/)
             ]
           },
           {
@@ -446,7 +440,7 @@ return {
             "concreteType": "User",
             "plural": false,
             "selections": [
-              v4,
+              (v4/*: any*/),
               {
                 "kind": "LinkedField",
                 "alias": null,
@@ -456,7 +450,7 @@ return {
                 "concreteType": "UserAppVersion",
                 "plural": true,
                 "selections": [
-                  v2,
+                  (v2/*: any*/),
                   {
                     "kind": "LinkedField",
                     "alias": null,
@@ -466,8 +460,8 @@ return {
                     "concreteType": "UserAppSettings",
                     "plural": false,
                     "selections": [
-                      v3,
-                      v4,
+                      (v3/*: any*/),
+                      (v4/*: any*/),
                       {
                         "kind": "ScalarField",
                         "alias": null,
@@ -495,9 +489,9 @@ return {
                         "concreteType": "AppVersion",
                         "plural": false,
                         "selections": [
-                          v6,
-                          v4,
-                          v2
+                          (v6/*: any*/),
+                          (v4/*: any*/),
+                          (v2/*: any*/)
                         ]
                       },
                       {
@@ -509,13 +503,13 @@ return {
                         "concreteType": "AppVersion",
                         "plural": false,
                         "selections": [
-                          v7,
-                          v6,
-                          v4,
-                          v9
+                          (v7/*: any*/),
+                          (v6/*: any*/),
+                          (v4/*: any*/),
+                          (v9/*: any*/)
                         ]
                       },
-                      v8
+                      (v8/*: any*/)
                     ]
                   },
                   {
@@ -527,8 +521,8 @@ return {
                     "concreteType": "AppVersion",
                     "plural": false,
                     "selections": [
-                      v2,
-                      v9,
+                      (v2/*: any*/),
+                      (v9/*: any*/),
                       {
                         "kind": "LinkedField",
                         "alias": null,
@@ -538,8 +532,8 @@ return {
                         "concreteType": "App",
                         "plural": false,
                         "selections": [
-                          v7,
-                          v4
+                          (v7/*: any*/),
+                          (v4/*: any*/)
                         ]
                       },
                       {
@@ -551,9 +545,9 @@ return {
                         "concreteType": "Developer",
                         "plural": false,
                         "selections": [
-                          v2,
-                          v5,
-                          v4
+                          (v2/*: any*/),
+                          (v5/*: any*/),
+                          (v4/*: any*/)
                         ]
                       },
                       {
@@ -565,8 +559,8 @@ return {
                         "concreteType": "AppManifest",
                         "plural": false,
                         "selections": [
-                          v5,
-                          v3
+                          (v5/*: any*/),
+                          (v3/*: any*/)
                         ]
                       },
                       {
@@ -578,13 +572,13 @@ return {
                         "concreteType": "AppVersion",
                         "plural": false,
                         "selections": [
-                          v4
+                          (v4/*: any*/)
                         ]
                       },
-                      v4
+                      (v4/*: any*/)
                     ]
                   },
-                  v4
+                  (v4/*: any*/)
                 ]
               }
             ]
@@ -592,6 +586,13 @@ return {
         ]
       }
     ]
+  },
+  "params": {
+    "operationKind": "mutation",
+    "name": "AppUpdateModalUpdateUserAppVersionMutation",
+    "id": null,
+    "text": "mutation AppUpdateModalUpdateUserAppVersionMutation(\n  $input: UpdateUserAppVersionMutationInput!\n) {\n  updateUserAppVersion(input: $input) {\n    userAppVersion {\n      ...AppUpdateModal_userAppVersion\n      id\n    }\n    viewer {\n      ...AppsScreen_user\n      id\n    }\n  }\n}\n\nfragment AppUpdateModal_userAppVersion on UserAppVersion {\n  localID\n  settings {\n    webDomains {\n      domain\n      internal\n      external\n    }\n    id\n  }\n  update {\n    fromVersion {\n      manifest {\n        profile {\n          name\n        }\n        version\n        webDomains {\n          domain\n          internal\n          external\n        }\n      }\n      id\n    }\n    toVersion {\n      publicID\n      manifest {\n        profile {\n          name\n        }\n        version\n        webDomains {\n          domain\n          internal\n          external\n        }\n      }\n      id\n    }\n    permissionsChanged\n  }\n}\n\nfragment AppsScreen_user on User {\n  id\n  apps {\n    ...AppUpdateModal_userAppVersion\n    localID\n    appVersion {\n      ...AppItem_appVersion\n      app {\n        publicID\n        id\n      }\n      installationState\n      manifest {\n        profile {\n          name\n        }\n        webDomains {\n          domain\n          internal\n          external\n        }\n      }\n      id\n    }\n    update {\n      fromVersion {\n        localID\n        id\n      }\n      toVersion {\n        installationState\n        manifest {\n          version\n        }\n        id\n      }\n      permissionsChanged\n    }\n    settings {\n      permissionsChecked\n      webDomains {\n        domain\n        internal\n        external\n      }\n      id\n    }\n    id\n  }\n}\n\nfragment AppItem_appVersion on AppVersion {\n  localID\n  installationState\n  app {\n    publicID\n    id\n  }\n  developer {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n  manifest {\n    profile {\n      name\n    }\n  }\n  update {\n    id\n  }\n}\n",
+    "metadata": {}
   }
 };
 })();

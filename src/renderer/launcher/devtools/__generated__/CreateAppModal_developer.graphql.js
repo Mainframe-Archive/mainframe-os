@@ -7,17 +7,23 @@
 'use strict';
 
 /*::
-import type { ConcreteFragment } from 'relay-runtime';
+import type { ReaderFragment } from 'relay-runtime';
 import type { FragmentReference } from "relay-runtime";
 declare export opaque type CreateAppModal_developer$ref: FragmentReference;
+declare export opaque type CreateAppModal_developer$fragmentType: CreateAppModal_developer$ref;
 export type CreateAppModal_developer = {|
   +localID: string,
   +$refType: CreateAppModal_developer$ref,
 |};
+export type CreateAppModal_developer$data = CreateAppModal_developer;
+export type CreateAppModal_developer$key = {
+  +$data?: CreateAppModal_developer$data,
+  +$fragmentRefs: CreateAppModal_developer$ref,
+};
 */
 
 
-const node/*: ConcreteFragment*/ = {
+const node/*: ReaderFragment*/ = {
   "kind": "Fragment",
   "name": "CreateAppModal_developer",
   "type": "OwnDeveloper",

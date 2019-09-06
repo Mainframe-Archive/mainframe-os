@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash b3cf415128e513a531e585cbe74b7df1
+ * @relayHash 903111fe6aaf7ecf356b8ba0d61942df
  */
 
 /* eslint-disable */
@@ -53,24 +53,26 @@ var v0 = [
 ];
 return {
   "kind": "Request",
-  "operationKind": "query",
-  "name": "IdentitySelectorViewQuery",
-  "id": null,
-  "text": "query IdentitySelectorViewQuery {\n  viewer {\n    id\n  }\n}\n",
-  "metadata": {},
   "fragment": {
     "kind": "Fragment",
     "name": "IdentitySelectorViewQuery",
     "type": "Query",
     "metadata": null,
     "argumentDefinitions": [],
-    "selections": v0
+    "selections": (v0/*: any*/)
   },
   "operation": {
     "kind": "Operation",
     "name": "IdentitySelectorViewQuery",
     "argumentDefinitions": [],
-    "selections": v0
+    "selections": (v0/*: any*/)
+  },
+  "params": {
+    "operationKind": "query",
+    "name": "IdentitySelectorViewQuery",
+    "id": null,
+    "text": "query IdentitySelectorViewQuery {\n  viewer {\n    id\n  }\n}\n",
+    "metadata": {}
   }
 };
 })();

@@ -7,13 +7,14 @@
 'use strict';
 
 /*::
-import type { ConcreteFragment } from 'relay-runtime';
+import type { ReaderFragment } from 'relay-runtime';
 type InviteContactModal_contactInvite$ref = any;
 type InviteContactModal_user$ref = any;
 export type ContactConnectionState = "CONNECTED" | "DECLINED" | "RECEIVED" | "SENDING_BLOCKCHAIN" | "SENDING_FEED" | "SENT_BLOCKCHAIN" | "SENT_FEED" | "%future added value";
 export type ContactStakeState = "RECLAIMED" | "RECLAIMING" | "SEIZED" | "STAKED" | "%future added value";
 import type { FragmentReference } from "relay-runtime";
 declare export opaque type ContactsScreen_user$ref: FragmentReference;
+declare export opaque type ContactsScreen_user$fragmentType: ContactsScreen_user$ref;
 export type ContactsScreen_user = {|
   +localID: string,
   +publicID: string,
@@ -82,10 +83,15 @@ export type ContactsScreen_user = {|
   +$fragmentRefs: InviteContactModal_user$ref,
   +$refType: ContactsScreen_user$ref,
 |};
+export type ContactsScreen_user$data = ContactsScreen_user;
+export type ContactsScreen_user$key = {
+  +$data?: ContactsScreen_user$data,
+  +$fragmentRefs: ContactsScreen_user$ref,
+};
 */
 
 
-const node/*: ConcreteFragment*/ = (function(){
+const node/*: ReaderFragment*/ = (function(){
 var v0 = {
   "kind": "ScalarField",
   "alias": null,
@@ -108,7 +114,7 @@ v2 = {
   "storageKey": null
 },
 v3 = [
-  v2,
+  (v2/*: any*/),
   {
     "kind": "ScalarField",
     "alias": null,
@@ -132,7 +138,7 @@ v5 = {
   "args": null,
   "concreteType": "GenericProfile",
   "plural": false,
-  "selections": v3
+  "selections": (v3/*: any*/)
 },
 v6 = {
   "kind": "ScalarField",
@@ -156,8 +162,8 @@ v8 = {
   "storageKey": null
 },
 v9 = [
-  v2,
-  v0,
+  (v2/*: any*/),
+  (v0/*: any*/),
   {
     "kind": "LinkedField",
     "alias": null,
@@ -209,13 +215,8 @@ return {
   "metadata": null,
   "argumentDefinitions": [],
   "selections": [
-    {
-      "kind": "FragmentSpread",
-      "name": "InviteContactModal_user",
-      "args": null
-    },
-    v0,
-    v1,
+    (v0/*: any*/),
+    (v1/*: any*/),
     {
       "kind": "LinkedField",
       "alias": null,
@@ -224,7 +225,7 @@ return {
       "args": null,
       "concreteType": "NamedProfile",
       "plural": false,
-      "selections": v3
+      "selections": (v3/*: any*/)
     },
     {
       "kind": "ScalarField",
@@ -242,13 +243,13 @@ return {
       "concreteType": "ContactRequest",
       "plural": true,
       "selections": [
-        v0,
-        v1,
-        v4,
-        v5,
-        v6,
-        v7,
-        v8,
+        (v0/*: any*/),
+        (v1/*: any*/),
+        (v4/*: any*/),
+        (v5/*: any*/),
+        (v6/*: any*/),
+        (v7/*: any*/),
+        (v8/*: any*/),
         {
           "kind": "ScalarField",
           "alias": null,
@@ -274,10 +275,10 @@ return {
       "concreteType": "Contact",
       "plural": true,
       "selections": [
-        v0,
-        v4,
-        v1,
-        v6,
+        (v0/*: any*/),
+        (v4/*: any*/),
+        (v1/*: any*/),
+        (v6/*: any*/),
         {
           "kind": "LinkedField",
           "alias": null,
@@ -287,12 +288,7 @@ return {
           "concreteType": "ContactInvite",
           "plural": false,
           "selections": [
-            {
-              "kind": "FragmentSpread",
-              "name": "InviteContactModal_contactInvite",
-              "args": null
-            },
-            v7,
+            (v7/*: any*/),
             {
               "kind": "ScalarField",
               "alias": null,
@@ -314,17 +310,22 @@ return {
               "args": null,
               "storageKey": null
             },
-            v8,
+            (v8/*: any*/),
             {
               "kind": "ScalarField",
               "alias": null,
               "name": "reclaimedStakeTX",
               "args": null,
               "storageKey": null
+            },
+            {
+              "kind": "FragmentSpread",
+              "name": "InviteContactModal_contactInvite",
+              "args": null
             }
           ]
         },
-        v5
+        (v5/*: any*/)
       ]
     },
     {
@@ -344,7 +345,7 @@ return {
           "args": null,
           "concreteType": "EthHDWallet",
           "plural": true,
-          "selections": v9
+          "selections": (v9/*: any*/)
         },
         {
           "kind": "LinkedField",
@@ -354,9 +355,14 @@ return {
           "args": null,
           "concreteType": "EthLedgerWallet",
           "plural": true,
-          "selections": v9
+          "selections": (v9/*: any*/)
         }
       ]
+    },
+    {
+      "kind": "FragmentSpread",
+      "name": "InviteContactModal_user",
+      "args": null
     }
   ]
 };

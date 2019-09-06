@@ -7,12 +7,13 @@
 'use strict';
 
 /*::
-import type { ConcreteFragment } from 'relay-runtime';
+import type { ReaderFragment } from 'relay-runtime';
 type AppItem_appVersion$ref = any;
 type AppUpdateModal_userAppVersion$ref = any;
 export type AppInstallationState = "DONE" | "DOWNLOADING" | "FAILED" | "PENDING" | "%future added value";
 import type { FragmentReference } from "relay-runtime";
 declare export opaque type AppsScreen_user$ref: FragmentReference;
+declare export opaque type AppsScreen_user$fragmentType: AppsScreen_user$ref;
 export type AppsScreen_user = {|
   +id: string,
   +apps: $ReadOnlyArray<{|
@@ -58,10 +59,15 @@ export type AppsScreen_user = {|
   |}>,
   +$refType: AppsScreen_user$ref,
 |};
+export type AppsScreen_user$data = AppsScreen_user;
+export type AppsScreen_user$key = {
+  +$data?: AppsScreen_user$data,
+  +$fragmentRefs: AppsScreen_user$ref,
+};
 */
 
 
-const node/*: ConcreteFragment*/ = (function(){
+const node/*: ReaderFragment*/ = (function(){
 var v0 = {
   "kind": "ScalarField",
   "alias": null,
@@ -131,12 +137,7 @@ return {
       "concreteType": "UserAppVersion",
       "plural": true,
       "selections": [
-        {
-          "kind": "FragmentSpread",
-          "name": "AppUpdateModal_userAppVersion",
-          "args": null
-        },
-        v0,
+        (v0/*: any*/),
         {
           "kind": "LinkedField",
           "alias": null,
@@ -146,11 +147,6 @@ return {
           "concreteType": "AppVersion",
           "plural": false,
           "selections": [
-            {
-              "kind": "FragmentSpread",
-              "name": "AppItem_appVersion",
-              "args": null
-            },
             {
               "kind": "LinkedField",
               "alias": null,
@@ -169,7 +165,7 @@ return {
                 }
               ]
             },
-            v1,
+            (v1/*: any*/),
             {
               "kind": "LinkedField",
               "alias": null,
@@ -197,8 +193,13 @@ return {
                     }
                   ]
                 },
-                v2
+                (v2/*: any*/)
               ]
+            },
+            {
+              "kind": "FragmentSpread",
+              "name": "AppItem_appVersion",
+              "args": null
             }
           ]
         },
@@ -220,7 +221,7 @@ return {
               "concreteType": "AppVersion",
               "plural": false,
               "selections": [
-                v0
+                (v0/*: any*/)
               ]
             },
             {
@@ -232,7 +233,7 @@ return {
               "concreteType": "AppVersion",
               "plural": false,
               "selections": [
-                v1,
+                (v1/*: any*/),
                 {
                   "kind": "LinkedField",
                   "alias": null,
@@ -278,8 +279,13 @@ return {
               "args": null,
               "storageKey": null
             },
-            v2
+            (v2/*: any*/)
           ]
+        },
+        {
+          "kind": "FragmentSpread",
+          "name": "AppUpdateModal_userAppVersion",
+          "args": null
         }
       ]
     }

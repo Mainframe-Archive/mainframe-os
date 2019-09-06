@@ -42,6 +42,7 @@ const createRender = (Container: ComponentType<*>) => {
 
 type Props = {
   Container?: ComponentType<*>,
+  dataFrom?: 'NETWORK_ONLY' | 'STORE_THEN_NETWORK',
   query: GraphQLTaggedNode,
   render?: ReadyState => ?Element<*>,
   variables?: ?Object,
@@ -49,6 +50,7 @@ type Props = {
 
 export default function RelayRenderer({
   Container,
+  dataFrom,
   query,
   render,
   variables,
@@ -66,6 +68,7 @@ export default function RelayRenderer({
 
   return (
     <QueryRenderer
+      dataFrom={dataFrom || 'STORE_THEN_NETWORK'}
       environment={environment}
       query={query}
       variables={variables || {}}

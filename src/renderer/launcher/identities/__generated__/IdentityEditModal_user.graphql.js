@@ -7,9 +7,10 @@
 'use strict';
 
 /*::
-import type { ConcreteFragment } from 'relay-runtime';
+import type { ReaderFragment } from 'relay-runtime';
 import type { FragmentReference } from "relay-runtime";
 declare export opaque type IdentityEditModal_user$ref: FragmentReference;
+declare export opaque type IdentityEditModal_user$fragmentType: IdentityEditModal_user$ref;
 export type IdentityEditModal_user = {|
   +localID: string,
   +publicID: string,
@@ -20,10 +21,15 @@ export type IdentityEditModal_user = {|
   |},
   +$refType: IdentityEditModal_user$ref,
 |};
+export type IdentityEditModal_user$data = IdentityEditModal_user;
+export type IdentityEditModal_user$key = {
+  +$data?: IdentityEditModal_user$data,
+  +$fragmentRefs: IdentityEditModal_user$ref,
+};
 */
 
 
-const node/*: ConcreteFragment*/ = {
+const node/*: ReaderFragment*/ = {
   "kind": "Fragment",
   "name": "IdentityEditModal_user",
   "type": "User",

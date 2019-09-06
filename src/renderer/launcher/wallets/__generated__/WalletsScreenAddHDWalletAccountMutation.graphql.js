@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash fb892c3cf8ba10efe0d5aa8c8fe7c9ad
+ * @relayHash 5bba89369582f4f7ff6d9b5ee72585f2
  */
 
 /* eslint-disable */
@@ -10,11 +10,11 @@
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
 type WalletsScreen_user$ref = any;
-export type AddHDWalletAccountInput = {
+export type AddHDWalletAccountInput = {|
   walletID: string,
   index: number,
   clientMutationId?: ?string,
-};
+|};
 export type WalletsScreenAddHDWalletAccountMutationVariables = {|
   input: AddHDWalletAccountInput
 |};
@@ -84,8 +84,7 @@ v1 = [
   {
     "kind": "Variable",
     "name": "input",
-    "variableName": "input",
-    "type": "AddHDWalletAccountInput!"
+    "variableName": "input"
   }
 ],
 v2 = {
@@ -126,35 +125,30 @@ v4 = [
     "concreteType": "WalletAccount",
     "plural": true,
     "selections": [
-      v2
+      (v2/*: any*/)
     ]
   },
-  v3
+  (v3/*: any*/)
 ];
 return {
   "kind": "Request",
-  "operationKind": "mutation",
-  "name": "WalletsScreenAddHDWalletAccountMutation",
-  "id": null,
-  "text": "mutation WalletsScreenAddHDWalletAccountMutation(\n  $input: AddHDWalletAccountInput!\n) {\n  addHDWalletAccount(input: $input) {\n    address\n    viewer {\n      ...WalletsScreen_user\n      id\n    }\n  }\n}\n\nfragment WalletsScreen_user on User {\n  profile {\n    ethAddress\n  }\n  ethWallets {\n    hd {\n      name\n      localID\n      accounts {\n        address\n      }\n      id\n    }\n    ledger {\n      name\n      localID\n      accounts {\n        address\n      }\n      id\n    }\n  }\n}\n",
-  "metadata": {},
   "fragment": {
     "kind": "Fragment",
     "name": "WalletsScreenAddHDWalletAccountMutation",
     "type": "Mutation",
     "metadata": null,
-    "argumentDefinitions": v0,
+    "argumentDefinitions": (v0/*: any*/),
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
         "name": "addHDWalletAccount",
         "storageKey": null,
-        "args": v1,
+        "args": (v1/*: any*/),
         "concreteType": "AddHDWalletAccountPayload",
         "plural": false,
         "selections": [
-          v2,
+          (v2/*: any*/),
           {
             "kind": "LinkedField",
             "alias": null,
@@ -178,18 +172,18 @@ return {
   "operation": {
     "kind": "Operation",
     "name": "WalletsScreenAddHDWalletAccountMutation",
-    "argumentDefinitions": v0,
+    "argumentDefinitions": (v0/*: any*/),
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
         "name": "addHDWalletAccount",
         "storageKey": null,
-        "args": v1,
+        "args": (v1/*: any*/),
         "concreteType": "AddHDWalletAccountPayload",
         "plural": false,
         "selections": [
-          v2,
+          (v2/*: any*/),
           {
             "kind": "LinkedField",
             "alias": null,
@@ -234,7 +228,7 @@ return {
                     "args": null,
                     "concreteType": "EthHDWallet",
                     "plural": true,
-                    "selections": v4
+                    "selections": (v4/*: any*/)
                   },
                   {
                     "kind": "LinkedField",
@@ -244,16 +238,23 @@ return {
                     "args": null,
                     "concreteType": "EthLedgerWallet",
                     "plural": true,
-                    "selections": v4
+                    "selections": (v4/*: any*/)
                   }
                 ]
               },
-              v3
+              (v3/*: any*/)
             ]
           }
         ]
       }
     ]
+  },
+  "params": {
+    "operationKind": "mutation",
+    "name": "WalletsScreenAddHDWalletAccountMutation",
+    "id": null,
+    "text": "mutation WalletsScreenAddHDWalletAccountMutation(\n  $input: AddHDWalletAccountInput!\n) {\n  addHDWalletAccount(input: $input) {\n    address\n    viewer {\n      ...WalletsScreen_user\n      id\n    }\n  }\n}\n\nfragment WalletsScreen_user on User {\n  profile {\n    ethAddress\n  }\n  ethWallets {\n    hd {\n      name\n      localID\n      accounts {\n        address\n      }\n      id\n    }\n    ledger {\n      name\n      localID\n      accounts {\n        address\n      }\n      id\n    }\n  }\n}\n",
+    "metadata": {}
   }
 };
 })();

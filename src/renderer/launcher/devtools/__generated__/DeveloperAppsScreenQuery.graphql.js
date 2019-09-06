@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 2be64daa0a4836df98f07e2f410564e0
+ * @relayHash 1a56d7f72587a1381b7cd963f4c3c023
  */
 
 /* eslint-disable */
@@ -79,8 +79,7 @@ v1 = [
   {
     "kind": "Variable",
     "name": "id",
-    "variableName": "developerID",
-    "type": "ID!"
+    "variableName": "developerID"
   }
 ],
 v2 = {
@@ -117,24 +116,19 @@ v4 = {
 };
 return {
   "kind": "Request",
-  "operationKind": "query",
-  "name": "DeveloperAppsScreenQuery",
-  "id": null,
-  "text": "query DeveloperAppsScreenQuery(\n  $developerID: ID!\n) {\n  developer: node(id: $developerID) {\n    __typename\n    ... on OwnDeveloper {\n      ...DeveloperAppsScreen_developer\n    }\n    id\n  }\n}\n\nfragment DeveloperAppsScreen_developer on OwnDeveloper {\n  ...CreateAppModal_developer\n  apps {\n    ...AppItem_ownApp\n    id\n  }\n}\n\nfragment CreateAppModal_developer on OwnDeveloper {\n  localID\n}\n\nfragment AppItem_ownApp on OwnApp {\n  localID\n  publicID\n  developer {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n  profile {\n    name\n  }\n}\n",
-  "metadata": {},
   "fragment": {
     "kind": "Fragment",
     "name": "DeveloperAppsScreenQuery",
     "type": "Query",
     "metadata": null,
-    "argumentDefinitions": v0,
+    "argumentDefinitions": (v0/*: any*/),
     "selections": [
       {
         "kind": "LinkedField",
         "alias": "developer",
         "name": "node",
         "storageKey": null,
-        "args": v1,
+        "args": (v1/*: any*/),
         "concreteType": null,
         "plural": false,
         "selections": [
@@ -156,14 +150,14 @@ return {
   "operation": {
     "kind": "Operation",
     "name": "DeveloperAppsScreenQuery",
-    "argumentDefinitions": v0,
+    "argumentDefinitions": (v0/*: any*/),
     "selections": [
       {
         "kind": "LinkedField",
         "alias": "developer",
         "name": "node",
         "storageKey": null,
-        "args": v1,
+        "args": (v1/*: any*/),
         "concreteType": null,
         "plural": false,
         "selections": [
@@ -174,12 +168,12 @@ return {
             "args": null,
             "storageKey": null
           },
-          v2,
+          (v2/*: any*/),
           {
             "kind": "InlineFragment",
             "type": "OwnDeveloper",
             "selections": [
-              v3,
+              (v3/*: any*/),
               {
                 "kind": "LinkedField",
                 "alias": null,
@@ -189,7 +183,7 @@ return {
                 "concreteType": "OwnApp",
                 "plural": true,
                 "selections": [
-                  v3,
+                  (v3/*: any*/),
                   {
                     "kind": "ScalarField",
                     "alias": null,
@@ -206,13 +200,13 @@ return {
                     "concreteType": "OwnDeveloper",
                     "plural": false,
                     "selections": [
-                      v3,
-                      v4,
-                      v2
+                      (v3/*: any*/),
+                      (v4/*: any*/),
+                      (v2/*: any*/)
                     ]
                   },
-                  v4,
-                  v2
+                  (v4/*: any*/),
+                  (v2/*: any*/)
                 ]
               }
             ]
@@ -220,6 +214,13 @@ return {
         ]
       }
     ]
+  },
+  "params": {
+    "operationKind": "query",
+    "name": "DeveloperAppsScreenQuery",
+    "id": null,
+    "text": "query DeveloperAppsScreenQuery(\n  $developerID: ID!\n) {\n  developer: node(id: $developerID) {\n    __typename\n    ... on OwnDeveloper {\n      ...DeveloperAppsScreen_developer\n    }\n    id\n  }\n}\n\nfragment DeveloperAppsScreen_developer on OwnDeveloper {\n  ...CreateAppModal_developer\n  apps {\n    ...AppItem_ownApp\n    id\n  }\n}\n\nfragment CreateAppModal_developer on OwnDeveloper {\n  localID\n}\n\nfragment AppItem_ownApp on OwnApp {\n  localID\n  publicID\n  developer {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n  profile {\n    name\n  }\n}\n",
+    "metadata": {}
   }
 };
 })();

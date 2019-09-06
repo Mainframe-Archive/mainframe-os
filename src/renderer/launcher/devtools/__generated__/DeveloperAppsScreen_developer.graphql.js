@@ -7,11 +7,12 @@
 'use strict';
 
 /*::
-import type { ConcreteFragment } from 'relay-runtime';
+import type { ReaderFragment } from 'relay-runtime';
 type AppItem_ownApp$ref = any;
 type CreateAppModal_developer$ref = any;
 import type { FragmentReference } from "relay-runtime";
 declare export opaque type DeveloperAppsScreen_developer$ref: FragmentReference;
+declare export opaque type DeveloperAppsScreen_developer$fragmentType: DeveloperAppsScreen_developer$ref;
 export type DeveloperAppsScreen_developer = {|
   +apps: $ReadOnlyArray<{|
     +id: string,
@@ -20,21 +21,21 @@ export type DeveloperAppsScreen_developer = {|
   +$fragmentRefs: CreateAppModal_developer$ref,
   +$refType: DeveloperAppsScreen_developer$ref,
 |};
+export type DeveloperAppsScreen_developer$data = DeveloperAppsScreen_developer;
+export type DeveloperAppsScreen_developer$key = {
+  +$data?: DeveloperAppsScreen_developer$data,
+  +$fragmentRefs: DeveloperAppsScreen_developer$ref,
+};
 */
 
 
-const node/*: ConcreteFragment*/ = {
+const node/*: ReaderFragment*/ = {
   "kind": "Fragment",
   "name": "DeveloperAppsScreen_developer",
   "type": "OwnDeveloper",
   "metadata": null,
   "argumentDefinitions": [],
   "selections": [
-    {
-      "kind": "FragmentSpread",
-      "name": "CreateAppModal_developer",
-      "args": null
-    },
     {
       "kind": "LinkedField",
       "alias": null,
@@ -45,18 +46,23 @@ const node/*: ConcreteFragment*/ = {
       "plural": true,
       "selections": [
         {
-          "kind": "FragmentSpread",
-          "name": "AppItem_ownApp",
-          "args": null
-        },
-        {
           "kind": "ScalarField",
           "alias": null,
           "name": "id",
           "args": null,
           "storageKey": null
+        },
+        {
+          "kind": "FragmentSpread",
+          "name": "AppItem_ownApp",
+          "args": null
         }
       ]
+    },
+    {
+      "kind": "FragmentSpread",
+      "name": "CreateAppModal_developer",
+      "args": null
     }
   ]
 };

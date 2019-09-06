@@ -7,9 +7,10 @@
 'use strict';
 
 /*::
-import type { ConcreteFragment } from 'relay-runtime';
+import type { ReaderFragment } from 'relay-runtime';
 import type { FragmentReference } from "relay-runtime";
 declare export opaque type WalletsScreen_user$ref: FragmentReference;
+declare export opaque type WalletsScreen_user$fragmentType: WalletsScreen_user$ref;
 export type WalletsScreen_user = {|
   +profile: {|
     +ethAddress: ?string
@@ -32,10 +33,15 @@ export type WalletsScreen_user = {|
   |},
   +$refType: WalletsScreen_user$ref,
 |};
+export type WalletsScreen_user$data = WalletsScreen_user;
+export type WalletsScreen_user$key = {
+  +$data?: WalletsScreen_user$data,
+  +$fragmentRefs: WalletsScreen_user$ref,
+};
 */
 
 
-const node/*: ConcreteFragment*/ = (function(){
+const node/*: ReaderFragment*/ = (function(){
 var v0 = [
   {
     "kind": "ScalarField",
@@ -112,7 +118,7 @@ return {
           "args": null,
           "concreteType": "EthHDWallet",
           "plural": true,
-          "selections": v0
+          "selections": (v0/*: any*/)
         },
         {
           "kind": "LinkedField",
@@ -122,7 +128,7 @@ return {
           "args": null,
           "concreteType": "EthLedgerWallet",
           "plural": true,
-          "selections": v0
+          "selections": (v0/*: any*/)
         }
       ]
     }

@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 3f99f6f7b172ab43cd5350456e4cb775
+ * @relayHash c0ea4b1e861f3127614ae9368fb05af3
  */
 
 /* eslint-disable */
@@ -53,24 +53,26 @@ var v0 = [
 ];
 return {
   "kind": "Request",
-  "operationKind": "subscription",
-  "name": "SideMenuAppUpdatesChangedSubscription",
-  "id": null,
-  "text": "subscription SideMenuAppUpdatesChangedSubscription {\n  appUpdatesChanged {\n    appUpdatesCount\n  }\n}\n",
-  "metadata": {},
   "fragment": {
     "kind": "Fragment",
     "name": "SideMenuAppUpdatesChangedSubscription",
     "type": "Subscription",
     "metadata": null,
     "argumentDefinitions": [],
-    "selections": v0
+    "selections": (v0/*: any*/)
   },
   "operation": {
     "kind": "Operation",
     "name": "SideMenuAppUpdatesChangedSubscription",
     "argumentDefinitions": [],
-    "selections": v0
+    "selections": (v0/*: any*/)
+  },
+  "params": {
+    "operationKind": "subscription",
+    "name": "SideMenuAppUpdatesChangedSubscription",
+    "id": null,
+    "text": "subscription SideMenuAppUpdatesChangedSubscription {\n  appUpdatesChanged {\n    appUpdatesCount\n  }\n}\n",
+    "metadata": {}
   }
 };
 })();

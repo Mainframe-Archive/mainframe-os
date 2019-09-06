@@ -7,9 +7,10 @@
 'use strict';
 
 /*::
-import type { ConcreteFragment } from 'relay-runtime';
+import type { ReaderFragment } from 'relay-runtime';
 import type { FragmentReference } from "relay-runtime";
 declare export opaque type AppUpdateModal_userAppVersion$ref: FragmentReference;
+declare export opaque type AppUpdateModal_userAppVersion$fragmentType: AppUpdateModal_userAppVersion$ref;
 export type AppUpdateModal_userAppVersion = {|
   +localID: string,
   +settings: {|
@@ -51,10 +52,15 @@ export type AppUpdateModal_userAppVersion = {|
   |},
   +$refType: AppUpdateModal_userAppVersion$ref,
 |};
+export type AppUpdateModal_userAppVersion$data = AppUpdateModal_userAppVersion;
+export type AppUpdateModal_userAppVersion$key = {
+  +$data?: AppUpdateModal_userAppVersion$data,
+  +$fragmentRefs: AppUpdateModal_userAppVersion$ref,
+};
 */
 
 
-const node/*: ConcreteFragment*/ = (function(){
+const node/*: ReaderFragment*/ = (function(){
 var v0 = {
   "kind": "LinkedField",
   "alias": null,
@@ -121,7 +127,7 @@ v1 = {
       "args": null,
       "storageKey": null
     },
-    v0
+    (v0/*: any*/)
   ]
 };
 return {
@@ -147,7 +153,7 @@ return {
       "concreteType": "UserAppSettings",
       "plural": false,
       "selections": [
-        v0
+        (v0/*: any*/)
       ]
     },
     {
@@ -168,7 +174,7 @@ return {
           "concreteType": "AppVersion",
           "plural": false,
           "selections": [
-            v1
+            (v1/*: any*/)
           ]
         },
         {
@@ -187,7 +193,7 @@ return {
               "args": null,
               "storageKey": null
             },
-            v1
+            (v1/*: any*/)
           ]
         },
         {

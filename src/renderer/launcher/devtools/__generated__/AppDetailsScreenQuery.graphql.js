@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 8ec1701ef49d79161b7ac29d9b3098c8
+ * @relayHash 92698746a5cb008cd22e5c2fc251f073
  */
 
 /* eslint-disable */
@@ -80,8 +80,7 @@ v1 = [
   {
     "kind": "Variable",
     "name": "id",
-    "variableName": "appID",
-    "type": "ID!"
+    "variableName": "appID"
   }
 ],
 v2 = {
@@ -125,24 +124,19 @@ v5 = {
 };
 return {
   "kind": "Request",
-  "operationKind": "query",
-  "name": "AppDetailsScreenQuery",
-  "id": null,
-  "text": "query AppDetailsScreenQuery(\n  $appID: ID!\n) {\n  app: node(id: $appID) {\n    __typename\n    ... on OwnApp {\n      ...AppDetailsScreen_app\n    }\n    id\n  }\n}\n\nfragment AppDetailsScreen_app on OwnApp {\n  localID\n  publicID\n  profile {\n    name\n  }\n  contentsPath\n  developer {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n  inProgressVersion {\n    version\n    webDomains {\n      domain\n      internal\n      external\n    }\n  }\n  latestPublishedVersion {\n    version\n  }\n  viewerOwnAppID\n}\n",
-  "metadata": {},
   "fragment": {
     "kind": "Fragment",
     "name": "AppDetailsScreenQuery",
     "type": "Query",
     "metadata": null,
-    "argumentDefinitions": v0,
+    "argumentDefinitions": (v0/*: any*/),
     "selections": [
       {
         "kind": "LinkedField",
         "alias": "app",
         "name": "node",
         "storageKey": null,
-        "args": v1,
+        "args": (v1/*: any*/),
         "concreteType": null,
         "plural": false,
         "selections": [
@@ -164,14 +158,14 @@ return {
   "operation": {
     "kind": "Operation",
     "name": "AppDetailsScreenQuery",
-    "argumentDefinitions": v0,
+    "argumentDefinitions": (v0/*: any*/),
     "selections": [
       {
         "kind": "LinkedField",
         "alias": "app",
         "name": "node",
         "storageKey": null,
-        "args": v1,
+        "args": (v1/*: any*/),
         "concreteType": null,
         "plural": false,
         "selections": [
@@ -182,12 +176,12 @@ return {
             "args": null,
             "storageKey": null
           },
-          v2,
+          (v2/*: any*/),
           {
             "kind": "InlineFragment",
             "type": "OwnApp",
             "selections": [
-              v3,
+              (v3/*: any*/),
               {
                 "kind": "ScalarField",
                 "alias": null,
@@ -195,7 +189,7 @@ return {
                 "args": null,
                 "storageKey": null
               },
-              v4,
+              (v4/*: any*/),
               {
                 "kind": "ScalarField",
                 "alias": null,
@@ -212,9 +206,9 @@ return {
                 "concreteType": "OwnDeveloper",
                 "plural": false,
                 "selections": [
-                  v3,
-                  v4,
-                  v2
+                  (v3/*: any*/),
+                  (v4/*: any*/),
+                  (v2/*: any*/)
                 ]
               },
               {
@@ -226,7 +220,7 @@ return {
                 "concreteType": "OwnAppVersion",
                 "plural": false,
                 "selections": [
-                  v5,
+                  (v5/*: any*/),
                   {
                     "kind": "LinkedField",
                     "alias": null,
@@ -270,7 +264,7 @@ return {
                 "concreteType": "OwnAppVersion",
                 "plural": false,
                 "selections": [
-                  v5
+                  (v5/*: any*/)
                 ]
               },
               {
@@ -285,6 +279,13 @@ return {
         ]
       }
     ]
+  },
+  "params": {
+    "operationKind": "query",
+    "name": "AppDetailsScreenQuery",
+    "id": null,
+    "text": "query AppDetailsScreenQuery(\n  $appID: ID!\n) {\n  app: node(id: $appID) {\n    __typename\n    ... on OwnApp {\n      ...AppDetailsScreen_app\n    }\n    id\n  }\n}\n\nfragment AppDetailsScreen_app on OwnApp {\n  localID\n  publicID\n  profile {\n    name\n  }\n  contentsPath\n  developer {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n  inProgressVersion {\n    version\n    webDomains {\n      domain\n      internal\n      external\n    }\n  }\n  latestPublishedVersion {\n    version\n  }\n  viewerOwnAppID\n}\n",
+    "metadata": {}
   }
 };
 })();

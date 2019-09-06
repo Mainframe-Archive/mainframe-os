@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 846c97550bcd1aed96d3812ded747998
+ * @relayHash 1139bc5475e73e8f0425d83c862f273c
  */
 
 /* eslint-disable */
@@ -74,8 +74,7 @@ v1 = [
           {
             "kind": "Variable",
             "name": "publicID",
-            "variableName": "publicID",
-            "type": "ID!"
+            "variableName": "publicID"
           }
         ],
         "concreteType": "PeerLookupResult",
@@ -120,24 +119,26 @@ v1 = [
 ];
 return {
   "kind": "Request",
-  "operationKind": "query",
-  "name": "ContactsScreenLookupPeerQuery",
-  "id": null,
-  "text": "query ContactsScreenLookupPeerQuery(\n  $publicID: ID!\n) {\n  lookup {\n    peerByID(publicID: $publicID) {\n      profile {\n        name\n      }\n      publicID\n      publicKey\n    }\n  }\n}\n",
-  "metadata": {},
   "fragment": {
     "kind": "Fragment",
     "name": "ContactsScreenLookupPeerQuery",
     "type": "Query",
     "metadata": null,
-    "argumentDefinitions": v0,
-    "selections": v1
+    "argumentDefinitions": (v0/*: any*/),
+    "selections": (v1/*: any*/)
   },
   "operation": {
     "kind": "Operation",
     "name": "ContactsScreenLookupPeerQuery",
-    "argumentDefinitions": v0,
-    "selections": v1
+    "argumentDefinitions": (v0/*: any*/),
+    "selections": (v1/*: any*/)
+  },
+  "params": {
+    "operationKind": "query",
+    "name": "ContactsScreenLookupPeerQuery",
+    "id": null,
+    "text": "query ContactsScreenLookupPeerQuery(\n  $publicID: ID!\n) {\n  lookup {\n    peerByID(publicID: $publicID) {\n      profile {\n        name\n      }\n      publicID\n      publicKey\n    }\n  }\n}\n",
+    "metadata": {}
   }
 };
 })();
