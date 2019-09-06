@@ -3,17 +3,21 @@
 import { Text, Button } from '@morpheus-ui/core'
 import memoize from 'memoize-one'
 import React, { Component } from 'react'
-import { graphql, createFragmentContainer } from 'react-relay'
+import {
+  graphql,
+  commitMutation,
+  createFragmentContainer,
+  type Environment,
+} from 'react-relay'
 import styled from 'styled-components/native'
 
 import PlusIcon from '../../UIComponents/Icons/PlusIcon'
 import OSLogo from '../../UIComponents/MainframeOSLogo'
-// import EditIcon from '../../UIComponents/Icons/EditIcon'
+import EditIcon from '../../UIComponents/Icons/EditIcon'
 import rpc from '../rpc'
 import RelayRenderer from '../RelayRenderer'
 
 import AppInstallModal from './AppInstallModal'
-import AppPreviewModal from './AppPreviewModal'
 import AppUpdateModal from './AppUpdateModal'
 import { InstalledAppItem } from './AppItem'
 import AppsGrid from './AppsGrid'
@@ -39,6 +43,18 @@ const SUGGESTED_APPS = [
     description: 'Transfer crypto money in no time',
   },
 ]
+
+const appRemoveMutation = graphql`
+  mutation AppsScreenRemoveUserAppVersionMutation(
+    $input: RemoveUserAppVersionMutationInput!
+  ) {
+    removeUserAppVersion(input: $input) {
+      viewer {
+        ...AppsScreen_user
+      }
+    }
+  }
+`
 
 const Container = styled.View`
   padding: 0 0 20px 50px;
@@ -71,12 +87,15 @@ const ScrollView = styled.ScrollView`
 `
 
 type Props = {
+  relay: {
+    environment: Environment,
+  },
   user: User,
 }
 
 type State = {
   showModal: ?{
-    type: 'app_install' | 'app_preview' | 'app_update',
+    type: 'app_install' | 'app_update',
     publicID?: ?string,
     userAppVersionID?: ?string,
     suggestedApp?: ?Object,
@@ -98,22 +117,6 @@ class AppsView extends Component<Props, State> {
     editing: false,
     deleting: undefined,
   }
-
-  // TODO: move this logic to a dedicated DB collection and Swarm feed
-  // componentDidMount() {
-  //   this.fetchSuggested()
-  // }
-
-  // fetchSuggested = async () => {
-  //   try {
-  //     const suggestedPromise = await fetch(SUGGESTED_APPS_URL)
-  //     const suggestedApps = await suggestedPromise.json()
-  //     this.setState({ suggestedApps })
-  //   } catch (err) {
-  //     // eslint-disable-next-line no-console
-  //     console.error(err)
-  //   }
-  // }
 
   toggleEditing = () => {
     this.setState({
@@ -155,8 +158,13 @@ class AppsView extends Component<Props, State> {
     }
   }
 
-  onStartDeleting = (userAppVersionID: string) => {
-    this.setState({ deleting: userAppVersionID })
+  onStartDeleting = (publicID: string) => {
+    const found = this.props.user.apps.find(uav => {
+      return uav.appVersion.app.publicID === publicID
+    })
+    if (found != null) {
+      this.setState({ deleting: found.localID })
+    }
   }
 
   onCancelDelete = () => {
@@ -164,16 +172,21 @@ class AppsView extends Component<Props, State> {
   }
 
   onPressDelete = () => {
-    // to be Implemented --- Temporarily just cancel
-    this.onCancelDelete()
-  }
+    const { deleting } = this.state
+    if (deleting == null) {
+      return
+    }
 
-  previewSuggested = (app: SuggestedAppData) => {
-    this.setState({
-      showModal: {
-        type: 'app_preview',
-        suggestedApp: app,
-        publicID: app.publicID,
+    commitMutation(this.props.relay.environment, {
+      mutation: appRemoveMutation,
+      variables: {
+        input: { userAppVersionID: deleting },
+      },
+      onCompleted: () => {
+        this.setState({ deleting: null })
+      },
+      onError: () => {
+        this.setState({ deleting: null })
       },
     })
   }
@@ -215,7 +228,7 @@ class AppsView extends Component<Props, State> {
         <InstalledAppItem
           appVersion={appVersion}
           editing={this.state.editing}
-          deleting={this.state.deleting === appVersion.app.publicID}
+          deleting={this.state.deleting === localID}
           key={localID}
           installedApp={appVersion}
           onOpenApp={() => {
@@ -252,7 +265,7 @@ class AppsView extends Component<Props, State> {
                   key={app.publicID}
                   appData={app}
                   onPressInstall={this.installSuggested}
-                  onOpen={this.previewSuggested}
+                  onOpen={this.installSuggested}
                 />
               ))}
             </AppsGrid>
@@ -274,15 +287,6 @@ class AppsView extends Component<Props, State> {
               onInstallComplete={this.onInstallComplete}
             />
           )
-          break
-        case 'app_preview':
-          modal = this.state.showModal.suggestedApp ? (
-            <AppPreviewModal
-              appData={this.state.showModal.suggestedApp}
-              onRequestClose={this.onCloseModal}
-              onPressInstall={this.installSuggested}
-            />
-          ) : null
           break
         case 'app_update': {
           const userAppVersion = this.props.user.apps.find(
@@ -317,11 +321,11 @@ class AppsView extends Component<Props, State> {
           </LogoContainer>
           {this.props.user.apps.length ? (
             <ButtonsContainer>
-              {/* <Button
+              <Button
                 onPress={this.toggleEditing}
                 variant={editButtonVariants}
                 Icon={EditIcon}
-              /> */}
+              />
               <Button
                 variant={['xSmallIconOnly', 'noTitle']}
                 Icon={PlusIcon}

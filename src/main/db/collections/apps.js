@@ -34,6 +34,7 @@ type AppMethods = {|
     manifest: AppManifestData,
   ): Promise<AppVersionDoc>,
   handleDownloadedVersion(appVersion: AppVersionDoc): Promise<void>,
+  safeRemove(): Promise<void>,
   startUpdatesSubscription(bzz: Bzz): rxjs$TeardownLogic,
   stopUpdatesSubscription(): void,
   startSync(bzz: Bzz): rxjs$TeardownLogic,
@@ -227,6 +228,14 @@ export default async (params: CollectionParams): Promise<AppsCollection> => {
           }
           return doc
         })
+      },
+
+      async safeRemove(): Promise<void> {
+        const versions = await db.app_versions
+          .find({ app: this.localID })
+          .exec()
+        await Promise.all(versions.map(v => v.remove()))
+        await this.remove()
       },
 
       startUpdatesSubscription(bzz: Bzz): rxjs$TeardownLogic {

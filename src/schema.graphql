@@ -321,10 +321,11 @@ type Mutation {
   createApp(input: CreateAppInput!): CreateAppPayload
   createAppVersion(input: CreateAppVersionInput!): CreateAppVersionPayload
   installUserAppVersion(input: InstallUserAppVersionMutationInput!): InstallUserAppVersionMutationPayload
-  updateUserAppVersion(input: UpdateUserAppVersionMutationInput!): UpdateUserAppVersionMutationPayload
-  setAppWebDomainsDefinitions(input: SetAppWebDomainsDefinitionsInput!): SetAppWebDomainsDefinitionsPayload
   publishAppVersion(input: PublishAppVersionInput!): PublishAppVersionPayload
+  removeUserAppVersion(input: RemoveUserAppVersionMutationInput!): RemoveUserAppVersionMutationPayload
+  setAppWebDomainsDefinitions(input: SetAppWebDomainsDefinitionsInput!): SetAppWebDomainsDefinitionsPayload
   updateAppDetails(input: UpdateAppDetailsInput!): UpdateAppDetailsPayload
+  updateUserAppVersion(input: UpdateUserAppVersionMutationInput!): UpdateUserAppVersionMutationPayload
   acceptContactRequest(input: AcceptContactRequestInput!): AcceptContactRequestPayload
   addContact(input: AddContactInput!): AddContactPayload
   createDeveloper(input: CreateDeveloperInput!): CreateDeveloperPayload
@@ -419,6 +420,16 @@ type Query {
     id: ID!
   ): Node
   viewer: User!
+}
+
+input RemoveUserAppVersionMutationInput {
+  userAppVersionID: String!
+  clientMutationId: String
+}
+
+type RemoveUserAppVersionMutationPayload {
+  viewer: User!
+  clientMutationId: String
 }
 
 input SetAppWebDomainsDefinitionsInput {
