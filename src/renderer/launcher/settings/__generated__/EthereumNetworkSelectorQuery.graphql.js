@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 35dd40e8dbbdc39b5182526e65d3950a
+ * @relayHash c89aa3b7130dd7af662cfcb185566019
  */
 
 /* eslint-disable */
@@ -38,11 +38,6 @@ fragment EthereumNetworkSelector_user on User {
 
 const node/*: ConcreteRequest*/ = {
   "kind": "Request",
-  "operationKind": "query",
-  "name": "EthereumNetworkSelectorQuery",
-  "id": null,
-  "text": "query EthereumNetworkSelectorQuery {\n  user: viewer {\n    ...EthereumNetworkSelector_user\n    id\n  }\n}\n\nfragment EthereumNetworkSelector_user on User {\n  ethURL\n}\n",
-  "metadata": {},
   "fragment": {
     "kind": "Fragment",
     "name": "EthereumNetworkSelectorQuery",
@@ -99,6 +94,13 @@ const node/*: ConcreteRequest*/ = {
         ]
       }
     ]
+  },
+  "params": {
+    "operationKind": "query",
+    "name": "EthereumNetworkSelectorQuery",
+    "id": null,
+    "text": "query EthereumNetworkSelectorQuery {\n  user: viewer {\n    ...EthereumNetworkSelector_user\n    id\n  }\n}\n\nfragment EthereumNetworkSelector_user on User {\n  ethURL\n}\n",
+    "metadata": {}
   }
 };
 // prettier-ignore

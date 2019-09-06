@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash b839c50e01b03c06d305f2500b8b1b5e
+ * @relayHash c27db03dc0aabf42d7404b8587ba3282
  */
 
 /* eslint-disable */
@@ -68,24 +68,26 @@ var v0 = [
 ];
 return {
   "kind": "Request",
-  "operationKind": "query",
-  "name": "DevtoolsRouterQuery",
-  "id": null,
-  "text": "query DevtoolsRouterQuery {\n  devtools {\n    developers {\n      id\n    }\n  }\n}\n",
-  "metadata": {},
   "fragment": {
     "kind": "Fragment",
     "name": "DevtoolsRouterQuery",
     "type": "Query",
     "metadata": null,
     "argumentDefinitions": [],
-    "selections": v0
+    "selections": (v0/*: any*/)
   },
   "operation": {
     "kind": "Operation",
     "name": "DevtoolsRouterQuery",
     "argumentDefinitions": [],
-    "selections": v0
+    "selections": (v0/*: any*/)
+  },
+  "params": {
+    "operationKind": "query",
+    "name": "DevtoolsRouterQuery",
+    "id": null,
+    "text": "query DevtoolsRouterQuery {\n  devtools {\n    developers {\n      id\n    }\n  }\n}\n",
+    "metadata": {}
   }
 };
 })();

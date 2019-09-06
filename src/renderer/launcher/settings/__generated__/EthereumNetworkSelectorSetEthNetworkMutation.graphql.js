@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 7c4d19aa0a5e09f6771948fbf8cadcdd
+ * @relayHash a85d047198ee8566a0ac7fc3fe30fb7c
  */
 
 /* eslint-disable */
@@ -10,10 +10,10 @@
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
 type EthereumNetworkSelector_user$ref = any;
-export type SetEthNetworkInput = {
+export type SetEthNetworkInput = {|
   url: string,
   clientMutationId?: ?string,
-};
+|};
 export type EthereumNetworkSelectorSetEthNetworkMutationVariables = {|
   input: SetEthNetworkInput
 |};
@@ -61,30 +61,24 @@ v1 = [
   {
     "kind": "Variable",
     "name": "input",
-    "variableName": "input",
-    "type": "SetEthNetworkInput!"
+    "variableName": "input"
   }
 ];
 return {
   "kind": "Request",
-  "operationKind": "mutation",
-  "name": "EthereumNetworkSelectorSetEthNetworkMutation",
-  "id": null,
-  "text": "mutation EthereumNetworkSelectorSetEthNetworkMutation(\n  $input: SetEthNetworkInput!\n) {\n  setEthNetwork(input: $input) {\n    user: viewer {\n      ...EthereumNetworkSelector_user\n      id\n    }\n  }\n}\n\nfragment EthereumNetworkSelector_user on User {\n  ethURL\n}\n",
-  "metadata": {},
   "fragment": {
     "kind": "Fragment",
     "name": "EthereumNetworkSelectorSetEthNetworkMutation",
     "type": "Mutation",
     "metadata": null,
-    "argumentDefinitions": v0,
+    "argumentDefinitions": (v0/*: any*/),
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
         "name": "setEthNetwork",
         "storageKey": null,
-        "args": v1,
+        "args": (v1/*: any*/),
         "concreteType": "SetEthNetworkPayload",
         "plural": false,
         "selections": [
@@ -111,14 +105,14 @@ return {
   "operation": {
     "kind": "Operation",
     "name": "EthereumNetworkSelectorSetEthNetworkMutation",
-    "argumentDefinitions": v0,
+    "argumentDefinitions": (v0/*: any*/),
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
         "name": "setEthNetwork",
         "storageKey": null,
-        "args": v1,
+        "args": (v1/*: any*/),
         "concreteType": "SetEthNetworkPayload",
         "plural": false,
         "selections": [
@@ -150,6 +144,13 @@ return {
         ]
       }
     ]
+  },
+  "params": {
+    "operationKind": "mutation",
+    "name": "EthereumNetworkSelectorSetEthNetworkMutation",
+    "id": null,
+    "text": "mutation EthereumNetworkSelectorSetEthNetworkMutation(\n  $input: SetEthNetworkInput!\n) {\n  setEthNetwork(input: $input) {\n    user: viewer {\n      ...EthereumNetworkSelector_user\n      id\n    }\n  }\n}\n\nfragment EthereumNetworkSelector_user on User {\n  ethURL\n}\n",
+    "metadata": {}
   }
 };
 })();

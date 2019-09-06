@@ -7,10 +7,11 @@
 'use strict';
 
 /*::
-import type { ConcreteFragment } from 'relay-runtime';
+import type { ReaderFragment } from 'relay-runtime';
 export type ContactStakeState = "RECLAIMED" | "RECLAIMING" | "SEIZED" | "STAKED" | "%future added value";
 import type { FragmentReference } from "relay-runtime";
 declare export opaque type InviteContactModal_contactInvite$ref: FragmentReference;
+declare export opaque type InviteContactModal_contactInvite$fragmentType: InviteContactModal_contactInvite$ref;
 export type InviteContactModal_contactInvite = {|
   +ethNetwork: string,
   +fromAddress: string,
@@ -20,10 +21,15 @@ export type InviteContactModal_contactInvite = {|
   +reclaimedStakeTX: ?string,
   +$refType: InviteContactModal_contactInvite$ref,
 |};
+export type InviteContactModal_contactInvite$data = InviteContactModal_contactInvite;
+export type InviteContactModal_contactInvite$key = {
+  +$data?: InviteContactModal_contactInvite$data,
+  +$fragmentRefs: InviteContactModal_contactInvite$ref,
+};
 */
 
 
-const node/*: ConcreteFragment*/ = {
+const node/*: ReaderFragment*/ = {
   "kind": "Fragment",
   "name": "InviteContactModal_contactInvite",
   "type": "ContactInvite",

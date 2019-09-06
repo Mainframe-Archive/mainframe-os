@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 5104ddf5088e7640ec4a2c26ee504914
+ * @relayHash 79a5a4e8006a603fe465e98b4c0b7c51
  */
 
 /* eslint-disable */
@@ -10,13 +10,13 @@
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
 type AppDetailsScreen_app$ref = any;
-export type UpdateAppDetailsInput = {
+export type UpdateAppDetailsInput = {|
   appID: string,
   name: string,
   contentsPath: string,
   version: string,
   clientMutationId?: ?string,
-};
+|};
 export type AppDetailsScreenUpdateAppDetailsMutationVariables = {|
   input: UpdateAppDetailsInput
 |};
@@ -88,8 +88,7 @@ v1 = [
   {
     "kind": "Variable",
     "name": "input",
-    "variableName": "input",
-    "type": "UpdateAppDetailsInput!"
+    "variableName": "input"
   }
 ],
 v2 = {
@@ -133,24 +132,19 @@ v5 = {
 };
 return {
   "kind": "Request",
-  "operationKind": "mutation",
-  "name": "AppDetailsScreenUpdateAppDetailsMutation",
-  "id": null,
-  "text": "mutation AppDetailsScreenUpdateAppDetailsMutation(\n  $input: UpdateAppDetailsInput!\n) {\n  updateAppDetails(input: $input) {\n    app {\n      ...AppDetailsScreen_app\n      id\n    }\n  }\n}\n\nfragment AppDetailsScreen_app on OwnApp {\n  localID\n  publicID\n  profile {\n    name\n  }\n  contentsPath\n  developer {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n  inProgressVersion {\n    version\n    webDomains {\n      domain\n      internal\n      external\n    }\n  }\n  latestPublishedVersion {\n    version\n  }\n  viewerOwnAppID\n}\n",
-  "metadata": {},
   "fragment": {
     "kind": "Fragment",
     "name": "AppDetailsScreenUpdateAppDetailsMutation",
     "type": "Mutation",
     "metadata": null,
-    "argumentDefinitions": v0,
+    "argumentDefinitions": (v0/*: any*/),
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
         "name": "updateAppDetails",
         "storageKey": null,
-        "args": v1,
+        "args": (v1/*: any*/),
         "concreteType": "UpdateAppDetailsPayload",
         "plural": false,
         "selections": [
@@ -177,14 +171,14 @@ return {
   "operation": {
     "kind": "Operation",
     "name": "AppDetailsScreenUpdateAppDetailsMutation",
-    "argumentDefinitions": v0,
+    "argumentDefinitions": (v0/*: any*/),
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
         "name": "updateAppDetails",
         "storageKey": null,
-        "args": v1,
+        "args": (v1/*: any*/),
         "concreteType": "UpdateAppDetailsPayload",
         "plural": false,
         "selections": [
@@ -197,7 +191,7 @@ return {
             "concreteType": "OwnApp",
             "plural": false,
             "selections": [
-              v2,
+              (v2/*: any*/),
               {
                 "kind": "ScalarField",
                 "alias": null,
@@ -205,7 +199,7 @@ return {
                 "args": null,
                 "storageKey": null
               },
-              v3,
+              (v3/*: any*/),
               {
                 "kind": "ScalarField",
                 "alias": null,
@@ -222,9 +216,9 @@ return {
                 "concreteType": "OwnDeveloper",
                 "plural": false,
                 "selections": [
-                  v2,
-                  v3,
-                  v4
+                  (v2/*: any*/),
+                  (v3/*: any*/),
+                  (v4/*: any*/)
                 ]
               },
               {
@@ -236,7 +230,7 @@ return {
                 "concreteType": "OwnAppVersion",
                 "plural": false,
                 "selections": [
-                  v5,
+                  (v5/*: any*/),
                   {
                     "kind": "LinkedField",
                     "alias": null,
@@ -280,7 +274,7 @@ return {
                 "concreteType": "OwnAppVersion",
                 "plural": false,
                 "selections": [
-                  v5
+                  (v5/*: any*/)
                 ]
               },
               {
@@ -290,12 +284,19 @@ return {
                 "args": null,
                 "storageKey": null
               },
-              v4
+              (v4/*: any*/)
             ]
           }
         ]
       }
     ]
+  },
+  "params": {
+    "operationKind": "mutation",
+    "name": "AppDetailsScreenUpdateAppDetailsMutation",
+    "id": null,
+    "text": "mutation AppDetailsScreenUpdateAppDetailsMutation(\n  $input: UpdateAppDetailsInput!\n) {\n  updateAppDetails(input: $input) {\n    app {\n      ...AppDetailsScreen_app\n      id\n    }\n  }\n}\n\nfragment AppDetailsScreen_app on OwnApp {\n  localID\n  publicID\n  profile {\n    name\n  }\n  contentsPath\n  developer {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n  inProgressVersion {\n    version\n    webDomains {\n      domain\n      internal\n      external\n    }\n  }\n  latestPublishedVersion {\n    version\n  }\n  viewerOwnAppID\n}\n",
+    "metadata": {}
   }
 };
 })();

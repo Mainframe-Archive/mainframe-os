@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 8be18b7beed38a2cbf7ad768f8baeb01
+ * @relayHash f4756e27425fcac0479dc011eb452d30
  */
 
 /* eslint-disable */
@@ -9,16 +9,16 @@
 
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
-export type UpdateProfileInput = {
+export type UpdateProfileInput = {|
   profile: UpdateUserProfileInput,
   privateProfile?: ?boolean,
   clientMutationId?: ?string,
-};
-export type UpdateUserProfileInput = {
+|};
+export type UpdateUserProfileInput = {|
   name?: ?string,
   avatar?: ?string,
   ethAddress?: ?string,
-};
+|};
 export type IdentityEditModalUpdateProfileMutationVariables = {|
   input: UpdateProfileInput
 |};
@@ -67,8 +67,7 @@ v1 = [
       {
         "kind": "Variable",
         "name": "input",
-        "variableName": "input",
-        "type": "UpdateProfileInput!"
+        "variableName": "input"
       }
     ],
     "concreteType": "UpdateProfilePayload",
@@ -97,24 +96,26 @@ v1 = [
 ];
 return {
   "kind": "Request",
-  "operationKind": "mutation",
-  "name": "IdentityEditModalUpdateProfileMutation",
-  "id": null,
-  "text": "mutation IdentityEditModalUpdateProfileMutation(\n  $input: UpdateProfileInput!\n) {\n  updateProfile(input: $input) {\n    viewer {\n      id\n    }\n  }\n}\n",
-  "metadata": {},
   "fragment": {
     "kind": "Fragment",
     "name": "IdentityEditModalUpdateProfileMutation",
     "type": "Mutation",
     "metadata": null,
-    "argumentDefinitions": v0,
-    "selections": v1
+    "argumentDefinitions": (v0/*: any*/),
+    "selections": (v1/*: any*/)
   },
   "operation": {
     "kind": "Operation",
     "name": "IdentityEditModalUpdateProfileMutation",
-    "argumentDefinitions": v0,
-    "selections": v1
+    "argumentDefinitions": (v0/*: any*/),
+    "selections": (v1/*: any*/)
+  },
+  "params": {
+    "operationKind": "mutation",
+    "name": "IdentityEditModalUpdateProfileMutation",
+    "id": null,
+    "text": "mutation IdentityEditModalUpdateProfileMutation(\n  $input: UpdateProfileInput!\n) {\n  updateProfile(input: $input) {\n    viewer {\n      id\n    }\n  }\n}\n",
+    "metadata": {}
   }
 };
 })();

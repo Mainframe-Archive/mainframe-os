@@ -7,9 +7,10 @@
 'use strict';
 
 /*::
-import type { ConcreteFragment } from 'relay-runtime';
+import type { ReaderFragment } from 'relay-runtime';
 import type { FragmentReference } from "relay-runtime";
 declare export opaque type AppDetailsScreen_app$ref: FragmentReference;
+declare export opaque type AppDetailsScreen_app$fragmentType: AppDetailsScreen_app$ref;
 export type AppDetailsScreen_app = {|
   +localID: string,
   +publicID: string,
@@ -37,10 +38,15 @@ export type AppDetailsScreen_app = {|
   +viewerOwnAppID: string,
   +$refType: AppDetailsScreen_app$ref,
 |};
+export type AppDetailsScreen_app$data = AppDetailsScreen_app;
+export type AppDetailsScreen_app$key = {
+  +$data?: AppDetailsScreen_app$data,
+  +$fragmentRefs: AppDetailsScreen_app$ref,
+};
 */
 
 
-const node/*: ConcreteFragment*/ = (function(){
+const node/*: ReaderFragment*/ = (function(){
 var v0 = {
   "kind": "ScalarField",
   "alias": null,
@@ -80,7 +86,7 @@ return {
   "metadata": null,
   "argumentDefinitions": [],
   "selections": [
-    v0,
+    (v0/*: any*/),
     {
       "kind": "ScalarField",
       "alias": null,
@@ -88,7 +94,7 @@ return {
       "args": null,
       "storageKey": null
     },
-    v1,
+    (v1/*: any*/),
     {
       "kind": "ScalarField",
       "alias": null,
@@ -105,8 +111,8 @@ return {
       "concreteType": "OwnDeveloper",
       "plural": false,
       "selections": [
-        v0,
-        v1
+        (v0/*: any*/),
+        (v1/*: any*/)
       ]
     },
     {
@@ -118,7 +124,7 @@ return {
       "concreteType": "OwnAppVersion",
       "plural": false,
       "selections": [
-        v2,
+        (v2/*: any*/),
         {
           "kind": "LinkedField",
           "alias": null,
@@ -162,7 +168,7 @@ return {
       "concreteType": "OwnAppVersion",
       "plural": false,
       "selections": [
-        v2
+        (v2/*: any*/)
       ]
     },
     {

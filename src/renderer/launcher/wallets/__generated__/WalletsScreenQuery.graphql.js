@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 16bb952b7a670962338a7242cd6bd420
+ * @relayHash 5969a8db23b683a6ca34f485fb5c6daa
  */
 
 /* eslint-disable */
@@ -97,15 +97,10 @@ v1 = [
       }
     ]
   },
-  v0
+  (v0/*: any*/)
 ];
 return {
   "kind": "Request",
-  "operationKind": "query",
-  "name": "WalletsScreenQuery",
-  "id": null,
-  "text": "query WalletsScreenQuery {\n  user: viewer {\n    ...WalletsScreen_user\n    id\n  }\n}\n\nfragment WalletsScreen_user on User {\n  profile {\n    ethAddress\n  }\n  ethWallets {\n    hd {\n      name\n      localID\n      accounts {\n        address\n      }\n      id\n    }\n    ledger {\n      name\n      localID\n      accounts {\n        address\n      }\n      id\n    }\n  }\n}\n",
-  "metadata": {},
   "fragment": {
     "kind": "Fragment",
     "name": "WalletsScreenQuery",
@@ -180,7 +175,7 @@ return {
                 "args": null,
                 "concreteType": "EthHDWallet",
                 "plural": true,
-                "selections": v1
+                "selections": (v1/*: any*/)
               },
               {
                 "kind": "LinkedField",
@@ -190,14 +185,21 @@ return {
                 "args": null,
                 "concreteType": "EthLedgerWallet",
                 "plural": true,
-                "selections": v1
+                "selections": (v1/*: any*/)
               }
             ]
           },
-          v0
+          (v0/*: any*/)
         ]
       }
     ]
+  },
+  "params": {
+    "operationKind": "query",
+    "name": "WalletsScreenQuery",
+    "id": null,
+    "text": "query WalletsScreenQuery {\n  user: viewer {\n    ...WalletsScreen_user\n    id\n  }\n}\n\nfragment WalletsScreen_user on User {\n  profile {\n    ethAddress\n  }\n  ethWallets {\n    hd {\n      name\n      localID\n      accounts {\n        address\n      }\n      id\n    }\n    ledger {\n      name\n      localID\n      accounts {\n        address\n      }\n      id\n    }\n  }\n}\n",
+    "metadata": {}
   }
 };
 })();

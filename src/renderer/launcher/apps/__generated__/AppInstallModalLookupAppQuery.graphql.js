@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash bb86ab2bd32b4819a1e1f8614d2d0a1f
+ * @relayHash 756581af15bc92826f87a87dec3b952a
  */
 
 /* eslint-disable */
@@ -92,8 +92,7 @@ v1 = [
   {
     "kind": "Variable",
     "name": "publicID",
-    "variableName": "publicID",
-    "type": "ID!"
+    "variableName": "publicID"
   }
 ],
 v2 = {
@@ -187,17 +186,12 @@ v5 = {
 };
 return {
   "kind": "Request",
-  "operationKind": "query",
-  "name": "AppInstallModalLookupAppQuery",
-  "id": null,
-  "text": "query AppInstallModalLookupAppQuery(\n  $publicID: ID!\n) {\n  lookup {\n    appByID(publicID: $publicID) {\n      app {\n        latestAvailableVersion {\n          localID\n          publicID\n          manifest {\n            profile {\n              name\n            }\n            version\n            webDomains {\n              domain\n              internal\n              external\n            }\n          }\n          id\n        }\n        id\n      }\n      userAppVersion {\n        localID\n        id\n      }\n    }\n  }\n}\n",
-  "metadata": {},
   "fragment": {
     "kind": "Fragment",
     "name": "AppInstallModalLookupAppQuery",
     "type": "Query",
     "metadata": null,
-    "argumentDefinitions": v0,
+    "argumentDefinitions": (v0/*: any*/),
     "selections": [
       {
         "kind": "LinkedField",
@@ -213,7 +207,7 @@ return {
             "alias": null,
             "name": "appByID",
             "storageKey": null,
-            "args": v1,
+            "args": (v1/*: any*/),
             "concreteType": "AppLookupResult",
             "plural": false,
             "selections": [
@@ -235,9 +229,9 @@ return {
                     "concreteType": "AppVersion",
                     "plural": false,
                     "selections": [
-                      v2,
-                      v3,
-                      v4
+                      (v2/*: any*/),
+                      (v3/*: any*/),
+                      (v4/*: any*/)
                     ]
                   }
                 ]
@@ -251,7 +245,7 @@ return {
                 "concreteType": "UserAppVersion",
                 "plural": false,
                 "selections": [
-                  v2
+                  (v2/*: any*/)
                 ]
               }
             ]
@@ -263,7 +257,7 @@ return {
   "operation": {
     "kind": "Operation",
     "name": "AppInstallModalLookupAppQuery",
-    "argumentDefinitions": v0,
+    "argumentDefinitions": (v0/*: any*/),
     "selections": [
       {
         "kind": "LinkedField",
@@ -279,7 +273,7 @@ return {
             "alias": null,
             "name": "appByID",
             "storageKey": null,
-            "args": v1,
+            "args": (v1/*: any*/),
             "concreteType": "AppLookupResult",
             "plural": false,
             "selections": [
@@ -301,13 +295,13 @@ return {
                     "concreteType": "AppVersion",
                     "plural": false,
                     "selections": [
-                      v2,
-                      v3,
-                      v4,
-                      v5
+                      (v2/*: any*/),
+                      (v3/*: any*/),
+                      (v4/*: any*/),
+                      (v5/*: any*/)
                     ]
                   },
-                  v5
+                  (v5/*: any*/)
                 ]
               },
               {
@@ -319,8 +313,8 @@ return {
                 "concreteType": "UserAppVersion",
                 "plural": false,
                 "selections": [
-                  v2,
-                  v5
+                  (v2/*: any*/),
+                  (v5/*: any*/)
                 ]
               }
             ]
@@ -328,6 +322,13 @@ return {
         ]
       }
     ]
+  },
+  "params": {
+    "operationKind": "query",
+    "name": "AppInstallModalLookupAppQuery",
+    "id": null,
+    "text": "query AppInstallModalLookupAppQuery(\n  $publicID: ID!\n) {\n  lookup {\n    appByID(publicID: $publicID) {\n      app {\n        latestAvailableVersion {\n          localID\n          publicID\n          manifest {\n            profile {\n              name\n            }\n            version\n            webDomains {\n              domain\n              internal\n              external\n            }\n          }\n          id\n        }\n        id\n      }\n      userAppVersion {\n        localID\n        id\n      }\n    }\n  }\n}\n",
+    "metadata": {}
   }
 };
 })();
