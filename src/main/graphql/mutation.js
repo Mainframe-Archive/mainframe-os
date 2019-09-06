@@ -1,5 +1,6 @@
 // @flow
 
+import { remove } from 'fs-extra'
 import {
   GraphQLBoolean,
   GraphQLEnumType,
@@ -13,7 +14,6 @@ import {
 import { mutationWithClientMutationId } from 'graphql-relay'
 
 import {
-  app,
   contact,
   devtoolsField,
   ethHdWallet,
@@ -749,6 +749,15 @@ const setAppWebDomainsDefinitionsMutation = mutationWithClientMutationId({
         throw new Error('Application not found')
       }
       await app.setWebDomains(args.webDomains)
+
+      // Update user own apps settings with new domains
+      const userOwnApps = await ctx.db.user_own_apps
+        .find({ ownApp: args.appID, user: ctx.userID })
+        .exec()
+      await Promise.all(
+        userOwnApps.map(uoa => uoa.setWebDomains(args.webDomains)),
+      )
+
       return { app }
     } catch (err) {
       ctx.logger.log({
@@ -826,6 +835,71 @@ const installUserAppVersionMutation = mutationWithClientMutationId({
   },
 })
 
+const removeUserAppVersionMutation = mutationWithClientMutationId({
+  name: 'RemoveUserAppVersionMutation',
+  inputFields: {
+    userAppVersionID: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+  },
+  outputFields: {
+    viewer: viewerField,
+  },
+  mutateAndGetPayload: async (args, ctx) => {
+    ctx.logger.log({
+      level: 'debug',
+      message: 'RemoveUserAppVersion mutation called',
+      userAppVersionID: args.userAppVersionID,
+    })
+    try {
+      const userAppVersion = await ctx.getDoc(
+        'user_app_versions',
+        args.userAppVersionID,
+      )
+      if (userAppVersion == null) {
+        throw new Error('User app version not found')
+      }
+
+      const [app, settings] = await Promise.all([
+        userAppVersion.populate('app'),
+        userAppVersion.populate('settings'),
+      ])
+      if (app == null) {
+        throw new Error('App not found')
+      }
+      if (settings == null) {
+        throw new Error('User app settings not found')
+      }
+
+      // As we only support a single user, we can completely delete all the app contents for all versions
+      const contentsPath = ctx.user.system.env.getAppVersionsContentsPath(
+        app.getPublicID(),
+      )
+      await userAppVersion.remove()
+      await Promise.all([
+        app.safeRemove(),
+        settings.remove(),
+        remove(contentsPath),
+      ])
+
+      ctx.logger.log({
+        level: 'debug',
+        message: 'RemoveUserAppVersion mutation called',
+        userAppVersionID: args.userAppVersionID,
+      })
+      return {}
+    } catch (err) {
+      ctx.logger.log({
+        level: 'error',
+        message: 'RemoveUserAppVersion mutation called',
+        userAppVersionID: args.userAppVersionID,
+        error: err.toString(),
+      })
+      throw err
+    }
+  },
+})
+
 const updateUserAppVersionMutation = mutationWithClientMutationId({
   name: 'UpdateUserAppVersionMutation',
   inputFields: {
@@ -874,7 +948,7 @@ const updateUserAppVersionMutation = mutationWithClientMutationId({
           userAppVersionID: args.userAppVersionID,
           appVersionID: update.localID,
         })
-        await update.downloadContents(ctx)
+        await update.downloadContents(ctx.user)
         await userAppVersion.applyUpdate(update.localID, args.webDomains)
         ctx.logger.log({
           level: 'debug',
@@ -1006,10 +1080,11 @@ export default new GraphQLObjectType({
     createApp: createAppMutation,
     createAppVersion: createAppVersionMutation,
     installUserAppVersion: installUserAppVersionMutation,
-    updateUserAppVersion: updateUserAppVersionMutation,
-    setAppWebDomainsDefinitions: setAppWebDomainsDefinitionsMutation,
     publishAppVersion: publishAppVersionMutation,
+    removeUserAppVersion: removeUserAppVersionMutation,
+    setAppWebDomainsDefinitions: setAppWebDomainsDefinitionsMutation,
     updateAppDetails: updateAppDetailsMutation,
+    updateUserAppVersion: updateUserAppVersionMutation,
     // Users
     acceptContactRequest: acceptContactRequestMutation,
     addContact: addContactMutation,

@@ -186,6 +186,7 @@ export default class InvitesHandler {
             return
           }
         } else {
+          // eslint-disable-next-line require-atomic-updates
           peer = await this.db.peers.createFromID(
             this.bzz,
             contractEvent.senderFeed,
@@ -378,27 +379,22 @@ export default class InvitesHandler {
   }
 
   async processInviteTransaction(contactID: string, walletAddress: string) {
-    return new Promise(async (resolve, reject) => {
-      // TODO: Notify launcher and request permission from user?
-      try {
-        const params = await this.getInviteParams(contactID)
-        const txOptions = { from: walletAddress }
-        this.invitesContract
-          .send('sendInvite', params, txOptions)
-          .then(inviteRes => {
-            inviteRes.on('mined', hash => {
-              resolve(hash)
-            })
-            inviteRes.on('error', err => {
-              reject(err)
-            })
+    // TODO: Notify launcher and request permission from user?
+    const params = await this.getInviteParams(contactID)
+    return await new Promise((resolve, reject) => {
+      this.invitesContract
+        .send('sendInvite', params, { from: walletAddress })
+        .then(inviteRes => {
+          inviteRes.on('mined', hash => {
+            resolve(hash)
           })
-          .catch(err => {
+          inviteRes.on('error', err => {
             reject(err)
           })
-      } catch (err) {
-        reject(err)
-      }
+        })
+        .catch(err => {
+          reject(err)
+        })
     })
   }
 
@@ -460,9 +456,7 @@ export default class InvitesHandler {
     )
     if (!receivedAddress) {
       throw new Error(
-        `Could not find a wallet containing address: ${
-          contactRequest.receivedAddress
-        }`,
+        `Could not find a wallet containing address: ${contactRequest.receivedAddress}`,
       )
     }
 
@@ -573,9 +567,7 @@ export default class InvitesHandler {
     await this.ethClient.fetchNetwork()
     if (!contracts[this.ethClient.networkName]) {
       throw new Error(
-        `Sorry, Ethereum network "${
-          this.ethClient.networkName
-        }" is not supported for contact invites`,
+        `Sorry, Ethereum network "${this.ethClient.networkName}" is not supported for contact invites`,
       )
     }
     if (
@@ -583,9 +575,7 @@ export default class InvitesHandler {
       this.ethClient.networkName !== 'mainnet'
     ) {
       throw new Error(
-        `Sorry, this feature is only available on Ethereum mainnet, you are currently running on ${
-          this.ethClient.networkName
-        }.`,
+        `Sorry, this feature is only available on Ethereum mainnet, you are currently running on ${this.ethClient.networkName}.`,
       )
     }
   }

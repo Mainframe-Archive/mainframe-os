@@ -375,6 +375,7 @@ export const sandboxed = {
           params.key,
         )
         await ctx.storage.feed.setContentHash(bzz, newManifestHash)
+        // eslint-disable-next-line require-atomic-updates
         ctx.storage.manifestHash = newManifestHash
       } catch (error) {
         throw new Error('Failed to access storage')

@@ -14,6 +14,7 @@ const getLedgerApp = async (): Promise<LedgerAppEth> => {
     return ledgerApp
   }
   const transport = await Transport.create()
+  // eslint-disable-next-line require-atomic-updates
   ledgerApp = new LedgerAppEth(transport)
   return ledgerApp
 }

@@ -267,6 +267,7 @@ export default async (params: CollectionParams): Promise<UsersCollection> => {
             userID: this.localID,
             contactPublicID: publicID,
           })
+          // eslint-disable-next-line require-atomic-updates
           peer = await db.peers.createFromID(bzz, publicID)
           logger.log({
             level: 'debug',

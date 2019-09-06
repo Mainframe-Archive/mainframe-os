@@ -220,6 +220,7 @@ export default async (params: CollectionParams): Promise<OwnAppsCollection> => {
 
         let { contentsHash } = toPublish
         if (contentsHash == null) {
+          // eslint-disable-next-line require-atomic-updates
           contentsHash = await bzz.uploadDirectoryFrom(this.contentsPath)
           await this.atomicUpdate(doc => {
             const version = doc.versions.find(

@@ -1,19 +1,14 @@
 // @flow
 
-import React, { Component } from 'react'
-import styled from 'styled-components/native'
+import React from 'react'
 import Blockies from 'react-blockies'
+import styled from 'styled-components/native'
 
 import { type IconSize } from '../../UIComponents/Avatar'
 
 type Props = {
-  url?: ?string,
-  id?: ?string,
-  size: IconSize,
-}
-
-type State = {
-  error: boolean,
+  id: string,
+  size?: IconSize,
 }
 
 export const ICON_SIZE = {
@@ -34,22 +29,11 @@ const Container = styled.View`
   z-index: 2;
 `
 
-export default class AppIcon extends Component<Props, State> {
-  static defaultProps = {
-    size: 'medium',
-  }
-
-  render() {
-    const { id, url, size } = this.props
-    const iconSize = ICON_SIZE[size]
-    return (
-      <Container iconSize={iconSize}>
-        {url ? (
-          <img src={url} width={iconSize} height={iconSize} alt="" />
-        ) : id ? (
-          <Blockies seed={id} size={8} scale={Math.ceil(iconSize / 8)} />
-        ) : null}
-      </Container>
-    )
-  }
+export default function AppIcon({ id, size }: Props) {
+  const iconSize = (size && ICON_SIZE[size]) || ICON_SIZE.medium
+  return (
+    <Container iconSize={iconSize}>
+      <Blockies seed={id} size={8} scale={Math.ceil(iconSize / 8)} />
+    </Container>
+  )
 }

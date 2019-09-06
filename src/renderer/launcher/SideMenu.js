@@ -3,93 +3,29 @@
 import { Button } from '@morpheus-ui/core'
 import AppsIcon from '@morpheus-ui/icons/AppsMd'
 import AppsFilledIcon from '@morpheus-ui/icons/AppsFilledMd'
-import IdentityIcon from '@morpheus-ui/icons/IdentityMd'
-import IdentityFilledIcon from '@morpheus-ui/icons/IdentityFilledMd'
 import ContactsIcon from '@morpheus-ui/icons/ContactsMd'
 import ContactsFilledIcon from '@morpheus-ui/icons/ContactsFilledMd'
 import WalletsIcon from '@morpheus-ui/icons/WalletsMd'
 import WalletsFilledIcon from '@morpheus-ui/icons/WalletsFilledMd'
 import SettingsIcon from '@morpheus-ui/icons/SettingsMd'
 import SettingsFilledIcon from '@morpheus-ui/icons/SettingsFilledMd'
-import NotificationsIcon from '@morpheus-ui/icons/NotificationsMd'
-import NotificationsFilledIcon from '@morpheus-ui/icons/NotificationsFilledMd'
-import React, { Component } from 'react'
-// import {
-//   graphql,
-//   QueryRenderer,
-//   createFragmentContainer,
-//   // $FlowFixMe: requestSubscription not present in Flow definition but exported by library
-//   requestSubscription,
-//   type Disposable,
-//   type Environment,
-// } from 'react-relay'
+import React, { useState } from 'react'
+import { graphql } from 'react-relay'
 import { Route } from 'react-router'
 import styled from 'styled-components/native'
 
 import SvgSelectedPointer from '../UIComponents/SVGSelectedPointer'
+
 import { ROUTES } from './constants'
-// import RelayLoaderView from './RelayLoaderView'
-// import { EnvironmentContext } from './RelayEnvironment'
-// import rpc from './rpc'
+import { useSubscription } from './RelayEnvironment'
 
-// import type { SideMenu_contacts as Contacts } from './__generated__/SideMenu_contacts.graphql'
-// import type { SideMenu_apps as Apps } from './__generated__/SideMenu_apps.graphql'
-
-export type ScreenNames =
-  | 'apps'
-  | 'identities'
-  | 'contacts'
-  | 'wallets'
-  | 'settings'
-  | 'notifications'
-
-type Props = {}
-
-const MENU_ITEMS: Array<ScreenNames> = [
-  'apps',
-  // 'identities',
-  'contacts',
-  'wallets',
-  // 'notifications',
-  'settings',
-]
-
-const BUTTONS: Object = {
-  apps: {
-    title: 'Applications',
-    icon: AppsIcon,
-    activeIcon: AppsFilledIcon,
-    path: ROUTES.APPS,
-  },
-  identities: {
-    title: 'Identities',
-    icon: IdentityIcon,
-    activeIcon: IdentityFilledIcon,
-  },
-  contacts: {
-    title: 'Contacts',
-    icon: ContactsIcon,
-    activeIcon: ContactsFilledIcon,
-    path: ROUTES.CONTACTS,
-  },
-  wallets: {
-    title: 'Wallets',
-    icon: WalletsIcon,
-    activeIcon: WalletsFilledIcon,
-    path: ROUTES.WALLETS,
-  },
-  settings: {
-    title: 'More',
-    icon: SettingsIcon,
-    activeIcon: SettingsFilledIcon,
-    path: ROUTES.SETTINGS,
-  },
-  notifications: {
-    title: 'Notifications',
-    icon: NotificationsIcon,
-    activeIcon: NotificationsFilledIcon,
-  },
-}
+const APP_UPDATES_CHANGED_SUBSCRIPTION = graphql`
+  subscription SideMenuAppUpdatesChangedSubscription {
+    appUpdatesChanged {
+      appUpdatesCount
+    }
+  }
+`
 
 const Container = styled.View`
   width: 126px;
@@ -111,7 +47,7 @@ const NotificationDot = styled.View`
   height: 5px;
   border-radius: 100%;
   background-color: ${props =>
-    props.notifications ? props.theme.colors.PRIMARY_RED : 'transparent'};
+    props.active ? props.theme.colors.PRIMARY_RED : 'transparent'};
   margin-top: 7px;
 `
 
@@ -123,56 +59,55 @@ const SelectedPointer = styled.View`
   margin-top: -8px;
 `
 
-// const CONTACTS_CHANGED_SUBSCRIPTION = graphql`
-//   subscription SideMenuContactsChangedSubscription {
-//     contactsChanged {
-//       viewer {
-//         id
-//         # contacts {
-//         #   invitesCount(userID: $userID)
-//         # }
-//       }
-//     }
-//   }
-// `
+type ItemKey = 'apps' | 'contacts' | 'wallets' | 'settings'
+type State = { [key: ItemKey]: boolean }
 
-export default class SideMenu extends Component<Props> {
-  // _contactsChangedSub: Disposable
+const ITEMS = [
+  {
+    key: 'apps',
+    title: 'Applications',
+    icon: AppsIcon,
+    activeIcon: AppsFilledIcon,
+    path: ROUTES.APPS,
+  },
+  {
+    key: 'contacts',
+    title: 'Contacts',
+    icon: ContactsIcon,
+    activeIcon: ContactsFilledIcon,
+    path: ROUTES.CONTACTS,
+  },
+  {
+    key: 'wallets',
+    title: 'Wallets',
+    icon: WalletsIcon,
+    activeIcon: WalletsFilledIcon,
+    path: ROUTES.WALLETS,
+  },
+  {
+    key: 'settings',
+    title: 'More',
+    icon: SettingsIcon,
+    activeIcon: SettingsFilledIcon,
+    path: ROUTES.SETTINGS,
+  },
+]
 
-  static defaultProps = {
-    notifications: [],
-  }
+export default function SideMenu() {
+  const [state, setState] = useState<State>({
+    apps: false,
+    contacts: false,
+    wallets: false,
+    settings: false,
+  })
 
-  componentDidMount() {
-    // TODO: create hook to handle subscription lifecycle
-    // this._contactsChangedSub = requestSubscription(
-    //   this.props.relay.environment,
-    //   { subscription: CONTACTS_CHANGED_SUBSCRIPTION },
-    // )
-  }
+  useSubscription(APP_UPDATES_CHANGED_SUBSCRIPTION, data => {
+    setState({ ...state, apps: data.appUpdatesChanged.appUpdatesCount > 0 })
+  })
 
-  componentWillUnmount() {
-    // this._contactsChangedSub.dispose()
-  }
-
-  // hasNotifications(type: ScreenNames) {
-  //   const { apps, contacts } = this.props
-  //   switch (type) {
-  //     case 'contacts':
-  //       return contacts.invitesCount > 0
-  //     case 'apps':
-  //       return apps.updatesCount > 0
-  //     default:
-  //       return false
-  //   }
-  // }
-
-  renderMenuItem(item: ScreenNames) {
-    const data = BUTTONS[item]
-    const notifications = false // this.hasNotifications(item)
-
+  const items = ITEMS.map(data => {
     return (
-      <Route key={item} path={data.path}>
+      <Route key={data.key} path={data.path}>
         {({ history, match }) => (
           <MenuItem>
             <Button
@@ -188,18 +123,16 @@ export default class SideMenu extends Component<Props> {
                 <SvgSelectedPointer />
               </SelectedPointer>
             ) : null}
-            {<NotificationDot notifications={notifications} />}
+            <NotificationDot active={state[data.key] === true} />
           </MenuItem>
         )}
       </Route>
     )
-  }
+  })
 
-  render() {
-    return (
-      <Container>
-        <ScrollView>{MENU_ITEMS.map(i => this.renderMenuItem(i))}</ScrollView>
-      </Container>
-    )
-  }
+  return (
+    <Container>
+      <ScrollView>{items}</ScrollView>
+    </Container>
+  )
 }

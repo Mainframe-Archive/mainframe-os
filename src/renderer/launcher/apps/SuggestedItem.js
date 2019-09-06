@@ -73,7 +73,7 @@ export default class SuggestedItem extends Component<Props, State> {
     this.props.onPressInstall(this.props.appData.publicID)
   }
   render() {
-    const { publicID, name, description, icon } = this.props.appData
+    const { publicID, name, description } = this.props.appData
     return (
       <AppButtonContainer
         className="transition"
@@ -83,7 +83,7 @@ export default class SuggestedItem extends Component<Props, State> {
         onPress={this.onOpen}
         key={publicID}>
         <IconContainer className="transition" hover={this.state.hover}>
-          <AppIcon url={icon} id={publicID} />
+          <AppIcon id={publicID} size="medium" />
           <AppShadow
             className={
               this.state.hover ? 'app-shadow app-shadow-hover' : 'app-shadow'

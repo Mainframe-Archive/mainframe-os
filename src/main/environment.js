@@ -59,6 +59,10 @@ export class Environment {
     return this.type === 'testing'
   }
 
+  getAppVersionsContentsPath(appID: string): string {
+    return join(this.paths.data, 'apps', appID)
+  }
+
   getAppContentsPath(appID: string, version: string): string {
     return join(this.paths.data, 'apps', appID, version)
   }

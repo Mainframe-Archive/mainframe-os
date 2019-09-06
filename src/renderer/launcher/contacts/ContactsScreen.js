@@ -599,22 +599,20 @@ class ContactsView extends Component<Props, State> {
     }
   }
 
-  getWalletAccounts = memoize(
-    (ethWallets: EthWallets): WalletAccounts => {
-      const wallets = {}
-      ethWallets.hd.forEach(w => {
-        w.accounts.forEach(a => {
-          wallets[a.address] = toWalletAccount(a)
-        })
+  getWalletAccounts = memoize((ethWallets: EthWallets): WalletAccounts => {
+    const wallets = {}
+    ethWallets.hd.forEach(w => {
+      w.accounts.forEach(a => {
+        wallets[a.address] = toWalletAccount(a)
       })
-      ethWallets.ledger.forEach(w => {
-        w.accounts.forEach(a => {
-          wallets[a.address] = toWalletAccount(a)
-        })
+    })
+    ethWallets.ledger.forEach(w => {
+      w.accounts.forEach(a => {
+        wallets[a.address] = toWalletAccount(a)
       })
-      return wallets
-    },
-  )
+    })
+    return wallets
+  })
 
   isIdentitySelected = () => {
     return this.state.selectedContact === this.props.user.localID
@@ -1216,9 +1214,7 @@ class ContactsView extends Component<Props, State> {
 
       return (
         <Notification
-          message={`${
-            user.contactInviteStake
-          } MFT have been added to your wallet.`}
+          message={`${user.contactInviteStake} MFT have been added to your wallet.`}
           address={selectedAddress}
           firstLine={selectedAddress}
           secondLine={balances}

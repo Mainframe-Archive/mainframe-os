@@ -505,9 +505,11 @@ class InviteContactModal extends Component<Props, State> {
                   <Text variant={['greyDark23', 'ellipsis', 'mono']} size={12}>
                     {wallet.address}
                   </Text>
-                  <Text variant="greyDark23" size={11}>{`MFT: ${
-                    wallet.balances.mft
-                  }, ETH: ${wallet.balances.eth}`}</Text>
+                  <Text
+                    variant="greyDark23"
+                    size={
+                      11
+                    }>{`MFT: ${wallet.balances.mft}, ETH: ${wallet.balances.eth}`}</Text>
                 </AddContactDetailText>
               </AddContactDetail>
             ),

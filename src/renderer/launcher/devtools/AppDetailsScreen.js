@@ -387,7 +387,11 @@ class AppDetails extends Component<Props, State> {
       case 'new_version':
         return (
           <NewAppVersionModal
-            currentVersion={appData.version || '1.0.0'}
+            currentVersion={
+              app.latestPublishedVersion == null
+                ? '1.0.0'
+                : app.latestPublishedVersion.version
+            }
             onRequestClose={this.onCloseModal}
             onSetVersion={this.onSetNewVersion}
           />

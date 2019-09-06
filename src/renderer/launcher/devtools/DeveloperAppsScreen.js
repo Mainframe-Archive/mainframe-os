@@ -43,6 +43,7 @@ function Apps(props: Props) {
 
   if (showModal) {
     return (
+      // eslint-disable-next-line react/prop-types
       <CreateAppModal
         developer={props.developer}
         onAppCreated={closeModal}
@@ -98,6 +99,7 @@ export default function DevelopersAppsScreen(screenProps: ScreenProps) {
         if (props == null) {
           return null
         }
+        // eslint-disable-next-line react/prop-types
         return props.developer == null ? (
           <Redirect to={ROUTES.DEVTOOLS_DEVELOPER_CREATE} />
         ) : (

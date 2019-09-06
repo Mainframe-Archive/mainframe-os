@@ -1,7 +1,7 @@
 // @flow
 
 import React, { Component } from 'react'
-import { createFragmentContainer, graphql } from 'react-relay'
+import { createFragmentContainer } from 'react-relay'
 import styled from 'styled-components/native'
 
 import { Text, Button } from '@morpheus-ui/core'
@@ -25,11 +25,7 @@ export type Identities = {
   ownDevelopers: Array<User>,
 }
 
-type RendererProps = {
-  user: CurrentUser,
-}
-
-type Props = RendererProps & {
+type Props = {
   identities: Identities,
 }
 
@@ -143,6 +139,7 @@ class IdentitiesView extends Component<Props, State> {
 
   render() {
     const userData = this.props.identities.ownUsers.find(
+      // eslint-disable-next-line
       u => u.localID === this.props.user.localID,
     )
     return (

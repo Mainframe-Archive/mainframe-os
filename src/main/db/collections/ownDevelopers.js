@@ -158,7 +158,7 @@ export default async (
         const publish = createPublisher<DeveloperPayload>({
           bzz,
           feed: this.getPublicFeed(),
-          transform: writeDeveloper, // TODO: new transform for developer
+          transform: writeDeveloper,
         })
 
         // TODO: also add subscriptions to own apps and filter if developer is self
