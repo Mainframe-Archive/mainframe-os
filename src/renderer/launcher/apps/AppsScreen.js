@@ -27,14 +27,18 @@ type UserAppData = $Call<<T>($ReadOnlyArray<T>) => T, UserApps>
 
 // const SUGGESTED_APPS_URL = `https://mainframehq.github.io/suggested-apps/apps.json?timestamp=${new Date().toString()}`
 
-// const SUGGESTED_APPS = [
-//   {
-//     publicID: string,
-//     name: string,
-//     description?: ?string,
-//     longDescription?: ?string,
-//   }
-// ]
+const SUGGESTED_APPS = [
+  {
+    publicID: 'mafde4d014eb07e8164bbbc32f32930dc6c5eaceac',
+    name: 'Noted',
+    description: 'Create fast and secured notes',
+  },
+  {
+    publicID: 'mad5412f300c0ffd168e8cb9a5cd9b3f1bcbd1979e',
+    name: 'Payments',
+    description: 'Transfer crypto money in no time',
+  },
+]
 
 const Container = styled.View`
   padding: 0 0 20px 50px;
@@ -128,18 +132,13 @@ class AppsView extends Component<Props, State> {
 
   onPressInstall = () => {
     this.setState({
-      showModal: {
-        type: 'app_install',
-      },
+      showModal: { type: 'app_install' },
     })
   }
 
-  installSuggested = (userAppVersionID: string) => {
+  installSuggested = (publicID: string) => {
     this.setState({
-      showModal: {
-        type: 'app_install',
-        userAppVersionID,
-      },
+      showModal: { type: 'app_install', publicID },
     })
   }
 
@@ -197,30 +196,13 @@ class AppsView extends Component<Props, State> {
     })
   }
 
-  getSuggestedList = memoize(
-    (
-      apps: UserApps,
-      suggestedApps: Array<SuggestedAppData>,
-    ): Array<SuggestedAppData> => {
-      return suggestedApps.filter((item: SuggestedAppData) => {
-        return (
-          apps.find(app => app.appVersion.app.publicID === item.publicID) ==
-          null
-        )
-      })
-    },
-  )
-
-  getIcon = memoize(
-    (
-      publicID?: ?string,
-      suggestedApps: Array<SuggestedAppData> = this.state.suggestedApps,
-    ) => {
-      if (!publicID) return null
-      const icon = suggestedApps.filter(app => app.publicID === publicID)
-      return icon.length ? icon[0].icon : null
-    },
-  )
+  getSuggestedList = memoize((apps: UserApps): Array<SuggestedAppData> => {
+    return SUGGESTED_APPS.filter((item: SuggestedAppData) => {
+      return (
+        apps.find(app => app.appVersion.app.publicID === item.publicID) == null
+      )
+    })
+  })
 
   // RENDER
 
@@ -232,7 +214,6 @@ class AppsView extends Component<Props, State> {
         // $FlowFixMe: injected fragment type
         <InstalledAppItem
           appVersion={appVersion}
-          icon={this.getIcon(appVersion.app.publicID, this.state.suggestedApps)}
           editing={this.state.editing}
           deleting={this.state.deleting === appVersion.app.publicID}
           key={localID}
@@ -247,7 +228,7 @@ class AppsView extends Component<Props, State> {
         />
       )
     })
-    const suggested = this.getSuggestedList(apps, this.state.suggestedApps)
+    const suggested = this.getSuggestedList(apps)
 
     return (
       <ScrollView>
@@ -291,7 +272,6 @@ class AppsView extends Component<Props, State> {
               publicID={this.state.showModal.publicID}
               onRequestClose={this.onCloseModal}
               onInstallComplete={this.onInstallComplete}
-              getIcon={this.getIcon}
             />
           )
           break

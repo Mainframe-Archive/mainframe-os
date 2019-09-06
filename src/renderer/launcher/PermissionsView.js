@@ -73,7 +73,6 @@ const IconContainer = styled.View`
 
 type Props = {
   publicID: string,
-  icon?: ?string,
   name: string,
   webDomainsGrants?: WebDomainsDefinitions | ReadOnlyWebDomainsDefinitions,
   webDomainsRequirements: WebDomainsDefinitions | ReadOnlyWebDomainsDefinitions,
@@ -222,11 +221,7 @@ export default class PermissionsView extends Component<Props, State> {
       content = (
         <ScrollView>
           <IconContainer>
-            <AppIcon
-              id={this.props.publicID}
-              url={this.props.icon}
-              size="small"
-            />
+            <AppIcon id={this.props.publicID} size="small" />
             <AppShadow className="app-shadow" small />
           </IconContainer>
           <PermissionRow first>

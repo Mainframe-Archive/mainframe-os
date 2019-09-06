@@ -84,7 +84,6 @@ type Props = {
   publicID?: ?string,
   onRequestClose: () => void,
   onInstallComplete: () => void,
-  getIcon?: (id?: ?string) => ?string,
 }
 
 type State = {
@@ -216,13 +215,9 @@ export default class AppInstallModal extends Component<Props, State> {
     const { appVersion } = this.state
     if (!appVersion) return null
 
-    const icon = this.props.getIcon
-      ? this.props.getIcon(appVersion.publicID)
-      : null
     return (
       <PermissionsView
         publicID={appVersion.publicID}
-        icon={icon}
         name={appVersion.manifest.profile.name || appVersion.publicID}
         webDomainsRequirements={appVersion.manifest.webDomains}
         onSubmit={this.onSubmitWebDomains}
