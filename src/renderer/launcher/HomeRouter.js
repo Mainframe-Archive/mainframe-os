@@ -104,7 +104,6 @@ export default function HomeRouter() {
         status === 'UPDATE_AVAILABLE' ||
         status === 'UPDATE_DOWNLOADING' ||
         status === 'UPDATE_DOWNLOADED'
-      console.log('system update subscription status', status, hasUpdate)
       setBadges(b => ({ ...b, settings: hasUpdate }))
     },
   )

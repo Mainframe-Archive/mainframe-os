@@ -86,8 +86,6 @@ export type MenuBadges = { [key: BadgeKey]: boolean }
 type Props = { badges: MenuBadges }
 
 export default function SideMenu({ badges }: Props) {
-  console.log('render SideMenu badges', badges)
-
   const items = ITEMS.map(data => {
     return (
       <Route key={data.key} path={data.path}>

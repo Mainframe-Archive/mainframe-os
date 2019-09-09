@@ -1,7 +1,7 @@
 // @flow
 
 import { shell } from 'electron'
-import { Text, Button } from '@morpheus-ui/core'
+import { Text } from '@morpheus-ui/core'
 import SettingsToolIcon from '@morpheus-ui/icons/SettingsToolSm'
 import DocumentIcon from '@morpheus-ui/icons/DocumentSm'
 import CommunityIcon from '@morpheus-ui/icons/CommunitySm'
