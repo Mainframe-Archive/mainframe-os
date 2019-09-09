@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 29bc5d04900a6a5d5c24369c5f63d41b
+ * @relayHash b8ce137bc51be5d4be5cf2aac6c86fa9
  */
 
 /* eslint-disable */
@@ -40,11 +40,6 @@ fragment SystemUpdateItem_systemUpdate on SystemUpdate {
 
 const node/*: ConcreteRequest*/ = {
   "kind": "Request",
-  "operationKind": "query",
-  "name": "SystemUpdateItemQuery",
-  "id": null,
-  "text": "query SystemUpdateItemQuery {\n  systemUpdate {\n    ...SystemUpdateItem_systemUpdate\n    id\n  }\n}\n\nfragment SystemUpdateItem_systemUpdate on SystemUpdate {\n  status\n  currentVersion\n  newVersion\n}\n",
-  "metadata": {},
   "fragment": {
     "kind": "Fragment",
     "name": "SystemUpdateItemQuery",
@@ -115,6 +110,13 @@ const node/*: ConcreteRequest*/ = {
         ]
       }
     ]
+  },
+  "params": {
+    "operationKind": "query",
+    "name": "SystemUpdateItemQuery",
+    "id": null,
+    "text": "query SystemUpdateItemQuery {\n  systemUpdate {\n    ...SystemUpdateItem_systemUpdate\n    id\n  }\n}\n\nfragment SystemUpdateItem_systemUpdate on SystemUpdate {\n  status\n  currentVersion\n  newVersion\n}\n",
+    "metadata": {}
   }
 };
 // prettier-ignore

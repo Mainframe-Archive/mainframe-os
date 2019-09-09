@@ -7,20 +7,26 @@
 'use strict';
 
 /*::
-import type { ConcreteFragment } from 'relay-runtime';
+import type { ReaderFragment } from 'relay-runtime';
 export type SystemUpdateStatus = "CHECKING" | "ERROR" | "IDLE" | "NO_UPDATE" | "UPDATE_AVAILABLE" | "UPDATE_DOWNLOADED" | "UPDATE_DOWNLOADING" | "%future added value";
 import type { FragmentReference } from "relay-runtime";
 declare export opaque type SystemUpdateItem_systemUpdate$ref: FragmentReference;
+declare export opaque type SystemUpdateItem_systemUpdate$fragmentType: SystemUpdateItem_systemUpdate$ref;
 export type SystemUpdateItem_systemUpdate = {|
   +status: SystemUpdateStatus,
   +currentVersion: string,
   +newVersion: ?string,
   +$refType: SystemUpdateItem_systemUpdate$ref,
 |};
+export type SystemUpdateItem_systemUpdate$data = SystemUpdateItem_systemUpdate;
+export type SystemUpdateItem_systemUpdate$key = {
+  +$data?: SystemUpdateItem_systemUpdate$data,
+  +$fragmentRefs: SystemUpdateItem_systemUpdate$ref,
+};
 */
 
 
-const node/*: ConcreteFragment*/ = {
+const node/*: ReaderFragment*/ = {
   "kind": "Fragment",
   "name": "SystemUpdateItem_systemUpdate",
   "type": "SystemUpdate",

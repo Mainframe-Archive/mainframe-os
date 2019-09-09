@@ -35,7 +35,7 @@ type Props = {
 export default function NewAppButton(props: Props) {
   const [hover, setHover] = useState(false)
   const toggleHover = useCallback(() => {
-    setHover(!hover)
+    setHover(h => !h)
   }, [])
 
   const color = hover ? '#DA1157' : '#808080'

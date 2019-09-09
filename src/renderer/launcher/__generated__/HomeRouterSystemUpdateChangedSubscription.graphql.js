@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 377156fbea841b447a011808c4502d32
+ * @relayHash f07dcd290664a7bceba70b8f718d471b
  */
 
 /* eslint-disable */
@@ -9,44 +9,46 @@
 
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
-type SystemUpdateItem_systemUpdate$ref = any;
-export type SystemUpdateItemUpdateChangedSubscriptionVariables = {||};
-export type SystemUpdateItemUpdateChangedSubscriptionResponse = {|
+export type SystemUpdateStatus = "CHECKING" | "ERROR" | "IDLE" | "NO_UPDATE" | "UPDATE_AVAILABLE" | "UPDATE_DOWNLOADED" | "UPDATE_DOWNLOADING" | "%future added value";
+export type HomeRouterSystemUpdateChangedSubscriptionVariables = {||};
+export type HomeRouterSystemUpdateChangedSubscriptionResponse = {|
   +systemUpdateChanged: {|
     +systemUpdate: {|
-      +$fragmentRefs: SystemUpdateItem_systemUpdate$ref
+      +status: SystemUpdateStatus
     |}
   |}
 |};
-export type SystemUpdateItemUpdateChangedSubscription = {|
-  variables: SystemUpdateItemUpdateChangedSubscriptionVariables,
-  response: SystemUpdateItemUpdateChangedSubscriptionResponse,
+export type HomeRouterSystemUpdateChangedSubscription = {|
+  variables: HomeRouterSystemUpdateChangedSubscriptionVariables,
+  response: HomeRouterSystemUpdateChangedSubscriptionResponse,
 |};
 */
 
 
 /*
-subscription SystemUpdateItemUpdateChangedSubscription {
+subscription HomeRouterSystemUpdateChangedSubscription {
   systemUpdateChanged {
     systemUpdate {
-      ...SystemUpdateItem_systemUpdate
+      status
       id
     }
   }
 }
-
-fragment SystemUpdateItem_systemUpdate on SystemUpdate {
-  status
-  currentVersion
-  newVersion
-}
 */
 
-const node/*: ConcreteRequest*/ = {
+const node/*: ConcreteRequest*/ = (function(){
+var v0 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "status",
+  "args": null,
+  "storageKey": null
+};
+return {
   "kind": "Request",
   "fragment": {
     "kind": "Fragment",
-    "name": "SystemUpdateItemUpdateChangedSubscription",
+    "name": "HomeRouterSystemUpdateChangedSubscription",
     "type": "Subscription",
     "metadata": null,
     "argumentDefinitions": [],
@@ -69,11 +71,7 @@ const node/*: ConcreteRequest*/ = {
             "concreteType": "SystemUpdate",
             "plural": false,
             "selections": [
-              {
-                "kind": "FragmentSpread",
-                "name": "SystemUpdateItem_systemUpdate",
-                "args": null
-              }
+              (v0/*: any*/)
             ]
           }
         ]
@@ -82,7 +80,7 @@ const node/*: ConcreteRequest*/ = {
   },
   "operation": {
     "kind": "Operation",
-    "name": "SystemUpdateItemUpdateChangedSubscription",
+    "name": "HomeRouterSystemUpdateChangedSubscription",
     "argumentDefinitions": [],
     "selections": [
       {
@@ -103,27 +101,7 @@ const node/*: ConcreteRequest*/ = {
             "concreteType": "SystemUpdate",
             "plural": false,
             "selections": [
-              {
-                "kind": "ScalarField",
-                "alias": null,
-                "name": "status",
-                "args": null,
-                "storageKey": null
-              },
-              {
-                "kind": "ScalarField",
-                "alias": null,
-                "name": "currentVersion",
-                "args": null,
-                "storageKey": null
-              },
-              {
-                "kind": "ScalarField",
-                "alias": null,
-                "name": "newVersion",
-                "args": null,
-                "storageKey": null
-              },
+              (v0/*: any*/),
               {
                 "kind": "ScalarField",
                 "alias": null,
@@ -139,12 +117,13 @@ const node/*: ConcreteRequest*/ = {
   },
   "params": {
     "operationKind": "subscription",
-    "name": "SystemUpdateItemUpdateChangedSubscription",
+    "name": "HomeRouterSystemUpdateChangedSubscription",
     "id": null,
-    "text": "subscription SystemUpdateItemUpdateChangedSubscription {\n  systemUpdateChanged {\n    systemUpdate {\n      ...SystemUpdateItem_systemUpdate\n      id\n    }\n  }\n}\n\nfragment SystemUpdateItem_systemUpdate on SystemUpdate {\n  status\n  currentVersion\n  newVersion\n}\n",
+    "text": "subscription HomeRouterSystemUpdateChangedSubscription {\n  systemUpdateChanged {\n    systemUpdate {\n      status\n      id\n    }\n  }\n}\n",
     "metadata": {}
   }
 };
+})();
 // prettier-ignore
-(node/*: any*/).hash = '8bbd53e2fb8924bd27d93a7fe75b14eb';
+(node/*: any*/).hash = 'ce6a54f0dc8f263e9824730d1f0dbb8e';
 module.exports = node;

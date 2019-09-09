@@ -1,5 +1,6 @@
 // @flow
 
+import { is } from 'electron-util'
 import {
   autoUpdater,
   type ProgressInfo,
@@ -25,6 +26,11 @@ export type UpdaterState =
 export type UpdaterSubject = BehaviorSubject<UpdaterState>
 
 export const checkForUpdates = () => {
+  if (!is.development) {
+    // Updates are disabled in development
+    return
+  }
+
   autoUpdater.checkForUpdates().catch(() => {
     // Silence promise rejection - errors are listened to in setupUpdater()
   })
@@ -34,7 +40,8 @@ export const setupUpdater = (logger: Logger): UpdaterSubject => {
   const subject = new BehaviorSubject<UpdaterState>({ status: 'idle' })
   let updateInfo: UpdateInfo | null = null
 
-  autoUpdater.autoInstallOnAppQuit = false
+  autoUpdater.allowPrerelease = true // No stable version of Mainframe OS yet
+  autoUpdater.autoInstallOnAppQuit = false // Installation must be initiated by the user
   autoUpdater.logger = logger.child({ context: 'system/updater' })
 
   autoUpdater.on('checking-for-update', () => {
@@ -67,7 +74,9 @@ export const setupUpdater = (logger: Logger): UpdaterSubject => {
     })
   })
 
-  autoUpdater.checkForUpdates()
+  if (!is.development) {
+    autoUpdater.checkForUpdates()
+  }
 
   return subject
 }

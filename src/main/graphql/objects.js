@@ -36,6 +36,10 @@ const TYPE_COLLECTION = {
 
 export const { nodeInterface, nodeField } = nodeDefinitions<GraphQLContext>(
   (globalId: string, ctx: GraphQLContext) => {
+    if (globalId.startsWith('@')) {
+      // Use `@` prefix for objects implementing the Node interface without being a DB document
+      return {}
+    }
     const { type, id } = fromGlobalId(globalId)
     const collection = TYPE_COLLECTION[type]
     return collection == null ? null : ctx.getDoc(collection, id)
@@ -967,7 +971,7 @@ export const systemUpdate = new GraphQLObjectType({
   fields: () => ({
     id: {
       type: new GraphQLNonNull(GraphQLID),
-      resolve: () => 'SystemUpdate',
+      resolve: () => '@systemUpdate',
     },
     status: {
       type: new GraphQLNonNull(systemUpdateStatus),

@@ -9,23 +9,13 @@ import WalletsIcon from '@morpheus-ui/icons/WalletsMd'
 import WalletsFilledIcon from '@morpheus-ui/icons/WalletsFilledMd'
 import SettingsIcon from '@morpheus-ui/icons/SettingsMd'
 import SettingsFilledIcon from '@morpheus-ui/icons/SettingsFilledMd'
-import React, { useState } from 'react'
-import { graphql } from 'react-relay'
+import React from 'react'
 import { Route } from 'react-router'
 import styled from 'styled-components/native'
 
 import SvgSelectedPointer from '../UIComponents/SVGSelectedPointer'
 
 import { ROUTES } from './constants'
-import { useSubscription } from './RelayEnvironment'
-
-const APP_UPDATES_CHANGED_SUBSCRIPTION = graphql`
-  subscription SideMenuAppUpdatesChangedSubscription {
-    appUpdatesChanged {
-      appUpdatesCount
-    }
-  }
-`
 
 const Container = styled.View`
   width: 126px;
@@ -59,9 +49,6 @@ const SelectedPointer = styled.View`
   margin-top: -8px;
 `
 
-type ItemKey = 'apps' | 'contacts' | 'wallets' | 'settings'
-type State = { [key: ItemKey]: boolean }
-
 const ITEMS = [
   {
     key: 'apps',
@@ -93,17 +80,13 @@ const ITEMS = [
   },
 ]
 
-export default function SideMenu() {
-  const [state, setState] = useState<State>({
-    apps: false,
-    contacts: false,
-    wallets: false,
-    settings: false,
-  })
+type BadgeKey = 'apps' | 'contacts' | 'wallets' | 'settings'
+export type MenuBadges = { [key: BadgeKey]: boolean }
 
-  useSubscription(APP_UPDATES_CHANGED_SUBSCRIPTION, data => {
-    setState({ ...state, apps: data.appUpdatesChanged.appUpdatesCount > 0 })
-  })
+type Props = { badges: MenuBadges }
+
+export default function SideMenu({ badges }: Props) {
+  console.log('render SideMenu badges', badges)
 
   const items = ITEMS.map(data => {
     return (
@@ -123,7 +106,7 @@ export default function SideMenu() {
                 <SvgSelectedPointer />
               </SelectedPointer>
             ) : null}
-            <NotificationDot active={state[data.key] === true} />
+            <NotificationDot active={badges[data.key] === true} />
           </MenuItem>
         )}
       </Route>
