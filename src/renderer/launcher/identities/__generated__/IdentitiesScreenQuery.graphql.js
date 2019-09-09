@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash c84e118d30a2660a2d1cc967f132e776
+ * @relayHash aeeafff34d2353706d40b198bb11c54a
  */
 
 /* eslint-disable */
@@ -53,24 +53,26 @@ var v0 = [
 ];
 return {
   "kind": "Request",
-  "operationKind": "query",
-  "name": "IdentitiesScreenQuery",
-  "id": null,
-  "text": "query IdentitiesScreenQuery {\n  viewer {\n    id\n  }\n}\n",
-  "metadata": {},
   "fragment": {
     "kind": "Fragment",
     "name": "IdentitiesScreenQuery",
     "type": "Query",
     "metadata": null,
     "argumentDefinitions": [],
-    "selections": v0
+    "selections": (v0/*: any*/)
   },
   "operation": {
     "kind": "Operation",
     "name": "IdentitiesScreenQuery",
     "argumentDefinitions": [],
-    "selections": v0
+    "selections": (v0/*: any*/)
+  },
+  "params": {
+    "operationKind": "query",
+    "name": "IdentitiesScreenQuery",
+    "id": null,
+    "text": "query IdentitiesScreenQuery {\n  viewer {\n    id\n  }\n}\n",
+    "metadata": {}
   }
 };
 })();

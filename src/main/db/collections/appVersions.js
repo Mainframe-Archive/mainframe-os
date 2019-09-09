@@ -82,10 +82,7 @@ export default async (
 
       async getUpdate(): Promise<AppVersionDoc | null> {
         const app = await this.populate('app')
-        return app.latestAvailableVersion == null ||
-          app.latestAvailableVersion === this.manifest.version
-          ? null
-          : app.populate('latestAvailableVersion')
+        return await app.getAppVersionGreaterThan(this.manifest.version)
       },
 
       async downloadContents(ctx: UserContext): Promise<string> {

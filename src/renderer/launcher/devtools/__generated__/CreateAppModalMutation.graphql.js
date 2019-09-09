@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash c81d3550d3188ddd858d576853eaf0bf
+ * @relayHash ec4485d0a8c3cd1366a3a34b742a44d1
  */
 
 /* eslint-disable */
@@ -10,19 +10,19 @@
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
 type DeveloperAppsScreen_developer$ref = any;
-export type CreateAppInput = {
+export type CreateAppInput = {|
   name: string,
   contentsPath: string,
   version: string,
   developerID: string,
   webDomains: $ReadOnlyArray<WebDomainDefinitionInput>,
   clientMutationId?: ?string,
-};
-export type WebDomainDefinitionInput = {
+|};
+export type WebDomainDefinitionInput = {|
   domain: string,
   internal?: ?boolean,
   external?: ?boolean,
-};
+|};
 export type CreateAppModalMutationVariables = {|
   input: CreateAppInput
 |};
@@ -107,8 +107,7 @@ v1 = [
   {
     "kind": "Variable",
     "name": "input",
-    "variableName": "input",
-    "type": "CreateAppInput!"
+    "variableName": "input"
   }
 ],
 v2 = {
@@ -145,24 +144,19 @@ v4 = {
 };
 return {
   "kind": "Request",
-  "operationKind": "mutation",
-  "name": "CreateAppModalMutation",
-  "id": null,
-  "text": "mutation CreateAppModalMutation(\n  $input: CreateAppInput!\n) {\n  createApp(input: $input) {\n    app {\n      id\n      localID\n      developer {\n        ...DeveloperAppsScreen_developer\n        id\n      }\n      profile {\n        name\n      }\n    }\n  }\n}\n\nfragment DeveloperAppsScreen_developer on OwnDeveloper {\n  ...CreateAppModal_developer\n  apps {\n    ...AppItem_ownApp\n    id\n  }\n}\n\nfragment CreateAppModal_developer on OwnDeveloper {\n  localID\n}\n\nfragment AppItem_ownApp on OwnApp {\n  localID\n  publicID\n  developer {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n  profile {\n    name\n  }\n}\n",
-  "metadata": {},
   "fragment": {
     "kind": "Fragment",
     "name": "CreateAppModalMutation",
     "type": "Mutation",
     "metadata": null,
-    "argumentDefinitions": v0,
+    "argumentDefinitions": (v0/*: any*/),
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
         "name": "createApp",
         "storageKey": null,
-        "args": v1,
+        "args": (v1/*: any*/),
         "concreteType": "CreateAppPayload",
         "plural": false,
         "selections": [
@@ -175,8 +169,8 @@ return {
             "concreteType": "OwnApp",
             "plural": false,
             "selections": [
-              v2,
-              v3,
+              (v2/*: any*/),
+              (v3/*: any*/),
               {
                 "kind": "LinkedField",
                 "alias": null,
@@ -193,7 +187,7 @@ return {
                   }
                 ]
               },
-              v4
+              (v4/*: any*/)
             ]
           }
         ]
@@ -203,14 +197,14 @@ return {
   "operation": {
     "kind": "Operation",
     "name": "CreateAppModalMutation",
-    "argumentDefinitions": v0,
+    "argumentDefinitions": (v0/*: any*/),
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
         "name": "createApp",
         "storageKey": null,
-        "args": v1,
+        "args": (v1/*: any*/),
         "concreteType": "CreateAppPayload",
         "plural": false,
         "selections": [
@@ -223,8 +217,8 @@ return {
             "concreteType": "OwnApp",
             "plural": false,
             "selections": [
-              v2,
-              v3,
+              (v2/*: any*/),
+              (v3/*: any*/),
               {
                 "kind": "LinkedField",
                 "alias": null,
@@ -234,7 +228,7 @@ return {
                 "concreteType": "OwnDeveloper",
                 "plural": false,
                 "selections": [
-                  v3,
+                  (v3/*: any*/),
                   {
                     "kind": "LinkedField",
                     "alias": null,
@@ -244,7 +238,7 @@ return {
                     "concreteType": "OwnApp",
                     "plural": true,
                     "selections": [
-                      v3,
+                      (v3/*: any*/),
                       {
                         "kind": "ScalarField",
                         "alias": null,
@@ -261,24 +255,31 @@ return {
                         "concreteType": "OwnDeveloper",
                         "plural": false,
                         "selections": [
-                          v3,
-                          v4,
-                          v2
+                          (v3/*: any*/),
+                          (v4/*: any*/),
+                          (v2/*: any*/)
                         ]
                       },
-                      v4,
-                      v2
+                      (v4/*: any*/),
+                      (v2/*: any*/)
                     ]
                   },
-                  v2
+                  (v2/*: any*/)
                 ]
               },
-              v4
+              (v4/*: any*/)
             ]
           }
         ]
       }
     ]
+  },
+  "params": {
+    "operationKind": "mutation",
+    "name": "CreateAppModalMutation",
+    "id": null,
+    "text": "mutation CreateAppModalMutation(\n  $input: CreateAppInput!\n) {\n  createApp(input: $input) {\n    app {\n      id\n      localID\n      developer {\n        ...DeveloperAppsScreen_developer\n        id\n      }\n      profile {\n        name\n      }\n    }\n  }\n}\n\nfragment DeveloperAppsScreen_developer on OwnDeveloper {\n  ...CreateAppModal_developer\n  apps {\n    ...AppItem_ownApp\n    id\n  }\n}\n\nfragment CreateAppModal_developer on OwnDeveloper {\n  localID\n}\n\nfragment AppItem_ownApp on OwnApp {\n  localID\n  publicID\n  developer {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n  profile {\n    name\n  }\n}\n",
+    "metadata": {}
   }
 };
 })();

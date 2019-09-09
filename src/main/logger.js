@@ -28,11 +28,11 @@ export const createLogger = (env: Environment): Logger => {
     ],
   })
 
-  if (env.isDev) {
+  if (env.isDev || process.env.MAINFRAME_LOG) {
     logger.add(
       new winston.transports.Console({
         format: winston.format.simple(),
-        level: 'debug',
+        level: process.env.MAINFRAME_LOG || 'debug',
       }),
     )
   }

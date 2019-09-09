@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 4c000180328d78dbe08fca2f6f286ef7
+ * @relayHash 0d44a8af6d128d90e177a2100150b55e
  */
 
 /* eslint-disable */
@@ -11,11 +11,11 @@
 import type { ConcreteRequest } from 'relay-runtime';
 type ContactsScreen_user$ref = any;
 type InviteContactModal_contactInvite$ref = any;
-export type AddContactInput = {
+export type AddContactInput = {|
   publicID: string,
   aliasName?: ?string,
   clientMutationId?: ?string,
-};
+|};
 export type ContactsScreenAddContactMutationVariables = {|
   input: AddContactInput
 |};
@@ -170,8 +170,7 @@ v1 = [
   {
     "kind": "Variable",
     "name": "input",
-    "variableName": "input",
-    "type": "AddContactInput!"
+    "variableName": "input"
   }
 ],
 v2 = {
@@ -211,8 +210,8 @@ v6 = {
   "concreteType": "GenericProfile",
   "plural": false,
   "selections": [
-    v4,
-    v5
+    (v4/*: any*/),
+    (v5/*: any*/)
   ]
 },
 v7 = {
@@ -238,7 +237,7 @@ v9 = {
   "concreteType": "ContactInvite",
   "plural": false,
   "selections": [
-    v7,
+    (v7/*: any*/),
     {
       "kind": "ScalarField",
       "alias": null,
@@ -260,7 +259,7 @@ v9 = {
       "args": null,
       "storageKey": null
     },
-    v8,
+    (v8/*: any*/),
     {
       "kind": "ScalarField",
       "alias": null,
@@ -292,8 +291,8 @@ v12 = {
   "storageKey": null
 },
 v13 = [
-  v4,
-  v2,
+  (v4/*: any*/),
+  (v2/*: any*/),
   {
     "kind": "LinkedField",
     "alias": null,
@@ -337,28 +336,23 @@ v13 = [
       }
     ]
   },
-  v10
+  (v10/*: any*/)
 ];
 return {
   "kind": "Request",
-  "operationKind": "mutation",
-  "name": "ContactsScreenAddContactMutation",
-  "id": null,
-  "text": "mutation ContactsScreenAddContactMutation(\n  $input: AddContactInput!\n) {\n  addContact(input: $input) {\n    contact {\n      localID\n      publicID\n      profile {\n        name\n        ethAddress\n      }\n      invite {\n        ...InviteContactModal_contactInvite\n      }\n      id\n    }\n    viewer {\n      ...ContactsScreen_user\n      id\n    }\n  }\n}\n\nfragment InviteContactModal_contactInvite on ContactInvite {\n  ethNetwork\n  fromAddress\n  inviteTX\n  stakeState\n  stakeAmount\n  reclaimedStakeTX\n}\n\nfragment ContactsScreen_user on User {\n  ...InviteContactModal_user\n  localID\n  publicID\n  profile {\n    name\n    ethAddress\n  }\n  contactInviteStake\n  contactRequests {\n    localID\n    publicID\n    peerID\n    profile {\n      name\n      ethAddress\n    }\n    connectionState\n    ethNetwork\n    stakeAmount\n    receivedAddress\n    senderAddress\n    id\n  }\n  contacts {\n    localID\n    peerID\n    publicID\n    connectionState\n    invite {\n      ...InviteContactModal_contactInvite\n      ethNetwork\n      fromAddress\n      inviteTX\n      stakeState\n      stakeAmount\n      reclaimedStakeTX\n    }\n    profile {\n      name\n      ethAddress\n    }\n    id\n  }\n  ethWallets {\n    hd {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n    ledger {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n  }\n}\n\nfragment InviteContactModal_user on User {\n  contactInviteStake\n  profile {\n    ethAddress\n  }\n}\n",
-  "metadata": {},
   "fragment": {
     "kind": "Fragment",
     "name": "ContactsScreenAddContactMutation",
     "type": "Mutation",
     "metadata": null,
-    "argumentDefinitions": v0,
+    "argumentDefinitions": (v0/*: any*/),
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
         "name": "addContact",
         "storageKey": null,
-        "args": v1,
+        "args": (v1/*: any*/),
         "concreteType": "AddContactPayload",
         "plural": false,
         "selections": [
@@ -371,9 +365,9 @@ return {
             "concreteType": "Contact",
             "plural": false,
             "selections": [
-              v2,
-              v3,
-              v6,
+              (v2/*: any*/),
+              (v3/*: any*/),
+              (v6/*: any*/),
               {
                 "kind": "LinkedField",
                 "alias": null,
@@ -415,14 +409,14 @@ return {
   "operation": {
     "kind": "Operation",
     "name": "ContactsScreenAddContactMutation",
-    "argumentDefinitions": v0,
+    "argumentDefinitions": (v0/*: any*/),
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
         "name": "addContact",
         "storageKey": null,
-        "args": v1,
+        "args": (v1/*: any*/),
         "concreteType": "AddContactPayload",
         "plural": false,
         "selections": [
@@ -435,11 +429,11 @@ return {
             "concreteType": "Contact",
             "plural": false,
             "selections": [
-              v2,
-              v3,
-              v6,
-              v9,
-              v10
+              (v2/*: any*/),
+              (v3/*: any*/),
+              (v6/*: any*/),
+              (v9/*: any*/),
+              (v10/*: any*/)
             ]
           },
           {
@@ -467,12 +461,12 @@ return {
                 "concreteType": "NamedProfile",
                 "plural": false,
                 "selections": [
-                  v5,
-                  v4
+                  (v5/*: any*/),
+                  (v4/*: any*/)
                 ]
               },
-              v2,
-              v3,
+              (v2/*: any*/),
+              (v3/*: any*/),
               {
                 "kind": "LinkedField",
                 "alias": null,
@@ -482,13 +476,13 @@ return {
                 "concreteType": "ContactRequest",
                 "plural": true,
                 "selections": [
-                  v2,
-                  v3,
-                  v11,
-                  v6,
-                  v12,
-                  v7,
-                  v8,
+                  (v2/*: any*/),
+                  (v3/*: any*/),
+                  (v11/*: any*/),
+                  (v6/*: any*/),
+                  (v12/*: any*/),
+                  (v7/*: any*/),
+                  (v8/*: any*/),
                   {
                     "kind": "ScalarField",
                     "alias": null,
@@ -503,7 +497,7 @@ return {
                     "args": null,
                     "storageKey": null
                   },
-                  v10
+                  (v10/*: any*/)
                 ]
               },
               {
@@ -515,13 +509,13 @@ return {
                 "concreteType": "Contact",
                 "plural": true,
                 "selections": [
-                  v2,
-                  v11,
-                  v3,
-                  v12,
-                  v9,
-                  v6,
-                  v10
+                  (v2/*: any*/),
+                  (v11/*: any*/),
+                  (v3/*: any*/),
+                  (v12/*: any*/),
+                  (v9/*: any*/),
+                  (v6/*: any*/),
+                  (v10/*: any*/)
                 ]
               },
               {
@@ -541,7 +535,7 @@ return {
                     "args": null,
                     "concreteType": "EthHDWallet",
                     "plural": true,
-                    "selections": v13
+                    "selections": (v13/*: any*/)
                   },
                   {
                     "kind": "LinkedField",
@@ -551,16 +545,23 @@ return {
                     "args": null,
                     "concreteType": "EthLedgerWallet",
                     "plural": true,
-                    "selections": v13
+                    "selections": (v13/*: any*/)
                   }
                 ]
               },
-              v10
+              (v10/*: any*/)
             ]
           }
         ]
       }
     ]
+  },
+  "params": {
+    "operationKind": "mutation",
+    "name": "ContactsScreenAddContactMutation",
+    "id": null,
+    "text": "mutation ContactsScreenAddContactMutation(\n  $input: AddContactInput!\n) {\n  addContact(input: $input) {\n    contact {\n      localID\n      publicID\n      profile {\n        name\n        ethAddress\n      }\n      invite {\n        ...InviteContactModal_contactInvite\n      }\n      id\n    }\n    viewer {\n      ...ContactsScreen_user\n      id\n    }\n  }\n}\n\nfragment InviteContactModal_contactInvite on ContactInvite {\n  ethNetwork\n  fromAddress\n  inviteTX\n  stakeState\n  stakeAmount\n  reclaimedStakeTX\n}\n\nfragment ContactsScreen_user on User {\n  ...InviteContactModal_user\n  localID\n  publicID\n  profile {\n    name\n    ethAddress\n  }\n  contactInviteStake\n  contactRequests {\n    localID\n    publicID\n    peerID\n    profile {\n      name\n      ethAddress\n    }\n    connectionState\n    ethNetwork\n    stakeAmount\n    receivedAddress\n    senderAddress\n    id\n  }\n  contacts {\n    localID\n    peerID\n    publicID\n    connectionState\n    invite {\n      ...InviteContactModal_contactInvite\n      ethNetwork\n      fromAddress\n      inviteTX\n      stakeState\n      stakeAmount\n      reclaimedStakeTX\n    }\n    profile {\n      name\n      ethAddress\n    }\n    id\n  }\n  ethWallets {\n    hd {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n    ledger {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n  }\n}\n\nfragment InviteContactModal_user on User {\n  contactInviteStake\n  profile {\n    ethAddress\n  }\n}\n",
+    "metadata": {}
   }
 };
 })();

@@ -7,10 +7,11 @@
 'use strict';
 
 /*::
-import type { ConcreteFragment } from 'relay-runtime';
+import type { ReaderFragment } from 'relay-runtime';
 export type AppInstallationState = "DONE" | "DOWNLOADING" | "FAILED" | "PENDING" | "%future added value";
 import type { FragmentReference } from "relay-runtime";
 declare export opaque type AppItem_appVersion$ref: FragmentReference;
+declare export opaque type AppItem_appVersion$fragmentType: AppItem_appVersion$ref;
 export type AppItem_appVersion = {|
   +localID: string,
   +installationState: AppInstallationState,
@@ -33,10 +34,15 @@ export type AppItem_appVersion = {|
   |},
   +$refType: AppItem_appVersion$ref,
 |};
+export type AppItem_appVersion$data = AppItem_appVersion;
+export type AppItem_appVersion$key = {
+  +$data?: AppItem_appVersion$data,
+  +$fragmentRefs: AppItem_appVersion$ref,
+};
 */
 
 
-const node/*: ConcreteFragment*/ = (function(){
+const node/*: ReaderFragment*/ = (function(){
 var v0 = {
   "kind": "ScalarField",
   "alias": null,
@@ -69,7 +75,7 @@ return {
   "metadata": null,
   "argumentDefinitions": [],
   "selections": [
-    v0,
+    (v0/*: any*/),
     {
       "kind": "ScalarField",
       "alias": null,
@@ -104,8 +110,8 @@ return {
       "concreteType": "Developer",
       "plural": false,
       "selections": [
-        v0,
-        v1
+        (v0/*: any*/),
+        (v1/*: any*/)
       ]
     },
     {
@@ -117,7 +123,7 @@ return {
       "concreteType": "AppManifest",
       "plural": false,
       "selections": [
-        v1
+        (v1/*: any*/)
       ]
     },
     {

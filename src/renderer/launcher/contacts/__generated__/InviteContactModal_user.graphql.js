@@ -7,9 +7,10 @@
 'use strict';
 
 /*::
-import type { ConcreteFragment } from 'relay-runtime';
+import type { ReaderFragment } from 'relay-runtime';
 import type { FragmentReference } from "relay-runtime";
 declare export opaque type InviteContactModal_user$ref: FragmentReference;
+declare export opaque type InviteContactModal_user$fragmentType: InviteContactModal_user$ref;
 export type InviteContactModal_user = {|
   +contactInviteStake: string,
   +profile: {|
@@ -17,10 +18,15 @@ export type InviteContactModal_user = {|
   |},
   +$refType: InviteContactModal_user$ref,
 |};
+export type InviteContactModal_user$data = InviteContactModal_user;
+export type InviteContactModal_user$key = {
+  +$data?: InviteContactModal_user$data,
+  +$fragmentRefs: InviteContactModal_user$ref,
+};
 */
 
 
-const node/*: ConcreteFragment*/ = {
+const node/*: ReaderFragment*/ = {
   "kind": "Fragment",
   "name": "InviteContactModal_user",
   "type": "User",

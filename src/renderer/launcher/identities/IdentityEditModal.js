@@ -1,18 +1,16 @@
 // @flow
 
 import React, { Component } from 'react'
-import { Text, TextField, Switch } from '@morpheus-ui/core'
-import styled from 'styled-components/native'
+// import { Text, TextField, Switch } from '@morpheus-ui/core'
+// import styled from 'styled-components/native'
 import { type FormSubmitPayload } from '@morpheus-ui/forms'
 import { createFragmentContainer, graphql, commitMutation } from 'react-relay'
 
-import CopyableBlock from '../CopyableBlock'
+// import CopyableBlock from '../CopyableBlock'
 import { EnvironmentContext } from '../RelayEnvironment'
 import FormModalView from '../../UIComponents/FormModalView'
-import { type OwnUserIdentity } from './__generated__/IdentityEditModal_ownUserIdentity.graphql.js'
 
 type Props = {
-  ownUserIdentity: OwnUserIdentity,
   onClose: () => void,
 }
 
@@ -22,20 +20,20 @@ type State = {
   discoverable?: ?boolean,
 }
 
-const Container = styled.View`
-  width: 100%;
-  max-width: 450px;
-  min-width: 300px;
-  flex: 1;
-  justify-content: center;
-`
-
-const FormContainer = styled.View`
-  padding: 20px;
-  justify-content: center;
-  width: 100%;
-  min-width: 300px;
-`
+// const Container = styled.View`
+//   width: 100%;
+//   max-width: 450px;
+//   min-width: 300px;
+//   flex: 1;
+//   justify-content: center;
+// `
+//
+// const FormContainer = styled.View`
+//   padding: 20px;
+//   justify-content: center;
+//   width: 100%;
+//   min-width: 300px;
+// `
 
 const updateProfileMutation = graphql`
   mutation IdentityEditModalUpdateProfileMutation($input: UpdateProfileInput!) {
@@ -59,7 +57,6 @@ class IdentityEditModal extends Component<Props, State> {
   onSubmit = (payload: FormSubmitPayload) => {
     if (payload.valid) {
       const input = {
-        userID: this.props.user.localID,
         profile: {
           name: payload.fields.name,
         },
@@ -98,9 +95,9 @@ class IdentityEditModal extends Component<Props, State> {
   }
 
   render() {
-    const updateError = this.state.errorMsg ? (
-      <Text variant="error">{this.state.errorMsg}</Text>
-    ) : null
+    // const updateError = this.state.errorMsg ? (
+    //   <Text variant="error">{this.state.errorMsg}</Text>
+    // ) : null
     return (
       <FormModalView
         onRequestClose={this.props.onClose}
@@ -110,27 +107,27 @@ class IdentityEditModal extends Component<Props, State> {
         confirmButton="SAVE"
         confirmButtonDisabled={!!this.state.updating}
         onSubmitForm={this.onSubmit}>
-        <Container>
+        {/* <Container>
           <FormContainer>
             <TextField
-              autoFocus
-              name="name"
-              required
-              defaultValue={this.props.user.profile.name}
+          autoFocus
+          name="name"
+          required
+          defaultValue={this.props.user.profile.name}
             />
             <Switch
-              name="discoverable"
-              defaultValue={!this.props.user.privateProfile}
-              label="Make my name and ETH address discoverable to other users"
-              onChange={this.onToggleDiscoverable}
+          name="discoverable"
+          defaultValue={!this.props.user.privateProfile}
+          label="Make my name and ETH address discoverable to other users"
+          onChange={this.onToggleDiscoverable}
             />
             {updateError}
             <Text variant="smallTitle" theme={{ padding: '20px 0 10px 0' }}>
-              Mainframe ID
+          Mainframe ID
             </Text>
             <CopyableBlock value={this.props.user.publicID} />
           </FormContainer>
-        </Container>
+        </Container> */}
       </FormModalView>
     )
   }

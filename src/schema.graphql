@@ -90,6 +90,11 @@ type AppUpdate {
   permissionsChanged: Boolean!
 }
 
+type AppUpdatesPayload {
+  appUpdatesCount: Int!
+  viewer: User!
+}
+
 type AppVersion implements Node {
   """The ID of an object"""
   id: ID!
@@ -316,10 +321,11 @@ type Mutation {
   createApp(input: CreateAppInput!): CreateAppPayload
   createAppVersion(input: CreateAppVersionInput!): CreateAppVersionPayload
   installUserAppVersion(input: InstallUserAppVersionMutationInput!): InstallUserAppVersionMutationPayload
-  updateUserAppVersion(input: UpdateUserAppVersionMutationInput!): UpdateUserAppVersionMutationPayload
-  setAppWebDomainsDefinitions(input: SetAppWebDomainsDefinitionsInput!): SetAppWebDomainsDefinitionsPayload
   publishAppVersion(input: PublishAppVersionInput!): PublishAppVersionPayload
+  removeUserAppVersion(input: RemoveUserAppVersionMutationInput!): RemoveUserAppVersionMutationPayload
+  setAppWebDomainsDefinitions(input: SetAppWebDomainsDefinitionsInput!): SetAppWebDomainsDefinitionsPayload
   updateAppDetails(input: UpdateAppDetailsInput!): UpdateAppDetailsPayload
+  updateUserAppVersion(input: UpdateUserAppVersionMutationInput!): UpdateUserAppVersionMutationPayload
   acceptContactRequest(input: AcceptContactRequestInput!): AcceptContactRequestPayload
   addContact(input: AddContactInput!): AddContactPayload
   createDeveloper(input: CreateDeveloperInput!): CreateDeveloperPayload
@@ -417,6 +423,16 @@ type Query {
   viewer: User!
 }
 
+input RemoveUserAppVersionMutationInput {
+  userAppVersionID: String!
+  clientMutationId: String
+}
+
+type RemoveUserAppVersionMutationPayload {
+  viewer: User!
+  clientMutationId: String
+}
+
 input SetAppWebDomainsDefinitionsInput {
   appID: String!
   webDomains: [WebDomainDefinitionInput!]!
@@ -450,6 +466,7 @@ type SetProfileWalletPayload {
 }
 
 type Subscription {
+  appUpdatesChanged: AppUpdatesPayload!
   appVersionChanged: AppVersionPayload!
   contactChanged: ContactChangedPayload!
   contactsChanged: ContactChangedPayload!
@@ -533,6 +550,7 @@ type User implements Node {
   privateProfile: Boolean!
   publicID: ID!
   apps: [UserAppVersion!]!
+  appUpdatesCount: Int!
   contacts: [Contact!]!
   contactInviteStake: String!
   contactRequests: [ContactRequest!]!

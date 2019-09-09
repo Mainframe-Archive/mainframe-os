@@ -34,9 +34,7 @@ export default function NewAppVersionModal(props: Props) {
           return 'Please provide a valid version number, e.g. 1.0.0'
         }
         if (semver.lte(params.value, props.currentVersion)) {
-          return `Please provide a new version higher than the current one (${
-            props.currentVersion
-          })`
+          return `Please provide a new version higher than the current one (${props.currentVersion})`
         }
       }
     },

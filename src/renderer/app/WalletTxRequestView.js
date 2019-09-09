@@ -7,7 +7,7 @@ import { decodeTransactionData, type DecodedTxResult } from '@mainframe/eth'
 import styled from 'styled-components/native'
 import { Text } from '@morpheus-ui/core'
 
-import rpc, { getEthClient } from './rpc'
+import { getEthClient } from './rpc'
 
 type Props = {
   transaction: {

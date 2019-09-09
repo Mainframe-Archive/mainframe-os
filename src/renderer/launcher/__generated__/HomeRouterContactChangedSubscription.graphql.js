@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 9a4f9136bc10a709f4e050723206e41a
+ * @relayHash eda63eab3fe576d135932840f0b9c653
  */
 
 /* eslint-disable */
@@ -167,11 +167,6 @@ v5 = {
 };
 return {
   "kind": "Request",
-  "operationKind": "subscription",
-  "name": "HomeRouterContactChangedSubscription",
-  "id": null,
-  "text": "subscription HomeRouterContactChangedSubscription {\n  contactChanged {\n    contact {\n      localID\n      peerID\n      publicID\n      connectionState\n      invite {\n        ethNetwork\n        inviteTX\n        stakeAmount\n        stakeState\n        reclaimedStakeTX\n      }\n      profile {\n        name\n        ethAddress\n      }\n      id\n    }\n  }\n}\n",
-  "metadata": {},
   "fragment": {
     "kind": "Fragment",
     "name": "HomeRouterContactChangedSubscription",
@@ -197,12 +192,12 @@ return {
             "concreteType": "Contact",
             "plural": false,
             "selections": [
-              v0,
-              v1,
-              v2,
-              v3,
-              v4,
-              v5
+              (v0/*: any*/),
+              (v1/*: any*/),
+              (v2/*: any*/),
+              (v3/*: any*/),
+              (v4/*: any*/),
+              (v5/*: any*/)
             ]
           }
         ]
@@ -232,12 +227,12 @@ return {
             "concreteType": "Contact",
             "plural": false,
             "selections": [
-              v0,
-              v1,
-              v2,
-              v3,
-              v4,
-              v5,
+              (v0/*: any*/),
+              (v1/*: any*/),
+              (v2/*: any*/),
+              (v3/*: any*/),
+              (v4/*: any*/),
+              (v5/*: any*/),
               {
                 "kind": "ScalarField",
                 "alias": null,
@@ -250,6 +245,13 @@ return {
         ]
       }
     ]
+  },
+  "params": {
+    "operationKind": "subscription",
+    "name": "HomeRouterContactChangedSubscription",
+    "id": null,
+    "text": "subscription HomeRouterContactChangedSubscription {\n  contactChanged {\n    contact {\n      localID\n      peerID\n      publicID\n      connectionState\n      invite {\n        ethNetwork\n        inviteTX\n        stakeAmount\n        stakeState\n        reclaimedStakeTX\n      }\n      profile {\n        name\n        ethAddress\n      }\n      id\n    }\n  }\n}\n",
+    "metadata": {}
   }
 };
 })();

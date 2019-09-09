@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash f119a11d58c49a388c65edabc7d526d9
+ * @relayHash a83838a7850741836e467bc90566bc96
  */
 
 /* eslint-disable */
@@ -10,10 +10,10 @@
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
 type WalletsScreen_user$ref = any;
-export type SetProfileWalletInput = {
+export type SetProfileWalletInput = {|
   address: string,
   clientMutationId?: ?string,
-};
+|};
 export type WalletsScreenSetProfileWalletMutationVariables = {|
   input: SetProfileWalletInput
 |};
@@ -53,10 +53,6 @@ fragment WalletsScreen_user on User {
       localID
       accounts {
         address
-        balances {
-          eth
-          mft
-        }
       }
       id
     }
@@ -65,10 +61,6 @@ fragment WalletsScreen_user on User {
       localID
       accounts {
         address
-        balances {
-          eth
-          mft
-        }
       }
       id
     }
@@ -89,8 +81,7 @@ v1 = [
   {
     "kind": "Variable",
     "name": "input",
-    "variableName": "input",
-    "type": "SetProfileWalletInput!"
+    "variableName": "input"
   }
 ],
 v2 = {
@@ -130,56 +121,26 @@ v3 = [
         "name": "address",
         "args": null,
         "storageKey": null
-      },
-      {
-        "kind": "LinkedField",
-        "alias": null,
-        "name": "balances",
-        "storageKey": null,
-        "args": null,
-        "concreteType": "WalletBalances",
-        "plural": false,
-        "selections": [
-          {
-            "kind": "ScalarField",
-            "alias": null,
-            "name": "eth",
-            "args": null,
-            "storageKey": null
-          },
-          {
-            "kind": "ScalarField",
-            "alias": null,
-            "name": "mft",
-            "args": null,
-            "storageKey": null
-          }
-        ]
       }
     ]
   },
-  v2
+  (v2/*: any*/)
 ];
 return {
   "kind": "Request",
-  "operationKind": "mutation",
-  "name": "WalletsScreenSetProfileWalletMutation",
-  "id": null,
-  "text": "mutation WalletsScreenSetProfileWalletMutation(\n  $input: SetProfileWalletInput!\n) {\n  setProfileWallet(input: $input) {\n    viewer {\n      ...WalletsScreen_user\n      id\n    }\n  }\n}\n\nfragment WalletsScreen_user on User {\n  profile {\n    ethAddress\n  }\n  ethWallets {\n    hd {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n    ledger {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n  }\n}\n",
-  "metadata": {},
   "fragment": {
     "kind": "Fragment",
     "name": "WalletsScreenSetProfileWalletMutation",
     "type": "Mutation",
     "metadata": null,
-    "argumentDefinitions": v0,
+    "argumentDefinitions": (v0/*: any*/),
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
         "name": "setProfileWallet",
         "storageKey": null,
-        "args": v1,
+        "args": (v1/*: any*/),
         "concreteType": "SetProfileWalletPayload",
         "plural": false,
         "selections": [
@@ -206,14 +167,14 @@ return {
   "operation": {
     "kind": "Operation",
     "name": "WalletsScreenSetProfileWalletMutation",
-    "argumentDefinitions": v0,
+    "argumentDefinitions": (v0/*: any*/),
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
         "name": "setProfileWallet",
         "storageKey": null,
-        "args": v1,
+        "args": (v1/*: any*/),
         "concreteType": "SetProfileWalletPayload",
         "plural": false,
         "selections": [
@@ -261,7 +222,7 @@ return {
                     "args": null,
                     "concreteType": "EthHDWallet",
                     "plural": true,
-                    "selections": v3
+                    "selections": (v3/*: any*/)
                   },
                   {
                     "kind": "LinkedField",
@@ -271,16 +232,23 @@ return {
                     "args": null,
                     "concreteType": "EthLedgerWallet",
                     "plural": true,
-                    "selections": v3
+                    "selections": (v3/*: any*/)
                   }
                 ]
               },
-              v2
+              (v2/*: any*/)
             ]
           }
         ]
       }
     ]
+  },
+  "params": {
+    "operationKind": "mutation",
+    "name": "WalletsScreenSetProfileWalletMutation",
+    "id": null,
+    "text": "mutation WalletsScreenSetProfileWalletMutation(\n  $input: SetProfileWalletInput!\n) {\n  setProfileWallet(input: $input) {\n    viewer {\n      ...WalletsScreen_user\n      id\n    }\n  }\n}\n\nfragment WalletsScreen_user on User {\n  profile {\n    ethAddress\n  }\n  ethWallets {\n    hd {\n      name\n      localID\n      accounts {\n        address\n      }\n      id\n    }\n    ledger {\n      name\n      localID\n      accounts {\n        address\n      }\n      id\n    }\n  }\n}\n",
+    "metadata": {}
   }
 };
 })();

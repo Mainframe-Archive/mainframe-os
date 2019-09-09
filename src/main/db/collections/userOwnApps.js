@@ -5,6 +5,7 @@ import type { AppData } from '../../../types'
 import { COLLECTION_NAMES } from '../constants'
 import type { Collection, CollectionParams, Doc } from '../types'
 
+import type { WebDomainsDefinitions } from '../schemas/appManifest'
 import schema, { type UserOwnAppData } from '../schemas/userOwnApp'
 import { generateLocalID } from '../utils'
 
@@ -14,6 +15,7 @@ import type { UserDoc } from './users'
 
 type UserOwnAppMethods = {|
   getAppData(): Promise<AppData>,
+  setWebDomains(webDomains: WebDomainsDefinitions): Promise<void>,
 |}
 
 export type UserOwnAppDoc = Doc<
@@ -83,6 +85,11 @@ export default async (
           profile: app.profile,
           publicID: app.getPublicID(),
         }
+      },
+
+      async setWebDomains(webDomains: WebDomainsDefinitions): Promise<void> {
+        const settings = await this.populate('settings')
+        await settings.atomicSet('webDomains', webDomains)
       },
     },
   })

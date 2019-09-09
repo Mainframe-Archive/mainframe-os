@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash cc0e2c41ce91462fd3a25ed3b79530c1
+ * @relayHash c200ee26a3dc50c56f6ad61394ff539d
  */
 
 /* eslint-disable */
@@ -10,11 +10,11 @@
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
 type WalletsScreen_user$ref = any;
-export type DeleteWalletInput = {
+export type DeleteWalletInput = {|
   walletID: string,
   type: string,
   clientMutationId?: ?string,
-};
+|};
 export type WalletImportViewDeleteWalletMutationVariables = {|
   input: DeleteWalletInput
 |};
@@ -54,10 +54,6 @@ fragment WalletsScreen_user on User {
       localID
       accounts {
         address
-        balances {
-          eth
-          mft
-        }
       }
       id
     }
@@ -66,10 +62,6 @@ fragment WalletsScreen_user on User {
       localID
       accounts {
         address
-        balances {
-          eth
-          mft
-        }
       }
       id
     }
@@ -90,8 +82,7 @@ v1 = [
   {
     "kind": "Variable",
     "name": "input",
-    "variableName": "input",
-    "type": "DeleteWalletInput!"
+    "variableName": "input"
   }
 ],
 v2 = {
@@ -131,56 +122,26 @@ v3 = [
         "name": "address",
         "args": null,
         "storageKey": null
-      },
-      {
-        "kind": "LinkedField",
-        "alias": null,
-        "name": "balances",
-        "storageKey": null,
-        "args": null,
-        "concreteType": "WalletBalances",
-        "plural": false,
-        "selections": [
-          {
-            "kind": "ScalarField",
-            "alias": null,
-            "name": "eth",
-            "args": null,
-            "storageKey": null
-          },
-          {
-            "kind": "ScalarField",
-            "alias": null,
-            "name": "mft",
-            "args": null,
-            "storageKey": null
-          }
-        ]
       }
     ]
   },
-  v2
+  (v2/*: any*/)
 ];
 return {
   "kind": "Request",
-  "operationKind": "mutation",
-  "name": "WalletImportViewDeleteWalletMutation",
-  "id": null,
-  "text": "mutation WalletImportViewDeleteWalletMutation(\n  $input: DeleteWalletInput!\n) {\n  deleteWallet(input: $input) {\n    viewer {\n      ...WalletsScreen_user\n      id\n    }\n  }\n}\n\nfragment WalletsScreen_user on User {\n  profile {\n    ethAddress\n  }\n  ethWallets {\n    hd {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n    ledger {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n  }\n}\n",
-  "metadata": {},
   "fragment": {
     "kind": "Fragment",
     "name": "WalletImportViewDeleteWalletMutation",
     "type": "Mutation",
     "metadata": null,
-    "argumentDefinitions": v0,
+    "argumentDefinitions": (v0/*: any*/),
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
         "name": "deleteWallet",
         "storageKey": null,
-        "args": v1,
+        "args": (v1/*: any*/),
         "concreteType": "DeleteWalletPayload",
         "plural": false,
         "selections": [
@@ -207,14 +168,14 @@ return {
   "operation": {
     "kind": "Operation",
     "name": "WalletImportViewDeleteWalletMutation",
-    "argumentDefinitions": v0,
+    "argumentDefinitions": (v0/*: any*/),
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
         "name": "deleteWallet",
         "storageKey": null,
-        "args": v1,
+        "args": (v1/*: any*/),
         "concreteType": "DeleteWalletPayload",
         "plural": false,
         "selections": [
@@ -262,7 +223,7 @@ return {
                     "args": null,
                     "concreteType": "EthHDWallet",
                     "plural": true,
-                    "selections": v3
+                    "selections": (v3/*: any*/)
                   },
                   {
                     "kind": "LinkedField",
@@ -272,16 +233,23 @@ return {
                     "args": null,
                     "concreteType": "EthLedgerWallet",
                     "plural": true,
-                    "selections": v3
+                    "selections": (v3/*: any*/)
                   }
                 ]
               },
-              v2
+              (v2/*: any*/)
             ]
           }
         ]
       }
     ]
+  },
+  "params": {
+    "operationKind": "mutation",
+    "name": "WalletImportViewDeleteWalletMutation",
+    "id": null,
+    "text": "mutation WalletImportViewDeleteWalletMutation(\n  $input: DeleteWalletInput!\n) {\n  deleteWallet(input: $input) {\n    viewer {\n      ...WalletsScreen_user\n      id\n    }\n  }\n}\n\nfragment WalletsScreen_user on User {\n  profile {\n    ethAddress\n  }\n  ethWallets {\n    hd {\n      name\n      localID\n      accounts {\n        address\n      }\n      id\n    }\n    ledger {\n      name\n      localID\n      accounts {\n        address\n      }\n      id\n    }\n  }\n}\n",
+    "metadata": {}
   }
 };
 })();

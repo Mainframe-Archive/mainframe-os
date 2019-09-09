@@ -6,7 +6,7 @@ import { flatMap } from 'rxjs/operators'
 
 import type OwnFeed from './OwnFeed'
 
-const DEFAULT_POLL_INTERVAL = 10 * 60 * 1000 // 10 mins
+export const DEFAULT_POLL_INTERVAL = 10 * 60 * 1000 // 10 mins
 
 type IdentityFunc = <T>(t: T) => T
 const identity: IdentityFunc = <T>(input: T): T => input
@@ -20,7 +20,8 @@ export type PublisherParams<T> = {
 export const createPublisher = <T>(params: PublisherParams<T>) => {
   const transform = params.transform || identity
   return async (data: T): Promise<string> => {
-    return await params.feed.publishJSON(params.bzz, transform(data))
+    const transformed = await transform(data)
+    return await params.feed.publishJSON(params.bzz, transformed)
   }
 }
 

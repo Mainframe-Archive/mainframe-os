@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 690e9f630fe2acba9b4b51fa8e5108c8
+ * @relayHash e9beb607e867f257be7a92b6e5c756b0
  */
 
 /* eslint-disable */
@@ -56,6 +56,10 @@ fragment AppsScreen_user on User {
       id
     }
     update {
+      fromVersion {
+        localID
+        id
+      }
       toVersion {
         installationState
         manifest {
@@ -221,7 +225,7 @@ v4 = {
   "concreteType": "AppManifest",
   "plural": false,
   "selections": [
-    v3,
+    (v3/*: any*/),
     {
       "kind": "ScalarField",
       "alias": null,
@@ -229,7 +233,7 @@ v4 = {
       "args": null,
       "storageKey": null
     },
-    v2
+    (v2/*: any*/)
   ]
 },
 v5 = {
@@ -248,11 +252,6 @@ v6 = {
 };
 return {
   "kind": "Request",
-  "operationKind": "query",
-  "name": "AppsScreenQuery",
-  "id": null,
-  "text": "query AppsScreenQuery {\n  user: viewer {\n    ...AppsScreen_user\n    id\n  }\n}\n\nfragment AppsScreen_user on User {\n  id\n  apps {\n    ...AppUpdateModal_userAppVersion\n    localID\n    appVersion {\n      ...AppItem_appVersion\n      app {\n        publicID\n        id\n      }\n      installationState\n      manifest {\n        profile {\n          name\n        }\n        webDomains {\n          domain\n          internal\n          external\n        }\n      }\n      id\n    }\n    update {\n      toVersion {\n        installationState\n        manifest {\n          version\n        }\n        id\n      }\n      permissionsChanged\n    }\n    settings {\n      permissionsChecked\n      webDomains {\n        domain\n        internal\n        external\n      }\n      id\n    }\n    id\n  }\n}\n\nfragment AppUpdateModal_userAppVersion on UserAppVersion {\n  localID\n  settings {\n    webDomains {\n      domain\n      internal\n      external\n    }\n    id\n  }\n  update {\n    fromVersion {\n      manifest {\n        profile {\n          name\n        }\n        version\n        webDomains {\n          domain\n          internal\n          external\n        }\n      }\n      id\n    }\n    toVersion {\n      publicID\n      manifest {\n        profile {\n          name\n        }\n        version\n        webDomains {\n          domain\n          internal\n          external\n        }\n      }\n      id\n    }\n    permissionsChanged\n  }\n}\n\nfragment AppItem_appVersion on AppVersion {\n  localID\n  installationState\n  app {\n    publicID\n    id\n  }\n  developer {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n  manifest {\n    profile {\n      name\n    }\n  }\n  update {\n    id\n  }\n}\n",
-  "metadata": {},
   "fragment": {
     "kind": "Fragment",
     "name": "AppsScreenQuery",
@@ -292,7 +291,7 @@ return {
         "concreteType": "User",
         "plural": false,
         "selections": [
-          v0,
+          (v0/*: any*/),
           {
             "kind": "LinkedField",
             "alias": null,
@@ -302,7 +301,7 @@ return {
             "concreteType": "UserAppVersion",
             "plural": true,
             "selections": [
-              v1,
+              (v1/*: any*/),
               {
                 "kind": "LinkedField",
                 "alias": null,
@@ -312,8 +311,8 @@ return {
                 "concreteType": "UserAppSettings",
                 "plural": false,
                 "selections": [
-                  v2,
-                  v0,
+                  (v2/*: any*/),
+                  (v0/*: any*/),
                   {
                     "kind": "ScalarField",
                     "alias": null,
@@ -341,8 +340,9 @@ return {
                     "concreteType": "AppVersion",
                     "plural": false,
                     "selections": [
-                      v4,
-                      v0
+                      (v4/*: any*/),
+                      (v0/*: any*/),
+                      (v1/*: any*/)
                     ]
                   },
                   {
@@ -354,10 +354,10 @@ return {
                     "concreteType": "AppVersion",
                     "plural": false,
                     "selections": [
-                      v5,
-                      v4,
-                      v0,
-                      v6
+                      (v5/*: any*/),
+                      (v4/*: any*/),
+                      (v0/*: any*/),
+                      (v6/*: any*/)
                     ]
                   },
                   {
@@ -378,8 +378,8 @@ return {
                 "concreteType": "AppVersion",
                 "plural": false,
                 "selections": [
-                  v1,
-                  v6,
+                  (v1/*: any*/),
+                  (v6/*: any*/),
                   {
                     "kind": "LinkedField",
                     "alias": null,
@@ -389,8 +389,8 @@ return {
                     "concreteType": "App",
                     "plural": false,
                     "selections": [
-                      v5,
-                      v0
+                      (v5/*: any*/),
+                      (v0/*: any*/)
                     ]
                   },
                   {
@@ -402,9 +402,9 @@ return {
                     "concreteType": "Developer",
                     "plural": false,
                     "selections": [
-                      v1,
-                      v3,
-                      v0
+                      (v1/*: any*/),
+                      (v3/*: any*/),
+                      (v0/*: any*/)
                     ]
                   },
                   {
@@ -416,8 +416,8 @@ return {
                     "concreteType": "AppManifest",
                     "plural": false,
                     "selections": [
-                      v3,
-                      v2
+                      (v3/*: any*/),
+                      (v2/*: any*/)
                     ]
                   },
                   {
@@ -429,18 +429,25 @@ return {
                     "concreteType": "AppVersion",
                     "plural": false,
                     "selections": [
-                      v0
+                      (v0/*: any*/)
                     ]
                   },
-                  v0
+                  (v0/*: any*/)
                 ]
               },
-              v0
+              (v0/*: any*/)
             ]
           }
         ]
       }
     ]
+  },
+  "params": {
+    "operationKind": "query",
+    "name": "AppsScreenQuery",
+    "id": null,
+    "text": "query AppsScreenQuery {\n  user: viewer {\n    ...AppsScreen_user\n    id\n  }\n}\n\nfragment AppsScreen_user on User {\n  id\n  apps {\n    ...AppUpdateModal_userAppVersion\n    localID\n    appVersion {\n      ...AppItem_appVersion\n      app {\n        publicID\n        id\n      }\n      installationState\n      manifest {\n        profile {\n          name\n        }\n        webDomains {\n          domain\n          internal\n          external\n        }\n      }\n      id\n    }\n    update {\n      fromVersion {\n        localID\n        id\n      }\n      toVersion {\n        installationState\n        manifest {\n          version\n        }\n        id\n      }\n      permissionsChanged\n    }\n    settings {\n      permissionsChecked\n      webDomains {\n        domain\n        internal\n        external\n      }\n      id\n    }\n    id\n  }\n}\n\nfragment AppUpdateModal_userAppVersion on UserAppVersion {\n  localID\n  settings {\n    webDomains {\n      domain\n      internal\n      external\n    }\n    id\n  }\n  update {\n    fromVersion {\n      manifest {\n        profile {\n          name\n        }\n        version\n        webDomains {\n          domain\n          internal\n          external\n        }\n      }\n      id\n    }\n    toVersion {\n      publicID\n      manifest {\n        profile {\n          name\n        }\n        version\n        webDomains {\n          domain\n          internal\n          external\n        }\n      }\n      id\n    }\n    permissionsChanged\n  }\n}\n\nfragment AppItem_appVersion on AppVersion {\n  localID\n  installationState\n  app {\n    publicID\n    id\n  }\n  developer {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n  manifest {\n    profile {\n      name\n    }\n  }\n  update {\n    id\n  }\n}\n",
+    "metadata": {}
   }
 };
 })();

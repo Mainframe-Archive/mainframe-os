@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash e41958c4a5519ff4fbe60d0247087bdf
+ * @relayHash 5bba89369582f4f7ff6d9b5ee72585f2
  */
 
 /* eslint-disable */
@@ -10,11 +10,11 @@
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
 type WalletsScreen_user$ref = any;
-export type AddHDWalletAccountInput = {
+export type AddHDWalletAccountInput = {|
   walletID: string,
   index: number,
   clientMutationId?: ?string,
-};
+|};
 export type WalletsScreenAddHDWalletAccountMutationVariables = {|
   input: AddHDWalletAccountInput
 |};
@@ -56,10 +56,6 @@ fragment WalletsScreen_user on User {
       localID
       accounts {
         address
-        balances {
-          eth
-          mft
-        }
       }
       id
     }
@@ -68,10 +64,6 @@ fragment WalletsScreen_user on User {
       localID
       accounts {
         address
-        balances {
-          eth
-          mft
-        }
       }
       id
     }
@@ -92,8 +84,7 @@ v1 = [
   {
     "kind": "Variable",
     "name": "input",
-    "variableName": "input",
-    "type": "AddHDWalletAccountInput!"
+    "variableName": "input"
   }
 ],
 v2 = {
@@ -134,60 +125,30 @@ v4 = [
     "concreteType": "WalletAccount",
     "plural": true,
     "selections": [
-      v2,
-      {
-        "kind": "LinkedField",
-        "alias": null,
-        "name": "balances",
-        "storageKey": null,
-        "args": null,
-        "concreteType": "WalletBalances",
-        "plural": false,
-        "selections": [
-          {
-            "kind": "ScalarField",
-            "alias": null,
-            "name": "eth",
-            "args": null,
-            "storageKey": null
-          },
-          {
-            "kind": "ScalarField",
-            "alias": null,
-            "name": "mft",
-            "args": null,
-            "storageKey": null
-          }
-        ]
-      }
+      (v2/*: any*/)
     ]
   },
-  v3
+  (v3/*: any*/)
 ];
 return {
   "kind": "Request",
-  "operationKind": "mutation",
-  "name": "WalletsScreenAddHDWalletAccountMutation",
-  "id": null,
-  "text": "mutation WalletsScreenAddHDWalletAccountMutation(\n  $input: AddHDWalletAccountInput!\n) {\n  addHDWalletAccount(input: $input) {\n    address\n    viewer {\n      ...WalletsScreen_user\n      id\n    }\n  }\n}\n\nfragment WalletsScreen_user on User {\n  profile {\n    ethAddress\n  }\n  ethWallets {\n    hd {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n    ledger {\n      name\n      localID\n      accounts {\n        address\n        balances {\n          eth\n          mft\n        }\n      }\n      id\n    }\n  }\n}\n",
-  "metadata": {},
   "fragment": {
     "kind": "Fragment",
     "name": "WalletsScreenAddHDWalletAccountMutation",
     "type": "Mutation",
     "metadata": null,
-    "argumentDefinitions": v0,
+    "argumentDefinitions": (v0/*: any*/),
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
         "name": "addHDWalletAccount",
         "storageKey": null,
-        "args": v1,
+        "args": (v1/*: any*/),
         "concreteType": "AddHDWalletAccountPayload",
         "plural": false,
         "selections": [
-          v2,
+          (v2/*: any*/),
           {
             "kind": "LinkedField",
             "alias": null,
@@ -211,18 +172,18 @@ return {
   "operation": {
     "kind": "Operation",
     "name": "WalletsScreenAddHDWalletAccountMutation",
-    "argumentDefinitions": v0,
+    "argumentDefinitions": (v0/*: any*/),
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
         "name": "addHDWalletAccount",
         "storageKey": null,
-        "args": v1,
+        "args": (v1/*: any*/),
         "concreteType": "AddHDWalletAccountPayload",
         "plural": false,
         "selections": [
-          v2,
+          (v2/*: any*/),
           {
             "kind": "LinkedField",
             "alias": null,
@@ -267,7 +228,7 @@ return {
                     "args": null,
                     "concreteType": "EthHDWallet",
                     "plural": true,
-                    "selections": v4
+                    "selections": (v4/*: any*/)
                   },
                   {
                     "kind": "LinkedField",
@@ -277,16 +238,23 @@ return {
                     "args": null,
                     "concreteType": "EthLedgerWallet",
                     "plural": true,
-                    "selections": v4
+                    "selections": (v4/*: any*/)
                   }
                 ]
               },
-              v3
+              (v3/*: any*/)
             ]
           }
         ]
       }
     ]
+  },
+  "params": {
+    "operationKind": "mutation",
+    "name": "WalletsScreenAddHDWalletAccountMutation",
+    "id": null,
+    "text": "mutation WalletsScreenAddHDWalletAccountMutation(\n  $input: AddHDWalletAccountInput!\n) {\n  addHDWalletAccount(input: $input) {\n    address\n    viewer {\n      ...WalletsScreen_user\n      id\n    }\n  }\n}\n\nfragment WalletsScreen_user on User {\n  profile {\n    ethAddress\n  }\n  ethWallets {\n    hd {\n      name\n      localID\n      accounts {\n        address\n      }\n      id\n    }\n    ledger {\n      name\n      localID\n      accounts {\n        address\n      }\n      id\n    }\n  }\n}\n",
+    "metadata": {}
   }
 };
 })();

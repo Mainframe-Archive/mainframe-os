@@ -62,7 +62,7 @@ export default function ToastMessage({
         in={visible}
         classNames="alert-toast"
         timeout={300}
-      unmountOnExit>
+        unmountOnExit>
         <Message visible={visible}>
           {message ? (
             <Text bold color="white" size={13}>

@@ -11,7 +11,6 @@ import { generateLocalID } from '../utils'
 
 import type { WebDomainsDefinitions } from '../schemas/appManifest'
 import schema, { type UserAppVersionData } from '../schemas/userAppVersion'
-import type { UserAppSettingsData } from '../schemas/userAppSettings'
 
 import type { AppDoc } from './apps'
 import type { AppVersionDoc } from './appVersions'
@@ -21,6 +20,7 @@ import type { UserDoc } from './users'
 type UserAppVersionMethods = {|
   getPublicID(): Promise<string>,
   getAppData(env: Environment): Promise<AppData>,
+  getNewAvailableVersion(): Promise<AppVersionDoc | null>,
   downloadContents(ctx: UserContext): Promise<string>,
   applyUpdate(
     appVersionID: string,
@@ -134,6 +134,16 @@ export default async (
           profile: appVersion.manifest.profile || {},
           publicID: app.getPublicID(),
         }
+      },
+
+      async getNewAvailableVersion(): Promise<AppVersionDoc | null> {
+        const [app, appVersion] = await Promise.all([
+          this.populate('app'),
+          this.populate('appVersion'),
+        ])
+        return app == null || appVersion == null
+          ? null
+          : await app.getAppVersionGreaterThan(appVersion.manifest.version)
       },
 
       async downloadContents(ctx: UserContext): Promise<string> {

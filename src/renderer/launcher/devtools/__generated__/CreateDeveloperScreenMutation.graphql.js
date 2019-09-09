@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 2dd8a295e2aeff812b45fe244d519dcc
+ * @relayHash 05ea7478c3b800dba3603c4542d13a63
  */
 
 /* eslint-disable */
@@ -9,14 +9,14 @@
 
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
-export type CreateDeveloperInput = {
+export type CreateDeveloperInput = {|
   profile: UserProfileInput,
   clientMutationId?: ?string,
-};
-export type UserProfileInput = {
+|};
+export type UserProfileInput = {|
   name: string,
   avatar?: ?string,
-};
+|};
 export type CreateDeveloperScreenMutationVariables = {|
   input: CreateDeveloperInput
 |};
@@ -74,8 +74,7 @@ v1 = [
   {
     "kind": "Variable",
     "name": "input",
-    "variableName": "input",
-    "type": "CreateDeveloperInput!"
+    "variableName": "input"
   }
 ],
 v2 = {
@@ -94,7 +93,7 @@ v3 = {
   "concreteType": "OwnDeveloper",
   "plural": false,
   "selections": [
-    v2
+    (v2/*: any*/)
   ]
 },
 v4 = {
@@ -117,28 +116,23 @@ v4 = {
 };
 return {
   "kind": "Request",
-  "operationKind": "mutation",
-  "name": "CreateDeveloperScreenMutation",
-  "id": null,
-  "text": "mutation CreateDeveloperScreenMutation(\n  $input: CreateDeveloperInput!\n) {\n  createDeveloper(input: $input) {\n    developer {\n      id\n    }\n    devtools {\n      developers {\n        profile {\n          name\n        }\n        id\n      }\n    }\n  }\n}\n",
-  "metadata": {},
   "fragment": {
     "kind": "Fragment",
     "name": "CreateDeveloperScreenMutation",
     "type": "Mutation",
     "metadata": null,
-    "argumentDefinitions": v0,
+    "argumentDefinitions": (v0/*: any*/),
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
         "name": "createDeveloper",
         "storageKey": null,
-        "args": v1,
+        "args": (v1/*: any*/),
         "concreteType": "CreateDeveloperPayload",
         "plural": false,
         "selections": [
-          v3,
+          (v3/*: any*/),
           {
             "kind": "LinkedField",
             "alias": null,
@@ -157,7 +151,7 @@ return {
                 "concreteType": "OwnDeveloper",
                 "plural": true,
                 "selections": [
-                  v4
+                  (v4/*: any*/)
                 ]
               }
             ]
@@ -169,18 +163,18 @@ return {
   "operation": {
     "kind": "Operation",
     "name": "CreateDeveloperScreenMutation",
-    "argumentDefinitions": v0,
+    "argumentDefinitions": (v0/*: any*/),
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
         "name": "createDeveloper",
         "storageKey": null,
-        "args": v1,
+        "args": (v1/*: any*/),
         "concreteType": "CreateDeveloperPayload",
         "plural": false,
         "selections": [
-          v3,
+          (v3/*: any*/),
           {
             "kind": "LinkedField",
             "alias": null,
@@ -199,8 +193,8 @@ return {
                 "concreteType": "OwnDeveloper",
                 "plural": true,
                 "selections": [
-                  v4,
-                  v2
+                  (v4/*: any*/),
+                  (v2/*: any*/)
                 ]
               }
             ]
@@ -208,6 +202,13 @@ return {
         ]
       }
     ]
+  },
+  "params": {
+    "operationKind": "mutation",
+    "name": "CreateDeveloperScreenMutation",
+    "id": null,
+    "text": "mutation CreateDeveloperScreenMutation(\n  $input: CreateDeveloperInput!\n) {\n  createDeveloper(input: $input) {\n    developer {\n      id\n    }\n    devtools {\n      developers {\n        profile {\n          name\n        }\n        id\n      }\n    }\n  }\n}\n",
+    "metadata": {}
   }
 };
 })();

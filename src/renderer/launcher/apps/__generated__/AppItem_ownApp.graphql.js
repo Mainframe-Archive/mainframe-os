@@ -7,9 +7,10 @@
 'use strict';
 
 /*::
-import type { ConcreteFragment } from 'relay-runtime';
+import type { ReaderFragment } from 'relay-runtime';
 import type { FragmentReference } from "relay-runtime";
 declare export opaque type AppItem_ownApp$ref: FragmentReference;
+declare export opaque type AppItem_ownApp$fragmentType: AppItem_ownApp$ref;
 export type AppItem_ownApp = {|
   +localID: string,
   +publicID: string,
@@ -24,10 +25,15 @@ export type AppItem_ownApp = {|
   |},
   +$refType: AppItem_ownApp$ref,
 |};
+export type AppItem_ownApp$data = AppItem_ownApp;
+export type AppItem_ownApp$key = {
+  +$data?: AppItem_ownApp$data,
+  +$fragmentRefs: AppItem_ownApp$ref,
+};
 */
 
 
-const node/*: ConcreteFragment*/ = (function(){
+const node/*: ReaderFragment*/ = (function(){
 var v0 = {
   "kind": "ScalarField",
   "alias": null,
@@ -60,7 +66,7 @@ return {
   "metadata": null,
   "argumentDefinitions": [],
   "selections": [
-    v0,
+    (v0/*: any*/),
     {
       "kind": "ScalarField",
       "alias": null,
@@ -77,11 +83,11 @@ return {
       "concreteType": "OwnDeveloper",
       "plural": false,
       "selections": [
-        v0,
-        v1
+        (v0/*: any*/),
+        (v1/*: any*/)
       ]
     },
-    v1
+    (v1/*: any*/)
   ]
 };
 })();

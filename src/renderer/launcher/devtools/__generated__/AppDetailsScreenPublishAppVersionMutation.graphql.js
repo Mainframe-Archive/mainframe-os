@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 88e1c1a1ebaa6297a457bcfc0948a432
+ * @relayHash 27fa14664968d2f481a0623ead90a2e1
  */
 
 /* eslint-disable */
@@ -10,10 +10,10 @@
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
 type AppDetailsScreen_app$ref = any;
-export type PublishAppVersionInput = {
+export type PublishAppVersionInput = {|
   appID: string,
   clientMutationId?: ?string,
-};
+|};
 export type AppDetailsScreenPublishAppVersionMutationVariables = {|
   input: PublishAppVersionInput
 |};
@@ -87,8 +87,7 @@ v1 = [
   {
     "kind": "Variable",
     "name": "input",
-    "variableName": "input",
-    "type": "PublishAppVersionInput!"
+    "variableName": "input"
   }
 ],
 v2 = {
@@ -139,24 +138,19 @@ v6 = {
 };
 return {
   "kind": "Request",
-  "operationKind": "mutation",
-  "name": "AppDetailsScreenPublishAppVersionMutation",
-  "id": null,
-  "text": "mutation AppDetailsScreenPublishAppVersionMutation(\n  $input: PublishAppVersionInput!\n) {\n  publishAppVersion(input: $input) {\n    app {\n      ...AppDetailsScreen_app\n      id\n    }\n    versionHash\n  }\n}\n\nfragment AppDetailsScreen_app on OwnApp {\n  localID\n  publicID\n  profile {\n    name\n  }\n  contentsPath\n  developer {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n  inProgressVersion {\n    version\n    webDomains {\n      domain\n      internal\n      external\n    }\n  }\n  latestPublishedVersion {\n    version\n  }\n  viewerOwnAppID\n}\n",
-  "metadata": {},
   "fragment": {
     "kind": "Fragment",
     "name": "AppDetailsScreenPublishAppVersionMutation",
     "type": "Mutation",
     "metadata": null,
-    "argumentDefinitions": v0,
+    "argumentDefinitions": (v0/*: any*/),
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
         "name": "publishAppVersion",
         "storageKey": null,
-        "args": v1,
+        "args": (v1/*: any*/),
         "concreteType": "PublishAppVersionPayload",
         "plural": false,
         "selections": [
@@ -176,7 +170,7 @@ return {
               }
             ]
           },
-          v2
+          (v2/*: any*/)
         ]
       }
     ]
@@ -184,14 +178,14 @@ return {
   "operation": {
     "kind": "Operation",
     "name": "AppDetailsScreenPublishAppVersionMutation",
-    "argumentDefinitions": v0,
+    "argumentDefinitions": (v0/*: any*/),
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
         "name": "publishAppVersion",
         "storageKey": null,
-        "args": v1,
+        "args": (v1/*: any*/),
         "concreteType": "PublishAppVersionPayload",
         "plural": false,
         "selections": [
@@ -204,7 +198,7 @@ return {
             "concreteType": "OwnApp",
             "plural": false,
             "selections": [
-              v3,
+              (v3/*: any*/),
               {
                 "kind": "ScalarField",
                 "alias": null,
@@ -212,7 +206,7 @@ return {
                 "args": null,
                 "storageKey": null
               },
-              v4,
+              (v4/*: any*/),
               {
                 "kind": "ScalarField",
                 "alias": null,
@@ -229,9 +223,9 @@ return {
                 "concreteType": "OwnDeveloper",
                 "plural": false,
                 "selections": [
-                  v3,
-                  v4,
-                  v5
+                  (v3/*: any*/),
+                  (v4/*: any*/),
+                  (v5/*: any*/)
                 ]
               },
               {
@@ -243,7 +237,7 @@ return {
                 "concreteType": "OwnAppVersion",
                 "plural": false,
                 "selections": [
-                  v6,
+                  (v6/*: any*/),
                   {
                     "kind": "LinkedField",
                     "alias": null,
@@ -287,7 +281,7 @@ return {
                 "concreteType": "OwnAppVersion",
                 "plural": false,
                 "selections": [
-                  v6
+                  (v6/*: any*/)
                 ]
               },
               {
@@ -297,13 +291,20 @@ return {
                 "args": null,
                 "storageKey": null
               },
-              v5
+              (v5/*: any*/)
             ]
           },
-          v2
+          (v2/*: any*/)
         ]
       }
     ]
+  },
+  "params": {
+    "operationKind": "mutation",
+    "name": "AppDetailsScreenPublishAppVersionMutation",
+    "id": null,
+    "text": "mutation AppDetailsScreenPublishAppVersionMutation(\n  $input: PublishAppVersionInput!\n) {\n  publishAppVersion(input: $input) {\n    app {\n      ...AppDetailsScreen_app\n      id\n    }\n    versionHash\n  }\n}\n\nfragment AppDetailsScreen_app on OwnApp {\n  localID\n  publicID\n  profile {\n    name\n  }\n  contentsPath\n  developer {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n  inProgressVersion {\n    version\n    webDomains {\n      domain\n      internal\n      external\n    }\n  }\n  latestPublishedVersion {\n    version\n  }\n  viewerOwnAppID\n}\n",
+    "metadata": {}
   }
 };
 })();

@@ -33,11 +33,14 @@ export const EnvironmentContext = createContext<Environment>(
 
 export const useEnvironment = () => useContext(EnvironmentContext)
 
-export const useSubscription = (subscription: GraphQLTaggedNode) => {
+export const useSubscription = (
+  subscription: GraphQLTaggedNode,
+  onNext?: (data: Object) => void,
+) => {
   const env = useEnvironment()
 
   useEffect(() => {
-    const sub = requestSubscription(env, { subscription })
+    const sub = requestSubscription(env, { subscription, onNext })
     return () => {
       sub.dispose()
     }

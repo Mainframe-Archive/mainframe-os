@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 537b3d2d723f12fc336c5eea8bf29dbd
+ * @relayHash 53ca5f71d0b0936bbc9ba167f5ecbaa5
  */
 
 /* eslint-disable */
@@ -95,11 +95,6 @@ v2 = {
 };
 return {
   "kind": "Request",
-  "operationKind": "subscription",
-  "name": "HomeRouterAppVersionChangedSubscription",
-  "id": null,
-  "text": "subscription HomeRouterAppVersionChangedSubscription {\n  appVersionChanged {\n    appVersion {\n      ...AppItem_appVersion\n      id\n    }\n  }\n}\n\nfragment AppItem_appVersion on AppVersion {\n  localID\n  installationState\n  app {\n    publicID\n    id\n  }\n  developer {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n  manifest {\n    profile {\n      name\n    }\n  }\n  update {\n    id\n  }\n}\n",
-  "metadata": {},
   "fragment": {
     "kind": "Fragment",
     "name": "HomeRouterAppVersionChangedSubscription",
@@ -159,7 +154,7 @@ return {
             "concreteType": "AppVersion",
             "plural": false,
             "selections": [
-              v0,
+              (v0/*: any*/),
               {
                 "kind": "ScalarField",
                 "alias": null,
@@ -183,7 +178,7 @@ return {
                     "args": null,
                     "storageKey": null
                   },
-                  v1
+                  (v1/*: any*/)
                 ]
               },
               {
@@ -195,9 +190,9 @@ return {
                 "concreteType": "Developer",
                 "plural": false,
                 "selections": [
-                  v0,
-                  v2,
-                  v1
+                  (v0/*: any*/),
+                  (v2/*: any*/),
+                  (v1/*: any*/)
                 ]
               },
               {
@@ -209,7 +204,7 @@ return {
                 "concreteType": "AppManifest",
                 "plural": false,
                 "selections": [
-                  v2
+                  (v2/*: any*/)
                 ]
               },
               {
@@ -221,15 +216,22 @@ return {
                 "concreteType": "AppVersion",
                 "plural": false,
                 "selections": [
-                  v1
+                  (v1/*: any*/)
                 ]
               },
-              v1
+              (v1/*: any*/)
             ]
           }
         ]
       }
     ]
+  },
+  "params": {
+    "operationKind": "subscription",
+    "name": "HomeRouterAppVersionChangedSubscription",
+    "id": null,
+    "text": "subscription HomeRouterAppVersionChangedSubscription {\n  appVersionChanged {\n    appVersion {\n      ...AppItem_appVersion\n      id\n    }\n  }\n}\n\nfragment AppItem_appVersion on AppVersion {\n  localID\n  installationState\n  app {\n    publicID\n    id\n  }\n  developer {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n  manifest {\n    profile {\n      name\n    }\n  }\n  update {\n    id\n  }\n}\n",
+    "metadata": {}
   }
 };
 })();
