@@ -22,7 +22,6 @@ mac:
   icon: 'build/icon.icns'
   target:
     - dmg
-    - dir
     - zip
 
 win:

@@ -36,7 +36,14 @@ export default class OwnFeed {
   }
 
   async getContentHash(bzz: Bzz): Promise<string | null> {
-    return await bzz.getFeedContentHash(this.feed)
+    try {
+      return await bzz.getFeedContentHash(this.feed)
+    } catch (err) {
+      if (err.status === 404) {
+        return null
+      }
+      throw err
+    }
   }
 
   async setContentHash(bzz: Bzz, hash: string): Promise<void> {

@@ -225,39 +225,44 @@ export const sandboxed = {
     params: {
       key: STORAGE_KEY_PARAM,
     },
-    handler: (ctx: AppContext, params: { key: string }): Promise<boolean> => {
-      return new Promise((resolve, reject) => {
-        dialog.showSaveDialog(
-          ctx.window,
-          { title: 'Save file to:', buttonLabel: 'Download' },
-          async filePath => {
-            if (filePath === undefined) {
-              // Dialog was canceled
-              resolve(false)
-            } else {
-              try {
-                const stream = await downloadStream(ctx, params.key)
-                if (stream === null) {
-                  reject(new Error('File not found'))
-                } else {
-                  await new Promise((resolve, reject) => {
-                    stream
-                      .pipe(createWriteStream(filePath))
-                      .on('error', error => {
-                        reject(error)
-                      })
-                      .on('finish', () => {
-                        resolve(true)
-                      })
-                  })
-                }
-              } catch (error) {
-                reject(new Error('Failed to access storage'))
-              }
-            }
-          },
-        )
+    handler: async (
+      ctx: AppContext,
+      params: { key: string },
+    ): Promise<boolean> => {
+      const res = await dialog.showSaveDialog(ctx.window, {
+        title: 'Save file to:',
+        buttonLabel: 'Download',
       })
+      if (res.cancelled || res.filePath == null) {
+        return false
+      }
+
+      const stream = await downloadStream(ctx, params.key)
+      if (stream === null) {
+        throw new Error('File not found')
+      }
+
+      try {
+        return await new Promise((resolve, reject) => {
+          stream
+            .pipe(createWriteStream(res.filePath))
+            .on('error', error => {
+              reject(error)
+            })
+            .on('finish', () => {
+              resolve(true)
+            })
+        })
+      } catch (err) {
+        ctx.logger.log({
+          level: 'warn',
+          message: 'App RPC request `storage_promptDownload` failed',
+          error: err.toString(),
+          params,
+          filePath: res.filePath,
+        })
+        throw new Error('Failed to access storage')
+      }
     },
   },
 
@@ -265,31 +270,41 @@ export const sandboxed = {
     params: {
       key: STORAGE_KEY_PARAM,
     },
-    handler: (ctx: AppContext, params: { key: string }): Promise<boolean> => {
-      return new Promise((resolve, reject) => {
-        dialog.showOpenDialog(
-          ctx.window,
-          { title: 'Select file to upload', buttonLabel: 'Upload' },
-          async filePaths => {
-            if (filePaths === undefined) {
-              // No file selected
-              resolve(false)
-            } else {
-              try {
-                const filePath = filePaths[0]
-                await uploadStream(ctx, {
-                  contentType: mime.getType(filePath),
-                  key: params.key,
-                  stream: createReadStream(filePath),
-                })
-                resolve(true)
-              } catch (error) {
-                reject(new Error('Failed to access storage'))
-              }
-            }
-          },
-        )
+    handler: async (
+      ctx: AppContext,
+      params: { key: string },
+    ): Promise<boolean> => {
+      const res = await dialog.showOpenDialog(ctx.window, {
+        title: 'Select file to upload',
+        buttonLabel: 'Upload',
       })
+      if (
+        res.cancelled ||
+        res.filePaths == null ||
+        res.filePaths.length === 0
+      ) {
+        // No file selected
+        return false
+      }
+
+      const filePath = res.filePaths[0]
+      try {
+        await uploadStream(ctx, {
+          contentType: mime.getType(filePath),
+          key: params.key,
+          stream: createReadStream(filePath),
+        })
+        return true
+      } catch (err) {
+        ctx.logger.log({
+          level: 'warn',
+          message: 'App RPC request `storage_promptUpload` failed',
+          error: err.toString(),
+          params,
+          filePath,
+        })
+        throw new Error('Failed to access storage')
+      }
     },
   },
 
