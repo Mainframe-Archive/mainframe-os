@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash eda63eab3fe576d135932840f0b9c653
+ * @relayHash c0096e9e4bb05afc32b88a9490619b66
  */
 
 /* eslint-disable */
@@ -9,6 +9,7 @@
 
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
+type InviteContactModal_contactInvite$ref = any;
 export type ContactConnectionState = "CONNECTED" | "DECLINED" | "RECEIVED" | "SENDING_BLOCKCHAIN" | "SENDING_FEED" | "SENT_BLOCKCHAIN" | "SENT_FEED" | "%future added value";
 export type ContactStakeState = "RECLAIMED" | "RECLAIMING" | "SEIZED" | "STAKED" | "%future added value";
 export type HomeRouterContactChangedSubscriptionVariables = {||};
@@ -21,10 +22,12 @@ export type HomeRouterContactChangedSubscriptionResponse = {|
       +connectionState: ContactConnectionState,
       +invite: ?{|
         +ethNetwork: string,
+        +fromAddress: string,
         +inviteTX: string,
-        +stakeAmount: string,
         +stakeState: ContactStakeState,
+        +stakeAmount: string,
         +reclaimedStakeTX: ?string,
+        +$fragmentRefs: InviteContactModal_contactInvite$ref,
       |},
       +profile: {|
         +name: ?string,
@@ -49,10 +52,12 @@ subscription HomeRouterContactChangedSubscription {
       publicID
       connectionState
       invite {
+        ...InviteContactModal_contactInvite
         ethNetwork
+        fromAddress
         inviteTX
-        stakeAmount
         stakeState
+        stakeAmount
         reclaimedStakeTX
       }
       profile {
@@ -62,6 +67,15 @@ subscription HomeRouterContactChangedSubscription {
       id
     }
   }
+}
+
+fragment InviteContactModal_contactInvite on ContactInvite {
+  ethNetwork
+  fromAddress
+  inviteTX
+  stakeState
+  stakeAmount
+  reclaimedStakeTX
 }
 */
 
@@ -95,52 +109,48 @@ v3 = {
   "storageKey": null
 },
 v4 = {
-  "kind": "LinkedField",
+  "kind": "ScalarField",
   "alias": null,
-  "name": "invite",
-  "storageKey": null,
+  "name": "ethNetwork",
   "args": null,
-  "concreteType": "ContactInvite",
-  "plural": false,
-  "selections": [
-    {
-      "kind": "ScalarField",
-      "alias": null,
-      "name": "ethNetwork",
-      "args": null,
-      "storageKey": null
-    },
-    {
-      "kind": "ScalarField",
-      "alias": null,
-      "name": "inviteTX",
-      "args": null,
-      "storageKey": null
-    },
-    {
-      "kind": "ScalarField",
-      "alias": null,
-      "name": "stakeAmount",
-      "args": null,
-      "storageKey": null
-    },
-    {
-      "kind": "ScalarField",
-      "alias": null,
-      "name": "stakeState",
-      "args": null,
-      "storageKey": null
-    },
-    {
-      "kind": "ScalarField",
-      "alias": null,
-      "name": "reclaimedStakeTX",
-      "args": null,
-      "storageKey": null
-    }
-  ]
+  "storageKey": null
 },
 v5 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "fromAddress",
+  "args": null,
+  "storageKey": null
+},
+v6 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "inviteTX",
+  "args": null,
+  "storageKey": null
+},
+v7 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "stakeState",
+  "args": null,
+  "storageKey": null
+},
+v8 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "stakeAmount",
+  "args": null,
+  "storageKey": null
+},
+v9 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "reclaimedStakeTX",
+  "args": null,
+  "storageKey": null
+},
+v10 = {
   "kind": "LinkedField",
   "alias": null,
   "name": "profile",
@@ -196,8 +206,29 @@ return {
               (v1/*: any*/),
               (v2/*: any*/),
               (v3/*: any*/),
-              (v4/*: any*/),
-              (v5/*: any*/)
+              {
+                "kind": "LinkedField",
+                "alias": null,
+                "name": "invite",
+                "storageKey": null,
+                "args": null,
+                "concreteType": "ContactInvite",
+                "plural": false,
+                "selections": [
+                  (v4/*: any*/),
+                  (v5/*: any*/),
+                  (v6/*: any*/),
+                  (v7/*: any*/),
+                  (v8/*: any*/),
+                  (v9/*: any*/),
+                  {
+                    "kind": "FragmentSpread",
+                    "name": "InviteContactModal_contactInvite",
+                    "args": null
+                  }
+                ]
+              },
+              (v10/*: any*/)
             ]
           }
         ]
@@ -231,8 +262,24 @@ return {
               (v1/*: any*/),
               (v2/*: any*/),
               (v3/*: any*/),
-              (v4/*: any*/),
-              (v5/*: any*/),
+              {
+                "kind": "LinkedField",
+                "alias": null,
+                "name": "invite",
+                "storageKey": null,
+                "args": null,
+                "concreteType": "ContactInvite",
+                "plural": false,
+                "selections": [
+                  (v4/*: any*/),
+                  (v5/*: any*/),
+                  (v6/*: any*/),
+                  (v7/*: any*/),
+                  (v8/*: any*/),
+                  (v9/*: any*/)
+                ]
+              },
+              (v10/*: any*/),
               {
                 "kind": "ScalarField",
                 "alias": null,
@@ -250,11 +297,11 @@ return {
     "operationKind": "subscription",
     "name": "HomeRouterContactChangedSubscription",
     "id": null,
-    "text": "subscription HomeRouterContactChangedSubscription {\n  contactChanged {\n    contact {\n      localID\n      peerID\n      publicID\n      connectionState\n      invite {\n        ethNetwork\n        inviteTX\n        stakeAmount\n        stakeState\n        reclaimedStakeTX\n      }\n      profile {\n        name\n        ethAddress\n      }\n      id\n    }\n  }\n}\n",
+    "text": "subscription HomeRouterContactChangedSubscription {\n  contactChanged {\n    contact {\n      localID\n      peerID\n      publicID\n      connectionState\n      invite {\n        ...InviteContactModal_contactInvite\n        ethNetwork\n        fromAddress\n        inviteTX\n        stakeState\n        stakeAmount\n        reclaimedStakeTX\n      }\n      profile {\n        name\n        ethAddress\n      }\n      id\n    }\n  }\n}\n\nfragment InviteContactModal_contactInvite on ContactInvite {\n  ethNetwork\n  fromAddress\n  inviteTX\n  stakeState\n  stakeAmount\n  reclaimedStakeTX\n}\n",
     "metadata": {}
   }
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = 'a2be13f359d36542e80eba921f5daab4';
+(node/*: any*/).hash = '4292b7b1b0f6f4d2f50a05fa4e573e4d';
 module.exports = node;

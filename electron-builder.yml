@@ -23,6 +23,7 @@ mac:
   target:
     - dmg
     - dir
+    - zip
 
 win:
   certificateSubjectName: 'Mainframe Group, Inc'
@@ -34,8 +35,9 @@ win:
         - 'ia32'
 
 files:
-  # Files to exclude
+  # Files to include
   - 'build/icon/*'
+  - 'dist/latest-mac.yml'
 
   # Individual files to exclude - mostly from https://github.com/LedgerHQ/ledger-live-desktop/blob/develop/electron-builder.yml
   - '!report-*.html'

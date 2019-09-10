@@ -1,18 +1,22 @@
 // @flow
 
-import { GraphQLNonNull, GraphQLObjectType } from 'graphql'
+import { GraphQLObjectType } from 'graphql'
 
-import { devtoolsField, lookup, nodeField, viewerField } from './objects'
+import {
+  devtoolsField,
+  lookupField,
+  nodeField,
+  systemUpdateField,
+  viewerField,
+} from './objects'
 
 export default new GraphQLObjectType({
   name: 'Query',
   fields: () => ({
     devtools: devtoolsField,
-    lookup: {
-      type: new GraphQLNonNull(lookup),
-      resolve: () => ({}),
-    },
+    lookup: lookupField,
     node: nodeField,
+    systemUpdate: systemUpdateField,
     viewer: viewerField,
   }),
 })

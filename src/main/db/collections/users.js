@@ -3,6 +3,7 @@
 import { Bzz } from '@erebos/api-bzz-node'
 import { createKeyPair, sign } from '@erebos/secp256k1'
 import { EthClient, ETH_RPC_URLS, type TXParams } from '@mainframe/eth'
+import { is } from 'electron-util'
 import objectHash from 'object-hash'
 import { type Observable, Subject, Subscription } from 'rxjs'
 import { debounceTime, filter, flatMap, map } from 'rxjs/operators'
@@ -217,9 +218,10 @@ export default async (params: CollectionParams): Promise<UsersCollection> => {
       },
 
       initEthClient(): EthClient {
-        const walletProvider = new WalletProvider(this)
-        // return new EthClient(this.ethURL, walletProvider)
-        return new EthClient(ETH_RPC_URLS.WS.ropsten, walletProvider)
+        return new EthClient(
+          is.development ? ETH_RPC_URLS.WS.ropsten : this.ethURL,
+          new WalletProvider(this),
+        )
       },
 
       checkEthConnection(): void {

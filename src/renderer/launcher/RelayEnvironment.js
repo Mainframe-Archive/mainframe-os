@@ -33,9 +33,9 @@ export const EnvironmentContext = createContext<Environment>(
 
 export const useEnvironment = () => useContext(EnvironmentContext)
 
-export const useSubscription = (
+export const useSubscription = <T = Object>(
   subscription: GraphQLTaggedNode,
-  onNext?: (data: Object) => void,
+  onNext?: (data: T) => void,
 ) => {
   const env = useEnvironment()
 

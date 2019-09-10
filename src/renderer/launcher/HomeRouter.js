@@ -1,6 +1,6 @@
 // @flow
 
-import React from 'react'
+import React, { useState } from 'react'
 import { Redirect, Route, Switch } from 'react-router'
 import { graphql } from 'relay-runtime'
 import styled from 'styled-components/native'
@@ -8,12 +8,22 @@ import styled from 'styled-components/native'
 import { ROUTES } from './constants'
 import { useSubscription } from './RelayEnvironment'
 
-import SideMenu from './SideMenu'
+import SideMenu, { type MenuBadges } from './SideMenu'
 import AppsScreen from './apps/AppsScreen'
 import ContactsScreen from './contacts/ContactsScreen'
 import DevtoolsRouter from './devtools/DevtoolsRouter'
 import SettingsRouter from './settings/SettingsRouter'
 import WalletsScreen from './wallets/WalletsScreen'
+import type { HomeRouterAppUpdatesChangedSubscriptionResponse as AppUpdatesData } from './__generated__/HomeRouterAppUpdatesChangedSubscription.graphql'
+import type { HomeRouterSystemUpdateChangedSubscriptionResponse as SystemUpdateData } from './__generated__/HomeRouterSystemUpdateChangedSubscription.graphql'
+
+const APP_UPDATES_CHANGED_SUBSCRIPTION = graphql`
+  subscription HomeRouterAppUpdatesChangedSubscription {
+    appUpdatesChanged {
+      appUpdatesCount
+    }
+  }
+`
 
 const APP_VERSION_CHANGED_SUBSCRIPTION = graphql`
   subscription HomeRouterAppVersionChangedSubscription {
@@ -34,16 +44,28 @@ const CONTACT_CHANGED_SUBSCRIPTION = graphql`
         publicID
         connectionState
         invite {
+          ...InviteContactModal_contactInvite
           ethNetwork
+          fromAddress
           inviteTX
-          stakeAmount
           stakeState
+          stakeAmount
           reclaimedStakeTX
         }
         profile {
           name
           ethAddress
         }
+      }
+    }
+  }
+`
+
+const SYSTEM_UPDATE_CHANGED_SUBSCRIPTION = graphql`
+  subscription HomeRouterSystemUpdateChangedSubscription {
+    systemUpdateChanged {
+      systemUpdate {
+        status
       }
     }
   }
@@ -62,12 +84,33 @@ const ContentContainer = styled.View`
 `
 
 export default function HomeRouter() {
+  const [badges, setBadges] = useState<MenuBadges>({
+    apps: false,
+    contacts: false,
+    wallets: false,
+    settings: false,
+  })
+
+  useSubscription(APP_UPDATES_CHANGED_SUBSCRIPTION, (data: AppUpdatesData) => {
+    setBadges(b => ({ ...b, apps: data.appUpdatesChanged.appUpdatesCount > 0 }))
+  })
   useSubscription(APP_VERSION_CHANGED_SUBSCRIPTION)
   useSubscription(CONTACT_CHANGED_SUBSCRIPTION)
+  useSubscription(
+    SYSTEM_UPDATE_CHANGED_SUBSCRIPTION,
+    (data: SystemUpdateData) => {
+      const { status } = data.systemUpdateChanged.systemUpdate
+      const hasUpdate =
+        status === 'UPDATE_AVAILABLE' ||
+        status === 'UPDATE_DOWNLOADING' ||
+        status === 'UPDATE_DOWNLOADED'
+      setBadges(b => ({ ...b, settings: hasUpdate }))
+    },
+  )
 
   return (
-    <Container testID="launcher-view">
-      <SideMenu />
+    <Container>
+      <SideMenu badges={badges} />
       <ContentContainer>
         <Switch>
           <Route path={ROUTES.APPS} component={AppsScreen} />

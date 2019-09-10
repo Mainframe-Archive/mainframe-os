@@ -419,6 +419,7 @@ type Query {
     """The ID of an object"""
     id: ID!
   ): Node
+  systemUpdate: SystemUpdate!
   viewer: User!
 }
 
@@ -469,10 +470,33 @@ type Subscription {
   appVersionChanged: AppVersionPayload!
   contactChanged: ContactChangedPayload!
   contactsChanged: ContactChangedPayload!
+  systemUpdateChanged: SystemUpdateChangedPayload!
 }
 
 enum SupportedWallets {
   ETHEREUM
+}
+
+type SystemUpdate implements Node {
+  id: ID!
+  status: SystemUpdateStatus!
+  currentVersion: String!
+  newVersion: String
+  downloadProgress: Float
+}
+
+type SystemUpdateChangedPayload {
+  systemUpdate: SystemUpdate!
+}
+
+enum SystemUpdateStatus {
+  IDLE
+  CHECKING
+  ERROR
+  NO_UPDATE
+  UPDATE_AVAILABLE
+  UPDATE_DOWNLOADING
+  UPDATE_DOWNLOADED
 }
 
 input UpdateAppDetailsInput {

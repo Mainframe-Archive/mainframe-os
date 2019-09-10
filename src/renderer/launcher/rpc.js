@@ -32,6 +32,15 @@ export default {
     client.notify('log', info)
   },
 
+  // System
+
+  async checkUpdate(): Promise<void> {
+    await client.request('system_checkUpdate')
+  },
+  async installUpdate(): Promise<void> {
+    await client.request('system_installUpdate')
+  },
+
   // DB
 
   async createDB(password: string, save?: boolean = false): Promise<void> {

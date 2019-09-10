@@ -4,22 +4,26 @@ import type { UserDoc } from '../db/collections/users'
 import type { CollectionKey, Collections, DB } from '../db/types'
 import type { Logger } from '../logger'
 
+import type { SystemContext } from './system'
 import type { UserContext } from './user'
 
 export type ContextParams = {
   db: DB,
   logger: Logger,
+  system: SystemContext,
   user: UserContext,
 }
 
 export class GraphQLContext {
   db: DB
   logger: Logger
+  system: SystemContext
   user: UserContext
 
   constructor(params: ContextParams) {
     this.db = params.db
     this.logger = params.logger.child({ context: 'graphql' })
+    this.system = params.system
     this.user = params.user
   }
 

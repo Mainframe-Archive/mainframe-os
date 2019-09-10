@@ -23,24 +23,24 @@ if (
   ENV_TYPE = NODE_ENV
 }
 
+const env = Environment.get(ENV_NAME, ENV_TYPE)
+const logger = createLogger(env)
+const system = new SystemContext({ env, logger })
+
 if (ENV_TYPE === 'production') {
   if (app.requestSingleInstanceLock()) {
     app.on('second-instance', () => {
-      // Someone tried to run a second instance, we should focus our window.
-      // TODO: update logic for new windows management system
-      // if (launcherWindow) {
-      //   if (launcherWindow.isMinimized()) launcherWindow.restore()
-      //   launcherWindow.focus()
-      // }
+      logger.log({
+        level: 'info',
+        message:
+          'Second instance event handler will show existing launcher window',
+      })
+      system.showOpenLauncher()
     })
   } else {
     app.exit()
   }
 }
-
-const env = Environment.get(ENV_NAME, ENV_TYPE)
-const logger = createLogger(env)
-const system = new SystemContext({ env, logger })
 
 // App Lifecycle
 
@@ -63,7 +63,7 @@ app.on('window-all-closed', () => {
 })
 
 app.on('activate', () => {
-  // TODO: focus on most relevant window
+  system.showOpenLauncher()
 })
 
 // Window lifecycle events

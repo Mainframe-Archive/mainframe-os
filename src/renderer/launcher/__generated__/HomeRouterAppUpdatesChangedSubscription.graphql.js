@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash c0ea4b1e861f3127614ae9368fb05af3
+ * @relayHash 44a5a71c35bece17b7a2838c25bfc184
  */
 
 /* eslint-disable */
@@ -9,21 +9,21 @@
 
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
-export type SideMenuAppUpdatesChangedSubscriptionVariables = {||};
-export type SideMenuAppUpdatesChangedSubscriptionResponse = {|
+export type HomeRouterAppUpdatesChangedSubscriptionVariables = {||};
+export type HomeRouterAppUpdatesChangedSubscriptionResponse = {|
   +appUpdatesChanged: {|
     +appUpdatesCount: number
   |}
 |};
-export type SideMenuAppUpdatesChangedSubscription = {|
-  variables: SideMenuAppUpdatesChangedSubscriptionVariables,
-  response: SideMenuAppUpdatesChangedSubscriptionResponse,
+export type HomeRouterAppUpdatesChangedSubscription = {|
+  variables: HomeRouterAppUpdatesChangedSubscriptionVariables,
+  response: HomeRouterAppUpdatesChangedSubscriptionResponse,
 |};
 */
 
 
 /*
-subscription SideMenuAppUpdatesChangedSubscription {
+subscription HomeRouterAppUpdatesChangedSubscription {
   appUpdatesChanged {
     appUpdatesCount
   }
@@ -55,7 +55,7 @@ return {
   "kind": "Request",
   "fragment": {
     "kind": "Fragment",
-    "name": "SideMenuAppUpdatesChangedSubscription",
+    "name": "HomeRouterAppUpdatesChangedSubscription",
     "type": "Subscription",
     "metadata": null,
     "argumentDefinitions": [],
@@ -63,19 +63,19 @@ return {
   },
   "operation": {
     "kind": "Operation",
-    "name": "SideMenuAppUpdatesChangedSubscription",
+    "name": "HomeRouterAppUpdatesChangedSubscription",
     "argumentDefinitions": [],
     "selections": (v0/*: any*/)
   },
   "params": {
     "operationKind": "subscription",
-    "name": "SideMenuAppUpdatesChangedSubscription",
+    "name": "HomeRouterAppUpdatesChangedSubscription",
     "id": null,
-    "text": "subscription SideMenuAppUpdatesChangedSubscription {\n  appUpdatesChanged {\n    appUpdatesCount\n  }\n}\n",
+    "text": "subscription HomeRouterAppUpdatesChangedSubscription {\n  appUpdatesChanged {\n    appUpdatesCount\n  }\n}\n",
     "metadata": {}
   }
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '72eba2192a17a1f94f79a52da1596ef5';
+(node/*: any*/).hash = '90ae801cce63122dc5cdc10d1ebfbeeb';
 module.exports = node;

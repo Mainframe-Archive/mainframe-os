@@ -1,6 +1,6 @@
 // @flow
 
-import type { WebContents } from 'electron'
+import { app, type WebContents } from 'electron'
 import { getPassword, setPassword } from 'keytar'
 import nanoid from 'nanoid'
 
@@ -10,6 +10,7 @@ import type { DB } from '../db/types'
 import type { Environment } from '../environment'
 import type { Logger } from '../logger'
 import { createChannels } from '../rpc'
+import { setupUpdater, type UpdaterSubject } from '../updater'
 import { createAppWindow, createLauncherWindow } from '../windows'
 
 import { AppContext, AppSession } from './app'
@@ -36,8 +37,9 @@ export class SystemContext {
   dbReady: Promise<DB>
   env: Environment
   initialized: boolean = false
-  syncing: boolean = false
   logger: Logger
+  syncing: boolean = false
+  updater: UpdaterSubject
 
   constructor(params: ContextParams) {
     this.dbReady = new Promise(resolve => {
@@ -48,15 +50,17 @@ export class SystemContext {
     })
     this.env = params.env
     this.logger = params.logger.child({ context: 'system' })
+    this.updater = setupUpdater(params.logger)
 
     createChannels(this)
 
     this.logger.log({
       level: 'debug',
       message: 'System context created',
+      config: this.config.store,
       envName: this.env.name,
       envType: this.env.type,
-      config: this.config.store,
+      systemVersion: app.getVersion(),
     })
   }
 
@@ -317,6 +321,14 @@ export class SystemContext {
     this._launchersByContents.set(ctx.window.webContents, ctx.launcherID)
 
     return ctx
+  }
+
+  showOpenLauncher(): void {
+    // $FlowFixMe: Object.values() losing type
+    const ctx: ?LauncherContext = Object.values(this._launchers)[0]
+    if (ctx != null) {
+      ctx.showWindow()
+    }
   }
 
   getUserContext(userID: string): UserContext {

@@ -10,9 +10,10 @@ import {
   scan,
 } from 'rxjs/operators'
 
+import type { UpdaterState } from '../updater'
 import type { GraphQLContext } from '../context/graphql'
 
-import { appVersion, contact, viewerField } from './objects'
+import { appVersion, contact, systemUpdate, viewerField } from './objects'
 import observableToAsyncIterator from './observableToAsyncIterator'
 
 const appUpdatesPayload = new GraphQLObjectType({
@@ -139,6 +140,29 @@ const contactsChanged = {
   },
 }
 
+const systemUpdateChangedPayload = new GraphQLObjectType({
+  name: 'SystemUpdateChangedPayload',
+  fields: () => ({
+    systemUpdate: {
+      type: new GraphQLNonNull(systemUpdate),
+    },
+  }),
+})
+
+const systemUpdateChanged = {
+  type: new GraphQLNonNull(systemUpdateChangedPayload),
+  subscribe: (self, args, ctx: GraphQLContext) => {
+    const observable = ctx.system.updater.pipe(
+      // The UI is not showing download progress so we can filter to only emit on status change
+      distinctUntilChanged((a: UpdaterState, b: UpdaterState) => {
+        return a.status !== b.status
+      }),
+      map(systemUpdate => ({ systemUpdateChanged: { systemUpdate } })),
+    )
+    return observableToAsyncIterator(observable)
+  },
+}
+
 export default new GraphQLObjectType({
   name: 'Subscription',
   fields: () => ({
@@ -146,5 +170,6 @@ export default new GraphQLObjectType({
     appVersionChanged,
     contactChanged,
     contactsChanged,
+    systemUpdateChanged,
   }),
 })
