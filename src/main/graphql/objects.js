@@ -950,6 +950,7 @@ export const lookup = new GraphQLObjectType({
 
 export const lookupField = {
   type: new GraphQLNonNull(lookup),
+  resolve: () => ({}),
 }
 
 export const systemUpdateStatus = new GraphQLEnumType({

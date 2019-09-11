@@ -490,7 +490,7 @@ export default {
     },
     copyableBlock: {
       fontFamily: 'IBM Plex Mono',
-      padding: '30px 20px',
+      padding: '20px 20px',
       textAlign: 'center',
       color: '#303030',
       fontSize: 13,

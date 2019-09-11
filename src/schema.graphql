@@ -166,6 +166,14 @@ type ContactRequest implements Node {
   connectionState: ContactConnectionState!
 }
 
+type ContactRequestsChangedPayload {
+  viewer: User!
+}
+
+type contactsChangedPayload {
+  viewer: User!
+}
+
 enum ContactStakeState {
   STAKED
   RECLAIMING
@@ -469,7 +477,8 @@ type Subscription {
   appUpdatesChanged: AppUpdatesPayload!
   appVersionChanged: AppVersionPayload!
   contactChanged: ContactChangedPayload!
-  contactsChanged: ContactChangedPayload!
+  contactsChanged: contactsChangedPayload!
+  contactRequestsChanged: ContactRequestsChangedPayload!
   systemUpdateChanged: SystemUpdateChangedPayload!
 }
 

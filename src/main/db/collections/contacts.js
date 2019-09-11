@@ -200,19 +200,16 @@ export default async (
           getFirstContactFeed(userAddress, peerAddress),
         )
 
-        const payload = await encode(
-          sharedKey,
-          writeFirstContact({
-            contact: {
-              signature,
-              publicKey: this.keyPair.publicKey,
-            },
-            peer: {
-              publicFeed: userAddress,
-            },
-          }),
-        )
-
+        const firstContactData = await writeFirstContact({
+          contact: {
+            signature,
+            publicKey: this.keyPair.publicKey,
+          },
+          peer: {
+            publicFeed: userAddress,
+          },
+        })
+        const payload = await encode(sharedKey, firstContactData)
         await feed.publishJSON(user.getBzz(), payload)
 
         logger.log({

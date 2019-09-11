@@ -461,11 +461,11 @@ class AppDetails extends Component<Props, State> {
             {hasDraftVersion ? null : (
               <ButtonsContainer>
                 {openButton}
-                <Button
+                {/* <Button
                   variant={['mediumUppercase', 'marginRight10']}
                   title="SUBMIT TO MAINFRAME APP STORE"
                   onPress={this.onPressSubmitFoReview}
-                />
+                /> */}
                 <Button
                   variant={['mediumUppercase', 'redOutline']}
                   title="NEW VERSION"
