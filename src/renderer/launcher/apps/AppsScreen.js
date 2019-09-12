@@ -7,6 +7,9 @@ import {
   graphql,
   commitMutation,
   createFragmentContainer,
+  // $FlowFixMe: requestSubscription not present in Flow definition but exported by library
+  requestSubscription,
+  type Disposable,
   type Environment,
 } from 'react-relay'
 import styled from 'styled-components/native'
@@ -43,6 +46,16 @@ const SUGGESTED_APPS = [
     description: 'Transfer crypto money in no time',
   },
 ]
+
+const APP_VERSION_CHANGED_SUBSCRIPTION = graphql`
+  subscription AppsScreenAppVersionChangedSubscription {
+    appVersionChanged {
+      appVersion {
+        ...AppItem_appVersion
+      }
+    }
+  }
+`
 
 const appRemoveMutation = graphql`
   mutation AppsScreenRemoveUserAppVersionMutation(
@@ -110,12 +123,26 @@ type State = {
 }
 
 class AppsView extends Component<Props, State> {
+  _subscriptions: Array<Disposable> = []
   state = {
     showModal: null,
     showOnboarding: false,
     suggestedApps: [],
     editing: false,
     deleting: undefined,
+  }
+
+  componentDidMount() {
+    this._subscriptions.push(
+      requestSubscription(this.props.relay.environment, {
+        subscription: APP_VERSION_CHANGED_SUBSCRIPTION,
+      }),
+    )
+  }
+
+  componentWillUnmount() {
+    this._subscriptions.forEach(sub => sub.dispose())
+    this._subscriptions = []
   }
 
   toggleEditing = () => {

@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash c0096e9e4bb05afc32b88a9490619b66
+ * @relayHash e86208f80aba58cf89fbf003e986d404
  */
 
 /* eslint-disable */
@@ -12,8 +12,8 @@ import type { ConcreteRequest } from 'relay-runtime';
 type InviteContactModal_contactInvite$ref = any;
 export type ContactConnectionState = "CONNECTED" | "DECLINED" | "RECEIVED" | "SENDING_BLOCKCHAIN" | "SENDING_FEED" | "SENT_BLOCKCHAIN" | "SENT_FEED" | "%future added value";
 export type ContactStakeState = "RECLAIMED" | "RECLAIMING" | "SEIZED" | "STAKED" | "%future added value";
-export type HomeRouterContactChangedSubscriptionVariables = {||};
-export type HomeRouterContactChangedSubscriptionResponse = {|
+export type ContactsScreenContactChangedSubscriptionVariables = {||};
+export type ContactsScreenContactChangedSubscriptionResponse = {|
   +contactChanged: {|
     +contact: {|
       +localID: string,
@@ -36,15 +36,15 @@ export type HomeRouterContactChangedSubscriptionResponse = {|
     |}
   |}
 |};
-export type HomeRouterContactChangedSubscription = {|
-  variables: HomeRouterContactChangedSubscriptionVariables,
-  response: HomeRouterContactChangedSubscriptionResponse,
+export type ContactsScreenContactChangedSubscription = {|
+  variables: ContactsScreenContactChangedSubscriptionVariables,
+  response: ContactsScreenContactChangedSubscriptionResponse,
 |};
 */
 
 
 /*
-subscription HomeRouterContactChangedSubscription {
+subscription ContactsScreenContactChangedSubscription {
   contactChanged {
     contact {
       localID
@@ -179,7 +179,7 @@ return {
   "kind": "Request",
   "fragment": {
     "kind": "Fragment",
-    "name": "HomeRouterContactChangedSubscription",
+    "name": "ContactsScreenContactChangedSubscription",
     "type": "Subscription",
     "metadata": null,
     "argumentDefinitions": [],
@@ -237,7 +237,7 @@ return {
   },
   "operation": {
     "kind": "Operation",
-    "name": "HomeRouterContactChangedSubscription",
+    "name": "ContactsScreenContactChangedSubscription",
     "argumentDefinitions": [],
     "selections": [
       {
@@ -295,13 +295,13 @@ return {
   },
   "params": {
     "operationKind": "subscription",
-    "name": "HomeRouterContactChangedSubscription",
+    "name": "ContactsScreenContactChangedSubscription",
     "id": null,
-    "text": "subscription HomeRouterContactChangedSubscription {\n  contactChanged {\n    contact {\n      localID\n      peerID\n      publicID\n      connectionState\n      invite {\n        ...InviteContactModal_contactInvite\n        ethNetwork\n        fromAddress\n        inviteTX\n        stakeState\n        stakeAmount\n        reclaimedStakeTX\n      }\n      profile {\n        name\n        ethAddress\n      }\n      id\n    }\n  }\n}\n\nfragment InviteContactModal_contactInvite on ContactInvite {\n  ethNetwork\n  fromAddress\n  inviteTX\n  stakeState\n  stakeAmount\n  reclaimedStakeTX\n}\n",
+    "text": "subscription ContactsScreenContactChangedSubscription {\n  contactChanged {\n    contact {\n      localID\n      peerID\n      publicID\n      connectionState\n      invite {\n        ...InviteContactModal_contactInvite\n        ethNetwork\n        fromAddress\n        inviteTX\n        stakeState\n        stakeAmount\n        reclaimedStakeTX\n      }\n      profile {\n        name\n        ethAddress\n      }\n      id\n    }\n  }\n}\n\nfragment InviteContactModal_contactInvite on ContactInvite {\n  ethNetwork\n  fromAddress\n  inviteTX\n  stakeState\n  stakeAmount\n  reclaimedStakeTX\n}\n",
     "metadata": {}
   }
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '4292b7b1b0f6f4d2f50a05fa4e573e4d';
+(node/*: any*/).hash = '2cb4f2df12169543244481b29fe9e4c6';
 module.exports = node;

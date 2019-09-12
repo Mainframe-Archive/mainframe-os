@@ -133,7 +133,7 @@ export default class InvitesHandler {
       this.logger.log({
         level: 'debug',
         message: 'Fetched invite events',
-        events: events.toString(),
+        events,
       })
 
       for (let i = 0; i < events.length; i++) {

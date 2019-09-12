@@ -189,7 +189,6 @@ export class LauncherContext {
   }
 
   async subscribe(query: string, variables?: Object = {}): Promise<string> {
-    // TODO: better check for the subscribe() return, it could be an ExecutionResult with errors
     // $FlowFixMe: AsyncIterator
     const iterator = await subscribe(
       schema,
@@ -199,14 +198,23 @@ export class LauncherContext {
       variables,
     )
 
+    if (iterator.errors && iterator.errors.length > 0) {
+      this.logger.log({
+        level: 'error',
+        message: 'GraphQL subscription failed to create iterator',
+        errors: iterator.errors.map(e => e.toString()),
+      })
+      throw new Error('Failed to create subscription iterator')
+    }
+
     const subscription = new GraphQLSubscription(iterator)
     this._graphqlSubscriptions[subscription.id] = subscription
 
-    subscription.start(this.graphqlNotify).catch(error => {
+    subscription.start(this.graphqlNotify).catch(err => {
       this.logger.log({
         level: 'error',
         message: 'GraphQL subscription notification failed',
-        error,
+        error: err.toString(),
       })
       delete this._graphqlSubscriptions[subscription.id]
     })

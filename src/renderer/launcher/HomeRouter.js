@@ -15,6 +15,7 @@ import DevtoolsRouter from './devtools/DevtoolsRouter'
 import SettingsRouter from './settings/SettingsRouter'
 import WalletsScreen from './wallets/WalletsScreen'
 import type { HomeRouterAppUpdatesChangedSubscriptionResponse as AppUpdatesData } from './__generated__/HomeRouterAppUpdatesChangedSubscription.graphql'
+import type { HomeRouterContactRequestsChangedSubscriptionResponse as ContactRequestsData } from './__generated__/HomeRouterContactRequestsChangedSubscription.graphql'
 import type { HomeRouterSystemUpdateChangedSubscriptionResponse as SystemUpdateData } from './__generated__/HomeRouterSystemUpdateChangedSubscription.graphql'
 
 const APP_UPDATES_CHANGED_SUBSCRIPTION = graphql`
@@ -25,36 +26,12 @@ const APP_UPDATES_CHANGED_SUBSCRIPTION = graphql`
   }
 `
 
-const APP_VERSION_CHANGED_SUBSCRIPTION = graphql`
-  subscription HomeRouterAppVersionChangedSubscription {
-    appVersionChanged {
-      appVersion {
-        ...AppItem_appVersion
-      }
-    }
-  }
-`
-
-const CONTACT_CHANGED_SUBSCRIPTION = graphql`
-  subscription HomeRouterContactChangedSubscription {
-    contactChanged {
-      contact {
-        localID
-        peerID
-        publicID
-        connectionState
-        invite {
-          ...InviteContactModal_contactInvite
-          ethNetwork
-          fromAddress
-          inviteTX
-          stakeState
-          stakeAmount
-          reclaimedStakeTX
-        }
-        profile {
-          name
-          ethAddress
+const CONTACT_REQUESTS_CHANGED_SUBSCRIPTION = graphql`
+  subscription HomeRouterContactRequestsChangedSubscription {
+    contactRequestsChanged {
+      viewer {
+        contactRequests {
+          localID
         }
       }
     }
@@ -94,8 +71,13 @@ export default function HomeRouter() {
   useSubscription(APP_UPDATES_CHANGED_SUBSCRIPTION, (data: AppUpdatesData) => {
     setBadges(b => ({ ...b, apps: data.appUpdatesChanged.appUpdatesCount > 0 }))
   })
-  useSubscription(APP_VERSION_CHANGED_SUBSCRIPTION)
-  useSubscription(CONTACT_CHANGED_SUBSCRIPTION)
+  useSubscription(
+    CONTACT_REQUESTS_CHANGED_SUBSCRIPTION,
+    (data: ContactRequestsData) => {
+      const { contactRequests } = data.contactRequestsChanged.viewer
+      setBadges(b => ({ ...b, contacts: contactRequests.length > 0 }))
+    },
+  )
   useSubscription(
     SYSTEM_UPDATE_CHANGED_SUBSCRIPTION,
     (data: SystemUpdateData) => {

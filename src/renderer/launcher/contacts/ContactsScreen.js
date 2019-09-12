@@ -36,6 +36,7 @@ import Avatar from '../../UIComponents/Avatar'
 import SvgSelectedPointer from '../../UIComponents/SVGSelectedPointer'
 import FormModalView from '../../UIComponents/FormModalView'
 import Loader from '../../UIComponents/Loader'
+import CopyableBlock from '../CopyableBlock'
 import { InformationBox } from '../identities/IdentitiesView'
 import RelayRenderer from '../RelayRenderer'
 import InviteContactModal, {
@@ -272,6 +273,32 @@ type State = {
   notification: string,
 }
 
+const CONTACT_CHANGED_SUBSCRIPTION = graphql`
+  subscription ContactsScreenContactChangedSubscription {
+    contactChanged {
+      contact {
+        localID
+        peerID
+        publicID
+        connectionState
+        invite {
+          ...InviteContactModal_contactInvite
+          ethNetwork
+          fromAddress
+          inviteTX
+          stakeState
+          stakeAmount
+          reclaimedStakeTX
+        }
+        profile {
+          name
+          ethAddress
+        }
+      }
+    }
+  }
+`
+
 const CONTACTS_CHANGED_SUBSCRIPTION = graphql`
   subscription ContactsScreenContactsChangedSubscription {
     contactsChanged {
@@ -330,7 +357,7 @@ const peerLookupQuery = graphql`
 `
 
 class ContactsView extends Component<Props, State> {
-  _subscription: ?Disposable
+  _subscriptions: Array<Disposable> = []
 
   constructor(props: Props) {
     super(props)
@@ -343,15 +370,21 @@ class ContactsView extends Component<Props, State> {
   }
 
   componentDidMount() {
-    this._subscription = requestSubscription(this.props.relay.environment, {
-      subscription: CONTACTS_CHANGED_SUBSCRIPTION,
-    })
+    this._subscriptions.push(
+      requestSubscription(this.props.relay.environment, {
+        subscription: CONTACT_CHANGED_SUBSCRIPTION,
+      }),
+    )
+    this._subscriptions.push(
+      requestSubscription(this.props.relay.environment, {
+        subscription: CONTACTS_CHANGED_SUBSCRIPTION,
+      }),
+    )
   }
 
   componentWillUnmount() {
-    if (this._subscription != null) {
-      this._subscription.dispose()
-    }
+    this._subscriptions.forEach(sub => sub.dispose())
+    this._subscriptions = []
   }
 
   getSelectedContact(): Contact | ContactRequest {
@@ -795,7 +828,7 @@ class ContactsView extends Component<Props, State> {
   }
 
   renderAddNewContactFormStep1() {
-    const { error, radio } = this.state
+    const { addingContact, error, radio } = this.state
 
     const errorMsg = error ? (
       <Row size={1}>
@@ -861,7 +894,8 @@ class ContactsView extends Component<Props, State> {
         confirmButton={radio === 'blockchain' ? 'NEXT' : 'ADD'}
         dismissButton="CANCEL"
         onRequestClose={this.closeModal}
-        onSubmitForm={this.submitNewContact}>
+        onSubmitForm={this.submitNewContact}
+        confirmButtonDisabled={!!addingContact}>
         <FormContainer modal>
           <Row size={1}>
             <Column>
@@ -1152,23 +1186,36 @@ class ContactsView extends Component<Props, State> {
               </Column>
             </Row>
           )}
-          <Row size={1}>
-            <Column>
-              <Text variant="smallTitle" theme={{ padding: '20px 0 10px 0' }}>
-                Mainframe ID
-              </Text>
-              <Text variant="addressLarge">{selectedContact.publicID}</Text>
-            </Column>
-          </Row>
-          {this.isIdentitySelected() && (
+          {this.isIdentitySelected() ? (
+            <>
+              <Row size={1}>
+                <Column>
+                  <Text
+                    variant="smallTitle"
+                    theme={{ padding: '20px 0 10px 0' }}>
+                    Mainframe ID
+                  </Text>
+                  <CopyableBlock value={selectedContact.publicID} />
+                </Column>
+              </Row>
+              <Row size={1}>
+                <Column>
+                  <InformationBox
+                    content={
+                      'Share your Mainframe ID with your contacts and let your friends add you on Mainframe OS.'
+                    }
+                    full
+                  />
+                </Column>
+              </Row>
+            </>
+          ) : (
             <Row size={1}>
               <Column>
-                <InformationBox
-                  content={
-                    'Share your Mainframe ID with your contacts and let your friends add you on Mainframe OS.'
-                  }
-                  full
-                />
+                <Text variant="smallTitle" theme={{ padding: '20px 0 10px 0' }}>
+                  Mainframe ID
+                </Text>
+                <Text variant="addressLarge">{selectedContact.publicID}</Text>
               </Column>
             </Row>
           )}

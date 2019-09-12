@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 53ca5f71d0b0936bbc9ba167f5ecbaa5
+ * @relayHash a6fbdcf084e8cd9921ff49b2de10a76e
  */
 
 /* eslint-disable */
@@ -10,23 +10,23 @@
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
 type AppItem_appVersion$ref = any;
-export type HomeRouterAppVersionChangedSubscriptionVariables = {||};
-export type HomeRouterAppVersionChangedSubscriptionResponse = {|
+export type AppsScreenAppVersionChangedSubscriptionVariables = {||};
+export type AppsScreenAppVersionChangedSubscriptionResponse = {|
   +appVersionChanged: {|
     +appVersion: {|
       +$fragmentRefs: AppItem_appVersion$ref
     |}
   |}
 |};
-export type HomeRouterAppVersionChangedSubscription = {|
-  variables: HomeRouterAppVersionChangedSubscriptionVariables,
-  response: HomeRouterAppVersionChangedSubscriptionResponse,
+export type AppsScreenAppVersionChangedSubscription = {|
+  variables: AppsScreenAppVersionChangedSubscriptionVariables,
+  response: AppsScreenAppVersionChangedSubscriptionResponse,
 |};
 */
 
 
 /*
-subscription HomeRouterAppVersionChangedSubscription {
+subscription AppsScreenAppVersionChangedSubscription {
   appVersionChanged {
     appVersion {
       ...AppItem_appVersion
@@ -97,7 +97,7 @@ return {
   "kind": "Request",
   "fragment": {
     "kind": "Fragment",
-    "name": "HomeRouterAppVersionChangedSubscription",
+    "name": "AppsScreenAppVersionChangedSubscription",
     "type": "Subscription",
     "metadata": null,
     "argumentDefinitions": [],
@@ -133,7 +133,7 @@ return {
   },
   "operation": {
     "kind": "Operation",
-    "name": "HomeRouterAppVersionChangedSubscription",
+    "name": "AppsScreenAppVersionChangedSubscription",
     "argumentDefinitions": [],
     "selections": [
       {
@@ -228,13 +228,13 @@ return {
   },
   "params": {
     "operationKind": "subscription",
-    "name": "HomeRouterAppVersionChangedSubscription",
+    "name": "AppsScreenAppVersionChangedSubscription",
     "id": null,
-    "text": "subscription HomeRouterAppVersionChangedSubscription {\n  appVersionChanged {\n    appVersion {\n      ...AppItem_appVersion\n      id\n    }\n  }\n}\n\nfragment AppItem_appVersion on AppVersion {\n  localID\n  installationState\n  app {\n    publicID\n    id\n  }\n  developer {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n  manifest {\n    profile {\n      name\n    }\n  }\n  update {\n    id\n  }\n}\n",
+    "text": "subscription AppsScreenAppVersionChangedSubscription {\n  appVersionChanged {\n    appVersion {\n      ...AppItem_appVersion\n      id\n    }\n  }\n}\n\nfragment AppItem_appVersion on AppVersion {\n  localID\n  installationState\n  app {\n    publicID\n    id\n  }\n  developer {\n    localID\n    profile {\n      name\n    }\n    id\n  }\n  manifest {\n    profile {\n      name\n    }\n  }\n  update {\n    id\n  }\n}\n",
     "metadata": {}
   }
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = '241293dcac42795d9cbfc9eb865880c4';
+(node/*: any*/).hash = '043b15205e8fab5a2982faaa9ed1a5ff';
 module.exports = node;

@@ -125,13 +125,42 @@ const contactChanged = {
   },
 }
 
+const contactsChangedPayload = new GraphQLObjectType({
+  name: 'contactsChangedPayload',
+  fields: () => ({
+    viewer: viewerField,
+  }),
+})
+
 const contactsChanged = {
-  type: new GraphQLNonNull(contactChangedPayload),
+  type: new GraphQLNonNull(contactsChangedPayload),
   subscribe: async (self, args, ctx: GraphQLContext) => {
     const user = await ctx.getUser()
     const observable = user.get$('contacts').pipe(
       map(() => ({
         contactsChanged: {
+          viewer: {},
+        },
+      })),
+    )
+    return observableToAsyncIterator(observable)
+  },
+}
+
+const contactRequestsChangedPayload = new GraphQLObjectType({
+  name: 'ContactRequestsChangedPayload',
+  fields: () => ({
+    viewer: viewerField,
+  }),
+})
+
+const contactRequestsChanged = {
+  type: new GraphQLNonNull(contactRequestsChangedPayload),
+  subscribe: async (self, args, ctx: GraphQLContext) => {
+    const user = await ctx.getUser()
+    const observable = user.get$('contactRequests').pipe(
+      map(() => ({
+        contactRequestsChanged: {
           viewer: {},
         },
       })),
@@ -170,6 +199,7 @@ export default new GraphQLObjectType({
     appVersionChanged,
     contactChanged,
     contactsChanged,
+    contactRequestsChanged,
     systemUpdateChanged,
   }),
 })

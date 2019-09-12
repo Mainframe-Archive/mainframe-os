@@ -22,7 +22,7 @@ const TextContainer = styled.View`
 `
 
 const ButtonContainer = styled.View`
-  padding: 20px;
+  padding: 10px;
 `
 
 type Props = {
