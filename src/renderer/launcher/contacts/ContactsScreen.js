@@ -828,7 +828,7 @@ class ContactsView extends Component<Props, State> {
   }
 
   renderAddNewContactFormStep1() {
-    const { error, radio } = this.state
+    const { addingContact, error, radio } = this.state
 
     const errorMsg = error ? (
       <Row size={1}>
@@ -894,7 +894,8 @@ class ContactsView extends Component<Props, State> {
         confirmButton={radio === 'blockchain' ? 'NEXT' : 'ADD'}
         dismissButton="CANCEL"
         onRequestClose={this.closeModal}
-        onSubmitForm={this.submitNewContact}>
+        onSubmitForm={this.submitNewContact}
+        confirmButtonDisabled={!!addingContact}>
         <FormContainer modal>
           <Row size={1}>
             <Column>

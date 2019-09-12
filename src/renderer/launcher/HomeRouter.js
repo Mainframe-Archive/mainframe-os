@@ -15,7 +15,7 @@ import DevtoolsRouter from './devtools/DevtoolsRouter'
 import SettingsRouter from './settings/SettingsRouter'
 import WalletsScreen from './wallets/WalletsScreen'
 import type { HomeRouterAppUpdatesChangedSubscriptionResponse as AppUpdatesData } from './__generated__/HomeRouterAppUpdatesChangedSubscription.graphql'
-import type { HomeRouterContactRequestChangedSubscriptionResponse as ContactRequestsData } from './__generated__/HomeRouterContactRequestsChangedSubscription.graphql'
+import type { HomeRouterContactRequestsChangedSubscriptionResponse as ContactRequestsData } from './__generated__/HomeRouterContactRequestsChangedSubscription.graphql'
 import type { HomeRouterSystemUpdateChangedSubscriptionResponse as SystemUpdateData } from './__generated__/HomeRouterSystemUpdateChangedSubscription.graphql'
 
 const APP_UPDATES_CHANGED_SUBSCRIPTION = graphql`

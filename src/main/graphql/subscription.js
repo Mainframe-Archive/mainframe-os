@@ -158,9 +158,9 @@ const contactRequestsChanged = {
   type: new GraphQLNonNull(contactRequestsChangedPayload),
   subscribe: async (self, args, ctx: GraphQLContext) => {
     const user = await ctx.getUser()
-    const observable = user.get$('contactsRequests').pipe(
+    const observable = user.get$('contactRequests').pipe(
       map(() => ({
-        userContactRequestsChanged: {
+        contactRequestsChanged: {
           viewer: {},
         },
       })),
