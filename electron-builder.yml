@@ -36,6 +36,8 @@ win:
 files:
   # Files to include
   - 'build/icon/*'
+  - 'dist/latest.yml'
+  - 'dist/latest-linux.yml'
   - 'dist/latest-mac.yml'
 
   # Individual files to exclude - mostly from https://github.com/LedgerHQ/ledger-live-desktop/blob/develop/electron-builder.yml
