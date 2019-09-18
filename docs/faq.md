@@ -1,7 +1,6 @@
 ---
 id: faq
-title: Mainframe OS FAQ
-sidebar_label: FAQ
+title: FAQ
 ---
 
 ## What is Mainframe OS?

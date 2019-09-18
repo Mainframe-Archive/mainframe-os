@@ -4,33 +4,40 @@ title: Mainframe SDK
 sidebar_label: Mainframe SDK
 ---
 
-Javascript SDK for communicating with the Mainframe launcher and daemon.
+Javascript SDK for interacting with the Mainframe OS platform.
 
+## Installation
+
+```sh
+yarn add '@mainframe/sdk'
 ```
+
+## Usage
+
+```js
 import MainframeSDK from '@mainframe/sdk'
-const sdk = new MainframeSDK()
-const res = await sdk.apiVersion()
+
+const run = async () => {
+  const sdk = new MainframeSDK()
+  const contacts = await sdk.contacts.selectContacts()
+}
+
+run().catch(error => {
+  console.log('Error using SDK', error)
+})
 ```
 
-# API
-
-### apiVersion()
-
-Get the current api version of the Mainframe client.
-
-**returns:** `Promise<string>`
-
-# Contacts
+## Contacts APIs
 
 ### contacts.selectContacts()
 
 Will present the user with a list of contacts to select from and returns an Array containing data for the selected contacts.
 
-**returns:** Promise<Array<[Contact](#contact)>>
+**returns:** [`Promise<Array<Contact>>`](#contact)
 
 **Example:**
 
-```
+```js
 const contacts = await sdk.contacts.selectContacts()
 ```
 
@@ -38,11 +45,11 @@ const contacts = await sdk.contacts.selectContacts()
 
 Will allow the user to only select a single contact from their list of contacts and return a data object for that contact. If no contact is selected it will return undefined.
 
-**returns:** Promise<?[Contact](#contact)>
+**returns:** [`Promise<?Contact>`](#contact)
 
 **Example:**
 
-```
+```js
 const contact = await sdk.contacts.selectContact()
 ```
 
@@ -50,11 +57,11 @@ const contact = await sdk.contacts.selectContact()
 
 Allows you to fetch data for contacts your app has previously been approved to read data from. It's possible some contacts could return no data in the case where the user has deleted a contact or revoked permission.
 
-**returns:** Promise<Array<[ExistingContact](#existing-contact)>>
+**returns:** [`Promise<Array<ExistingContact>>`](#existing-contact)
 
 **Example:**
 
-```
+```js
 const contacts = await sdk.contacts.getDataForContacts(['ue64gf93b'])
 ```
 
@@ -62,11 +69,11 @@ const contacts = await sdk.contacts.getDataForContacts(['ue64gf93b'])
 
 A call to fetch data for a single contact your app has previously been approved to read data from.
 
-**returns:** Promise<?[Contact](#contact)>
+**returns:** [`Promise<?Contact>`](#contact)
 
 **Example:**
 
-```
+```js
 const contact = await sdk.contacts.getDataForContact('ue64gf93b')
 ```
 
@@ -74,63 +81,23 @@ const contact = await sdk.contacts.getDataForContact('ue64gf93b')
 
 Fetches all the contacts your app has previously been approved to read data from.
 
-**returns:** Promise<Array<[Contact](#contact)>>
+**returns:** [`Promise<Array<Contact>>`](#contact)
 
 **Example:**
 
-```
+```js
 const contact = await sdk.contacts.getApprovedContacts()
 ```
 
-# Payments
+## Ethereum APIs
 
-Payment API's to facilitate transferring funds between users.
-
-### payments.payContact()
-
-Read events from the blockchain.
-
-**Arguments**
-
-1. `currency: 'MFT' | 'ETH'`
-1. `value: number`
-1. `contactID?: string`
-1. `from?: string`
-
-**returns:** Promise<[Transaction EventEmitter](#transaction-eventEmitter:)>
-
-If no contact ID is provided the contact picker will be displayed by the trusted UI to allow the user to select a contact.
-
-If no from address is provided the users default ETH address will be used.
-
-**Example:**
-
-```
-const params = {
-  value: 500,
-  currency: 'MFT',
-}
-
-const tx = await sdk.payments.payContact(params)
-tx.on('hash', hash => ... )
-  .on('mined', () => ... )
-  .on('confirmed', () => ... )
-  .on('error', error => ... )
-
-
-```
-
-# Ethereum
-
-API's for interacting with the Ethereum blockchain.
+APIs for interacting with the Ethereum blockchain.
 
 ### ethereum.web3Provider
 
-A getter for the MainframeOS web3Provider.
+A getter for the Mainframe OS web3Provider.
 
-_Currently incompatible with Web3 versions later than 1.0.0-beta.37, see issue [#2266](https://github.com/ethereum/web3.js/issues/2266) for more info._
-
-```
+```js
 const web3 = new Web3(sdk.ethereum.web3Provider)
 ```
 
@@ -146,10 +113,17 @@ Returns a numeric string representing the Ethereum network ID. A few example val
 ‘42’: Kovan Test Network
 ```
 
-### ethereum.selectedAccount
+### ethereum.getDefaultAccount
 
-Returns a hex-prefixed string representing the current user’s selected address, e.g.:
-`0xde0B295669a9FD93d5F28D9Ec85E40f4cb697BAe`.
+Fetches the users default Ethereum address
+
+**returns:** `Promise<?string>`
+
+**Example:**
+
+```js
+const account = await sdk.ethereum.getDefaultAccount()
+```
 
 ### ethereum.on(eventName, value)
 
@@ -160,11 +134,10 @@ Provides a way to listen to events from the providers event emitter.
 
 **Example:**
 
-```
+```js
 sdk.ethereum.on('accountsChanged', accounts => {
   // Time to refresh state
 })
-
 ```
 
 ### ethereum.sendETH()
@@ -178,11 +151,11 @@ Transfer ETH on Ethereum blockchain.
 1. `from: string`
 1. `confirmations?: number`
 
-**returns:** [Transaction EventEmitter](#transaction-eventEmitter)
+**returns:** [`Promise<Transaction EventEmitter>`](#transaction-eventEmitter)
 
 **Example:**
 
-```
+```js
 const params = {
   value: 500,
   from: '0xde0B295669a9FD93d5F28D9Ec85E40f4cb697BAe',
@@ -208,11 +181,11 @@ Transfer MFT on Ethereum blockchain.
 1. `from: string`
 1. `confirmations?: number`
 
-**returns:** [Transaction EventEmitter](#transaction-eventEmitter)
+**returns:** [`Promise<Transaction EventEmitter>`](#transaction-eventEmitter)
 
 **Example:**
 
-```
+```js
 const params = {
   value: 500,
   from: '0xde0B295669a9FD93d5F28D9Ec85E40f4cb697BAe',
@@ -227,17 +200,70 @@ await sdk.payments.sendMFT(params)
 
 ```
 
-# Storage
+### ethereum.sign(message: string, address: string)
+
+Sign a message with a users Ethereum wallet.
+
+**returns:** `Promise<string>`
+
+**Example:**
+
+```js
+const signedMsg = await sdk.ethereum.sign(
+  'hello',
+  '0xcf8d1238198ad8b389666574f2d8bc411a4b39b6',
+)
+```
+
+## Payments APIs
+
+Payment APIs to facilitate transferring funds between users.
+
+### payments.payContact()
+
+Read events from the blockchain.
+
+**Arguments**
+
+1. `currency: 'MFT' | 'ETH'`
+1. `value: number`
+1. `contactID?: string`
+1. `from?: string`
+
+**returns:** [`Promise<Transaction EventEmitter>`](#transaction-eventEmitter)
+
+If no contact ID is provided the contact picker will be displayed by the trusted UI to allow the user to select a contact.
+
+If no from address is provided the users default eth address will be used.
+
+**Example:**
+
+```js
+const params = {
+  value: 500,
+  currency: 'MFT',
+}
+
+const tx = await sdk.payments.payContact(params)
+tx.on('hash', hash => ... )
+  .on('mined', () => ... )
+  .on('confirmed', () => ... )
+  .on('error', error => ... )
+
+
+```
+
+## Storage APIs
 
 ### storage.promptUpload()
 
 Will show a file upload window to the user, they can select one file they wish to upload.
 
-**returns:** Promise<true> if the file was successfully uploaded, Promise<false> if the upload window was closed.
+**returns:** `Promise<true>` if the file was successfully uploaded, Promise<false> if the upload window was closed.
 
 **Example:**
 
-```
+```js
 const key = 'example.jpg' // name that is going to be used in the app
 
 await sdk.storage.promptUpload(key)
@@ -247,11 +273,11 @@ await sdk.storage.promptUpload(key)
 
 Will show a save file window to the user, they can select where they wish to save the file.
 
-**returns:** Promise<true> if the file was successfully saved, Promise<false> if the save window was closed.
+**returns:** `Promise<true>` if the file was successfully saved, `Promise<false>` if the save window was closed.
 
 **Example:**
 
-```
+```js
 const key = 'example.jpg' // key of the file user wants to download
 
 await sdk.storage.promptDownload(key)
@@ -261,11 +287,11 @@ await sdk.storage.promptDownload(key)
 
 Fetches keys for all the files your app has previously uploaded.
 
-**returns:** Promise<Array<{ contentType: string, key: string }>>
+**returns:** `Promise<Array<{ contentType: string, key: string }>>`
 
 **Example:**
 
-```
+```js
 const list = await sdk.storage.list()
 ```
 
@@ -273,11 +299,11 @@ const list = await sdk.storage.list()
 
 Sets a string value for a given key.
 
-**returns:** Promise<?string>
+**returns:** `Promise<?string>`
 
 **Example:**
 
-```
+```js
 const key = 'my-key'
 const data = 'example data'
 
@@ -288,11 +314,11 @@ await sdk.storage.set(key, data)
 
 Fetches a string value for a given key.
 
-**returns:** Promise<?string>
+**returns:** `Promise<?string>`
 
 **Example:**
 
-```
+```js
 const key = 'my-key'
 
 const data = await sdk.storage.get(key)
@@ -302,21 +328,21 @@ const data = await sdk.storage.get(key)
 
 Deletes the key from the list of files available to the app.
 
-**returns:** Promise<void>
+**returns:** `Promise<void>`
 
 **Example:**
 
-```
+```js
 const key = 'my-key'
 
 const data = await sdk.storage.delete(key)
 ```
 
-# Types
+## Types
 
-### Contact:
+### Contact
 
-```
+```js
 {
   id: string,
   data: {
@@ -329,11 +355,11 @@ const data = await sdk.storage.delete(key)
 }
 ```
 
-### Existing Contact:
+### Existing Contact
 
 Optional data field where a contact might have been removed or revoked access.
 
-```
+```js
 {
   id: string,
   data: ?{
@@ -346,7 +372,7 @@ Optional data field where a contact might have been removed or revoked access.
 }
 ```
 
-### Transaction EventEmitter:
+### Transaction EventEmitter
 
 Event Emitter returned by calls that write to the blockchain.
 Will emit the following events:
@@ -366,3 +392,7 @@ Once the transaction has reached the required number of confirmations.
 **Error:** `error`
 
 Emitted on error.
+
+## Source code
+
+The Mainframe SDK source code is freely accessible in its [GitHub repository](https://github.com/MainframeHQ/mainframe-sdk).

@@ -9,28 +9,23 @@
 // site configuration options.
 
 const siteConfig = {
-  title: 'Mainframe OS Documentation', // Title for your website.
+  title: 'Mainframe OS', // Title for your website.
   tagline: 'Get started using Mainframe OS.',
   url: 'https://docs.mainframeos.com', // Your website URL
-  baseUrl: '/', // Base URL for your project */
+  baseUrl: '/', // Base URL for your project
   cname: 'docs.mainframeos.com',
-  // For github.io type URLs, you would set the url and baseUrl like:
-  //   url: 'https://facebook.github.io',
-  //   baseUrl: '/test-site/',
 
   // Used for publishing and more
   projectName: 'mainframe-os',
   organizationName: 'MainframeHQ',
-  // For top-level user or org sites, the organization is still the same.
-  // e.g., for the https://JoelMarcey.github.io site, it would be set like...
-  //   organizationName: 'JoelMarcey'
 
   // For no header links in the top nav bar -> headerLinks: [],
   headerLinks: [
-    {doc: 'introduction', label: 'Quick Start'},
-    {doc: 'platform', label: 'Platform'},
-    {doc: 'sdk', label: 'SDK'},
-    {doc: 'faq', label: 'FAQ'},
+    { doc: 'introduction', label: 'Introduction' },
+    { doc: 'app-development', label: 'App development' },
+    { doc: 'sdk', label: 'SDK' },
+    { doc: 'roadmap', label: 'Roadmap' },
+    { doc: 'faq', label: 'FAQ' },
   ],
 
   /* path to images for header/footer */
@@ -42,13 +37,6 @@ const siteConfig = {
   colors: {
     primaryColor: '#DA1157',
     secondaryColor: '#00A7E7',
-  },
-
-  /* Custom fonts for website */
-
-  fonts: {
-    myFont: ['Poppins', 'Serif'],
-    myOtherFont: ['Poppins', '-apple-system', 'system-ui'],
   },
 
   // This copyright info is used in /core/Footer.js and blog RSS/Atom feeds.
@@ -66,6 +54,7 @@ const siteConfig = {
   onPageNav: 'separate',
   // No .html extensions for paths.
   cleanUrl: true,
+  scrollToTop: true,
 
   // Open Graph and Twitter card images.
   // ogImage: 'img/docusaurus.png',
@@ -80,6 +69,6 @@ const siteConfig = {
   // You may provide arbitrary config keys to be used as needed by your
   // template. For example, if you need your repo's URL...
   //   repoUrl: 'https://github.com/facebook/test-site',
-};
+}
 
-module.exports = siteConfig;
+module.exports = siteConfig
