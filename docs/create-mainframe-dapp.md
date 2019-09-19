@@ -4,9 +4,9 @@ title: create-mainframe-dapp
 sidebar_label: create-mainframe-dapp
 ---
 
-[`create-mainframe-dapp`](https://github.com/MainframeHQ/create-mainframe-dapp) is a bootstrapping tool to streamline the initial setup process for a new app. Projects started with `create-mainframe-dapp` integrate the [Mainframe SDK](sdk.md), and are structured and configured as needed to be installed in Mainframe OS.
+[`create-mainframe-dapp`](https://github.com/MainframeHQ/create-mainframe-dapp) is a bootstrapping tool to streamline the initial setup process for a new app.
 
-> This guide assumes some familiarity with React development.
+Projects started with [`create-mainframe-dapp`](https://github.com/MainframeHQ/create-mainframe-dapp) integrate the [Mainframe SDK](sdk.md), and are structured and configured as needed to be installed in Mainframe OS.
 
 ## Prerequisites
 

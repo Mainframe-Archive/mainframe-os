@@ -14,13 +14,13 @@ Apps contents (HTML, JavaScript and other assets) are stored using the Swarm whe
 Once published, an app gets a unique Mainframe App ID that can be used by any user of Mainframe OS to install it.
 New versions can also be published by developers, Mainframe OS notifying users having the app installed that it can be updated.
 
-More details are available in the [application creation and publication documentation](app-flow.md).
+> More details are available in the [application creation and publication documentation](app-flow.md).
 
 ## Mainframe APIs
 
 In order to access the possibilities offered by Mainframe OS, an app can communicate with the underlying platform using the injected `window.mainframe.rpc` API. The easiest way to interact with the platform is to use the [Mainframe SDK](sdk.md).
 
-The [SDK documentation](sdk.md) also presents the different APIs made available to apps by Mainframe OS.
+> The [SDK documentation](sdk.md) also presents the different APIs made available to apps by Mainframe OS.
 
 ## Getting help
 

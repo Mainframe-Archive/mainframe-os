@@ -34,7 +34,7 @@ The name you choose will be **publicly displayed** and associated to the applica
 1. Give your app a version (it must follow the [Semantic Versioning](https://semver.org/) format).
 1. Select the folder containing your application contents (`index.html` and possibly others).
 
-> If you are using `create-mainframe-dapp`, make sure to run `yarn build` and open the `build` folder.
+> If you are using [`create-mainframe-dapp`](create-mainframe-dapp.md), make sure to run `yarn build` and open the `build` folder.
 
 ### Application permissions
 

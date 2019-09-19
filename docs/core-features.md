@@ -16,4 +16,4 @@ The following features are also in development and should be made available in a
 - **Files** are binary data stored in Swarm, that can be encrypted and fully private (never shared) or shared with selected contacts, or shared publicly and unencrypted.
 - **Messages** are text and possibly additional data exchanged with contacts.
 
-If you are a developer, you can learn more about using these features in the [app development documentation](app-development.md).
+> If you are a developer, you can learn more about using these features in the [app development documentation](app-development.md).

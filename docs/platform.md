@@ -14,4 +14,4 @@ The Mainframe platform is made of the following projects, hosted on GitHub:
 All these projects are developed in JavaScript using [Node](https://nodejs.org/en/) v10+ and related technologies.\
 Each repository may contain specific setup instructions.
 
-If you are interested in contributing to the Mainframe platform development, don't hesitate to contact us using one of the [support channels](support.md).
+> If you are interested in contributing to the Mainframe platform development, don't hesitate to contact us using one of the [support channels](support.md).
