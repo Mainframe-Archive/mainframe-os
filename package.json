@@ -123,6 +123,7 @@
     "del-cli": "^3.0.0",
     "electron": "^6.0.10",
     "electron-builder": "^21.2.0",
+    "electron-notarize": "^0.1.1",
     "electron-webpack": "^2.7.4",
     "eslint": "^6.4.0",
     "eslint-config-mainframe": "^4.0.1",

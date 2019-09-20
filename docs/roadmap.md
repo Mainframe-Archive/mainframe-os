@@ -89,7 +89,7 @@ We are still evaluating the features and UX improvements we should prioritize fo
 
 We'll continue to plan and update the roadmap to stay **two releases ahead**. Anything beyond that is unrealistic in this rapidly changing technological landscape.
 
-#### Projects Backlog
+### Projects Backlog
 
 (In no particular order. Subject to change.)
 

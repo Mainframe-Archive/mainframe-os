@@ -1,11 +1,10 @@
+# App config
+
 appId: com.mainframeos.desktop
 productName: MainframeOS
 artifactName: '${productName}.${ext}'
 
-electronVersion: '6.0.10'
-
-directories:
-  buildResources: build
+# Target platforms config
 
 linux:
   category: Network
@@ -14,15 +13,19 @@ linux:
     - AppImage
     - dir
 
-dmg:
-  icon: 'build/dmg/icon.png'
-  background: 'build/dmg/background.png'
-
 mac:
+  entitlements: 'build/entitlements.mac.plist'
+  entitlementsInherit: 'build/entitlements.mac.plist'
+  gatekeeperAssess: false
+  hardenedRuntime: true
   icon: 'build/icon.icns'
   target:
     - dmg
     - zip
+dmg:
+  icon: 'build/dmg/icon.png'
+  background: 'build/dmg/background.png'
+  sign: false
 
 win:
   certificateSubjectName: 'Mainframe Group, Inc'
@@ -32,6 +35,15 @@ win:
       arch:
         - 'x64'
         - 'ia32'
+
+# Build config
+
+electronVersion: '6.0.10'
+
+directories:
+  buildResources: build
+
+# afterSign: 'scripts/notarize-macos-build.js'
 
 files:
   # Files to include
