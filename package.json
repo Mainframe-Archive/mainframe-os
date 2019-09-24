@@ -2,7 +2,7 @@
   "name": "mainframe-os",
   "author": "Mainframe Group, Inc",
   "description": "A platform for decentralized apps",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "main": "src/main/index.js",
   "respository": "github:MainframeHQ/mainframe-os",
   "license": "MIT",
@@ -42,7 +42,7 @@
     }
   },
   "resolutions": {
-    "leveldown": "^5.2.0"
+    "leveldown": "^5.2.1"
   },
   "dependencies": {
     "@babel/polyfill": "^7.6.0",
@@ -74,11 +74,11 @@
     "file-url": "^3.0.0",
     "fs-extra": "^8.1.0",
     "get-stream": "^5.0.0",
-    "graphql": "^14.5.6",
+    "graphql": "^14.5.7",
     "graphql-relay": "^0.6.0",
     "gsap": "^2.1.3",
     "keytar": "^4.9.0",
-    "leveldown": "^5.2.0",
+    "leveldown": "^5.2.1",
     "mime": "^2.4.4",
     "nanoid": "^2.1.1",
     "object-hash": "^1.3.1",
@@ -103,17 +103,17 @@
     "winston": "^3.2.1"
   },
   "devDependencies": {
-    "@babel/cli": "^7.6.0",
-    "@babel/core": "^7.6.0",
+    "@babel/cli": "^7.6.2",
+    "@babel/core": "^7.6.2",
     "@babel/plugin-proposal-class-properties": "^7.5.5",
-    "@babel/plugin-proposal-object-rest-spread": "^7.5.5",
+    "@babel/plugin-proposal-object-rest-spread": "^7.6.2",
     "@babel/plugin-syntax-dynamic-import": "^7.0.0",
-    "@babel/plugin-transform-runtime": "^7.6.0",
-    "@babel/preset-env": "^7.6.0",
+    "@babel/plugin-transform-runtime": "^7.6.2",
+    "@babel/preset-env": "^7.6.2",
     "@babel/preset-flow": "^7.0.0",
     "@babel/preset-react": "^7.0.0",
-    "@babel/register": "^7.6.0",
-    "@svgr/cli": "^4.3.2",
+    "@babel/register": "^7.6.2",
+    "@svgr/cli": "^4.3.3",
     "babel-eslint": "^10.0.3",
     "babel-loader": "^8.0.6",
     "babel-plugin-react-native-web": "^0.10.0",
@@ -136,6 +136,6 @@
     "relay-compiler": "^6.0.0",
     "spectron": "^8.0.0",
     "url-loader": "^2.1.0",
-    "webpack": "^4.40.2"
+    "webpack": "^4.41.0"
   }
 }
