@@ -5,20 +5,20 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-const React = require('react');
+const React = require('react')
 
 class Footer extends React.Component {
   docUrl(doc, language) {
-    const baseUrl = this.props.config.baseUrl;
-    const docsUrl = this.props.config.docsUrl;
-    const docsPart = `${docsUrl ? `${docsUrl}/` : ''}`;
-    const langPart = `${language ? `${language}/` : ''}`;
-    return `${baseUrl}${docsPart}${langPart}${doc}`;
+    const baseUrl = this.props.config.baseUrl
+    const docsUrl = this.props.config.docsUrl
+    const docsPart = `${docsUrl ? `${docsUrl}/` : ''}`
+    const langPart = `${language ? `${language}/` : ''}`
+    return `${baseUrl}${docsPart}${langPart}${doc}`
   }
 
   pageUrl(doc, language) {
-    const baseUrl = this.props.config.baseUrl;
-    return baseUrl + (language ? `${language}/` : '') + doc;
+    const baseUrl = this.props.config.baseUrl
+    return baseUrl + (language ? `${language}/` : '') + doc
   }
 
   render() {
@@ -36,14 +36,14 @@ class Footer extends React.Component {
           </a>
           <div>
             <h5>Docs</h5>
-            <a href={this.docUrl('quick-start')}>Getting Started</a>
-            <a href={this.docUrl('web3')}>Guidelines</a>
-            <a href={this.docUrl('introduction')}>API Reference</a>
+            <a href={this.docUrl('getting-started')}>Getting started</a>
+            <a href={this.docUrl('app-development')}>Application development</a>
+            <a href={this.docUrl('sdk')}>SDK documentation</a>
           </div>
           <div>
             <h5>Community</h5>
             <a
-              href="https://community.mainframe.com"
+              href="https://gitter.im/MainframeHQ/Lobby"
               target="_blank"
               rel="noreferrer noopener">
               Gitter
@@ -83,8 +83,8 @@ class Footer extends React.Component {
         </a>
         <section className="copyright">{this.props.config.copyright}</section>
       </footer>
-    );
+    )
   }
 }
 
-module.exports = Footer;
+module.exports = Footer

@@ -20,8 +20,9 @@ This project is in alpha, lots of breaking changes are to be expected between re
 
 ### Prerequisites
 
-- [Node](https://nodejs.org/en/) v10.x and [Yarn](https://yarnpkg.com/en/) v1.13
-- Installed git and added to PATH environment variable
+- [Node](https://nodejs.org/en/) v10+
+- [Yarn](https://yarnpkg.com/en/) v1.13+
+- [git](https://git-scm.com/)
 
 ### Platform-specific dependencies
 
@@ -40,7 +41,8 @@ npm install --global --production windows-build-tools
 ### Setup
 
 ```
-yarn install
+yarn install # install dependencies
+yarn run deps:build # rebuild native dependencies for Electron
 ```
 
 ## Development

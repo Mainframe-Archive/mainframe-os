@@ -1,8 +1,19 @@
 {
   "docs": {
-    "Mainframe OS": ["introduction"],
-    "Platform Documentation": ["platform", "build-dapps", "publish"],
-    "SDK Documentation": ["sdk"],
-    "Guidelines": ["web3"]
+    "Mainframe OS": [
+      "introduction",
+      "core-features",
+      "getting-started",
+      "mft",
+      "faq",
+      "support"
+    ],
+    "Application development": [
+      "app-development",
+      "app-flow",
+      "sdk",
+      "create-mainframe-dapp"
+    ],
+    "Platform development": ["platform", "roadmap"]
   }
 }

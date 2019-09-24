@@ -5,67 +5,60 @@
     "previous": "Previous",
     "tagline": "Get started using Mainframe OS.",
     "docs": {
-      "build-dapps": {
-        "title": "Building Mainframe Apps"
+      "app-development": {
+        "title": "Developing Mainframe applications",
+        "sidebar_label": "Application development"
+      },
+      "app-flow": {
+        "title": "Creating and publishing apps"
+      },
+      "core-features": {
+        "title": "Core features"
       },
       "create-mainframe-dapp": {
         "title": "create-mainframe-dapp",
         "sidebar_label": "create-mainframe-dapp"
       },
       "faq": {
-        "title": "Mainframe OS FAQ",
-        "sidebar_label": "FAQ"
+        "title": "FAQ"
+      },
+      "getting-started": {
+        "title": "Getting started"
       },
       "introduction": {
-        "title": "Getting Started with Mainframe OS",
-        "sidebar_label": "Getting Started"
+        "title": "Welcome to Mainframe OS",
+        "sidebar_label": "Introduction"
       },
       "mft": {
-        "title": "MFT Token Utility",
-        "sidebar_label": "MFT"
+        "title": "MFT integration"
       },
       "platform": {
-        "title": "Mainframe Platform",
-        "sidebar_label": "Mainframe Platform"
+        "title": "Mainframe platform development",
+        "sidebar_label": "Mainframe platform"
       },
-      "publish": {
-        "title": "Publish Your Dapp"
-      },
-      "readme": {
-        "title": "readme"
+      "roadmap": {
+        "title": "Development roadmap",
+        "sidebar_label": "Roadmap"
       },
       "sdk": {
         "title": "Mainframe SDK",
         "sidebar_label": "Mainframe SDK"
       },
-      "troubleshooting": {
-        "title": "Troubleshooting Mainframe OS installation (macOS only)",
-        "sidebar_label": "troubleshooting"
-      },
-      "unix": {
-        "title": "Unix Instructions",
-        "sidebar_label": "Unix Instructions"
-      },
-      "web3": {
-        "title": "Web3 Notes",
-        "sidebar_label": "Web3 Notes"
-      },
-      "windows": {
-        "title": "Windows Instructions",
-        "sidebar_label": "Windows Instructions"
+      "support": {
+        "title": "Support"
       }
     },
     "links": {
-      "Quick Start": "Quick Start",
-      "Platform": "Platform",
+      "Introduction": "Introduction",
+      "App development": "App development",
       "SDK": "SDK",
+      "Roadmap": "Roadmap",
       "FAQ": "FAQ"
     },
     "categories": {
       "Mainframe OS": "Mainframe OS",
-      "Platform Documentation": "Platform Documentation",
-      "SDK Documentation": "SDK Documentation",
-      "Guidelines": "Guidelines"
+      "Application development": "Application development",
+      "Platform development": "Platform development"
     }
   },
   "pages-strings": {

@@ -80,7 +80,7 @@ export default class SuggestedItem extends Component<Props, State> {
         hover={this.state.hover}
         onMouseOver={this.toggleHover}
         onMouseOut={this.toggleHover}
-        onPress={this.onOpen}
+        onPress={this.onPressInstall}
         key={publicID}>
         <IconContainer className="transition" hover={this.state.hover}>
           <AppIcon id={publicID} size="medium" />
