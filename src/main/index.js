@@ -13,7 +13,6 @@ import { createLogger } from './logger'
 
 const { MAINFRAME_ENV, NODE_ENV } = process.env
 
-const ENV_NAME = MAINFRAME_ENV || 'local-test'
 let ENV_TYPE = is.development ? 'development' : 'production'
 if (
   NODE_ENV === 'development' ||
@@ -22,6 +21,7 @@ if (
 ) {
   ENV_TYPE = NODE_ENV
 }
+const ENV_NAME = MAINFRAME_ENV || `mfos-${NODE_ENV}`
 
 const env = Environment.get(ENV_NAME, ENV_TYPE)
 const logger = createLogger(env)
