@@ -1,0 +1,134 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Creating and publishing apps · Mainframe OS</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="## Creating an app"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Creating and publishing apps · Mainframe OS"/><meta property="og:type" content="website"/><meta property="og:url" content="https://docs.mainframeos.com/"/><meta property="og:description" content="## Creating an app"/><meta name="twitter:card" content="summary"/><link rel="shortcut icon" href="/img/favicon.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="https://unpkg.com/vanilla-back-to-top@7.1.14/dist/vanilla-back-to-top.min.js"></script><script>
+        document.addEventListener('DOMContentLoaded', function() {
+          addBackToTop(
+            {"zIndex":100}
+          )
+        });
+        </script><script src="/js/scrollSpy.js"></script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/MF_Symbol_Red-Rose_BG.png" alt="Mainframe OS"/><h2 class="headerTitleWithLogo">Mainframe OS</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive"><a href="/docs/introduction" target="_self">Introduction</a></li><li class="siteNavGroupActive"><a href="/docs/app-development" target="_self">App development</a></li><li class="siteNavGroupActive"><a href="/docs/sdk" target="_self">SDK</a></li><li class="siteNavGroupActive"><a href="/docs/roadmap" target="_self">Roadmap</a></li><li class="siteNavGroupActive"><a href="/docs/faq" target="_self">FAQ</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Application development</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Mainframe OS</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/introduction">Introduction</a></li><li class="navListItem"><a class="navItem" href="/docs/core-features">Core features</a></li><li class="navListItem"><a class="navItem" href="/docs/getting-started">Getting started</a></li><li class="navListItem"><a class="navItem" href="/docs/mft">MFT integration</a></li><li class="navListItem"><a class="navItem" href="/docs/faq">FAQ</a></li><li class="navListItem"><a class="navItem" href="/docs/support">Support</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Application development</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/app-development">Application development</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/docs/app-flow">Creating and publishing apps</a></li><li class="navListItem"><a class="navItem" href="/docs/sdk">Mainframe SDK</a></li><li class="navListItem"><a class="navItem" href="/docs/create-mainframe-dapp">create-mainframe-dapp</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Platform development</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/platform">Mainframe platform</a></li><li class="navListItem"><a class="navItem" href="/docs/roadmap">Roadmap</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 class="postHeaderTitle">Creating and publishing apps</h1></header><article><div><span><h2><a class="anchor" aria-hidden="true" id="creating-an-app"></a><a href="#creating-an-app" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Creating an app</h2>
+<h3><a class="anchor" aria-hidden="true" id="using-create-mainframe-dapp"></a><a href="#using-create-mainframe-dapp" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Using create-mainframe-dapp</h3>
+<p>If you are familiar React, you can get started using <a href="/docs/create-mainframe-dapp"><code>create-mainframe-dapp</code></a> to setup your app for easy integration with Mainframe OS.</p>
+<h3><a class="anchor" aria-hidden="true" id="from-scratch"></a><a href="#from-scratch" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>From scratch</h3>
+<p>Mainframe OS only needs an <code>index.html</code> file to be present to open an app, you can get started simply by creating a new folder with an <code>index.hml</code> file having basic contents, for example:</p>
+<ol>
+<li><code>mkdir my-app</code></li>
+<li><code>echo '&lt;h1&gt;Hello Mainframe OS&lt;/h1&gt;' &gt; my-app/index.html</code></li>
+</ol>
+<h2><a class="anchor" aria-hidden="true" id="adding-your-app-in-mainframe-os"></a><a href="#adding-your-app-in-mainframe-os" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Adding your app in Mainframe OS</h2>
+<h3><a class="anchor" aria-hidden="true" id="access-the-developer-tools"></a><a href="#access-the-developer-tools" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Access the developer tools</h3>
+<ol>
+<li>Launch Mainframe OS</li>
+<li>In the <strong>More</strong> screen, click the <strong>App development tool</strong> link.</li>
+</ol>
+<h3><a class="anchor" aria-hidden="true" id="create-a-developer-identity"></a><a href="#create-a-developer-identity" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Create a developer identity</h3>
+<p>If you haven't already created a developer identity, this is a necessary step before adding an app.
+The name you choose will be <strong>publicly displayed</strong> and associated to the applications you publish.</p>
+<h3><a class="anchor" aria-hidden="true" id="import-your-app"></a><a href="#import-your-app" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Import your app</h3>
+<ol>
+<li>Click the <strong>ADD</strong> button.</li>
+<li>Give your app a name.</li>
+<li>Give your app a version (it must follow the <a href="https://semver.org/">Semantic Versioning</a> format).</li>
+<li>Select the folder containing your application contents (<code>index.html</code> and possibly others).</li>
+</ol>
+<blockquote>
+<p>If you are using <a href="/docs/create-mainframe-dapp"><code>create-mainframe-dapp</code></a>, make sure to run <code>yarn build</code> and open the <code>build</code> folder.</p>
+</blockquote>
+<h3><a class="anchor" aria-hidden="true" id="application-permissions"></a><a href="#application-permissions" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Application permissions</h3>
+<p>If your application needs to make requests to Web domains, you can add them in this step.
+Mainframe OS prevents applications from communicating with Web domains that are not explicitly whitelisted.</p>
+<blockquote>
+<p>These permissions can be edited before publishing your app, so it is not required to add all the domains you want to whitelist during this step.</p>
+</blockquote>
+<h2><a class="anchor" aria-hidden="true" id="running-your-app"></a><a href="#running-your-app" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Running your app</h2>
+<ol>
+<li>In the developer tools screen, click the app you want to open.</li>
+<li>Launch the app by clicking the <strong>OPEN</strong> button.</li>
+<li>Your app will open in a new window, inside the application sandbox.</li>
+</ol>
+<h3><a class="anchor" aria-hidden="true" id="debugging"></a><a href="#debugging" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Debugging</h3>
+<p>The Chrome Developer Tools (&quot;devtools&quot;) can be opened from the <strong>View</strong> menu &gt; <strong>Toggle Developer Tools</strong>.
+When you open these devtools from your application window, it will be the devtools for the Mainframe sandbox, <strong>not</strong> your application itself.
+In order to open the devtools for your app, you must run the following command in the console of the sandbox devtools:</p>
+<pre><code class="hljs css language-js">$(<span class="hljs-string">'webview'</span>).openDevTools()
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="publishing-your-app"></a><a href="#publishing-your-app" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Publishing your app</h2>
+<p>From the app details view in Mainframe OS:</p>
+<ol>
+<li>Click the <strong>PUBLISH APP</strong> button.</li>
+<li>Set the Web domains your app needs to communicate with in the app permissions.</li>
+<li>Verify the app informations are correct in the summary screen.</li>
+<li>Click the <strong>PUBLISH</strong> button and wait for your app contents and manifest to be uploaded.</li>
+<li>The resulting App ID can now be shared with other users of Mainframe OS to install your app.</li>
+</ol>
+<h3><a class="anchor" aria-hidden="true" id="updating-your-app"></a><a href="#updating-your-app" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Updating your app</h3>
+<p>After your app has been published, on the app details screen:</p>
+<ol>
+<li>Click the <strong>New Version +</strong> button.</li>
+<li>Set the new version number and click the <strong>ADD NEW VERSION</strong> button.</li>
+<li>You should now see an entry for that version in draft form, that can be edited as needed.</li>
+<li>When ready, click the <strong>PUBLIC UPDATE</strong> button.</li>
+<li>Set the Web domains your app needs to communicate with in the app permissions.</li>
+<li>Verify the app informations are correct in the summary screen.</li>
+<li>Click the <strong>PUBLISH</strong> button and wait for your app contents and manifest to be uploaded.</li>
+</ol>
+<p>Users who have already installed the app will be notified there is an update available and guided through installing it.</p>
+<p>New users will automatically have access to the latest version.</p>
+<h3><a class="anchor" aria-hidden="true" id="submitting-your-app"></a><a href="#submitting-your-app" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Submitting your app</h3>
+<p>A future release of Mainframe OS will offer developers the ability to submit their app for review and discovery in Mainframe OS.</p>
+<p>In the meantime, don't hesitate to reach out to the Mainframe team using one of the <a href="/docs/support">support channels</a> so we can help promote your app!</p>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/app-development"><span class="arrow-prev">← </span><span>Application development</span></a><a class="docs-next button" href="/docs/sdk"><span>Mainframe SDK</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#creating-an-app">Creating an app</a><ul class="toc-headings"><li><a href="#using-create-mainframe-dapp">Using create-mainframe-dapp</a></li><li><a href="#from-scratch">From scratch</a></li></ul></li><li><a href="#adding-your-app-in-mainframe-os">Adding your app in Mainframe OS</a><ul class="toc-headings"><li><a href="#access-the-developer-tools">Access the developer tools</a></li><li><a href="#create-a-developer-identity">Create a developer identity</a></li><li><a href="#import-your-app">Import your app</a></li><li><a href="#application-permissions">Application permissions</a></li></ul></li><li><a href="#running-your-app">Running your app</a><ul class="toc-headings"><li><a href="#debugging">Debugging</a></li></ul></li><li><a href="#publishing-your-app">Publishing your app</a><ul class="toc-headings"><li><a href="#updating-your-app">Updating your app</a></li><li><a href="#submitting-your-app">Submitting your app</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/" class="nav-home"><img src="/img/MF_Symbol_Dark_BG.png" alt="Mainframe OS" width="66"/></a><div><h5>Docs</h5><a href="/docs/getting-started">Getting started</a><a href="/docs/app-development">Application development</a><a href="/docs/sdk">SDK documentation</a></div><div><h5>Community</h5><a href="https://gitter.im/MainframeHQ/Lobby" target="_blank" rel="noreferrer noopener">Gitter</a><a href="https://www.youtube.com/c/MainframeHQ">YouTube</a><a href="https://twitter.com/Mainframe_HQ" target="_blank" rel="noreferrer noopener">Twitter</a></div><div><h5>More</h5><a href="https://github.com/MainframeHQ">GitHub</a><a class="github-button" href="https://github.com/mainframehq/mainframe-os" data-icon="octicon-star" data-show-count="true" aria-label="Star mainframehq/mainframe-os on GitHub">Star</a></div></section><a href="https://mainframeos.com/developers" target="_blank" rel="noreferrer noopener" class="fbOpenSource"><img src="/img/mainframe_dark.png" alt="Mainframe" width="170"/></a><section class="copyright">Copyright © 2019 Mainframe</section></footer></div></body></html>
